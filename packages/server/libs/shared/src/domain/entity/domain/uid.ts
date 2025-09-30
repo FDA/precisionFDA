@@ -1,6 +1,5 @@
-import { DXEnityType, DxId } from './dxid'
-import { PlatformEntityType } from './platform.entity.type'
+import { DXEntityType, DxId } from './dxid'
 
-export type Uid<
-  ENTITY extends DXEnityType | PlatformEntityType = DXEnityType | PlatformEntityType,
-> = `${DxId<ENTITY>}-${number}`
+export type UidAbleEntityType = DXEntityType
+
+export type Uid<ENTITY extends UidAbleEntityType = UidAbleEntityType> = `${DxId<ENTITY>}-${number}`

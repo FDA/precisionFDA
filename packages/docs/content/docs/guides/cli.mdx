@@ -2,20 +2,20 @@
 title: CLI
 ---
 
-With the precisionFDA CLI, you can easily manage your files, folders and assets on precisionFDA. You can both upload and download large data to and from your home area or a Space that you have access to. You can also create or delete folders and files, list files from a specific location, list available Spaces and describe entities like apps or workflows. Moreover, you can use the precisionFDA CLI in your scripts to automate your workflow and perform batch operations. The CLI is also preinstalled on the workstations provided by precisionFDA.
+With the precisionFDA CLI, you can easily manage your files, folders, and assets on precisionFDA. You can both upload and download large data to and from your home area or a Space that you have access to. You can also create or delete folders and files, list files from a specific location, list available Spaces, and describe entities like apps or workflows. Moreover, you can use the precisionFDA CLI in your scripts to automate your workflow and perform batch operations. The CLI is also preinstalled on the workstations provided by precisionFDA.
 
 ## Download the CLI
 
 import { Download } from 'lucide-react'
 
 <div className="flex gap-4 shrink">
-  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.10.3.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
+  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.11.0.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
     <button data-variant="primary" className="flex items-center gap-1.5 bg-[#1f70b7] py-1 px-4 rounded-md border border-[#4e8cc1] text-white cursor-pointer"><Download className='h-4.5' />Linux</button>
   </a>
-  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.10.3.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
+  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.11.0.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
     <button data-variant="primary" className="flex items-center gap-1.5 bg-[#1f70b7] py-1 px-4 rounded-md border border-[#4e8cc1] text-white cursor-pointer"><Download className='h-4.5' />MacOS</button>
   </a>
-  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.10.3.zip" className='no-underline' target="_blank" rel="noreferrer">
+  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.11.0.zip" className='no-underline' target="_blank" rel="noreferrer">
     <button data-variant="primary" className="flex items-center gap-1.5 bg-[#1f70b7] py-1 px-4 rounded-md border border-[#4e8cc1] text-white cursor-pointer"><Download className='h-4.5' />Windows</button>
   </a>
 </div>
@@ -31,40 +31,35 @@ To generate a key necessary for using the CLI, follow these steps in the applica
 - Click on your name in the top right corner of the app.
 - From the submenu options, select 'Generate CLI Key' and copy the presented key.
 
-Alternatively, visit the [**Assets**](/home/assets) page and click on 'Generate CLI Key' button and copy the presented key.
-
-**Note:** This does not apply to CLI usage on workstations, the key is already pre-generated for you in a workstation's config.
+Alternatively, visit the [**Assets**](/home/assets) page and click on the 'Generate CLI Key' button and copy the presented key.
+**Note:** This does not apply to CLI usage on workstations; the key is already pre-generated for you in a workstation's configuration.
 
 > [!info] CLI Usage Tips
 > **Authorization Key:**
-> 
-> The CLI requires an authorization key to be passed with the first command you run using `-key` flag.  
-> After that, the key is stored in a config file and you don't have to pass it anymore.  
-> The key is valid for **24 hours**. If it expires, you will be prompted to generate a new one.
+>
+> The CLI requires an authorization key to be passed with the first command you run using the `-key` flag. After that, the key is stored in a config file, and you don't have to pass it anymore. The key is valid for **24 hours**. If it expires, you will be prompted to generate a new one.
+>
 > **Help Sections:**
 >
-> Each CLI command has its specific help section with various examples.  
-> Just add either **_\-help_** or **_\-h_** flag at the end of the command. Example: `pfda ls -help`
+> Each CLI command has its specific help section with various examples. Just add either the **`-help`** or **`-h`** flag at the end of the command.
+> Example: `pfda ls -help`
 >
 > **Wildcards:**
 >
-> Some of the CLI commands support wildcards in their arguments.  
-> `?` - represents 1 character, `*` - represents 0 or many characters, example `pfda download '*.csv'` Check individual commands below to see more examples and learn more.
+> Some of the CLI commands support wildcards in their arguments.
+> `?` - represents 1 character, `*` - represents 0 or many characters. Example: `pfda download '*.csv'`. Check individual commands below to see more examples and learn more.
 >
 > **Result Code:**
 >
-> All CLI commands follow the same result code pattern.  
-> If the command is successful, it exits with code **0**.  
-> If an error occurs, the error message is printed to stdout and the command exits with code **1**.
-> 
+> All CLI commands follow the same result code pattern. If the command is successful, it exits with code **0**. If an error occurs, an error message is printed to stdout, and the command exits with code **1**.
+>
 > **Result Format:**
 >
-> Some CLI commands support result response in JSON format. Simply append `-json` flag to the command.  
-> If an error occurs, it results with JSON object with one key, **"error"**.
+> Some CLI commands support a result response in JSON format. Simply append the `-json` flag to the command. If an error occurs, it results in a JSON object with one key, **"error"**.
 
 ## Uploading Files & Folders
 
-The CLI command `pfda upload-file` is designed for uploading files or folders into a specific location. By default, files are uploaded to the root of the My Home area. The command supports uploading multiple files or folders, and also allows uploads via stdin (piped input).
+The CLI command `pfda upload-file` is designed for uploading files or folders to a specific location. By default, files are uploaded to the root of the My Home area. The command supports uploading multiple files or folders and also allows uploads via stdin (piped input).
 
 ### Usage
 
@@ -74,13 +69,13 @@ The CLI command `pfda upload-file` is designed for uploading files or folders in
 
 All flags are optional. They can be used to specify the upload location or the name of the file (in case of stdin input).
 
-- `-h, -help`: Displays the help message and exit.
+- `-h, -help`: Displays the help message and exits.
 - `-space-id <ID>`: Uploads the file to the specified space.
 - `-folder-id <ID>`: Uploads the file to the specified folder.
 - `-name <NAME>`: Specifies the name of a stdin file. Required for stdin input.
-- `-json`: Responds the command result in JSON format.
-- `-threads`: Changes number of upload threads to spawn per file (Max 100). Consider memory usage.
-- `-chunksize`: Changes size of each upload chunk in bytes (Min 16MB, Max 4GB). Consider memory usage.
+- `-threads <NUMBER>`: Changes the number of upload threads to spawn per file (max 100). Consider memory usage.
+- `-chunksize <SIZE_IN_BYTES>`: Changes the size of each upload chunk in bytes (min 16MB, max 4GB). Consider memory usage.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
@@ -107,31 +102,32 @@ _# Uploads multiple files to the specified space._<br/>
 _# Uploads a file provided via stdin with the specified name._<br/>
 `./pfda upload-file -name piped_file.csv`
 
-_# Uploads 'script01.py' to the root folder of My Home and responds with JSON result._<br/>
+_# Uploads 'script01.py' to the root folder of My Home and responds with the JSON result._<br/>
 `./pfda upload-file script01.py -json`
 
-_# Uploads large file 'data.sql' to the root folder of My Home with manually set chunksize and upload threads._<br/>
-`./pfda upload-file script01.py -threads 20 -chunksize 134217728`
+_# Uploads the large file 'data.sql' to the root folder of My Home with a manually set chunk size and number of upload threads._<br/>
+`./pfda upload-file data.sql -threads 20 -chunksize 134217728`
 
 > [!info] Tips and Notes
 > **Finding FOLDER ID or SPACE ID:**
 >
-> To find FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.  
-> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.  
-> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.  
-> You can also use the precisionFDA CLI command `ls -folders` to list folders in specified location. You can also use the precisionFDA CLI command `list-spaces` to list available spaces you can upload the file to.
-> 
+> To find a FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.
+> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.
+> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.
+> You can also use the precisionFDA CLI command `pfda ls -folders` to list folders in a specified location.
+> You can also use the precisionFDA CLI command `pfda ls-spaces` to list available spaces to which you can upload the file.
+>
 > **Uploading multiple items:**
 >
 > When uploading multiple files and/or folders, ensure they are all passed as arguments before any flags.
 >
 > **Optimizing uploads:**
 >
-> The `-threads` and `-chunksize` flags are useful for optimizing uploads. Increasing the number of threads can speed up the process, but be mindful of memory usage. Similarly, increasing the chunk size can reduce the number of API calls, though this also impacts memory usage. These values are not controlled and if you decide to use them, you might run into **OutOfMemory errors** on the host machine. The default values are 10 threads and 64MB chunk size.
+> The `-threads` and `-chunksize` flags are useful for optimizing uploads. Increasing the number of threads can speed up the process, but be mindful of memory usage. Similarly, increasing the chunk size can reduce the number of API calls, though this also impacts memory usage. These values are not controlled, and if you decide to use them, you might run into **OutOfMemory errors** on the host machine. The default values are 10 threads and a 64MB chunk size.
 
 ## Uploading Assets
 
-The CLI command `pfda upload-asset` is designed for uploading an asset to precisionFDA. You need to prepare a folder with the asset contents, and a readme file. The folder can contain any files and subfolders. The readme file name must end in `.md` or `.txt`. Similarly, the desired asset name must end in `.tar` or `.tar.gz`.
+The CLI command `pfda upload-asset` is designed for uploading an asset to precisionFDA. You need to prepare a folder with the asset contents and a readme file. The folder can contain any files and subfolders. The readme file name must end in `.md` or `.txt`. Similarly, the desired asset name must end in `.tar` or `.tar.gz`.
 
 ### Usage
 
@@ -139,22 +135,19 @@ The CLI command `pfda upload-asset` is designed for uploading an asset to precis
 
 ### Available Flags
 
-All flags are optional. They can be used to specify result format.
-
-- `-h, -help`: Displays the help message and exit.
-- `-json`: Responds the command result in JSON format.
+- `-h, -help`: Displays the help message and exits.
+- `-json`: Displays the command result in JSON format.
 
 ### Example
 
-The following example demonstrates use case for the `upload-asset` command:
+The following example demonstrates a use case for the `upload-asset` command:
 
-\# Uploads 'my_assets.tar.gz' to the Assets root folder of My Home.
-
+_# Uploads 'my_assets.tar.gz' to the Assets root folder of My Home._
 `./pfda upload-asset -name my_assets.tar.gz -root ./local_assets -readme ./readme.md`
 
 ## Downloading Files
 
-The CLI command `pfda download` is designed for downloading files from My Home or a Space. You simply need the unique file id or its name. In case you need to download the whole content of a folder, use `-folder-id <ID>` flag with integer id. To download files from public folders, use `-public` flag together with your command. Filename download supports wildcards, providing a handy way to download multiple files with just one command.
+The CLI command `pfda download` is designed for downloading files from My Home or a Space. You simply need the unique file ID or its name. In case you need to download the entire content of a folder, use the `-folder-id <ID>` flag with its integer ID. To download files from public folders, use the `-public` flag together with your command. Filename download supports wildcards, providing a handy way to download multiple files with just one command.
 
 ### Usage
 
@@ -162,34 +155,34 @@ The CLI command `pfda download` is designed for downloading files from My Home o
 
 ### Available Flags
 
-All flags are optional. They can be used to specify the download location or the name of the file.
+All flags are optional. They can be used to specify the download location.
 
-- `-h, -help`: Displays the help message and exit.
-- `-output <PATH>`: Downloads to given path.
+- `-h, -help`: Displays the help message and exits.
+- `-output <PATH>`: Downloads to the given path.
 - `-space-id <ID>`: Downloads from the specified space.
-- `-folder-id <ID>`: Download from the specified folder.
-- `-public`: Download from public folder, must specify `-folder-id <ID>`.
-- `-overwrite <true|false>`: Preselects overwrite option for dialog if path already exists.
-- `-recursive`: Recursively downloads content of selected folder.
-- `-json`: Responds the command result in JSON format.
+- `-folder-id <ID>`: Downloads from the specified folder.
+- `-public`: Downloads from a public folder. Must be used with `-folder-id <ID>`.
+- `-overwrite <true|false>`: Preselects the overwrite option for the dialog if the path already exists.
+- `-recursive`: Recursively downloads the content of the selected folder.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
 The following examples demonstrate various use cases for the `download` command:
 
-_# Downloads file by id to the current directory_<br/>
+_# Downloads a file by ID to the current directory._<br/>
 `./pfda download file-GJk1kpQ05xgQd8bP54kJFjzkz-1`
 
-_# Downloads file by name to the current directory_<br/>
+_# Downloads a file by name to the current directory._<br/>
 `./pfda download data_01.csv`
 
-_# Downloads file and preselect overwrite option if a file with the same name already exists in the target location._<br/>
+_# Downloads a file and preselects the overwrite option if a file with the same name already exists in the target location._<br/>
 `./pfda download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -overwrite true`
 
-_# Downloads file to the specified file path with a new name._<br/>
+_# Downloads a file to the specified file path with a new name._<br/>
 `./pfda download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -output ./results/data_final.csv`
 
-_# Downloads file to the specified output directory using its original name_<br/>
+_# Downloads a file to the specified output directory using its original name._<br/>
 `./pfda download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -output ./results`
 
 _# Downloads top-level My Home folder content to the current directory._<br/>
@@ -198,55 +191,56 @@ _# Downloads top-level My Home folder content to the current directory._<br/>
 _# Downloads top-level public folder content to the current directory._<br/>
 `./pfda download -folder-id 2704 -public`
 
-_# Downloads whole folder content to the specified output directory._<br/>
+_# Downloads the whole folder content to the specified output directory._<br/>
 `./pfda download -folder-id 2704 -output ./data_dump -recursive`
 
-_# Downloads whole space folder content to the specified output directory._<br/>
+_# Downloads the whole space folder content to the specified output directory._<br/>
 `./pfda download -space-id 1995 -folder-id 2704 -output ./data_dump -recursive`
 
-_# Downloads top-level folder content that is a CSV file to the current directory._<br/>
+_# Downloads CSV files from the top-level folder content to the current directory._<br/>
 `./pfda download '*.csv' -folder-id 2704`
 
 _# Downloads top-level folder content prefixed with 'res\_' to the current directory._<br/>
 `./pfda download 'res_*' -folder-id 2704`
 
-_# Downloads content from the root folder of My Home - has no valid folder-id._<br/>
+_# Downloads content from the root folder of My Home (which has no valid folder-id)._<br/>
 `./pfda download -folder-id root`
 
-_# Downloads from the root folder of the Space - has no valid folder-id._<br/>
+_# Downloads from the root folder of the Space (which has no valid folder-id)._<br/>
 `./pfda download -space-id 1995 -folder-id root`
 
-_# Downloads multiple files - combine file-ids and filenames._<br/>
+_# Downloads multiple files by combining file IDs and filenames._<br/>
 `./pfda download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 intro.pdf file-YZm9QpQ0b69Qd8bP454kmcf76-2`
 
 > [!info] Tips and Notes
 >
 > **Finding FOLDER ID or SPACE ID:**
-> 
-> To find FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.  
-> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.  
-> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.  
-> You can also use the precisionFDA CLI command `ls -folders` to list folders in a specified location. You can also use the precisionFDA CLI command `list-spaces` to list available spaces you can upload the file to.
+>
+> To find a FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.
+> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.
+> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.
+> You can also use the precisionFDA CLI command `pfda ls -folders` to list folders in a specified location.
+> You can also use the precisionFDA CLI command `pfda ls-spaces` to list available spaces.
 >
 > **Download by name:**
 >
-> Filenames are not unique. There might be several files matching the same name in the target location. In that case you will be offered a list of files matching the name to choose from. To avoid such problems, prefer file-id whenever possible.
+> Filenames are not unique. There might be several files matching the same name in the target location. In that case, you will be offered a list of files matching the name to choose from. To avoid such problems, prefer using the file ID whenever possible.
 >
 > **Wildcards:**
 >
-> Download using filename also supports wildcards. If you wish to use wildcard download, put the argument in simple quotes to prevent shell character expansion.
+> Downloading by filename also supports wildcards. If you wish to use a wildcard, put the argument in single quotes to prevent shell character expansion.
 >
 > **Downloading multiple items:**
 >
->When downloading multiple files, ensure they are all passed as arguments before any flags.
+> When downloading multiple files, ensure they are all passed as arguments before any flags.
 >
 > **Scripting:**
 >
-> The `-overwrite <true|false>` flag is useful for scripting to avoid dialog selection if file already exists. If you want to decide in the dialog, omit the flag completely.
+> The `-overwrite <true|false>` flag is useful for scripting to avoid a dialog selection if a file already exists. If you want to decide in the dialog, omit the flag completely.
 
 ## Creating Folders
 
-The CLI command `pfda mkdir` is designed for creating new folders. It allows for the creation of folders within My Home or specified spaces and folders. The command supports the creation of nested folder structures and multiple folders simultaneously. Creating a new nested folder structure is allowed with the `-parents` flag. To create a new folder, you only need the desired name. If you wish to create the folder inside an already existing folder or space, use according flags to do so.
+The CLI command `pfda mkdir` is designed for creating new folders. It allows for the creation of folders within My Home or specified spaces and folders. The command supports the creation of nested folder structures and multiple folders simultaneously. To create a new folder, you only need the desired name. If you wish to create the folder inside an already existing folder or space, use the corresponding flags to do so. Creating a new nested folder structure is allowed with the `-parents` flag.
 
 ### Usage
 
@@ -256,20 +250,20 @@ The CLI command `pfda mkdir` is designed for creating new folders. It allows for
 
 All flags are optional. They can be used to specify the target location.
 
-- `-h, -help`: Displays the help message and exit.
+- `-h, -help`: Displays the help message and exits.
 - `-space-id <ID>`: Creates the folder in the specified space.
 - `-folder-id <ID>`: Creates the folder in the specified folder.
-- `-p, -parents`: Creates parent directories as needed, no error if existing.
-- `-json`: Responds the command result in JSON format.
+- `-p, -parents`: Creates parent directories as needed; no error if existing.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
 The following examples demonstrate various use cases for the `mkdir` command:
 
-_# Creates new folder named DATA in your My Home section._<br/>
+_# Creates a new folder named DATA in your My Home section._<br/>
 `./pfda mkdir DATA`
 
-_# Creates new folder named DATA in the root of the space._<br/>
+_# Creates a new folder named DATA in the root of the space._<br/>
 `./pfda mkdir DATA -space-id 1995`
 
 _# Creates 3 new folders in the specified folder._<br/>
@@ -281,10 +275,11 @@ _# Creates the specified nested folder structure._<br/>
 > [!info] Tips and Notes
 > **Finding FOLDER ID or SPACE ID:**
 >
-> To find FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.  
-> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.  
-> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.  
-> You can also use the precisionFDA CLI command `ls -folders` to list folders in specified location. You can also use the precisionFDA CLI command `list-spaces` to list available spaces you can upload the file to.
+> To find a FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.
+> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.
+> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.
+> You can also use the precisionFDA CLI command `pfda ls -folders` to list folders in a specified location.
+> You can also use the precisionFDA CLI command `pfda ls-spaces` to list available spaces.
 >
 > **Creating multiple items:**
 >
@@ -292,10 +287,8 @@ _# Creates the specified nested folder structure._<br/>
 
 ## Removing Folders
 
-The CLI command `pfda rmdir` is designed for removing folders from My Home or a Space.  
-All you need is the unique folder ID. For safety reasons only empty folders are allowed to be removed.
-
-**Please be cautious. This is a permanent destructive operation and cannot be undone.**
+The CLI command `pfda rmdir` is designed for removing folders from My Home or a Space. All you need is the unique folder ID. For safety reasons, only empty folders are allowed to be removed.
+**Please be cautious. This is a permanent, destructive operation and cannot be undone.**
 
 ### Usage
 
@@ -303,42 +296,38 @@ All you need is the unique folder ID. For safety reasons only empty folders are 
 
 ### Available Flags
 
-All flags are optional.
-
-- `-h, -help`: Displays the help message and exit.
-- `-json`: Responds the command result in JSON format.
+- `-h, -help`: Displays the help message and exits.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
 The following examples demonstrate various use cases for the `rmdir` command:
 
-_# Removes a folder by id_<br/>
+_# Removes a folder by ID._<br/>
 `./pfda rmdir 2704`
 
-_# Removes multiple folders_<br/>
+_# Removes multiple folders._<br/>
 `./pfda rmdir 2704 3404 4504`
 
-_# Removes a folder by id and responds with JSON result_<br/>
+_# Removes a folder by ID and responds with the JSON result._<br/>
 `./pfda rmdir 2704 -json`
 
 > [!info] Tips and Notes
 > **Finding FOLDER ID:**
 >
-> To find FOLDER_ID, inspect the URL when browsing the contents of a target folder or space.  
-> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.  
-> You can also use the precisionFDA CLI command `ls -folders` to list folders in specified location.
+> To find a FOLDER_ID, inspect the URL when browsing the contents of a target folder.
+> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.
+> You can also use the precisionFDA CLI command `pfda ls -folders` to list folders in a specified location.
 >
 > **Deleting multiple folders:**
 >
-> When deleting multiple folders, ensure all their ids are passed as arguments before any flags.
+> When deleting multiple folders, ensure all their IDs are passed as arguments before any flags.
 
 ## Removing Files
 
-The CLI command `pfda rm` is designed for removing files from My Home or a Space.  
-You simply need the unique id for the file which is of the form `file-ABCDEF1234567890-1` or its name.  
-Removing by filename supports wildcards, providing a handy way to remove multiple files with just one command.
+The CLI command `pfda rm` is designed for removing files from My Home or a Space. You simply need the unique ID for the file, which is of the form `file-ABCDEF1234567890-1`, or its name. Removing by filename supports wildcards, providing a handy way to remove multiple files with just one command.
 
-**Please be cautious. This is a permanent destructive operation and cannot be undone.**
+**Please be cautious. This is a permanent, destructive operation and cannot be undone.**
 
 ### Usage
 
@@ -348,45 +337,46 @@ Removing by filename supports wildcards, providing a handy way to remove multipl
 
 All flags are optional. They can be used to specify the target location.
 
-- `-h, -help`: Displays the help message and exit.
+- `-h, -help`: Displays the help message and exits.
 - `-space-id <ID>`: Executes in the specified space.
 - `-folder-id <ID>`: Executes in the specified folder.
-- `-json`: Responds the command result in JSON format.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
 The following examples demonstrate various use cases for the `rm` command:
 
-_# Removes a file by id_<br/>
+_# Removes a file by ID._<br/>
 `./pfda rm file-GJk1kpQ05xgQd8bP54kJFjzkz-1`
 
-_# Removes a file by name in root of My Home_<br/>
+_# Removes a file by name in the root of My Home._<br/>
 `./pfda rm intro.pdf`
 
-_# Removes all CSV files in the target folder_<br/>
+_# Removes all CSV files in the target folder._<br/>
 `./pfda rm '*.csv' -folder-id 2704`
 
-_# Removes all files that have 'res\_' in their name in the target space and folder_<br/>
+_# Removes all files that have 'res\_' in their name in the target space and folder._<br/>
 `./pfda rm 'res_*' -space-id 1995 -folder-id 2704`
 
-_# Removes multiple files - combine file-ids and filenames._<br/>
+_# Removes multiple files by combining file IDs and filenames._<br/>
 `./pfda rm file-GJk1kpQ05xgQd8bP54kJFjzkz-1 intro.pdf file-YZm9QpQ0b69Qd8bP454kmcf76-2`
 
 > [!info] Tips and Notes
 > **Finding FOLDER ID or SPACE ID:**
 >
-> To find FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.  
-> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.  
-> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.  
-> You can also use the precisionFDA CLI command `ls -folders` to list folders in specified location. You can also use the precisionFDA CLI command `list-spaces` to list available spaces you can upload the file to.
+> To find a FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.
+> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.
+> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.
+> You can also use the precisionFDA CLI command `pfda ls -folders` to list folders in a specified location.
+> You can also use the precisionFDA CLI command `pfda ls-spaces` to list available spaces.
 >
 > **Remove by name:**
 >
-> Filenames are not unique. There might be several files matching the same name in the target location. In that case, you will be offered a list of files matching the name to choose from. To avoid such problems, prefer file-id whenever possible.
+> Filenames are not unique. There might be several files matching the same name in the target location. In that case, you will be offered a list of files matching the name to choose from. To avoid such problems, prefer using the file ID whenever possible.
 >
 > **Wildcards:**
 >
-> Deleting using filename also supports wildcards. If you wish to use wildcard remove, put the argument in single quotes to prevent shell character expansion.
+> Deleting by filename also supports wildcards. If you wish to use a wildcard, put the argument in single quotes to prevent shell character expansion.
 >
 > **Removing multiple items:**
 >
@@ -394,7 +384,7 @@ _# Removes multiple files - combine file-ids and filenames._<br/>
 
 ## Listing Files
 
-The CLI command `pfda ls` is designed for listing files in a given location. If no location is provided, the root of My Home will be listed. By default, public files are not listed. To display public files, use `-public` flag. If you are interested in a specific Space or folder, provide the location via corresponding flag. There are also options to filter files or folders only.
+The CLI command `pfda ls` is designed for listing files in a given location. If no location is provided, the root of My Home will be listed. By default, public files are not listed. To display public files, use the `-public` flag. If you are interested in a specific Space or folder, provide the location via the corresponding flag. There are also options to filter for only files or only folders.
 
 ### Usage
 
@@ -404,50 +394,51 @@ The CLI command `pfda ls` is designed for listing files in a given location. If 
 
 All flags are optional. They can be used to specify the target location or to filter the result.
 
-- `-h, -help`: Displays the help message and exit.
+- `-h, -help`: Displays the help message and exits.
 - `-space-id <ID>`: Executes in the specified space.
 - `-folder-id <ID>`: Executes in the specified folder.
 - `-brief`: Displays a brief version of the response.
 - `-folders`: Displays only folders.
 - `-files`: Displays only files.
 - `-public`: Displays only public files & folders.
-- `-json`: Responds the command result in JSON format.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
 The following examples demonstrate various use cases for the `ls` command:
 
-_# Lists files from My Home_<br/>
+_# Lists files from My Home._<br/>
 `./pfda ls`
 
-_# Lists only files from My Home folder_<br/>
+_# Lists only files from a My Home folder._<br/>
 `./pfda ls -folder-id 2704 -files`
 
-_# Lists only folders from desired Space and present the results as JSON_<br/>
+_# Lists only folders from the desired Space and presents the results as JSON._<br/>
 `./pfda ls -space-id 1995 -folders -json`
 
-_# Lists from desired Space and folder_<br/>
+_# Lists from the desired Space and folder._<br/>
 `./pfda ls -space-id 1995 -folder-id 2704`
 
 > [!info] Tips and Notes
 > **Finding FOLDER ID or SPACE ID:**
 >
-> To find FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.  
-> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.  
-> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.  
-> You can also use the precisionFDA CLI command `ls -folders` to list folders in specified location. You can also use the precisionFDA CLI command `list-spaces` to list available spaces you can upload the file to.
+> To find a FOLDER_ID or SPACE_ID, inspect the URL when browsing the contents of a target folder or space.
+> For example, in the URL **"https://precision.fda.gov/spaces/1995/files"**, the Space ID is **1995**.
+> For example, in the URL **"https://precision.fda.gov/home/files?folder_id=2704"**, the Folder ID is **2704**.
+> You can also use the precisionFDA CLI command `pfda ls -folders` to list folders in a specified location.
+> You can also use the precisionFDA CLI command `pfda ls-spaces` to list available spaces.
 >
 > **Brief response:**
-> 
-> You can also use `-brief` flag to list only ID and name.
+>
+> You can also use the `-brief` flag to list only the ID and name.
 
 ## Listing Assets
 
-The CLI command `pfda ls-assets` is designed for listing assets in a given location. If no location is provided, 'My Home' is used by default. By default, public assets are not listed. To display them, use `-public` flag. The command always responds in JSON format.
+The CLI command `pfda ls-assets` is designed for listing assets in a given location. If no location is provided, 'My Home' is used by default. By default, public assets are not listed. To display them, use the `-public` flag.
 
 ### Usage
 
-`./pfda ls-assets [FLAG...]`
+`./pfda ls-assets [...FLAG]`
 
 ### Available Flags
 
@@ -455,24 +446,25 @@ All flags are optional and can be used to specify the assets to list.
 
 - `-h, -help`: Displays the help message and exits.
 - `-public`: Lists public assets.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
 The following examples demonstrate various use cases for the `ls-assets` command:
 
-_# Lists all assets in your 'My Home'_<br/>
+_# Lists all assets in your 'My Home'._<br/>
 `./pfda ls-assets`
 
-_# Lists all public assets accessible to the user_<br/>
+_# Lists all public assets accessible to the user._<br/>
 `./pfda ls-assets -public`
 
 ## Listing Applications
 
-The CLI command `pfda ls-apps` is designed for listing applications in a given location. If no location is provided, 'My Home' is used by default. By default, public applications are not listed. To display them, use `-public` flag. The command always responds in JSON format.
+The CLI command `pfda ls-apps` is designed for listing applications in a given location. If no location is provided, 'My Home' is used by default. By default, public applications are not listed. To display them, use the `-public` flag.
 
 ### Usage
 
-`./pfda ls-apps [FLAG...]`
+`./pfda ls-apps [...FLAG]`
 
 ### Available Flags
 
@@ -481,27 +473,28 @@ All flags are optional and can be used to specify the applications to list.
 - `-h, -help`: Displays the help message and exits.
 - `-public`: Lists public applications.
 - `-space-id <ID>`: Lists applications in the specified space.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
 The following examples demonstrate various use cases for the `ls-apps` command:
 
-_# Lists all applications from the space with id 24_<br/>
+_# Lists all applications from the space with ID 24._<br/>
 `./pfda ls-apps -space-id 24`
 
-_# Lists all applications in your 'My Home'_<br/>
+_# Lists all applications in your 'My Home'._<br/>
 `./pfda ls-apps`
 
-_# Lists all public applications accessible to the user_<br/>
+_# Lists all public applications accessible to the user._<br/>
 `./pfda ls-apps -public`
 
 ## Listing Discussions
 
-The CLI command `pfda ls-discussions` is designed for listing discussions in a given location. The command always responds in JSON format.
+The CLI command `pfda ls-discussions` is designed for listing discussions in a given location.
 
 ### Usage
 
-`./pfda ls-discussions [FLAG...]`
+`./pfda ls-discussions [...FLAG]`
 
 ### Available Flags
 
@@ -509,21 +502,22 @@ All flags are optional and can be used to specify the discussions to list.
 
 - `-h, -help`: Displays the help message and exits.
 - `-space-id <ID>`: Lists discussions in the specified space.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
-The following example demonstrate use case for the `ls-discussions` command:
+The following example demonstrates a use case for the `ls-discussions` command:
 
-_# Lists all discussions from the space with id 24_<br/>
+_# Lists all discussions from the space with ID 24._<br/>
 `./pfda ls-discussions -space-id 24`
 
 ## Listing Executions
 
-The CLI command `pfda ls-executions` is designed for listing executions in a given location. If no location is provided, 'My Home' is used by default. By default, public executions are not listed. To display them, use `-public` flag. The command always responds in JSON format.
+The CLI command `pfda ls-executions` is designed for listing executions in a given location. If no location is provided, 'My Home' is used by default. By default, public executions are not listed. To display them, use the `-public` flag.
 
 ### Usage
 
-`./pfda ls-executions [FLAG...]`
+`./pfda ls-executions [...FLAG]`
 
 ### Available Flags
 
@@ -532,23 +526,24 @@ All flags are optional and can be used to specify the executions to list.
 - `-h, -help`: Displays the help message and exits.
 - `-public`: Lists public executions.
 - `-space-id <ID>`: Lists executions in the specified space.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
 The following examples demonstrate various use cases for the `ls-executions` command:
 
-_# Lists all executions in your 'My Home'_<br/>
+_# Lists all executions in your 'My Home'._<br/>
 `./pfda ls-executions`
 
-_# Lists all executions from the space with id 24_<br/>
+_# Lists all executions from the space with ID 24._<br/>
 `./pfda ls-executions -space-id 24`
 
-_# Lists all public executions accessible to the user_<br/>
+_# Lists all public executions accessible to the user._<br/>
 `./pfda ls-executions -public`
 
 ## Listing Spaces
 
-The CLI command `pfda ls-spaces` is designed to list all spaces available to you. By default only activated non-locked spaces are presented. There are also options to filter only certain types of spaces or spaces that are not activated yet.
+The CLI command `pfda ls-spaces` is designed to list all spaces available to you. By default, only activated, non-locked spaces are presented. There are also options to filter for only certain types of spaces or spaces that are not yet activated.
 
 ### Usage
 
@@ -556,29 +551,29 @@ The CLI command `pfda ls-spaces` is designed to list all spaces available to you
 
 ### Available Flags
 
-All flags are optional. They can be used to specify the target location.
+All flags are optional. They can be used to filter the results.
 
-- `-h, -help`: Displays the help message and exit.
+- `-h, -help`: Displays the help message and exits.
 - `-locked`: Shows only locked spaces.
 - `-unactivated`: Shows only unactivated spaces.
 - `-review`: Shows only review spaces.
-- `-groups`: Shows only groups spaces.
+- `-groups`: Shows only group spaces.
 - `-private`: Shows only private spaces.
 - `-administrator`: Shows only administrator spaces.
 - `-government`: Shows only government spaces.
-- `-json`: Responds the command result in JSON format.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
-The following examples demonstrate various use cases for the `list-spaces` command:
+The following examples demonstrate various use cases for the `ls-spaces` command:
 
-_# Lists all available spaces_<br/>
+_# Lists all available spaces._<br/>
 `./pfda ls-spaces`
 
-_# Lists only spaces of type private or groups_<br/>
+_# Lists only spaces of type 'private' or 'group'._<br/>
 `./pfda ls-spaces -groups -private`
 
-_# Lists only unactivated spaces and present the result as JSON_<br/>
+_# Lists only unactivated spaces and presents the result as JSON._<br/>
 `./pfda ls-spaces -unactivated -json`
 
 ## Listing Space Members
@@ -587,7 +582,7 @@ The CLI command `pfda ls-members` is designed for listing members in a given spa
 
 ### Usage
 
-`./pfda ls-members [FLAG...]`
+`./pfda ls-members [...FLAG]`
 
 ### Available Flags
 
@@ -595,23 +590,21 @@ All flags are optional and can be used to specify the members to list.
 
 - `-h, -help`: Displays the help message and exits.
 - `-space-id <ID>`: Lists members in the specified space.
-- `-json`: Responds the command result in JSON format.
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
 The following examples demonstrate various use cases for the `ls-members` command:
 
-_# Lists all members from the space with id 24_<br/>
+_# Lists all members from the space with ID 24._<br/>
 `./pfda ls-members -space-id 24`
 
-_# Lists all members from the space with id 24 in JSON format_<br/>
+_# Lists all members from the space with ID 24 in JSON format._<br/>
 `./pfda ls-members -space-id 24 -json`
 
 ## Describing Entities
 
-The CLI command `pfda describe` is designed to display details about any entity.  
-All you need is the unique entity ID. It is of the form `{entity}-ABCDEF1234567890-{number}`.  
-Supported types are: app, asset, discussion, file, execution and workflow. The response is always in JSON format.
+The CLI command `pfda describe` is designed to display details about an entity. All you need is the unique entity ID, which is of the form `{entity}-ABCDEF1234567890-{number}`. Supported types are: app, asset, discussion, file, execution, and workflow.
 
 ### Usage
 
@@ -619,36 +612,34 @@ Supported types are: app, asset, discussion, file, execution and workflow. The r
 
 ### Available Flags
 
-All flags are optional.
-
-- `-h, -help`: Displays the help message and exit.
+- `-h, -help`: Displays the help message and exits.
+- `-json`: Displays the command result in JSON format.
 
 ### Example
 
 The following examples demonstrate use cases for the `describe` command:
 
-_# Describes an app_<br/>
+_# Describes an app._<br/>
 `./pfda describe app-GZfKXJ80GGYZKxQQGpz7KX2p-1`
 
-_# Describes an execution_<br/>
+_# Describes an execution._<br/>
 `./pfda describe job-GZg92X80Z0gx903yy68z8YPk-1`
 
-_# Describes a workflow_<br/>
-`./pfda describe worfklow-GZq2qY80Z0gjx7qJQ9GJyF8v-1`
+_# Describes a workflow._<br/>
+`./pfda describe workflow-GZq2qY80Z0gjx7qJQ9GJyF8v-1`
 
-_# Describes a file_<br/>
+_# Describes a file._<br/>
 `./pfda describe file-GJk1kpQ05xgQd8bP54kJFjzkz-4`
 
-_# Describes an asset_<br/>
+_# Describes an asset._<br/>
 `./pfda describe file-GZYY1pQ05xgQd8bP54kJFFX7a-1`
 
-_# Describes a discussion_<br/>
+_# Describes a discussion._<br/>
 `./pfda describe discussion-17`
 
 ## Getting Scope
 
-The CLI command `pfda get-scope` is designed to print the current scope.  
-If you are running it in a private scope, 'private' is printed to the console. In case you are in a space, only the integer Space ID is printed to the console.
+The CLI command `pfda get-scope` is designed to print the current scope. If you are running it in a private scope, 'private' is printed to the console. If you are in a space, the integer Space ID is printed to the console.
 
 ### Usage
 
@@ -656,70 +647,111 @@ If you are running it in a private scope, 'private' is printed to the console. I
 
 ### Available Flags
 
-All flags are optional.
-
-- `-h, -help`: Displays the help message and exit.
-- `-json`: Responds the command result in JSON format.
+- `-h, -help`: Displays the help message and exits.
+- `-json`: Displays the command result in JSON format.
 
 ### Example
 
-The following example demonstrates use case for the `get-scope` command:
+The following example demonstrates a use case for the `get-scope` command:
 
-_# Get scope of the current workstation's context_<br/>
+_# Gets the scope of the current workstation's context._<br/>
 `./pfda get-scope`
 
 ## Printing Content
 
-The CLI commands `pfda cat` and `pfda head` are designed to print the content of a file. They only accept a single parameter - the unique file ID. You can print whole file content or just a few first lines if that's all you need.
+The CLI commands `pfda cat` and `pfda head` are designed to print the content of a file. They accept a single parameter: the unique file ID. You can print the whole file's content or just the first few lines.
 
 ### Available Flags
 
-All flags are optional. They can be used to specify the number of lines to print.
-
-- `-h, -help`: Displays the help message and exit.
-- `-lines`: Alters number of lines to display. (head command only)
+- `-h, -help`: Displays the help message and exits.
+- `-lines`: Alters the number of lines to display (for `head` command only).
+- `-json`: Displays the command result in JSON format.
 
 ### Examples
 
-The following examples demonstrate use cases for the `cat` and `head` command:
+The following examples demonstrate use cases for the `cat` and `head` commands:
 
-_# Prints whole file content_<br/>
+_# Prints the whole file content._<br/>
 `./pfda cat file-GJk1kpQ05xgQd8bP54kJFjzkz-1`
 
-_# Prints first 10 lines of a file_<br/>
+_# Prints the first 10 lines of a file._<br/>
 `./pfda head file-GJk1kpQ05xgQd8bP54kJFjzkz-1`
 
-_# Prints first 30 lines of a file_<br/>
+_# Prints the first 30 lines of a file._<br/>
 `./pfda head file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -lines 30`
+
+## Setting Tags
+
+The CLI command `pfda set-tags` is designed to update tags for a specified entity. You simply need the unique entity ID and a comma-separated list of tags you wish to apply.
+
+**Please be cautious. The new list of tags will replace whatever was set before.**
+
+### Usage
+
+`./pfda set-tags <ENTITY_ID> <TAGS>`
+
+### Available Flags
+
+- `-h, -help`: Displays the help message and exits.
+- `-json`: Displays the command result in JSON format.
+
+### Example
+
+The following example demonstrates the use case for the `set-tags` command:
+
+_# Sets tags for a file by its ID._<br/>
+`./pfda set-tags file-GJk1kpQ05xgQd8bP54kJFjzkz-1 "oncology,genomics,research data"`
+
+## Setting Properties
+
+The CLI command `pfda set-properties` is designed to update properties for a specified entity. You need the unique entity ID and a JSON object containing the properties.
+
+**Please be cautious. The new properties will replace whatever was set before.**
+
+### Usage
+
+`./pfda set-properties <ENTITY_ID> <PROPERTIES_JSON>`
+
+### Available Flags
+
+- `-h, -help`: Displays the help message and exits.
+- `-json`: Displays the command result in JSON format.
+
+### Example
+
+The following example demonstrates the use case for the `set-properties` command:
+
+_# Sets properties for a file by its ID using a JSON object._<br/>
+`./pfda set-properties file-GJk1kpQ05xgQd8bP54kJFjzkz-1 '{"project": "PHX", "sample_id": "PHX-007", "validated": "true"}'`
 
 ---
 
 ## pFDA CLI Changelog
-
-| <div style={{width:'195px'}}>Version</div> | Note                                                                      |
-|------------------------------|-----------------------------------------------------------------------------------------|
-| Version 2.10.3 (08/20/2025)  | Fixed issue with binary being dynamically linked                                        |
-| Version 2.10.2 (07/30/2025)  | Fixed issue with parsing json args                                                      |
-| Version 2.10.1 (06/30/2025)  | Fixed issue with parsing flags                                                          |
-| Version 2.10.0 (06/17/2025)  | Improved error handling, comma-separated arguments support, optimizing performance      |
-| Version 2.9.0 (03/31/2025)   | New features: rotate-password, get-password for dbclusters                              |
-| Version 2.8.0 (01/20/2025)   | New features: create-discussion, create-reply, edit-discussion, edit-reply              |
-| Version 2.7.3 (11/27/2024)   | Security fixes, improved error handling                                                 |
-| Version 2.7.2 (09/12/2024)   | Upgrade Go to 1.23.1                                                                    |
-| Version 2.7.1 (05/31/2024)   | ls shows files and folders in all states                                                |
-| Version 2.7.0 (05/16/2024)   | Fixed file-upload bug, various improvements                                             |
-| Version 2.6.0 (04/02/2024)   | New features: describe, ls-assets, ls-apps, ls-executions, ls-workflows, ls-discussions |
-| Version 2.5.0 (12/14/2023)   | Support of JSON responses, upload-file bug fixes.                                       |
-| Version 2.4.1 (07/20/2023)   | Fixed folder id manipulation.                                                           |
-| Version 2.4 (05/25/2023)     | New features: get-space-id, upload-file stdin input.                                    |
-| Version 2.3 (03/08/2023)     | New features: mkdir, rm, rmdir, head, tail.                                             |
-| Version 2.2.1 (12/20/2022)   | ls output improvements, added -overwrite flag for download.                             |
-| Version 2.2 (12/07/2022)     | New features: ls, list-space, describe-app, describe-workflow.                          |
-| Version 2.1.2 (8/03/2022)    | Fixed windows asset upload.                                                             |
-| Version 2.1.1 (7/18/2022)    | Improvements to asset upload.                                                           |
-| Version 2.1 (2/22/2022)      | Added download feature, upload to space, -cmd flag is now optional.                     |
-| Version 2.0.1 (8/26/2021)    | Fix an issue uploading very large files.                                                |
-| Version 2.0.0 (6/21/2018)    | TLS 1.2 and FIPS 140-2 support.                                                         |
-| Version 1.0.4 (1/5/2016)     | Reduced memory usage of each thread.                                                    |
-| Version 1.0.3 (12/14/2015)   | The uploader can now be used for both assets and files.                                 |
-| Version 1.0.2 (12/3/2015)    | Multi-threaded uploading, for faster uploading of large assets.                         |
+| <div style={{width:'195px'}}>Version</div> | Note  |
+|---|---|
+| Version 2.11.0 (09/25/2025) | New features: set-tags, set-properties |
+| Version 2.10.3 (08/20/2025) | Fixed issue with binary being dynamically linked |
+| Version 2.10.2 (07/30/2025) | Fixed issue with parsing JSON arguments |
+| Version 2.10.1 (06/30/2025) | Fixed issue with parsing flags |
+| Version 2.10.0 (06/17/2025) | Improved error handling, comma-separated arguments support, performance optimizations |
+| Version 2.9.0 (03/31/2025) | New features: rotate-password, get-password for dbclusters |
+| Version 2.8.0 (01/20/2025) | New features: create-discussion, create-reply, edit-discussion, edit-reply |
+| Version 2.7.3 (11/27/2024) | Security fixes, improved error handling |
+| Version 2.7.2 (09/12/2024) | Upgraded Go to 1.23.1 |
+| Version 2.7.1 (05/31/2024) | `ls` now shows files and folders in all states |
+| Version 2.7.0 (05/16/2024) | Fixed file-upload bug, various improvements |
+| Version 2.6.0 (04/02/2024) | New features: describe, ls-assets, ls-apps, ls-executions, ls-workflows, ls-discussions |
+| Version 2.5.0 (12/14/2023) | Support for JSON responses, upload-file bug fixes |
+| Version 2.4.1 (07/20/2023) | Fixed folder ID manipulation |
+| Version 2.4 (05/25/2023) | New features: get-space-id, upload-file stdin input |
+| Version 2.3 (03/08/2023) | New features: mkdir, rm, rmdir, head, tail |
+| Version 2.2.1 (12/20/2022) | `ls` output improvements, added `-overwrite` flag for download |
+| Version 2.2 (12/07/2022) | New features: ls, list-space, describe-app, describe-workflow |
+| Version 2.1.2 (8/03/2022) | Fixed Windows asset upload |
+| Version 2.1.1 (7/18/2022) | Improvements to asset upload |
+| Version 2.1 (2/22/2022) | Added download feature, upload to space; `-cmd` flag is now optional |
+| Version 2.0.1 (8/26/2021) | Fixed an issue with uploading very large files |
+| Version 2.0.0 (6/21/2018) | TLS 1.2 and FIPS 140-2 support |
+| Version 1.0.4 (1/5/2016) | Reduced memory usage of each thread |
+| Version 1.0.3 (12/14/2015) | The uploader can now be used for both assets and files |
+| Version 1.0.2 (12/3/2015) | Multi-threaded uploading for faster uploading of large assets |

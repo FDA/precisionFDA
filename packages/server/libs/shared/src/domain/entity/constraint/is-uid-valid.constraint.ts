@@ -7,10 +7,10 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator'
-import { DXEnityType } from '../domain/dxid'
+import { DXEntityType } from '../domain/dxid'
 
 type ConstraintOptions = {
-  entityType: DXEnityType
+  entityType: DXEntityType
   each?: boolean
 }
 

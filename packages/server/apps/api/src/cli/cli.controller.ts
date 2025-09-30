@@ -42,6 +42,8 @@ import { CliDiscussionDTO } from '@shared/domain/cli/dto/cli-discussion.dto'
 import { CliNodeDTO } from '@shared/domain/cli/dto/cli-node.dto'
 import { CliListDiscussionsFacade } from '../facade/cli/cli-list-discussions.facade'
 import { CliFindNodesFacade } from '../facade/cli/cli-find-nodes.facade'
+import { SetPropertiesFacade } from '@shared/facade/property/set-properties.facade'
+import { SetPropertiesDTO } from '@shared/domain/property/dto/set-properties.dto'
 
 // SPECIAL ROUTES INTENDED FOR CLI USAGE ONLY. CONTAINS CLI SPECIFIC LOGIC & SPECIAL RESPONSE OBJECTS.
 @Controller('/cli')
@@ -58,6 +60,7 @@ export class CliController {
     private readonly cliListMembersFacade: CliListMembersFacade,
     private readonly cliListDiscussionsFacade: CliListDiscussionsFacade,
     private readonly cliFindNodesFacade: CliFindNodesFacade,
+    private readonly cliSetPropertiesFacade: SetPropertiesFacade,
   ) {}
 
   @UseGuards(UserContextGuard)
@@ -75,7 +78,7 @@ export class CliController {
 
   @Get('/version/latest')
   getLatestVersion(): { version: string } {
-    return { version: '2.10.3' }
+    return { version: '2.11.0' }
   }
 
   @UseGuards(UserContextGuard)
@@ -175,5 +178,11 @@ export class CliController {
   ): Promise<{ url: string }> {
     const url = await this.cliUpdateDiscussionFacade.updateDiscussion(id, body)
     return { url }
+  }
+
+  @UseGuards(UserContextGuard)
+  @Post('/properties')
+  async setProperties(@Body() body: SetPropertiesDTO): Promise<void> {
+    return this.cliSetPropertiesFacade.setProperties(body)
   }
 }

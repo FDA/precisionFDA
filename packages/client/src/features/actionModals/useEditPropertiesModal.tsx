@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { TransparentButton, Button } from '../../components/Button'
+import { Button, TransparentButton } from '../../components/Button'
 import { FieldGroup } from '../../components/form/styles'
 import { CrossIcon } from '../../components/icons/PlusIcon'
 import '../../utils/yupValidators'
@@ -16,7 +16,8 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { InputTextS } from '../apps/form/Fields'
-import { PropertiesResource, ServerScope } from '../home/types'
+import { ServerScope } from '../home/types'
+import { RequestResponse } from './useFeatureMutation'
 
 const StyledForm = styled.form`
   min-width: 450px;
@@ -85,25 +86,20 @@ const schema = Yup.object().shape({
     .default([{ key: '', value: '' }]),
 })
 
-async function editPropertiesRequest({
-  id,
-  type,
-  properties,
-}: {
-  id: number|string
-  type: PropertiesResource
-  properties: Properties
-}) {
+async function editPropertiesRequest({ targetId, properties }: { targetId: string; properties: Properties }) {
   return axios
-    .post('/api/set_properties', {
-      item_id: id,
-      type,
+    .post<RequestResponse>('/api/v2/properties', {
+      targetId,
       properties,
     })
     .then(d => d.data)
 }
 
-const mergeAndUpdateProperties = (itemProperties: Properties, newPropertiesObject: Properties, commonPropertiesKeys: string[]): Properties => {
+const mergeAndUpdateProperties = (
+  itemProperties: Properties,
+  newPropertiesObject: Properties,
+  commonPropertiesKeys: string[],
+): Properties => {
   const mergedProperties = { ...itemProperties, ...newPropertiesObject }
   commonPropertiesKeys.forEach(key => {
     if (!newPropertiesObject.hasOwnProperty(key) && commonPropertiesKeys.includes(key)) {
@@ -125,14 +121,13 @@ function getError(errors: FieldErrors<FormInputs>, key: string) {
 }
 
 const EditPropertiesForm = ({
-  type,
   selected,
   setShowModal,
   onSuccess,
 }: {
-  type: PropertiesResource
   selected: {
-    id: number|string
+    id: number | string
+    uid: string
     name: string
     properties: Properties
   }[]
@@ -150,12 +145,10 @@ const EditPropertiesForm = ({
     return acc
   }, {})
 
-  const propertiesArr = Object
-    .entries(selected.length == 1 ? selected[0].properties : commonProperties)
-    .map(([key, value]) => ({
-      key,
-      value,
-    }))
+  const propertiesArr = Object.entries(selected.length == 1 ? selected[0].properties : commonProperties).map(([key, value]) => ({
+    key,
+    value,
+  }))
 
   const {
     register,
@@ -176,12 +169,12 @@ const EditPropertiesForm = ({
   })
 
   const mutation = useMutation({
-    mutationKey: ['edit-resource-properties', type],
-    mutationFn: (payload: { id: number|string, properties: Properties }) => editPropertiesRequest({
-      id: payload.id,
-      type,
-      properties: payload.properties,
-    }),
+    mutationKey: ['edit-resource-properties'],
+    mutationFn: (payload: { targetId: string; properties: Properties }) =>
+      editPropertiesRequest({
+        targetId: payload.targetId,
+        properties: payload.properties,
+      }),
   })
 
   const onSubmit = async (d: FormInputs) => {
@@ -191,11 +184,13 @@ const EditPropertiesForm = ({
     }, {} as Properties)
 
     for (const item of selected) {
-      const propertiesToUse = selected.length === 1 ? newProperties :
-        mergeAndUpdateProperties(item.properties, newProperties, Object.keys(commonProperties))
+      const propertiesToUse =
+        selected.length === 1
+          ? newProperties
+          : mergeAndUpdateProperties(item.properties, newProperties, Object.keys(commonProperties))
 
       await mutation.mutateAsync({
-        id: item.id,
+        targetId: item.uid ?? 'folder-' + item.id,
         properties: propertiesToUse,
       })
     }
@@ -223,17 +218,11 @@ const EditPropertiesForm = ({
           <StyledFieldGroup>
             {fields.length === 0 && (
               <NoProperties>
-                No properties have been added{' '}
-                <StyledButtonText onClick={handleAppendProperty}>
-                  Add a property
-                </StyledButtonText>
+                No properties have been added <StyledButtonText onClick={handleAppendProperty}>Add a property</StyledButtonText>
               </NoProperties>
             )}
             {fields.map((field, index) => {
-              const { isError, message } = getError(
-                errors,
-                `props.${index}.key`,
-              )
+              const { isError, message } = getError(errors, `props.${index}.key`)
               return (
                 <FieldWrapper key={field.id} data-testid={`property-${index}`}>
                   <InputTextS
@@ -244,16 +233,10 @@ const EditPropertiesForm = ({
                     disabled={mutation.isPending}
                     $isError={isError}
                   />
-                  {isError && (
-                    <Tooltip id={`props.${index}.key`} />
-                  )}
-                  <InputTextS
-                    autoComplete="off"
-                    {...register(`props.${index}.value`)}
-                    disabled={mutation.isPending}
-                  />
+                  {isError && <Tooltip id={`props.${index}.key`} />}
+                  <InputTextS autoComplete="off" {...register(`props.${index}.value`)} disabled={mutation.isPending} />
                   <Remove data-testid="property-remove" onClick={() => remove(index)}>
-                    <CrossIcon/>
+                    <CrossIcon />
                   </Remove>
                 </FieldWrapper>
               )
@@ -262,19 +245,9 @@ const EditPropertiesForm = ({
         </ModalScroll>
       </StyledForm>
       <StyledFooter>
-        {fields.length > 0 ? (
-          <StyledButtonText onClick={handleAppendProperty}>
-            Add another property
-          </StyledButtonText>
-        ) : (
-          <div/>
-        )}
+        {fields.length > 0 ? <StyledButtonText onClick={handleAppendProperty}>Add another property</StyledButtonText> : <div />}
         <ButtonRow>
-          <Button
-            type="button"
-            onClick={() => setShowModal(false)}
-            disabled={mutation.isPending}
-          >
+          <Button type="button" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
           <Button
@@ -293,28 +266,21 @@ const EditPropertiesForm = ({
 
 export function useEditPropertiesModal<
   T extends {
-    id: number|string
+    id: number | string
+    uid: string
     name: string
     properties: Properties
     scope: ServerScope
     featured: boolean
   },
->({
-  type,
-  selected,
-  onSuccess,
-}: {
-  type: PropertiesResource
-  selected: T[]
-  onSuccess?: (res: unknown) => void
-}) {
+>({ selected, onSuccess }: { selected: T[]; onSuccess?: (res: unknown) => void }) {
   const { isShown, setShowModal } = useModal()
   const mSelected = useMemo(() => selected, [isShown])
 
   const modalComp = (
     <ModalNext
       id="edit-properties-modal"
-      data-testid={`modal-${type}-edit-properties`}
+      data-testid={'modal-edit-properties'}
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
@@ -324,12 +290,7 @@ export function useEditPropertiesModal<
         hide={() => setShowModal(false)}
       />
 
-      <EditPropertiesForm
-        type={type}
-        onSuccess={onSuccess}
-        setShowModal={setShowModal}
-        selected={mSelected}
-      />
+      <EditPropertiesForm onSuccess={onSuccess} setShowModal={setShowModal} selected={mSelected} />
     </ModalNext>
   )
   return {

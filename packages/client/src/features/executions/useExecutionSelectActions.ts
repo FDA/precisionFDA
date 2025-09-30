@@ -76,7 +76,6 @@ export const useExecutionSelectActions = ({
     setShowModal: setPropertiesModal,
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal<IExecution>({
-    type: 'job',
     selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
@@ -190,7 +189,9 @@ export const useExecutionSelectActions = ({
     } else {
       // If the user is not the owner of the job in a space, they cannot connect
       // to the workstation or perform other actions where ownership is needed
-      actions = actions.filter(action => ['Track', 'Copy to space', 'Comments', 'Edit tags', 'Edit properties'].includes(action.name))
+      actions = actions.filter(action =>
+        ['Track', 'Copy to space', 'Comments', 'Edit tags', 'Edit properties'].includes(action.name),
+      )
     }
   }
 

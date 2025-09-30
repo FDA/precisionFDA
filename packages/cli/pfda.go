@@ -1,5 +1,4 @@
 // PrecisionFDA CLI
-// Version 2.10.3
 package main
 
 import (
@@ -14,6 +13,7 @@ import (
 	"strings"
 
 	_ "crypto/tls/fipsonly"
+
 	"dnanexus.com/precision-fda-cli/helpers"
 	"dnanexus.com/precision-fda-cli/precisionfda"
 	"rsc.io/goversion/version"
@@ -23,10 +23,12 @@ import (
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
-const usageString = `
-****************************
-PFDA COMMAND LINE TOOL v2.10.3
-****************************
+
+func getUsageMessage() string {
+	return fmt.Sprintf(
+		`********************************
+PFDA COMMAND LINE TOOL v%s
+********************************
 
 All available commands:
    pfda cat
@@ -51,6 +53,8 @@ All available commands:
    pfda rm
    pfda rmdir
    pfda rotate-password
+   pfda set-properties
+   pfda set-tags
    pfda upload-asset
    pfda upload-file
    pfda upload-resource
@@ -62,7 +66,8 @@ Command specific help section with description, examples and available flags:
 To print version info and exit:
    pfda -version
 
-Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli`
+Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli`, Version)
+}
 
 //
 // N.B. the -cmd flag exists and is now deprecated, but the following should all work
@@ -212,6 +217,14 @@ var invokeEditReply = func(client precisionfda.IPFDAClient, jsonBody *string) er
 	return client.EditReply(*jsonBody)
 }
 
+var invokeSetTags = func(client precisionfda.IPFDAClient, entityID string, args []string) error {
+	return client.SetTags(entityID, args)
+}
+
+var invokeSetProperties = func(client precisionfda.IPFDAClient, entityID string, jsonProperties string) error {
+	return client.SetProperties(entityID, jsonProperties)
+}
+
 var invokeGetDbClusterPassword = func(client precisionfda.IPFDAClient, dbClusterId *string) error {
 	return client.GetDbClusterPassword(*dbClusterId)
 }
@@ -315,7 +328,7 @@ func mainInternal() int {
 	}
 
 	pfdaclient := precisionfda.NewPFDAClient(serverURL)
-	pfdaclient.Platform = OsArch
+	pfdaclient.UserAgent = GetUserAgent()
 	pfdaclient.JsonResponse = *flagJson
 
 	skipVerifyBool, _ := strconv.ParseBool(*skipVerify)
@@ -549,7 +562,7 @@ func mainInternal() int {
 
 		entityType := helpers.ParseEntityType(args[0])
 		if entityType == "" {
-			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, job, file, worklfow, discussion.", args[0]), *flagJson)
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, worklfow.", args[0]), *flagJson)
 		}
 
 		err := invokeDescribe(pfdaclient, &args[0])
@@ -848,6 +861,34 @@ func mainInternal() int {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
 
+	case "set-tags":
+		if help {
+			return helpers.PrintSetTagsHelp()
+		}
+		entityType := helpers.ParseEntityType(args[0])
+		if entityType == "" {
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, worklfow.", args[0]), *flagJson)
+		}
+
+		err := invokeSetTags(pfdaclient, args[0], args[1:])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "set-properties":
+		if help {
+			return helpers.PrintSetPropertiesHelp()
+		}
+		entityType := helpers.ParseEntityType(args[0])
+		if entityType == "" {
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, worklfow.", args[0]), *flagJson)
+		}
+
+		err := invokeSetProperties(pfdaclient, args[0], args[1])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
 	case "get-password":
 		if help {
 			return helpers.PrintGetPasswordHelp()
@@ -918,7 +959,7 @@ func mainInternal() int {
 
 	case "":
 		// Empty command
-		fmt.Println(usageString)
+		fmt.Print(getUsageMessage())
 		checkLatestVersion(pfdaclient)
 		return 0
 
@@ -995,4 +1036,8 @@ func GetTLSVersion(tr *http.Transport) string {
 		return "TLS 1.3"
 	}
 	return "Unknown"
+}
+
+func GetUserAgent() string {
+	return `precisionFDA CLI/` + Version + ` (` + OsArch + `)`
 }

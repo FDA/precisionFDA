@@ -12,6 +12,13 @@ import {
 } from '@shared/domain/space-membership/space-membership.enum'
 import { ErrorCodes } from '@shared/errors'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { SetPropertiesDTO } from '@shared/domain/property/dto/set-properties.dto'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 
 describe('/cli', async () => {
   let em: EntityManager<MySqlDriver>
@@ -36,7 +43,7 @@ describe('/cli', async () => {
     expect(body).to.be.an('object')
     expect(body).to.have.property('version')
     expect(body.version).to.be.a('string')
-    expect(body.version).to.equal('2.10.3')
+    expect(body.version).to.equal('2.11.0')
   })
 
   describe('cli describe', () => {
@@ -310,7 +317,7 @@ describe('/cli', async () => {
     const user3 = create.userHelper.create(em)
     const user4 = create.userHelper.create(em)
     const user5 = create.userHelper.create(em)
-    const nonMemberUser = create.userHelper.create(em)
+    create.userHelper.create(em) // non-member
     create.spacesHelper.addMember(
       em,
       {
@@ -689,6 +696,261 @@ describe('/cli', async () => {
 
       expect(body).to.be.an('array')
       expect(body).to.have.length(0)
+    })
+  })
+
+  describe('cli properties', () => {
+    // test setting properties
+    it('POST /properties sets properties on all node types', async () => {
+      const file = create.filesHelper.createUploaded(em, { user })
+      const asset = create.filesHelper.createAsset(em, { user })
+      const folder = create.filesHelper.createFolder(em, { user })
+      await em.flush()
+
+      const fileDTO: SetPropertiesDTO = {
+        targetId: file.uid,
+        properties: {
+          prop1: 'value1',
+          prop2: 'value2',
+        },
+      }
+
+      const assetDTO: SetPropertiesDTO = {
+        targetId: asset.uid,
+        properties: {
+          prop3: 'value3',
+          prop4: 'value4',
+          prop5: 'value5',
+        },
+      }
+
+      const folderDTO: SetPropertiesDTO = {
+        targetId: `folder-${folder.id}`,
+        properties: {
+          prop6: 'value6',
+        },
+      }
+
+      const requests = [
+        supertest(testedApp.getHttpServer())
+          .post(`/cli/properties`)
+          .send(fileDTO)
+          .set('Accept', 'application/json')
+          .set(getDefaultHeaderData(user))
+          .expect(201),
+
+        supertest(testedApp.getHttpServer())
+          .post(`/cli/properties`)
+          .send(assetDTO)
+          .set('Accept', 'application/json')
+          .set(getDefaultHeaderData(user))
+          .expect(201),
+
+        supertest(testedApp.getHttpServer())
+          .post(`/cli/properties`)
+          .send(folderDTO)
+          .set('Accept', 'application/json')
+          .set(getDefaultHeaderData(user))
+          .expect(201),
+      ]
+
+      const responses = await Promise.all(requests)
+      for (const body of responses.map((r) => r.body)) {
+        expect(body).to.be.empty()
+      }
+      em.clear()
+      const savedFile = await em.findOneOrFail(UserFile, { id: file.id })
+      const savedAsset = await em.findOneOrFail(Asset, { id: asset.id })
+      const savedFolder = await em.findOneOrFail(Folder, { id: folder.id })
+      // check if properties were set
+      const fileProp = await savedFile.properties.load()
+      const assetProp = await savedAsset.properties.load()
+      const folderProp = await savedFolder.properties.load()
+      // check that only two are there
+      expect(fileProp).to.have.length(2)
+      expect(assetProp).to.have.length(3)
+      expect(folderProp).to.have.length(1)
+      expect(fileProp[0].propertyName).to.equal('prop1')
+      expect(fileProp[0].propertyValue).to.equal('value1')
+      expect(fileProp[1].propertyName).to.equal('prop2')
+      expect(fileProp[1].propertyValue).to.equal('value2')
+      expect(assetProp[0].propertyName).to.equal('prop3')
+      expect(assetProp[0].propertyValue).to.equal('value3')
+      expect(assetProp[1].propertyName).to.equal('prop4')
+      expect(assetProp[1].propertyValue).to.equal('value4')
+      expect(assetProp[2].propertyName).to.equal('prop5')
+      expect(assetProp[2].propertyValue).to.equal('value5')
+      expect(folderProp[0].propertyName).to.equal('prop6')
+      expect(folderProp[0].propertyValue).to.equal('value6')
+    })
+
+    it('POST /properties returns 403 for non-existing file', async () => {
+      const fileProperties: SetPropertiesDTO = {
+        targetId: 'file-nonexisting-1',
+        properties: {
+          prop1: 'value1',
+          prop2: 'value2',
+        },
+      }
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post(`/cli/properties`)
+        .send(fileProperties)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(403)
+
+      expect(body.error).to.be.an('object')
+      expect(body.error).to.have.property('code').that.equals(ErrorCodes.NOT_PERMITTED)
+    })
+
+    it('POST /properties returns 403 for not-editable file', async () => {
+      const user2 = create.userHelper.create(em)
+      await em.flush()
+      const file = create.filesHelper.createUploaded(em, { user: user2 }, { name: 'test-file.txt' })
+      await em.flush()
+
+      const fileProperties: SetPropertiesDTO = {
+        targetId: file.uid,
+        properties: {
+          prop1: 'value1',
+          prop2: 'value2',
+        },
+      }
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post(`/cli/properties`)
+        .send(fileProperties)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(403)
+
+      expect(body.error).to.be.an('object')
+      expect(body.error).to.have.property('code').that.equals(ErrorCodes.NOT_PERMITTED)
+    })
+
+    it('POST /properties sets properties on dbcluster, app, workflow ', async () => {
+      const dbCluster = create.dbClusterHelper.create(em, { user })
+      const appSeries = create.appSeriesHelper.create(em, { user }, { name: 'Properties App' })
+      const workflowSeries = create.workflowSeriesHelper.create(em, { user })
+      await em.flush()
+      const app = create.appHelper.createRegular(em, { user }, { appSeriesId: appSeries.id })
+      const workflow = create.workflowHelper.create(
+        em,
+        { user },
+        { workflowSeriesId: workflowSeries.id },
+      )
+      await em.flush()
+      const dbClusterDTO: SetPropertiesDTO = {
+        targetId: dbCluster.uid,
+        properties: {
+          dbprop1: 'dbvalue1',
+        },
+      }
+      const appDTO: SetPropertiesDTO = {
+        targetId: app.uid,
+        properties: {
+          approp1: 'appvalue1',
+        },
+      }
+      const workflowDTO: SetPropertiesDTO = {
+        targetId: workflow.uid,
+        properties: {
+          wfprop1: 'wfvalue1',
+        },
+      }
+
+      const requests = [
+        supertest(testedApp.getHttpServer())
+          .post(`/cli/properties`)
+          .send(dbClusterDTO)
+          .set('Accept', 'application/json')
+          .set(getDefaultHeaderData(user))
+          .expect(201),
+
+        supertest(testedApp.getHttpServer())
+          .post(`/cli/properties`)
+          .send(appDTO)
+          .set('Accept', 'application/json')
+          .set(getDefaultHeaderData(user))
+          .expect(201),
+
+        supertest(testedApp.getHttpServer())
+          .post(`/cli/properties`)
+          .send(workflowDTO)
+          .set('Accept', 'application/json')
+          .set(getDefaultHeaderData(user))
+          .expect(201),
+      ]
+
+      const responses = await Promise.all(requests)
+      for (const body of responses.map((r) => r.body)) {
+        expect(body).to.be.empty()
+      }
+      em.clear()
+      const savedDbCluster = await em.findOneOrFail(DbCluster, { id: dbCluster.id })
+      const savedApp = await em.findOneOrFail(AppSeries, { id: appSeries.id })
+      const savedWorkflow = await em.findOneOrFail(WorkflowSeries, { id: workflowSeries.id })
+
+      // check if properties were set
+      const dbClusterProp = await savedDbCluster.properties.load()
+      const appProp = await savedApp.properties.load()
+      const workflowProp = await savedWorkflow.properties.load()
+      expect(dbClusterProp).to.have.length(1)
+      expect(dbClusterProp[0].propertyName).to.equal('dbprop1')
+      expect(dbClusterProp[0].propertyValue).to.equal('dbvalue1')
+      expect(appProp).to.have.length(1)
+      expect(appProp[0].propertyName).to.equal('approp1')
+      expect(appProp[0].propertyValue).to.equal('appvalue1')
+      expect(workflowProp).to.have.length(1)
+      expect(workflowProp[0].propertyName).to.equal('wfprop1')
+      expect(workflowProp[0].propertyValue).to.equal('wfvalue1')
+    })
+
+    it('POST /properties overrides existing properties', async () => {
+      const file = create.filesHelper.createUploaded(em, { user })
+      await em.flush()
+
+      const fileDTO1: SetPropertiesDTO = {
+        targetId: file.uid,
+        properties: {
+          prop1: 'value1',
+          prop2: 'value2',
+          prop3: 'value2',
+          prop4: 'value2',
+        },
+      }
+      const fileDTO2: SetPropertiesDTO = {
+        targetId: file.uid,
+        properties: {
+          prop2: 'value2-new',
+          prop5: 'value5',
+        },
+      }
+
+      await supertest(testedApp.getHttpServer())
+        .post(`/cli/properties`)
+        .send(fileDTO1)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(201)
+
+      await supertest(testedApp.getHttpServer())
+        .post(`/cli/properties`)
+        .send(fileDTO2)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(201)
+
+      em.clear()
+      const savedFile = await em.findOneOrFail(UserFile, { id: file.id })
+      // check if properties were set
+      const fileProp = await savedFile.properties.load()
+      expect(fileProp).to.have.length(2)
+      expect(fileProp[0].propertyName).to.equal('prop2')
+      expect(fileProp[0].propertyValue).to.equal('value2-new')
+      expect(fileProp[1].propertyName).to.equal('prop5')
+      expect(fileProp[1].propertyValue).to.equal('value5')
     })
   })
 })

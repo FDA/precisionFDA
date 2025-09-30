@@ -1,7 +1,6 @@
 package precisionfda
 
 import (
-	"dnanexus.com/precision-fda-cli/helpers"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -9,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+
+	"dnanexus.com/precision-fda-cli/helpers"
 )
 
 // apiConfig holds configuration for making API calls.

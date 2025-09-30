@@ -1,62 +1,51 @@
-import { EntityName, FilterQuery } from '@mikro-orm/core'
+import { FilterQuery } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { AppSeries } from '@shared/domain/app-series/app-series.entity'
-import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
-import { Job } from '@shared/domain/job/job.entity'
-import { CreatePropertyDTO } from '@shared/domain/property/dto/CreatePropertyDTO'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User } from '@shared/domain/user/user.entity'
-import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
-import { HOME_SCOPE, Scope, STATIC_SCOPE } from '@shared/enums'
-import { PermissionError } from '@shared/errors'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import * as errors from '../../../errors'
-import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
 import { SPACE_STATE } from '../../space/space.enum'
 import { getIdFromScopeName, scopeContainsId } from '../../space/space.helper'
-import { Node } from '../../user-file/node.entity'
 import { FILE_STI_TYPE } from '../../user-file/user-file.types'
 import { GeneralProperty, PropertyType } from '../property.entity'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-
-export interface IPropertyService {
-  setProperty: (input: CreatePropertyDTO) => Promise<void>
-  getValidKeys: (scope: Scope, targetType: PropertyType) => Promise<string[]>
-}
+import { PropertyRepository } from '@shared/domain/property/property.repository'
+import { Property } from '@shared/domain/property/dto/set-properties.dto'
 
 @Injectable()
-export class PropertyService implements IPropertyService {
+export class PropertyService {
   @ServiceLogger()
   private readonly logger: Logger
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
+    private readonly propertyRepository: PropertyRepository,
   ) {}
 
-  async setProperty(input: CreatePropertyDTO): Promise<void> {
-    const targetType = input.targetType
-    const targetId = input.targetId
-    await this.checkTypeAndPermissions(targetType, targetId)
-
+  async setProperty({
+    targetType,
+    targetId,
+    properties,
+  }: {
+    targetType: PropertyType
+    targetId: number
+    properties: Property
+  }): Promise<void> {
     await this.em.transactional(async () => {
-      const currentProperties: GeneralProperty[] = await this.em.find(GeneralProperty, {
-        targetType,
-        targetId,
-      })
+      // Delete existing properties
+      const currentProperties = await this.propertyRepository.find({ targetType, targetId })
 
       this.logger.log(`Deleting properties with target id: ${targetId} and type: ${targetType}`)
       await this.em.removeAndFlush(currentProperties)
+
+      // Create new properties in batch
       this.logger.log(`Setting properties with target id: ${targetId} and type: ${targetType}`)
-      for (const key in input.properties) {
-        const newProperty = new GeneralProperty()
-        newProperty.targetId = targetId
-        newProperty.targetType = targetType
-        newProperty.propertyName = key
-        newProperty.propertyValue = input.properties[key]
-        this.em.persist(newProperty)
-      }
-      await this.em.flush()
+      const newProperties = Object.entries(properties).map(([propertyName, propertyValue]) =>
+        this.em.create(GeneralProperty, { targetId, targetType, propertyName, propertyValue }),
+      )
+
+      this.em.persist(newProperties)
     })
   }
 
@@ -69,7 +58,7 @@ export class PropertyService implements IPropertyService {
     return Promise.resolve([...new Set(results.map((p) => p.propertyName))])
   }
 
-  private getEntityByType(targetType: PropertyType) {
+  private getEntityByType(targetType: PropertyType): string {
     switch (targetType) {
       case 'node':
       case 'asset':
@@ -151,59 +140,5 @@ export class PropertyService implements IPropertyService {
       }
     }
     return condition
-  }
-
-  private async checkTypeAndPermissions(targetType: PropertyType, targetId: number): Promise<void> {
-    let targetEntity: EntityName<Job | Node | WorkflowSeries | AppSeries | DbCluster>
-    switch (targetType) {
-      case 'node':
-      case 'asset':
-        targetEntity = 'Node'
-        break
-      case 'workflowSeries':
-      case 'appSeries':
-      case 'job':
-      case 'dbCluster':
-        // capitalize type for DbQuery
-        targetEntity = targetType.charAt(0).toUpperCase() + targetType.slice(1)
-        break
-      default:
-        throw new errors.ValidationError('Unsupported type!')
-    }
-    const user = this.user
-    const target: Node | WorkflowSeries | Job | AppSeries | DbCluster = await this.em.findOneOrFail(
-      targetEntity,
-      { id: targetId },
-    )
-
-    if (target.scope == STATIC_SCOPE.PRIVATE && target.user?.id !== user.id) {
-      throw new PermissionError()
-    }
-    // space scope
-    else if (target.scope && scopeContainsId(target.scope)) {
-      const space = await this.em.findOne(Space, {
-        id: getIdFromScopeName(target.scope),
-        state: SPACE_STATE.ACTIVE,
-        spaceMemberships: {
-          user: {
-            id: user.id,
-          },
-          role: CAN_EDIT_ROLES,
-        },
-      })
-      if (!space) {
-        throw new PermissionError()
-      }
-      // public scope
-    } else {
-      const dbUser = await this.em.findOneOrFail(User, {
-        id: user.id,
-      })
-      const isSiteAdmin = await dbUser.isSiteAdmin()
-
-      if (!isSiteAdmin && target.user?.id !== user.id) {
-        throw new PermissionError()
-      }
-    }
   }
 }

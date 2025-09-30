@@ -19,7 +19,7 @@ export class DbClusterUpdateFacade {
   async updateDbCluster(uid: Uid<'dbcluster'>, body: UpdateDbClusterDTO): Promise<void> {
     this.logger.log({ body: body, userId: this.userContext.id }, 'Updating DbCluster')
 
-    const dbCluster = await this.dbClusterService.getEditableByUid(uid)
+    const dbCluster = await this.dbClusterService.getEditableEntityByUid(uid)
     if (!dbCluster) {
       this.logger.warn(
         { userId: this.userContext.id, dbClusterUid: uid },

@@ -7,7 +7,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator'
-import { DXEnityType, DXEntities } from '../domain/dxid'
+import { DXEntityType, DXEntities } from '../domain/dxid'
 
 @ValidatorConstraint({ async: true })
 class IsValidEntityIdentifierConstraint implements ValidatorConstraintInterface {
@@ -18,7 +18,7 @@ class IsValidEntityIdentifierConstraint implements ValidatorConstraintInterface 
     }
 
     return (DXEntities as ReadonlyArray<string>).includes(entityType)
-      ? UidUtils.isValidUId(value, entityType as DXEnityType)
+      ? UidUtils.isValidUId(value, entityType as DXEntityType)
       : new RegExp(`^${entityType}-\\d+$`).test(value)
   }
 

@@ -141,6 +141,11 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.11.0 (2025-09-25)
+
+- New feature - set-tags; sets tags on a given entity.
+- New feature - set-properties; sets properties on a given entity.
+
 ### 2.10.3 (2025-08-21)
 
 - fixed issue with binary being dynamically linked

@@ -17,6 +17,7 @@ import { CliListMembersFacade } from './cli-list-members.facade'
 import { SpaceModule } from '@shared/domain/space/space.module'
 import { CliListDiscussionsFacade } from './cli-list-discussions.facade'
 import { CliFindNodesFacade } from './cli-find-nodes.facade'
+import { PropertyModule } from '@shared/domain/property/property.module'
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CliFindNodesFacade } from './cli-find-nodes.facade'
     SpaceModule,
     AttachmentsFacadeModule,
     RemoveNodesFacadeModule,
+    PropertyModule,
   ],
   providers: [
     CliDescribeEntityFacade,

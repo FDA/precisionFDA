@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/md5"
-	"dnanexus.com/precision-fda-cli/helpers"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -25,6 +24,8 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"dnanexus.com/precision-fda-cli/helpers"
+
 	"github.com/docker/go-units"
 	"github.com/gosuri/uilive"
 	"github.com/hashicorp/go-cleanhttp"     // required by go-retryablehttp
@@ -32,7 +33,6 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.10.3 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
@@ -78,6 +78,8 @@ type IPFDAClient interface {
 	CreateReply(jsonBody string) error
 	EditDiscussion(jsonBody string) error
 	EditReply(jsonBody string) error
+	SetTags(entityID string, tags []string) error
+	SetProperties(entityID string, jsonProperties string) error
 	GetDbClusterPassword(dbClusterID string) error
 	RotateDbClusterPassword(dbClusterID string) error
 	RefreshToken(autoRefresh bool) (string, error)
@@ -88,7 +90,7 @@ type IPFDAClient interface {
 
 type PFDAClient struct {
 	BaseURL         string
-	Platform        string
+	UserAgent       string
 	NumRoutines     int
 	ChunkSize       int
 	MinRoutines     int
@@ -448,7 +450,7 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 	c.readAndChunk(file, chunkPool, &size)
 
 	close(chunkPool)
-	c.TagCliFile(fileID)
+	c.SetTags(fileID, []string{tagCLI})
 	wg.Wait()
 
 	if withProgressBar && !c.JsonResponse {
@@ -1154,7 +1156,7 @@ func (c *PFDAClient) createNewFolder(name string, parentFolderID string, spaceID
 		return newFolderID, fmt.Errorf("unable to create folder: %s - already exists in target location", name)
 	}
 
-	c.TagCliFolder(newFolderID)
+	c.SetTags("folder-"+newFolderID, []string{tagCLI})
 	return newFolderID, nil
 }
 
@@ -1410,7 +1412,7 @@ func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
 }
 
 func (c *PFDAClient) setPostHeaders(req *retryablehttp.Request) {
-	req.Header.Set("User-Agent", userAgent+"("+c.Platform+")")
+	req.Header.Set("User-Agent", c.UserAgent)
 	if c.AuthKey != "" {
 		req.Header.Set("Authorization", "Key "+c.AuthKey)
 	}

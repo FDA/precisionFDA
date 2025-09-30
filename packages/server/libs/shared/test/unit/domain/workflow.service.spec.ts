@@ -3,7 +3,7 @@ import { App } from '@shared/domain/app/app.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { WorkflowService } from '../../../src/domain/workflow/service/workflow.service'
+import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
 
 describe('WorkflowService', () => {
   const APP_1_UID = 'app 1 uid'
@@ -78,7 +78,9 @@ describe('WorkflowService', () => {
     })
 
     it('should return empty array if spec has empty input stages', async () => {
-      const EMPTY_INPUT_STAGES_WORKFLOW = { spec: { input_spec: { stages: [] } } } as unknown as Workflow
+      const EMPTY_INPUT_STAGES_WORKFLOW = {
+        spec: { input_spec: { stages: [] } },
+      } as unknown as Workflow
 
       const res = await getInstance().getApps(EMPTY_INPUT_STAGES_WORKFLOW)
 

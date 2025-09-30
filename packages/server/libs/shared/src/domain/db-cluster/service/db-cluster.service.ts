@@ -17,9 +17,10 @@ import { invertObj } from 'ramda'
 import { DbClusterRepository } from '../db-cluster.repository'
 import { DbClusterPaginationDTO } from '../dto/db-cluster-pagination.dto'
 import { DbClusterDTO } from '../dto/db-cluster.dto'
+import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 
 @Injectable()
-export class DbClusterService {
+export class DbClusterService implements SearchableByUid<'dbcluster'> {
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -27,6 +28,12 @@ export class DbClusterService {
     private readonly em: SqlEntityManager,
     private readonly dbClusterRepo: DbClusterRepository,
   ) {}
+  getAccessibleEntityByUid(uid: Uid<'dbcluster'>): Promise<DbCluster | null> {
+    return this.dbClusterRepo.findAccessibleOne({ uid: uid })
+  }
+  getEditableEntityByUid(uid: Uid<'dbcluster'>): Promise<DbCluster | null> {
+    return this.dbClusterRepo.findEditableOne({ uid: uid })
+  }
 
   async getNonTerminatedDbClusters(): Promise<DbCluster[]> {
     const nonTerminatedDbClusters = await this.dbClusterRepo.find(
@@ -90,10 +97,6 @@ export class DbClusterService {
 
   async getEditableByDxId(dxid: DxId<'dbcluster'>): Promise<DbCluster> {
     return await this.dbClusterRepo.findEditableOne({ dxid: dxid })
-  }
-
-  async getEditableByUid(uid: Uid<'dbcluster'>): Promise<DbCluster> {
-    return await this.dbClusterRepo.findEditableOne({ uid: uid })
   }
 
   async getAccessibleByUid(

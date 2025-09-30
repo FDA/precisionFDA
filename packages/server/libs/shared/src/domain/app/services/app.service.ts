@@ -37,9 +37,10 @@ import { ENTITY_TYPE } from '../app.enum'
 import { constructDxid, constructDxName } from '../app.helper'
 import { PlatformSpec, Spec } from '../app.input'
 import { AppRepository } from '../app.repository'
+import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 
 @Injectable()
-export class AppService {
+export class AppService implements SearchableByUid<'app'> {
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -51,6 +52,14 @@ export class AppService {
     private readonly appSeriesRepository: AppSeriesRepository,
     private readonly appRepository: AppRepository,
   ) {}
+
+  getAccessibleEntityByUid(uid: Uid<'app'>): Promise<App | null> {
+    return this.appRepository.findAccessibleOne({ uid })
+  }
+
+  getEditableEntityByUid(uid: Uid<'app'>): Promise<App | null> {
+    return this.appRepository.findEditableOne({ uid })
+  }
 
   private validateSpec(spec: Spec, type: string, alreadySeenSpec: string[]): void {
     if (!spec.name || spec.name.length === 0) {

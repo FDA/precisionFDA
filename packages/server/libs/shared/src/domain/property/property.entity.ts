@@ -1,4 +1,5 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
+import { PropertyRepository } from '@shared/domain/property/property.repository'
 
 export const propertyTypes = [
   'node',
@@ -14,6 +15,7 @@ export type PropertyType = (typeof propertyTypes)[number]
   abstract: true,
   tableName: 'properties',
   discriminatorColumn: 'target_type',
+  repository: () => PropertyRepository,
 })
 // Named 'General' to avoid import conflict with mikro-orm.
 export class GeneralProperty {

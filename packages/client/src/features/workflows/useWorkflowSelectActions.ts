@@ -14,25 +14,37 @@ import { copyWorkflowsRequest, deleteWorkflowRequest, WorkflowCopyResponse } fro
 import { IWorkflow } from './workflows.types'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
-export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, resourceKeys, resetSelected }: { homeScope?: HomeScope, spaceId?: string, selectedItems: IWorkflow[], resourceKeys: string[], resetSelected?: () => void }) => {
+export const useWorkflowSelectActions = ({
+  homeScope,
+  spaceId,
+  selectedItems,
+  resourceKeys,
+  resetSelected,
+}: {
+  homeScope?: HomeScope
+  spaceId?: string
+  selectedItems: IWorkflow[]
+  resourceKeys: string[]
+  resetSelected?: () => void
+}) => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user ? user.admin : false
 
-  const featureMutation = useFeatureMutation({ resource: 'workflows', onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  const featureMutation = useFeatureMutation({
+    resource: 'workflows',
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
 
-  const {
-    modalComp: copyToSpaceModal,
-    setShowModal: setCopyToSpaceModal,
-  } = useCopyToSpaceModal<IWorkflow>({
+  const { modalComp: copyToSpaceModal, setShowModal: setCopyToSpaceModal } = useCopyToSpaceModal<IWorkflow>({
     resource: 'workflows',
     selected,
     updateFunction: copyWorkflowsRequest,
-    onSuccess: (res) => {
+    onSuccess: res => {
       const workflowRes = res as WorkflowCopyResponse
       toast.success('The workflow has been copied to the space successfully.')
       queryClient.invalidateQueries({ queryKey: resourceKeys }).then(() => {
@@ -43,10 +55,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     },
   })
 
-  const {
-    modalComp: tagsModal,
-    setShowModal: setTagsModal,
-  } = useEditTagsModal({
+  const { modalComp: tagsModal, setShowModal: setTagsModal } = useEditTagsModal({
     resource: 'workflows',
     selected: { uid: `workflow-series-${selected[0]?.workflow_series_id}`, name: selected[0]?.name, tags: selected[0]?.tags },
     onSuccess: () => {
@@ -54,22 +63,15 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     },
   })
 
-  const {
-    modalComp: propertiesModal,
-    setShowModal: setPropertiesModal,
-  } = useEditPropertiesModal({
-    type: 'workflowSeries',
+  const { modalComp: propertiesModal, setShowModal: setPropertiesModal } = useEditPropertiesModal<IWorkflow>({
     selected: selected.map(wrkflw => ({ ...wrkflw, id: wrkflw.workflow_series_id })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'workflowSeries']})
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties'] })
     },
   })
 
-  const {
-    modalComp: deleteModal,
-    setShowModal: setDeleteModal,
-  } = useDeleteModal({
+  const { modalComp: deleteModal, setShowModal: setDeleteModal } = useDeleteModal({
     resource: 'workflow',
     selected: selected.map(s => ({ name: s.name, id: s.uid, location: s.location })),
     request: (ids: string[]) => deleteWorkflowRequest(ids.map(String)),
@@ -86,10 +88,10 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     },
   })
 
-  const {
-    modalComp: exportToModal,
-    setShowModal: setExportToModal,
-  } = useExportToModal({ selected: selected[0], resource: 'workflows' })
+  const { modalComp: exportToModal, setShowModal: setExportToModal } = useExportToModal({
+    selected: selected[0],
+    resource: 'workflows',
+  })
 
   const links = selected[0]?.links
 
@@ -156,7 +158,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
         type: 'modal',
         func: () => setDeleteModal(true),
         shouldHide: homeScope === 'spaces',
-        isDisabled: selected.some((e) => !e.links?.delete) || selected.length === 0,
+        isDisabled: selected.some(e => !e.links?.delete) || selected.length === 0,
       },
       {
         name: 'Copy to space',
@@ -176,14 +178,14 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
         type: 'modal',
         func: () => setTagsModal(true),
         isDisabled: false,
-        shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || (selected.length !== 1),
+        shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1,
       },
       {
         name: 'Edit properties',
         type: 'modal',
         func: () => setPropertiesModal(true),
         isDisabled: selected.length === 0,
-        shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name),
+        shouldHide: !isAdmin && selected[0]?.added_by !== user?.full_name,
       },
     ]
 
@@ -192,15 +194,30 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     }
 
     return allActions
-  }, [selected, links, homeScope, isAdmin, user?.full_name, featureMutation, setExportToModal, setDeleteModal, setCopyToSpaceModal, setTagsModal, setPropertiesModal])
+  }, [
+    selected,
+    links,
+    homeScope,
+    isAdmin,
+    user?.full_name,
+    featureMutation,
+    setExportToModal,
+    setDeleteModal,
+    setCopyToSpaceModal,
+    setTagsModal,
+    setPropertiesModal,
+  ])
 
-  const modals = useMemo(() => ({
-    'Copy to space': copyToSpaceModal,
-    'Delete': deleteModal,
-    'Export to': exportToModal,
-    'Edit tags': tagsModal,
-    'Edit properties': propertiesModal,
-  }), [copyToSpaceModal, deleteModal, exportToModal, tagsModal, propertiesModal])
+  const modals = useMemo(
+    () => ({
+      'Copy to space': copyToSpaceModal,
+      Delete: deleteModal,
+      'Export to': exportToModal,
+      'Edit tags': tagsModal,
+      'Edit properties': propertiesModal,
+    }),
+    [copyToSpaceModal, deleteModal, exportToModal, tagsModal, propertiesModal],
+  )
 
   return { actions, modals }
 }

@@ -1,19 +1,23 @@
 import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common'
-import { CreatePropertyDTO } from '@shared/domain/property/dto/CreatePropertyDTO'
 import { PropertyType } from '@shared/domain/property/property.entity'
 import { PropertyService } from '@shared/domain/property/services/property.service'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { EntityScope } from '@shared/types/common'
+import { SetPropertiesDTO } from '@shared/domain/property/dto/set-properties.dto'
+import { SetPropertiesFacade } from '@shared/facade/property/set-properties.facade'
 
 @UseGuards(UserContextGuard)
 @Controller('/properties')
 export class PropertiesController {
-  constructor(private readonly propertyService: PropertyService) {}
+  constructor(
+    private readonly propertyService: PropertyService,
+    private readonly propertyFacade: SetPropertiesFacade,
+  ) {}
 
   @HttpCode(201)
   @Post()
-  async setProperty(@Body() properties: CreatePropertyDTO): Promise<void> {
-    return await this.propertyService.setProperty(properties)
+  async setProperty(@Body() properties: SetPropertiesDTO): Promise<void> {
+    return await this.propertyFacade.setProperties(properties)
   }
 
   // fetch list of valid property key options for user and given scope.

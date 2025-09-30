@@ -7,6 +7,7 @@ import {
   FILE_STATE_DX,
   FILE_STATE_PFDA,
   FILE_STI_TYPE,
+  FileOrAsset,
 } from '@shared/domain/user-file/user-file.types'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -18,6 +19,8 @@ import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 @Injectable()
 export class NodeService {
@@ -32,8 +35,28 @@ export class NodeService {
     private readonly userRepository: UserRepository,
     private readonly folderRepository: FolderRepository,
   ) {}
+  getAccessibleEntityByUid(uid: Uid<'file'>): Promise<FileOrAsset> {
+    return this.nodeRepository.findAccessibleOne({
+      uid,
+      stiType: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET],
+    }) as Promise<UserFile>
+  }
+  getEditableEntityByUid(uid: Uid<'file'>): Promise<FileOrAsset> {
+    return this.nodeRepository.findEditableOne({
+      uid,
+      stiType: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET],
+    }) as Promise<UserFile>
+  }
 
-  async markNodesAsRemoving(ids: number[]) {
+  getEditableEntityById(id: number): Promise<Node> {
+    return this.nodeRepository.findEditableOne({ id })
+  }
+
+  getAccessibleEntityById(id: number): Promise<Node> {
+    return this.nodeRepository.findAccessibleOne({ id })
+  }
+
+  async markNodesAsRemoving(ids: number[]): Promise<void> {
     const nodes = await this.nodeRepository.find({ id: { $in: ids } })
     nodes.forEach((node) => {
       node.state = FILE_STATE_PFDA.REMOVING
@@ -49,7 +72,7 @@ export class NodeService {
    * - if node is in space, user has edit role in space
    * @param node
    */
-  async validateEditableBy(node: Node) {
+  async validateEditableBy(node: Node): Promise<void> {
     if (node.locked) {
       throw new Error('Locked items cannot be removed.')
     }
@@ -78,7 +101,7 @@ export class NodeService {
     throw new PermissionError(`You have no permissions to remove '${node.name}'.`)
   }
 
-  async rollbackRemovingState(nodes: Node[]) {
+  async rollbackRemovingState(nodes: Node[]): Promise<void> {
     this.logger.error(`Rolling back removing state for nodes ${nodes.map((node) => node.id)}`)
     nodes.forEach((node) => {
       if (node.stiType === FILE_STI_TYPE.FOLDER) {
@@ -98,7 +121,7 @@ export class NodeService {
    * @param filters
    * @returns
    */
-  async loadNodes(ids: number[], filters: nodeQueryFilter) {
+  async loadNodes(ids: number[], filters: nodeQueryFilter): Promise<Node[]> {
     this.logger.log(`Loading nodes ${ids} with filters ${JSON.stringify(filters)}`)
     const nodes: Node[] = await this.nodeRepository.find({
       $or: [
@@ -138,7 +161,7 @@ export class NodeService {
   /**
    * Method recursively collects all children of given node if it's a folder.
    */
-  async collectChildren(parentFolder: Folder, wholeTree: Node[]) {
+  async collectChildren(parentFolder: Folder, wholeTree: Node[]): Promise<void> {
     const relations = parentFolder.isInSpace() ? 'scopedChildren' : 'nonScopedChildren'
     const folderWithChildren = await this.folderRepository.findOne(parentFolder.id, {
       populate: [relations],

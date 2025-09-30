@@ -1,7 +1,6 @@
-import { DXEnityType } from './dxid'
 import { EntityType } from './entity.type'
-import { Uid } from './uid'
+import { Uid, UidAbleEntityType } from './uid'
 
-export type NonDXEntity = Exclude<EntityType, DXEnityType>
+export type NonUidEntity = Exclude<EntityType, UidAbleEntityType>
 
-export type EntityIdentifier = Uid | `${NonDXEntity}-${string}`
+export type EntityIdentifier = Uid | `${NonUidEntity}-${number}`
