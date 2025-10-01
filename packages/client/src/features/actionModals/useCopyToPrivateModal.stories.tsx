@@ -1,6 +1,5 @@
 import { Meta, StoryObj } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
-import { http, HttpResponse } from 'msw'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { copyAppsToPrivate } from '../apps/apps.api'
 import { APIResource } from '../home/types'
@@ -26,12 +25,15 @@ type Story = StoryObj<Props>
 
 const CopyToPrivateModalWrapper = ({ type }: Props) => {
   const mockData = type === 'apps' ? mockCopyApps.apps : mockCopyFiles.files
-  const copyFunction = type === 'apps' ? copyAppsToPrivate : 
-    (ids: number[]) => fetch('/api/files/copy', { 
-      method: 'POST', 
-      body: JSON.stringify({ item_ids: ids, scope: 'private' }),
-      headers: { 'Content-Type': 'application/json' },
-    }).then(r => r.json())
+  const copyFunction =
+    type === 'apps'
+      ? copyAppsToPrivate
+      : (ids: number[]) =>
+          fetch('/api/files/copy', {
+            method: 'POST',
+            body: JSON.stringify({ item_ids: ids, scope: 'private' }),
+            headers: { 'Content-Type': 'application/json' },
+          }).then(r => r.json())
 
   const { modalComp, setShowModal } = useCopyToPrivateModal({
     copyFunction,
@@ -42,7 +44,7 @@ const CopyToPrivateModalWrapper = ({ type }: Props) => {
   useEffect(() => {
     setShowModal(true)
   }, [setShowModal])
-  
+
   return modalComp
 }
 
