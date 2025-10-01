@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ModalNext } from '../../../modal/ModalNext'
 import { useModal } from '../../../modal/useModal'
 import { pluralize } from '../../../../utils/formatting'
@@ -24,7 +24,7 @@ const Header = styled.div`
   align-items: flex-start;
   padding: 24px 24px 16px;
   border-bottom: 1px solid #e2e8f0;
-  background: white;
+  background: var(--tertiary-100);
 `
 
 const HeaderContent = styled.div`
@@ -242,7 +242,6 @@ const StyledForm = styled.form`
   flex-direction: column;
 `
 
-// Component
 const ProvisioningModal = ({
   invitations,
   handleClose,

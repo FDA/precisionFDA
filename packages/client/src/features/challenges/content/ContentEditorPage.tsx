@@ -5,7 +5,6 @@ import { NotAllowedPage } from '../../../components/NotAllowed'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ContentTypePage } from './ContentTypePage'
 
-
 const StyledChallengeHeader = styled.div`
   max-width: 300px;
   min-width: 226px;
@@ -24,11 +23,11 @@ const NavItem = styled.div`
   border-bottom: 1px solid #e0e0e0;
   width: auto;
   font-size: 14px;
-  
+
   &[data-active='true'] {
     background-color: antiquewhite;
   }
-  
+
   a {
     flex-grow: 1;
     padding: 12px 0;
@@ -52,11 +51,9 @@ const NavItemBack = styled(NavItem)`
 
 export default function ChallengeContentEditPage() {
   const user = useAuthUser()
-  const { challengeId } = useParams<{
-    challengeId: string
-  }>()
+  const { challengeId } = useParams()
 
-  if (!user?.isAdmin) {
+  if (!user?.can_create_challenges) {
     return <NotAllowedPage />
   }
 
@@ -78,13 +75,15 @@ export default function ChallengeContentEditPage() {
         </NavItem>
         <br />
         <NavItemResource>
-          <a data-turbolinks="false" href={`/challenges/${challengeId}/editor/resources`}>Resources</a>
+          <a data-turbolinks="false" href={`/challenges/${challengeId}/editor/resources`}>
+            Resources
+          </a>
         </NavItemResource>
       </StyledChallengeHeader>
       <Routes>
-        <Route path="/info" element={<ContentTypePage key="info" challengeId={challengeId!} contentType="info" />} />
-        <Route path="/results" element={<ContentTypePage key="results" challengeId={challengeId!} contentType="results" />} />
-        <Route path="/pre-registration" element={<ContentTypePage key="pre-registration" challengeId={challengeId!} contentType="pre-registration" />} />
+        <Route path="/info" element={<ContentTypePage challengeId={challengeId!} contentType="info" />} />
+        <Route path="/results" element={<ContentTypePage challengeId={challengeId!} contentType="results" />} />
+        <Route path="/pre-registration" element={<ContentTypePage challengeId={challengeId!} contentType="pre-registration" />} />
       </Routes>
     </StyledRow>
   )

@@ -1,5 +1,5 @@
 import { TZDate } from '@date-fns/tz'
-import { format } from 'date-fns-tz'
+import { format } from 'date-fns'
 import { enUS } from 'date-fns/locale'
 import React from 'react'
 import { Link } from 'react-router-dom'

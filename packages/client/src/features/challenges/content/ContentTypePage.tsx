@@ -109,13 +109,13 @@ const ScrollBody = styled.div`
 `
 
 export const ContentTypePage = ({ challengeId, contentType }: { challengeId: number | string; contentType: ContentType }) => {
-  const { data } = useChallengeByIDQuery(challengeId!, contentType)
+  const { data } = useChallengeByIDQuery(challengeId, contentType)
   if (!data) return null
   return (
     <LexiContext editorState={data[mapContentTypeToKey(contentType)]}>
       <ScrollBody className="editor-shell" style={{ margin: 0 }}>
         <Editor insertImageType="uri" />
-        <ButtonBar challengeId={challengeId!} contentType={contentType!} />
+        <ButtonBar challengeId={challengeId} contentType={contentType} />
       </ScrollBody>
     </LexiContext>
   )
