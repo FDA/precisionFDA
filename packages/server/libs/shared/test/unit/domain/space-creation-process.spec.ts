@@ -1,30 +1,30 @@
+import { Reference } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { config } from '@shared/config'
+import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
 import { AdministratorSpaceCreationProcess } from '@shared/domain/space/create/administrator-space-creation.process'
 import { GovernmentSpaceCreationProcess } from '@shared/domain/space/create/government-space-creation.process'
 import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
 import { PrivateSpaceCreationProcess } from '@shared/domain/space/create/private-space-creation.process'
+import { ReviewSpaceCreationProcess } from '@shared/domain/space/create/review-space-creation.process'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User, USER_STATE } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
 import { PlatformClient } from '@shared/platform-client'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import * as generate from '@shared/test/generate'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { ReviewSpaceCreationProcess } from '@shared/domain/space/create/review-space-creation.process'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
-import { Reference } from '@mikro-orm/core'
-import { Space } from '@shared/domain/space/space.entity'
-import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { config } from '@shared/config'
-import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 describe('space creation process tests', () => {
   const SHARED_SPACE_ID = 2
@@ -561,6 +561,8 @@ describe('space creation process tests', () => {
 
     it('basic', async () => {
       const input = new CreateSpaceDTO()
+      input.name = 'name'
+      input.description = 'description'
       input.spaceType = SPACE_TYPE.REVIEW
       input.guestLeadDxuser = guestLeadUser.dxuser
       input.hostLeadDxuser = hostLeadUser.dxuser
@@ -659,8 +661,22 @@ describe('space creation process tests', () => {
       expect(emCreateStub.calledTwice).to.be.true()
       expect(emCreateStub.firstCall.args[0]).to.be.eq(Space)
       expect(emCreateStub.firstCall.args[1].spaceId).to.be.eq(SHARED_SPACE_ID)
+      expect(emCreateStub.firstCall.args[1].name).to.be.eq('name')
+      expect(emCreateStub.firstCall.args[1].description).to.be.eq('description')
+      expect(emCreateStub.firstCall.args[1].type).to.be.eq(SPACE_TYPE.REVIEW)
+      expect(emCreateStub.firstCall.args[1].state).to.be.eq(SPACE_STATE.ACTIVE)
+      expect(emCreateStub.firstCall.args[1].protected).to.be.true()
+      expect(emCreateStub.firstCall.args[1].hostDxOrg).to.contain('host')
+      expect(emCreateStub.firstCall.args[1].guestDxOrg).to.be.null()
       expect(emCreateStub.secondCall.args[0]).to.be.eq(Space)
       expect(emCreateStub.secondCall.args[1].spaceId).to.be.eq(SHARED_SPACE_ID)
+      expect(emCreateStub.secondCall.args[1].name).to.be.eq('name')
+      expect(emCreateStub.secondCall.args[1].description).to.be.eq('description')
+      expect(emCreateStub.secondCall.args[1].type).to.be.eq(SPACE_TYPE.REVIEW)
+      expect(emCreateStub.secondCall.args[1].state).to.be.eq(SPACE_STATE.ACTIVE)
+      expect(emCreateStub.secondCall.args[1].protected).to.be.true()
+      expect(emCreateStub.secondCall.args[1].hostDxOrg).to.be.null()
+      expect(emCreateStub.secondCall.args[1].guestDxOrg).to.contain('guest')
 
       expect(emPopulateStub.calledTwice).to.be.true()
       expect(emPopulateStub.firstCall.args[1]).to.deep.eq(['confidentialSpaces'])

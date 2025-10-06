@@ -60,31 +60,47 @@ const nameOfLead = (leadType: 'guest' | 'host', spaceType: ISpace['type']) => {
 }
 
 export const validationSchema = Yup.object().shape({
-  space_type: Yup.string().required('Space type required'),
+  spaceType: Yup.string().required('Space type required'),
   name: Yup.string().required('Name required'),
   description: Yup.string().required('Description required'),
-  guest_lead_dxuser: Yup.string()
+  hostLeadDxuser: Yup.string()
     .nullable()
-    .when('space_type', (space_type: string, schema: Yup.StringSchema<string | null | undefined>) =>
-      ['groups', 'review'].includes(space_type)
-        ? schema.required(`${nameOfLead('guest', space_type as ISpace['type'])} lead required`)
+    .when('spaceType', ([spaceType], schema: Yup.StringSchema<string | null | undefined>) =>
+      ['groups', 'review'].includes(spaceType)
+        ? schema.required(`${nameOfLead('host', spaceType as ISpace['type'])} lead required`)
         : schema,
     ),
-
-  host_lead_dxuser: Yup.string()
+  guestLeadDxuser: Yup.string()
     .nullable()
-    .when('space_type', (space_type: string, schema: Yup.StringSchema<string | null | undefined>) =>
-      ['groups', 'review'].includes(space_type)
-        ? schema.required(`${nameOfLead('host', space_type as ISpace['type'])} lead required`)
+    .when('spaceType', ([spaceType], schema: Yup.StringSchema<string | null | undefined>) =>
+      ['groups', 'review'].includes(spaceType)
+        ? schema.required(`${nameOfLead('guest', spaceType as ISpace['type'])} lead required`)
         : schema,
     ),
   cts: Yup.string()
     .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'review',
-      then: Yup.string().nullable(),
+    .when('spaceType', {
+      is: (spaceType: string) => spaceType === 'review',
+      then: val => val,
     }),
-  protected: Yup.boolean().nullable(),
+  protected: Yup.boolean()
+    .nullable()
+    .when('spaceType', {
+      is: (spaceType: string) => ['groups', 'review', 'government'].includes(spaceType),
+      then: val => val,
+    }),
+  restrictedReviewer: Yup.boolean()
+    .nullable()
+    .when('spaceType', {
+      is: (spaceType: string) => spaceType === 'review',
+      then: val => val,
+    }),
+  restrictedDiscussions: Yup.boolean()
+    .nullable()
+    .when('spaceType', {
+      is: (spaceType: string) => spaceType === 'review',
+      then: val => val,
+    }),
 })
 
 export const editValidationSchema = Yup.object().shape({
@@ -93,8 +109,8 @@ export const editValidationSchema = Yup.object().shape({
   description: Yup.string().required('Description required'),
   cts: Yup.string()
     .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'review',
-      then: Yup.string().nullable(),
+    .when('spaceType', {
+      is: (spaceType: string) => spaceType === 'review',
+      then: val => val,
     }),
 })
