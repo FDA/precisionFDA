@@ -20,6 +20,7 @@ export class CreateSpaceDTO {
   spaceType: SPACE_TYPE
 
   @IsString()
+  @IsNotEmpty()
   hostLeadDxuser: string
 
   @ValidateIf((o) => o.spaceType === SPACE_TYPE.REVIEW)

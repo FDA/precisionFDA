@@ -1,38 +1,24 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { UseMutationResult } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { UseMutationResult } from '@tanstack/react-query'
-import { Divider, FieldLabelRow, InputError } from '../../../components/form/styles'
+import { Button } from '../../../components/Button'
+import { Checkbox } from '../../../components/Checkbox'
 import { FieldGroup } from '../../../components/form/FieldGroup'
+import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
+import { Divider, FieldLabelRow, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { CreateSpacePayload, CreateSpaceResponse } from '../spaces.api'
-import { ISpace } from '../spaces.types'
-import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
-import { HintText, Row, StyledForm } from './styles'
-import { getSpaceTypeOptions, SPACE_TYPE_HINT, validationSchema } from './helpers'
-import { Checkbox } from '../../../components/Checkbox'
 import { useConfirm } from '../../modal/useConfirm'
-import { Button } from '../../../components/Button'
-
-interface SpaceCreateForm {
-  space_type: ISpace['type']
-  name: string
-  description: string
-  source_space_id: string | null
-  guest_lead_dxuser: string | null
-  host_lead_dxuser: string | null
-  cts: string | null
-  protected: boolean | null
-  restricted_reviewer: boolean | null
-  restricted_discussions: boolean | null
-}
+import { CreateSpacePayload, CreateSpaceResponse } from '../spaces.api'
+import { getSpaceTypeOptions, SPACE_TYPE_HINT, validationSchema } from './helpers'
+import { HintText, Row, StyledForm } from './styles'
 
 export interface ISpaceForm {
   mutation: UseMutationResult<CreateSpaceResponse, unknown, CreateSpacePayload, unknown>
-  defaultValues?: Partial<SpaceCreateForm>
+  defaultValues?: Partial<CreateSpacePayload>
 }
 
 export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
@@ -50,52 +36,44 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
     setValue,
     watch,
     getValues,
-  } = useForm<SpaceCreateForm>({
+  } = useForm<CreateSpacePayload>({
     mode: 'onBlur',
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      space_type: 'private_type',
+      spaceType: 'private_type',
       name: '',
       description: '',
-      host_lead_dxuser: '',
-      guest_lead_dxuser: '',
-      cts: null,
+      hostLeadDxuser: '',
+      guestLeadDxuser: '',
+      cts: '',
       protected: false,
-      restricted_reviewer: null,
-      restricted_discussions: null,
+      restrictedReviewer: false,
+      restrictedDiscussions: false,
       ...defaultValues,
     },
   })
 
   useEffect(() => {
-    const stype = watch().space_type
-    if (stype === 'private_type' || stype === 'government' || stype === 'administrator') {
-      setValue('cts', null)
-      clearErrors(['host_lead_dxuser', 'guest_lead_dxuser', 'cts'])
+    const stype = watch().spaceType
+    if (stype !== 'review') {
+      setValue('cts', '')
+      clearErrors(['hostLeadDxuser', 'guestLeadDxuser', 'cts'])
+      setValue('restrictedReviewer', false)
+      setValue('restrictedDiscussions', false)
     }
-  }, [watch().space_type])
+    if (!['government', 'review', 'groups'].includes(stype.toString())) {
+      setValue('protected', false)
+    }
+  }, [watch().spaceType])
 
   const onSubmit = () => {
     const vals = getValues()
-    if (['private_type', 'administrator', 'government'].includes(vals.space_type.toString())) {
-      vals.host_lead_dxuser = user ? user.dxuser : null
-      vals.guest_lead_dxuser = ''
+    if (['private_type', 'administrator', 'government'].includes(vals.spaceType.toString())) {
+      vals.hostLeadDxuser = user?.dxuser ?? ''
+      vals.guestLeadDxuser = ''
     }
 
-    const createSpaceRequest: CreateSpacePayload = {
-      name: vals.name,
-      description: vals.description,
-      spaceType: vals.space_type,
-      sourceSpaceId: vals.source_space_id,
-      guestLeadDxuser: vals.guest_lead_dxuser,
-      hostLeadDxuser: vals.host_lead_dxuser,
-      cts: vals.cts ?? '',
-      protected: vals.protected,
-      restrictedReviewer: vals.restricted_reviewer ?? false,
-      restrictedDiscussions: vals.restricted_discussions ?? false,
-    }
-
-    mutation.mutateAsync(createSpaceRequest)
+    mutation.mutateAsync(vals)
   }
 
   const handleProtectedSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,11 +81,11 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
   }
 
   const handleRestrictedReviewer = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue('restricted_reviewer', event.target.checked)
+    setValue('restrictedReviewer', event.target.checked)
   }
 
   const handleRestrictedDiscussions = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue('restricted_discussions', event.target.checked)
+    setValue('restrictedDiscussions', event.target.checked)
   }
 
   const isSubmitting = mutation.isPending
@@ -123,10 +101,10 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
     if (getValues().protected) {
       restrictions.push('protected')
     }
-    if (getValues().restricted_reviewer) {
+    if (getValues().restrictedReviewer) {
       restrictions.push('FDA-associated restricted')
     }
-    if (getValues().restricted_discussions) {
+    if (getValues().restrictedDiscussions) {
       restrictions.push('Shared Area discussions restricted')
     }
 
@@ -143,7 +121,7 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
     <StyledForm>
       <FieldGroup label="Space type">
         <Controller
-          name="space_type"
+          name="spaceType"
           control={control}
           render={({ field: { value, onChange, onBlur } }) => (
             <RadioButtonGroup
@@ -155,8 +133,8 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
             />
           )}
         />
-        <ErrorMessage errors={errors} name="space_type" render={({ message }) => <InputError>{message}</InputError>} />
-        <HintText>{SPACE_TYPE_HINT[watch().space_type]}</HintText>
+        <ErrorMessage errors={errors} name="spaceType" render={({ message }) => <InputError>{message}</InputError>} />
+        <HintText>{SPACE_TYPE_HINT[watch().spaceType]}</HintText>
       </FieldGroup>
 
       <Divider />
@@ -170,29 +148,29 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
         <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
       </FieldGroup>
 
-      {watch().space_type === 'groups' && (
+      {watch().spaceType === 'groups' && (
         <>
           <FieldGroup label="Host Lead" required>
-            <InputText {...register('host_lead_dxuser')} disabled={isSubmitting} />
-            <ErrorMessage errors={errors} name="host_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
+            <InputText {...register('hostLeadDxuser')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="hostLeadDxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
           <FieldGroup label="Guest Lead" required>
-            <InputText {...register('guest_lead_dxuser')} disabled={isSubmitting} />
-            <ErrorMessage errors={errors} name="guest_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
+            <InputText {...register('guestLeadDxuser')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="guestLeadDxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
         </>
       )}
 
-      {watch().space_type === 'review' && (
+      {watch().spaceType === 'review' && (
         <>
           <FieldGroup label="Reviewer Lead" required>
-            <InputText {...register('host_lead_dxuser')} disabled={isSubmitting} />
-            <ErrorMessage errors={errors} name="host_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
+            <InputText {...register('hostLeadDxuser')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="hostLeadDxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
 
           <FieldGroup label="Sponsor Lead" required>
-            <InputText {...register('guest_lead_dxuser')} disabled={isSubmitting} />
-            <ErrorMessage errors={errors} name="guest_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
+            <InputText {...register('guestLeadDxuser')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="guestLeadDxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
 
           <FieldGroup label="Center Tracking System #">
@@ -209,7 +187,7 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
         </>
       )}
 
-      {['review', 'groups', 'government'].includes(watch().space_type as string) && (
+      {['review', 'groups', 'government'].includes(watch().spaceType as string) && (
         <FieldGroup>
           <FieldLabelRow>
             <Checkbox
@@ -234,15 +212,15 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
         </FieldGroup>
       )}
 
-      {watch().space_type === 'review' && (
+      {watch().spaceType === 'review' && (
         <>
           <FieldGroup>
             <FieldLabelRow>
               <Checkbox
-                {...register('restricted_reviewer')}
+                {...register('restrictedReviewer')}
                 disabled={isSubmitting}
                 onChange={handleRestrictedReviewer}
-                checked={watch().restricted_reviewer || false}
+                checked={watch().restrictedReviewer || false}
               />
               Restrict Reviewer side of Space to FDA users only
             </FieldLabelRow>
@@ -251,10 +229,10 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
           <FieldGroup>
             <FieldLabelRow>
               <Checkbox
-                {...register('restricted_discussions')}
+                {...register('restrictedDiscussions')}
                 disabled={isSubmitting}
                 onChange={handleRestrictedDiscussions}
-                checked={watch().restricted_discussions || false}
+                checked={watch().restrictedDiscussions || false}
               />
               Disable Shared Area Discussions
             </FieldLabelRow>
@@ -269,7 +247,7 @@ export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
           disabled={Object.keys(errors).length > 0 || isSubmitting}
           type="button"
           onClick={
-            getValues().protected || getValues().restricted_reviewer || getValues().restricted_discussions
+            getValues().protected || getValues().restrictedReviewer || getValues().restrictedDiscussions
               ? openConfirmation
               : handleSubmit(onSubmit)
           }

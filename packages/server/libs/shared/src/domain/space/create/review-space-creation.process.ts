@@ -1,21 +1,21 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
-import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
-import { PlatformClient } from '@shared/platform-client'
+import { Inject, Injectable } from '@nestjs/common'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { Space } from '../space.entity'
-import { NotFoundError, PermissionError } from '@shared/errors'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { NotFoundError, PermissionError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
+import { Space } from '../space.entity'
 
 @Injectable()
 export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
@@ -65,9 +65,12 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
     await this.handleTags(input, sharedSpace)
 
     const hostPrivateSpace = this.em.create(Space, {
-      ...sharedSpace,
-      id: null,
-      guestProject: null,
+      name: sharedSpace.name,
+      description: sharedSpace.description,
+      type: sharedSpace.type,
+      state: sharedSpace.state,
+      protected: sharedSpace.protected,
+      hostDxOrg: sharedSpace.hostDxOrg,
       guestDxOrg: null,
       spaceId: sharedSpace.id,
       sponsorOrgId: null,
@@ -81,10 +84,13 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
     this.em.persist(hostPrivateSpace)
 
     const guestPrivateSpace = this.em.create(Space, {
-      ...sharedSpace,
-      id: null,
-      hostProject: null,
+      name: sharedSpace.name,
+      description: sharedSpace.description,
+      type: sharedSpace.type,
+      state: sharedSpace.state,
+      protected: sharedSpace.protected,
       hostDxOrg: null,
+      guestDxOrg: sharedSpace.guestDxOrg,
       spaceId: sharedSpace.id,
       sponsorOrgId: null,
       restrictToTemplate: false,
@@ -266,6 +272,7 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
     sharedSpace.guestProject = guestProject.id
     guestPrivateSpace.guestProject = guestPrivateProject.id
     hostPrivateSpace.hostProject = hostPrivateProject.id
+
     this.em.persist(sharedSpace)
     this.em.persist(guestPrivateSpace)
     this.em.persist(hostPrivateSpace)
