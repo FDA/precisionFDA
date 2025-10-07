@@ -7,9 +7,9 @@ import { BackLinkMargin } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { AdminWrapper } from '../../admin/AdminWrapper'
-import { CreateNewsItemPayload, deleteNewsItemRequest, editNewsItemRequest, newsItemRequest } from '../api'
-import { NewsItem } from '../types'
-import { CreateNewsForm, NewsItemForm } from './NewsItemForm'
+import { deleteNewsItemRequest, editNewsItemRequest, newsItemRequest } from '../api'
+import { NewsItem, NewsItemPayload } from '../types'
+import { NewsItemForm } from './NewsItemForm'
 import { FormPageContainer } from './styles'
 
 const useNewsItemRequest = (id: string) => {
@@ -24,7 +24,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
   const queryClient = useQueryClient()
   const editNewsItemMutation = useMutation({
     mutationKey: ['edit-news-item'],
-    mutationFn: (payload: CreateNewsItemPayload) => editNewsItemRequest(data.id, payload),
+    mutationFn: (payload: NewsItemPayload) => editNewsItemRequest(data.id, payload),
     onSuccess: () => {
       navigate('/admin/news')
       queryClient.invalidateQueries({
@@ -58,14 +58,14 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
     },
   })
 
-  const handleSubmit = (vals: CreateNewsForm) => {
+  const handleSubmit = (vals: NewsItemPayload) => {
     editNewsItemMutation.mutateAsync(vals)
   }
   const handleDelete = () => {
     if (window.confirm('Are you sure you wish to delete this item?')) deleteNewsItemMutation.mutateAsync()
   }
 
-  const tData = { ...data, createdAt: new Date(data.createdAt)?.toISOString().substring(0,10) } satisfies NewsItem
+  const tData = { ...data, createdAt: new Date(data.createdAt)?.toISOString().substring(0, 10) } satisfies NewsItem
 
   return <NewsItemForm onSubmit={handleSubmit} onDelete={handleDelete} defaultValues={tData} />
 }
@@ -80,13 +80,7 @@ const EditNewsItemPage = () => {
         <FormPageContainer>
           <BackLinkMargin linkTo="/admin/news">Back to admin news list</BackLinkMargin>
           <PageTitle>Edit news item</PageTitle>
-          {isLoading ? (
-            <Loader />
-          ) : data ? (
-            <EditNewsItemMutation data={data} />
-          ) : (
-            <div>News item not found.</div>
-          )}
+          {isLoading ? <Loader /> : data ? <EditNewsItemMutation data={data} /> : <div>News item not found.</div>}
         </FormPageContainer>
       </AdminWrapper>
     </UserLayout>

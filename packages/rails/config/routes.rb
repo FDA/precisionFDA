@@ -198,13 +198,6 @@ Rails.application.routes.draw do
         get :describe, on: :member # for CLI
       end
 
-      # News
-      post "news" => "news_items#create"
-      post "news/positions" => "news_items#positions"
-      put "news/:id" => "news_items#edit"
-      get "news/:id" => "news_items#show"
-      delete "news/:id" => "news_items#delete"
-
       resources :challenges, only: %i(index show create update) do
         get :years, on: :collection
         get :scoring_app_users, on: :collection

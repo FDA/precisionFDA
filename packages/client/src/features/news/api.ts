@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { PaginationMetaV2 } from '../../types/pagination'
-import { NewsItem, NewsListParams } from './types'
+import { NewsItem, NewsItemPayload, NewsListParams } from './types'
 
 export interface NewsListResponse {
   meta: PaginationMetaV2
@@ -16,7 +16,7 @@ export async function newsAdminAllRequest(params: NewsListParams) {
 }
 
 export async function newsItemRequest(id: string) {
-  return axios.get(`/api/news/${id}`).then(response => response.data as NewsItem)
+  return axios.get(`/api/v2/news/${id}`).then(response => response.data as NewsItem)
 }
 
 export type NewsYearsListResponse = string[]
@@ -26,26 +26,14 @@ export async function newsYearsListRequest(): Promise<NewsYearsListResponse> {
 export interface CreateNewsItemResponse {
   error?: Error
 }
-export interface CreateNewsItemPayload {
-  title?: string
-  isPublication?: boolean
+
+export async function createNewsItemRequest(payload: NewsItemPayload) {
+  return axios.post('/api/v2/news', payload).then(r => r.data as CreateNewsItemResponse)
 }
 
-export async function createNewsItemRequest(payload: CreateNewsItemPayload) {
-  return axios.post('/api/news', { news_item: payload }).then(r => r.data as CreateNewsItemResponse)
-}
-
-export async function editNewsItemRequest(id: string | number, payload: CreateNewsItemPayload) {
-  return axios.put(`/api/news/${id}`, { news_item: payload }).then(r => r.data as CreateNewsItemResponse)
+export async function editNewsItemRequest(id: string | number, payload: NewsItemPayload) {
+  return axios.put(`/api/v2/news/${id}`, payload).then(r => r.data as CreateNewsItemResponse)
 }
 export async function deleteNewsItemRequest(id: string | number) {
-  return axios.delete(`/api/news/${id}`).then(r => r.data as unknown)
-}
-
-interface NewsPositionReqBody {
-  news_items: Record<number, number>
-}
-
-export async function savePositionsRequest(payload: NewsPositionReqBody['news_items']) {
-  return axios.post('/api/news/positions', { news_items: payload }).then(r => r.data as unknown)
+  return axios.delete(`/api/v2/news/${id}`).then(r => r.data as unknown)
 }

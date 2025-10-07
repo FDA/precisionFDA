@@ -6,8 +6,9 @@ import { BackLink } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { AdminWrapper } from '../../admin/AdminWrapper'
-import { CreateNewsItemPayload, createNewsItemRequest } from '../api'
-import { CreateNewsForm, NewsItemForm } from './NewsItemForm'
+import { createNewsItemRequest } from '../api'
+import { NewsItemPayload } from '../types'
+import { NewsItemForm } from './NewsItemForm'
 import { FormPageContainer } from './styles'
 
 const CreateNewsItemPage = () => {
@@ -15,7 +16,7 @@ const CreateNewsItemPage = () => {
   const queryClient = useQueryClient()
   const createNewsItemMutation = useMutation({
     mutationKey: ['create-news-item'],
-    mutationFn: (payload: CreateNewsItemPayload) => createNewsItemRequest(payload),
+    mutationFn: (payload: NewsItemPayload) => createNewsItemRequest(payload),
     onSuccess: () => {
       navigate('/admin/news')
       queryClient.invalidateQueries({
@@ -28,7 +29,7 @@ const CreateNewsItemPage = () => {
     },
   })
 
-  const handleSubmit = (vals: CreateNewsForm) => {
+  const handleSubmit = (vals: NewsItemPayload) => {
     createNewsItemMutation.mutateAsync(vals)
   }
 

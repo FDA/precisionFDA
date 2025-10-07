@@ -4,6 +4,8 @@ import { Link, Navigate } from 'react-router-dom'
 import { Tooltip } from 'react-tooltip'
 import styled, { css } from 'styled-components'
 import { StringParam, useQueryParam } from 'use-query-params'
+import { Button, TransparentButton } from '../../components/Button'
+import ExternalLink from '../../components/Controls/ExternalLink'
 import { ArrowLeftIcon } from '../../components/icons/ArrowLeftIcon'
 import { GlobeIcon } from '../../components/icons/GlobeIcon'
 import { NewspaperIcon } from '../../components/icons/NewspaperIcon'
@@ -11,13 +13,11 @@ import { Svg } from '../../components/icons/Svg'
 import { Loader } from '../../components/Loader'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { PageContainerMargin, PageTitle } from '../../components/Page/styles'
-import ExternalLink from '../../components/Controls/ExternalLink'
 import { UserLayout } from '../../layouts/UserLayout'
 import { useAuthUserQuery } from '../auth/api'
+import { ButtonRow } from '../modal/styles'
 import { NewsItem } from './types'
 import { useNewsAdminAllRequest } from './useNewsListQuery'
-import { Button, TransparentButton } from '../../components/Button'
-import { ButtonRow } from '../modal/styles'
 
 const StyledCard = styled.div`
   display: flex;
@@ -83,25 +83,19 @@ const StyledTip = styled.div<{ enabled: boolean }>`
   ${props => !props.enabled && 'opacity: 0.3;'}
 `
 
-const TypeSelect = styled(TransparentButton)<{ selected: boolean}>`
+const TypeSelect = styled(TransparentButton)<{ selected: boolean }>`
   padding: 4px 8px;
   display: flex;
   align-items: center;
-  ${props => props.selected && css`
-    background-color: var(--primary-500);
-    color: white;
-  `}
+  ${props =>
+    props.selected &&
+    css`
+      background-color: var(--primary-500);
+      color: white;
+    `}
 `
 
-const TipIcon = ({
-  infoText,
-  enabled,
-  children,
-}: {
-  enabled: boolean
-  infoText: string
-  children: React.ReactNode
-}) => {
+const TipIcon = ({ infoText, enabled, children }: { enabled: boolean; infoText: string; children: React.ReactNode }) => {
   return (
     <StyledTip enabled={enabled} data-tooltip-content={infoText} data-tooltip-id="news-list-tips">
       {children}
@@ -109,38 +103,20 @@ const TipIcon = ({
   )
 }
 
-export function SortableItem({
-  id,
-  newsItem,
-}: {
-  id: number
-  newsItem: NewsItem
-}) {
+export function SortableItem({ id, newsItem }: { id: number; newsItem: NewsItem }) {
   return (
     <StyledCard>
       <CardLeft>
         <Link to={`/admin/news/${id}/edit`}>{newsItem.title}</Link>
       </CardLeft>
       <CardRight>
-        <TipIcon
-          infoText={newsItem.isPublication ? 'Publication' : 'Article'}
-          enabled={newsItem.isPublication}
-        >
+        <TipIcon infoText={newsItem.isPublication ? 'Publication' : 'Article'} enabled={newsItem.isPublication}>
           <NewspaperIcon />
         </TipIcon>
-        <TipIcon
-          infoText={newsItem.published ? 'Published' : 'Not Published'}
-          enabled={newsItem.published}
-        >
+        <TipIcon infoText={newsItem.published ? 'Published' : 'Not Published'} enabled={newsItem.published}>
           <GlobeIcon />
         </TipIcon>
-        {newsItem.createdAt ? (
-          <DateText>
-            {format(new Date(newsItem.createdAt), 'MM/dd/yyyy')}
-          </DateText>
-        ) : (
-          <div />
-        )}
+        {newsItem.createdAt ? <DateText>{format(new Date(newsItem.createdAt), 'MM/dd/yyyy')}</DateText> : <div />}
         {newsItem.link ? (
           <ExternalLink to={newsItem.link}>
             <ArrowLeftIcon />
@@ -166,15 +142,13 @@ function ListAdminNews() {
           <PageTitle>Admin News Items</PageTitle>
           <Row>
             <Link to="/admin/news/create">
-              <Button data-variant='primary'>Add News Item</Button>
+              <Button data-variant="primary">Add News Item</Button>
             </Link>
             <ButtonRow>
               <TypeSelect selected={!typeParam} onClick={() => setTypeParam(null, 'replaceIn')}>
                 All
               </TypeSelect>
-              <TypeSelect selected={typeParam === 'publication'}
-                onClick={() => setTypeParam('publication', 'replaceIn')}
-              >
+              <TypeSelect selected={typeParam === 'publication'} onClick={() => setTypeParam('publication', 'replaceIn')}>
                 Publications
               </TypeSelect>
               <TypeSelect selected={typeParam === 'article'} onClick={() => setTypeParam('article', 'replaceIn')}>
@@ -185,12 +159,8 @@ function ListAdminNews() {
         </PageHeader>
 
         <StyledList>
-          {isLoading ? (
-            <Loader />
-          ) : (
-            data?.map(i => <SortableItem key={i.id} id={i.id} newsItem={i} />)
-          )}
-          {data?.length === 0 && <div>No news items found</div>}
+          {isLoading ? <Loader /> : (data as NewsItem[])?.map(i => <SortableItem key={i.id} id={i.id} newsItem={i} />)}
+          {!isLoading && (data as NewsItem[])?.length === 0 && <div>No news items found</div>}
         </StyledList>
       </NewsPageContainerMargin>
     </UserLayout>
