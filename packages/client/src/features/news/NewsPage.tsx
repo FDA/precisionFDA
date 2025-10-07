@@ -1,9 +1,13 @@
+import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import React from 'react'
-import { StringParam, useQueryParams } from 'use-query-params'
-import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { StringParam, useQueryParams } from 'use-query-params'
+import { Button } from '../../components/Button'
+import ExternalLink from '../../components/Controls/ExternalLink'
+import { InlineError } from '../../components/Error'
 import { Loader } from '../../components/Loader'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { hidePagination, Pagination } from '../../components/Pagination'
 import {
@@ -22,29 +26,25 @@ import {
   Title,
 } from '../../components/Public/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
-import { usePaginationParams } from '../../hooks/usePaginationState'
-import ExternalLink from '../../components/Controls/ExternalLink'
-import NavigationBar from '../../components/NavigationBar/NavigationBar'
+import { usePaginationParamsV2 } from '../../hooks/usePaginationState'
 import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { newsYearsListRequest } from './api'
 import { ItemBody, ItemDate, NewsListItem } from './styles'
 import { useNewsListQuery } from './useNewsListQuery'
-import { Button } from '../../components/Button'
-import { InlineError } from '../../components/Error'
 
 const NewsPage = () => {
   usePageMeta({ title: 'News - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateNews = user && user.can_administer_site
-  const pagination = usePaginationParams()
+  const pagination = usePaginationParamsV2()
   const [query, setQuery] = useQueryParams({ year: StringParam, type: StringParam })
 
   const { data, isLoading, isFetched } = useNewsListQuery({
     year: query.year,
     type: query.type,
     page: pagination.pageParam,
-    perPage: pagination.perPageParam,
+    pageSize: pagination.pageSizeParam,
   })
   const {
     data: yearsListData,
@@ -67,7 +67,7 @@ const NewsPage = () => {
           ) : (
             <PageMainBody>
               {!isLoading && data?.data?.length === 0 && <div>No news items. Try changing the filter.</div>}
-              {data?.data?.length > 0 && query.year && <PageFilterTitle>{query.year}</PageFilterTitle>}
+              {data?.data && data.data.length > 0 && query.year && <PageFilterTitle>{query.year}</PageFilterTitle>}
               <PageList>
                 {data?.data?.map(n => (
                   <NewsListItem key={n.id}>
@@ -96,10 +96,11 @@ const NewsPage = () => {
                 ))}
                 <Pagination
                   page={data?.meta?.page}
+                  perPage={data?.meta?.pageSize}
                   totalCount={data?.meta?.total}
                   totalPages={data?.meta?.totalPages}
                   isHidden={hidePagination(isFetched, data?.data?.length, data?.meta?.totalPages)}
-                  onPerPageSelect={() => {}}
+                  onPerPageSelect={pagination.setPageSizeParam}
                   setPage={n => {
                     pagination.setPageParam(n, 'replaceIn')
                   }}

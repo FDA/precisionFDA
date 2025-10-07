@@ -34,7 +34,7 @@ describe('/news', () => {
       date: Date,
       isPublication: boolean,
       published: boolean,
-    ) => {
+    ): void => {
       news.push(
         create.newsHelper.create(
           em,
@@ -48,7 +48,7 @@ describe('/news', () => {
         ),
       )
     }
-    const getUTCDate = (year: number, month: number, day: number) =>
+    const getUTCDate = (year: number, month: number, day: number): Date =>
       new Date(Date.UTC(year, month, day))
 
     // 2023
@@ -188,17 +188,21 @@ describe('/news', () => {
   })
 
   it('POST /news works', async () => {
-    const data = generate.news.create()
+    const data = { ...generate.news.create(), createdAt: new Date().toISOString().slice(0, 10) }
     const { body } = await supertest(testedApp.getHttpServer())
       .post(`/news`)
       .set(getDefaultHeaderData(siteAdmin))
       .send(data)
       .expect(201)
-    expect(body).to.deep.include(data)
+    expect(body).to.deep.eq({ id: body.id })
 
     const newsRepo = em.getRepository(NewsItem)
     const newsItemFromDb = await newsRepo.findOne({ id: body.id })
-    expect(newsItemFromDb).to.deep.include(data)
+    expect(newsItemFromDb.title).to.be.eq(data.title)
+    expect(newsItemFromDb.content).to.be.eq(data.content)
+    expect(newsItemFromDb.link).to.be.eq(data.link)
+    expect(newsItemFromDb.published).to.be.eq(data.published)
+    expect(newsItemFromDb.isPublication).to.be.eq(false)
   })
 
   it("POST /news doesn't work if not site admin", async () => {

@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common'
+import { NewsModule } from '@shared/domain/news-item/news-item.module'
 import { NewsController } from './news.controller'
-import { MikroOrmModule } from '@mikro-orm/nestjs'
-import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 
 @Module({
-  imports: [MikroOrmModule.forFeature([NewsItem])],
+  imports: [NewsModule],
   controllers: [NewsController],
 })
 export class NewsApiModule {}
