@@ -1,22 +1,10 @@
 import { Module } from '@nestjs/common'
 import { PropertyService } from '@shared/domain/property/services/property.service'
-import { UserFileModule } from '@shared/domain/user-file/user-file.module'
-import { AppModule } from '@shared/domain/app/app.module'
-import { JobModule } from '@shared/domain/job/job.module'
-import { WorkflowModule } from '@shared/domain/workflow/workflow.module'
-import { DbClusterModule } from '@shared/domain/db-cluster/db-cluster.module'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { GeneralProperty } from './property.entity'
 
 @Module({
-  imports: [
-    UserFileModule,
-    AppModule,
-    JobModule,
-    WorkflowModule,
-    DbClusterModule,
-    MikroOrmModule.forFeature([GeneralProperty]),
-  ],
+  imports: [MikroOrmModule.forFeature([GeneralProperty])],
   providers: [PropertyService],
   exports: [PropertyService],
 })

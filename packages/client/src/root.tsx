@@ -1,6 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
-import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
 import AuthWall from './AuthWall'
@@ -41,7 +41,6 @@ const ExpertsListPage = React.lazy(() => import('./features/experts/ExpertsList'
 const WorkflowRunPage = React.lazy(() => import('./features/workflows/run/RunWorkflowForm'))
 const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
 const ListAdminNews = React.lazy(() => import('./features/news/ListAdminNews'))
-const SearchResultPage = React.lazy(() => import('./features/search/SearchResultPage'))
 
 const ToS = React.lazy(() => import('./pages/ToS'))
 const Security = React.lazy(() => import('./pages/Security'))
@@ -104,7 +103,6 @@ const router = createBrowserRouter([
       { path: '/request_access', element: <RequestAccessPage /> },
       { path: 'security', element: <Security /> },
       { path: 'daaas', element: <Navigate to="/data-portals/main" replace /> },
-      { path: 'search', element: <SearchResultPage /> },
       { path: '*', element: <NoFoundPage /> },
 
       // Protected routes

@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import React, { useState, useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { PlacesType, Tooltip } from 'react-tooltip'
 import { useAlertDismissed } from '../../features/admin/alerts/useAlertDismissedLocalStorage'
@@ -21,12 +21,7 @@ import { ProfileIcon } from '../icons/ProfileIcon'
 import { SiteMenuIcon } from '../icons/SiteMenuIcon'
 import { StarIcon } from '../icons/StarIcon'
 import { ThemeToggle } from '../ThemeToggle'
-import { 
-  SiteNavItemType, 
-  getNavigationPath, 
-  getNavigationTarget, 
-  getNavigationRel,
-} from './NavItems'
+import { getNavigationPath, getNavigationRel, getNavigationTarget, SiteNavItemType } from './NavItems'
 import { getOrderedFavoritesOnly } from './getOrderedFavoritesOnly'
 import { getObjectsByIds } from './orderObjectById'
 import {
@@ -164,20 +159,14 @@ const MenuLink = ({
   children: React.ReactNode
   'data-testid': string
 }) => {
-  
   if (navItem.navigation.type === 'internal') {
     return (
-      <Link
-        to={getNavigationPath(navItem)}
-        onClick={onClick}
-        title={navItem.text}
-        data-testid={rest['data-testid']}
-      >
+      <Link to={getNavigationPath(navItem)} onClick={onClick} title={navItem.text} data-testid={rest['data-testid']}>
         {children}
       </Link>
     )
   }
-  
+
   return (
     <a
       href={getNavigationPath(navItem)}
@@ -278,7 +267,7 @@ const SiteNav = ({
 }: {
   className: string
   setShowSiteNav: (v: boolean, ms?: number) => void
-  ignoredOutsideClickRef: React.RefObject<HTMLElement> | React.RefObject<HTMLButtonElement|null>
+  ignoredOutsideClickRef: React.RefObject<HTMLElement> | React.RefObject<HTMLButtonElement | null>
   isSiteAdmin: boolean
 }) => {
   const clickRef = useOnOutsideClickRef(true, () => setShowSiteNav(false), ignoredOutsideClickRef)
@@ -439,7 +428,7 @@ const Header: React.FC = () => {
               }
 
               const dynamicNavItem = { ...i }
-              
+
               // If CDMH item, get the correct link
               const normalizedId = i.id.replace(/-([a-z])/g, (_match, letter) => {
                 return letter.toUpperCase()
@@ -454,7 +443,7 @@ const Header: React.FC = () => {
 
               const { id, iconHeight, text, icon: Icon } = dynamicNavItem
               const navigationPath = getNavigationPath(dynamicNavItem)
-              
+
               return (
                 <MenuLink navItem={dynamicNavItem} key={id} data-testid={`favoritenav-${id}`}>
                   <HeaderMenuItem $active={isActiveLink(navigationPath, pathname)}>
@@ -477,7 +466,12 @@ const Header: React.FC = () => {
             </EditMenuWrap>
           </HeaderLeft>
           <HeaderRight>
-            <HeaderMenuItem as={TransparentButton} $active={isSearchShown} onClick={() => setShowSearch(true)} data-testid="search-button">
+            <HeaderMenuItem
+              as={TransparentButton}
+              $active={isSearchShown}
+              onClick={() => setShowSearch(true)}
+              data-testid="search-button"
+            >
               <SearchIcon />
             </HeaderMenuItem>
             <DropdownNext
