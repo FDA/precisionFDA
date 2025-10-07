@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { ModalHeaderTop, ModalNext } from '../../features/modal/ModalNext'
+import { ModalNext } from '../../features/modal/ModalNext'
 import { useModal } from '../../features/modal/useModal'
 import { CloseIcon } from '../icons/CloseIcon'
 import { SearchIcon } from '../icons/SearchIcon'
@@ -14,6 +14,9 @@ import {
   FilterOption,
   FilterSidebar,
   FilterTitle,
+  Header,
+  HeaderContent,
+  ModalContainer,
   ResultDescription,
   ResultLink,
   ResultTitle,
@@ -23,8 +26,10 @@ import {
   SearchResults,
   Section,
   SectionHeader,
+  Title,
   ViewMoreButton,
 } from './styles'
+
 import {
   DISPLAY_NAMES,
   FILTER_OPTIONS,
@@ -34,6 +39,8 @@ import {
   SearchData,
   SearchResultWithCategory,
 } from './types'
+import { CloseButton } from '../../features/modal/styles'
+import { PlusIcon } from '../icons/PlusIcon'
 
 const NoResultText = styled.p`
   font-weight: bold;
@@ -106,7 +113,7 @@ const getFilteredResults = (
   results: SearchResultWithCategory[]
   groupedResults?: GroupedResults
 } => {
-  if (!searchQuery.trim()) return { results: [] }
+  if (!searchQuery.trim()) return { results: []}
 
   if (selectedFilter === 'all') {
     return getAllResults(searchData)
@@ -181,7 +188,9 @@ const GroupedSearchResults = ({
             <SearchResultItemComponent key={index} result={result} onLinkClick={onLinkClick} />
           ))}
           {categoryResults!.some(r => r.hasMore) && (
-            <ViewMoreButton onClick={() => onViewMore(category)}>View all results for {displayName}</ViewMoreButton>
+            <ViewMoreButton data-variant="primary" onClick={() => onViewMore(category)}>
+              View all results for {displayName}
+            </ViewMoreButton>
           )}
         </Section>
       )
@@ -190,11 +199,11 @@ const GroupedSearchResults = ({
 )
 
 const FlatSearchResults = ({ results, onLinkClick }: { results: SearchResultWithCategory[]; onLinkClick: () => void }) => (
-  <>
+  <Section>
     {results.map((result, index) => (
       <SearchResultItemComponent key={index} result={result} onLinkClick={onLinkClick} />
     ))}
-  </>
+  </Section>
 )
 
 const SearchResultsContent = ({
@@ -273,10 +282,18 @@ export const SearchModal = ({ isShown, hide }: { isShown: boolean; hide: () => v
 
   const getCountText = (filterOption: FilterType) => {
     if (filterOption === 'all') {
-      return null
+      const allCounts = Object.values(resultCounts)
+
+      if (allCounts.every(count => count === undefined)) {
+        return isSearching && debouncedSearchQuery.trim() === '' ? undefined : 0
+      }
+
+      return allCounts.reduce<number>((sum, count) => sum + (count || 0), 0)
     }
 
-    return resultCounts?.[filterOption]
+    const count = resultCounts?.[filterOption]
+
+    return count === undefined && isSearching && debouncedSearchQuery.trim() !== '' ? 0 : count
   }
 
   const handleViewMore = (category: SearchCategory) => {
@@ -290,52 +307,66 @@ export const SearchModal = ({ isShown, hide }: { isShown: boolean; hide: () => v
 
   return (
     <ModalNext id="global-search-modal" data-testid="global-search-modal" isShown={isShown} hide={hide} variant="large">
-      <ModalHeaderTop disableClose={false} headerText="Search" hide={hide} />
-      <SearchBar>
-        <div className="iconwrap">
-          <SearchIcon height={14} />
-        </div>
-        <InputText
-          ref={searchInputRef}
-          placeholder="Search for documentation, challenges, expert blogs, and Q&A..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-        />
-        {searchQuery?.length ? (
-          <div className="iconwrap iconwrap-right" onClick={() => onCancelSearchClick()}>
-            <CloseIcon height={14} />
+      <ModalContainer>
+        <Header>
+          <HeaderContent>
+            <Title>Global Search</Title>
+          </HeaderContent>
+          <CloseButton data-testid="modal-close-button" type="button" data-dismiss="modal" aria-label="Close" onClick={hide}>
+            <PlusIcon height={16} />
+          </CloseButton>
+        </Header>
+        <SearchBar>
+          <div className="iconwrap">
+            <SearchIcon height={18} />
           </div>
-        ) : null}
-      </SearchBar>
-      <SearchContainer>
-        <FilterSidebar>
-          <FilterTitle>Filter By</FilterTitle>
-          {FILTER_OPTIONS.map(option => (
-            <FilterOption key={option} $selected={selectedFilter === option}>
-              <input
-                type="radio"
-                name="searchFilter"
-                value={option}
-                checked={selectedFilter === option}
-                onChange={e => setSelectedFilter(e.target.value as FilterType)}
-              />
-              {DISPLAY_NAMES[option]}
-              {getCountText(option) == null ? null : <CountPill>{getCountText(option)}</CountPill>}
-            </FilterOption>
-          ))}
-        </FilterSidebar>
-        <SearchResults>
-          <SearchResultsContent
-            searchQuery={searchQuery}
-            isLoading={isSearching}
-            results={results}
-            selectedFilter={selectedFilter}
-            groupedResults={groupedResults}
-            onViewMore={handleViewMore}
-            onLinkClick={hide}
+          <InputText
+            ref={searchInputRef}
+            placeholder="Search for documentation, challenges, expert blogs, and Q&A..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
           />
-        </SearchResults>
-      </SearchContainer>
+          {searchQuery?.length ? (
+            <button
+              className="iconwrap iconwrap-right"
+              type="button"
+              onClick={onCancelSearchClick}
+              aria-label="Clear search"
+            >
+              <CloseIcon height={14} />
+            </button>
+          ) : null}
+        </SearchBar>
+        <SearchContainer>
+          <FilterSidebar>
+            <FilterTitle>Filter By</FilterTitle>
+            {FILTER_OPTIONS.map(option => (
+              <FilterOption key={option} data-selected={selectedFilter === option}>
+                <input
+                  type="radio"
+                  name="searchFilter"
+                  value={option}
+                  checked={selectedFilter === option}
+                  onChange={e => setSelectedFilter(e.target.value as FilterType)}
+                />
+                {DISPLAY_NAMES[option]}
+                {<CountPill>{getCountText(option)}</CountPill>}
+              </FilterOption>
+            ))}
+          </FilterSidebar>
+          <SearchResults>
+            <SearchResultsContent
+              searchQuery={searchQuery}
+              isLoading={isSearching}
+              results={results}
+              selectedFilter={selectedFilter}
+              groupedResults={groupedResults}
+              onViewMore={handleViewMore}
+              onLinkClick={hide}
+            />
+          </SearchResults>
+        </SearchContainer>
+      </ModalContainer>
     </ModalNext>
   )
 }

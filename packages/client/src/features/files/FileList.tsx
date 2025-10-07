@@ -10,7 +10,6 @@ import {
 } from '@tanstack/react-table'
 import React, { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import useWebSocket from 'react-use-websocket'
 import { useQueryParam } from 'use-query-params'
 import { Button } from '../../components/Button'
 import { DropdownNext } from '../../components/Dropdown/DropdownNext'
@@ -22,14 +21,13 @@ import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { StyledPageTable } from '../../components/Table/components/styles'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../utils/config'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, FilesListBreadcrumbHeader, FilesListResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
+import { HomeScope, IMeta, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
@@ -44,7 +42,7 @@ import { useFolderActions } from './useFolderActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
-type ListType = { files: (IFile|IFolder)[]; meta: IMeta }
+type ListType = { files: (IFile | IFolder)[]; meta: IMeta }
 
 export const FileList = ({
   homeScope,
@@ -234,9 +232,7 @@ export const FileList = ({
                 />
               )}
             >
-              {dropdownProps => (
-                <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} data-testid="home-files-actions-button" />
-              )}
+              {dropdownProps => <ActionsButton {...dropdownProps} data-testid="home-files-actions-button" />}
             </DropdownNext>
           </QuickActions>
         </ActionsRow>

@@ -57,7 +57,6 @@ export const ErrorHint = styled.div`
 export const inputFocus = css`
   &:focus {
     border-color: #40a9ff;
-    border-right-width: 1px !important;
     outline: 0;
     box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
   }

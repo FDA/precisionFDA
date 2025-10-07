@@ -22,6 +22,8 @@ export const ModalContent = styled.div`
   max-width: 1000px;
   width: auto;
   outline: none;
+  max-height: 90vh;
+  overflow: hidden;
 
   &[data-variant='large'] {
     width: min(80%, 900px);
@@ -31,6 +33,34 @@ export const ModalContent = styled.div`
   }
   &[data-variant='small'] {
     width: min(80%, 400px);
+  }
+
+  @media (max-width: 768px) {
+    max-height: 95vh;
+    min-width: 280px;
+    
+    &[data-variant='large'] {
+      width: min(95%, 900px);
+    }
+    &[data-variant='medium'] {
+      width: min(90%, 600px);
+    }
+    &[data-variant='small'] {
+      width: min(85%, 400px);
+    }
+  }
+
+  @media (max-height: 700px) {
+    max-height: 98vh;
+  }
+
+  @media (max-width: 480px) {
+    &[data-variant='large'],
+    &[data-variant='medium'],
+    &[data-variant='small'] {
+      width: calc(100vw - 32px);
+      min-width: 0;
+    }
   }
 `
 
