@@ -24,13 +24,7 @@ const StyledSubtext = styled.div`
   color: var(--c-text-500);
 `
 
-async function editTagsRequest({
-  uid,
-  tags,
-}: {
-  uid: string
-  tags: string
-}) {
+async function editTagsRequest({ uid, tags }: { uid: string; tags: string }) {
   const response = await axios.post('/api/set_tags', {
     taggable_uid: uid,
     tags,
@@ -46,47 +40,45 @@ const EditTagsForm = ({
   resource,
   onSuccess,
   uid,
-  setShowModal,
+  hideModal,
   tags,
 }: {
   resource: APIResource
   uid: string
   tags: string[]
   onSuccess?: (res: unknown) => void
-  setShowModal?: (show: boolean) => void
+  hideModal: () => void
 }) => {
-  const { register, handleSubmit } = useForm<FormInputs>({
+  const { register, handleSubmit, setFocus } = useForm<FormInputs>({
     defaultValues: {
       tags: tags.join(', '),
     },
   })
+
+  React.useEffect(() => {
+    setFocus('tags')
+  }, [setFocus])
 
   const mutation = useMutation({
     mutationKey: ['edit-resource-tags', resource],
     mutationFn: (t: string) => editTagsRequest({ uid, tags: t }),
     onSuccess: res => {
       if (onSuccess) onSuccess(res)
-      if (setShowModal) setShowModal(false)
-      toast.success(`Success: ${resource} editing tags`)
+      hideModal()
+      toast.success(`Successfully edited ${resource} tags`)
     },
     onError: () => {
       toast.error(`Error: editing ${resource} tags`)
     },
   })
 
-  const onSubmit = async (d: FormInputs) => {
-    await mutation.mutateAsync(d.tags)
+  const onSubmit = ({ tags: t }: FormInputs) => {
+    mutation.mutate(t)
   }
 
   return (
     <>
-      <StyledForm
-        id="edit-tag-form"
-        onSubmit={e => {
-          e.stopPropagation()
-          handleSubmit(onSubmit)(e)
-        }}
-      >
+      <StyledForm id="edit-tag-form" onSubmit={handleSubmit(onSubmit)}>
         <StyledSubtext>Tags are public to the community</StyledSubtext>
         <FieldGroup>
           <label>Tags (comma-separated)</label>
@@ -95,19 +87,10 @@ const EditTagsForm = ({
       </StyledForm>
       <Footer>
         <ButtonRow>
-          <Button
-            type="button"
-            onClick={() => setShowModal && setShowModal(false)}
-            disabled={mutation.isPending}
-          >
+          <Button type="button" onClick={hideModal} disabled={mutation.isPending}>
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            form="edit-tag-form"
-            disabled={mutation.isPending}
-          >
+          <Button data-variant="primary" type="submit" form="edit-tag-form" disabled={mutation.isPending}>
             Edit Tags
           </Button>
         </ButtonRow>
@@ -116,9 +99,7 @@ const EditTagsForm = ({
   )
 }
 
-export function useEditTagsModal<
-  T extends { uid: string; name: string; tags: string[] },
->({
+export function useEditTagsModal<T extends { uid: string; name: string; tags: string[] }>({
   resource,
   selected,
   onSuccess,
@@ -128,31 +109,16 @@ export function useEditTagsModal<
   onSuccess?: (res: unknown) => void
 }) {
   const { isShown, setShowModal } = useModal()
-  const mSelected = useMemo(() => selected, [isShown])
+  const mSelected = useMemo(() => selected, [selected])
+  const hideModal = () => setShowModal(false)
 
   const modalComp = (
-    <ModalNext
-      id='edit-tags-modal'
-      data-testid={`modal-${resource}-edit-tags`}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={`Edit tags for ${mSelected?.name}`}
-        hide={() => setShowModal(false)}
-      />
-      {selected && (
-        <EditTagsForm
-          resource={resource}
-          onSuccess={onSuccess}
-          uid={selected.uid}
-          setShowModal={setShowModal}
-          tags={selected.tags}
-        />
-      )}
+    <ModalNext id="edit-tags-modal" data-testid={`modal-${resource}-edit-tags`} isShown={isShown} hide={hideModal}>
+      <ModalHeaderTop disableClose={false} headerText={`Edit tags for ${mSelected?.name}`} hide={hideModal} />
+      <EditTagsForm resource={resource} onSuccess={onSuccess} uid={mSelected?.uid} hideModal={hideModal} tags={mSelected?.tags} />
     </ModalNext>
   )
+
   return {
     modalComp,
     setShowModal,
