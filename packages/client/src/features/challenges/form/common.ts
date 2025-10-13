@@ -10,15 +10,14 @@ const commonValidationSchema = {
   name: Yup.string().required('Name is required').max(150, 'Name cannot be longer than 150 characters'),
   cardImageId: Yup.string().nullable().optional(),
   cardImageUrl: Yup.string().nullable().optional(),
-  cardImageFile: Yup.mixed()
-  .when('cardImageUrl', {
-    is: (val: string) => !val,
-    then: Yup.mixed().test('presence', 'Image file is required', (value: FileList) => {
-      if(value?.length > 0) {
-        return true
-      }
-      return false
-    }),
+  cardImageFile: Yup.mixed().when('cardImageUrl', (cardImageUrl, schema) => {
+    if (!cardImageUrl) {
+      return schema.test('presence', 'Image file is required', (value: unknown) => {
+        const files = value as FileList | undefined
+        return !!files && files.length > 0
+      })
+    }
+    return schema
   }),
   scope: Yup.object()
     .shape({
@@ -50,14 +49,18 @@ const commonValidationSchema = {
     .required('Status is required'),
   preRegistrationUrl: Yup.string()
     .when('status', {
-      is: (val: { value: string }) => val?.value === 'pre-registration',
-      then: Yup.string()
-        .required('Preregistration link is required for the pre-registration status'),
-    }).test(
+      is: (val: { value: string } | null | undefined) => val?.value === 'pre-registration',
+      then: (schema: Yup.StringSchema) => schema.required('Preregistration link is required for the pre-registration status'),
+      otherwise: (schema: Yup.StringSchema) => schema,
+    })
+    .test(
       'is-valid-url',
-      'Link must be a valid URL and start with either \'http://\' or \'https://\'',
-      // eslint-disable-next-line no-useless-escape
-      value => !value || /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/.test(value),
+      "Link must be a valid URL and start with either 'http://' or 'https://'",
+      value =>
+        !value ||
+        /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/.test(
+          value,
+        ),
     ),
 }
 
