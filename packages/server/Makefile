@@ -76,19 +76,19 @@ run-prettier:
 	$(bin)prettier --write ./apps/**/src/**/*.ts
 
 test-shared:
-	$(bin)mocha --config ./libs/shared/.mocharc.js \
+	pnpm exec mocha --config ./libs/shared/.mocharc.js \
 	--recursive "./libs/shared/test/**/*.spec.ts"
 
 test-api:
-	$(bin)mocha --config ./apps/api/.mocharc.js \
+	pnpm exec mocha --config ./apps/api/.mocharc.js \
 	--recursive "./apps/api/test/**/*.spec.ts"
 
 test-worker:
-	$(bin)mocha --config ./apps/worker/.mocharc.js \
+	pnpm exec mocha --config ./apps/worker/.mocharc.js \
 	--recursive "./apps/worker/test/**/*.spec.ts"
 
 test-admin-platform-client:
-	$(bin)mocha --config ./apps/admin-platform-client/.mocharc.js \
+	pnpm exec mocha --config ./apps/admin-platform-client/.mocharc.js \
 	--recursive "./apps/admin-platform-client/test/**/*.spec.ts"
 
 
