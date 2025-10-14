@@ -177,7 +177,6 @@ jobs:
       DATABASE_TEST_NAME: test_db
       SECRET_KEY_BASE: secret
       MAKE: "make --jobs 4"
-
     services:
       mysql:
         image: mysql:5.7
@@ -189,23 +188,30 @@ jobs:
         image: redis
         ports:
           - 6379:6379
-    needs: [ruby-setup]
+    needs: [ ruby-setup ]
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           working-directory: ./packages/rails
           bundler-cache: true
           cache-version: 1
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10.10.0
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22.15.0"
-          cache: "pnpm"
-      - name: Prepare env & db
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.10.0
+
+      - name: Verify pnpm
+        run: pnpm -v
+
+      - name: Prepare env & DB
         working-directory: ./packages/rails
         env:
           NO_FIPS: 1
@@ -216,26 +222,31 @@ jobs:
           bundle exec rake db:setup
           bundle exec rake db:generate_mock_data
           bundle exec rake user:generate_test_users
-      - name: Install Deps
-        run: make install
+
+      - name: Install Dependencies (Server Only)
         working-directory: ./packages/server
-      - name: Test
+        run: pnpm install --frozen-lockfile --filter ./packages/server... --prod=false --filter .
+
+      - name: Run Tests
+        working-directory: ./packages/server
         run: |
           make test-shared
           make test-worker
           make test-api
           make test-admin-platform-client
+
+      - name: Test Production Build
         working-directory: ./packages/server
-      - name: Test production build
         run: pnpm run build
+
+      - name: Test API Production Start
         working-directory: ./packages/server
-      - name: Test API production start
         run: make run-dist ARGS="-- --shutdown"
-        working-directory: ./packages/server
         timeout-minutes: 1
-      - name: Test worker production start
-        run: make run-dist ARGS="-- --shutdown"
+
+      - name: Test Worker Production Start
         working-directory: ./packages/server
+        run: make run-dist ARGS="-- --shutdown"
         timeout-minutes: 1
 
   test-react-app:
