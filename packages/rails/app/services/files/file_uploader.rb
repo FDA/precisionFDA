@@ -59,11 +59,9 @@ module Files
         end
       end
 
-      url_service = UploadUrlFetcher.new(context, uid)
-
       Parallel.each_with_index(chunks, in_threads: THREADS_COUNT) do |(chunk, md5, size), index|
         idx = index + 1
-        result = url_service.fetch_url(md5: md5, size: size, index: idx)
+        result = https_apps_client.get_upload_url(uid, idx, md5, size)
         send_to_store(result["url"], result["headers"], chunk, idx)
       end
     ensure
