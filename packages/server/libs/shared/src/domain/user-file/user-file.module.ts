@@ -23,6 +23,7 @@ import { SpaceModule } from '@shared/domain/space/space.module'
 import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
 import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
+import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
     FolderService,
     NodeService,
     ArchiveEntryService,
+    UrlFetchService,
     NodeHelper,
     FileSyncQueueJobProducer,
   ],
@@ -66,6 +68,7 @@ import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
     FolderService,
     NodeService,
     ArchiveEntryService,
+    UrlFetchService,
     BullQueueModule,
     FileSyncQueueJobProducer,
     MikroOrmModule,

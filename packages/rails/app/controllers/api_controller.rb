@@ -960,12 +960,9 @@ class ApiController < ApplicationController
   # url (string, where HTTP PUT must be performed)
   # expires (int, timestamp)
   # headers (hash of string key/values, headers must be given to HTTP PUT)
-  #
+  # Deprecate - use /api/v2/files/${uid}/upload_url instead
   def get_upload_url
-    url_service = UploadUrlFetcher.new(@context, unsafe_params[:id])
-
-    result = url_service.fetch_url(unsafe_params)
-
+    result = https_apps_client.get_upload_url(unsafe_params[:id], unsafe_params[:index], unsafe_params[:md5], unsafe_params[:size])
     render json: result
   end
 

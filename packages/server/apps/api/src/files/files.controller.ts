@@ -37,6 +37,10 @@ import {
   SelectedNode,
 } from '@shared/domain/user-file/user-file.types'
 import { TimeUtils } from '@shared/utils/time.utils'
+import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
+import { GetUploadURLResponse } from '@shared/platform-client/platform-client.responses'
+import { GetUploadUrlQueryDTO } from './model/get-upload-url-query.dto'
+import { FileUidParamDTO } from './model/file-uid-param.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/files')
@@ -45,9 +49,20 @@ export class FilesController {
     private readonly user: UserContext,
     private readonly logger: Logger,
     private readonly userFileService: UserFileService,
+    private readonly urlFetchService: UrlFetchService,
     private readonly userFileResolverFacade: UserFileResolverFacade,
     private readonly userFileDownloadFacade: UserFileDownloadFacade,
   ) {}
+
+  @Get('/:uid/upload-url')
+  async getUploadUrl(
+    @Param() params: FileUidParamDTO,
+    @Query() query: GetUploadUrlQueryDTO,
+  ): Promise<GetUploadURLResponse> {
+    const { uid } = params
+    const { index, md5, size } = query
+    return await this.urlFetchService.getUploadUrl(uid, index, md5, size)
+  }
 
   // Triggers job that closes file
   //   Note that the file uid (not dxid) is used here, e.g.
@@ -117,7 +132,7 @@ export class FilesController {
 
   // TODO - PFDA-6501
   private getTimestamp(): string {
-    const pad = (number: number) => (number < 10 ? '0' : '') + number
+    const pad = (number: number): number | string => (number < 10 ? '0' : '') + number
     const now = new Date()
     return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
   }

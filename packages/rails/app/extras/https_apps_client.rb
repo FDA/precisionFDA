@@ -4,6 +4,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # initializes the instance
   def initialize; end
 
+  def get_upload_url(fileUid, index, md5, size)
+    request(
+      "/files/#{fileUid}/upload-url",
+      {},
+      Net::HTTP::Get::METHOD,
+      { index: index, md5: md5, size: size },
+    )
+  end
+
   # Start sync job
   # @param job_dxid [String] Job dxid to sync.
   def job_sync(job_dxid)
