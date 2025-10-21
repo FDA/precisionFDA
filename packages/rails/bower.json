@@ -2,9 +2,7 @@
   "name": "precision-fda",
   "version": "0.0.1",
   "homepage": "https://github.com/dnanexus/precision-fda",
-  "authors": [
-    "Pamella Tater <ptater@dnanexus.com>"
-  ],
+  "authors": ["Pamella Tater <ptater@dnanexus.com>"],
   "license": "MIT",
   "ignore": [
     "**/.*",
@@ -24,7 +22,7 @@
     "lodash": "~3.10.1",
     "moment": " ~2.29.4",
     "sass-flex-mixin": "^1.0.3",
-    "dagre-d3": "~0.4.11",
+    "dagre-d3": "dagrejs/dagre-d3#~0.4.11",
     "knockout-sortable": "~0.11.0",
     "sortable": "~0.8.0",
     "ace-builds": "~1.2.3",
@@ -35,5 +33,9 @@
     "cookies-js": "^1.2.3",
     "highcharts": "^10.3.3",
     "jstree": "^3.3.15"
+  },
+  "resolutions": {
+    "graphlib": "dagrejs/graphlib.git#~1.0.5",
+    "dagre": "dagrejs/dagre.git#~0.7.3"
   }
 }
