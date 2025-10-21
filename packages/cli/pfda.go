@@ -873,6 +873,8 @@ func mainInternal() int {
 		err := invokeSetTags(pfdaclient, args[0], args[1:])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
+		} else {
+			helpers.PrintResult("Tags successfully set", *flagJson)
 		}
 
 	case "set-properties":

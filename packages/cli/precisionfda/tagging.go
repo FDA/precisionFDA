@@ -54,7 +54,6 @@ func (c *PFDAClient) SetTags(entityID string, tags []string) error {
 		return err
 	}
 
-	helpers.PrintResult("Tags successfully set", c.JsonResponse)
 	return nil
 }
 
@@ -76,7 +75,7 @@ func (c *PFDAClient) SetProperties(entityID string, propertiesJSON string) error
 		return err
 	}
 
-	_, _, err = c.makeRequest("POST", setPropertiesURL, jsonData)
+	_, err = c.makeRequest("POST", setPropertiesURL, jsonData)
 	if err != nil {
 		return err
 	}

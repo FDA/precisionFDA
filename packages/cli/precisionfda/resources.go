@@ -1,13 +1,14 @@
 package precisionfda
 
 import (
-	"dnanexus.com/precision-fda-cli/helpers"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"dnanexus.com/precision-fda-cli/helpers"
 )
 
 func (c *PFDAClient) UploadResources(args []string, portalID string) error {
@@ -44,7 +45,7 @@ func (c *PFDAClient) UploadResources(args []string, portalID string) error {
 			retryInterval *= 2 // exponential backoff
 		}
 
-		_, body, err := c.makeRequest("GET", getResourceApiURL, nil)
+		body, err := c.makeRequest("GET", getResourceApiURL, nil)
 		if err != nil {
 			return err
 		}
@@ -107,7 +108,7 @@ func (c *PFDAClient) UploadResource(path string, portalID string, withProgressBa
 		return err
 	}
 
-	_, body, err := c.makeRequest("POST", createURL, jsonData)
+	body, err := c.makeRequest("POST", createURL, jsonData)
 	if err != nil {
 		return err
 	}

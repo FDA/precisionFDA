@@ -131,11 +131,8 @@ func (c *PFDAClient) LsSpaces(flags map[string]bool) error {
 func (c *PFDAClient) LsMembers(spaceID string) error {
 	apiURL := fmt.Sprintf("%s/api/v2/cli/spaces/%s/members", c.BaseURL, spaceID)
 
-	status, body, err := c.makeRequest("GET", apiURL, nil)
+	body, err := c.makeRequest("GET", apiURL, nil)
 	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("Space not found or inaccessible")
-		}
 		return err
 	}
 

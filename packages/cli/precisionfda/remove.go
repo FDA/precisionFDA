@@ -1,10 +1,11 @@
 package precisionfda
 
 import (
-	"dnanexus.com/precision-fda-cli/helpers"
 	"encoding/json"
 	"fmt"
 	"strconv"
+
+	"dnanexus.com/precision-fda-cli/helpers"
 )
 
 type jsonFindNodesResponse struct {
@@ -26,7 +27,7 @@ func (c *PFDAClient) RemoveFile(uids []string) error {
 	if err != nil {
 		return err
 	}
-	_, body, err := c.makeRequest("DELETE", deleteFileURL, jsonData)
+	body, err := c.makeRequest("DELETE", deleteFileURL, jsonData)
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func (c *PFDAClient) RemoveDir(id string) error {
 		return err
 	}
 
-	_, body, err := c.makeRequest("DELETE", deleteFileURL, jsonData)
+	body, err := c.makeRequest("DELETE", deleteFileURL, jsonData)
 	if err != nil {
 		return err
 	}

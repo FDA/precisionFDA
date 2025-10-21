@@ -141,6 +141,10 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.11.1 (2025-10-28)
+
+- fixed issue with json output in upload-file
+
 ### 2.11.0 (2025-09-25)
 
 - New feature - set-tags; sets tags on a given entity.
