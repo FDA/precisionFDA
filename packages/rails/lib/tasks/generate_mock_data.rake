@@ -51,7 +51,11 @@ namespace :db do
       end
     end
 
-    create_news!
-    puts "Mock data generated successfully!"
+    if NewsItem.none?
+      create_news!
+      puts "Mock data generated successfully!"
+    else
+      puts "News items already exist. Skipping mock data generation."
+    end
   end
 end
