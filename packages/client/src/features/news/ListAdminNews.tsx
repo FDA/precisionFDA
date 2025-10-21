@@ -116,15 +116,12 @@ export function SortableItem({ id, newsItem }: { id: number; newsItem: NewsItem 
         <TipIcon infoText={newsItem.published ? 'Published' : 'Not Published'} enabled={newsItem.published}>
           <GlobeIcon />
         </TipIcon>
-        {newsItem.createdAt ? <DateText>{format(new Date(newsItem.createdAt), 'MM/dd/yyyy')}</DateText> : <div />}
+        {newsItem.createdAt ? <DateText>{format(new Date(newsItem.createdAt), 'MM/dd/yyyy')}</DateText> : null}
         {newsItem.link ? (
           <ExternalLink to={newsItem.link}>
             <ArrowLeftIcon />
           </ExternalLink>
-        ) : (
-          <div />
-        )}
-        <Tooltip id="news-list-tips" />
+        ) : null}
       </CardRight>
     </StyledCard>
   )
@@ -162,6 +159,7 @@ function ListAdminNews() {
           {isLoading ? <Loader /> : (data as NewsItem[])?.map(i => <SortableItem key={i.id} id={i.id} newsItem={i} />)}
           {!isLoading && (data as NewsItem[])?.length === 0 && <div>No news items found</div>}
         </StyledList>
+        <Tooltip id="news-list-tips" />
       </NewsPageContainerMargin>
     </UserLayout>
   )
