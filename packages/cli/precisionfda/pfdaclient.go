@@ -805,7 +805,7 @@ func (c *PFDAClient) FileViewLink(arg string, preauthenticated bool, duration in
 func (c *PFDAClient) DescribeEntity(entityID string) error {
 	apiURL := fmt.Sprintf("%s/api/v2/cli/%s/describe", c.BaseURL, entityID)
 
-	_, body, err := c.makeRequest("GET", apiURL, nil)
+	body, err := c.makeRequest("GET", apiURL, nil)
 	if err != nil {
 		return err
 	}
@@ -822,7 +822,7 @@ func (c *PFDAClient) GetScope() error {
 
 	apiURL := fmt.Sprintf("%s/api/v2/cli/job/%s/scope", c.BaseURL, dxJobId)
 
-	_, body, err := c.makeRequest("GET", apiURL, nil)
+	body, err := c.makeRequest("GET", apiURL, nil)
 	if err != nil {
 		return err
 	}
@@ -954,7 +954,7 @@ func (c *PFDAClient) Rmdir(args []string) error {
 		if err != nil {
 			return err
 		}
-		_, body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
+		body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
 		c.HandleError(err)
 
 		var response []jsonFindNodesResponse
@@ -993,7 +993,7 @@ func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 			return err
 		}
 		// first check for matching files to be deleted - filename (with wildcard) logic
-		_, body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
+		body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
 		if err != nil {
 			return err
 		}
@@ -1073,7 +1073,7 @@ func (c *PFDAClient) RefreshToken(autoRefresh bool) (string, error) {
 func (c *PFDAClient) GetLatestVersion() (string, error) {
 	apiURL := fmt.Sprintf("%s/api/v2/cli/version/latest", c.BaseURL)
 
-	_, body, err := c.makeRequest("GET", apiURL, nil)
+	body, err := c.makeRequest("GET", apiURL, nil)
 	if err != nil {
 		return "", err
 	}
@@ -1331,30 +1331,6 @@ func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte
 	return status, body, err
 }
 
-// Deprecated: This method is not handling errors correctly, use makeRequest instead.
-func (c *PFDAClient) makeRequestWithHeadersFail(requestType string, url string, headers map[string]interface{}, data []byte) (status string, body []byte, err error) {
-	req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
-	if err != nil {
-		return "", nil, fmt.Errorf("request failed: %w", err)
-	}
-	for header, value := range headers {
-		req.Header.Set(header, value.(string))
-	}
-
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return "", nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-	status = resp.Status
-	body, _ = io.ReadAll(resp.Body)
-
-	if !strings.HasPrefix(status, "2") {
-		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n", requestType, url, status)
-	}
-	return status, body, err
-}
-
 func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *int64) {
 	// dynamically adjust chunkSize
 	chunkIndex := 1
@@ -1388,16 +1364,17 @@ func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *
 }
 
 func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
-	uploadURL := c.BaseURL + "/api/get_upload_url"
+	uploadURL := fmt.Sprintf("%s/api/v2/files/%s/upload-url", c.BaseURL, id)
 	md5Sum := md5.Sum(chunk.data)
-	jsonData, err := json.Marshal(jsonChunkInfo{
-		ID:    id,
-		Size:  len(chunk.data),
-		Index: chunk.index,
-		Md5:   hex.EncodeToString(md5Sum[:]),
-	})
 
-	_, body, err := c.makeRequestFail("POST", uploadURL, jsonData)
+	// build URL with query parameters
+	params := url.Values{}
+	params.Add("size", strconv.Itoa(len(chunk.data)))
+	params.Add("index", strconv.Itoa(chunk.index))
+	params.Add("md5", hex.EncodeToString(md5Sum[:]))
+
+	fullURL := fmt.Sprintf("%s?%s", uploadURL, params.Encode())
+	body, err := c.makeRequest("GET", fullURL, nil)
 
 	var resultJSON map[string]interface{}
 	err = json.Unmarshal(body, &resultJSON)
@@ -1407,7 +1384,7 @@ func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
 	if resultJSON["url"] == "" {
 		panic("No url in response!")
 	}
-	_, _, err = c.makeRequestWithHeadersFail("PUT", resultJSON["url"].(string), resultJSON["headers"].(map[string]interface{}), chunk.data)
+	_, err = c.makeRequestWithHeaders("PUT", resultJSON["url"].(string), resultJSON["headers"].(map[string]interface{}), chunk.data)
 	return err
 }
 

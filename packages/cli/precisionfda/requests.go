@@ -2,12 +2,11 @@ package precisionfda
 
 import (
 	"bytes"
-	"dnanexus.com/precision-fda-cli/helpers"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/go-retryablehttp"
 	"io"
-	"strings"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 type ErrorResponse struct {
@@ -35,23 +34,43 @@ func parseErrorMessage(responseBody []byte) string {
 	return "An unknown error occurred."
 }
 
-/**
- * Make a request to the PrecisionFDA API.
- * In case of an error, the function will return the error message in err.
- */
-func (c *PFDAClient) makeRequest(requestType string, url string, data []byte) (status string, body []byte, err error) {
+func (c *PFDAClient) makeRequestWithHeaders(requestType string, url string, headers map[string]interface{}, data []byte) ([]byte, error) {
 	req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
-	helpers.CheckErr(err)
-	c.setPostHeaders(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// only set pfda headers if no custom headers are provided
+	if len(headers) == 0 {
+		c.setPostHeaders(req)
+	} else {
+		for key, value := range headers {
+			req.Header.Set(key, value.(string))
+		}
+	}
 
 	resp, err := c.Client.Do(req)
-	helpers.CheckErr(err)
-	defer resp.Body.Close()
-	status = resp.Status
-	body, _ = io.ReadAll(resp.Body)
-
-	if !strings.HasPrefix(status, "2") {
-		err = fmt.Errorf(parseErrorMessage(body))
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
 	}
-	return status, body, err
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, parseErrorMessage(body))
+	}
+
+	return body, nil
+}
+
+/**
+ * Make a request to the PrecisionFDA API.
+ * Returns the response body on success, or an error with status information.
+ */
+func (c *PFDAClient) makeRequest(requestType string, url string, data []byte) ([]byte, error) {
+	return c.makeRequestWithHeaders(requestType, url, nil, data)
 }
