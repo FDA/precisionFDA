@@ -34,7 +34,7 @@ export async function bootstrap() {
   }
 
   app.useGlobalPipes(new CustomValidationPipe({ transform: true }))
-  await app.listen(config.api.port)
+  await app.listen(config.api.port, '0.0.0.0')
 
   log.log(`${enableSsl ? 'HTTPS' : 'HTTP'} Server: started (port: ${config.api.port.toString()})`)
 

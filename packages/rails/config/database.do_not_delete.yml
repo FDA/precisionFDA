@@ -2,25 +2,33 @@ default: &default
   adapter: mysql2
   pool: <%= ENV["DB_POOL"] || 20 %>
   timeout: 5000
-  host: 127.0.0.1
+  host: db
   username: root
   password: password
   collation: utf8_unicode_ci
   variables:
     sql_mode: TRADITIONAL
 
-development:
-  <<: *default
-  database: "dev_db"
-
 dev:
   <<: *default
-  database: "dev_db"
+  database: precisionfda-dev
+
+development:
+  <<: *default
+  database: precision-fda
 
 test:
   <<: *default
-  database: "test_db"
+  database: precisionfda-test
+
+ui_test:
+  <<: *default
+  database: precisionfda-ui-test
+
+staging:
+  <<: *default
+  database: precisionfda-production
 
 production:
   <<: *default
-  database: "production_db"
+  database: precisionfda-production

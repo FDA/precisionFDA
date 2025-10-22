@@ -107,6 +107,7 @@ module PrecisionFda
     if LOG_TO_STDOUT
       $stdout.sync = true
       log_output = $stdout
+      error_log_output = $stderr
     end
 
     # Main logger logs everything either to the STDOUT or to the file specified in the log_output variable

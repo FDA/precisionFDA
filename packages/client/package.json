@@ -17,6 +17,7 @@
     "dev:msw": "ENABLE_DEV_MSW=true pnpm run dev",
     "dev": "NODE_ENV=development webpack-dev-server --mode development --config webpack.development.config.js --live-reload",
     "start:dev": "pnpm run server",
+    "start": "NODE_ENV=production webpack-dev-server --mode production --config webpack.production.config.js",
     "test": "jest",
     "storybook": "storybook dev -p 6006 --debug-webpack",
     "build-storybook": "storybook build",

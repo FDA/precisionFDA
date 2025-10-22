@@ -68,7 +68,11 @@ export function getMikroOrmConfig(opts: MikroOrmConfigOptions): MikroOrmModuleSy
       new SQLQueryLogger(config.database.printDBQueryValuesInLog, options),
     metadataProvider: TsMorphMetadataProvider,
     entities: [getEntityGlob(opts.distPath, 'js')],
-    entitiesTs: [getEntityGlob(opts.sourcePath, 'ts'), getEntityGlob('./libs/shared/src', 'ts')],
+    entitiesTs: [
+      getEntityGlob(opts.sourcePath, 'ts'),
+      getEntityGlob('./libs/shared/src', 'ts'),
+      getEntityGlob(opts.distPath + '/**', 'd.ts'),
+    ],
     driver: MySqlDriver,
     // v5 introduced strict checking. Having this enabled would mean a lot
     // of work, but we need to eventually reach this property to be true
