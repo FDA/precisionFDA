@@ -1,0 +1,129 @@
+services:
+  default:
+    pfda-nodejs-api:
+      imageName: server
+      desiredCount: 1
+      container:
+        cpu: 256
+        memoryReservation: 512
+      containerPort: 3001
+      serviceConnect:
+        securityGroups:
+          - name: common-sg
+      command: ["pnpm", "run", "start:prod:api"]
+      healthCheck:
+        command: ["CMD-SHELL", "curl -kf https://localhost:3001/health || exit 1"]
+        interval: 30
+        timeout: 5
+        retries: 3
+        startPeriod: 60
+
+    pfda-nodejs-api-internal:
+      imageName: server
+      desiredCount: 1
+      container:
+        cpu: 512
+        memoryReservation: 1024
+      containerPort: 3001
+      serviceConnect:
+        securityGroups:
+          - name: api-internal-sg
+      command: ["npm", "run", "start:prod:api", "--", "--internal"]
+      healthCheck:
+        command: ["CMD-SHELL", "curl -kf https://localhost:3001/health || exit 1"]
+        interval: 30
+        timeout: 5
+        retries: 3
+        startPeriod: 60
+
+    pfda-nodejs-worker:
+      imageName: server
+      desiredCount: 2
+      container:
+        cpu: 256
+        memoryReservation: 512
+      containerPort: 3001
+      serviceConnect:
+        securityGroups:
+          - name: common-sg
+      command: ["pnpm", "run", "start:prod:worker"]
+
+    pfda-nodejs-admin-platform-client:
+      imageName: server
+      desiredCount: 2
+      container:
+        cpu: 256
+        memoryReservation: 512
+      containerPort: 3002
+      serviceConnect:
+        securityGroups:
+          - name: common-sg
+      command: ["pnpm", "run", "start:prod:admin-platform-client"]
+
+
+    pfda-db-migrate:
+      imageName: web
+      desiredCount: 0  # not a running service; run as needed
+      container:
+        cpu: 256
+        memoryReservation: 512
+      containerPort: 3000
+      command: ["bundle", "exec", "rake", "db:migrate"]
+      serviceConnect:
+        securityGroups:
+          - name: common-sg
+
+    pfda-web:
+      imageName: web
+      desiredCount: 2
+      container:
+        cpu: 256
+        memoryReservation: 512
+      containerPort: 3000
+      serviceConnect:
+        securityGroups:
+          - name: web-sg
+
+    pfda-sidekiq:
+      imageName: web
+      desiredCount: 1
+      container:
+        cpu: 256
+        memoryReservation: 512
+      containerPort: 3000
+      serviceConnect:
+        securityGroups:
+          - name: common-sg
+      entryPoint: ["./docker/entrypoint/sidekiq.entrypoint.sh"]
+
+    pfda-docs:
+      imageName: docs
+      desiredCount: 1
+      container:
+        cpu: 128
+        memoryReservation: 256
+      containerPort: 4040
+      serviceConnect:
+        securityGroups:
+          - name: common-sg
+
+    pfda-nginx:
+      imageName: nginx
+      desiredCount: 1
+      container:
+        cpu: 256
+        memoryReservation: 512
+      containerPort: 443
+      serviceConnect:
+        securityGroups:
+          - name: nginx-sg
+      targetGroupName: ecs-default-tg
+
+
+#  dev:
+#    pfda-nodejs-api:
+#      desiredCount: 3
+#      container:
+#        cpu: 256
+#        memoryReservation: 512
+

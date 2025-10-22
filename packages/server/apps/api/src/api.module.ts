@@ -20,6 +20,7 @@ import { EmailApiModule } from './emails/email.api.module'
 import { ExpertsApiModule } from './experts/experts.api.module'
 import { FilesApiModule } from './files/files.api.module'
 import { FolderApiModule } from './folders/folder.api.module'
+import { HealthApiModule } from './health/health.api.module'
 import { JobApiModule } from './jobs/job.api.module'
 import { LicenseApiModule } from './licenses/license.api.module'
 import { RailsLoggerInterceptor } from './logger/interceptor/rails-logger.interceptor'
@@ -65,6 +66,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     EmailApiModule,
     ExpertsApiModule,
     FilesApiModule,
+    HealthApiModule,
     SpaceEventsApiModule,
     FolderApiModule,
     JobApiModule,

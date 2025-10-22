@@ -2,8 +2,6 @@ environment ENV["RAILS_ENV"] || "production"
 threads    2, 16
 port       3000
 workers    ENV.fetch("WEB_CONCURRENCY", 4).to_i
-stdout_redirect File.expand_path("../../../log/puma.log", __dir__),
-                File.expand_path("../../../log/puma-err.log", __dir__)
 
 preload_app!
 

@@ -1,4 +1,4 @@
-name: DEV - Deploy pFDA to AWS
+name: DEV (NON-DOCKER) - Deploy pFDA to AWS
 
 on:
   workflow_dispatch:

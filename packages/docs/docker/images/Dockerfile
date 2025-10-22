@@ -33,6 +33,7 @@ USER nextjs
 
 EXPOSE 4040
 ENV PORT=4040
+ENV HOSTNAME=0.0.0.0
 
 # Start Next.js in production mode
 CMD ["pnpm", "start"]
