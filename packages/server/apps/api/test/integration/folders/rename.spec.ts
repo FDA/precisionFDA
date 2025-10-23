@@ -103,7 +103,7 @@ describe('PATCH /folders/:id/rename', () => {
           newName: 'b',
         })
       em.clear()
-      const folders = await em.find(Folder, {}, { filters: ['folder'] })
+      const folders = await em.find(Folder, { stiType: FILE_STI_TYPE.FOLDER })
       expect(folders).to.have.lengthOf(1)
       expect(folders[0]).to.have.property('name', 'a')
     })

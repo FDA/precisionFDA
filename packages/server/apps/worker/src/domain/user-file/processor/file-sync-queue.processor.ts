@@ -13,10 +13,10 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
 import { TypeUtils } from '@shared/utils/type-utils'
 import { Job } from 'bull'
-import { lockNodesHandler } from '../../../jobs/lock-nodes.handler'
-import { unlockNodesHandler } from '../../../jobs/unlock-nodes.handler'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 import { BaseQueueProcessor } from '../../../queues/processor/base-queue.processor'
+import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
+import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
 
 @Processor(config.workerJobs.queues.fileSync.name)
 export class FileSyncQueueProcessor extends BaseQueueProcessor {
@@ -26,6 +26,8 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
   constructor(
     private readonly user: UserContext,
     private readonly userDataConsistencyReportFacade: UserDataConsistencyReportFacade,
+    private readonly lockNodeFacade: LockNodeFacade,
+    private readonly unlockNodeFacade: UnlockNodeFacade,
     private readonly removeNodesFacade: RemoveNodesFacade,
     private readonly notificationService: NotificationService,
     private readonly jobServiceWithPlatformClient: JobService,
@@ -69,12 +71,14 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.LOCK_NODES)
   async lockNodes(job: Job): Promise<void> {
-    await lockNodesHandler(job)
+    const ids: number[] = job.data.payload as number[]
+    await this.lockNodeFacade.lockNodes(ids)
   }
 
   @ProcessWithContext(TASK_TYPE.UNLOCK_NODES)
   async unlockNodes(job: Job): Promise<void> {
-    await unlockNodesHandler(job)
+    const ids: number[] = job.data.payload as number[]
+    await this.unlockNodeFacade.unlockNodes(ids)
   }
 
   @ProcessWithContext(TASK_TYPE.WORKSTATION_SNAPSHOT)

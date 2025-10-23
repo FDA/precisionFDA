@@ -9,7 +9,6 @@ import { NotificationService } from '@shared/domain/notification/services/notifi
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
@@ -30,6 +29,7 @@ import { DataPortal } from '../data-portal.entity'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
 import { CreateResourceResponse, DataPortalMemberParam, DataPortalParam } from './data-portal.types'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { EntityService } from '@shared/domain/entity/entity.service'
 
 @Injectable()
 export class DataPortalService {
@@ -55,7 +55,7 @@ export class DataPortalService {
     private readonly dataPortalRepo: DataPortalRepository,
     private readonly platformClient: PlatformClient,
     private readonly notificationService: NotificationService,
-    private readonly userFileService: UserFileService,
+    private readonly entityService: EntityService,
     private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
@@ -77,9 +77,13 @@ export class DataPortalService {
             return {
               id: r.id,
               name: r.userFile.getEntity().name,
-              url: await this.userFileService.getDownloadLink(r.userFile.getEntity(), {
-                inline: true,
-              }),
+              url: await this.entityService.getEntityDownloadLink(
+                r.userFile.getEntity(),
+                r.userFile.getEntity().name,
+                {
+                  inline: true,
+                },
+              ),
             }
           }),
       )
@@ -118,7 +122,7 @@ export class DataPortalService {
     return { id: resource.id, fileUid: userFile.uid }
   }
 
-  removeResource = async (id: number) => {
+  async removeResource(id: number): Promise<void> {
     this.logger.log(`Removing resource: ${id}`)
     const resource = await this.em.findOneOrFail(Resource, { id: id }, { populate: ['userFile'] })
     const dataPortal = await this.em.findOneOrFail(
@@ -286,7 +290,7 @@ export class DataPortalService {
     return portal
   }
 
-  update = async (input: UpdateDataPortalDTO): Promise<DataPortalParam> => {
+  async update(input: UpdateDataPortalDTO): Promise<DataPortalParam> {
     this.logger.log('Updating data portal', input, this.user.id)
     const portal = await this.em.findOneOrFail(
       DataPortal,

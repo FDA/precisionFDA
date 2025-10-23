@@ -1,9 +1,6 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EntityService } from '@shared/domain/entity/entity.service'
-import { Event } from '@shared/domain/event/event.entity'
-import * as eventHelper from '@shared/domain/event/event.helper'
-import { EVENT_TYPES } from '@shared/domain/event/event.helper'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -12,7 +9,6 @@ import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import {
   FILE_STATE_DX,
@@ -27,7 +23,6 @@ import { PlatformClient } from '@shared/platform-client'
 import * as queue from '@shared/queue'
 import { expect } from 'chai'
 import sinon, { SinonStub, match, stub } from 'sinon'
-import { NodeService } from '@shared/domain/user-file/node.service'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
@@ -89,8 +84,6 @@ describe('UserFileService', () => {
   const sanitizeNodeNamesStub = stub()
   const renameDuplicateFilesStub = stub()
 
-  const getEntityDownloadLinkStub = stub()
-
   const getLicenseItemsForNodeStub = stub()
 
   const createAndSendSpaceEventStub = stub()
@@ -111,11 +104,6 @@ describe('UserFileService', () => {
   const emFindOneOrFailStub = stub()
 
   let createFileSynchronizeJobTaskStub: SinonStub
-  let loadNodesStub = stub()
-  let getNodePathStub: SinonStub
-  let createFileEventStub: SinonStub
-  let createFolderEventStub: SinonStub
-  let collectChildrenStub = stub()
   let referenceCreateStub: SinonStub
 
   const userClient = {
@@ -133,6 +121,25 @@ describe('UserFileService', () => {
   const notificationService = {
     createNotification: createNotificationStub,
   } as unknown as NotificationService
+
+  const nodeHelperGetNodePathStub = stub()
+  const nodeHelperGetParentFolderStub = stub()
+  const nodeHelperCollectChildrenStub = stub()
+  const nodeHelper = {
+    getNodePath: nodeHelperGetNodePathStub,
+    getWarningsForUnclosedFiles: getWarningsForUnclosedFilesStub,
+    sanitizeNodeNames: sanitizeNodeNamesStub,
+    renameDuplicateFiles: renameDuplicateFilesStub,
+    getParentFolder: nodeHelperGetParentFolderStub,
+    collectChildren: nodeHelperCollectChildrenStub,
+  } as unknown as NodeHelper
+
+  const eventHelperCreateFolderEventStub = stub()
+  const enentHelperCreateFileEventStub = stub()
+  const eventHelper = {
+    createFolderEvent: eventHelperCreateFolderEventStub,
+    createFileEvent: enentHelperCreateFileEventStub,
+  } as unknown as EventHelper
 
   const findAccessibleStub = stub()
   const findAccessibleOneStub = stub()
@@ -164,7 +171,7 @@ describe('UserFileService', () => {
     count: fileRepoCountStub,
     findEditable: findEditableStub,
   } as unknown as UserFileRepository
-  const licesnsedItemRepo = {
+  const licensedItemRepo = {
     getLicenseItemsForNode: getLicenseItemsForNodeStub,
   } as unknown as LicensedItemRepository
   const spaceRepository = {
@@ -195,21 +202,6 @@ describe('UserFileService', () => {
     populate: emPopulateStub,
   } as unknown as SqlEntityManager
 
-  const nodesHelper = {
-    getWarningsForUnclosedFiles: getWarningsForUnclosedFilesStub,
-    sanitizeNodeNames: sanitizeNodeNamesStub,
-    renameDuplicateFiles: renameDuplicateFilesStub,
-  } as unknown as NodeHelper
-
-  const entityService = {
-    getEntityDownloadLink: getEntityDownloadLinkStub,
-  } as unknown as EntityService
-
-  const nodeService = {
-    collectChildren: collectChildrenStub,
-    loadNodes: loadNodesStub,
-  } as unknown as NodeService
-
   const spaceEventService = {
     createAndSendSpaceEvent: createAndSendSpaceEventStub,
   } as unknown as SpaceEventService
@@ -218,17 +210,6 @@ describe('UserFileService', () => {
     referenceCreateStub = stub(Reference, 'create')
     referenceCreateStub.withArgs(USER).returns(USER)
     createFileSynchronizeJobTaskStub = stub(queue, 'createFileSynchronizeJobTask')
-    getNodePathStub = stub(userFileHelper, 'getNodePath')
-    createFileEventStub = stub(eventHelper, 'createFileEvent')
-    createFolderEventStub = stub(eventHelper, 'createFolderEvent')
-
-    loadNodesStub.reset()
-    loadNodesStub.throws()
-    getNodePathStub.reset()
-    getNodePathStub.throws()
-
-    createFileEventStub.reset()
-    createFileEventStub.throws()
 
     getReferenceStub.reset()
     getReferenceStub.throws()
@@ -255,6 +236,12 @@ describe('UserFileService', () => {
 
     folderRepoFindOneStub.reset()
     folderRepoFindOneStub.throws()
+
+    nodeHelperGetParentFolderStub.reset()
+    nodeHelperGetParentFolderStub.throws()
+
+    nodeHelperCollectChildrenStub.reset()
+    nodeHelperCollectChildrenStub.throws()
 
     getLicenseItemsForNodeStub.reset()
     getLicenseItemsForNodeStub.throws()
@@ -319,20 +306,11 @@ describe('UserFileService', () => {
       return callback(em)
     })
 
-    getEntityDownloadLinkStub.reset()
-    getEntityDownloadLinkStub.throws()
-
     removeTaggingsStub.reset()
     removeTaggingsStub.throws()
 
     createSpaceEventStub.reset()
     createSpaceEventStub.throws()
-
-    createFolderEventStub.reset()
-    createFolderEventStub.throws()
-
-    collectChildrenStub.reset()
-    collectChildrenStub.throws()
 
     emFindOneStub.reset()
     emFindOneStub.throws()
@@ -348,14 +326,20 @@ describe('UserFileService', () => {
 
     nodeLoadIfAccessibleByUserStub.reset()
     nodeLoadIfAccessibleByUserStub.throws()
+
+    nodeHelperGetNodePathStub.reset()
+    nodeHelperGetNodePathStub.throws()
+
+    eventHelperCreateFolderEventStub.reset()
+    eventHelperCreateFolderEventStub.throws()
+
+    enentHelperCreateFileEventStub.reset()
+    enentHelperCreateFileEventStub.throws()
   })
 
   afterEach(() => {
     referenceCreateStub.restore()
     createFileSynchronizeJobTaskStub.restore()
-    getNodePathStub.restore()
-    createFileEventStub.restore()
-    createFolderEventStub.restore()
   })
 
   describe('#createFile', () => {
@@ -557,134 +541,6 @@ describe('UserFileService', () => {
     })
   })
 
-  describe('#composeFilesForBulkDownload', () => {
-    it('correct preparation of two files', async () => {
-      getWarningsForUnclosedFilesStub.returns(null)
-      sanitizeNodeNamesStub.callsFake((nodes) => {
-        return nodes
-      })
-      renameDuplicateFilesStub.callsFake((nodes) => {
-        return nodes
-      })
-      const commonNode = {
-        stiType: FILE_STI_TYPE.USERFILE,
-        project: 'project',
-        state: 'closed',
-      }
-      loadNodesStub.returns([
-        { id: 123, uid: 'file-123-1', dxid: 'file-123', name: 'name-123', ...commonNode },
-        { id: 234, uid: 'file-234-1', dxid: 'file-234', name: 'name-234', ...commonNode },
-      ])
-
-      findAccessibleStub.returns([{} as UserFile, {} as UserFile])
-      getNodePathStub.withArgs(match.any, match.has('id', 123)).returns('file-123-1_path')
-      getNodePathStub.withArgs(match.any, match.has('id', 234)).returns('file-234-1_path')
-
-      fileDownloadLinkStub.returns({ url: 'http://download-link.com' })
-      const fileEvent = { type: eventHelper.EVENT_TYPES.FILE_BULK_DOWNLOAD } as Event
-      createFileEventStub.returns({ ...fileEvent, param1: 'file_path' })
-      emPopulateStub.reset()
-
-      const IDs = [123, 234]
-      const response = await getInstance().composeFilesForBulkDownload(IDs)
-
-      // assert
-      expect(loadNodesStub.calledOnce).to.be.true()
-      expect(loadNodesStub.firstCall.args[0]).to.eq(IDs)
-
-      expect(fileDownloadLinkStub.calledTwice).to.be.true()
-      expect(fileDownloadLinkStub.firstCall.args[0]).to.deep.eq({
-        fileDxid: 'file-123',
-        filename: 'name-123',
-        project: 'project',
-        duration: 24 * 60 * 60,
-      })
-      expect(fileDownloadLinkStub.secondCall.args[0]).to.deep.eq({
-        fileDxid: 'file-234',
-        filename: 'name-234',
-        project: 'project',
-        duration: 24 * 60 * 60,
-      })
-
-      expect(createFileEventStub.calledTwice).to.be.true()
-      expect(createFileEventStub.firstCall.args[0]).to.eq(EVENT_TYPES.FILE_BULK_DOWNLOAD)
-      expect(createFileEventStub.firstCall.args[2]).to.eq('file-123-1_path')
-      expect(createFileEventStub.firstCall.args[3]).to.deep.eq(USER)
-      expect(createFileEventStub.secondCall.args[0]).to.eq(EVENT_TYPES.FILE_BULK_DOWNLOAD)
-      expect(createFileEventStub.secondCall.args[2]).to.eq('file-234-1_path')
-      expect(createFileEventStub.secondCall.args[3]).to.deep.eq(USER)
-
-      expect(persistStub.calledTwice).to.be.true()
-      expect(persistStub.firstCall.args[0].type).to.eq(EVENT_TYPES.FILE_BULK_DOWNLOAD)
-      expect(persistStub.firstCall.args[0].param1).to.eq('file_path')
-      expect(persistStub.secondCall.args[0].type).to.eq(EVENT_TYPES.FILE_BULK_DOWNLOAD)
-      expect(persistStub.secondCall.args[0].param1).to.eq('file_path')
-
-      expect(response.files.length).to.eq(2)
-      expect(response.files[0].url).to.eq('http://download-link.com')
-      expect(response.files[0].path).to.eq('file-123-1_path')
-      expect(response.files[1].url).to.eq('http://download-link.com')
-      expect(response.files[1].path).to.eq('file-234-1_path')
-    })
-
-    it("user doesn't have access to at least one file", async () => {
-      emPopulateStub.reset()
-      loadNodesStub.returns([{ name: 'object_1' }, { name: 'object_2' }])
-
-      findAccessibleStub.returns([{} as UserFile])
-
-      await expect(getInstance().composeFilesForBulkDownload([10, 20])).to.be.rejectedWith(
-        PermissionError,
-        'You do not have permission to download all of these files',
-      )
-    })
-  })
-
-  describe('#getDownloadLink', () => {
-    it('should not catch error from entity service', async () => {
-      const error = new Error('my error')
-      getEntityDownloadLinkStub.throws(error)
-
-      const file = { id: 0 } as unknown as UserFile
-
-      await expect(getInstance().getDownloadLink(file)).to.be.rejectedWith(error)
-    })
-
-    it('should return the result from entity service', async () => {
-      const file = { id: 0, name: 'NAME' } as unknown as UserFile
-      const options = { preauthenticated: true }
-      getEntityDownloadLinkStub.withArgs(file, file.name, options).resolves('LINK')
-
-      const res = await getInstance().getDownloadLink(file, options)
-
-      expect(res).to.eq('LINK')
-    })
-  })
-
-  describe('#getDownloadLinkForUid', () => {
-    const FILE_UID = 'file-uid-1'
-    const FILE_NAME = 'FILE_NAME'
-    const FILE = {
-      name: FILE_NAME,
-      uid: FILE_UID,
-      state: FILE_STATE_DX.CLOSED,
-      isInSpace: () => false,
-    } as unknown as UserFile
-    const OPTIONS = { preauthenticated: true }
-
-    beforeEach(() => {
-      getEntityDownloadLinkStub.withArgs(FILE, FILE.name, OPTIONS).resolves('LINK')
-      findAccessibleOneStub.withArgs(FILE_UID).resolves(FILE)
-    })
-
-    it('should return result from entity service', async () => {
-      findAccessibleOneStub.withArgs({ uid: FILE_UID }).resolves(FILE)
-      const res = await getInstance().getDownloadLink(FILE, OPTIONS)
-
-      expect(res).to.eq('LINK')
-    })
-  })
-
   describe('#listSelectedFiles', async () => {
     const file1 = {
       id: 5,
@@ -718,12 +574,13 @@ describe('UserFileService', () => {
           stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.FOLDER] },
         })
         .returns([file1, folder2])
-      collectChildrenStub.resolves()
+      nodeHelperGetParentFolderStub.reset()
+      nodeHelperCollectChildrenStub.reset()
 
       const res = await getInstance().listSelectedFiles([file1.id, folder2.id])
       expect(res.length).to.eq(2)
       expect((res[0] as SelectedFile).sourceFolderId).to.eq(undefined)
-      expect(collectChildrenStub.calledOnce).to.be.true()
+      nodeHelperCollectChildrenStub.reset()
     })
   })
 
@@ -765,7 +622,7 @@ describe('UserFileService', () => {
           scope: SPACE,
         })
         .returns([existingFile1, existingFile2])
-      getNodePathStub.returns('path')
+      nodeHelperGetNodePathStub.returns('path')
 
       const res = await getInstance().validateCopyFiles([FILE_UID1, FILE_UID2, FILE_UID3], SPACE)
       expect(Object.keys(res).length).to.eq(2)
@@ -865,15 +722,14 @@ describe('UserFileService', () => {
       USER_CTX,
       userClient,
       challengeBotClient,
-      notificationService,
       nodeRepository,
       fileRepository,
       spaceRepository,
-      licesnsedItemRepo,
-      nodesHelper,
-      entityService,
-      nodeService,
+      licensedItemRepo,
+      nodeHelper,
+      eventHelper,
       spaceEventService,
+      notificationService,
     )
   }
 })

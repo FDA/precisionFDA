@@ -16,13 +16,14 @@ import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { TaggingModule } from '@shared/domain/tagging/tagging.module'
 import { SpaceEventModule } from '@shared/domain/space-event/space-event.module'
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { FolderService } from '@shared/domain/user-file/folder.service'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { SpaceModule } from '@shared/domain/space/space.module'
 import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
 import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
+import { FolderService } from '@shared/domain/user-file/folder.service'
+import { EventModule } from '@shared/domain/event/event.module'
 import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
 
 @Module({
@@ -43,6 +44,7 @@ import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.serv
     TaggingModule,
     SpaceEventModule,
     SpaceModule,
+    EventModule,
     MikroOrmModule.forFeature([
       Node,
       UserFile,
@@ -64,9 +66,8 @@ import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.serv
     FileSyncQueueJobProducer,
   ],
   exports: [
-    UserFileService,
-    FolderService,
     NodeService,
+    NodeHelper,
     ArchiveEntryService,
     UrlFetchService,
     BullQueueModule,

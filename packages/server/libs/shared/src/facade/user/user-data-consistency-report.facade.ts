@@ -20,7 +20,7 @@ import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { findUnclosedFilesOrAssets, getNodePath } from '@shared/domain/user-file/user-file.helper'
+import { findUnclosedFilesOrAssets } from '@shared/domain/user-file/user-file.helper'
 import { User } from '@shared/domain/user/user.entity'
 import { NotFoundError } from '@shared/errors'
 import { UserSpaceInconsistencyFixService } from '@shared/facade/user/service/user-space-inconsistency-fix.service'
@@ -38,6 +38,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 
 // UserDataConsistencyReportOperation uses a user token to inspect the user's
@@ -62,6 +63,7 @@ export class UserDataConsistencyReportFacade {
     private readonly spaceMembershipRepository: SpaceMembershipRepository,
     private readonly emailsJobProducer: EmailQueueJobProducer,
     private readonly platformClient: PlatformClient,
+    private readonly nodeHelper: NodeHelper,
     private readonly userSpaceInconsistencyFixService: UserSpaceInconsistencyFixService,
   ) {}
 
@@ -224,7 +226,7 @@ export class UserDataConsistencyReportFacade {
           const parentKey = node.scope.startsWith('space')
             ? 'scopedParentFolderId'
             : 'parentFolderId'
-          const nodePath = await getNodePath(this.em, node)
+          const nodePath = await this.nodeHelper.getNodePath(node)
           const httpsFiles = await this.platformClient.filesList({
             project: node.project,
             folder: nodePath,

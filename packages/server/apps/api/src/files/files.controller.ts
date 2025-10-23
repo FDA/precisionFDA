@@ -19,7 +19,6 @@ import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-li
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { createCloseFileJobTask } from '@shared/queue'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import archiver from 'archiver'
@@ -37,6 +36,9 @@ import {
   SelectedNode,
 } from '@shared/domain/user-file/user-file.types'
 import { TimeUtils } from '@shared/utils/time.utils'
+import { UserFileBulkDownloadFacade } from '../facade/user-file/user-file-bulk-download.facade'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger'
 import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
 import { GetUploadURLResponse } from '@shared/platform-client/platform-client.responses'
 import { GetUploadUrlQueryDTO } from './model/get-upload-url-query.dto'
@@ -48,10 +50,11 @@ export class FilesController {
   constructor(
     private readonly user: UserContext,
     private readonly logger: Logger,
-    private readonly userFileService: UserFileService,
+    private readonly nodeService: NodeService,
     private readonly urlFetchService: UrlFetchService,
     private readonly userFileResolverFacade: UserFileResolverFacade,
     private readonly userFileDownloadFacade: UserFileDownloadFacade,
+    private readonly userFileBulkDownloadFacade: UserFileBulkDownloadFacade,
   ) {}
 
   @Get('/:uid/upload-url')
@@ -76,12 +79,47 @@ export class FilesController {
 
   @Get('bulk_download')
   @Header('Content-Type', 'application/octet-stream')
+  @ApiOperation({ summary: 'Bulk download files' })
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    isArray: true,
+    description: 'IDs of items to download',
+    required: true,
+    example: [1, 2, 3],
+  })
+  @ApiQuery({
+    name: 'folder_id',
+    type: Number,
+    required: false,
+    description: `
+      Optional folder ID that the contents is located in.
+      Should not be sent for contents in root. Non root bulk
+      download has to send it - example: if you're downloading following
+
+      /folder1/folder2/file1.txt
+      /folder1/folder2/file2.txt
+      /folder1/folder2/folder3/file3.txt
+
+      you have to send ID of folder2. It's necessary for stripping paths.
+    `,
+    example: 42,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Binary stream with the downloaded content',
+    content: {
+      'application/octet-stream': {
+        schema: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   async bulkDownload(
     @Query('id', new ParseArrayPipe({ items: Number })) ids: number[],
     @Res() res: Response,
     @Query('folder_id', new ParseIntPipe({ optional: true })) folderId?: number,
   ): Promise<void> {
-    const filesToBeDownloaded = await this.userFileService.composeFilesForBulkDownload(
+    const filesToBeDownloaded = await this.userFileBulkDownloadFacade.composeFilesForBulkDownload(
       ids,
       folderId,
     )
@@ -149,12 +187,12 @@ export class FilesController {
   async getSelectedFiles(
     @Query('ids', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[],
   ): Promise<SelectedNode[]> {
-    return this.userFileService.listSelectedFiles(ids)
+    return this.nodeService.listSelectedFiles(ids)
   }
 
   @Post('/copy/validate')
   async validateCopyFiles(@Body() body: FilesValidateCopyingBodyDto): Promise<ExistingFileSet> {
-    return this.userFileService.validateCopyFiles(body.uids, body.scope)
+    return this.nodeService.validateCopyFiles(body.uids, body.scope)
   }
 
   @Get('/:uid/download-link')

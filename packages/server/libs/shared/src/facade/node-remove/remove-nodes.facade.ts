@@ -4,15 +4,13 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { ComparisonService } from '@shared/domain/comparison/comparison.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
-import { getNodePath } from '@shared/domain/user-file/user-file.helper'
-import { createFileEvent, createFolderEvent, EVENT_TYPES } from '@shared/domain/event/event.helper'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { PlatformClient } from '@shared/platform-client'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -23,6 +21,8 @@ import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 
 @Injectable()
 export class RemoveNodesFacade {
@@ -34,8 +34,9 @@ export class RemoveNodesFacade {
     private readonly user: UserContext,
     private readonly userRepository: UserRepository,
     private readonly userFileRepository: UserFileRepository,
+    private readonly nodeHelper: NodeHelper,
+    private readonly eventHelper: EventHelper,
     private readonly comparisonService: ComparisonService,
-    private readonly userFileService: UserFileService,
     private readonly nodeService: NodeService,
     private readonly spaceService: SpaceService,
     private readonly taggingService: TaggingService,
@@ -119,16 +120,16 @@ export class RemoveNodesFacade {
 
   private async validateNodes(nodes: Node[]): Promise<void> {
     for (const node of nodes) {
-      await this.userFileService.validateProtectedSpaces('remove', this.user.id, node)
+      await this.nodeService.validateProtectedSpaces('remove', this.user.id, node)
       await this.nodeService.validateEditableBy(node)
       await this.spaceService.validateVerificationSpace(node)
 
       if (node.stiType === FILE_STI_TYPE.USERFILE) {
         await this.comparisonService.validateComparisons(node as UserFile)
-        await this.userFileService.validateSpaceReports(node as UserFile)
+        await this.nodeService.validateSpaceReports(node as UserFile)
       }
       if (node.stiType === FILE_STI_TYPE.ASSET) {
-        await this.userFileService.validateAssetRemoval(node as Asset)
+        await this.nodeService.validateAssetRemoval(node as Asset)
       }
     }
   }
@@ -137,7 +138,7 @@ export class RemoveNodesFacade {
     this.logger.log(`Removing file with uid: ${fileToRemove.uid}`)
 
     const lastNode = (await this.userFileRepository.count({ dxid: fileToRemove.dxid })) === 1
-    const filePath = await getNodePath(this.em, fileToRemove as Node)
+    const filePath = await this.nodeHelper.getNodePath(fileToRemove as Node)
     const user = await this.userRepository.findOne(this.user.id)
 
     return await this.em.transactional(async () => {
@@ -147,7 +148,7 @@ export class RemoveNodesFacade {
         await this.archiveEntryService.removeArchiveEntriesForNode(fileToRemove.id)
       }
 
-      const fileEvent = await createFileEvent(
+      const fileEvent = await this.eventHelper.createFileEvent(
         EVENT_TYPES.FILE_DELETED,
         fileToRemove,
         filePath,
@@ -191,10 +192,10 @@ export class RemoveNodesFacade {
 
   private async removeFolder(folderToRemove: Folder): Promise<number> {
     const user = await this.userRepository.findOne(this.user.id)
-    const folderPath = await getNodePath(this.em, folderToRemove)
+    const folderPath = await this.nodeHelper.getNodePath(folderToRemove)
 
     return await this.em.transactional(async () => {
-      const folderEvent = await createFolderEvent(
+      const folderEvent = await this.eventHelper.createFolderEvent(
         EVENT_TYPES.FOLDER_DELETED,
         folderToRemove,
         folderPath,

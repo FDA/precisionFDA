@@ -7,11 +7,12 @@ import { SpaceReport } from '@shared/domain/space-report/entity/space-report.ent
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { getProjectDxid } from '@shared/domain/space/space.helper'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 @Injectable()
 export class SpaceReportResultGenerateFacade {
@@ -23,10 +24,10 @@ export class SpaceReportResultGenerateFacade {
     private readonly spaceReportService: SpaceReportService,
     private readonly userFileCreateFacade: UserFileCreateFacade,
     private readonly entityProvenanceService: EntityProvenanceService,
-    private readonly userFileService: UserFileService,
+    private readonly nodeService: NodeService,
   ) {}
 
-  async generate(reportId: number) {
+  async generate(reportId: number): Promise<SpaceReport> {
     const report = await this.em.transactional(async () => {
       const report = await this.em.findOne(SpaceReport, reportId, {
         lockMode: LockMode.PESSIMISTIC_WRITE,
@@ -76,15 +77,15 @@ export class SpaceReportResultGenerateFacade {
         )
       }
 
-      await this.userFileService.closeFile(resultFile.uid)
+      await this.nodeService.closeFile(resultFile.uid)
     }
 
     return report
   }
 
-  private async getProjectDxid(report: SpaceReport, space?: Space) {
+  private async getProjectDxid(report: SpaceReport, space?: Space): Promise<DxId<'project'>> {
     if (!space) {
-      return report.createdBy.getEntity().privateFilesProject
+      return report.createdBy.getEntity().privateFilesProject as DxId<'project'>
     }
 
     const membership = await this.em.findOne(SpaceMembership, {
@@ -102,7 +103,7 @@ export class SpaceReportResultGenerateFacade {
     return getProjectDxid(space, membership)
   }
 
-  private getName(report: SpaceReport, space?: Space) {
+  private getName(report: SpaceReport, space?: Space): string {
     const createdAt = report.createdAt.toLocaleDateString()
     const extension = report.format.toLowerCase()
     const spaceTitle = space
@@ -112,7 +113,7 @@ export class SpaceReportResultGenerateFacade {
     return `PFDA - ${spaceTitle} report - ${createdAt}.${extension}`
   }
 
-  private async getDescription(report: SpaceReport, space?: Space) {
+  private async getDescription(report: SpaceReport, space?: Space): Promise<string> {
     const generated = new Date(report.createdAt).toLocaleString()
 
     if (space) {

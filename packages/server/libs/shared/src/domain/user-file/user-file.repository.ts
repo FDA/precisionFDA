@@ -55,45 +55,18 @@ export class UserFileRepository extends AccessControlRepository<UserFile> {
       ],
     }
   }
-  /**
-   * Loads userfile identified by uids and verifies if they are accessible by user.
-   * @param userId
-   * @param uids
-   * @param spaceIds
-   */
-  async findAccessibleByUser(
-    userId: number,
-    uids: Uid<'file'>[],
-    spaceIds: number[],
-  ): Promise<UserFile[]> {
-    const scopes = spaceIds.map((id) => `space-${id}`)
-
-    return await this.find(
-      {
-        $or: [
-          { scope: STATIC_SCOPE.PUBLIC },
-          { user: userId, scope: STATIC_SCOPE.PRIVATE },
-          { scope: { $in: (scopes as []) ?? [] } },
-        ],
-        state: FILE_STATE_DX.CLOSED,
-        uid: { $in: uids as [] },
-      },
-      { filters: ['asset'], populate: ['user', 'taggings.tag'] },
-    )
-  }
 
   async findFileWithUid(uid: Uid<'file'>, populate?: string[]): Promise<UserFile | null> {
     return await this.findOne(
       { uid },
       {
-        filters: ['userfile'],
         populate: (populate as never[]) || (['user', 'taggings.tag'] as never[]),
       },
     )
   }
 
   async findFilesWithDxid(dxid: DxId<'file'>): Promise<UserFile[]> {
-    return await this.find({ dxid }, { filters: ['userfile'], populate: ['user', 'taggings.tag'] })
+    return await this.find({ dxid }, { populate: ['user', 'taggings.tag'] })
   }
 
   // Find files uploaded or owned by a user that are pending
@@ -105,7 +78,6 @@ export class UserFileRepository extends AccessControlRepository<UserFile> {
         state: { $in: [FILE_STATE_DX.OPEN, FILE_STATE_DX.CLOSING] },
       },
       {
-        filters: ['userfile'],
         populate: ['taggings.tag', 'user'],
       },
     )

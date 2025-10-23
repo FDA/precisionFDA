@@ -1,14 +1,10 @@
-import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
+import { EntityManager } from '@mikro-orm/mysql'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { Space } from '@shared/domain/space/space.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { difference, isNil } from 'ramda'
-import { STATIC_SCOPE } from '../../enums'
-import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { Asset } from './asset.entity'
 import { AssetRepository } from './asset.repository'
 import { FolderRepository } from './folder.repository'
@@ -227,66 +223,6 @@ const findFolderForPath = (
   return currentFolder
 }
 
-/**
- * Returns parentFolder if scope is private, public or null, otherwise it returns scopedParentFolder
- * @param node
- */
-export const getParentFolder = (node: Node): Node => {
-  if (
-    [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)
-  ) {
-    return node.parentFolder
-  }
-  return node.scopedParentFolder
-}
-
-const getNodePath = async (
-  em: SqlEntityManager,
-  node: Node,
-  folders: string[] | undefined = [],
-): Promise<string> => {
-  folders.unshift(node.name)
-  const parentFolderNode = getParentFolder(node)
-  if (!parentFolderNode) {
-    // we have reached root, compose the path and return it
-    return `/${folders.join('/')}`
-  }
-  const folderRepo = em.getRepository(Folder)
-  const parentFolder = await folderRepo.findOne({ id: parentFolderNode.id })
-
-  return getNodePath(em, parentFolder as Node, folders)
-}
-
-const filterNodesByUser = async (
-  em: SqlEntityManager,
-  nodes: Node[],
-  currentUser: User,
-): Promise<Node[]> => {
-  for (const node of nodes) {
-    if (node.isInSpace()) {
-      const spaceId = node.getSpaceId()
-      const space = await em.findOneOrFail(Space, spaceId, {
-        populate: ['spaceMemberships', 'spaceMemberships.user'],
-      })
-      const leadMemberships = space.spaceMemberships
-        .getItems()
-        .find(
-          (membership) =>
-            membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === currentUser.id,
-        )
-      if (leadMemberships) {
-        return nodes
-      }
-      if (!leadMemberships) {
-        throw new Error(`You have no permissions to lock or unlock '${node.name}'.`)
-      }
-    } else {
-      return nodes.filter((innerNode) => innerNode.user.id === currentUser.id)
-    }
-  }
-
-  return nodes
-}
 const findFileOrAssetWithUid = async (
   em: EntityManager,
   uid: Uid<'file'>,
@@ -351,14 +287,12 @@ export {
   createFoldersTraverse,
   detectIntersectedTraverse,
   filterLeafPaths,
-  filterNodesByUser,
   findFileOrAssetsWithDxid,
   findFileOrAssetWithUid,
   findFolderForPath,
   findUnclosedFilesOrAssets,
   folderPathsFromFolders,
   getFolderPath,
-  getNodePath,
   getPathsToBuild,
   getSuccessMessage,
   parseFoldersFromClient,

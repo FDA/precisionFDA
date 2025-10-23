@@ -48,11 +48,11 @@ export class AssetRepository extends AccessControlRepository<Asset> {
     }
   }
   async findAssetWithUid(uid: Uid<'file'>): Promise<Asset | null> {
-    return await this.findOne({ uid }, { filters: ['asset'], populate: ['user', 'taggings.tag'] })
+    return await this.findOne({ uid }, { populate: ['user', 'taggings.tag'] })
   }
 
   async findAllAssetsWithDxid(dxid: DxId<'file'>): Promise<Asset[]> {
-    return await this.find({ dxid }, { filters: ['asset'], populate: ['user', 'taggings.tag'] })
+    return await this.find({ dxid }, { populate: ['user', 'taggings.tag'] })
   }
 
   // Find assets uploaded or owned by a user that are pending
@@ -63,7 +63,7 @@ export class AssetRepository extends AccessControlRepository<Asset> {
         user: userId,
         state: { $in: [FILE_STATE_DX.OPEN, FILE_STATE_DX.CLOSING] },
       },
-      { filters: ['asset'], populate: ['user', 'taggings.tag'] },
+      { populate: ['user', 'taggings.tag'] },
     )
   }
 
@@ -89,7 +89,7 @@ export class AssetRepository extends AccessControlRepository<Asset> {
         state: FILE_STATE_DX.CLOSED,
         uid: { $in: uids as [] },
       },
-      { filters: ['asset'], populate: ['user', 'taggings.tag'] },
+      { populate: ['user', 'taggings.tag'] },
     )
   }
 }

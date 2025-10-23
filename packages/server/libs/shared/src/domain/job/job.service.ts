@@ -32,9 +32,8 @@ import {
 } from '../../platform-client/platform-client.responses'
 import { Maybe, UserCtx } from '../../types'
 import { DxId } from '../entity/domain/dxid'
-import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
+import { EventHelper } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
-import { FolderService } from '../user-file/folder.service'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
@@ -45,6 +44,8 @@ import { SpaceMembershipRepository } from '@shared/domain/space-membership/space
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
 import { Job as BullJob } from 'bull'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 import { Uid } from '@shared/domain/entity/domain/uid'
 
@@ -58,7 +59,7 @@ export class JobService implements SearchableByUid<'job'> {
     private readonly user: UserContext,
     private readonly platformClient: PlatformClient,
     private readonly notificationService: NotificationService,
-    private readonly folderService: FolderService,
+    private readonly nodeService: NodeService,
     private readonly emailsJobProducer: EmailQueueJobProducer,
     private readonly jobSyncService: JobSynchronizationService,
     private readonly challengeJobSynchService: ChallengeJobSynchronizationService,
@@ -67,6 +68,7 @@ export class JobService implements SearchableByUid<'job'> {
     private readonly jobRepo: JobRepository,
     private readonly spaceRepo: SpaceRepository,
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
+    private readonly eventHelper: EventHelper,
   ) {}
   getAccessibleEntityByUid(uid: Uid<'job'>): Promise<Job | null> {
     return this.jobRepo.findAccessibleOne({ uid })
@@ -255,7 +257,7 @@ export class JobService implements SearchableByUid<'job'> {
 
   private async getOrCreateOutputFolder(job: Job): Promise<Folder | null> {
     if (job.runData.output_folder_path) {
-      const folders = await this.folderService.createFoldersOnPath(
+      const folders = await this.nodeService.createFoldersOnPath(
         job.runData.output_folder_path,
         job.scope,
         job.user.id,
@@ -313,7 +315,7 @@ export class JobService implements SearchableByUid<'job'> {
     const filePromises = outputFiles.map(async (outputFile) => {
       await this.em.persistAndFlush(outputFile) // flush for id
 
-      const fileEvent = await createFileEvent(
+      const fileEvent = await this.eventHelper.createFileEvent(
         EVENT_TYPES.FILE_CREATED,
         outputFile,
         outputFile.name, // path

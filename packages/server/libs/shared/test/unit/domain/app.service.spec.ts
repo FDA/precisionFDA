@@ -10,8 +10,7 @@ import { AppRepository } from '@shared/domain/app/app.repository'
 import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
 import { AppService } from '@shared/domain/app/services/app.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { Event } from '@shared/domain/event/event.entity'
-import { EVENT_TYPES } from '@shared/domain/event/event.helper'
+import { Event, EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { allowedInstanceTypes } from '@shared/domain/job/job.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
@@ -190,7 +189,7 @@ describe('app service tests', () => {
 
     // validate createAppEvent
     const loadedAppEvent = await em.findOneOrFail(Event, { param1: appId })
-    expect(loadedAppEvent.type).to.equal(EVENT_TYPES.APP_CREATED.toString())
+    expect(loadedAppEvent.type).to.equal(EVENT_TYPES.APP_CREATED)
     expect(loadedAppEvent.orgHandle).not.to.be.null()
     expect(loadedAppEvent.dxuser).not.to.be.null()
     expect(loadedAppEvent.param1).to.equal(appId)

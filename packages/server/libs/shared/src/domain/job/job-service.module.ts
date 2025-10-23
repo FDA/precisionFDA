@@ -14,6 +14,7 @@ import { JobSynchronizationService } from '@shared/domain/job/services/job-synch
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
+import { EventModule } from '@shared/domain/event/event.module'
 
 const imports = [
   MikroOrmModule.forFeature([Job, Space, SpaceMembership]),
@@ -22,6 +23,7 @@ const imports = [
   NotificationModule,
   UserFileModule,
   EmailModule,
+  EventModule,
 ]
 
 @Module({

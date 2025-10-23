@@ -45,13 +45,6 @@ interface BulkDownloadFiles {
   scope: string
 }
 
-// ITrackable represents an object whose provenance can be tracked
-// This is applicable to UserFile, Folder and Assets
-interface ITrackable {
-  parentId: number
-  parentType: PARENT_TYPE
-}
-
 export type FileOrAsset = UserFile | Asset
 export type FileOrAssetOrFolder = UserFile | Asset | Folder
 
@@ -115,7 +108,6 @@ export {
   FILE_STATE_PFDA,
   FILE_STI_TYPE,
   FOLDER_STATE,
-  ITrackable,
   NodeResponse,
   PARENT_TYPE,
   ResolvePath,

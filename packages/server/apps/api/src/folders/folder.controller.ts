@@ -25,8 +25,8 @@ import { RecreateFolderDTO } from './model/recreate-folder.dto'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { FolderService } from '@shared/domain/user-file/folder.service'
 import { FetchChildrenDTO } from './model/fetch-children.dto'
+import { NodeService } from '@shared/domain/user-file/node.service'
 
 @UseGuards(UserContextGuard)
 @Controller('/folders')
@@ -37,12 +37,12 @@ export class FolderController {
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly folderService: FolderService,
+    private readonly nodeService: NodeService,
   ) {}
 
   @Get('/children')
   async getChildren(@Query() input: FetchChildrenDTO): Promise<Node[]> {
-    return this.folderService.getFolderChildren(input)
+    return this.nodeService.getFolderChildren(input)
   }
 
   @Patch('/:id/rename')
