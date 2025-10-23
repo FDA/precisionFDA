@@ -22,6 +22,8 @@ import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facad
 
 @Injectable()
 export class SyncFilesStateFacade {
+  MAX_FILES_PER_RUN = 100
+
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -43,6 +45,12 @@ export class SyncFilesStateFacade {
     const dxuser = this.userCtx.dxuser
 
     let openFiles = await findUnclosedFilesOrAssets(this.em, user.id)
+    if (openFiles.length > this.MAX_FILES_PER_RUN) {
+      this.logger.warn(
+        `Too many open files (${openFiles.length}) for ${dxuser}, processing only first ${this.MAX_FILES_PER_RUN}`,
+      )
+      openFiles = openFiles.slice(0, this.MAX_FILES_PER_RUN)
+    }
 
     this.logger.log(
       {
