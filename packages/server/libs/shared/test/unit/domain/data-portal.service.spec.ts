@@ -6,7 +6,6 @@ import { DataPortalService } from '@shared/domain/data-portal/service/data-porta
 import { FileParam } from '@shared/domain/data-portal/service/data-portal.types'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { expect } from 'chai'
@@ -34,6 +33,7 @@ import { UniqueConstraintViolationException } from '@mikro-orm/core'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { EntityService } from '@shared/domain/entity/entity.service'
 
 describe('DataPortalService', () => {
   const FILE_DXID = 'file-dxid'
@@ -50,13 +50,13 @@ describe('DataPortalService', () => {
   let dataPortalService: DataPortalService
   let notificationService: NotificationService
   let dataPortalRepository: DataPortalRepository
-  let userFileService: UserFileService
+  let entityService: EntityService
   let removeNodesFacade: RemoveNodesFacade
   const findDataPortalsStub = stub()
-  const getDownloadLinkStub = stub()
+  const entityServiceGetEntityDownloadLinkStub = stub()
   const removeNodesStub = stub()
 
-  const createDataPortalService = (userId: number) => {
+  const createDataPortalService = (userId: number): DataPortalService => {
     const userCtx: UserContext = {
       id: userId,
       accessToken: 'accessToken',
@@ -70,9 +70,9 @@ describe('DataPortalService', () => {
       findDataPortalsByCardImageUid: findDataPortalsStub,
     } as unknown as DataPortalRepository
 
-    userFileService = {
-      getDownloadLink: getDownloadLinkStub,
-    } as unknown as UserFileService
+    entityService = {
+      getEntityDownloadLink: entityServiceGetEntityDownloadLinkStub,
+    } as unknown as EntityService
 
     removeNodesFacade = {
       removeNodes: removeNodesStub,
@@ -84,7 +84,7 @@ describe('DataPortalService', () => {
       dataPortalRepository,
       userClient,
       notificationService,
-      userFileService,
+      entityService,
       removeNodesFacade,
     )
   }
@@ -117,7 +117,7 @@ describe('DataPortalService', () => {
       {
         name: DATA_PORTAL_NAME,
         cardImage: {
-          getEntity: () => ({
+          getEntity: (): { dxid: string; name: string; project: string } => ({
             dxid: FILE_DXID,
             name: FILE_NAME,
             project: PROJECT,
@@ -126,8 +126,8 @@ describe('DataPortalService', () => {
       },
     ])
 
-    getDownloadLinkStub.reset()
-    getDownloadLinkStub.resolves('link')
+    entityServiceGetEntityDownloadLinkStub.reset()
+    entityServiceGetEntityDownloadLinkStub.resolves('link')
 
     dataPortalService = createDataPortalService(user.id)
   })

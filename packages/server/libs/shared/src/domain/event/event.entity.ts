@@ -1,12 +1,30 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
 
+export enum EVENT_TYPES {
+  FOLDER_CREATED = 'Event::FolderCreated',
+  FOLDER_DELETED = 'Event::FolderDeleted',
+  JOB_CLOSED = 'Event::JobClosed',
+  JOB_ADDED = 'Event::JobAdded',
+  FOLDER_LOCKED = 'Event::FolderLocked',
+  FOLDER_UNLOCKED = 'Event::FolderUnlocked',
+  FILE_ABANDONED = 'Event::FileAbandoned',
+  FILE_DELETED = 'Event::FileDeleted',
+  FILE_BULK_DOWNLOAD = 'Event::FileBulkDownload',
+  FILE_LOCKED = 'Event::FileLocked',
+  FILE_UNLOCKED = 'Event::FileUnlocked',
+  APP_CREATED = 'Event::AppCreated',
+  APP_PUBLISHED = 'Event::AppPublished',
+  FILE_CREATED = 'Event::FileCreated',
+  DBCLUSTER_PASSWORD_ROTATED = 'Event::DbClusterPasswordRotated',
+}
+
 @Entity({ tableName: 'events' })
 export class Event {
   @PrimaryKey()
   id: number
 
   @Property()
-  type: string
+  type: EVENT_TYPES
 
   @Property()
   orgHandle: string

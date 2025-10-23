@@ -10,9 +10,9 @@ import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PlatformClient } from '@shared/platform-client'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { NodeService } from '@shared/domain/user-file/node.service'
 
 describe('ChallengeFacade', () => {
   const CREATE_CHALLENGE_DTO = {
@@ -59,6 +59,7 @@ describe('ChallengeFacade', () => {
   let createSpaceStub: SinonStub
   let sendEmailStub: SinonStub
   let fileCreateStub: SinonStub
+  let nodeServiceCreateFileStub: SinonStub
 
   beforeEach(() => {
     createSpaceStub = stub()
@@ -67,6 +68,7 @@ describe('ChallengeFacade', () => {
     getChallengeStub = stub().returns(PREREG_CHALLENGE)
     sendEmailStub = stub()
     fileCreateStub = stub().returns(FILE_DXID)
+    nodeServiceCreateFileStub = stub()
   })
 
   describe('createChallenge', () => {
@@ -177,14 +179,14 @@ describe('ChallengeFacade', () => {
       fileCreate: fileCreateStub,
     } as unknown as PlatformClient
 
-    const userFileService = {
-      sendEmail: sendEmailStub,
-    } as unknown as UserFileService
+    const nodeService = {
+      createFile: nodeServiceCreateFileStub,
+    } as unknown as NodeService
 
     return new ChallengeFacade(
       challengeService,
       challengeBotClient,
-      userFileService,
+      nodeService,
       spaceService,
       emailService,
     )

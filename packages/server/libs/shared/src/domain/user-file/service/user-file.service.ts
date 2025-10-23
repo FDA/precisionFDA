@@ -1,18 +1,13 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { EntityService } from '@shared/domain/entity/entity.service'
-import * as eventHelper from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
@@ -29,13 +24,11 @@ import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers
 import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserCtx } from '@shared/types'
 import { EntityScope, SpaceScope } from '@shared/types/common'
-import { TimeUtils } from '@shared/utils/time.utils'
 import { UserFileCreate } from '../domain/user-file-create'
 import { Folder } from '../folder.entity'
 import { UserFile } from '../user-file.entity'
 import { FOLLOW_UP_ACTION } from '../user-file.input'
 import {
-  BulkDownloadFiles,
   ExistingFileSet,
   FILE_STATE,
   FILE_STATE_DX,
@@ -47,10 +40,12 @@ import {
 } from '../user-file.types'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
-import { NodeService } from '@shared/domain/user-file/node.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { EventHelper } from '@shared/domain/event/event.helper'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 
 @Injectable()
 export class UserFileService {
@@ -62,16 +57,63 @@ export class UserFileService {
     private readonly userCtx: UserContext,
     private readonly userClient: PlatformClient,
     @Inject(CHALLENGE_BOT_PLATFORM_CLIENT) private readonly challengeBotClient: PlatformClient,
-    private readonly notificationService: NotificationService,
     private readonly nodeRepo: NodeRepository,
     private readonly fileRepo: UserFileRepository,
     private readonly spaceRepo: SpaceRepository,
     private readonly licensedItemRepo: LicensedItemRepository,
     private readonly nodeHelper: NodeHelper,
-    private readonly entityService: EntityService,
-    private readonly nodeService: NodeService,
+    private readonly eventHelper: EventHelper,
     private readonly spaceEventService: SpaceEventService,
+    private readonly notificationService: NotificationService,
   ) {}
+
+  async lockFile(fileId: number): Promise<void> {
+    this.logger.log(`Locking file with id: ${fileId}`)
+
+    const fileToLock = await this.fileRepo.findOneOrFail(fileId)
+    this.logger.log(`Locking file with uid: ${fileToLock.uid}`)
+    const currentUser = await this.userCtx.loadEntity()
+
+    await this.em.transactional(async () => {
+      const filePath = await this.nodeHelper.getNodePath(fileToLock)
+
+      fileToLock.locked = true
+      fileToLock.state = FILE_STATE_DX.CLOSED
+      await this.em.persistAndFlush(fileToLock)
+      const fileEvent = await this.eventHelper.createFileEvent(
+        EVENT_TYPES.FILE_LOCKED,
+        fileToLock,
+        filePath,
+        currentUser,
+      )
+      this.em.persist(fileEvent)
+      this.logger.log(`Locked file ${fileToLock.uid}`)
+    })
+  }
+
+  async unlockFile(fileId: number): Promise<void> {
+    this.logger.log(`Unlocking file with id: ${fileId}`)
+
+    const fileToUnlock = await this.fileRepo.findOneOrFail(fileId)
+    this.logger.log(`Unlocking file with uid: ${fileToUnlock.uid}`)
+    const currentUser = await this.userCtx.loadEntity()
+
+    await this.em.transactional(async () => {
+      const filePath = await this.nodeHelper.getNodePath(fileToUnlock)
+
+      fileToUnlock.locked = false
+      fileToUnlock.state = FILE_STATE_DX.CLOSED
+      await this.em.persistAndFlush(fileToUnlock)
+      const fileEvent = await this.eventHelper.createFileEvent(
+        EVENT_TYPES.FILE_UNLOCKED,
+        fileToUnlock,
+        filePath,
+        currentUser,
+      )
+      this.em.persist(fileEvent)
+      this.logger.log(`Unlocked file ${fileToUnlock.uid}`)
+    })
+  }
 
   /**
    * Loads file and returns it if the user is allowed to close it.
@@ -102,13 +144,6 @@ export class UserFileService {
       throw new PermissionError(`User ${user.dxuser} does not have access to file ${fileUid}`)
     }
     return [file as FileOrAsset, false]
-  }
-
-  async getUserFileOrAsset(fileUid: Uid<'file'>): Promise<FileOrAsset | null> {
-    return (await this.nodeRepo.findAccessibleOne({
-      uid: fileUid,
-      stiType: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET],
-    })) as FileOrAsset | null
   }
 
   private async closeFileOnPlatform(fileDxid: string, challengeBotFile: boolean): Promise<void> {
@@ -162,95 +197,6 @@ export class UserFileService {
     } catch (error) {
       this.logger.error(`Error creating notification ${error}`)
     }
-  }
-
-  private async getEnclosingFolderPath(tm: SqlEntityManager, folderId?: number): Promise<string> {
-    if (!folderId) {
-      return null
-    }
-    const enclosingFolder = await this.nodeRepo.findOneOrFail({ id: folderId })
-    return await userFileHelper.getNodePath(tm, enclosingFolder)
-  }
-
-  /**
-   * Returns an array of file paths and urls for bulk download.
-   * @param fileIDs
-   * @param folderId
-   */
-  async composeFilesForBulkDownload(
-    fileIDs: number[],
-    folderId?: number,
-  ): Promise<BulkDownloadFiles> {
-    const loadedUser = await this.userCtx.loadEntity()
-    await this.em.populate(loadedUser, ['spaceMemberships', 'spaceMemberships.spaces'])
-    let nodes = await this.getAccessibleNodes(fileIDs)
-
-    const warnings = this.nodeHelper.getWarningsForUnclosedFiles(nodes)
-    if (warnings) {
-      await this.notificationService.createNotification({
-        message: warnings,
-        severity: SEVERITY.WARN,
-        action: NOTIFICATION_ACTION.DOWNLOAD_FILES_WARNING,
-        userId: this.userCtx.id,
-      })
-    }
-    nodes = nodes.filter((node) => node.state === 'closed')
-    nodes = this.nodeHelper.sanitizeNodeNames(nodes)
-    nodes = this.nodeHelper.renameDuplicateFiles(nodes)
-    const enclosingFolderPath = await this.getEnclosingFolderPath(this.em, folderId)
-
-    return {
-      files: await this.em.transactional(async (tm) => {
-        const filePromises = nodes
-          .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE)
-          .map(async (node) => {
-            return await this.processFile(tm, node, loadedUser, enclosingFolderPath)
-          })
-        return Promise.all(filePromises)
-      }),
-      scope: nodes[0].scope,
-    }
-  }
-
-  private async processFile(
-    tm: SqlEntityManager,
-    node: Asset | UserFile,
-    loadedUser: User,
-    enclosingFolderPath: string,
-  ): Promise<{ url: string; path: string }> {
-    const filePath = await userFileHelper.getNodePath(tm, node)
-    const fileDownloadLinkResponse = await this.userClient.fileDownloadLink({
-      fileDxid: node.dxid,
-      filename: node.name,
-      project: node.project,
-      duration: TimeUtils.daysToSeconds(1),
-    })
-    const fileEvent = await eventHelper.createFileEvent(
-      eventHelper.EVENT_TYPES.FILE_BULK_DOWNLOAD,
-      node as unknown as FileOrAsset,
-      filePath,
-      loadedUser,
-    )
-    tm.persist(fileEvent)
-    return {
-      url: fileDownloadLinkResponse.url,
-      path:
-        enclosingFolderPath && filePath.startsWith(enclosingFolderPath)
-          ? filePath.slice(enclosingFolderPath.length)
-          : filePath,
-    }
-  }
-
-  private async getAccessibleNodes(fileIDs: number[]): Promise<(Asset | UserFile)[]> {
-    const nodes = (await this.nodeService.loadNodes(fileIDs, {})) as (Asset | UserFile)[]
-    const idsToCheck = nodes
-      .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE)
-      .map((node) => node.id)
-    const accessibleNodes = await this.nodeRepo.findAccessible({ id: idsToCheck })
-    if (idsToCheck.length != accessibleNodes.length) {
-      throw new PermissionError('You do not have permission to download all of these files')
-    }
-    return nodes
   }
 
   async closeFile(fileUid: Uid<'file'>, followUpAction?: FOLLOW_UP_ACTION): Promise<void> {
@@ -322,10 +268,6 @@ export class UserFileService {
     return file
   }
 
-  async getDownloadLink(file: FileOrAsset, options?: DownloadLinkOptionsDto): Promise<string> {
-    return this.entityService.getEntityDownloadLink(file, file.name, options)
-  }
-
   /**
    * An asset cannot be deleted if it has an attached license and is associated with an app.
    *
@@ -378,9 +320,9 @@ export class UserFileService {
     const fileList = [] as SelectedNode[]
     for (const node of selectedNodes) {
       let nodePath = ''
-      const parentFolder = userFileHelper.getParentFolder(node as UserFile)
+      const parentFolder = this.nodeHelper.getParentFolder(node as UserFile)
       if (parentFolder) {
-        nodePath = await userFileHelper.getNodePath(this.em, parentFolder)
+        nodePath = await this.nodeHelper.getNodePath(parentFolder)
       }
       node.folderPath = `${nodePath}/`
       if (node.isFile) {
@@ -388,7 +330,7 @@ export class UserFileService {
         continue
       }
       const children = [] as UserFile[]
-      await this.nodeService.collectChildren(node as Folder, children)
+      await this.nodeHelper.collectChildren(node as Folder, children)
       const folder = {
         id: node.id,
         name: node.name,
@@ -452,7 +394,7 @@ export class UserFileService {
         if (file) {
           existingFiles[uid] = {
             uid: file.uid,
-            targetScopePath: await userFileHelper.getNodePath(this.em, file),
+            targetScopePath: await this.nodeHelper.getNodePath(file),
           }
         }
       }),

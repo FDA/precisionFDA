@@ -15,6 +15,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 /**
  * Concrete subclass of {@link SpaceCreationProcess} for creating a Groups space.
@@ -158,8 +159,8 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
     await this.adminClient.projectInvite(guestProject.id, space.guestDxOrg, 'CONTRIBUTE')
     this.logger.log(`invited guest org: ${space.guestDxOrg} to guest project: ${guestProject.id}`)
 
-    space.hostProject = hostProject.id
-    space.guestProject = guestProject.id
+    space.hostProject = hostProject.id as DxId<'project'>
+    space.guestProject = guestProject.id as DxId<'project'>
     this.em.persist(space)
   }
 }

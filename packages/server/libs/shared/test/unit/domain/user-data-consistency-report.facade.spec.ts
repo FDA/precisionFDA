@@ -16,6 +16,9 @@ import { PlatformClient } from '@shared/platform-client'
 import { create, db } from '@shared/test'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 describe('UserDataConsistencyReportFacade', () => {
   let em: EntityManager
@@ -26,6 +29,8 @@ describe('UserDataConsistencyReportFacade', () => {
   const projectDescribeStub = stub()
   const correctSpaceBillToStub = stub().named('correctSpaceBillTo')
   const inviteAdminUserToOrgStub = stub().named('inviteAdminUserToOrg')
+
+  const nodeHelper = {} as unknown as NodeHelper
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -150,13 +155,14 @@ describe('UserDataConsistencyReportFacade', () => {
     expect(inviteAdminUserToOrgStub.calledOnce).to.be.true()
   })
 
-  function getInstance() {
-    const userContext = {
+  function getInstance(): UserDataConsistencyReportFacade {
+    const userContext: UserContext = {
       id: user.id,
       dxuser: user.dxuser,
       accessToken: 'token',
+      loadEntity: async (): Promise<User> => null,
     }
-    const spaceMembershipRepository = em.getRepository(SpaceMembership)
+    const spaceMembershipRepository = em.getRepository(SpaceMembership) as SpaceMembershipRepository
     const emailsJobProducer = {} as unknown as EmailQueueJobProducer
     const platformClient = {
       userDescribe: userDescribeStub,
@@ -173,6 +179,7 @@ describe('UserDataConsistencyReportFacade', () => {
       spaceMembershipRepository,
       emailsJobProducer,
       platformClient,
+      nodeHelper,
       userSpaceInconsistencyFixService,
     )
   }

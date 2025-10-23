@@ -11,17 +11,16 @@ import {
 import { User } from '@shared/domain/user/user.entity'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
-import { FILE_STI_TYPE, ITrackable } from './user-file.types'
+import { FILE_STI_TYPE } from './user-file.types'
 
+@Filter({ name: 'pfdaonly', cond: { project: null } })
 @Entity({
   tableName: 'nodes',
   repository: () => FolderRepository,
   discriminatorColumn: 'stiType',
   discriminatorValue: FILE_STI_TYPE.FOLDER,
 })
-@Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
-@Filter({ name: 'pfdaonly', cond: { project: null } })
-export class Folder extends Node implements ITrackable {
+export class Folder extends Node {
   /**
    * @deprecated Do not use this attribute. Workaround for children mapping by two columns based on scope.
    * Use @children property instead.

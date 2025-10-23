@@ -11,6 +11,8 @@ import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes
 import { UserFacadeModule } from '@shared/facade/user/user-facade.module'
 import { FollowUpDecider } from './follow-up-decider'
 import { FileSyncQueueProcessor } from './processor/file-sync-queue.processor'
+import { NodeUnlockFacadeModule } from '@shared/facade/node-unlock/node-unlock-facade.module'
+import { NodeLockFacadeModule } from '@shared/facade/node-lock/node-lock-facade.module'
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { FileSyncQueueProcessor } from './processor/file-sync-queue.processor'
     JobModule,
     NotificationModule,
     RemoveNodesFacadeModule,
+    NodeUnlockFacadeModule,
+    NodeLockFacadeModule,
     UserFacadeModule,
   ],
   providers: [FileSyncQueueProcessor, FollowUpDecider],

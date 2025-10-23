@@ -4,7 +4,7 @@ import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Job } from '../job/job.entity'
 import { Asset } from './asset.entity'
-import { ITrackable, PARENT_TYPE } from './user-file.types'
+import { PARENT_TYPE } from './user-file.types'
 
 // The parentId and parentType columns of a node determines the parent element
 // parentType can be a User, a Job, a Comparison or another Node
@@ -12,7 +12,7 @@ import { ITrackable, PARENT_TYPE } from './user-file.types'
 const getRepositoryForParentType = (
   parentType: PARENT_TYPE,
   em: EntityManager,
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): EntityRepository<any> | null => {
   if (parentType === PARENT_TYPE.USER) {
     return em.getRepository(User)
@@ -29,19 +29,4 @@ const getRepositoryForParentType = (
   return null
 }
 
-// Find the parent element from where element originated
-const findParentEntity = async (
-  em: EntityManager,
-  parent: ITrackable,
-): Promise<User | Job | Asset | Comparison | null> => {
-  const repo = getRepositoryForParentType(parent.parentType, em)
-  if (!repo) {
-    return null
-  }
-  return await repo.findOne({ id: parent.parentId })
-}
-
-export {
-  getRepositoryForParentType,
-  findParentEntity,
-}
+export { getRepositoryForParentType }

@@ -343,7 +343,7 @@ export class JobSynchronizationService {
     await em.transactional(async (tem) => {
       const files = await fileRepo.find(
         { scope, taggings: { tag: { name: lockedKey } } },
-        { filters: ['userfile'], populate: ['taggings.tag'] },
+        { populate: ['taggings.tag'] },
       )
 
       files.forEach((file) => {

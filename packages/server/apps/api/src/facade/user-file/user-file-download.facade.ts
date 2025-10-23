@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
 import { NotFoundError, PermissionError, ValidationError } from '@shared/errors'
 import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { EntityService } from '@shared/domain/entity/entity.service'
 
 @Injectable()
 export class UserFileDownloadFacade {
@@ -13,8 +14,9 @@ export class UserFileDownloadFacade {
   private readonly logger: Logger
 
   constructor(
-    private readonly userFileService: UserFileService,
+    private readonly nodeService: NodeService,
     private readonly spaceService: SpaceService,
+    private readonly entityService: EntityService,
   ) {}
 
   /**
@@ -37,7 +39,7 @@ export class UserFileDownloadFacade {
   async getDownloadLink(uid: Uid<'file'>, options: DownloadLinkOptionsDto): Promise<string> {
     this.logger.debug('Attempting to generate download link', { fileUid: uid, options })
 
-    const file = await this.userFileService.getUserFileOrAsset(uid)
+    const file = await this.nodeService.getUserFileOrAsset(uid)
 
     if (!file) {
       throw new NotFoundError(`File with UID ${uid} not found`)
@@ -61,7 +63,7 @@ export class UserFileDownloadFacade {
       }
     }
 
-    const downloadLink = await this.userFileService.getDownloadLink(file, options)
+    const downloadLink = await this.entityService.getEntityDownloadLink(file, file.name, options)
     this.logger.log(`Download link for ${file.uid} generated successfully`)
 
     return downloadLink

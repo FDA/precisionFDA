@@ -2,14 +2,14 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Delete, HttpCode, Inject, Logger, Post, UseGuards } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { NodesInputDTO } from '@shared/domain/user-file/dto/nodes-input.dto'
-import { NodesLockOperation } from '@shared/domain/user-file/ops/node-lock'
-import { NodesUnlockOperation } from '@shared/domain/user-file/ops/node-unlock'
 import { RequestNodesLockOperation } from '@shared/domain/user-file/ops/start-lock-nodes-job'
 import { RequestNodesUnlockOperation } from '@shared/domain/user-file/ops/start-unlock-nodes-job'
 import { UserOpsCtx } from '@shared/types'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
+import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
 
 @UseGuards(UserContextGuard)
 @Controller('/nodes')
@@ -19,6 +19,8 @@ export class NodesController {
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly logger: Logger,
     private readonly removeNodesFacade: RemoveNodesFacade,
+    private readonly lockNodeFacade: LockNodeFacade,
+    private readonly unlockNodeFacade: UnlockNodeFacade,
   ) {}
 
   @HttpCode(204)
@@ -35,7 +37,7 @@ export class NodesController {
     if (async) {
       await new RequestNodesLockOperation(opsCtx).execute({ ids })
     } else {
-      await new NodesLockOperation(opsCtx).execute({ ids, async })
+      await this.lockNodeFacade.lockNodes(ids, async)
     }
   }
 
@@ -53,7 +55,7 @@ export class NodesController {
     if (async) {
       await new RequestNodesUnlockOperation(opsCtx).execute({ ids })
     } else {
-      await new NodesUnlockOperation(opsCtx).execute({ ids, async })
+      await this.unlockNodeFacade.unlockNodes(ids, async)
     }
   }
 

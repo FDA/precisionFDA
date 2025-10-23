@@ -8,13 +8,13 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { CreateChallengeResourceDTO } from '@shared/domain/challenge/dto/create-challenge-resource.dto'
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
 import { PlatformClient } from '@shared/platform-client'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { NodeService } from '@shared/domain/user-file/node.service'
 
 @Injectable()
 export class ChallengeFacade {
@@ -22,7 +22,7 @@ export class ChallengeFacade {
     private readonly challengeService: ChallengeService,
     @Inject(CHALLENGE_BOT_PLATFORM_CLIENT)
     private readonly challengeBotPlatformClient: PlatformClient,
-    private readonly userFileService: UserFileService,
+    private readonly nodeService: NodeService,
     private readonly spaceService: SpaceService,
     private readonly emailService: EmailService,
   ) {}
@@ -116,7 +116,7 @@ export class ChallengeFacade {
       description: null,
       project: challengeBot.privateFilesProject,
     })
-    const file = await this.userFileService.createFile({
+    const file = await this.nodeService.createFile({
       dxid: response.id,
       name: dto.name,
       description: dto.description,

@@ -1,5 +1,4 @@
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import {
   CliAnswerDTO,
@@ -12,7 +11,6 @@ import {
   CliFolderDescribeDTO,
   CliWorkflowDescribeDTO,
 } from '@shared/domain/cli/dto/cli-describe.dto'
-import { getNodePath } from '@shared/domain/user-file/user-file.helper'
 import { AppRepository } from '@shared/domain/app/app.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
@@ -28,6 +26,7 @@ import { UserFileRepository } from '@shared/domain/user-file/user-file.repositor
 import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 @Injectable()
 export class CliDescribeEntityFacade {
@@ -42,7 +41,7 @@ export class CliDescribeEntityFacade {
     private readonly platformClient: PlatformClient,
     private readonly attachmentsFacade: AttachmentManagementFacade,
     private readonly discussionService: DiscussionService,
-    private readonly em: SqlEntityManager,
+    private readonly nodeHelper: NodeHelper,
   ) {}
 
   /**
@@ -114,7 +113,7 @@ export class CliDescribeEntityFacade {
     if (!folder) {
       throw new NotFoundError('Folder not found or not accessible')
     }
-    const path = await getNodePath(this.em, folder)
+    const path = await this.nodeHelper.getNodePath(folder)
     return CliFolderDescribeDTO.fromEntity(folder, path)
   }
 

@@ -6,8 +6,9 @@ import { database } from '@shared/database'
 import { create, db } from '@shared/test'
 import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
+import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 
-describe('AssetRepository tests', () => {
+describe('AssetRepository', () => {
   let em: EntityManager<MySqlDriver>
   // let log: any
   let user1: User
@@ -19,7 +20,10 @@ describe('AssetRepository tests', () => {
     em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
-    // log = getLogger()
+
+    create.filesHelper.create(em, { user: user1 }, { name: 'user1_file' })
+    create.filesHelper.create(em, { user: user2 }, { name: 'user2_file' })
+
     await em.flush()
 
     assets = [
@@ -40,7 +44,7 @@ describe('AssetRepository tests', () => {
   })
 
   it('findAssetWithUid', async () => {
-    const repo = em.getRepository(Asset)
+    const repo = em.getRepository(Asset) as AssetRepository
     let result = await repo.findAssetWithUid(assets[1].uid)
     expect(result).to.be.not.null()
     expect(result?.name).to.equal('user1_asset2')
@@ -54,7 +58,7 @@ describe('AssetRepository tests', () => {
   })
 
   it('findUnclosedAssets', async () => {
-    const repo = em.getRepository(Asset)
+    const repo = em.getRepository(Asset) as AssetRepository
     let result = await repo.findUnclosedAssets(user1.id)
     // There should be done for now
     expect(result).to.have.length(0)
@@ -105,7 +109,7 @@ describe('AssetRepository tests', () => {
 
     // get ids for all assets (test filtering)
     const uids = assets.map((asset) => asset.uid)
-    const repo = em.getRepository(Asset)
+    const repo = em.getRepository(Asset) as AssetRepository
     let result = await repo.findAccessibleByUser(user1.id, uids, [1])
 
     expect(result.length).to.equal(4)

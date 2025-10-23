@@ -5,7 +5,6 @@ import { JobRunData } from '@shared/domain/job/job.types'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { Event } from '@shared/domain/event/event.entity'
 import { Notification } from '@shared/domain/notification/notification.entity'
 import { expect } from 'chai'
 import { create, db } from '@shared/test'
@@ -19,9 +18,8 @@ import {
 } from '@shared/platform-client/platform-client.responses'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { EVENT_TYPES } from '@shared/domain/event/event.helper'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { FolderService } from '@shared/domain/user-file/folder.service'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { Queue } from 'bull'
 import * as queueDomain from '@shared/queue'
@@ -34,8 +32,9 @@ import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -43,16 +42,16 @@ describe('Job service tests', () => {
   let jobService: JobService
   let userCtx: UserContext
   let notificationService: NotificationService
-  let folderService: FolderService
+  let nodeService: NodeService
   let emailQueueJobProducer: EmailQueueJobProducer
   let jobSynchronizationService: JobSynchronizationService
   let challengeJobSynchronizationService: ChallengeJobSynchronizationService
   let userRepo: UserRepository
   let jobRepo: JobRepository
   let spaceRepo: SpaceRepository
-  let nodeRepo: NodeRepository
   let spaceMembershipRepo: SpaceMembershipRepository
   let emailService: EmailService
+  let eventHelper: EventHelper
 
   let getMainQueueStub
   let userContextLoadEntityStub = stub()
@@ -62,6 +61,8 @@ describe('Job service tests', () => {
   let jobRepoFindStub = stub()
   let spaceMembershipRepoGetMembershipStub = stub()
   let spaceRepoFindOneStub = stub()
+  let eventHelperCreateFileEventStub = stub()
+  let nodeServiceCreateFoldersOnPathStub = stub()
 
   const file1Dxid = 'file-GY5q9B00Q6xpbXG503kKgF68'
   const file2Dxid = 'file-GXPKG480q0jQPgXxFxKyyJ7q'
@@ -86,9 +87,13 @@ describe('Job service tests', () => {
       loadEntity: userContextLoadEntityStub,
     } as UserContext
 
-    nodeRepo = {} as unknown as NodeRepository
     notificationService = new NotificationService(em, userCtx)
-    folderService = new FolderService(em, userCtx, nodeRepo)
+    nodeService = {
+      createFoldersOnPath: nodeServiceCreateFoldersOnPathStub,
+    } as unknown as NodeService
+    eventHelper = {
+      createFileEvent: eventHelperCreateFileEventStub,
+    } as unknown as EventHelper
     emailQueueJobProducer = new EmailQueueJobProducer(queue)
     jobSynchronizationService = {} as unknown as JobSynchronizationService
     challengeJobSynchronizationService = {} as unknown as ChallengeJobSynchronizationService
@@ -132,6 +137,9 @@ describe('Job service tests', () => {
 
     jobRepoFindStub.reset()
     jobRepoFindStub.throws()
+
+    eventHelperCreateFileEventStub.reset()
+    eventHelperCreateFileEventStub.throws()
 
     getMainQueueStub = stub(queueDomain, 'getMainQueue').throws()
     getMainQueueStub.returns(queue)
@@ -247,6 +255,7 @@ describe('Job service tests', () => {
 
   it('Test Job Outputs sync - sync job with all types of outputs', async () => {
     userContextLoadEntityStub.returns(user)
+    eventHelperCreateFileEventStub.reset()
     const platformClient = getPlatformClientWithComplexResults()
     jobService = getJobServiceInstance(platformClient)
     const job = create.jobHelper.create(em, { user }, { scope: STATIC_SCOPE.PRIVATE })
@@ -299,22 +308,15 @@ describe('Job service tests', () => {
       },
     })
 
-    const events = await em.find(Event, {})
-    expect(events.length).to.equal(3)
-    const event1 = events.find((event) => event.param2 === file1?.dxid)
-    expect(event1?.type).to.equal(EVENT_TYPES.FILE_CREATED)
-    expect(event1?.param2).to.equal(file1Dxid)
-    expect(event1?.data).to.equal('{"id":1,"scope":"private","name":"file1","path":"file1"}')
+    expect(eventHelperCreateFileEventStub.calledThrice).to.be.true()
+    expect(eventHelperCreateFileEventStub.firstCall.args[0]).to.equal(EVENT_TYPES.FILE_CREATED)
+    expect(eventHelperCreateFileEventStub.firstCall.args[1].dxid).to.equal(file2Dxid)
 
-    const event2 = events.find((event) => event.param2 === file2?.dxid)
-    expect(event2?.type).to.equal(EVENT_TYPES.FILE_CREATED)
-    expect(event2?.param2).to.equal(file2Dxid)
-    expect(event2?.data).to.equal('{"id":2,"scope":"private","name":"file2","path":"file2"}')
+    expect(eventHelperCreateFileEventStub.secondCall.args[0]).to.equal(EVENT_TYPES.FILE_CREATED)
+    expect(eventHelperCreateFileEventStub.secondCall.args[1].dxid).to.equal(file3Dxid)
 
-    const event3 = events.find((event) => event.param2 === file3?.dxid)
-    expect(event3?.type).to.equal(EVENT_TYPES.FILE_CREATED)
-    expect(event3?.param2).to.equal(file3Dxid)
-    expect(event3?.data).to.equal('{"id":3,"scope":"private","name":"file3","path":"file3"}')
+    expect(eventHelperCreateFileEventStub.thirdCall.args[0]).to.equal(EVENT_TYPES.FILE_CREATED)
+    expect(eventHelperCreateFileEventStub.thirdCall.args[1].dxid).to.equal(file1Dxid)
 
     const notifications = await em.find(Notification, {})
     expect(notifications.length).to.equal(1)
@@ -328,6 +330,7 @@ describe('Job service tests', () => {
 
   it('Test Job Outputs sync - sync job outputs in a space', async () => {
     userContextLoadEntityStub.returns(user)
+    eventHelperCreateFileEventStub.reset()
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
     const folder = create.filesHelper.createFolder(
@@ -339,6 +342,9 @@ describe('Job service tests', () => {
       },
     )
     await em.flush()
+    nodeServiceCreateFoldersOnPathStub.callsFake(() => {
+      return Promise.resolve([folder])
+    })
     const spaceMembership = create.spacesHelper.addMember(em, { space, user })
     const job = create.jobHelper.create(
       em,
@@ -364,6 +370,7 @@ describe('Job service tests', () => {
 
   it('Test Job Outputs sync - sync job outputs in a space and create new folder', async () => {
     userContextLoadEntityStub.returns(user)
+    eventHelperCreateFileEventStub.reset()
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
     const spaceMembership = create.spacesHelper.addMember(em, { space, user })
@@ -372,6 +379,10 @@ describe('Job service tests', () => {
       { user },
       { scope: `space-${space.id}`, runData: { output_folder_path: '/test-folder' } as JobRunData },
     )
+    const folder = { name: 'test-folder', scope: job.scope } as Folder
+    nodeServiceCreateFoldersOnPathStub.callsFake(() => {
+      return Promise.resolve([folder])
+    })
     jobRepoFindOneOrFailStub.withArgs({ dxid: job.dxid }).returns(job)
     spaceMembershipRepoGetMembershipStub.withArgs(space.id, user.id).returns(spaceMembership)
     spaceRepoFindOneStub.withArgs(space.id).returns(space)
@@ -387,13 +398,11 @@ describe('Job service tests', () => {
     expect(filesCreated[0].scope).to.equal('space-1')
     expect(filesCreated[1].scope).to.equal('space-1')
     expect(filesCreated[2].scope).to.equal('space-1')
-
-    const outputFolder = await em.findOneOrFail(Folder, { name: 'test-folder' })
-    expect(outputFolder.scope).to.equal('space-1')
   })
 
   it('Test Job Outputs sync - create files in output folder specified by path', async () => {
     userContextLoadEntityStub.returns(user)
+    eventHelperCreateFileEventStub.reset()
     await em.flush()
     const platformClient = getPlatformClientWithComplexResults()
     jobService = getJobServiceInstance(platformClient)
@@ -402,23 +411,22 @@ describe('Job service tests', () => {
       { user },
       { runData: { output_folder_path: 'folder1/folder2/folder3' } as JobRunData },
     )
-    jobRepoFindOneOrFailStub.withArgs({ dxid: job.dxid }).returns(job)
     await em.flush()
+    jobRepoFindOneOrFailStub.withArgs({ dxid: job.dxid }).returns(job)
+
+    const folder1 = { id: 10, name: 'folder1' } as Folder
+    const folder2 = { id: 11, parentFolderId: folder1.id, name: 'folder2' } as Folder
+    const folder3 = { id: 12, parentFolderId: folder2.id, name: 'folder3' } as Folder
+    nodeServiceCreateFoldersOnPathStub
+      .withArgs(job.runData.output_folder_path, job.scope, job.user.id, {
+        type: 'job',
+        value: job,
+      })
+      .resolves([folder1, folder2, folder3])
 
     await jobService.syncOutputs(job.dxid)
     const filesCreated = await em.find(UserFile, {})
     expect(filesCreated.length).to.equal(3)
-
-    const folder1 = await em.findOneOrFail(Folder, { name: 'folder1' })
-    const folder2 = await em.findOneOrFail(Folder, { name: 'folder2', parentFolderId: folder1.id })
-    const folder3 = await em.findOneOrFail(Folder, { name: 'folder3', parentFolderId: folder2.id })
-
-    expect(folder1.parentType).to.equal(PARENT_TYPE.JOB)
-    expect(folder1.parentId).to.equal(job.id)
-    expect(folder2.parentType).to.equal(PARENT_TYPE.JOB)
-    expect(folder2.parentId).to.equal(job.id)
-    expect(folder3.parentType).to.equal(PARENT_TYPE.JOB)
-    expect(folder3.parentId).to.equal(job.id)
 
     expect(filesCreated[0].parentFolderId).to.equal(folder3.id)
     expect(filesCreated[1].parentFolderId).to.equal(folder3.id)
@@ -591,7 +599,7 @@ describe('Job service tests', () => {
       userCtx,
       platformClient,
       notificationService,
-      folderService,
+      nodeService,
       emailQueueJobProducer,
       jobSynchronizationService,
       challengeJobSynchronizationService,
@@ -600,6 +608,7 @@ describe('Job service tests', () => {
       jobRepo,
       spaceRepo,
       spaceMembershipRepo,
+      eventHelper,
     )
   }
 })

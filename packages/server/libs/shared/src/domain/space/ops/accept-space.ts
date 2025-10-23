@@ -21,6 +21,7 @@ import {
 } from '../space.helper'
 import { NotificationService } from '../../notification/services/notification.service'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 type SpaceAcceptInput = { spaceId: number }
 
@@ -204,7 +205,7 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
 
     const contributeOrg = getOrgDxid(space, admin)
     setOrgDxid(newSpace, admin, contributeOrg)
-    setProjectDxid(newSpace, admin, newProjectRes.id)
+    setProjectDxid(newSpace, admin, newProjectRes.id as DxId<'project'>)
 
     await this.platformClient.projectInvite(newProjectRes.id, contributeOrg, 'CONTRIBUTE')
 
@@ -242,9 +243,9 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     // previously there was a call to project invite review_app_developers_org as well. Trying spaces without it.
 
     if (admin.isHost()) {
-      space.hostProject = newProjectRes.id
+      space.hostProject = newProjectRes.id as DxId<'project'>
     } else {
-      space.guestProject = newProjectRes.id
+      space.guestProject = newProjectRes.id as DxId<'project'>
     }
   }
 }

@@ -6,7 +6,6 @@ import { SPACE_STATE } from '@shared/domain/space/space.enum'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
@@ -22,19 +21,24 @@ import { UserRepository } from '@shared/domain/user/user.repository'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
 import { expect } from 'chai'
-import { match, stub } from 'sinon'
+import { stub } from 'sinon'
+import { SCOPE } from '@shared/types/common'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { FolderService } from '@shared/domain/user-file/folder.service'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 describe('NodeService', () => {
   const emFlushStub = stub()
   const emPersistAndFlushStub = stub()
   const emPopulateStub = stub()
   const nodeRepositoryFindStub = stub()
+  const nodeRepositoryFindAccessibleStub = stub()
   const spaceRepositoryFindOneStub = stub()
-  const folderRepositoryFindOneStub = stub()
+  const nodeHelperCollectChildrenStub = stub()
   let referenceStub
   let defaultUser = { id: 1, isSiteAdmin: () => false } as unknown as User
 
-  const createNodeService = (user: User) => {
+  const createNodeService = (user: User): NodeService => {
     const em = {
       flush: emFlushStub,
       persistAndFlush: emPersistAndFlushStub,
@@ -45,21 +49,26 @@ describe('NodeService', () => {
     } as unknown as SpaceRepository
     const nodeRepository = {
       find: nodeRepositoryFindStub,
+      findAccessible: nodeRepositoryFindAccessibleStub,
     } as unknown as NodeRepository
+    const userFileService = {} as unknown as UserFileService
+    const folderService = {} as unknown as FolderService
+    const nodeHelper = {
+      collectChildren: nodeHelperCollectChildrenStub,
+    } as unknown as NodeHelper
     const userRepository = {
       findOne: stub().resolves(user),
     } as unknown as UserRepository
-    const folderRepository = {
-      findOne: folderRepositoryFindOneStub,
-    } as unknown as FolderRepository
     const userCtx = { id: user.id } as unknown as UserContext
     return new NodeService(
       em,
       userCtx,
+      userFileService,
+      folderService,
       spaceRepository,
       nodeRepository,
       userRepository,
-      folderRepository,
+      nodeHelper,
     )
   }
 
@@ -79,8 +88,11 @@ describe('NodeService', () => {
     emPopulateStub.reset()
     emPopulateStub.throws()
 
-    folderRepositoryFindOneStub.reset()
-    folderRepositoryFindOneStub.throws()
+    nodeRepositoryFindAccessibleStub.reset()
+    nodeRepositoryFindAccessibleStub.throws()
+
+    nodeHelperCollectChildrenStub.reset()
+    nodeHelperCollectChildrenStub.throws()
 
     referenceStub = stub(Reference, 'create')
     referenceStub.withArgs(defaultUser).returns(defaultUser)
@@ -228,6 +240,86 @@ describe('NodeService', () => {
     })
   })
 
+  describe('#getFolderChildren', async () => {
+    it('in space', async () => {
+      nodeRepositoryFindAccessibleStub.reset()
+      const nodeService = createNodeService(defaultUser)
+      const scopes: SCOPE[] = ['space-1']
+      const parentFolderId = 1
+
+      await nodeService.getFolderChildren({
+        scopes,
+        folderId: parentFolderId,
+        types: [FILE_STI_TYPE.USERFILE],
+      })
+      expect(nodeRepositoryFindAccessibleStub.calledOnce).to.eq(true)
+
+      const whereClause = nodeRepositoryFindAccessibleStub.firstCall.firstArg
+      expect(whereClause.$or).to.have.lengthOf(1)
+      expect(whereClause.$or[0].scope).to.eq(scopes[0])
+      expect(whereClause.$or[0].scopedParentFolder).to.eq(parentFolderId)
+      expect(whereClause.stiType).to.deep.eq({
+        $in: [FILE_STI_TYPE.USERFILE],
+      })
+    })
+
+    it('private', async () => {
+      nodeRepositoryFindAccessibleStub.reset()
+      const nodeService = createNodeService(defaultUser)
+
+      const scopes: SCOPE[] = ['private']
+      const parentFolderId = 2
+
+      await nodeService.getFolderChildren({ scopes, folderId: parentFolderId })
+
+      expect(nodeRepositoryFindAccessibleStub.calledOnce).to.eq(true)
+
+      const whereClause = nodeRepositoryFindAccessibleStub.firstCall.firstArg
+      expect(whereClause.$or).to.have.lengthOf(1)
+      expect(whereClause.$or[0].scope).to.eq(scopes[0])
+      expect(whereClause.$or[0].parentFolder).to.eq(parentFolderId)
+      expect(whereClause.$or[0].user).to.eq(defaultUser.id)
+    })
+
+    it('multiple scopes', async () => {
+      nodeRepositoryFindAccessibleStub.reset()
+      const nodeService = createNodeService(defaultUser)
+
+      const scopes: SCOPE[] = ['private', 'space-1', 'space-2']
+      const parentFolderId = 3
+
+      await nodeService.getFolderChildren({
+        scopes,
+        folderId: parentFolderId,
+        types: [FILE_STI_TYPE.FOLDER],
+      })
+
+      expect(nodeRepositoryFindAccessibleStub.calledOnce).to.eq(true)
+
+      const whereClause = nodeRepositoryFindAccessibleStub.firstCall.firstArg
+      expect(whereClause.$or).to.have.lengthOf(3)
+
+      const privateCondition = whereClause.$or[0]
+      expect(privateCondition.scope).to.eq('private')
+      expect(privateCondition.parentFolder).to.eq(parentFolderId)
+      expect(privateCondition.user).to.eq(defaultUser.id)
+
+      const space1Condition = whereClause.$or[1]
+      expect(space1Condition.scope).to.eq('space-1')
+      expect(space1Condition.scopedParentFolder).to.eq(parentFolderId)
+      expect(space1Condition.user).to.be.undefined
+
+      const space2Condition = whereClause.$or[2]
+      expect(space2Condition.scope).to.eq('space-2')
+      expect(space2Condition.scopedParentFolder).to.eq(parentFolderId)
+      expect(space2Condition.user).to.be.undefined
+
+      expect(whereClause.stiType).to.deep.eq({
+        $in: [FILE_STI_TYPE.FOLDER],
+      })
+    })
+  })
+
   describe('#rollbackRemovingState', () => {
     it('basic', async () => {
       const nodes = [
@@ -304,9 +396,27 @@ describe('NodeService', () => {
 
       const nodes = [node3, node1, folder1, node2, folder2]
       nodeRepositoryFindStub.resolves(nodes)
-      folderRepositoryFindOneStub.withArgs(folder1.id, match.any).resolves(folder1)
-      folderRepositoryFindOneStub.withArgs(folder2.id, match.any).resolves(folder2)
       emPopulateStub.reset()
+      nodeHelperCollectChildrenStub.callsFake(async (parentFolder: Folder, wholeTree: Node[]) => {
+        // mimic what collectChildren would normally do, but controlled
+        if (parentFolder.id === folder1.id) {
+          parentFolder.folderPath = '/'
+          for (const child of parentFolder.nonScopedChildren) {
+            child.folderPath = `/${parentFolder.name}/`
+            wholeTree.push(child)
+          }
+        }
+
+        if (parentFolder.id === folder2.id) {
+          parentFolder.folderPath = `/${folder1.name}/`
+          for (const child of parentFolder.scopedChildren) {
+            child.folderPath = `/${folder1.name}/${parentFolder.name}/`
+            wholeTree.push(child)
+          }
+        }
+
+        wholeTree.push(parentFolder) // mimic the final push
+      })
 
       const result = await nodeService.loadNodes(input, filters)
 
@@ -336,11 +446,6 @@ describe('NodeService', () => {
       expect(result[2].id).to.eq(node1.id)
       expect(result[3].id).to.eq(folder2.id)
       expect(result[4].id).to.eq(folder1.id)
-
-      expect(folderRepositoryFindOneStub.calledThrice).to.be.true()
-      expect(folderRepositoryFindOneStub.firstCall.firstArg).to.eq(folder1.id)
-      expect(folderRepositoryFindOneStub.secondCall.firstArg).to.eq(folder2.id)
-      expect(folderRepositoryFindOneStub.thirdCall.firstArg).to.eq(folder2.id)
     })
   })
 })

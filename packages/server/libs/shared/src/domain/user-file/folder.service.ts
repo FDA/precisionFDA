@@ -1,10 +1,8 @@
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { ValidationError } from '@shared/errors'
+import { FolderNotFoundError, ValidationError } from '@shared/errors'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { createFolderEvent, EVENT_TYPES } from '../event/event.helper'
-import { getNodePath } from './user-file.helper'
+import { EventHelper } from '../event/event.helper'
 import { EntityScope, SCOPE } from '../../types/common'
 import { PARENT_TYPE } from './user-file.types'
 import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
@@ -13,9 +11,9 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { STATIC_SCOPE } from '@shared/enums'
 import { FilterQuery } from '@mikro-orm/core'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { FetchChildrenDTO } from 'apps/api/src/folders/model/fetch-children.dto'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 
 @Injectable()
 /**
@@ -27,40 +25,34 @@ export class FolderService {
 
   constructor(
     private readonly em: SqlEntityManager,
-    private readonly user: UserContext,
-    private readonly nodeRepo: NodeRepository,
-    private readonly folderRepository: FolderRepository,
+    private readonly userCtx: UserContext,
+    private readonly folderRepo: FolderRepository,
+    private readonly nodeHelper: NodeHelper,
+    private readonly eventHelper: EventHelper,
   ) {}
 
-  async getFolderChildren(input: FetchChildrenDTO): Promise<Node[]> {
-    const parentId = input.folderId ?? null
+  async unlockFolder(folderId: number): Promise<void> {
+    this.logger.log(`Unlocking folder with id: ${folderId}`)
 
-    const scopeConditions = input.scopes.map((scope) => {
-      const condition: FilterQuery<Node> = { scope }
-
-      if (scope.startsWith('space')) {
-        condition.scopedParentFolder = parentId
-      } else {
-        condition.parentFolder = parentId
-      }
-
-      if (scope === STATIC_SCOPE.PRIVATE) {
-        condition.user = this.user.id
-      }
-
-      return condition
-    })
-
-    const where: FilterQuery<Node> = {
-      $or: scopeConditions,
+    const folderToUnlock = await this.folderRepo.findOne(folderId)
+    if (!folderToUnlock) {
+      throw new FolderNotFoundError()
     }
+    const currentUser = await this.userCtx.loadEntity()
+    await this.em.transactional(async () => {
+      const folderPath = await this.nodeHelper.getNodePath(folderToUnlock)
 
-    if (input.types?.length) {
-      where.stiType = { $in: input.types }
-    }
+      const folderEvent = await this.eventHelper.createFolderEvent(
+        EVENT_TYPES.FOLDER_UNLOCKED,
+        folderToUnlock,
+        folderPath,
+        currentUser,
+      )
+      folderToUnlock.locked = false
+      folderToUnlock.state = null
 
-    return this.nodeRepo.findAccessible(where, {
-      orderBy: [{ stiType: 'ASC' }, { name: 'ASC' }],
+      await this.em.persistAndFlush(folderEvent)
+      this.logger.log(`Unlocked folder name: ${folderToUnlock.name} id: ${folderToUnlock.id}`)
     })
   }
 
@@ -127,7 +119,7 @@ export class FolderService {
   }
 
   async getFolderEntity(folderId: number): Promise<Folder | null> {
-    return await this.folderRepository.findEditableOne({ id: folderId })
+    return await this.folderRepo.findEditableOne({ id: folderId })
   }
 
   private async createFolderInternal(
@@ -177,20 +169,29 @@ export class FolderService {
 
     // Add the user condition only when the scope is private
     if (scope === STATIC_SCOPE.PRIVATE) {
-      whereClause.user = this.user.id
+      whereClause.user = this.userCtx.id
     }
 
     return await this.em.findOne(Folder, whereClause)
   }
 
-  private async createEventForFolder(folder: Folder, eventType: string, user: User): Promise<void> {
+  private async createEventForFolder(
+    folder: Folder,
+    eventType: EVENT_TYPES,
+    user: User,
+  ): Promise<void> {
     const loadedFolder = await this.em
       .getRepository(Folder)
       .findOneOrFail({ id: folder.id }, { populate: ['parentFolder', 'scopedParentFolder'] })
 
-    const folderPath = await getNodePath(this.em, loadedFolder)
+    const folderPath = await this.nodeHelper.getNodePath(loadedFolder)
 
-    const folderEvent = await createFolderEvent(eventType, loadedFolder, folderPath, user)
+    const folderEvent = await this.eventHelper.createFolderEvent(
+      eventType,
+      loadedFolder,
+      folderPath,
+      user,
+    )
 
     this.em.persist(folderEvent)
   }

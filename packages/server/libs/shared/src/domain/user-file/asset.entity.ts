@@ -1,30 +1,20 @@
-import {
-  Collection,
-  Entity,
-  Filter,
-  ManyToMany,
-  OneToMany,
-  Property,
-  Reference,
-} from '@mikro-orm/core'
+import { Collection, Entity, ManyToMany, OneToMany, Property } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
 import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { AssetRepository } from './asset.repository'
-import { Node } from './node.entity'
-import { FILE_STATE_DX, FILE_STI_TYPE, ITrackable } from './user-file.types'
+import { FILE_STATE_DX, FILE_STI_TYPE } from './user-file.types'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
-@Filter({ name: 'asset', cond: { stiType: FILE_STI_TYPE.ASSET } })
-@Filter({
-  name: 'accessibleBy',
-  cond: (args) => ({
-    $or: [{ user: { id: args.userId }, scope: 'private' }, { scope: { $in: args.spaceScopes } }],
-  }),
+@Entity({
+  tableName: 'nodes',
+  repository: () => AssetRepository,
+  discriminatorColumn: 'stiType',
+  discriminatorValue: FILE_STI_TYPE.ASSET,
 })
-@Entity({ tableName: 'nodes', repository: () => AssetRepository })
-class Asset extends Node implements ITrackable {
+class Asset extends UserFile {
   @Property()
   dxid: DxId<'file'>
 
@@ -40,8 +30,7 @@ class Asset extends Node implements ITrackable {
   taggings = new Collection<Tagging>(this)
 
   constructor(user: User) {
-    super()
-    this.user = Reference.create(user)
+    super(user)
   }
 
   isCreatedByChallengeBot(): boolean {

@@ -1,9 +1,18 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Node } from '@shared/domain/user-file/node.entity'
 import sanitize from 'sanitize-filename'
 import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
 
 interface FilesByFolder {
   [key: string]: Node[]
@@ -15,6 +24,103 @@ interface FilesByFolder {
  */
 @Injectable()
 export class NodeHelper {
+  @ServiceLogger()
+  private readonly logger: Logger
+
+  constructor(
+    private readonly em: SqlEntityManager,
+    private readonly userCtx: UserContext,
+    private readonly folderRepo: FolderRepository,
+    private readonly nodeRepo: NodeRepository,
+  ) {}
+
+  async filterNodesByUser(nodes: Node[]): Promise<Node[]> {
+    for (const node of nodes) {
+      if (node.isInSpace()) {
+        const spaceId = node.getSpaceId()
+        const space = await this.em.findOneOrFail(Space, spaceId, {
+          populate: ['spaceMemberships', 'spaceMemberships.user'],
+        })
+        const leadMemberships = space.spaceMemberships
+          .getItems()
+          .find(
+            (membership) =>
+              membership.role === SPACE_MEMBERSHIP_ROLE.LEAD &&
+              membership.user.id === this.userCtx.id,
+          )
+        if (leadMemberships) {
+          return nodes
+        }
+        if (!leadMemberships) {
+          throw new Error(`You have no permissions to lock or unlock '${node.name}'.`)
+        }
+      } else {
+        return nodes.filter((innerNode) => innerNode.user.id === this.userCtx.id)
+      }
+    }
+
+    return nodes
+  }
+
+  /**
+   * Method recursively collects all children of given node if it's a folder.
+   */
+  async collectChildren(parentFolder: Folder, wholeTree: Node[]): Promise<void> {
+    const relations = parentFolder.isInSpace() ? 'scopedChildren' : 'nonScopedChildren'
+    const folderWithChildren = await this.folderRepo.findOne(parentFolder.id, {
+      populate: [relations],
+    })
+
+    if (!folderWithChildren?.folderPath?.length) {
+      // only called for root folder
+      const parentNode = this.getParentFolder(folderWithChildren)
+      folderWithChildren.folderPath = parentNode ? `${await this.getNodePath(parentNode)}/` : '/'
+    }
+    for (const childrenNode of folderWithChildren.children) {
+      childrenNode.folderPath = `${folderWithChildren.folderPath}${folderWithChildren.name}/`
+      if (childrenNode.stiType === FILE_STI_TYPE.FOLDER) {
+        await this.collectChildren(childrenNode as Folder, wholeTree)
+      } else {
+        wholeTree.push(childrenNode)
+      }
+    }
+    // TODO(PFDA-5325): remove this line to avoid adding folder items
+    wholeTree.push(folderWithChildren)
+  }
+
+  async getFolderPath(folderId?: number): Promise<string> {
+    if (!folderId) {
+      return null
+    }
+    const enclosingFolder = await this.nodeRepo.findOneOrFail({ id: folderId })
+    return await this.getNodePath(enclosingFolder)
+  }
+
+  async getNodePath(node: Node, folders: string[] | undefined = []): Promise<string> {
+    folders.unshift(node.name)
+    const parentFolderNode = this.getParentFolder(node)
+    if (!parentFolderNode) {
+      // we have reached root, compose the path and return it
+      return `/${folders.join('/')}`
+    }
+    const parentFolder = await this.folderRepo.findOne({ id: parentFolderNode.id })
+
+    return this.getNodePath(parentFolder as Node, folders)
+  }
+
+  /**
+   * Returns parentFolder if scope is private, public or null, otherwise it returns scopedParentFolder
+   * @param node
+   */
+  getParentFolder(node: Node): Node {
+    if (
+      [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)
+    ) {
+      return node.parentFolder
+    }
+    return node.scopedParentFolder
+  }
+
   /**
    * Returns a string with warnings for unclosed files.
    * @param nodesToCheck

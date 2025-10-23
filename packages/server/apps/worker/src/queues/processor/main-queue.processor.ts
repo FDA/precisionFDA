@@ -5,7 +5,6 @@ import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { createRunFollowUpActionJobTask } from '@shared/queue'
@@ -19,13 +18,14 @@ import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
 import { JobService } from '@shared/domain/job/job.service'
+import { NodeService } from '@shared/domain/user-file/node.service'
 
 @Processor(config.workerJobs.queues.default.name)
 export class MainQueueProcessor extends BaseQueueProcessor {
   constructor(
     private readonly logger: Logger,
     private readonly user: UserContext,
-    private readonly userFileService: UserFileService,
+    private readonly nodeService: NodeService,
     private readonly challengeService: ChallengeService,
     private readonly dataPortalService: DataPortalService,
     private readonly followUpDecider: FollowUpDecider,
@@ -63,10 +63,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
   async syncFileState(job: Job): Promise<void> {
     const input = job.data.payload
     this.logger.log(`synchronizing file ${input.fileUid}`)
-    const result = await this.userFileService.synchronizeFile(
-      input.fileUid,
-      input.isChallengeBotFile,
-    )
+    const result = await this.nodeService.synchronizeFile(input.fileUid, input.isChallengeBotFile)
     this.logger.log(`synchronizeFile result: ${result}`)
 
     if (!result) {
@@ -91,7 +88,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
   @ProcessWithContext(TASK_TYPE.CLOSE_FILE)
   async closeFile(job: Job): Promise<void> {
     const payload = job.data.payload
-    await this.userFileService.closeFile(payload.fileUid, payload.followUpAction)
+    await this.nodeService.closeFile(payload.fileUid, payload.followUpAction)
   }
 
   @ProcessWithContext(TASK_TYPE.FOLLOW_UP_ACTION)

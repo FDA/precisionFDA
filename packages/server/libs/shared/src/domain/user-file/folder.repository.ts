@@ -62,20 +62,14 @@ export class FolderRepository extends AccessControlRepository<Folder> {
   }
 
   async findOneWithProject(id: number): Promise<Folder | null> {
-    return await this.findOne(
-      {
-        project: { $ne: null },
-        id,
-      },
-      { filters: ['folder'] },
-    )
+    return await this.findOne({
+      project: { $ne: null },
+      id,
+    })
   }
 
   async findChildren({ parentFolderId }: FindRemote): Promise<Folder[]> {
-    return await this.find(
-      { project: { $ne: null }, parentFolder: parentFolderId },
-      { filters: ['folder'] },
-    )
+    return await this.find({ project: { $ne: null }, parentFolder: parentFolderId })
   }
 
   // TODO: rename to findFoldersInProject
@@ -83,7 +77,7 @@ export class FolderRepository extends AccessControlRepository<Folder> {
     // implicit conditions on how to find folders :)
     return await this.find(
       { user: this.getReference(userId), project: projectDxid },
-      { filters: ['folder'], orderBy: { id: 'ASC' }, populate: ['taggings.tag'] },
+      { orderBy: { id: 'ASC' }, populate: ['taggings.tag'] },
     )
   }
 
@@ -91,22 +85,19 @@ export class FolderRepository extends AccessControlRepository<Folder> {
   async findForUser({ userId }: FindForUser): Promise<Folder[]> {
     return await this.find(
       { user: this.getReference(userId) },
-      { filters: ['folder'], orderBy: { id: 'ASC' }, populate: ['taggings.tag'] },
+      { orderBy: { id: 'ASC' }, populate: ['taggings.tag'] },
     )
   }
 
   async findAllPFDAOnlyFolders(): Promise<Folder[]> {
     return await this.findAll({
-      filters: ['folder', 'pfdaonly'],
+      filters: ['pfdaonly'],
       populate: ['user', 'taggings.tag'],
     })
   }
 
   async findPFDAOnlyFoldersForUser({ userId }: FindForUser): Promise<Folder[]> {
-    return await this.find(
-      { userId },
-      { filters: ['folder', 'pfdaonly'], populate: ['taggings.tag'] },
-    )
+    return await this.find({ userId }, { filters: ['pfdaonly'], populate: ['taggings.tag'] })
   }
 
   async findByName(
@@ -124,12 +115,5 @@ export class FolderRepository extends AccessControlRepository<Folder> {
           addTaggings,
         )
       : this.findOne({ name, [parentKey]: parentId, scope }, addTaggings)
-  }
-
-  removeWithTags(folder: Folder): Folder {
-    this.em.remove(folder)
-    folder.taggings.getItems().forEach((tagging) => tagging.tag.taggingCount--)
-    folder.taggings.removeAll()
-    return folder
   }
 }

@@ -8,6 +8,7 @@ import { TaggingModule } from '@shared/domain/tagging/tagging.module'
 import { SpaceEventModule } from '@shared/domain/space-event/space-event.module'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { LicensedItemModule } from '@shared/domain/licensed-item/licensed-item.module'
+import { EventModule } from '@shared/domain/event/event.module'
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { LicensedItemModule } from '@shared/domain/licensed-item/licensed-item.m
     TaggingModule,
     LicensedItemModule,
     PlatformClientModule,
+    EventModule,
   ],
   providers: [RemoveNodesFacade],
   exports: [RemoveNodesFacade],
