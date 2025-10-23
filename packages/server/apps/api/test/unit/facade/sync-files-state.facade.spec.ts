@@ -223,6 +223,59 @@ describe('SyncFilesStateFacade', () => {
       expect(file2.state).to.eq(FILE_STATE_DX.OPEN)
     })
 
+    it('max count per run', async () => {
+      const MAX_FILES_PER_RUN = 100
+
+      const files: FileOrAsset[] = []
+      for (let i = 0; i < MAX_FILES_PER_RUN + 10; i++) {
+        files.push({
+          uid: `file-dxid-${i}`,
+          dxid: `file-dxid-${i}`,
+          project: 'project-1',
+          isCreatedByChallengeBot: () => false,
+        } as unknown as FileOrAsset)
+      }
+      findUnclosedFilesOrAssetsStub
+        .withArgs(em, user.id)
+        .onFirstCall()
+        .resolves(files)
+        .onSecondCall()
+        .resolves([])
+      platformClientFileStatesStub
+        .withArgs({
+          fileDxids: files.slice(0, MAX_FILES_PER_RUN).map((f) => f.dxid),
+          projectDxid: 'project-1',
+        })
+        .resolves(
+          files.slice(0, MAX_FILES_PER_RUN).map((f, index) => ({
+            id: f.dxid,
+            describe: {
+              size: 10000 + index,
+              state: FILE_STATE_DX.CLOSED,
+            },
+          })) as FileStateResult[],
+        )
+      files.slice(0, MAX_FILES_PER_RUN).forEach((file) => {
+        findFileOrAssetWithUidStub.withArgs(em, file.uid).resolves(file)
+      })
+
+      const job = {} as unknown as Job
+
+      const facade = getInstance()
+      await facade.syncFiles(job)
+
+      for (let i = 0; i < MAX_FILES_PER_RUN; i++) {
+        const file = files[i]
+        expect(file.fileSize).to.eq(10000 + i)
+        expect(file.state).to.eq(FILE_STATE_DX.CLOSED)
+      }
+      for (let i = MAX_FILES_PER_RUN; i < files.length; i++) {
+        const file = files[i]
+        expect(file.fileSize).to.be.undefined
+        expect(file.state).to.be.undefined
+      }
+    })
+
     it('remove abandoned', async () => {
       const file1 = {
         uid: 'file1-dxid-1',

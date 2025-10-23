@@ -136,7 +136,14 @@ export class SpaceEventService {
         },
         receiverUserIds: [],
       }
-      await this.emailService.sendEmail(input)
+      try {
+        await this.emailService.sendEmail(input)
+      } catch (error) {
+        this.logger.error(
+          `Error sending membership change notification for space event id: ${event.id}`,
+          error,
+        )
+      }
     }
   }
 }
