@@ -62,6 +62,7 @@ RUN rm -rf public/packs app/assets/packs && \
 FROM ruby:${RUBY_IMAGE_TAG}-slim
 ARG NODE_VERSION
 ENV APP_DIR=/precision-fda
+ENV DOCKER_BUILD=true
 WORKDIR $APP_DIR
 
 # Install only runtime deps
