@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import yaml
+import re
 from botocore.exceptions import WaiterError, ClientError
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -24,6 +25,7 @@ class EcsDeployer:
         self.region = os.getenv("AWS_REGION", "us-east-1")
         self.environment = os.getenv("ENVIRONMENT")
         self.ecr_account = "991033550868"
+        self.branch = os.environ.get("GIT_BRANCH")
         self.services_file = services_file
         # Track previously deployed services for rollback
         self.deployed_services = {}
@@ -65,6 +67,8 @@ class EcsDeployer:
             ["pfda-sidekiq", "pfda-web", "pfda-docs"],
             ["pfda-nginx"],
         ]
+
+        self.prod_branches_patterns = [r"^master$",r"^production$",r"^release.*",r"^staging.*"]
 
     # ---------------------- Deployment Orchestration ----------------------
 
@@ -182,7 +186,7 @@ class EcsDeployer:
         tag = self.image_tags.get(image_key)
         if not tag:
             raise ValueError(f"Image tag not found for key: {image_key}")
-        image_uri = f"{self.ecr_account}.dkr.ecr.{self.region}.amazonaws.com/pfda/{image_key.lower()}:{tag}"
+        image_uri = self.get_image_uri(image_key, tag)
 
         ecs_secrets = self._get_ssm_secrets(service_name)
         execution_role_arn = f"arn:aws:iam::{self.account_id}:role/ecs-task-execution-role-pfda-{self.environment}"
@@ -444,6 +448,10 @@ class EcsDeployer:
         current_subset["portMappings"] = self._normalize_port_mappings(current_subset["portMappings"])
         new_subset["portMappings"] = self._normalize_port_mappings(new_subset["portMappings"])
 
+        # Compare only image hash instead of full image string
+        current_subset["image"] = self._extract_image_hash(current_subset["image"])
+        new_subset["image"] = self._extract_image_hash(new_subset["image"])
+
         if current_subset != new_subset:
             print(f"Detected changes in task definition for {service_name}")
             return True
@@ -638,6 +646,35 @@ class EcsDeployer:
         if len(failed_tasks) >= max_failures:
             print(f"Maximum failure threshold ({max_failures}) reached. Initiating rollback via exception.")
             raise ServiceDeploymentError(f"Deployment failed for {service_name}: {len(failed_tasks)} tasks failed.")
+
+
+    def get_image_uri(self, image_key, tag):
+        """
+        Returns the ECR image URI, adding 'prod/' for production branches.
+        Matches branch against regex patterns in self.prod_branches_patterns.
+        """
+        if any(re.match(pattern, self.branch) for pattern in self.prod_branches_patterns):
+            prefix = "prod/"
+        else:
+            prefix = ""
+        return f"{self.ecr_account}.dkr.ecr.{self.region}.amazonaws.com/pfda/{prefix}{image_key.lower()}:{tag}"
+
+    def _extract_image_hash(self, image_uri):
+        """
+        Extract only the hash from an ECR image tag.
+        """
+        if not image_uri:
+            return ""
+
+        # Get the tag part after colon
+        tag = image_uri.split(":")[-1]
+
+        # Split by hyphen and take the second-to-last part (the hash)
+        parts = tag.rsplit("-", 2)
+        if len(parts) >= 2:
+            return parts[-2]
+
+        return tag
 
 
 if __name__ == "__main__":

@@ -123,6 +123,7 @@ jobs:
           SERVER_TAG: ${{ env.SERVER_TAG }}
           DOCS_TAG: ${{ env.DOCS_TAG }}
           FORCE_DEPLOY_SERVICES: ${{ inputs.FORCE_DEPLOY_SERVICES }}
+          GIT_BRANCH: ${{ github.ref_name }} 
           PYTHONUNBUFFERED: "1"
         run: |
           echo "Deploying ECS to $ENVIRONMENT..."

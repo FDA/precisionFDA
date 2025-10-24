@@ -3,6 +3,12 @@ threads    2, 16
 port       3000
 workers    ENV.fetch("WEB_CONCURRENCY", 4).to_i
 
+# Only redirect stdout/stderr if NOT building in Docker
+unless ENV["DOCKER_BUILD"] == "true"
+  stdout_redirect File.expand_path("../../../log/puma.log", __dir__),
+                  File.expand_path("../../../log/puma-err.log", __dir__)
+end
+
 preload_app!
 
 before_fork do
