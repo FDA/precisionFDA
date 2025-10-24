@@ -31,11 +31,8 @@ module Files
         raise FileUploaderError, "Size of file exceeds maximum allowed file size"
       end
 
-      file = nil
-      Node.transaction do
-        file = create(options)
-        upload(file.uid, file_io)
-      end
+      file = create(options)
+      upload(file.uid, file_io)
 
       if file.nil?
         Rails.logger.error("FileUploader::create_and_upload: Error while uploading file")
@@ -50,22 +47,22 @@ module Files
     private
 
     def upload(uid, file_io, chunk_size = CHUNK_SIZE)
-      chunks = lambda do
-        if !file_io.eof?
+      index = 0
+      begin
+        until file_io.eof?
           chunk = file_io.read(chunk_size)
-          [chunk, md5sum(chunk), chunk.length]
-        else
-          Parallel::Stop
-        end
-      end
+          md5 = md5sum(chunk)
+          size = chunk.length
 
-      Parallel.each_with_index(chunks, in_threads: THREADS_COUNT) do |(chunk, md5, size), index|
-        idx = index + 1
-        result = https_apps_client.get_upload_url(uid, idx, md5, size)
-        send_to_store(result["url"], result["headers"], chunk, idx)
+          idx = index + 1
+          result = https_apps_client.get_upload_url(uid, idx, md5, size)
+          send_to_store(result["url"], result["headers"], chunk, idx)
+
+          index += 1
+        end
+      ensure
+        file_io.close
       end
-    ensure
-      file_io.close
     end
 
     def create(options)
