@@ -47,13 +47,13 @@ const FileUploadTable = ({ filesMeta, showRemove, uploadInProgress, handleRemove
 
   return (
     <UploadFilesContainer>
-      <UploadFilesHeader showRemove={showRemove}>
+      <UploadFilesHeader $showRemove={showRemove}>
         <div>File Name</div>
         <div>Status</div>
         {showRemove && <div>Action</div>}
       </UploadFilesHeader>
-      {filesMeta.map((file) => (
-        <FileItem key={file.id} showRemove={showRemove}>
+      {filesMeta.map(file => (
+        <FileItem key={file.id} $showRemove={showRemove}>
           <FileName>
             <div className="file-name-text" title={file.name}>
               {file.name}
@@ -220,7 +220,7 @@ export const useFileUploadModal = ({ homeScope, folderId, spaceId, isAllowed, on
     >
       <ModalHeaderTop headerText={`Upload files to ${folderId ? 'folder' : 'root'}`} hide={handleClose} />
       <DropZoneWrapper className={uploadInProgress ? 'exit' : 'enter'}>
-        <DropZoneCard {...getRootProps()} uploadInProgress={uploadInProgress}>
+        <DropZoneCard {...getRootProps()} $uploadInProgress={uploadInProgress}>
           <input {...getInputProps()} />
           <DropZoneContent>
             <IconWrapper>
