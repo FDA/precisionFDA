@@ -31,9 +31,9 @@ export const UploadFilesContainer = styled.div`
   padding: 0 8px 8px;
 `
 
-export const UploadFilesHeader = styled.div<{ showRemove?: boolean }>`
+export const UploadFilesHeader = styled.div<{ $showRemove?: boolean }>`
   display: grid;
-  grid-template-columns: 1fr 130px ${props => (props.showRemove ? '48px' : '')};
+  grid-template-columns: 1fr 130px ${props => (props.$showRemove ? '48px' : '')};
   gap: 12px;
   justify-content: space-between;
   align-items: center;
@@ -44,9 +44,9 @@ export const UploadFilesHeader = styled.div<{ showRemove?: boolean }>`
   border-bottom: 1px solid var(--c-layout-border);
 `
 
-export const FileItem = styled.div<{ showRemove?: boolean }>`
+export const FileItem = styled.div<{ $showRemove?: boolean }>`
   display: grid;
-  grid-template-columns: 1fr 120px ${props => (props.showRemove ? '48px' : '')};
+  grid-template-columns: 1fr 120px ${props => (props.$showRemove ? '48px' : '')};
   gap: 20px;
   padding: 2px 16px;
   border-bottom: 1px solid var(--c-layout-border-200);
@@ -155,7 +155,7 @@ export const DropZoneWrapper = styled.div`
   }
 `
 
-export const DropZoneCard = styled.div<{ uploadInProgress?: boolean }>`
+export const DropZoneCard = styled.div<{ $uploadInProgress?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,7 +163,7 @@ export const DropZoneCard = styled.div<{ uploadInProgress?: boolean }>`
   border: 2px var(--c-layout-border);
   border-radius: 12px;
   background: var(--background);
-  cursor: ${({ uploadInProgress }) => (uploadInProgress ? 'not-allowed' : 'pointer')};
+  cursor: ${({ $uploadInProgress }) => ($uploadInProgress ? 'not-allowed' : 'pointer')};
   transition: all 0.2s ease;
   text-align: center;
   user-select: none;
