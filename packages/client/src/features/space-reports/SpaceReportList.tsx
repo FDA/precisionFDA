@@ -4,7 +4,6 @@ import React, { useEffect } from 'react'
 import { Button } from '../../components/Button'
 import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import Table from '../../components/Table'
 import { StyledPageTable } from '../../components/Table/components/styles'
@@ -23,6 +22,7 @@ import { fetchReports } from './space-reports.api'
 import { useGenerateSpaceReportModal } from './useGenerateSpaceReportModal'
 import { useSpaceReportColumns } from './useSpaceReportColumns'
 import { userReportSelectActions } from './useSpaceReportSelectActions'
+import { SpaceReportIcon } from '../../components/icons/SpaceReportIcon'
 
 type ListType = { reports: ISpaceReport[]; meta: MetaV2 }
 
@@ -76,7 +76,7 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
       return
     }
     query.refetch()
-    client.invalidateQueries({ queryKey: ['space', scope]})
+    client.invalidateQueries({ queryKey: ['space', scope] })
   }, [lastJsonMessage])
 
   const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(selectedIndexes, query.data?.reports)
@@ -103,7 +103,7 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
           <QuickActions>
             {(scope === 'private' || isContributorOrHigher) && (
               <Button data-variant="primary" disabled={query.isLoading} onClick={() => setGenerateModal(true)}>
-                <PlusIcon height={12} /> Generate report
+                <SpaceReportIcon height={14} /> Generate report
               </Button>
             )}
           </QuickActions>

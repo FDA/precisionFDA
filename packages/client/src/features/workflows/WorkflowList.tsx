@@ -23,6 +23,7 @@ import { fetchWorkflowList } from './workflows.api'
 import { IWorkflow, WorkflowMeta } from './workflows.types'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
+import { NetworkIcon } from '../../components/icons/NetworkIcon'
 
 type ListType = { workflows: IWorkflow[]; meta: WorkflowMeta }
 
@@ -91,7 +92,7 @@ export const WorkflowList = ({
                 data-turbolinks="false"
                 href="/workflows/new"
               >
-                <PlusIcon height={12} /> Create Workflow
+                <NetworkIcon height={14} /> Create Workflow
               </Button>
             )}
 

@@ -10,7 +10,6 @@ import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../components/icons/PlusIcon'
 import { SyncIcon } from '../../components/icons/SyncIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
@@ -27,6 +26,7 @@ import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
 
 const DBStyledRight = styled(StyledRight)`
   gap: 20px;
@@ -40,10 +40,7 @@ const NoDatabases = styled.div`
 
 type ListType = { data: IDatabase[]; meta: MetaV2 }
 
-export const DatabaseList = ({ homeScope, spaceId }: { 
-  homeScope?: HomeScope, 
-  spaceId?: number
-}) => {
+export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; spaceId?: number }) => {
   const basePath = getBasePath(spaceId)
   if (homeScope && homeScope !== 'me' && homeScope !== 'spaces') {
     return (
@@ -79,10 +76,7 @@ export const DatabaseList = ({ homeScope, spaceId }: {
   const { isLoading, data, error } = query
   const { data: propertiesData } = usePropertiesQuery('dbCluster', homeScope)
 
-  const selectedObjects = getSelectedObjectsFromIndexes(
-    selectedIndexes,
-    data?.data,
-  )
+  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data)
   const { actions, modals } = useDatabaseSelectActions({
     selectedItems: selectedObjects,
     resourceKeys: ['dbclusters'],
@@ -95,13 +89,8 @@ export const DatabaseList = ({ homeScope, spaceId }: {
       <ResourceHeader>
         <ActionsRow>
           <QuickActions>
-            <Button
-              data-variant='primary'
-              data-testid="databases-create-link"
-              as={Link}
-              to={`${basePath}/databases/create`}
-            >
-              <PlusIcon height={12} /> Create Database
+            <Button data-variant="primary" data-testid="databases-create-link" as={Link} to={`${basePath}/databases/create`}>
+              <DatabaseIcon height={14} /> Create Database
             </Button>
           </QuickActions>
           <DBStyledRight>
@@ -111,16 +100,9 @@ export const DatabaseList = ({ homeScope, spaceId }: {
               </Refresh>
               Refresh
             </Button>
-            <DropdownNext
-              trigger="click"
-              content={() => <ActionsDropdownContent actions={actions} />}
-            >
+            <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
               {dropdownProps => (
-                <ActionsButton
-                  {...dropdownProps}
-                  data-testid="databases-actions-button"
-                  active={dropdownProps.$isActive}
-                />
+                <ActionsButton {...dropdownProps} data-testid="databases-actions-button" active={dropdownProps.$isActive} />
               )}
             </DropdownNext>
           </DBStyledRight>
@@ -191,7 +173,6 @@ export const DatabaseListTable = ({
   setColumnVisibility: (cols: VisibilityState) => void
   columnVisibility: VisibilityState
 }) => {
-
   const col = useDatabaseColumns({ properties })
 
   return (

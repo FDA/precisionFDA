@@ -19,7 +19,6 @@ import Table from '../../components/Table'
 import { ClipboardCheckIcon } from '../../components/icons/ClipboardCheckIcon'
 import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../components/icons/PlusIcon'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
@@ -41,6 +40,8 @@ import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { FolderIcon } from '../../components/icons/FolderIcon'
+import { FileIcon } from '../../components/icons/FileIcon'
 
 type ListType = { files: (IFile | IFolder)[]; meta: IMeta }
 
@@ -191,7 +192,7 @@ export const FileList = ({
                     }
                   }}
                 >
-                  <PlusIcon height={12} /> Add Folder
+                  <FolderIcon height={14} /> Create Folder
                 </Button>
                 <Button
                   data-variant="primary"
@@ -204,7 +205,7 @@ export const FileList = ({
                     }
                   }}
                 >
-                  <PlusIcon height={12} /> Add Files
+                  <FileIcon height={14} /> Create Files
                 </Button>
               </>
             )}

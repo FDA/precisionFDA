@@ -215,7 +215,7 @@ export const useFileUploadModal = ({ homeScope, folderId, spaceId, isAllowed, on
       id="modal-files-upload"
       data-testid="modal-files-upload"
       isShown={Boolean(isShown)}
-      hide={handleClose}
+      hide={() => {}}
       variant="medium"
     >
       <ModalHeaderTop headerText={`Upload files to ${folderId ? 'folder' : 'root'}`} hide={handleClose} />

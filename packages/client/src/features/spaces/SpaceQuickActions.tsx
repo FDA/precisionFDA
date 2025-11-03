@@ -15,6 +15,7 @@ import { useAddSpacesToSpaceGroupModal } from './modals/useAddSpacesToSpaceGroup
 import { useRemoveSpacesFromSpaceGroupModal } from './modals/useRemoveSpacesFromSpaceGroupModal'
 import { ISpaceV2 } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
+import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 
 const SpacesQuickActions = styled(QuickActions)`
   display: flex;
@@ -146,7 +147,7 @@ export const SpaceQuickActions = ({
         )}
         {!spaceGroupId && (
           <Button data-variant="primary" as={Link} to="/spaces/new">
-            Create Space
+            <ObjectGroupIcon height={14} /> Create Space
           </Button>
         )}
       </QuickActions>

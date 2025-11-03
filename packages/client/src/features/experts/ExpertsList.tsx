@@ -31,6 +31,7 @@ import { useExpertsListQuery } from './useExpertsListQuery'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { Button } from '../../components/Button'
+import { LightBulbIcon } from '../../components/icons/LightBulbIcon'
 
 export const ExpertListItem = styled.div`
   display: flex;
@@ -43,18 +44,6 @@ export const ItemImage = styled.div`
     height: 156px;
     border-radius: 10%;
   }
-`
-export const ExpertImageCircleSmall = styled.img`
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-`
-
-export const ExpertRow = styled.div`
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  width: fit-content;
 `
 
 export const Name = styled.div`
@@ -75,23 +64,13 @@ export const ExpertButtonRowWrap = styled.div`
   flex-wrap: wrap;
   gap: 8px;
 `
+
 export const ExpertButtonRow = styled.div`
   display: flex;
   gap: 16px;
   align-items: center;
   width: fit-content;
   margin-top: 16px;
-`
-
-export const StyledCondensedList = styled.div`
-  display: flex;
-  gap: 8px;
-  flex-direction: column;
-`
-export const ExpertMeta = styled.div`
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
 `
 
 const ExpertsList = () => {
@@ -201,7 +180,7 @@ const ExpertsList = () => {
               <RightSideItem>
                 <ButtonRow>
                   <Button data-variant="primary" as="a" data-turbolinks="false" href="/experts/new">
-                    Add an expert
+                    <LightBulbIcon height={14} /> Create Expert
                   </Button>
                 </ButtonRow>
               </RightSideItem>
