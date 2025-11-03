@@ -12,7 +12,7 @@ interface IPaginatedParams {
   starting?: Starting
 }
 
-type JobDescribeParams = { jobId: string }
+type JobDescribeParams = { jobDxId: DxId<'job'> }
 type JobTerminateParams = { jobId: string }
 
 type PackageMapping = {

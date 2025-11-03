@@ -42,6 +42,7 @@ import {
   ENGINE as DB_CLUSTER_ENGINE,
   ENGINES,
   STATUS as DB_CLUSTER_STATUS,
+  DB_SYNC_STATUS,
 } from '../domain/db-cluster/db-cluster.enum'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '../domain/job/job.enum'
 import {
@@ -680,6 +681,7 @@ const dbCluster = {
         .toJSDate(),
       status: DB_CLUSTER_STATUS.AVAILABLE,
       engine: DB_CLUSTER_ENGINE.MYSQL,
+      syncStatus: DB_SYNC_STATUS.IN_PROGRESS,
     }
   },
   createInput: (): AnyObject => ({

@@ -15,10 +15,10 @@ const StatusText = styled.span`
   }
 `
 
-export const DBStatus = ({ status }: { status: IDatabase['status'] }) => {
+export const DBStatus = ({ status }: { status: IDatabase['status'] | IDatabase['syncStatus']}) => {
   return (
     <StatusText>
-      {['creating', 'starting', 'stopping', 'terminating'].includes(status) && <Running />}
+      {['creating', 'starting', 'stopping', 'terminating', 'in progress'].includes(status) && <Running />}
       {status}
     </StatusText>
   )

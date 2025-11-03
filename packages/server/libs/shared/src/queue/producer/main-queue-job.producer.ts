@@ -140,7 +140,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
     }
 
     const options: JobOptions = {
-      jobId: `${TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT}.${data.dxid}`,
+      jobId: `${TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT}.${data.jobDxid}`,
       repeat: { cron: config.workerJobs.syncDbClusterJobOutput.repeatPattern },
     }
 

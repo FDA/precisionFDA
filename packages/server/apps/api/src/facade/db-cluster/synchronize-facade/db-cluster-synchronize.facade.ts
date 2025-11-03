@@ -7,7 +7,7 @@ import {
 } from '@shared/domain/db-cluster/access-control/db-cluster-access-control-encryptor'
 import { UsersDbClustersSaltService } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.service'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
-import { STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
+import { DB_SYNC_STATUS, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { isStateTerminal } from '@shared/domain/job/job.helper'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
@@ -296,9 +296,10 @@ export class DbClusterSynchronizeFacade {
         'DbCluster synchronization job created',
       )
       await this.mainJobProducer.createDbClusterSyncJobOutputTask(
-        { dxid: syncJobId.id },
+        { jobDxid: syncJobId.id, dbClusterUid: dbCluster.uid },
         this.userContext,
       )
+      await this.dbClusterService.updateSyncStatus(dbCluster.uid, DB_SYNC_STATUS.IN_PROGRESS)
     })
   }
 
@@ -408,7 +409,7 @@ export class DbClusterSynchronizeFacade {
     let platformJobData: JobDescribeResponse
     try {
       platformJobData = await this.userClient.jobDescribe({
-        jobId: payload.dxid,
+        jobDxId: payload.jobDxid,
       })
     } catch (err) {
       if (err instanceof ClientRequestError && err.props?.clientStatusCode) {
@@ -417,6 +418,7 @@ export class DbClusterSynchronizeFacade {
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
           this.logger.log({ error: err.props }, 'Received 401 from platform, removing sync task')
+          await this.dbClusterService.updateSyncStatus(payload.dbClusterUid, DB_SYNC_STATUS.FAILED)
           await removeRepeatable(job)
         }
       } else {
@@ -435,11 +437,12 @@ export class DbClusterSynchronizeFacade {
 
     if (isStateTerminal(remoteState)) {
       this.logger.debug(
-        { remoteState, job: payload.dxid },
+        { remoteState, job: payload.jobDxid, dbCluster: payload.dbClusterUid },
         'Remote DbCluster sync job state is terminal',
       )
       let msg = []
-      const ws = this.userClient.streamJobLogs(payload.dxid)
+      let syncStatus = DB_SYNC_STATUS.FAILED
+      const ws = this.userClient.streamJobLogs(payload.jobDxid)
 
       const WS_TIMEOUT_MS = 60000
       const wsTimeout = setTimeout(async () => {
@@ -452,30 +455,36 @@ export class DbClusterSynchronizeFacade {
           const log = JSON.parse(logStr)
           msg.push(log)
 
+          if (log['source'] === 'APP' && log['msg'] === 'Synchronization completed!') {
+            syncStatus = DB_SYNC_STATUS.COMPLETED
+          }
+
           // close signal from platform
           if (log['source'] === 'SYSTEM' && log['msg'] === 'END_LOG') {
             this.logger.log(
-              { job: payload.dxid, log: msg },
-              `Complete log of the DbCluster sync ${payload.dxid}`,
+              { job: payload.jobDxid, dbCluster: payload.dbClusterUid, log: msg },
+              `Complete log of the DbCluster sync ${payload.jobDxid}`,
             )
             clearTimeout(wsTimeout)
+            await this.dbClusterService.updateSyncStatus(payload.dbClusterUid, syncStatus)
             await removeRepeatable(job)
             ws.terminate()
             return
           }
         } catch (error) {
           this.logger.error(
-            { job: payload.dxid },
+            { job: payload.jobDxid, dbCluster: payload.dbClusterUid },
             `Failed to parse DbCluster sync job log: ${error}`,
           )
           clearTimeout(wsTimeout)
+          await this.dbClusterService.updateSyncStatus(payload.dbClusterUid, syncStatus)
           await removeRepeatable(job)
           ws.terminate()
         }
       })
     } else {
       this.logger.log(
-        { job: payload.dxid },
+        { job: payload.jobDxid, dbCluster: payload.dbClusterUid },
         'DbCluster sync job is not in terminal state. Will retry later...',
       )
       return

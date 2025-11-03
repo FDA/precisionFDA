@@ -153,7 +153,7 @@ export class CliDescribeEntityFacade {
     }
 
     const platformExecutionData = await this.platformClient
-      .jobDescribe({ jobId: execution.dxid })
+      .jobDescribe({ jobDxId: execution.dxid })
       .catch((err) => {
         if (err.props.clientStatusCode === 401) {
           return execution.describe

@@ -56,7 +56,7 @@ export class JobLogService {
 
   private async isJobAccessible(jobDxId): Promise<boolean> {
     try {
-      await this.userClient.jobDescribe({ jobId: jobDxId })
+      await this.userClient.jobDescribe({ jobDxId: jobDxId })
       return true
     } catch {
       return false
@@ -69,7 +69,7 @@ export class JobLogService {
   ): Promise<WebSocket> {
     try {
       const jobDescribe = await this.adminClient
-        .jobDescribe({ jobId: jobDxId })
+        .jobDescribe({ jobDxId: jobDxId })
         .catch(async (err) => {
           if (err.props.clientStatusCode !== 401) {
             throw err

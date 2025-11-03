@@ -78,7 +78,10 @@ export type SyncDbClusterJob = TaskWithAuth & {
 
 export type SyncDbClusterJobOutput = TaskWithAuth & {
   type: TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT
-  payload: { dxid: DxId<'job'> }
+  payload: {
+    jobDxid: DxId<'job'>
+    dbClusterUid: Uid<'dbcluster'>
+  }
 }
 
 export type SyncSpacesPermissionsJob = TaskWithAuth & {

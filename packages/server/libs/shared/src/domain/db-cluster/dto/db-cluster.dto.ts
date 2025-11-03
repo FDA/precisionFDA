@@ -1,5 +1,8 @@
 import {
+  DB_SYNC_STATUS,
+  DB_SYNC_STATUSES,
   DbClusterStatus,
+  DbClusterSyncStatus,
   ENGINE,
   ENGINES,
   STATUS,
@@ -18,6 +21,7 @@ export class DbClusterDTO {
   name: string
   title: string
   status: DbClusterStatus
+  syncStatus: DbClusterSyncStatus
   location: string
   scopeName: string
   description?: string
@@ -50,6 +54,7 @@ export class DbClusterDTO {
       name: dbcluster.name,
       title: dbcluster.name,
       status: STATUSES[invertObj(STATUS)[dbcluster.status]],
+      syncStatus: DB_SYNC_STATUSES[invertObj(DB_SYNC_STATUS)[dbcluster.syncStatus]],
       location: space ? getLocation(space) : titleize(dbcluster.scope),
       scopeName: dbcluster.scope,
       description: dbcluster.description,

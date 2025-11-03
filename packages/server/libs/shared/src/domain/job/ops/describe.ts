@@ -30,7 +30,7 @@ export class DescribeJobOperation extends BaseOperation<UserOpsCtx, DescribeJobI
     }
 
     const platformJobData = await platformClient.jobDescribe({
-      jobId: input.dxid,
+      jobDxId: input.dxid as DxId<'job'>,
     })
     this.ctx.log.debug({ platformJobData }, 'JOB description object from the platform')
 
