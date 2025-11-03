@@ -45,7 +45,8 @@ echo "database.yml generated from DATABASE_URL"
 # Wait for DB
 # ------------------------------
 echo "Waiting for DB ($host:$port) to be ready..."
-wait-for-it "$host:$port" -- echo "DB connection established"
+wait4ports -t 0 "tcp://$host:$port"
+echo "DB connection established"
 
 
 # ------------------------------

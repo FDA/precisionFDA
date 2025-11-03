@@ -119,11 +119,19 @@ services:
           - name: nginx-sg
       targetGroupName: ecs-default-tg
 
+  dev:
+    pfda-nodejs-worker:
+      desiredCount: 1
+    pfda-nodejs-admin-platform-client:
+      desiredCount: 1
+    pfda-web:
+      desiredCount: 1
 
-#  dev:
-#    pfda-nodejs-api:
-#      desiredCount: 3
-#      container:
-#        cpu: 256
-#        memoryReservation: 512
+  test:
+    pfda-nodejs-worker:
+      desiredCount: 1
+    pfda-nodejs-admin-platform-client:
+      desiredCount: 1
+    pfda-web:
+      desiredCount: 1
 
