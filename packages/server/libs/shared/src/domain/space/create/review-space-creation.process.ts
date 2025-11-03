@@ -129,28 +129,6 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
     })
     this.logger.log(`invited host lead: ${hostLead.dxuser} to host org: ${space.hostDxOrg}`)
 
-    // invite guest lead as admin on platform host org
-    await this.adminClient.inviteUserToOrganization({
-      orgDxId: space.hostDxOrg,
-      data: {
-        invitee: `user-${guestLead.dxuser}`,
-        level: 'ADMIN',
-        suppressEmailNotification: true,
-      },
-    })
-    this.logger.log(`invited guest lead: ${guestLead.dxuser} to host org: ${space.hostDxOrg}`)
-
-    // invite host lead as admin on platform guest org
-    await this.adminClient.inviteUserToOrganization({
-      orgDxId: space.guestDxOrg,
-      data: {
-        invitee: `user-${hostLead.dxuser}`,
-        level: 'ADMIN',
-        suppressEmailNotification: true,
-      },
-    })
-    this.logger.log(`invited host lead: ${hostLead.dxuser} to guest org: ${space.guestDxOrg}`)
-
     // invite guest lead as admin on platform guest org
     await this.adminClient.inviteUserToOrganization({
       orgDxId: space.guestDxOrg,
@@ -174,25 +152,10 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
       SPACE_MEMBERSHIP_SIDE.GUEST,
       SPACE_MEMBERSHIP_ROLE.LEAD,
     )
-    const hostLeadPrivateMembership = new SpaceMembership(
-      hostLead,
-      space.confidentialReviewerSpace,
-      SPACE_MEMBERSHIP_SIDE.HOST,
-      SPACE_MEMBERSHIP_ROLE.LEAD,
-    )
-    const guestLeadPrivateMembership = new SpaceMembership(
-      guestLead,
-      space.confidentialSponsorSpace,
-      SPACE_MEMBERSHIP_SIDE.GUEST,
-      SPACE_MEMBERSHIP_ROLE.LEAD,
-    )
+    hostLeadMembership.spaces.add(space.confidentialReviewerSpace)
+    guestLeadMembership.spaces.add(space.confidentialSponsorSpace)
 
-    this.em.persist([
-      hostLeadMembership,
-      guestLeadMembership,
-      hostLeadPrivateMembership,
-      guestLeadPrivateMembership,
-    ])
+    this.em.persist([hostLeadMembership, guestLeadMembership])
 
     return [hostLeadMembership, guestLeadMembership]
   }
