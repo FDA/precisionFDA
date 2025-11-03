@@ -1,4 +1,4 @@
-name: DEV - Deploy ECS
+name: TEST - Deploy ECS
 
 permissions:
   id-token: write
@@ -16,9 +16,11 @@ on:
           pfda-pfda-db-migrate, pfda-docs, pfda-nodejs-api, pfda-nodejs-api-internal, pfda-nodejs-worker, pfda-nodejs-admin-platform-client, pfda-sidekiq, pfda-web, pfda-nginx
         required: false
         default: ""
+  schedule:
+  - cron: '0 2 * * *'  # Daily at 02:00 UTC = 04:00 Prague (during DST)
 
 concurrency:
-  group: dev-deploy-ecs
+  group: test-deploy-ecs
   cancel-in-progress: false
   # if another run with the same group is in progress,
   # the new one will wait until it's finished (no overlap)
@@ -28,7 +30,7 @@ jobs:
   build-and-push-images:
     runs-on: ubuntu-latest
     environment:
-      name: dev_8517
+      name: test_4711
     outputs:
       web_image_tag: ${{ steps.set_output.outputs.web_image_tag }}
       nginx_image_tag: ${{ steps.set_output.outputs.nginx_image_tag }}
@@ -76,7 +78,7 @@ jobs:
     needs: build-and-push-images
     runs-on: ubuntu-latest
     environment:
-      name: dev_8517
+      name: test_4711
     steps:
       - name: Checkout code
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
@@ -123,7 +125,7 @@ jobs:
           SERVER_TAG: ${{ env.SERVER_TAG }}
           DOCS_TAG: ${{ env.DOCS_TAG }}
           FORCE_DEPLOY_SERVICES: ${{ inputs.FORCE_DEPLOY_SERVICES }}
-          GIT_BRANCH: ${{ github.ref_name }} 
+          GIT_BRANCH: ${{ github.ref_name }}
           PYTHONUNBUFFERED: "1"
         run: |
           echo "Deploying ECS to $ENVIRONMENT..."
