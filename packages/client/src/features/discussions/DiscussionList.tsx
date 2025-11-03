@@ -10,7 +10,6 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
@@ -24,6 +23,7 @@ import { useList } from '../home/useList'
 import { fetchDiscussionsRequest } from './api'
 import { Discussion } from './discussions.types'
 import { useDiscussionColumns } from './useDiscussionColumns'
+import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
 
 type ListType = { data: Discussion[]; meta: MetaV2 }
 
@@ -133,7 +133,7 @@ export const DiscussionList = ({
                 as={Link}
                 to={`${location.pathname}/create`}
               >
-                <PlusIcon height={12} /> Start a Discussion
+                <DiscussionIcon height={14} /> Create Discussion
               </Button>
             )}
           </QuickActions>

@@ -31,6 +31,7 @@ import { useAppListActions } from './useAppListActions'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useAppsColumns } from './useAppsColumns'
 import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { CubeIcon } from '../../components/icons/CubeIcon'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -74,7 +75,7 @@ export const AppList = ({
   const { isLoading, data, error } = query
 
   const selectedAppObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.apps)
-  
+
   const { actions, modals } = useAppSelectionActions({
     homeScope,
     spaceId,
@@ -104,7 +105,7 @@ export const AppList = ({
                 data-turbolinks="false"
                 data-testid="home-apps-create-button"
               >
-                <PlusIcon height={12} /> Create App
+                <CubeIcon height={14} /> Create App
               </Button>
             )}
             {spaceId && isContributorOrHigher && (
@@ -124,12 +125,12 @@ export const AppList = ({
           </QuickActions>
           <DropdownNext
             trigger="click"
-            content={() => 
+            content={() => (
               <ActionsDropdownContent
                 actions={actions}
                 message={homeScope === 'spaces' ? 'To perform other actions on this app, access it from the Space' : undefined}
               />
-            }
+            )}
           >
             {dropdownProps => (
               <ActionsButton {...dropdownProps} data-testid="home-apps-actions-button" active={dropdownProps.$isActive} />

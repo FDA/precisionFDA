@@ -31,7 +31,7 @@ export const UploadFilesContainer = styled.div`
   padding: 0 8px 8px;
 `
 
-export const UploadFilesHeader = styled.div<{ $showRemove?: boolean }>`
+export const UploadFilesHeader = styled.div<{ $showRemove: boolean }>`
   display: grid;
   grid-template-columns: 1fr 130px ${props => (props.$showRemove ? '48px' : '')};
   gap: 12px;
@@ -44,7 +44,7 @@ export const UploadFilesHeader = styled.div<{ $showRemove?: boolean }>`
   border-bottom: 1px solid var(--c-layout-border);
 `
 
-export const FileItem = styled.div<{ $showRemove?: boolean }>`
+export const FileItem = styled.div<{ $showRemove: boolean }>`
   display: grid;
   grid-template-columns: 1fr 120px ${props => (props.$showRemove ? '48px' : '')};
   gap: 20px;

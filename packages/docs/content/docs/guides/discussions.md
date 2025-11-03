@@ -10,7 +10,7 @@ The Discussions section of the website lists all the discussions. Click on a top
 
 ## Creating a discussion
 
-To create a new discussion, click "Start a discussion" under the Discussions section of the Space. Enter a discussion title and fill in the rest of the content using [Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#task-lists).
+To create a new discussion, click "Create discussion" under the Discussions section of the Space. Enter a discussion title and fill in the rest of the content using [Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#task-lists).
 
 ## Writing an answer
 

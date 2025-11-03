@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import queryString from 'query-string'
 import React, { useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import useWebSocket from 'react-use-websocket'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
@@ -26,14 +25,14 @@ import { usePageMeta } from '../../../hooks/usePageMeta'
 import { usePaginationParamsV2 } from '../../../hooks/usePaginationState'
 import { useLastWSNotification, useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import PublicLayout from '../../../layouts/PublicLayout'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../../home/types'
+import { NOTIFICATION_ACTION } from '../../home/types'
 import { challengesYearsListRequest } from '../api'
 import { TimeStatus } from '../types'
 import { getTimeStatusName, renderEmpty } from '../util'
 import { ChallengeListItem } from './ChallengeListItem'
 import { useChallengesListQuery } from './useChallengesListQuery'
+import { TrophyIcon } from '../../../components/icons/TrophyIcon'
 
 const HeroContent = styled.div`
   text-align: center;
@@ -129,7 +128,9 @@ const ChallengesList = () => {
               {year && <PageFilterTitle>{year}</PageFilterTitle>}
               <PageList>
                 {data?.data?.length === 0 && renderEmpty(timeStatus)}
-                {data?.data?.map(n => <ChallengeListItem key={n.id} challenge={n} />)}
+                {data?.data?.map(n => (
+                  <ChallengeListItem key={n.id} challenge={n} />
+                ))}
                 <Pagination
                   showPerPage={false}
                   perPage={pagination.pageSizeParam}
@@ -148,7 +149,7 @@ const ChallengesList = () => {
               <RightSideItem>
                 <ButtonRow>
                   <Button data-variant="primary" as={Link} to="/challenges/create" data-turbolinks="false">
-                    Create a new challenge
+                    <TrophyIcon height={14} /> Create Challenge
                   </Button>
                 </ButtonRow>
               </RightSideItem>
