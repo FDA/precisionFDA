@@ -106,7 +106,7 @@ export class JobSynchronizationService {
     let platformJobData: JobDescribeResponse
     try {
       platformJobData = await this.platformClient.jobDescribe({
-        jobId: jobDxid,
+        jobDxId: jobDxid,
       })
     } catch (err) {
       if (err instanceof ClientRequestError && err.props?.clientStatusCode) {

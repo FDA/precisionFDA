@@ -13,6 +13,12 @@ enum ENGINE {
   POSTGRESQL = 1,
 }
 
+enum DB_SYNC_STATUS {
+  COMPLETED = 0,
+  IN_PROGRESS = 1,
+  FAILED = 2,
+}
+
 const STATUSES = {
   AVAILABLE: 'available',
   CREATING: 'creating',
@@ -26,6 +32,12 @@ const STATUSES = {
 const ENGINES = {
   MYSQL: 'aurora-mysql',
   POSTGRESQL: 'aurora-postgresql',
+} as const
+
+const DB_SYNC_STATUSES = {
+  COMPLETED: 'completed',
+  IN_PROGRESS: 'in progress',
+  FAILED: 'failed',
 } as const
 
 const allowedInstanceTypes = [
@@ -51,14 +63,19 @@ interface ActionConfig {
 
 type DbClusterStatus = (typeof STATUSES)[keyof typeof STATUSES]
 
+type DbClusterSyncStatus = (typeof DB_SYNC_STATUSES)[keyof typeof DB_SYNC_STATUSES]
+
 export {
   ENGINE,
   STATUS,
+  DB_SYNC_STATUS,
   ENGINES,
   STATUSES,
+  DB_SYNC_STATUSES,
   allowedEngineVersions,
   allowedEngines,
   allowedInstanceTypes,
   ActionConfig,
   DbClusterStatus,
+  DbClusterSyncStatus,
 }

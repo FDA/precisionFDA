@@ -89,6 +89,10 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
         <MetadataKey>Instance</MetadataKey>
         <MetadataVal data-testid="db-instance">{RESOURCE_LABELS[db.dxInstanceClass] ?? db.dxInstanceClass}</MetadataVal>
       </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>Synchronization Status</MetadataKey>
+        <MetadataVal data-testid="db-sync-status"><DBStatus status={db.syncStatus} /></MetadataVal>
+      </MetadataItem>
     </MetadataRow>
     <MetadataRow>
       <MetadataItem>

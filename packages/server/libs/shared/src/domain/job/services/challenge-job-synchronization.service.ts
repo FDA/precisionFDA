@@ -42,7 +42,7 @@ export class ChallengeJobSynchronizationService {
         )
         for (const job of jobs) {
           const platformJobData = await this.challengeBotClient.jobDescribe({
-            jobId: job.dxid,
+            jobDxId: job.dxid,
           })
 
           const isOverTerminateMaxDuration = buildIsOverMaxDuration('terminate')

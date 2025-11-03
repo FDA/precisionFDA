@@ -27,6 +27,8 @@ export interface Links {
 
 export type DBStatus = 'creating' | 'available' | 'stopped' | 'stopping' | 'starting' | 'terminating' | 'terminated'
 
+export type DbSyncStatus = 'in progress' | 'failed' | 'completed'
+
 export interface IDatabase {
   id: number
   dxid: string
@@ -34,6 +36,7 @@ export interface IDatabase {
   name: string
   title: string
   status: DBStatus
+  syncStatus: DbSyncStatus
   location: string
   scopeName: string
   description: string

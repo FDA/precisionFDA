@@ -251,7 +251,7 @@ export class PlatformClient {
   }
 
   async jobDescribe(params: JobDescribeParams): Promise<JobDescribeResponse> {
-    const url = `${config.platform.apiUrl}/${params.jobId}/describe`
+    const url = `${config.platform.apiUrl}/${params.jobDxId}/describe`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {},

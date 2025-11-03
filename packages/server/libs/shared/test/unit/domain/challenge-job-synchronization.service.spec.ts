@@ -119,7 +119,7 @@ describe('ChallengeJobSynchronizationService', () => {
 
       userRepofindChallengeBotStub.resolves(challengeBotUser)
       jobRepoFindRunningJobsByUser.withArgs({ userId: challengeBotUser.id }).resolves([job])
-      platformClientJobDescribeStub.withArgs({ jobId: job.dxid }).resolves(platformData)
+      platformClientJobDescribeStub.withArgs({ jobDxId: job.dxid }).resolves(platformData)
       createJobClosedStub.withArgs(challengeBotUser, job, platformData).resolves(eventEntity)
       emPersistStub.reset()
       createSyncOutputsTaskStub.reset()
@@ -142,7 +142,7 @@ describe('ChallengeJobSynchronizationService', () => {
 
       userRepofindChallengeBotStub.resolves(challengeBotUser)
       jobRepoFindRunningJobsByUser.withArgs({ userId: challengeBotUser.id }).resolves([job])
-      platformClientJobDescribeStub.withArgs({ jobId: job.dxid }).resolves(platformData)
+      platformClientJobDescribeStub.withArgs({ jobDxId: job.dxid }).resolves(platformData)
 
       const service = getInstance()
       await service.checkChallengeJobs()
@@ -163,7 +163,7 @@ describe('ChallengeJobSynchronizationService', () => {
 
       userRepofindChallengeBotStub.resolves(challengeBotUser)
       jobRepoFindRunningJobsByUser.withArgs({ userId: challengeBotUser.id }).resolves([job])
-      platformClientJobDescribeStub.withArgs({ jobId: job.dxid }).resolves(platformData)
+      platformClientJobDescribeStub.withArgs({ jobDxId: job.dxid }).resolves(platformData)
       emFlushStub.reset()
 
       // these are only because we still use RequestTerminateJobOperation

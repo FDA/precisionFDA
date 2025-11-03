@@ -2,7 +2,13 @@ import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
-import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
+import {
+  DB_SYNC_STATUS,
+  ENGINE,
+  ENGINES,
+  STATUS,
+  STATUSES,
+} from '@shared/domain/db-cluster/db-cluster.enum'
 import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/create-db-cluster.dto'
 import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
 import { DxId } from '@shared/domain/entity/domain/dxid'
@@ -76,6 +82,7 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
       uid: `${describeDbClusterRes.id}-1`,
       name: describeDbClusterRes.name,
       status: STATUS[invertObj(STATUSES)[describeDbClusterRes.status]],
+      syncStatus: DB_SYNC_STATUS.IN_PROGRESS,
       project: describeDbClusterRes.project,
       dxInstanceClass: describeDbClusterRes.dxInstanceClass,
       engine: ENGINE[invertObj(ENGINES)[describeDbClusterRes.engine]],
@@ -191,5 +198,23 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
     )
     const event = await createDbClusterPasswordRotated(user, dbCluster)
     await this.em.persistAndFlush(event)
+  }
+
+  async updateSyncStatus(
+    dbClusterUid: Uid<'dbcluster'>,
+    newSyncStatus: DB_SYNC_STATUS,
+  ): Promise<void> {
+    this.logger.log(
+      { dbClusterUid: dbClusterUid, newSyncStatus: newSyncStatus },
+      "Updating DbCluster's sync status.",
+    )
+
+    await this.em.transactional(async (transactionalEntityManager) => {
+      const dbCluster = await transactionalEntityManager.findOneOrFail(DbCluster, {
+        uid: dbClusterUid,
+      })
+      dbCluster.syncStatus = newSyncStatus
+      await transactionalEntityManager.persistAndFlush(dbCluster)
+    })
   }
 }

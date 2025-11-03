@@ -15,7 +15,7 @@ import { DbClusterProperty } from '@shared/domain/property/db-cluster-property.e
 import { formatDuration } from '../../utils/format'
 import { DxId } from '../entity/domain/dxid'
 import { User } from '../user/user.entity'
-import { ENGINE, STATUS } from './db-cluster.enum'
+import { DB_SYNC_STATUS, ENGINE, STATUS } from './db-cluster.enum'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Tagging } from '../tagging/tagging.entity'
 import { DbClusterRepository } from './db-cluster.repository'
@@ -68,6 +68,9 @@ export class DbCluster extends ScopedEntity {
 
   @Enum()
   status!: STATUS
+
+  @Enum()
+  syncStatus!: DB_SYNC_STATUS
 
   @Enum()
   engine!: ENGINE
