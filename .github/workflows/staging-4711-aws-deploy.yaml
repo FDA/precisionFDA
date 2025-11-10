@@ -1,4 +1,4 @@
-name: STAGING - Deploy pFDA to AWS
+name: STAGING (DO NOT USE) - Deploy pFDA to AWS
 
 on:
   workflow_dispatch:
