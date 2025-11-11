@@ -26,15 +26,7 @@ module Api
       render json: resources
     end
 
-    def active
-      active_users = https_apps_client.active_users
-      render json: active_users
-    end
 
-    def government
-      government_users = https_apps_client.government_users
-      render json: government_users
-    end
 
     private
 
