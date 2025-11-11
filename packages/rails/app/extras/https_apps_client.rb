@@ -31,23 +31,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  # Gets active users' usernames
-  def active_users
-    request(
-      "/users/active",
-      {},
-      Net::HTTP::Get::METHOD,
-    )
-  end
 
-  # Gets government users' usernames
-  def government_users
-    request(
-      "/users/government",
-      {},
-      Net::HTTP::Get::METHOD,
-    )
-  end
 
   # Create resource for data portal
   # @param opts data about resource

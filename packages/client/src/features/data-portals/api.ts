@@ -4,11 +4,11 @@ import { processFile } from '../resources/uploadImage'
 import { DataPortal, CreateDataPortalData, UpdateDataPortalData } from './types'
 
 export async function fetchGovUsers(): Promise<[]> {
-  return axios.get('/api/users/government').then(r => r.data)
+  return axios.get('/api/v2/users/government').then(r => r.data)
 }
 
 export async function fetchActiveUsers(): Promise<[]> {
-  return axios.get('/api/users/active').then(r => r.data)
+  return axios.get('/api/v2/users/active').then(r => r.data)
 }
 
 export async function dataPortalsListRequest() {
@@ -43,7 +43,7 @@ export async function updateDataPortalRequest(payload: UpdateDataPortalRequest) 
   return axios.patch(`/api/v2/data-portals/${payload.id}`, payload).then(res => res.data as DataPortal)
 }
 
-export async function editDataPortalRequest(dataPortalData : UpdateDataPortalData) {
+export async function editDataPortalRequest(dataPortalData: UpdateDataPortalData) {
   const { dataPortal } = dataPortalData
   if (dataPortalData.image && dataPortalData.spaceId) {
     const cardImage = await createFile(dataPortalData.image.name, `space-${dataPortalData.spaceId}`, null)
@@ -54,7 +54,9 @@ export async function editDataPortalRequest(dataPortalData : UpdateDataPortalDat
 }
 
 export async function createDataPortalRequest(dataPortalData: CreateDataPortalData) {
-  const createPortalResponse = await axios.post('/api/v2/data-portals', dataPortalData.dataPortal).then(res => res.data as DataPortal)
+  const createPortalResponse = await axios
+    .post('/api/v2/data-portals', dataPortalData.dataPortal)
+    .then(res => res.data as DataPortal)
   if (!createPortalResponse.error) {
     await processFile(dataPortalData.image, createPortalResponse.cardImageUid)
   }
