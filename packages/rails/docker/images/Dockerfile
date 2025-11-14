@@ -4,7 +4,8 @@
 ARG RUBY_IMAGE_TAG=3.2.2
 ARG NODE_VERSION=22
 ARG BUNDLER_VERSION=2.4.10
-
+ARG GIT_BRANCH
+ARG GIT_REVISION
 FROM ruby:${RUBY_IMAGE_TAG}-alpine AS builder
 
 ENV RAILS_ENV=production
@@ -38,30 +39,39 @@ RUN set -eux && \
       tzdata \
       shared-mime-info
 
-
 RUN npm i -g pnpm@10.10.0 bower
 
-# Copy Rails app
-COPY packages/rails/ $APP_DIR
-
-RUN chmod +x ./docker/entrypoint/prod.entrypoint.sh
-RUN chmod +x ./docker/entrypoint/sidekiq.entrypoint.sh
+# Copy only dependency files for caching Ruby gems
+COPY packages/rails/Gemfile $APP_DIR/Gemfile
+COPY packages/rails/Gemfile.lock $APP_DIR/Gemfile.lock
 
 ENV NOKOGIRI_USE_SYSTEM_LIBRARIES=true
 
-# Install Ruby gems
+# Install Ruby gems (Cache Optimization Point 1)
 RUN gem install bundler -v "$BUNDLER_VERSION" --no-document && \
     bundle config set --local without 'development test' && \
     bundle config set force_ruby_platform true && \
     bundle install --jobs=4 --retry=3
 
+# Copy the rest of the Rails app
+COPY packages/rails/ $APP_DIR
+
+RUN chmod +x ./docker/entrypoint/prod.entrypoint.sh
+RUN chmod +x ./docker/entrypoint/sidekiq.entrypoint.sh
+
 # =========================
 # Build frontend assets
 # =========================
 
-COPY packages/client/ $APP_DIR/frontend
+# Copy only dependency files for caching Node modules
 WORKDIR $APP_DIR/frontend
-RUN pnpm install --frozen-lockfile && pnpm run build
+COPY packages/client/package.json $APP_DIR/frontend/package.json
+COPY packages/client/pnpm-lock.yaml $APP_DIR/frontend/pnpm-lock.yaml
+RUN pnpm install --frozen-lockfile
+
+# Copy the rest of the frontend code and build
+COPY packages/client/ $APP_DIR/frontend
+RUN pnpm run build
 
 WORKDIR $APP_DIR
 RUN mv .env.do_not_delete .env
@@ -78,7 +88,13 @@ RUN rm -rf public/packs app/assets/packs && \
 # Stage 2: Final (Runtime)
 # =========================
 FROM ruby:${RUBY_IMAGE_TAG}-alpine
+ARG GIT_BRANCH
+ARG GIT_REVISION
 
+RUN echo $GIT_BRANCH
+RUN echo $GIT_REVISION
+ENV GIT_BRANCH=${GIT_BRANCH}
+ENV GIT_REVISION=${GIT_REVISION}
 ENV APP_DIR=/precision-fda
 ENV DOCKER_BUILD=true
 WORKDIR $APP_DIR

@@ -134,6 +134,9 @@ runs:
         fi
       shell: bash
 
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349
+
     - name: Build and push Docker image
       if: steps.check_ecr.outputs.build_needed == 'true'
       uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75
@@ -142,6 +145,15 @@ runs:
         tags: ${{ inputs.orchestration-account-id }}.dkr.ecr.${{ inputs.region }}.amazonaws.com/${{ env.REPO_NAME }}:${{ env.IMAGE_TAG }}
         file:  ${{ env.DOCKERFILE }}
         context: ${{ inputs.context }}
+        build-args: |
+          GIT_BRANCH=${{ github.ref_name }}
+          GIT_REVISION=${{ github.sha }}
+        cache-from: |
+          type=gha,scope=gems,key=${{ runner.os }}-gems-${{ hashFiles('packages/rails/Gemfile.lock') }}
+          type=gha,scope=pnpm,key=${{ runner.os }}-pnpm-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
+        cache-to: |
+          type=gha,mode=max,scope=gems,key=${{ runner.os }}-gems-${{ hashFiles('packages/rails/Gemfile.lock') }}
+          type=gha,mode=max,scope=pnpm,key=${{ runner.os }}-pnpm-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
 
     - name: Set action output
       id: set_output

@@ -135,3 +135,21 @@ services:
     pfda-web:
       desiredCount: 1
 
+  staging:
+    pfda-nodejs-api:
+      desiredCount: 2
+      container:
+        cpu: 512
+        memoryReservation: 1024
+    pfda-nodejs-worker:
+      desiredCount: 4
+      container:
+        cpu: 512
+        memoryReservation: 1024
+    pfda-nodejs-api-internal:
+      desiredCount: 2
+      container:
+        cpu: 512
+        memoryReservation: 1024
+
+
