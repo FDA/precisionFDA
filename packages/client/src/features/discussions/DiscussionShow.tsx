@@ -142,7 +142,6 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
                 scope={discussion.scope}
               />
             ))}
-            <hr />
           </>
         )}
         {discussion.comments &&

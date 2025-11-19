@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
-import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
+import Menu from '../../../components/Menu/Menu'
 import { ArrowIcon } from '../../../components/icons/ArrowIcon'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { UnlockIcon } from '../../../components/icons/UnlockIcon'
@@ -25,13 +25,11 @@ const ButtonsRow = styled.div`
   gap: 8px;
 `
 
-const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button> & { $isActive?: boolean }>(
+const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button>>(
   (props, ref) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { $isActive, ...buttonProps } = props
     return (
       // @ts-expect-error ref type mismatch between Dropdown and Button components
-      <Button data-variant="primary" ref={ref} {...buttonProps}>
+      <Button data-variant="primary" ref={ref} {...props}>
         Resources &nbsp;
         <ArrowIcon />
       </Button>
@@ -191,16 +189,18 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
         onChange={setJobLimitInput}
         isSubmitButtonDisabled={Number.isNaN(jobLimitInput) || jobLimitInput < 0}
       />
-      <DropdownNext trigger="click" content={() => <ResourceDropdownContent selectedUsers={selectedUsers} />}>
-        {dropdownProps => (
-          <DropdownButton
-            {...dropdownProps}
-            data-testid="admin-users-resource-button"
-            active={dropdownProps.$isActive ? 'true' : 'false'}
-            disabled={selectedUsers.length === 0}
-          />
-        )}
-      </DropdownNext>
+      <Menu
+        trigger={
+          <Menu.Trigger>
+            <DropdownButton
+              data-testid="admin-users-resource-button"
+              disabled={selectedUsers.length === 0}
+            />
+          </Menu.Trigger>
+        }
+      >
+        <ResourceDropdownContent selectedUsers={selectedUsers} />
+      </Menu>
     </ButtonsRow>
   )
 }

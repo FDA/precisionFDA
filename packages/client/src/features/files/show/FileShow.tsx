@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import queryString from 'query-string'
 import React from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
+import { ActionsMenu } from '../../../components/Menu'
 import { HomeLabel } from '../../../components/HomeLabel'
 import { Filler } from '../../../components/Page/styles'
 import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
@@ -11,7 +11,7 @@ import { FileIcon } from '../../../components/icons/FileIcon'
 import { LockIcon } from '../../../components/icons/LockIcon'
 import { theme } from '../../../styles/theme'
 import { getBackPathNext } from '../../../utils/getBackPath'
-import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
 import { StyledBackLink } from '../../home/home.styles'
 import {
@@ -60,12 +60,9 @@ const FileActionsDropdown = ({
 
   return (
     <>
-      <DropdownNext
-        trigger="click"
-        content={() => <ActionsDropdownContent actions={actions} />}
-      >
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
-      </DropdownNext>
+      <ActionsMenu data-testid="file-show-actions-button">
+        <ActionsMenuContent actions={actions} />
+      </ActionsMenu>
 
       <ActionModalsRenderer modals={modals} />
     </>

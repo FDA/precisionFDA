@@ -12,7 +12,7 @@ import { StyledPageTable } from '../../components/Table/components/styles'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { SyncIcon } from '../../components/icons/SyncIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions, StyledRight } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
@@ -25,8 +25,9 @@ import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import Menu from '../../components/Menu/Menu'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
+import { ActionsMenu } from '../../components/Menu'
 
 const DBStyledRight = styled(StyledRight)`
   gap: 20px;
@@ -100,11 +101,9 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
               </Refresh>
               Refresh
             </Button>
-            <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
-              {dropdownProps => (
-                <ActionsButton {...dropdownProps} data-testid="databases-actions-button" active={dropdownProps.$isActive} />
-              )}
-            </DropdownNext>
+            <ActionsMenu data-testid="databases-actions-button">
+              <ActionsMenuContent actions={actions} />
+            </ActionsMenu>
           </DBStyledRight>
         </ActionsRow>
       </ResourceHeader>

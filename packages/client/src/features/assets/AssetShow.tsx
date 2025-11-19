@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { ActionsMenu } from '../../components/Menu'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink } from '../home/home.styles'
 import { License } from '../licenses/License'
@@ -40,12 +40,9 @@ const AssetActions = ({ homeScope, asset }: { homeScope?: HomeScope; asset: IAss
   })
   return (
     <>
-      <DropdownNext
-        trigger="click"
-        content={() => <ActionsDropdownContent actions={actions} />}
-      >
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
-      </DropdownNext>
+      <ActionsMenu data-testid="asset-show-actions-button">
+        <ActionsMenuContent actions={actions} />
+      </ActionsMenu>
 
       <ActionModalsRenderer modals={modals} />
     </>

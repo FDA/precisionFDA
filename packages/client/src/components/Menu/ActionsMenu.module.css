@@ -1,0 +1,54 @@
+.trigger {
+  position: relative;
+  padding: 7px 14px;
+  width: fit-content;
+  line-height: 1.475;
+  border-radius: 5px;
+  font-size: 14px;
+  box-shadow: 0 1px 2px var(--base-opacity-06);
+  min-width: 100px;
+  border: none;
+  background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-500) 100%);
+  color: white;
+}
+
+.trigger:hover:not([aria-disabled='true']) {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-color: transparent;
+}
+
+.trigger:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.trigger[data-popup-open='true'] {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.trigger[aria-disabled='true'] {
+  background: var(--tertiary-300);
+}
+
+.trigger[data-disabled] {
+  background: var(--tertiary-200);
+}
+
+.trigger[data-disabled]:hover {
+  transform: none;
+  box-shadow: 0 1px 2px var(--base-opacity-06);
+  background: var(--tertiary-200);
+}
+
+/* Message - specific to Actions menu */
+.message {
+  border-bottom: 1px solid var(--c-dropdown-menu-border);
+  max-width: 200px;
+  padding: 0 0.75rem;
+  padding-bottom: 0.5rem;
+  font-style: italic;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--c-text-700);
+}

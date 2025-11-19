@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import Menu from '../../components/Menu/Menu'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { Action } from '../home/action-types'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { QuickActions } from '../home/home.styles'
 import { ActionsButton } from '../home/show.styles'
 import { ISpaceGroup } from '../space-groups/types'
@@ -16,6 +16,7 @@ import { useRemoveSpacesFromSpaceGroupModal } from './modals/useRemoveSpacesFrom
 import { ISpaceV2 } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
+import { ActionsMenu } from '../../components/Menu'
 
 const SpacesQuickActions = styled(QuickActions)`
   display: flex;
@@ -124,19 +125,15 @@ export const SpaceQuickActions = ({
         )}
         {userCanAdministerSpaceGroups && !spaceGroupId && (
           <>
-            <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={spaceGroupAction} />}>
-              {dropdownProps => (
-                <ActionsButton
-                  disabled={!isSelectionValidForAddingToGroup}
-                  {...dropdownProps}
-                  active={dropdownProps.$isActive.toString()}
-                  label="Add to Space Group"
-                  data-testid="space-list-assign-to-group-button"
-                  data-tooltip-id="add-to-space-group"
-                  data-tooltip-content={'Only Group, Review, or Government spaces can be added to a space group'}
-                />
-              )}
-            </DropdownNext>
+            <ActionsMenu
+              disabled={!isSelectionValidForAddingToGroup}
+              label="Add to Space Group"
+              data-testid="space-list-assign-to-group-button"
+              data-tooltip-id="add-to-space-group"
+              data-tooltip-content={'Only Group, Review, or Government spaces can be added to a space group'}
+            >
+              <ActionsMenuContent actions={spaceGroupAction} />
+            </ActionsMenu>
             {selectedItems.length > 0 && !isSelectionValidForAddingToGroup && <Tooltip id="add-to-space-group" place="left" />}
           </>
         )}

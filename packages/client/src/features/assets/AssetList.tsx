@@ -2,7 +2,7 @@ import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, V
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { ActionsMenu } from '../../components/Menu'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
@@ -12,7 +12,7 @@ import { QuestionIcon } from '../../components/icons/QuestionIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { useGenerateKeyModal } from '../auth/useGenerateKeyModal'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
@@ -87,19 +87,12 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
               Generate CLI Key
             </Button>
           </QuickActions>
-          <DropdownNext
-            trigger="click"
-            content={() => 
-              <ActionsDropdownContent
-                actions={actions}
-                message={homeScope === 'spaces' ? 'To perform other actions on this asset, access it from the Space' : undefined}
-              />
-            }
-          >
-            {dropdownProps => (
-              <ActionsButton {...dropdownProps} data-testid="home-assets-actions-button" active={dropdownProps.$isActive} />
-            )}
-          </DropdownNext>
+          <ActionsMenu data-testid="home-assets-actions-button">
+            <ActionsMenuContent
+              actions={actions}
+              message={homeScope === 'spaces' ? 'To perform other actions on this asset, access it from the Space' : undefined}
+            />
+          </ActionsMenu>
         </ActionsRow>
       </ResourceHeader>
 

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Tooltip } from 'react-tooltip'
 import { Button } from '../../components/Button'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenu, Menu } from '../../components/Menu'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { Running } from '../../components/icons/StateIcons'
 import { getSpaceIdFromScope } from '../../utils'
 import { getBaseLink, useSelectableSpaces, useUserComputeInstances } from '../apps/run/utils'
@@ -143,20 +143,15 @@ export const ExecutionActionsRow = ({
           </Button>
         </Link>
       )}
-      <DropdownNext
-        trigger="click"
-        content={() => (
-          <ActionsDropdownContent
-            actions={
-              terminalStates.includes(execution.state)
-                ? actions.filter(action => !['Snapshot', 'Terminate'].includes(action.name))
-                : actions.filter(action => !['Copy to space', 'Snapshot'].includes(action.name))
-            }
-          />
-        )}
-      >
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
-      </DropdownNext>
+      <ActionsMenu data-testid="execution-actions-button">
+        <ActionsMenuContent
+          actions={
+            terminalStates.includes(execution.state)
+              ? actions.filter(action => !['Snapshot', 'Terminate'].includes(action.name))
+              : actions.filter(action => !['Copy to space', 'Snapshot'].includes(action.name))
+          }
+        />
+      </ActionsMenu>
       {isJobStartingOrRunning && !execution.links.open_external && <Tooltip id="workstation-starting" />}
       <ActionModalsRenderer modals={modals} />
     </>

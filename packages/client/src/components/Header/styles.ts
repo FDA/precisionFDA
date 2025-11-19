@@ -3,7 +3,6 @@ import { PFDALogoLight } from '../NavigationBar/PFDALogo'
 import { Svg } from '../icons/Svg'
 import { compactScrollBarV2 } from '../Page/styles'
 import { TransparentButton } from '../Button'
-import { StyledDropdown } from '../Dropdown'
 
 const bpSmall = '@media(min-width: 850px)'
 
@@ -148,6 +147,7 @@ export const IconWrap = styled.div<{ $marginBottom?: number}>`
   `
 
 export const DropdownMenuItem = styled(HeaderMenuItem)`
+  background: transparent;
   border-radius: 3px;
   ${HeaderItemText} {
     user-select: none;
@@ -288,7 +288,7 @@ export const HeaderRight = styled.div`
     border-radius: 3px;
   }
 
-  ${HeaderMenuItem}, ${StyledDropdown} {
+  ${HeaderMenuItem} {
     flex-shrink: 0;
   }
   

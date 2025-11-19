@@ -2,14 +2,14 @@ import { useQueryClient } from '@tanstack/react-query'
 import { ColumnSizingState } from '@tanstack/react-table'
 import React, { useEffect } from 'react'
 import { Button } from '../../components/Button'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import Menu from '../../components/Menu/Menu'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import Table from '../../components/Table'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 import { getSelectedObjectsFromIndexes } from '../../utils/object'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
@@ -23,6 +23,7 @@ import { useGenerateSpaceReportModal } from './useGenerateSpaceReportModal'
 import { useSpaceReportColumns } from './useSpaceReportColumns'
 import { userReportSelectActions } from './useSpaceReportSelectActions'
 import { SpaceReportIcon } from '../../components/icons/SpaceReportIcon'
+import { ActionsMenu } from '../../components/Menu'
 
 type ListType = { reports: ISpaceReport[]; meta: MetaV2 }
 
@@ -107,9 +108,9 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
               </Button>
             )}
           </QuickActions>
-          <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
-            {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
-          </DropdownNext>
+          <ActionsMenu data-testid="space-reports-actions-button">
+            <ActionsMenuContent actions={actions} />
+          </ActionsMenu>
         </ActionsRow>
       </ResourceHeader>
 

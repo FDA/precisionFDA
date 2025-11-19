@@ -10,7 +10,7 @@ import {
 } from '@tanstack/react-table'
 import React, { useEffect, useMemo, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { ActionsMenu } from '../../components/Menu'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
@@ -20,7 +20,7 @@ import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsRow } from '../home/home.styles'
@@ -94,11 +94,9 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
       <ResourceHeader>
         <ActionsRow>
           <div />
-          <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
-            {dropdownProps => (
-              <ActionsButton {...dropdownProps} data-testid="home-executions-actions-button" active={dropdownProps.$isActive} />
-            )}
-          </DropdownNext>
+          <ActionsMenu data-testid="home-executions-actions-button">
+            <ActionsMenuContent actions={actions} />
+          </ActionsMenu>
         </ActionsRow>
       </ResourceHeader>
 

@@ -2,13 +2,13 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Route, Navigate, Routes, useLocation, useParams } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
-import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
+import Menu from '../../components/Menu/Menu'
+import { RevisionMenu } from '../../components/Menu/RevisionMenu'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
 import { getBackPathNext } from '../../utils/getBackPath'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
@@ -138,16 +138,17 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
           <Pill>rev{workflow.revision}</Pill>
         </>
       </CloudResourcesHeaderButton>
-      <DropdownNext 
-        trigger="click" 
-        content={() => (
-          <ActionsDropdownContent 
-            actions={actions.filter(action => !['Run', 'Run Batch'].includes(action.name))} 
-          />
-        )}
+      <Menu
+        trigger={
+          <Menu.Trigger>
+            <ActionsButton />
+          </Menu.Trigger>
+        }
       >
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
-      </DropdownNext>
+        <ActionsMenuContent 
+          actions={actions.filter(action => !['Run', 'Run Batch'].includes(action.name))} 
+        />
+      </Menu>
 
       <ActionModalsRenderer modals={modals} />
     </>
@@ -205,7 +206,7 @@ export const WorkflowShow = ({
               <NetworkIcon height={20} />
               <span data-testid="workflow-show-title">{workflowTitle}</span>
             </Title>
-            <RevisionDropdown
+            <RevisionMenu
               revisions={meta.revisions}
               selectedValue={workflow.revision}
               linkToRevision={r => `${getBasePath(spaceId)}/workflows/${r.uid}`}
