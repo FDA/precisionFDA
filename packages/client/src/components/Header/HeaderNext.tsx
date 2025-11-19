@@ -12,7 +12,7 @@ import { IUser } from '../../types/user'
 import { AlertBanner } from '../AlertBanner'
 import { TransparentButton } from '../Button'
 import { CloudResourceModal } from '../CloudResourcesModal'
-import { DropdownNext } from '../Dropdown/DropdownNext'
+import Menu from '../Menu/Menu'
 import { ArrowLeftIcon } from '../icons/ArrowLeftIcon'
 import { CDMHIcon } from '../icons/CDMHIcon'
 import { CaretIcon } from '../icons/CaretIcon'
@@ -57,88 +57,7 @@ import { useNavFavorites } from './useNavFavorites'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
 import { useSearchModal } from '../GlobalSearch/useSearchModal'
 import { SearchIcon } from '../icons/SearchIcon'
-
-type UserMenuProps = {
-  user: IUser | null | undefined
-  userCanAdministerSite?: boolean
-  handleLogout: () => void
-  showCloudResourcesModal: () => void
-  generateCLIKey: () => void
-  hide: () => void
-}
-
-export const UserMenu = ({
-  user,
-  userCanAdministerSite = false,
-  handleLogout,
-  showCloudResourcesModal,
-  generateCLIKey,
-  hide,
-}: UserMenuProps) => (
-  <StyledDropMenuLinks>
-    <StyledLink data-turbolinks="false" href="/profile" onClick={() => hide()}>
-      Profile
-    </StyledLink>
-    {user && (
-      <>
-        <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`} onClick={() => hide()}>
-          Public Profile
-        </StyledLink>
-        <StyledOnClickModalDiv
-          onClick={() => {
-            showCloudResourcesModal()
-            hide()
-          }}
-        >
-          Cloud Resources
-        </StyledOnClickModalDiv>
-      </>
-    )}
-    <StyledLink
-      as="div"
-      onClick={() => {
-        generateCLIKey()
-        hide()
-      }}
-    >
-      Generate CLI Key
-    </StyledLink>
-    <StyledLink data-turbolinks="false" href="/licenses" onClick={() => hide()}>
-      Manage Licenses
-    </StyledLink>
-    <StyledLink as={Link} data-turbolinks="false" to="/account/notifications" onClick={() => hide()}>
-      Notification Settings
-    </StyledLink>
-    <StyledDivider />
-    <StyledLink as={Link} to="/about" data-turbolinks="false" onClick={() => hide()}>
-      About
-    </StyledLink>
-    <StyledLink data-turbolinks="false" href="/guidelines" onClick={() => hide()}>
-      Guidelines
-    </StyledLink>
-    <StyledLink as="a" target="_blank" href="/docs" data-turbolinks="false" onClick={() => hide()}>
-      Docs
-    </StyledLink>
-    <StyledDivider />
-    {userCanAdministerSite && (
-      <>
-        <StyledLink as={Link} to="/admin" onClick={() => hide()}>
-          Admin Dashboard
-        </StyledLink>
-        <StyledDivider />
-      </>
-    )}
-    <StyledLink
-      as="div"
-      onClick={() => {
-        hide()
-        handleLogout()
-      }}
-    >
-      Log Out
-    </StyledLink>
-  </StyledDropMenuLinks>
-)
+import { UserMenu } from './UserMenu'
 
 const isActiveLink = (linkPath: string, pathname: string) => {
   if (linkPath === '/') {
@@ -474,32 +393,30 @@ const Header: React.FC = () => {
             >
               <SearchIcon />
             </HeaderMenuItem>
-            <DropdownNext
-              trigger="click"
-              content={(props, { hide }) => (
-                <UserMenu
-                  user={user}
-                  userCanAdministerSite={userCanAdministerSite}
-                  handleLogout={handleLogout}
-                  showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
-                  generateCLIKey={() => generateCLIKeyAction.setShowModal(true)}
-                  hide={hide}
-                />
-              )}
+            <Menu
+              positioner={{ sideOffset: 3, side: 'bottom', align: 'end' }}
+              trigger={
+                <Menu.Trigger>
+                  <DropdownMenuItem $active={false} data-testid="user-context-menu">
+                    <IconWrap>
+                      <ProfileIcon height={16} />
+                    </IconWrap>
+                    <HeaderItemText>
+                      {getUsername(user)}
+                      <CaretIcon height={6} />
+                    </HeaderItemText>
+                  </DropdownMenuItem>
+                </Menu.Trigger>
+              }
             >
-              {dropdownProps => (
-                // @ts-expect-error ref types is not compatible with styled-components
-                <DropdownMenuItem {...dropdownProps} $active={dropdownProps.$isActive} data-testid="user-context-menu">
-                  <IconWrap>
-                    <ProfileIcon height={16} />
-                  </IconWrap>
-                  <HeaderItemText>
-                    {getUsername(user)}
-                    <CaretIcon height={6} />
-                  </HeaderItemText>
-                </DropdownMenuItem>
-              )}
-            </DropdownNext>
+              <UserMenu
+                user={user}
+                userCanAdministerSite={userCanAdministerSite}
+                handleLogout={handleLogout}
+                showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
+                generateCLIKey={() => generateCLIKeyAction.setShowModal(true)}
+              />
+            </Menu>
           </HeaderRight>
         </Nav>
       </StyledHeader>

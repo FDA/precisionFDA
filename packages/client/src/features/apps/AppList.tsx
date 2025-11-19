@@ -17,7 +17,7 @@ import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsRow, QuickActions } from '../home/home.styles'
@@ -30,7 +30,7 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useAppsColumns } from './useAppsColumns'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { ActionsMenu } from '../../components/Menu'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 
 type ListType = { apps: IApp[]; meta: IMeta }
@@ -123,19 +123,12 @@ export const AppList = ({
               </Button>
             )}
           </QuickActions>
-          <DropdownNext
-            trigger="click"
-            content={() => (
-              <ActionsDropdownContent
-                actions={actions}
-                message={homeScope === 'spaces' ? 'To perform other actions on this app, access it from the Space' : undefined}
-              />
-            )}
-          >
-            {dropdownProps => (
-              <ActionsButton {...dropdownProps} data-testid="home-apps-actions-button" active={dropdownProps.$isActive} />
-            )}
-          </DropdownNext>
+          <ActionsMenu data-testid="home-apps-actions-button">
+            <ActionsMenuContent
+              actions={actions}
+              message={homeScope === 'spaces' ? 'To perform other actions on this app, access it from the Space' : undefined}
+            />
+          </ActionsMenu>
         </ActionsRow>
       </ResourceHeader>
       <AppsListTable

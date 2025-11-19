@@ -2,29 +2,27 @@ import { Table } from '@tanstack/react-table'
 import React from 'react'
 import styled from 'styled-components'
 import { TransparentButton } from '../../Button'
-import Dropdown from '../../Dropdown'
+import Menu from '../../Menu/Menu'
 import { ColumnsIcon } from '../../icons/ColumnsIcon'
-import { Checkbox } from '../../CheckboxNext'
 
 const Back = styled.div`
-  grid-area: 1 / 1;
   background-color: var(--background);
   width: 32px;
   height: 32px;
   filter: blur(3px);
+  grid-area: 1 / 1;
+`
+const ColumnIconContainer = styled.div`
+  display: grid;
+  place-items: center;
 `
 
-const Front = styled(Dropdown)`
+const IconWrapper = styled.div`
   grid-area: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3;
-  width: 32px;
-  color: var(--tertiary-400);
-  svg:hover {
-    color: var(--tertiary-500);
-  }
+  z-index: 1;
 `
 
 const StyledDropdownContent = styled.div`
@@ -57,50 +55,49 @@ export function ColumnSelect<T>({ table }: { table: Table<T> }) {
 
   const content = () => {
     return (
-      <StyledDropdownContent>
+      <>
         {mainCols.map(column => {
           return (
-            <Row key={column.id}>
-              <Checkbox
-                {...{
-                  type: 'checkbox',
-                  checked: column.getIsVisible(),
-                  onChange: column.getToggleVisibilityHandler(),
-                }}
-              />{' '}
+            <Menu.CheckboxItem
+              key={column.id}
+              checked={column.getIsVisible()}
+              onCheckedChange={() => column.toggleVisibility()}
+            >
               {column.columnDef?.header as string}
-            </Row>
+            </Menu.CheckboxItem>
           )
         })}
-        <SectionText>{propCols.length > 0 && 'Properties'}</SectionText>
+        {propCols.length > 0 && <SectionText>Properties</SectionText>}
         {propCols.map(column => {
           return (
-            <Row key={column.id} className="px-1">
-              <Checkbox
-                {...{
-                  type: 'checkbox',
-                  checked: column.getIsVisible(),
-                  onChange: column.getToggleVisibilityHandler(),
-                }}
-              />{' '}
+            <Menu.CheckboxItem
+              key={column.id}
+              checked={column.getIsVisible()}
+              onCheckedChange={() => column.toggleVisibility()}
+            >
               {column.columnDef?.header as string}
-            </Row>
+            </Menu.CheckboxItem>
           )
         })}
-      </StyledDropdownContent>
+      </>
     )
   }
   return (
     <th className="col-visible">
-      <Front trigger="click" content={content()}>
-        {dropdownProps => (
-          // @ts-expect-error ref is not compatible
-          <TransparentButton {...dropdownProps} active={dropdownProps.$isActive ? 'true' : 'false'} title="Column Select">
-            <ColumnsIcon height={14} />
-          </TransparentButton>
-        )}
-      </Front>
-      <Back />
+      <Menu
+        trigger={
+          <Menu.Trigger className='p-0' aria-label="Column Select">
+            <ColumnIconContainer>
+              <Back />
+              <IconWrapper>
+                <ColumnsIcon height={14} />
+              </IconWrapper>
+            </ColumnIconContainer>
+          </Menu.Trigger>
+        }
+      >
+        {content()}
+      </Menu>
     </th>
   )
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
+import Menu from '../../../components/Menu/Menu'
 import { StarIcon } from '../../../components/icons/StarIcon'
 import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
 import { formatDiscussionDate } from '../helpers'
@@ -47,23 +47,18 @@ export const CardHeader = ({
           </StyledAnswerLabel>
         )}
         {canUserEdit && (
-          <DropdownNext
-            placement="bottom-end"
-            trigger="click"
-            content={() => (
-              <Ol>
-                <Li onClick={() => onClickEdit()}>{EDIT_TEXT[cardType]}</Li>
-                <Li onClick={() => onClickDelete()}>{DELETE_TEXT[cardType]}</Li>
-              </Ol>
-            )}
+          <Menu
+            trigger={
+              <Menu.Trigger>
+                <StyledEditButton data-testid={`${cardType}-dropdown`} tabIndex={0}>
+                  <ThreeDotsIcon width={16} />
+                </StyledEditButton>
+              </Menu.Trigger>
+            }
           >
-            {dropdownProps => (
-              // @ts-expect-error ref is not compatible
-              <StyledEditButton data-testid={`${cardType}-dropdown`} tabIndex={0} {...dropdownProps}>
-                <ThreeDotsIcon width={16} />
-              </StyledEditButton>
-            )}
-          </DropdownNext>
+            <Menu.Item onClick={() => onClickEdit()}>{EDIT_TEXT[cardType]}</Menu.Item>
+            <Menu.Item onClick={() => onClickDelete()}>{DELETE_TEXT[cardType]}</Menu.Item>
+          </Menu>
         )}
       </CardRight>
     </StyledCardHeader>

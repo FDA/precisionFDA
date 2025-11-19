@@ -1,14 +1,14 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import Menu from '../../components/Menu/Menu'
 import { Loader } from '../../components/Loader'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
 import { SyncIcon } from '../../components/icons/SyncIcon'
 import { Refresh } from '../../components/Page/styles'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
 import { RESOURCE_LABELS } from '../../types/user'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
@@ -36,6 +36,7 @@ import { DBStatus } from './DbStatus'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { getSpaceIdFromScope } from '../../utils'
 import { format } from 'date-fns'
+import { ActionsMenu } from '../../components/Menu'
 
 const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(db.scope)
@@ -115,12 +116,9 @@ const DetailActionsDropdown = ({ db }: { db: IDatabase; refetch?: () => void }) 
 
   return (
     <>
-      <DropdownNext
-        trigger="click"
-        content={() => <ActionsDropdownContent actions={actions} />}
-      >
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
-      </DropdownNext>
+      <ActionsMenu data-testid="db-detail-actions-button">
+        <ActionsMenuContent actions={actions} />
+      </ActionsMenu>
 
       <ActionModalsRenderer modals={modals} />
     </>

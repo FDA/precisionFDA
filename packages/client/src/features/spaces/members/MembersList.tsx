@@ -13,8 +13,8 @@ import { Button } from '../../../components/Button'
 import { ColumnFiltersState, ColumnSort, RowSelectionState } from '@tanstack/react-table'
 import { MembersListTable } from './MembersListTable'
 import { MemberCard } from './MemberCard'
-import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
-import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
+import Menu from '../../../components/Menu/Menu'
+import { ActionsMenuContent } from '../../home/ActionMenuContent'
 import { ActionsButton } from '../../home/show.styles'
 import { useMemberSelectionActions } from './useMemberSelectionActions'
 import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
@@ -142,16 +142,18 @@ export const MembersList = ({ space }: { space: ISpace }) => {
           {isLeadOrAdmin && viewMode === 'table' && (
             <ActionsRow>
               <div />
-              <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
-                {dropdownProps => (
-                  <ActionsButton
-                    {...dropdownProps}
-                    data-testid="members-actions-button"
-                    active={dropdownProps.$isActive}
-                    disabled={selectedMembers.length === 0}
-                  />
-                )}
-              </DropdownNext>
+              <Menu
+                trigger={
+                  <Menu.Trigger>
+                    <ActionsButton
+                      data-testid="members-actions-button"
+                      disabled={selectedMembers.length === 0}
+                    />
+                  </Menu.Trigger>
+                }
+              >
+                <ActionsMenuContent actions={actions} />
+              </Menu>
             </ActionsRow>
           )}
         </StyledButtonGroup>

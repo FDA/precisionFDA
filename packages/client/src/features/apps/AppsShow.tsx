@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
-import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
+import { ActionsMenu } from '../../components/Menu'
+import { RevisionMenu } from '../../components/Menu/RevisionMenu'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown } from '../../components/Markdown'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
@@ -11,7 +11,7 @@ import { CubeIcon } from '../../components/icons/CubeIcon'
 import { IChallenge } from '../../types/challenge'
 import { getSpaceIdFromScope } from '../../utils'
 import { getBackPathNext } from '../../utils/getBackPath'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
@@ -152,12 +152,9 @@ const DetailActionsDropdown = ({
 
   return (
     <>
-      <DropdownNext
-        trigger="click"
-        content={() => <ActionsDropdownContent actions={filteredActions} />}
-      >
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
-      </DropdownNext>
+      <ActionsMenu data-testid="app-show-actions-button">
+        <ActionsMenuContent actions={filteredActions} />
+      </ActionsMenu>
       
       <ActionModalsRenderer modals={modals} />
     </>
@@ -227,7 +224,7 @@ export const AppsShow = ({
                 : null}
             </Title>
 
-            <RevisionDropdown
+            <RevisionMenu
               revisions={meta.revisions}
               selectedValue={app.revision}
               linkToRevision={r => `${basePath}/apps/${r.uid}`}

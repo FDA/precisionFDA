@@ -14,7 +14,7 @@ import {
   BoolButton,
   BoolButtonGroup,
 } from '../../../components/Button/BoolButtons'
-import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
+import Menu from '../../../components/Menu/Menu'
 import { StyledDropMenuLinks } from '../../../components/Header/styles'
 import { InputText } from '../../../components/InputText'
 import { InputError } from '../../../components/form/styles'
@@ -493,65 +493,57 @@ export const SelectIOClass = ({
   children: React.ReactNode
 }) => {
   return (
-    <DropdownNext
-      trigger="click"
-      content={(props, { hide }) => (
-        <StyledDropMenuLinks
-          data-testid="io-items">
-          <StyledItem
-            onClick={() => {
-              hide()
-              addRow('string')
-            }}
+    <Menu
+      positioner={{ side: 'bottom', align: 'start' }}
+      trigger={
+        <Menu.Trigger>
+          <StyledButton
+            type="button"
           >
-            string
-          </StyledItem>
-          <StyledItem
-            onClick={() => {
-              hide()
-              addRow('file')
-            }}
-          >
-            file
-          </StyledItem>
-          <StyledItem
-            onClick={() => {
-              hide()
-              addRow('int')
-            }}
-          >
-            int
-          </StyledItem>
-          <StyledItem
-            onClick={() => {
-              hide()
-              addRow('float')
-            }}
-          >
-            float
-          </StyledItem>
-          <StyledItem
-            onClick={() => {
-              hide()
-              addRow('boolean')
-            }}
-          >
-            boolean
-          </StyledItem>
-        </StyledDropMenuLinks>
-      )}
+            <PlusIcon height={12} />
+            {children}
+          </StyledButton>
+        </Menu.Trigger>
+      }
     >
-      {({ $isActive, ...props }) => (
-        // @ts-expect-error ref is not compatible
-        <StyledButton
-          type="button"
-          {...props}
-          active={$isActive.toString() as BooleanString}
+      <StyledDropMenuLinks
+        data-testid="io-items">
+        <Menu.Item
+          onClick={() => {
+            addRow('string')
+          }}
         >
-          <PlusIcon height={12} />
-          {children}
-        </StyledButton>
-      )}
-    </DropdownNext>
+          string
+        </Menu.Item>
+        <Menu.Item
+          onClick={() => {
+            addRow('file')
+          }}
+        >
+          file
+        </Menu.Item>
+        <Menu.Item
+          onClick={() => {
+            addRow('int')
+          }}
+        >
+          int
+        </Menu.Item>
+        <Menu.Item
+          onClick={() => {
+            addRow('float')
+          }}
+        >
+          float
+        </Menu.Item>
+        <Menu.Item
+          onClick={() => {
+            addRow('boolean')
+          }}
+        >
+          boolean
+        </Menu.Item>
+      </StyledDropMenuLinks>
+    </Menu>
   )
 }

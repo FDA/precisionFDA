@@ -12,7 +12,7 @@ const StyledThemeToggle = styled.div`
   width: fit-content;
   display: flex;
   border-radius: 9999px;
-  border: 1px solid var(--c-layout-border-200);
+  border: 1px solid var(--c-layout-border);
 
   button {
     background: transparent;
@@ -27,7 +27,7 @@ const StyledThemeToggle = styled.div`
     min-width: auto;
 
     &[data-active='true'] {
-      background: var(--c-layout-border-200);
+      background: var(--tertiary-100);
     }
 
     &:hover {

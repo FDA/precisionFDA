@@ -1,0 +1,310 @@
+/* Trigger - Base styles shared by all menu triggers */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: all 150ms ease;
+  white-space: nowrap;
+  text-align: center;
+  touch-action: manipulation;
+  gap: 6px;
+  padding: none;
+  font-size: inherit;
+  font-weight: inherit;
+  border-radius: none;
+  background-color: transparent;
+  border: none;
+  color: var(--c-text-700);
+}
+
+.trigger:hover {
+  border-color: var(--primary-600);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--primary-300);
+  outline-offset: 2px;
+}
+
+.trigger[aria-disabled='true'],
+.trigger[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+  color: var(--c-text-400);
+  background: var(--tertiary-200);
+  border-color: var(--tertiary-300);
+}
+
+/* Positioner */
+.positioner {
+  z-index: 50;
+}
+
+.positioner[data-side='bottom'] {
+  transform-origin: top right;
+}
+
+.positioner[data-side='top'] {
+  transform-origin: bottom right;
+}
+
+/* Popup */
+.popup {
+  min-width: 12rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--c-dropdown-menu-border, #e5e7eb);
+  background-color: var(--c-dropdown-bg, #ffffff);
+  padding: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  outline: none;
+  animation: scaleIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: var(--transform-origin);
+}
+
+.popup[data-side='top'] {
+  animation: slideDown 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popup[data-side='right'] {
+  animation: slideLeft 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popup[data-side='bottom'] {
+  animation: slideUp 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popup[data-side='left'] {
+  animation: slideRight 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+/* Item */
+.item {
+  display: flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: background-color 150ms ease;
+  color: var(--base, #111827);
+  position: relative;
+  text-decoration: none;
+}
+
+.item a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.item a:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+.item:hover,
+.item[data-highlighted='true'],
+.item:focus-visible {
+  background-color: var(--c-dropdown-hover-bg, #f3f4f6);
+}
+
+.item[data-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  color: var(--c-dropdown-menu-text-disabled, #9ca3af);
+}
+
+/* Checkbox Item */
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  padding: 0.3rem 0.75rem;
+  padding-left: 2rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: background-color 150ms ease;
+  color: var(--base, #111827);
+  position: relative;
+}
+
+.checkboxItem:hover,
+.checkboxItem[data-highlighted='true'],
+.checkboxItem:focus-visible {
+  background-color: var(--c-dropdown-hover-bg, #f3f4f6);
+}
+
+.checkboxItem[data-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  color: var(--c-dropdown-menu-text-disabled, #9ca3af);
+}
+
+/* Radio Item */
+.radioItem {
+  display: flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  padding-left: 2rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: background-color 150ms ease;
+  color: var(--base, #111827);
+  position: relative;
+}
+
+.radioItem:hover,
+.radioItem[data-highlighted='true'] {
+  background-color: var(--c-dropdown-hover-bg, #f3f4f6);
+}
+
+.radioItem[data-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  color: var(--c-dropdown-menu-text-disabled, #9ca3af);
+}
+
+/* Item Indicator */
+.itemIndicator {
+  position: absolute;
+  left: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Group Label */
+.groupLabel {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  color: var(--c-text-400, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Separator */
+.separator {
+  height: 1px;
+  margin: 0.5rem -0.5rem;
+  background-color: var(--c-dropdown-menu-border, #e5e7eb);
+}
+
+/* Submenu Trigger */
+.subTrigger {
+  display: flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: background-color 150ms ease;
+  color: var(--base, #111827);
+  position: relative;
+}
+
+.subTrigger:hover,
+.subTrigger[data-highlighted='true'] {
+  background-color: var(--c-dropdown-hover-bg, #f3f4f6);
+}
+
+.subTrigger[data-popup-open='true'] {
+  background-color: var(--c-dropdown-active-bg, #e5e7eb);
+}
+
+.subTrigger[data-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  color: var(--c-dropdown-menu-text-disabled, #9ca3af);
+}
+
+/* Chevron */
+.chevron {
+  margin-left: auto;
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.6;
+}
+
+/* Animations */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

@@ -1,7 +1,7 @@
 import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
 import React from 'react'
 import { Button } from '../../components/Button'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { ActionsMenu } from '../../components/Menu'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
@@ -10,7 +10,7 @@ import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { HomeScope } from '../home/types'
@@ -111,11 +111,9 @@ export const WorkflowList = ({
               </Button>
             )}
           </QuickActions>
-          <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} message={message} />}>
-            {dropdownProps => (
-              <ActionsButton {...dropdownProps} data-testid="home-workflows-actions-button" active={dropdownProps.$isActive} />
-            )}
-          </DropdownNext>
+          <ActionsMenu data-testid="home-workflows-actions-button">
+            <ActionsMenuContent actions={actions} message={message} />
+          </ActionsMenu>
         </ActionsRow>
       </ResourceHeader>
 

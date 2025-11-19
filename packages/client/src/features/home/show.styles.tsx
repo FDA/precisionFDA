@@ -144,21 +144,20 @@ export const StyledActionsButton = styled(Button)<{ disabled?: boolean }>`
     `}
 `
 
-export const ActionsButton = ({
-  label = 'Actions',
-  ...props
-}: {
-  label?: string
-  disabled?: boolean
-  active?: boolean | BooleanString
-  ref: React.Ref<HTMLElement | null>
-}) => {
+export const ActionsButton = React.forwardRef<
+  HTMLElement,
+  {
+    label?: string
+    disabled?: boolean
+    active?: boolean | BooleanString
+  }
+>(({ label = 'Actions', ...props }, ref) => {
   return (
-    // @ts-expect-error react 19 passes ref through props
-    <StyledActionsButton data-variant="primary" {...props}>
+    // @ts-expect-error ref type mismatch
+    <StyledActionsButton data-variant="primary" ref={ref} {...props}>
       {label} <ArrowIcon />
     </StyledActionsButton>
   )
-}
+})
 
 ActionsButton.displayName = 'ActionsButton'

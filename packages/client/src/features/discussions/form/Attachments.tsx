@@ -1,7 +1,7 @@
 import React from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import { Button } from '../../../components/Button'
-import Dropdown from '../../../components/Dropdown'
+import Menu from '../../../components/Menu/Menu'
 import { useSelectAppModal } from '../../apps/actionsModals/useSelectAppModal'
 import { IApp } from '../../apps/apps.types'
 import { useSelectAssetModal } from '../../assets/actionModals/useSelectAssetModal'
@@ -14,7 +14,7 @@ import { IJob } from '../../executions/executions.types'
 import { useSelectFileModal } from '../../files/actionModals/useSelectFileModal'
 import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
 import { IFolder, TreeOnSelectInfo } from '../../files/files.types'
-import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../../home/ActionMenuContent'
 import { Attachment, AttachmentType, FormAttachments, NoteForm } from '../discussions.types'
 import { typeAttachmentKey } from '../helpers'
 import { NoteScope } from '../api'
@@ -112,58 +112,56 @@ export function Attachments({
       {assetsModalComp}
       {comparisonsModalComp}
       {jobModalComp}
-      <Dropdown
-        trigger="click"
-        content={
-          <ActionsDropdownContent
-            actions={[
-              {
-                name: 'Files',
-                type: 'modal',
-                func: () => setFilesShowModal(true),
-                isDisabled: false,
-              },
-              {
-                name: 'Folders',
-                type: 'modal',
-                func: () => setFoldersShowModal(true),
-                isDisabled: scope === 'public',
-              },
-              {
-                name: 'Assets',
-                type: 'modal',
-                func: () => setAssetsShowModal(true),
-                isDisabled: false,
-              },
-              {
-                name: 'Apps',
-                type: 'modal',
-                func: () => setAppsShowModal(true),
-                isDisabled: false,
-              },
-              {
-                name: 'Jobs',
-                type: 'modal',
-                func: () => setJobShowModal(true),
-                isDisabled: false,
-              },
-              {
-                name: 'Comparisons',
-                type: 'modal',
-                func: () => setComparisonsShowModal(true),
-                isDisabled: false,
-              },
-            ]}
-          />
+      <Menu
+        trigger={
+          <Menu.Trigger>
+            <Button type="button" data-testid="admin-users-resource-button">
+              Select Attachment
+            </Button>
+          </Menu.Trigger>
         }
       >
-        {dropdownProps => (
-          // @ts-expect-error ref not copatible with styled-components
-          <Button type="button" {...dropdownProps} data-testid="admin-users-resource-button" active={`${dropdownProps.$isActive}`}>
-            Select Attachment
-          </Button>
-        )}
-      </Dropdown>
+        <ActionsMenuContent
+          actions={[
+            {
+              name: 'Files',
+              type: 'modal',
+              func: () => setFilesShowModal(true),
+              isDisabled: false,
+            },
+            {
+              name: 'Folders',
+              type: 'modal',
+              func: () => setFoldersShowModal(true),
+              isDisabled: scope === 'public',
+            },
+            {
+              name: 'Assets',
+              type: 'modal',
+              func: () => setAssetsShowModal(true),
+              isDisabled: false,
+            },
+            {
+              name: 'Apps',
+              type: 'modal',
+              func: () => setAppsShowModal(true),
+              isDisabled: false,
+            },
+            {
+              name: 'Jobs',
+              type: 'modal',
+              func: () => setJobShowModal(true),
+              isDisabled: false,
+            },
+            {
+              name: 'Comparisons',
+              type: 'modal',
+              func: () => setComparisonsShowModal(true),
+              isDisabled: false,
+            },
+          ]}
+        />
+      </Menu>
     </>
   )
 }

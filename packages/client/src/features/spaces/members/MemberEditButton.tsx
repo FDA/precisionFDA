@@ -1,6 +1,6 @@
 import React from 'react'
-import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
-import { Li, Ol, StyledEditButton } from '../../discussions/styles'
+import Menu from '../../../components/Menu/Menu'
+import { StyledEditButton } from '../../discussions/styles'
 import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
 import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
 import { SpaceMembership } from './members.types'
@@ -20,22 +20,17 @@ const MemberEditButton: React.FC<MemberEditButtonProps> = ({
   })
   return (
     <>
-      <DropdownNext
-        placement="bottom-end"
-        trigger="click"
-        content={() => (
-          <Ol>
-            <Li onClick={() => setShowModal(true)}>Change Role</Li>
-          </Ol>
-        )}
+      <Menu
+        trigger={
+          <Menu.Trigger>
+            <StyledEditButton data-testid="member-edit-button" tabIndex={0}>
+              <ThreeDotsIcon width={16} />
+            </StyledEditButton>
+          </Menu.Trigger>
+        }
       >
-        {dropdownProps => (
-          // @ts-expect-error ref is not compatible
-          <StyledEditButton data-testid="member-edit-button" tabIndex={0} {...dropdownProps}>
-            <ThreeDotsIcon width={16} />
-          </StyledEditButton>
-        )}
-      </DropdownNext>
+        <Menu.Item onClick={() => setShowModal(true)}>Change Role</Menu.Item>
+      </Menu>
       {modalComp}
     </>
   )

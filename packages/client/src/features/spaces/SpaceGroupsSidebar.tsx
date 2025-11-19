@@ -3,17 +3,18 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { Button, IconButton, TransparentButton } from '../../components/Button'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { Menu } from '../../components/Menu'
 import { CaretUpIcon } from '../../components/icons/CaretUpIcon'
 import { EllipsisVerticalIcon } from '../../components/icons/EllipsisVerticalIcon'
 import { PlusIcon } from '../../components/icons/PlusIcon'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { useCreateSpaceGroupModal } from '../space-groups/modals/useCreateSpaceGroupModal'
 import { ISpaceGroup, ISpaceGroupSpace } from '../space-groups/types'
 import { useSpaceGroupSelectActions } from '../space-groups/useSpaceGroupSelectActions'
 import { truncateText } from './helpers'
 import { findSpaceTypeIcon } from './useSpacesColumns'
+import styles from './spaces.module.css'
 
 const SidebarContainer = styled.div`
   background: var(--tertiary-50);
@@ -244,23 +245,13 @@ const SpaceGroupItemRender = ({
         <h2 title={spaceGroup.name}>{truncateText(spaceGroup.name, truncateThreshold)}</h2>
         {spaceGroup.spaces?.length > 0 && <span>{spaceGroup.spaces?.length}</span>}
         {userCanAdministerSpaceGroups && (
-          <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
-            {dropdownProps => {
-              return (
-                // @ts-expect-error ref is not compatible
-                <IconButton
-                  {...dropdownProps}
-                  onClick={e => {
-                    e.stopPropagation()
-                    dropdownProps.onClick?.(e)
-                  }}
-                  data-testid={`space-list-assign-to-group-button-${spaceGroup.id}`}
-                >
-                  <EllipsisVerticalIcon width={16} height={16} />
-                </IconButton>
-              )
-            }}
-          </DropdownNext>
+          <Menu trigger={
+            <Menu.Trigger data-testid={`space-list-assign-to-group-button-${spaceGroup.id}`} className={styles.spaceGroupActionButton} onClick={e => e.stopPropagation()}>
+              <EllipsisVerticalIcon width={16} height={16} />
+            </Menu.Trigger>
+          }>
+            <ActionsMenuContent actions={actions} />
+          </Menu>
         )}
       </SpaceGroupHeading>
       {spaceGroupExpanded && spaceGroup.spaces?.length === 0 && <SpaceGroupsMessage>No spaces in this group</SpaceGroupsMessage>}

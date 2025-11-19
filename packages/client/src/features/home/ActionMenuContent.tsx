@@ -15,6 +15,7 @@ import {
   RouteAction,
   SelectionAction,
 } from './action-types'
+import { ActionsMenu } from '../../components/Menu'
 
 export const StyledActionItem = styled.li<{ disabled?: boolean; selected?: boolean }>`
   margin: 0;
@@ -158,15 +159,15 @@ const ActionItem = ({ action }: { action: Action }) => {
     case 'route': {
       const routeAction = action as RouteAction
       return (
-        <StyledActionItem key={action.name} disabled={isDisabled}>
+        <ActionsMenu.Item key={action.name} disabled={isDisabled}>
           {isDisabled ? <span>{action.name}</span> : <NavLink to={routeAction.to}>{action.name}</NavLink>}
-        </StyledActionItem>
+        </ActionsMenu.Item>
       )
     }
     case 'link': {
       const linkAction = action as LinkActionType
       return (
-        <StyledActionItem key={action.name} disabled={isDisabled}>
+        <ActionsMenu.Item key={action.name} disabled={isDisabled}>
           <LinkAction
             disabled={isDisabled}
             link={linkAction.link}
@@ -174,21 +175,21 @@ const ActionItem = ({ action }: { action: Action }) => {
           >
             {action.name}
           </LinkAction>
-        </StyledActionItem>
+        </ActionsMenu.Item>
       )
     }
     case 'selection': {
       const selectionAction = action as SelectionAction
       return (
-        <StyledActionItem
+        <ActionsMenu.CheckboxItem
           key={action.name}
-          onClick={() => {
+          onCheckedChange={(checked: boolean) => {
             if (!isDisabled) {
-              selectionAction.func(!selectionAction.isSelected)
+              selectionAction.func(checked)
             }
           }}
           disabled={isDisabled}
-          selected={selectionAction.isSelected}
+          checked={selectionAction.isSelected}
         >
           <StyleSelection>
             <StyleSelectionIcon>
@@ -196,25 +197,23 @@ const ActionItem = ({ action }: { action: Action }) => {
             </StyleSelectionIcon>
             {selectionAction.title}
           </StyleSelection>
-        </StyledActionItem>
+        </ActionsMenu.CheckboxItem>
       )
     }
     case 'modal': {
       const modalAction = action as ModalAction
       return (
-        <StyledActionItem key={action.name} onClick={() => !isDisabled && modalAction.func()} disabled={isDisabled}>
+        <ActionsMenu.Item key={action.name} onClick={() => !isDisabled && modalAction.func()} disabled={isDisabled}>
           {action.name}
-        </StyledActionItem>
+        </ActionsMenu.Item>
       )
     }
     default: {
       const functionAction = action as FunctionAction
       return (
-        <StyledActionItem
+        <ActionsMenu.Item
           key={action.name}
-          onClick={(e: React.MouseEvent) => {
-            e.preventDefault()
-            e.stopPropagation()
+          onClick={() => {
             if (!isDisabled) {
               functionAction.func()
             }
@@ -222,26 +221,26 @@ const ActionItem = ({ action }: { action: Action }) => {
           disabled={isDisabled}
         >
           {functionAction?.children || action.name}
-        </StyledActionItem>
+        </ActionsMenu.Item>
       )
     }
   }
 }
 
-export function ActionsDropdownContent({ actions, message }: { actions: Action[]; message?: React.ReactNode }) {
+export function ActionsMenuContent({ actions, message }: { actions: Action[]; message?: React.ReactNode }) {
   const visibleActions = actions.filter(action => !action.shouldHide)
 
   return (
-    <ActionMenu>
+    <>
       {message && <StyledActionsMessage>{message}</StyledActionsMessage>}
       {visibleActions.map(action => (
         <ActionItem key={action.name} action={action} />
       ))}
-    </ActionMenu>
+    </>
   )
 }
 
-export function ActionsDropdownGroupContent({ content }: { content: ActionGroup[] }) {
+export function ActionsMenuGroupContent({ content }: { content: ActionGroup[] }) {
   return (
     <GroupActionMenu>
       {content.map((item, index) => {

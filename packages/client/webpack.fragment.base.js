@@ -43,11 +43,27 @@ module.exports = () => ({
     rules: [
       {
         test: /\.s(a|c)ss$/,
-        exclude: [/dist/, /.build_cache/],
+        exclude: [/dist/, /.build_cache/, /\.module\.s(a|c)ss$/],
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
+        test: /\.module\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+            options: {
+              modules: {
+                localIdentName: '[name]__[local]--[hash:base64:5]',
+              },
+              esModule: false,
+            },
+          },
+        ],
+      },
+      {
         test: /\.css$/,
+        exclude: /\.module\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {

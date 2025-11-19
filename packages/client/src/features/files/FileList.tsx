@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQueryParam } from 'use-query-params'
 import { Button } from '../../components/Button'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { ActionsMenu } from '../../components/Menu'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
@@ -22,7 +22,7 @@ import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, FilesListBreadcrumbHeader, FilesListResourceHeader } from '../home/show.styles'
@@ -224,17 +224,12 @@ export const FileList = ({
                 )}
               </Button>
             )}
-            <DropdownNext
-              trigger="click"
-              content={() => (
-                <ActionsDropdownContent
-                  actions={actions}
-                  message={homeScope === 'spaces' ? 'To perform other actions on this file, access it from the Space' : undefined}
-                />
-              )}
-            >
-              {dropdownProps => <ActionsButton {...dropdownProps} data-testid="home-files-actions-button" />}
-            </DropdownNext>
+            <ActionsMenu data-testid="home-files-actions-button">
+              <ActionsMenuContent
+                actions={actions}
+                message={homeScope === 'spaces' ? 'To perform other actions on this file, access it from the Space' : undefined}
+              />
+            </ActionsMenu>
           </QuickActions>
         </ActionsRow>
       </FilesListResourceHeader>
