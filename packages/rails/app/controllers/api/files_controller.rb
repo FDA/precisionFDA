@@ -217,7 +217,7 @@ module Api
       end
 
       # Otherwise, render the data from the helper method
-      render render_files_list(files: files, folders: folders)
+      render_files_list(files: files, folders: folders)
     end
 
     # GET /api/files/everybody
@@ -244,13 +244,11 @@ module Api
 
       if show_count
         # Return a single value if `show_count` is true
-        filtered_files = FileService::FilesFilter.call(files, params[:filters])
-        page_dict = pagination_dict(filtered_files)
-        return page_dict[:total_count]
-      end
-
+        files.count
+      else
       # Call the helper method and render the returned hash
-      render render_files_list(files: files, folders: folders)
+      render_files_list(files: files, folders: folders)
+      end
     end
 
     # GET /api/files/spaces
@@ -283,7 +281,7 @@ module Api
 
       if show_count
         # Return the count directly
-        return files.size
+        files.size
       else
         # Your existing code for when show_count is false
         render_files_list(files: files, folders: folders)

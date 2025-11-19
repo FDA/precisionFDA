@@ -46,11 +46,11 @@ module Api
 
       if show_count
         filtered_assets = FileService::FilesFilter.call(assets, params[:filters])
-        page_dict = pagination_dict(filtered_assets)
-        return page_dict[:total_count]  # Return count instead of rendering
+        # Return a single value if `show_count` is true
+        filtered_assets.count
+      else
+        render_assets_list assets
       end
-
-      render_assets_list assets
     end
 
     # GET /api/jobs/featured
@@ -65,13 +65,11 @@ module Api
         search_by_tags(params.dig(:filters, :tags))
 
       if show_count
-        filtered_assets = FileService::FilesFilter.call(assets, params[:filters])
-        page_dict = pagination_dict(filtered_assets)
-        return page_dict[:total_count]
+        # Return a single value if `show_count` is true
+        assets.count
+      else
+        render_assets_list assets
       end
-
-      # This will be called if `show_count` is false
-      render_assets_list assets
     end
 
     # GET /api/assets/everybody
@@ -87,13 +85,11 @@ module Api
         search_by_tags(params.dig(:filters, :tags))
 
       if show_count
-        filtered_assets = FileService::FilesFilter.call(assets, params[:filters])
-        page_dict = pagination_dict(filtered_assets)
-        return page_dict[:total_count]
+        # Return a single value if `show_count` is true
+        assets.count
+      else
+        render_assets_list assets
       end
-
-      # This will be called if `show_count` is false
-      render_assets_list assets
     end
 
     # GET /api/assets/spaces
@@ -112,8 +108,8 @@ module Api
       assets = FileService::FilesFilter.call(assets, params[:filters]).to_a
 
       if show_count
-        # Return a simple integer count instead of rendering it
-        return assets.count
+        # Return a single value if `show_count` is true
+        assets.count
       else
         assets = sort_array_by_fields(assets, "created_at")
         page_meta = pagination_meta(assets.count)

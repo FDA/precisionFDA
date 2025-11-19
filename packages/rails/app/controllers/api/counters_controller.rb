@@ -3,6 +3,7 @@ module Api
   class CountersController < ApiController
     CONTROLLERS = {
       "assets" => AssetsController,
+      "apps" => AppsController,
       "dbclusters" => DbClustersController,
       "jobs" => JobsController,
       "files" => FilesController,
@@ -37,14 +38,11 @@ module Api
       counters[:reports] = SpaceReport.accessible_by_private.where(created_by: @context.user.id).count
 
       if params[:action] == "spaces"
-        apps = AppSeries.editable_by(@context).where.not(scope: [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE])
         discussions = Discussion.accessibly_in_spaces(@context)
       else
-        apps = AppSeries.editable_by(@context).where(scope: Scopes::SCOPE_PRIVATE)
         discussions = Discussion.accessible_by(@context).where(notes: { scope: Scopes::SCOPE_PUBLIC })
       end
 
-      counters[:apps] = apps.count
       counters[:discussions] = discussions.count
 
       render json: counters
