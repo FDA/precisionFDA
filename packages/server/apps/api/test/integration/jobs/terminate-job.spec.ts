@@ -86,21 +86,33 @@ describe('PATCH /jobs/:id/terminate', () => {
 
   context('error states', () => {
     it('throws 404 when the job does not exist', async () => {
+      const jobDxid = 'job-DX1234567890abcdef1234567'
       const { body } = await supertest(testedApp.getHttpServer())
-        .patch(`/jobs/${generate.random.dxstr()}/terminate`)
+        .patch(`/jobs/${jobDxid}/terminate`)
         .set(getDefaultHeaderData(user))
         .expect(404)
       expect(body.error).to.have.property('code', ErrorCodes.JOB_NOT_FOUND)
     })
 
     it('throws 404 when the job type is NOT HTTPS', async () => {
+      const jobDxid = 'job-DX1234567890abcdef1234567'
+
       job.entityType = ENTITY_TYPE.NORMAL
       await em.flush()
       const { body } = await supertest(testedApp.getHttpServer())
-        .patch(`/jobs/${generate.random.dxstr()}/terminate`)
+        .patch(`/jobs/${jobDxid}/terminate`)
         .set(getDefaultHeaderData(user))
         .expect(404)
       expect(body.error).to.have.property('code', ErrorCodes.JOB_NOT_FOUND)
+    })
+
+    it('throws 400 when job dxid is invalid', async () => {
+      const jobDxid = 'invalid-dxid'
+      const { body } = await supertest(testedApp.getHttpServer())
+        .patch(`/jobs/${jobDxid}/terminate`)
+        .set(getDefaultHeaderData(user))
+        .expect(400)
+      expect(body.error).to.have.property('code', ErrorCodes.VALIDATION)
     })
   })
 })

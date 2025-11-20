@@ -13,7 +13,6 @@ import { Job } from '@shared/domain/job/job.entity'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
-import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
 import { EventModule } from '@shared/domain/event/event.module'
 
 const imports = [
@@ -28,13 +27,8 @@ const imports = [
 
 @Module({
   imports,
-  providers: [
-    JobService,
-    JobLogService,
-    JobSynchronizationService,
-    ChallengeJobSynchronizationService,
-  ],
-  exports: [JobService, JobLogService],
+  providers: [JobService, JobLogService, JobSynchronizationService],
+  exports: [JobService, JobLogService, JobSynchronizationService],
 })
 export class JobServiceModule {
   static registerWithCustomPlatformClient(

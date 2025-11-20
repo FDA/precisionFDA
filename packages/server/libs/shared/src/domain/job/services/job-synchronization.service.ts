@@ -1,6 +1,6 @@
 import { wrap } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import {
   JobFinishedInputTemplate,
@@ -8,7 +8,6 @@ import {
 } from '@shared/domain/email/templates/mjml/job-finished.template'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { JobRepository } from '@shared/domain/job/job.repository'
-import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -46,15 +45,16 @@ import {
   sendJobFailedEmails,
   shouldSyncStatus,
 } from '../job.helper'
+import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
+import { CHALLENGE_BOT_USER_CONTEXT } from '@shared/domain/user-context/provider/challenge-bot-user-context.provider'
+import * as errors from '@shared/errors'
 
 /**
  * JobSynchronizationService is responsible for synchronizing the job status with the platform.
- * Works for both https and standalone apps.
+ * Works for both https and standalone apps and challenge submissions.
  *
  * Still work in progress - it was moved from a bunch of functions in synchronize.ts into a service, but
  * the service itself could use some refactoring to make it more readable and reusable within the service.
- *
- * Challenge bot jobs synchronization is implemented in ChallengeJobSynchronizationService.
  */
 @Injectable()
 export class JobSynchronizationService {
@@ -67,6 +67,8 @@ export class JobSynchronizationService {
     private readonly notificationService: NotificationService,
     private readonly jobRepo: JobRepository,
     private readonly platformClient: PlatformClient,
+    @Inject(CHALLENGE_BOT_PLATFORM_CLIENT) private readonly challengeBotClient: PlatformClient,
+    @Inject(CHALLENGE_BOT_USER_CONTEXT) private readonly challengeBotUserContext: UserContext,
   ) {}
 
   static getBullJobId(jobDxid: string): string {
@@ -75,6 +77,84 @@ export class JobSynchronizationService {
 
   static getJobDxidFromBullJobId(bullJobId: string): string {
     return bullJobId.replace('sync_job_status.', '')
+  }
+
+  /**
+   * Synchronizes all running jobs for the challenge bot user.
+   * This is a simplified synchronization without emails, notifications, or Bull job management.
+   */
+  async checkChallengeJobs(): Promise<void> {
+    this.logger.log('Running checkChallengeJobs')
+    const jobs = await this.jobRepo.findRunningJobsByUser({
+      userId: this.challengeBotUserContext.id,
+    })
+
+    if (jobs.length > 0) {
+      await this.em.transactional(async () => {
+        this.logger.log(
+          `Found ${jobs.length} non-terminal jobs for challenge bot user, syncing state`,
+        )
+        for (const job of jobs) {
+          await this.synchronizeChallengeJob(job)
+        }
+      })
+    } else {
+      this.logger.log('No non-terminal jobs found for challenge bot user')
+    }
+  }
+
+  /**
+   * Synchronizes a single challenge bot job.
+   * Simplified version without emails, notifications, or Bull job management.
+   */
+  private async synchronizeChallengeJob(job: Job): Promise<void> {
+    let platformJobData: JobDescribeResponse
+    try {
+      platformJobData = await this.challengeBotClient.jobDescribe({
+        jobDxId: job.dxid,
+      })
+    } catch (err) {
+      this.logger.error(
+        { error: err, jobId: job.dxid },
+        'Error fetching challenge job from platform',
+      )
+      return
+    }
+
+    const isOverTerminateMaxDuration = buildIsOverMaxDuration('terminate')
+    if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
+      this.logger.log(
+        { jobId: job.id, jobUid: job.uid },
+        'Job marked as stale, trying to terminate',
+      )
+
+      await this.requestTerminateChallengeJob(job.dxid)
+      return
+    }
+
+    if (isStateTerminal(platformJobData.state)) {
+      this.logger.log(
+        { remoteState: platformJobData.state },
+        'Remote job state is terminal, will sync folders and files',
+      )
+
+      const challengeBotUser = await this.challengeBotUserContext.loadEntity()
+      const eventEntity = await createJobClosed(challengeBotUser, job, platformJobData)
+      this.em.persist(eventEntity)
+      await createSyncOutputsTask({ dxid: job.dxid }, this.challengeBotUserContext)
+    }
+
+    this.logger.log(
+      {
+        jobId: job.dxid,
+        fromState: job.state,
+        toState: platformJobData.state,
+      },
+      'Updating job state and metadata from platform',
+    )
+
+    job.describe = platformJobData
+    job.state = platformJobData.state
   }
 
   async synchronizeJob(jobDxid: DxId<'job'>, bullJob: BullJob): Promise<Maybe<Job>> {
@@ -145,13 +225,7 @@ export class JobSynchronizationService {
         'Job marked as stale, trying to terminate',
       )
 
-      const terminateOp = new RequestTerminateJobOperation({
-        log: this.logger,
-        em: this.em,
-        user: this.userCtx,
-      })
-      await terminateOp.execute({ dxid: job.dxid })
-      return
+      await this.requestTerminateJob(job.dxid)
     }
 
     // fixme: the mapping is not perfect for the https apps
@@ -262,6 +336,43 @@ export class JobSynchronizationService {
 
     this.logger.debug({ job: updatedJob }, 'Updated job')
     await this.em.flush()
+  }
+
+  async requestTerminateJob(jobDxid: DxId<'job'>): Promise<Job> {
+    const job = await this.jobRepo.findEditableOne({ dxid: jobDxid })
+    if (!job) {
+      throw new errors.JobNotFoundError()
+    }
+    return this.terminateJob(job, this.platformClient)
+  }
+
+  async requestTerminateChallengeJob(jobDxid: DxId<'job'>): Promise<Job> {
+    const job = await this.jobRepo.findOne({ dxid: jobDxid, user: this.challengeBotUserContext.id })
+    return this.terminateJob(job, this.challengeBotClient)
+  }
+
+  private async terminateJob(
+    job: Job | null,
+    client: { jobTerminate: (params: { jobId: DxId<'job'> }) => Promise<unknown> },
+  ): Promise<Job> {
+    if (!job) {
+      throw new errors.JobNotFoundError()
+    }
+
+    if (isStateTerminal(job.state) || job.state === JOB_STATE.TERMINATING) {
+      this.logger.log(
+        { jobId: job.id, jobDxid: job.dxid },
+        'Job is already terminating or terminated',
+      )
+      throw new errors.InvalidStateError('Job is already terminating or terminated')
+    }
+
+    const apiResult = await client.jobTerminate({ jobId: job.dxid })
+    this.logger.log({ jobId: job.id, jobDxId: job.dxid, apiResult }, 'Job set to terminate')
+    job.state = JOB_STATE.TERMINATING
+    await this.em.flush()
+
+    return job
   }
 
   private async sendTerminationEmail(

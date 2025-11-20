@@ -12,6 +12,7 @@ import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
 import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 @Processor(config.workerJobs.queues.maintenance.name)
 export class MaintenanceQueueProcessor extends BaseQueueProcessor {
@@ -21,13 +22,14 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     private readonly userService: UserService,
     private readonly userCheckupFacade: UserCheckupFacade,
     private readonly jobServiceWithPlatformClient: JobService,
+    private readonly jobSyncService: JobSynchronizationService,
   ) {
     super()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_CHALLENGE_JOBS)
   async checkChallengeJobs(): Promise<void> {
-    await this.jobServiceWithPlatformClient.checkChallengeJobs()
+    await this.jobSyncService.checkChallengeJobs()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_STALE_JOBS)

@@ -1,5 +1,4 @@
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { EmailSendService } from '@shared/domain/email/email-send.service'
 import { JobService } from '@shared/domain/job/job.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
@@ -7,6 +6,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserService } from '@shared/domain/user/user.service'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
+import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
 import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
 import { Task, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
@@ -14,10 +14,13 @@ import { EmailQueueProcessor } from '../../src/domain/email/processor/email-queu
 import { FileSyncQueueProcessor } from '../../src/domain/user-file/processor/file-sync-queue.processor'
 import { MainQueueProcessor } from '../../src/queues/processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from '../../src/queues/processor/maintenance-queue.processor'
+import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
+import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 const dbClusterService = {
   syncDbClusterStatus: () => {},
-} as unknown as DbClusterService
+} as unknown as DbClusterCheckNonTerminatedFacade
 
 const adminDataConsistencyReportService = {
   createReport: () => {},
@@ -40,8 +43,11 @@ const userCheckupFacade = {
 
 const jobServiceUserClient = {
   checkStaleJobs: () => {},
-  checkChallengeJobs: () => {},
 } as JobService
+
+const jobSyncService = {
+  checkChallengeJobs: () => {},
+} as JobSynchronizationService
 
 const userCtx = {} as unknown as UserContext
 const removeNodesFacade = {} as unknown as RemoveNodesFacade
@@ -57,11 +63,14 @@ const processor = {
       userService,
       userCheckupFacade,
       jobServiceUserClient,
+      jobSyncService,
     ),
   FILE: (): FileSyncQueueProcessor =>
     new FileSyncQueueProcessor(
       userCtx,
       userDataConsistencyReportFacade,
+      {} as unknown as LockNodeFacade,
+      {} as unknown as UnlockNodeFacade,
       removeNodesFacade,
       notificationService,
       jobServiceUserClient,
