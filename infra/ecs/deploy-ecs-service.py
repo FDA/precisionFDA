@@ -4,6 +4,7 @@ import sys
 import time
 import yaml
 import re
+import json
 from botocore.exceptions import WaiterError, ClientError
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -59,6 +60,7 @@ class EcsDeployer:
         # Prepare data
         self.services = self._load_services()
         self._ssm_parameters = self._fetch_all_ssm_parameters()
+        self._resource_overrides = self._get_services_resource_overrides()
 
         # Define deployment stages
         self.stages = [
@@ -78,6 +80,11 @@ class EcsDeployer:
         try:
             for stage in self.stages:
                 stage_services = {name: self.services[name] for name in stage if name in self.services}
+
+                # Apply SSM overrides
+                for svc_name, svc_conf in stage_services.items():
+                    self._apply_resource_overrides(svc_name, svc_conf)
+
                 self._execute_in_capacity_aware_batches(
                     stage_services,
                     get_resource_requirements=lambda svc, conf: {
@@ -586,6 +593,40 @@ class EcsDeployer:
                 # Include other parameters only if service is not Nginx
                 ecs_secrets.append({"name": param["Name"].split("/")[-1], "valueFrom": param["Name"]})
         return ecs_secrets
+
+    def _get_services_resource_overrides(self):
+        """
+        Returns resource overrides for all services from SSM.
+        If no overrides are found, returns an empty dict.
+        """
+        param_name = f"{self.ssm_prefix}/service_resources"
+
+        param = next((p for p in self._ssm_parameters if p["Name"] == param_name), None)
+        if not param:
+            return {}
+
+        try:
+            return json.loads(param["Value"])
+        except json.JSONDecodeError:
+            print(f"SSM parameter {param_name} is not valid JSON")
+            return {}
+
+    def _apply_resource_overrides(self, svc_name, svc_conf):
+        """
+        Override resource config
+        """
+        overrides = self._resource_overrides.get(svc_name, {})
+        if not overrides:
+            return
+
+        container = svc_conf.get("container", {})
+
+        if "cpu" in overrides:
+            container["cpu"] = overrides["cpu"]
+        if "memory" in overrides:
+            container["memoryReservation"] = overrides["memory"]
+        if "desiredCount" in overrides:
+            svc_conf["desiredCount"] = overrides["desiredCount"]
 
     def _get_primary_deployment(self, service_name, new_task_def_arn):
         """Return the primary deployment for the service matching the new task definition."""

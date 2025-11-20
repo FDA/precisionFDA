@@ -138,3 +138,18 @@ dev:
 ```
 
 Overrides are merged with the defaults to adjust configuration per environment without duplication.
+
+### SSM Override
+You can also override resource settings (CPU, memory, desired count) via an SSM parameter. This allows adjusting resources without modifying the YAML file. 
+If the SSM parameter /pfda/<ENVIRONMENT>/app/service_resources exists, the values defined there take precedence over what is defined in services.yml.
+
+```json
+{
+  "pfda-nodejs-api": {
+    "cpu": 512,
+    "memory": 1024,
+    "desiredCount": 2
+  }
+}
+
+```
