@@ -32,7 +32,6 @@ import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 
@@ -45,7 +44,6 @@ describe('Job service tests', () => {
   let nodeService: NodeService
   let emailQueueJobProducer: EmailQueueJobProducer
   let jobSynchronizationService: JobSynchronizationService
-  let challengeJobSynchronizationService: ChallengeJobSynchronizationService
   let userRepo: UserRepository
   let jobRepo: JobRepository
   let spaceRepo: SpaceRepository
@@ -96,7 +94,6 @@ describe('Job service tests', () => {
     } as unknown as EventHelper
     emailQueueJobProducer = new EmailQueueJobProducer(queue)
     jobSynchronizationService = {} as unknown as JobSynchronizationService
-    challengeJobSynchronizationService = {} as unknown as ChallengeJobSynchronizationService
     userRepo = {
       findOneOrFail: userRepoFindOneOrFailStub,
       findAdminUser: userRepoFindAdminUserStub,
@@ -602,7 +599,6 @@ describe('Job service tests', () => {
       nodeService,
       emailQueueJobProducer,
       jobSynchronizationService,
-      challengeJobSynchronizationService,
       emailService,
       userRepo,
       jobRepo,

@@ -15,7 +15,6 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { ListJobsInput, PageJobs } from '@shared/domain/job/job.input'
 import { DescribeJobOperation } from '@shared/domain/job/ops/describe'
 import { ListJobsOperation } from '@shared/domain/job/ops/list'
-import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
 import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
 import { WorkstationService } from '@shared/domain/job/workstation.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -35,12 +34,15 @@ import {
   workstationAliveBodySchema,
 } from './job.schemas'
 import { Job } from '@shared/domain/job/job.entity'
+import { JobActionDTO } from '@shared/domain/job/dto/job-action.dto'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 @UseGuards(UserContextGuard)
 @Controller('/jobs')
 export class JobController {
   constructor(
     private readonly user: UserContext,
+    private readonly jobSynchronizationService: JobSynchronizationService,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly logger: Logger,
   ) {}
@@ -65,42 +67,30 @@ export class JobController {
   }
 
   // not used at the moment
-  @Get('/:jobDxId')
-  async describeJob(
-    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
-  ): Promise<Job> {
+  @Get('/:dxid')
+  async describeJob(@Param() param: JobActionDTO): Promise<Job> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
       em: this.em,
     }
 
-    return await new DescribeJobOperation(opsCtx).execute({ dxid })
+    return await new DescribeJobOperation(opsCtx).execute({ dxid: param.dxid })
   }
 
   // ------------------------
   //    HTTPS Workstations
   // ------------------------
-  @Patch('/:jobDxId/terminate')
-  async terminateJob(
-    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
-  ): Promise<Job> {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
-    return await new RequestTerminateJobOperation(opsCtx).execute({ dxid })
+  @Patch('/:dxid/terminate')
+  async terminateJob(@Param() param: JobActionDTO): Promise<Job> {
+    return await this.jobSynchronizationService.requestTerminateJob(param.dxid)
   }
 
-  @Patch('/:jobDxId/syncJob')
-  async syncJobStatus(
-    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
-  ): Promise<{
+  @Patch('/:dxid/syncJob')
+  async syncJobStatus(@Param() param: JobActionDTO): Promise<{
     message: string
   }> {
-    await createSyncJobStatusTask({ dxid }, this.user)
+    await createSyncJobStatusTask({ dxid: param.dxid }, this.user)
     return { message: 'Job sync task created' }
   }
 

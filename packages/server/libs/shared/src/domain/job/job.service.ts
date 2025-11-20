@@ -42,7 +42,6 @@ import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
 import { Job as BullJob } from 'bull'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
@@ -62,7 +61,6 @@ export class JobService implements SearchableByUid<'job'> {
     private readonly nodeService: NodeService,
     private readonly emailsJobProducer: EmailQueueJobProducer,
     private readonly jobSyncService: JobSynchronizationService,
-    private readonly challengeJobSynchService: ChallengeJobSynchronizationService,
     private readonly emailService: EmailService,
     private readonly userRepo: UserRepository,
     private readonly jobRepo: JobRepository,
@@ -75,10 +73,6 @@ export class JobService implements SearchableByUid<'job'> {
   }
   getEditableEntityByUid(uid: Uid<'job'>): Promise<Job | null> {
     return this.jobRepo.findEditableOne({ uid })
-  }
-
-  async checkChallengeJobs(): Promise<void> {
-    await this.challengeJobSynchService.checkChallengeJobs()
   }
 
   async synchronizeJob(jobDxid: DxId<'job'>, bullJob: BullJob): Promise<Maybe<Job>> {
