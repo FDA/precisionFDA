@@ -3,7 +3,9 @@
 <head>
   <%= render "_partials/head_react" %>
 </head>
-  <!-- revision: <%= @context.token %> /-->
+  <% if !Rails.env.production? %>
+    <!-- revision: <%= @context.token %> /-->
+  <% end %>
   <!-- revision: <%= git_revision %> /-->
   <body data-turbolinks="false">
     <noscript>This website requires JavaScript</noscript>

@@ -3,7 +3,9 @@
 <head>
   <%= render "_partials/head" %>
 </head>
-  <!-- revision: <%= @context.token %> /-->
+  <% if !Rails.env.production? %>
+    <!-- revision: <%= @context.token %> /-->
+  <% end %>
   <!-- revision: <%= git_revision %> /-->
   <body class="pfda-controller-<%= controller_name %> pfda-action-<%= action_name %> <% if !@context.logged_in? %>pfda-guest<% else %>pfda-user<% end %>" <%= yield(:body_attributes) %> <% if !@context.logged_in? %>data-no-turbolink<% end %> >
   <header>
