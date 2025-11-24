@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { BasicToast, ToastWithLink } from '../components/Toast'
-import { useAuthUser } from '../features/auth/useAuthUser'
 import { NOTIFICATION_ACTION, Notification, SEVERITY, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../features/home/types'
 import { confirmNotification } from '../features/notifications/notifications.api'
 import {
@@ -12,6 +11,7 @@ import {
   getNodeWsUrl,
   notificationsConfig,
 } from '../utils/config'
+import { getSessionExpiredAt } from '../utils/cookies'
 
 // list of notifications that do not show a toast
 const NO_TOAST_NOTIFICATIONS = [
@@ -33,7 +33,6 @@ const toastHandlers = {
 }
 
 export const useLastWSNotification = (filteredActions: NOTIFICATION_ACTION[] = []): WebSocketMessage => {
-  const user = useAuthUser()
   const { lastJsonMessage } = useWebSocket<WebSocketMessage>(
     getNodeWsUrl(),
     {
@@ -53,7 +52,7 @@ export const useLastWSNotification = (filteredActions: NOTIFICATION_ACTION[] = [
         }
       },
     },
-    !!user,
+    getSessionExpiredAt() > new Date(),
   )
   return lastJsonMessage
 }

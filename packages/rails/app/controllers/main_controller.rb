@@ -138,6 +138,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       Auditor.perform_audit(action: "destroy", record_type: "Session", record: { message: "User #{session[:username]} logged out" })
     end
 
+    cookies[:sessionExpiredAt] = Time.current.to_i
+
     logout_from_gsrs if GSRS_ENABLED
 
     Session.where(key: session_id).delete_all

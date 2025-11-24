@@ -4,9 +4,9 @@ import useWebSocket from 'react-use-websocket'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../utils/config'
+import { getSessionExpiredAt } from '../../utils/cookies'
 import { JobLogItem, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { JobState } from './executions.types'
-import { useAuthUser } from '../auth/useAuthUser'
 
 const StyledLogsContainer = styled.div`
   padding: 4px 0 4px 12px;
@@ -55,7 +55,6 @@ type ShowingLogItem = Pick<JobLogItem, 'source' | 'line' | 'level' | 'msg'>
 const isStopSignal = (log: ShowingLogItem) => log.source === 'SYSTEM' && log.msg === 'END_LOG'
 
 export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState }) => {
-  const user = useAuthUser()
   const [logs, setLogs] = useState<ShowingLogItem[]>([])
   const [isStreamingDone, setIsStreamingDone] = useState(false)
   const parentRef = useRef<HTMLDivElement | null>(null)
@@ -121,7 +120,7 @@ export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState 
         }
       },
     },
-    !!user,
+    getSessionExpiredAt() > new Date(),
   )
 
   useEffect(() => {

@@ -1,56 +1,52 @@
 import { differenceInSeconds, subSeconds } from 'date-fns'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/Button'
 import { useInterval } from '../../hooks/useInterval'
 import { getSessionExpiredAt } from '../../utils/cookies'
 import { pluralize } from '../../utils/formatting'
+import { useSessionRefresh } from '../../utils/useSessionRefresh'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
 import { useAuthUserQuery } from './api'
 import { onLogInWithSSO, useSiteSettingsQuery } from './useSiteSettingsQuery'
-import { sessionService } from '../../utils/sessionService'
 
 export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({ modal }) => {
-  const userQuery = useAuthUserQuery()
+  const isThrottled = useRef(false)
+  const userAuthQuery = useAuthUserQuery()
   const { data: ssoButtonResponse } = useSiteSettingsQuery()
   const [expiredAt, setExpiredAtTimer] = useState<Date | number>(getSessionExpiredAt())
   const [timer, setTimer] = useState<number>(0)
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
+  const WARNING_THRESHOLD_SECONDS = 59
   const sessionExpirationPassed = expiredAt < currentTime
   const sessionExpirationApproaching = !sessionExpirationPassed
-  const hasExpirationReachedLimit = sessionExpirationApproaching && subSeconds(expiredAt, 59) < currentTime
+  const hasExpirationReachedLimit = sessionExpirationApproaching && subSeconds(expiredAt, WARNING_THRESHOLD_SECONDS) < currentTime
   const calcDiff = differenceInSeconds(expiredAt, currentTime)
-  const user = userQuery.data?.user
 
-  // Start/stop automatic session refreshing on user activity
-  useEffect(() => {
-    if (user) {
-      sessionService.startSessionRefreshing()
-    } else {
-      sessionService.stopSessionRefreshing()
-    }
-
-    // Cleanup
-    return () => {
-      sessionService.stopSessionRefreshing()
-    }
-  }, [user?.id])
+  useSessionRefresh(sessionExpirationPassed, hasExpirationReachedLimit, isThrottled)
 
   useEffect(() => {
-    if (hasExpirationReachedLimit) {
-      if (calcDiff > 0) setTimer(calcDiff)
-      sessionService.stopSessionRefreshing()
+    if (hasExpirationReachedLimit && !modal.isShown) {
+      setTimer(calcDiff)
       modal.setShowModal(true)
     }
-  }, [hasExpirationReachedLimit, calcDiff])
+  }, [hasExpirationReachedLimit])
 
-  useInterval(() => {
-    setExpiredAtTimer(getSessionExpiredAt())
-    if (!hasExpirationReachedLimit) {
-      setCurrentTime(new Date())
-    }
-  }, 15000)
+  useInterval(
+    () => {
+      const newExpiredAt = getSessionExpiredAt()
+      setExpiredAtTimer(newExpiredAt)
+      if (!hasExpirationReachedLimit) {
+        setCurrentTime(new Date())
+      }
+      // if session is extended by other action, close the modal
+      if (subSeconds(newExpiredAt, WARNING_THRESHOLD_SECONDS) > currentTime && modal.isShown) {
+        modal.setShowModal(false)
+      }
+    },
+    !sessionExpirationPassed ? 15000 : null,
+  )
 
   useInterval(
     () => {
@@ -61,10 +57,9 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({ modal }) =
   )
 
   const handleStayLoggedIn = async () => {
-    await userQuery.refetch()
+    await userAuthQuery.refetch()
     setExpiredAtTimer(getSessionExpiredAt())
     modal.setShowModal(false)
-    sessionService.startSessionRefreshing()
   }
 
   const ssoUrl = ssoButtonResponse?.ssoButton.isEnabled ? ssoButtonResponse.ssoButton.data?.ssoUrl : undefined
