@@ -1,5 +1,5 @@
-import { ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { IChallenge } from '../../types/challenge'
@@ -13,13 +13,13 @@ import { useForkAppToModal } from '../actionModals/useForkAppToModal'
 import { useAuthUser } from '../auth/useAuthUser'
 import { useComparatorModal } from '../comparators/useComparatorModal'
 import { Action } from '../home/action-types'
+import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { HomeScope } from '../home/types'
 import { copyAppsRequest, copyAppsToPrivate, deleteAppsRequest } from './apps.api'
 import { IApp } from './apps.types'
 import { getBaseLink } from './run/utils'
 import { useAttachToChallengeModal } from './useAttachToChallengeModal'
 import { useExportToModal } from './useExportToModal'
-import { extractModalsFromActions } from '../home/extractModalsFromActions'
 
 export interface UseAppSelectionActionsResult {
   actions: Action[]
@@ -34,6 +34,7 @@ export const useAppSelectionActions = ({
   resetSelected,
   comparatorLinks,
   challenges,
+  isContributorOrHigher,
 }: {
   homeScope?: HomeScope
   spaceId?: string
@@ -42,12 +43,19 @@ export const useAppSelectionActions = ({
   resetSelected?: () => void
   comparatorLinks: { [key: string]: string }
   challenges: IChallenge[] | undefined
+  isContributorOrHigher?: boolean
 }): UseAppSelectionActionsResult => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user?.admin
+  const canDeleteApp = selected.every(
+    app =>
+      app.added_by === user?.dxuser ||
+      (isAdmin && app.scope === 'public') ||
+      (isContributorOrHigher && app.scope === `space-${spaceId}`),
+  )
 
   const featureMutation = useFeatureMutation({
     resource: 'apps',
@@ -254,7 +262,7 @@ export const useAppSelectionActions = ({
       name: 'Delete',
       type: 'modal',
       func: () => setDeleteModal(true),
-      isDisabled: selected.some(e => !e.links.delete) || selected.length === 0,
+      isDisabled: selected.length === 0 || !canDeleteApp,
       modal: deleteModal,
       showModal: isShownDeleteModal,
     },

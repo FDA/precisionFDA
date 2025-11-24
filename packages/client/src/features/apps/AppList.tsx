@@ -9,10 +9,12 @@ import {
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/Button'
+import { ActionsMenu } from '../../components/Menu'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
 import { StyledPageTable } from '../../components/Table/components/styles'
+import { CubeIcon } from '../../components/icons/CubeIcon'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
@@ -21,7 +23,7 @@ import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsRow, QuickActions } from '../home/home.styles'
-import { ActionsButton, ResourceHeader } from '../home/show.styles'
+import { ResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -30,8 +32,6 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useAppsColumns } from './useAppsColumns'
-import { ActionsMenu } from '../../components/Menu'
-import { CubeIcon } from '../../components/icons/CubeIcon'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -84,6 +84,7 @@ export const AppList = ({
     resetSelected,
     comparatorLinks: {},
     challenges: data?.meta?.challenges || undefined,
+    isContributorOrHigher,
   })
 
   const { actions: listActions, modals: listModals } = useAppListActions({

@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
-import { ActionsMenu } from '../../components/Menu'
-import { RevisionMenu } from '../../components/Menu/RevisionMenu'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown } from '../../components/Markdown'
+import { ActionsMenu } from '../../components/Menu'
+import { RevisionMenu } from '../../components/Menu/RevisionMenu'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
 import { CubeIcon } from '../../components/icons/CubeIcon'
@@ -15,7 +15,6 @@ import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
-  ActionsButton,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -34,10 +33,9 @@ import { getBasePath } from '../home/utils'
 import { AppExecutionsList } from './AppExecutionsList'
 import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
+import { StyledMarkdownAppShow } from './form/styles'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
-import { StyledMarkdownAppShow } from './form/styles'
-
 
 const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(app.scope)
@@ -125,12 +123,14 @@ const DetailActionsDropdown = ({
   comparatorLinks,
   challenges,
   spaceId,
+  isContributorOrHigher,
 }: {
   homeScope?: HomeScope
   app: IApp
   comparatorLinks: { [key: string]: string }
   challenges?: IChallenge[]
   spaceId?: string
+  isContributorOrHigher?: boolean
 }) => {
   const { actions, modals } = useAppSelectionActions({
     homeScope,
@@ -140,6 +140,7 @@ const DetailActionsDropdown = ({
     resourceKeys: ['app', app.uid],
     comparatorLinks,
     challenges,
+    isContributorOrHigher,
   })
 
   let filteredActions = actions
@@ -155,7 +156,7 @@ const DetailActionsDropdown = ({
       <ActionsMenu data-testid="app-show-actions-button">
         <ActionsMenuContent actions={filteredActions} />
       </ActionsMenu>
-      
+
       <ActionModalsRenderer modals={modals} />
     </>
   )
@@ -165,10 +166,12 @@ export const AppsShow = ({
   spaceId,
   emitScope,
   homeScope,
+  isContributorOrHigher,
 }: {
   homeScope?: HomeScope
   spaceId?: string
   emitScope?: EmitScope
+  isContributorOrHigher?: boolean
 }) => {
   const location = useLocation()
   const { appUid } = useParams<{ appUid: string }>()
@@ -247,6 +250,7 @@ export const AppsShow = ({
                 app={app}
                 comparatorLinks={meta.links.comparators}
                 challenges={meta.challenges}
+                isContributorOrHigher={isContributorOrHigher}
               />
             </StyledRight>
           </div>

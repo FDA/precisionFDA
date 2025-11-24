@@ -35,6 +35,7 @@ import { FileList } from '../../files/FileList'
 import { FileShow } from '../../files/show/FileShow'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../../home/home.styles'
 import { HomeLoader } from '../../home/show.styles'
+import { ApiErrorResponse } from '../../home/types'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
 import { SpaceReportList } from '../../space-reports/SpaceReportList'
 import { TrackInHome } from '../../tracks/TrackInHome'
@@ -46,7 +47,6 @@ import { MembersList } from '../members/MembersList'
 import { fixGuestPermissions, spaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
-import { ApiErrorResponse } from '../../home/types'
 import { Activation } from './SpaceActivation'
 import { SpaceLocked } from './SpaceLocked'
 import { SpaceNotAllowed } from './SpaceNotAllowed'
@@ -223,7 +223,10 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                 <Route path="apps/:appIdentifier/jobs/new" element={<RunJobPage spaceId={space.id} />} />
                 <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id.toString()} />} />
                 <Route path="apps/:appUid/fork" element={<ForkAppPage spaceId={space.id} />} />
-                <Route path="apps/:appUid/*" element={<AppsShow spaceId={space.id.toString()} />} />
+                <Route
+                  path="apps/:appUid/*"
+                  element={<AppsShow spaceId={space.id.toString()} isContributorOrHigher={isContributorOrHigher} />}
+                />
                 <Route path="apps/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
                 <Route
                   path="workflows"
