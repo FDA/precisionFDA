@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { toast } from 'react-toastify'
 
 export enum MESSAGE_TYPE {
@@ -58,4 +59,8 @@ export const displayPayloadMessage = (payload: Payload) => {
 export const getAuthenticityToken = () => {
   const CSRFHolder = document.getElementsByName('csrf-token')[0] as HTMLMetaElement
   return CSRFHolder ? CSRFHolder.content : null
+}
+
+export const refreshSession = async (): Promise<void> => {
+  return axios.get('/api/v2/session/refresh').then(() => {})
 }
