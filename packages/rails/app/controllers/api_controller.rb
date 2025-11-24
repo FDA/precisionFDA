@@ -1356,7 +1356,7 @@ class ApiController < ApplicationController
   def soft_delete
     items = Array(params[:item_ids]).map do |uid|
       item = item_from_uid(uid)
-      if item.editable_by?(@context)
+      if (item.klass != "app" && item.editable_by?(@context)) || (item.klass == "app" && item.deletable_by?(@context))
         item.update(deleted: true)
         item
       end

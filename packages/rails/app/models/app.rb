@@ -169,6 +169,14 @@ class App < ApplicationRecord
     )
   end
 
+  def deletable_by?(context)
+    return true if editable_by?(context)
+
+    return true if context.user.site_admin? && scope == SCOPE_PUBLIC
+
+    false
+  end
+
   def find_input(name)
     spec["input_spec"].select { |input| input["name"] == name }.first
   end
