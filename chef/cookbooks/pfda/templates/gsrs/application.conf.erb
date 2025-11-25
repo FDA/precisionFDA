@@ -20,6 +20,7 @@ spring.main.allow-bean-definition-overriding=true
 #eureka.client.serviceUrl.defaultZone= "http://localhost:8761/eureka"
 eureka.client.enabled=false
 ix.ginas.export.path="<%= @TOMCAT_PATH %>/gsrs_exports"
+admin.panel.download.path="<%= @TOMCAT_PATH %>/gsrs_exports/download"
 
 ## START AUTHENTICATION
 # SSO HTTP proxy authentication settings
@@ -37,7 +38,7 @@ ix.authentication.autoregisteractive=true
 
 # Oracle Connection
 #spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-#spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+# spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
 spring.jpa.hibernate.use-new-id-generator-mappings=true
 spring.datasource.driverClassName="org.mariadb.jdbc.Driver"
 spring.datasource.url="<%= @GSRS_DATABASE_URL %>"
@@ -75,6 +76,7 @@ gsrs.sessions.sessionSecure=false
 #         }
 # }
 
+ix.ginas.export.sortOutput.substances=[false];
 ix.ginas.export.settingsPresets.substances= {
    "PUBLIC_DATA_ONLY": {
    	"owner":"admin",

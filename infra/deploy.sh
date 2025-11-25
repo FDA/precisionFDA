@@ -64,6 +64,30 @@ fi
 
 # Instances reached a healthy state, detach old Auto Scaling Group(s)
 echo "Instances reached healthy state, detaching old Auto Scaling Group(s)"
+
+if [ "$ENV_INSTANCE_TYPE" == "gsrsinstance" ]; then
+    echo "Executing specific GSRS instance commands"
+
+    INSTANCE_IDS=$(aws autoscaling describe-auto-scaling-groups \
+        --auto-scaling-group-names "$ASG_NAME" \
+        --query "AutoScalingGroups[].Instances[].InstanceId" \
+        --output text | xargs | tr " " ",")
+
+    if [ -z "$INSTANCE_IDS" ]; then
+        echo "Warning: No instances found in ASG $ASG_NAME. Skipping SSM command."
+    else
+        echo "Sending SSM command to instances: $INSTANCE_IDS"
+        
+        aws ssm send-command \
+            --document-name "RunGsrsExport" \
+            --targets Key=instanceids,Values=${INSTANCE_IDS} \
+            --comment "Trigger GSRS export script" \
+            --region us-east-1
+
+        echo "SSM command successfully triggered."
+    fi
+fi
+
 asg_to_destroy=""
 asg_names=$(aws autoscaling describe-auto-scaling-groups --query AutoScalingGroups[].AutoScalingGroupName --output text)
 for asg_name in $asg_names; do
