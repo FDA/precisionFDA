@@ -1,5 +1,39 @@
-import { IApp } from '../apps.types'
-import { generateCopyUrl } from './utils'
+import { IApp, InputSpec } from '../apps.types'
+import { createRequestObject, generateCopyUrl, shouldIncludeInputValue } from './utils'
+
+describe('shouldIncludeInputValue', () => {
+  it('should return false for undefined', () => {
+    expect(shouldIncludeInputValue(undefined)).toBe(false)
+  })
+
+  it('should return false for null', () => {
+    expect(shouldIncludeInputValue(null)).toBe(false)
+  })
+
+  it('should return false for empty string', () => {
+    expect(shouldIncludeInputValue('')).toBe(false)
+  })
+
+  it('should return true for non-empty string', () => {
+    expect(shouldIncludeInputValue('value')).toBe(true)
+  })
+
+  it('should return true for string "0"', () => {
+    expect(shouldIncludeInputValue('0')).toBe(true)
+  })
+
+  it('should return true for number', () => {
+    expect(shouldIncludeInputValue(123)).toBe(true)
+  })
+
+  it('should return true for boolean true', () => {
+    expect(shouldIncludeInputValue(true)).toBe(true)
+  })
+
+  it('should return true for boolean false', () => {
+    expect(shouldIncludeInputValue(false)).toBe(true)
+  })
+})
 
 describe('generateCopyUrl', () => {
   const UID = 'app-uid-1'
@@ -62,5 +96,67 @@ describe('generateCopyUrl', () => {
 
     const encodedSpecialData = btoa(encodeURIComponent(specialDisplayData))
     expect(result).toBe(`${url}#${encodedSpecialData}`)
+  })
+})
+
+describe('createRequestObject', () => {
+  it('should include integer 0 in inputs, but exclude null and undefined', () => {
+    const jobName = 'test-job'
+    const jobLimit = 10
+    const outputFolderPath = '/output'
+    const instanceType = 'baseline-8'
+    const scope = 'private'
+    const app = { uid: 'app-123' } as IApp
+
+    const inputSpecs: InputSpec[] = [
+      {
+        name: 'intInput',
+        class: 'int',
+        label: 'Int Input',
+        optional: false,
+        default: null,
+        choices: null,
+        help: '',
+      },
+      {
+        name: 'nullInput',
+        class: 'string',
+        label: 'Null Input',
+        optional: true,
+        default: null,
+        choices: null,
+        help: '',
+      },
+      {
+        name: 'undefinedInput',
+        class: 'string',
+        label: 'Undefined Input',
+        optional: true,
+        default: null,
+        choices: null,
+        help: '',
+      },
+    ]
+
+    const inputsParam = {
+      intInput: '0',
+      nullInput: null as any,
+      undefinedInput: undefined,
+    }
+
+    const result = createRequestObject(
+      jobName,
+      jobLimit,
+      outputFolderPath,
+      instanceType,
+      scope,
+      inputsParam,
+      app,
+      inputSpecs,
+    )
+
+    expect(result.inputs).toHaveProperty('intInput', 0)
+    expect(result.inputs).not.toHaveProperty('nullInput')
+    expect(result.inputs).not.toHaveProperty('undefinedInput')
   })
 })
