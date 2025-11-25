@@ -138,12 +138,31 @@ export const getValue = (inputKey: string, value: FormInput, inputSpecs: InputSp
   return value as string | boolean
 }
 
+/**
+ * Determines whether an input value should be included in the request object.
+ * Returns true if the value is not undefined, null, or an empty string.
+ *
+ * @param value - The input value to check.
+ * @returns True if the value should be included, false otherwise.
+ */
+export const shouldIncludeInputValue = (value: FormInput | null | undefined): value is FormInput => {
+  if (value === undefined || value === null) {
+    return false
+  }
+
+  if (typeof value === 'string') {
+    return value !== ''
+  }
+
+  return true
+}
+
 export function mapInputKeyVals(inputVals: RunJobFormType['inputs'], inputSpecs: InputSpec[]) {
   for (const inputVal of inputVals) {
     let inputs: { [key: string]: FormInput } = {}
     Object.keys(inputVal.fields).forEach(key => {
       const value = getValue(key, inputVal.fields[key], inputSpecs)
-      if(value) {
+      if (shouldIncludeInputValue(value)) {
         inputs[key] = value
       }
     })
@@ -188,7 +207,7 @@ export const createRequestObject = (
 
   Object.keys(inputsParam).forEach(key => {
     const value = getValue(key, inputsParam[key], inputSpecs)
-    if(value) {
+    if (shouldIncludeInputValue(value)) {
       inputs[key] = value
     }
   })
