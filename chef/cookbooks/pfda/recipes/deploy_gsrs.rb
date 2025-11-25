@@ -144,6 +144,18 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
   notifies :restart, 'tomcat_service[gsrs]', :delayed
 end
 
+execute 'update_context_xml_frontend' do
+  command "sed -i 's|${user.dir}|#{node[:gsrs][:tomcat_path]}|g' #{node[:gsrs][:tomcat_path]}/webapps/frontend/META-INF/context.xml"
+  action :run
+  not_if "grep -q '#{node[:gsrs][:tomcat_path]}/conf' #{node[:gsrs][:tomcat_path]}/webapps/frontend/META-INF/context.xml"
+end
+
+execute 'update_context_xml_substances' do
+  command "sed -i 's|${user.dir}|#{node[:gsrs][:tomcat_path]}|g' #{node[:gsrs][:tomcat_path]}/webapps/substances/META-INF/context.xml"
+  action :run
+  not_if "grep -q '#{node[:gsrs][:tomcat_path]}/conf' #{node[:gsrs][:tomcat_path]}/webapps/substances/META-INF/context.xml"
+end
+
 directory "#{node[:gsrs][:tomcat_path]}/conf/Catalina/localhost" do
   owner node[:gsrs][:tomcat_user]
   group node[:gsrs][:tomcat_group]
