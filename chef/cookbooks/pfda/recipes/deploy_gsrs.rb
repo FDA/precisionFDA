@@ -20,8 +20,16 @@ end
 template "#{node[:gsrs][:tomcat_path]}/conf/context.xml" do
   source 'gsrs/context.xml'
   owner node[:gsrs][:tomcat_user]
-  group node[:gsrs][:tomcat_grop]
-  mode 0o600
+  group node[:gsrs][:tomcat_group]
+  mode 0600
+  notifies :restart, 'tomcat_service[gsrs]', :delayed
+end
+
+template "#{node[:gsrs][:tomcat_path]}/conf/server.xml" do
+  source 'gsrs/server.xml'
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_group]
+  mode 0600
   notifies :restart, 'tomcat_service[gsrs]', :delayed
 end
 
@@ -112,7 +120,7 @@ end
 template "#{node[:gsrs][:tomcat_path]}/webapps/frontend/WEB-INF/classes/static/assets/data/config.json" do
   source 'gsrs/config.json.erb'
   owner node[:gsrs][:tomcat_user]
-  group node[:gsrs][:tomcat_grop]
+  group node[:gsrs][:tomcat_group]
   mode 0o644
   variables(
     HOST: lazy { node.run_state.dig('ssm_params', 'app', 'environment', 'HOST') }
@@ -125,7 +133,7 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
   sensitive true
   mode 0o644
   owner node[:gsrs][:tomcat_user]
-  group node[:gsrs][:tomcat_grop]
+  group node[:gsrs][:tomcat_group]
   variables(
     TOMCAT_PATH: node[:gsrs][:tomcat_path],
     GSRS_DATABASE_URL: lazy { node.run_state['gsrs_database_url'] },
@@ -134,6 +142,43 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
     HOST: lazy { node.run_state.dig('ssm_params', 'app', 'environment', 'HOST') }
   )
   notifies :restart, 'tomcat_service[gsrs]', :delayed
+end
+
+directory "#{node[:gsrs][:tomcat_path]}/conf/Catalina/localhost" do
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_group]
+  mode '0755'
+  recursive true
+  action :create
+end
+
+template "#{node[:gsrs][:tomcat_path]}/conf/Catalina/localhost/rewrite.config" do
+  source 'gsrs/rewrite.config'
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_group]
+  mode 0600
+  notifies :restart, 'tomcat_service[gsrs]', :delayed
+end
+
+directory "#{node[:gsrs][:tomcat_path]}" do
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_group]
+  recursive true
+end
+
+directory "#{node[:gsrs][:og_tomcat_path]}" do
+  mode 0770
+  recursive true
+end
+
+template "/srv/www/precision_fda/current/packages/scripts/run_export.sh" do
+  source 'gsrs/run_export.sh.erb'
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_group]
+  mode 0755
+  variables(
+    GSRS_ADMIN_EMAIL: lazy { node.run_state.dig('ssm_params', 'app', 'environment', 'GSRS_ADMIN_EMAIL') },
+  )
 end
 
 tomcat_service 'gsrs' do

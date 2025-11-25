@@ -1,0 +1,90 @@
+#!/bin/bash
+
+# This script fetches an ETag from a search endpoint and then uses it to call a corresponding export endpoint.
+
+BASE_URL="http://localhost:8080/substances/api/v1"
+USERNAME="ADMIN"
+EMAIL="<%= @GSRS_ADMIN_EMAIL %>"
+
+MAX_RETRIES=20
+RETRY_INTERVAL=30
+RETRY_COUNT=0
+ETAG=""
+echo "Fetching ETag from the search endpoint..."
+
+sleep 60
+
+while [ -z "$ETAG" ] || [ "$ETAG" == "null" ]; do
+    if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
+        echo "Error: Failed to retrieve a valid ETag after ${MAX_RETRIES} attempts."
+        exit 1
+    fi
+
+    if [ "$RETRY_COUNT" -gt 0 ]; then
+        echo "...retrying in ${RETRY_INTERVAL} seconds. (Attempt ${RETRY_COUNT}/${MAX_RETRIES})"
+        sleep ${RETRY_INTERVAL}
+    fi
+    
+    ETAG=$(curl -s -H "AUTHENTICATION_USERNAME: ${USERNAME}" -H "AUTHENTICATION_EMAIL: ${EMAIL}" "${BASE_URL}/substances/search?facet=Deprecated%2FNot%20Deprecated&top=10&skip=0&order=%24root_lastEdited&fdim=10" | jq -r '.etag')
+
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+done
+
+echo "Successfully retrieved ETag: ${ETAG}"
+echo "Calling the export endpoint with the ETag..."
+
+EXPORT_URL="${BASE_URL}/substances/export/${ETAG}/txt?filename=export-test.txt&exportConfigId=0"
+echo "Calling URL: ${EXPORT_URL}"
+
+RESPONSE_BODY=$(curl -H "AUTHENTICATION_USERNAME: ${USERNAME}" -H "AUTHENTICATION_EMAIL: ${EMAIL}" "${EXPORT_URL}")
+
+sleep 10
+
+echo "Updating permissions for /opt/tomcat_gsrs_10_1_18..."
+sudo chmod -R 770 /opt/tomcat_gsrs_10_1_18
+
+ID=$(echo "${RESPONSE_BODY}" | jq -r '.id')
+if [ -z "$ID" ] || [ "$ID" == "null" ]; then
+    echo "Error: Failed to retrieve a valid ID from the export endpoint."
+    echo "Response was: ${RESPONSE_BODY}"
+    exit 1
+fi
+
+echo "Export process started with ID: ${ID}"
+
+POLL_INTERVAL=30
+ATTEMPT_COUNTER=0
+MAX_ATTEMPTS=360 # Max number of checks before timing out (360 * 30s = 3 h timeout)
+STATUS_URL="${BASE_URL}/profile/downloads/${ID}"
+echo "Polling status every ${POLL_INTERVAL} seconds (URL: ${STATUS_URL})"
+
+while true; do
+
+    if [ "${ATTEMPT_COUNTER}" -ge "${MAX_ATTEMPTS}" ]; then
+        echo "Error: Polling timed out after $((${MAX_ATTEMPTS} * ${POLL_INTERVAL})) seconds."
+        exit 1
+    fi
+
+    STATUS_RESPONSE=$(curl -s -H "AUTHENTICATION_USERNAME: ${USERNAME}" -H "AUTHENTICATION_EMAIL: ${EMAIL}" "${STATUS_URL}")
+    NUM_RECORDS=$(echo "${STATUS_RESPONSE}" | jq '.numRecords')
+
+    # Check if numRecords is a valid number and greater than 0
+    if [[ "$NUM_RECORDS" =~ ^[0-9]+$ ]] && [ "${NUM_RECORDS}" -gt 0 ]; then
+        echo "Export started! Currently processed ${NUM_RECORDS} records."
+        break 
+    else
+        CURRENT_COUNT=$(echo "${STATUS_RESPONSE}" | jq -r '.numRecords // 0')
+        echo "   Waiting... ${CURRENT_COUNT} records processed so far."
+        ATTEMPT_COUNTER=$((ATTEMPT_COUNTER + 1))
+        sleep ${POLL_INTERVAL}
+    fi
+done
+
+CANCEL_URL="${STATUS_URL}/profile/downloads(${ID})/@cancel"
+echo "Cancelling the export..."
+echo "Calling URL: ${CANCEL_URL}"
+
+curl -s -H "AUTHENTICATION_USERNAME: ${USERNAME}" -H "AUTHENTICATION_EMAIL: ${EMAIL}" "${CANCEL_URL}" -o /dev/null 
+
+echo ""
+echo "Script finished."

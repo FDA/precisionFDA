@@ -7,6 +7,7 @@ default[:app][:shortname] = "precision_fda"
 
 default[:gsrs][:packages] = ["openjdk-11-jdk"]
 default[:gsrs][:tomcat_path] = "/opt/gsrs"
+default[:gsrs][:og_tomcat_path] = "/opt/tomcat_gsrs_10_1_18"
 default[:gsrs][:tomcat_version] = "10.1.18"
 default[:gsrs][:tomcat_user] = "gsrs"
 default[:gsrs][:tomcat_group] = "gsrs"
