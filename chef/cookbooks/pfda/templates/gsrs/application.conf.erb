@@ -79,21 +79,20 @@ gsrs.sessions.sessionSecure=false
 ix.ginas.export.sortOutput.substances=[false];
 ix.ginas.export.settingsPresets.substances= {
    "PUBLIC_DATA_ONLY": {
-   	"owner":"admin",
-   	"scrubberSettings": {
-   		"removeAllLocked":true
-   	}
+        "owner":"admin",
+        "scrubberSettings": {
+                "removeAllLocked":true
+        }
    },
   "ALL_DATA": {
     "owner":"admin",
-   	"scrubberSettings":null
+        "scrubberSettings":null
    }
 }
 
-gsrs.importAdapterFactories.substances =
-	[
+gsrs.importAdapterFactories.substances.list.SDFImportAdapterFactory = 
+	[ 
 		{
-
 			"adapterName": "SDF Adapter",
 			"importAdapterFactoryClass": "gsrs.module.substance.importers.SDFImportAdapterFactory",
 			"stagingAreaServiceClass": "gsrs.stagingarea.service.DefaultStagingAreaService",
@@ -405,31 +404,57 @@ gsrs.availableProcessActions.substances = ["gsrs.dataexchange.processingactions.
 	"gsrs.dataexchange.processingactions.CreateBatchProcessingAction",
 	"gsrs.dataexchange.processingactions.ScrubProcessingAction"]
 
-gsrs.matchableCalculators.substances =
-[
-    {"matchableCalculationClass" : "gsrs.dataexchange.extractors.CASNumberMatchableExtractor",
-        "config" :{
-            "casCodeSystems": ["CAS", "CASNo", "CASNumber"]
-        }
-    },
-    {"matchableCalculationClass" : "gsrs.dataexchange.extractors.AllNamesMatchableExtractor","config" :{}},
-    {"matchableCalculationClass" : "gsrs.dataexchange.extractors.ApprovalIdMatchableExtractor","config" :{}},
-    {"matchableCalculationClass" : "gsrs.dataexchange.extractors.DefinitionalHashMatchableExtractor","config" :{}},
-    {"matchableCalculationClass" : "gsrs.dataexchange.extractors.SelectedCodesMatchableExtractor",
-        "config" :
-        {
-            "codeSystems" :["CAS", "ChemBL", "NCI", "NSC", "EINECS"]
-        }
-    },
-    {"matchableCalculationClass" : "gsrs.dataexchange.extractors.UUIDMatchableExtractor","config" :{}},
-    {"matchableCalculationClass" : "gsrs.dataexchange.extractors.CodeMatchableExtractor",
-        "config" :{
-            "reqCodeSystems": ["FDA UNII"],
-            "codeType": "PRIMARY",
-            "codeKey": "CODE"
-        }
-    }
-]
+gsrs.matchableCalculators.substances.list.CASNumberMatchableExtractor =
+{
+  "matchableCalculationClass" : "gsrs.dataexchange.extractors.CASNumberMatchableExtractor",
+  "order": 1000,
+  "config": {
+    "casCodeSystems": ["CAS", "CASNo", "CASNumber"]
+  }
+}
+gsrs.matchableCalculators.substances.list.AllNamesMatchableExtractor =
+{
+  "matchableCalculationClass" : "gsrs.dataexchange.extractors.AllNamesMatchableExtractor",
+  "order": 1100,
+  "config" :{}
+}
+gsrs.matchableCalculators.substances.list.ApprovalIdMatchableExtractor =
+{
+  "matchableCalculationClass" : "gsrs.dataexchange.extractors.ApprovalIdMatchableExtractor",
+  "order": 1200,
+  "config" :{}
+}
+gsrs.matchableCalculators.substances.list.DefinitionalHashMatchableExtractor =
+{
+  "matchableCalculationClass" : "gsrs.dataexchange.extractors.DefinitionalHashMatchableExtractor",
+  "order": 1300,
+  "config" :{}
+}
+gsrs.matchableCalculators.substances.list.SelectedCodesMatchableExtractor =
+{
+  "matchableCalculationClass" : "gsrs.dataexchange.extractors.SelectedCodesMatchableExtractor",
+  "order": 1400,
+  "config": {
+    "codeSystems" :["CAS", "ChemBL", "NCI", "NSC", "EINECS"]
+  }
+}
+gsrs.matchableCalculators.substances.list.UUIDMatchableExtractor =
+{
+  "matchableCalculationClass" : "gsrs.dataexchange.extractors.UUIDMatchableExtractor",
+  "order": 1500,
+  "config" :{}
+}
+gsrs.matchableCalculators.substances.list.CodeMatchableExtractor =
+{
+  "matchableCalculationClass" : "gsrs.dataexchange.extractors.CodeMatchableExtractor",
+  "order": 1600,
+  "disabled": true,
+  "config": {
+    "reqCodeSystems": ["FDA UNII"],
+    "codeType": "PRIMARY",
+    "codeKey": "CODE"
+  }
+}
 
 gsrs.uuidCodeSystem.substances="UUID Code"
 gsrs.approvalIdCodeSystem.substances="FDA UNII"
@@ -438,10 +463,15 @@ gsrs.application.ivm.search.max.fetch = "20000"
 gsrs.product.ivm.search.max.fetch = "20000"
 gsrs.clinicaltrial.ivm.search.max.fetch = "20000"
 
-gsrs.entityProcessors+={
-        "entityClassName": ix.ginas.models.v1.Substance,
-        "processor": "gsrs.dataexchange.processors.CalculateMatchablesProcessor",
-        "with":{
-		}
-   	}
-
+gsrs.indexers.list.SubstanceApplicationIndexValueMaker = null
+gsrs.indexers.list.SubstanceProductIndexValueMaker = null
+gsrs.indexers.list.SubstanceClinicalUSTrialIndexValueMaker = null
+gsrs.indexers.list.SubstanceClinicalEuropeTrialIndexValueMaker = null
+ix.ginas.export.exporterfactories.substances.list.ExcelSubstanceRelatedApplicationsExporterFactory = null
+ix.ginas.export.exporterfactories.substances.list.ExcelSubstanceRelatedProductsExporterFactory = null
+ix.ginas.export.exporterfactories.substances.list.ExcelSubstanceRelatedClinicalTrialsUSExporterFactory = null
+ix.ginas.export.exporterfactories.substances.list.ExcelSubstanceRelatedClinicalTrialsEuropeExporterFactory = null
+ix.ginas.export.exporterfactories.substances.list.FDANameExporterFactory=null
+ix.ginas.export.exporterfactories.substances.list.FDACodeExporterFactory=null
+ix.ginas.export.exporterfactories.substances.list.SRSLegacyDictionaryExporterFactory=null
+ix.ginas.export.exporterfactories.substances.list.SPLValidatorXMLExporterFactory=null
