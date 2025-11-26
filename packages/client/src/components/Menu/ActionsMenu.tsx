@@ -70,7 +70,7 @@ function ActionsMenuItem({
     <BaseMenu.Item
       onClick={onClick}
       disabled={disabled}
-      data-disabled={disabled}
+      data-disabled={disabled || undefined}
       closeOnClick={closeOnClick}
       className={`${baseStyles.item} ${className || ''}`}
       render={render}

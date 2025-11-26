@@ -25,6 +25,7 @@ const SpacesQuickActions = styled(QuickActions)`
   padding-top: 24px;
   padding-bottom: 16px;
   padding-left: 20px;
+  padding-right: 16px;
 `
 
 const SpaceGroupDropdownOption = styled.div`
