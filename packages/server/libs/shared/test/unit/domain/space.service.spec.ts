@@ -24,6 +24,8 @@ import { Reference } from '@mikro-orm/core'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
+import { EventHelper } from '@shared/domain/event/event.helper'
 
 describe('SpaceService', () => {
   const USER_ID = 1
@@ -49,10 +51,18 @@ describe('SpaceService', () => {
   }) as SqlEntityManager['transactional']
   const spaceMembershipRepoFindOneStub = stub()
   const temPersistAndFlushStub = stub()
+  const userContextLoadEntityStub = stub()
+  const eventHelperCreateAndPersistDeleteSpaceEventStub = stub()
 
-  const userContext = new UserContext(1, 'accessToken', 'dxuser', 'sessionId')
+  const userContext = {
+    id: USER_ID,
+    accessToken: 'accessToken',
+    dxuser: 'dxuser',
+    sessionId: 'sessionId',
+    loadEntity: userContextLoadEntityStub,
+  } as UserContext
 
-  const createSpaceService = () => {
+  const createSpaceService = (): SpaceService => {
     em.transactional = emTransactionalStub
     em.persistAndFlush = temPersistAndFlushStub
 
@@ -75,6 +85,10 @@ describe('SpaceService', () => {
     const spaceTypeToCreatorProviderMap = {
       [SPACE_TYPE.GROUPS]: buildProcess,
     } as unknown as { [T in SPACE_TYPE]: SpaceCreationProcess }
+    const spaceGroupService = {} as unknown as SpaceGroupService
+    const eventHelper = {
+      createAndPersistDeleteSpaceEvent: eventHelperCreateAndPersistDeleteSpaceEventStub,
+    } as unknown as EventHelper
 
     return new SpaceService(
       em,
@@ -83,6 +97,8 @@ describe('SpaceService', () => {
       spaceRepository,
       spaceMembershipRepository,
       userRepository,
+      spaceGroupService,
+      eventHelper,
     )
   }
 
@@ -114,11 +130,45 @@ describe('SpaceService', () => {
     temPersistAndFlushStub.reset()
     temPersistAndFlushStub.throws()
 
+    userContextLoadEntityStub.reset()
+    userContextLoadEntityStub.throws()
+
+    eventHelperCreateAndPersistDeleteSpaceEventStub.reset()
+    eventHelperCreateAndPersistDeleteSpaceEventStub.throws()
+
     referenceStub = stub(Reference, 'create')
   })
 
   afterEach(() => {
     referenceStub.restore()
+  })
+
+  describe('#deleteSpaces', () => {
+    it('basic', async () => {
+      const space1 = { id: 11 } as unknown as Space
+      const space2 = { id: 12 } as unknown as Space
+      const user = { id: USER_ID }
+
+      userContextLoadEntityStub.resolves(user)
+      const spaceService = createSpaceService()
+
+      spaceRepoFindEditableOneStub.withArgs({ id: space1.id }).resolves(space1)
+      spaceRepoFindEditableOneStub.withArgs({ id: space2.id }).resolves(space2)
+      eventHelperCreateAndPersistDeleteSpaceEventStub.resolves()
+
+      await spaceService.deleteSpaces([11, 12])
+
+      expect(spaceRepoFindEditableOneStub.calledTwice).to.be.true()
+      expect(spaceRepoFindEditableOneStub.firstCall.args[0]).to.deep.equal({ id: space1.id })
+      expect(spaceRepoFindEditableOneStub.secondCall.args[0]).to.deep.equal({ id: space2.id })
+      expect(eventHelperCreateAndPersistDeleteSpaceEventStub.calledTwice).to.be.true()
+      expect(eventHelperCreateAndPersistDeleteSpaceEventStub.firstCall.args[0]).to.equal(user)
+      expect(eventHelperCreateAndPersistDeleteSpaceEventStub.firstCall.args[1]).to.equal(space1)
+      expect(eventHelperCreateAndPersistDeleteSpaceEventStub.secondCall.args[0]).to.equal(user)
+      expect(eventHelperCreateAndPersistDeleteSpaceEventStub.secondCall.args[1]).to.equal(space2)
+      expect(space1.state).to.equal(SPACE_STATE.DELETED)
+      expect(space2.state).to.equal(SPACE_STATE.DELETED)
+    })
   })
 
   describe('#create', () => {
@@ -144,7 +194,9 @@ describe('SpaceService', () => {
       isSiteAdmin: async () => false,
     } as unknown as User
 
-    const createBaseSpace = (type: SPACE_TYPE = SPACE_TYPE.REVIEW) => {
+    const createBaseSpace = (
+      type: SPACE_TYPE = SPACE_TYPE.REVIEW,
+    ): { space; confidentialSpace1; confidentialSpace2 } => {
       const confidentialSpace1 = { name: 'a', description: 'b' }
       const confidentialSpace2 = { name: 'b', description: 'b' }
       const loadItemsStub = stub().resolves()
@@ -176,7 +228,7 @@ describe('SpaceService', () => {
       return { space, confidentialSpace1, confidentialSpace2 }
     }
 
-    const setupStubs = (space: Space, user: User) => {
+    const setupStubs = (space: Space, user: User): void => {
       userRepoFindOneStub.withArgs({ id: USER_ID }).resolves(user)
       spaceRepoFindEditableOneStub.withArgs({ id: SPACE_ID }).resolves(space)
     }
@@ -280,7 +332,11 @@ describe('SpaceService', () => {
     })
 
     it('fails update for GROUPS space if not site admin or lead', async () => {
-      const nonAdminUser = { id: USER_ID, dxuser: 'dxuser', isSiteAdmin: async () => false }
+      const nonAdminUser = {
+        id: USER_ID,
+        dxuser: 'dxuser',
+        isSiteAdmin: async (): Promise<boolean> => false,
+      }
       userRepoFindOneStub.withArgs({ id: USER_ID }).resolves(nonAdminUser)
       const { space } = createBaseSpace(SPACE_TYPE.GROUPS)
       space.findHostLead.resolves({ dxuser: 'notDxuser' })
@@ -327,12 +383,12 @@ describe('SpaceService', () => {
 
   describe('#lockSpace', () => {
     it('basic', async () => {
-      const user = { id: USER_ID, isReviewSpaceAdmin: () => true }
+      const user = { id: USER_ID, isReviewSpaceAdmin: (): boolean => true }
       const space = {
         id: SPACE_ID,
         state: SPACE_STATE.ACTIVE,
         type: SPACE_TYPE.REVIEW,
-        isConfidential: () => false,
+        isConfidential: (): boolean => false,
       }
 
       referenceStub.withArgs(user).returns(user)
@@ -411,12 +467,12 @@ describe('SpaceService', () => {
 
   describe('#unlockSpace', () => {
     it('basic', async () => {
-      const user = { id: USER_ID, isReviewSpaceAdmin: () => true }
+      const user = { id: USER_ID, isReviewSpaceAdmin: (): boolean => true }
       const space = {
         id: SPACE_ID,
         state: SPACE_STATE.LOCKED,
         type: SPACE_TYPE.REVIEW,
-        isConfidential: () => false,
+        isConfidential: (): boolean => false,
       }
 
       referenceStub.withArgs(user).returns(user)

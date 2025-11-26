@@ -16,6 +16,7 @@ export enum EVENT_TYPES {
   APP_PUBLISHED = 'Event::AppPublished',
   FILE_CREATED = 'Event::FileCreated',
   DBCLUSTER_PASSWORD_ROTATED = 'Event::DbClusterPasswordRotated',
+  SPACE_DELETED = 'Event::SpaceDeleted',
 }
 
 @Entity({ tableName: 'events' })

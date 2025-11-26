@@ -13,6 +13,7 @@ import { ChartLineIcon } from '../../../components/icons/ChartLineIcon'
 import { NewspaperIcon } from '../../../components/icons/NewspaperIcon'
 import { Loader } from '../../../components/Loader'
 import { fetchAdminStats } from '../users/api'
+import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 
 const PageHeader = styled.div`
   margin: 0;
@@ -105,6 +106,7 @@ export function AdminDashboard() {
         <ButtonBar>
           <LinkButton to="/admin/users" icon={<UsersIcon height={12} />} label="Users" />
           <LinkButton nonReact to="/admin/admin_memberships?group=site" icon={<AdminIcon height={12} />} label="Admins" />
+          <LinkButton nonReact to="/admin/spaces" icon={<ObjectGroupIcon height={12} />} label="Spaces" />
           <LinkButton nonReact to="/admin/sidekiq" icon={<ChartColumnIcon height={12} />} label="Sidekiq" />
           <LinkButton nonReact to="/admin/comparator_settings" icon={<BullsEyeIcon height={12} />} label="Comparator Settings" />
           <LinkButton to="/admin/alerts" icon={<BellIcon height={12} />} label="Site Alerts" />

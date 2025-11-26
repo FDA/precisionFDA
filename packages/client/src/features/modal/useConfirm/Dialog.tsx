@@ -18,17 +18,18 @@ export interface IDialogProps {
   okText?: string
   cancel: () => void
   cancelText?: string
+  dataVariant?: 'primary' | 'success' | 'warning' | 'link'
 }
 
 export const Dialog = (props: IDialogProps) => {
-  const { body, ok, okText, cancel, cancelText } = props
+  const { body, ok, okText, cancel, cancelText, dataVariant } = props
 
   return (
     <StyledConfirmDialog>
       {body}
       <StyledButtonRow>
         <Button onClick={cancel}>{cancelText || 'Cancel'}</Button>
-        <Button data-variant="primary" onClick={ok}>{okText || 'Ok'}</Button>
+        <Button data-variant={dataVariant} onClick={ok}>{okText || 'Ok'}</Button>
       </StyledButtonRow>
     </StyledConfirmDialog>
   )

@@ -7,10 +7,12 @@ import { SpaceMembership } from '@shared/domain/space-membership/space-membershi
 import { User } from '@shared/domain/user/user.entity'
 import { SpaceGroup } from '@shared/domain/space/space-group.entity'
 import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
+import { EventModule } from '@shared/domain/event/event.module'
 
 @Module({
   imports: [
     SpaceCreateModule,
+    EventModule,
     MikroOrmModule.forFeature([Space, SpaceMembership, User, SpaceGroup]),
   ],
   providers: [SpaceService, SpaceGroupService],

@@ -11,6 +11,7 @@ export const useConfirm = ({
   headerText,
   okText = 'I understand',
   cancelText = 'Back',
+  dataVariant = 'primary',
 }:{
   onOk: () => void
   body: ReactNode
@@ -18,6 +19,7 @@ export const useConfirm = ({
   headerText?: string
   okText?: string
   cancelText?: string
+  dataVariant?: 'primary' | 'success' | 'warning' | 'link'
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -31,13 +33,16 @@ export const useConfirm = ({
   }
 
   const ConfirmDialog = () => (
-    <ModalNext
-      id="confirm-modal"
-      isShown={isOpen}
-      hide={() => setIsOpen(false)}
-    >
+    <ModalNext id="confirm-modal" isShown={isOpen} hide={() => setIsOpen(false)}>
       <ModalHeaderTop headerText={headerText} hide={cancel} />
-      <DialogComponent body={body} ok={handleOk} cancelText={cancelText} okText={okText} cancel={cancel} />
+      <DialogComponent
+        body={body}
+        ok={handleOk}
+        cancelText={cancelText}
+        okText={okText}
+        cancel={cancel}
+        dataVariant={dataVariant}
+      />
     </ModalNext>
   )
 

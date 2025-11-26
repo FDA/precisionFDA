@@ -19,6 +19,11 @@ export class SpaceRepository extends AccessControlRepository<Space> {
   protected async getEditableWhere(): Promise<FilterQuery<Space>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
 
+    const isSiteAdmin = await user.isSiteAdmin()
+    if (isSiteAdmin) {
+      return {}
+    }
+
     return {
       spaceMemberships: {
         user: user.id,

@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   Enum,
+  Filter,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -26,6 +27,11 @@ type SpaceMeta = {
   restricted_discussions: boolean
 }
 
+@Filter({
+  name: 'excludeDeleted',
+  cond: () => ({ state: { $ne: SPACE_STATE.DELETED } }),
+  default: true,
+})
 @Entity({ tableName: 'spaces', repository: () => SpaceRepository })
 export class Space extends BaseEntity {
   @Property()
