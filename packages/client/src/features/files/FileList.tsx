@@ -8,7 +8,7 @@ import {
   RowSelectionState,
   VisibilityState,
 } from '@tanstack/react-table'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQueryParam } from 'use-query-params'
 import { Button } from '../../components/Button'
@@ -16,8 +16,6 @@ import { ActionsMenu } from '../../components/Menu'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
-import { ClipboardCheckIcon } from '../../components/icons/ClipboardCheckIcon'
-import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
@@ -26,7 +24,7 @@ import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, FilesListBreadcrumbHeader, FilesListResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta, NOTIFICATION_ACTION } from '../home/types'
+import { HomeScope, IMeta, NOTIFICATION_ACTION, MetaPath } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
@@ -42,6 +40,11 @@ import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
+import styles from './FileList.module.css'
+import { CopyText } from '../../components/CopyText/CopyText'
+import { CopyIcon } from 'lucide-react'
+import { clsx } from 'clsx'
+import { toast } from 'react-toastify'
 
 type ListType = { files: (IFile | IFolder)[]; meta: IMeta }
 
@@ -60,8 +63,6 @@ export const FileList = ({
   const [folderIdParam, setFolderIdParam] = useQueryParam<string | undefined>('folder_id')
   const user = useAuthUser()
   const isAdmin = user?.isAdmin ?? false
-
-  const [isCopiedIds, setIsCopiedIds] = useState<boolean>(false)
 
   const navigate = useNavigate()
 
@@ -118,6 +119,18 @@ export const FileList = ({
   const { data: propertiesData } = usePropertiesQuery('node', homeScope, space?.id.toString())
   const { isLoading, data, error } = query
 
+  // Keep previous folder meta path while loading to prevent breadcrumb flashing
+  const previousMetaRef = useRef<MetaPath[] | undefined>(data?.meta?.path)
+  useEffect(() => {
+    // Only update ref if not loading (i.e., we have actual data)
+    if (!isLoading && data?.meta) {
+      previousMetaRef.current = data.meta.path
+    }
+  }, [data?.meta?.path, isLoading])
+  
+  // Use current data if available, otherwise use cached value only during loading
+  const currentMetaPath = !isLoading && data?.meta ? data.meta.path : (isLoading ? previousMetaRef.current : undefined)
+
   const onFolderClick = (folderId: string) => {
     resetSelected()
     const search = new URLSearchParams(
@@ -165,14 +178,6 @@ export const FileList = ({
     return folderActions.find(action => action.name === actionName)
   }
 
-  const handleCopyIds = () => {
-    navigator.clipboard.writeText(selectedFileIds.join(', '))
-    setIsCopiedIds(true)
-    setTimeout(() => {
-      setIsCopiedIds(false)
-    }, 5000)
-  }
-
   if (error) return <ResouceQueryErrorMessage />
 
   return (
@@ -212,16 +217,15 @@ export const FileList = ({
           </QuickActions>
           <QuickActions>
             {selectedFileIds.length > 0 && (
-              <Button data-variant="primary" onClick={handleCopyIds}>
-                {isCopiedIds ? (
-                  <>
-                    <ClipboardCheckIcon height={14} /> Copied IDs
-                  </>
-                ) : (
-                  <>
-                    <ClipboardIcon height={14} /> Copy IDs
-                  </>
-                )}
+              <Button
+                data-variant="primary"
+                as={CopyText}
+                value={selectedFileIds.join(', ')}
+                iconColor="white"
+                iconSuccessColor="white"
+                style={{ color: 'white' }}
+              >
+                Copy IDs
               </Button>
             )}
             <ActionsMenu data-testid="home-files-actions-button">
@@ -243,6 +247,7 @@ export const FileList = ({
         filters={toArrayFromObject(filterQuery)}
         files={files}
         filesMeta={data?.meta}
+        metaPath={currentMetaPath}
         properties={propertiesData?.keys}
         onFolderClick={onFolderClick}
         onFileClick={onRowClick}
@@ -296,12 +301,14 @@ export const FilesListTable = ({
   columnSizing,
   setColumnSizing,
   filesMeta,
+  metaPath,
   folderId,
   columnVisibility,
   setColumnVisibility,
 }: {
   spaceId?: number
   filesMeta?: IMeta
+  metaPath?: MetaPath[]
   shouldResetFilters?: (string | undefined)[]
   isAdmin: boolean
   filters: ColumnFiltersState
@@ -362,15 +369,25 @@ export const FilesListTable = ({
       collisionDetection={centerToCursorCollisionDetection}
     >
       {dndMoveModal.modalComp}
-      <FilesListBreadcrumbHeader>
+      <div className={styles.breadcrumbHeader}>
         <FileBreadcrumb
           currentFolderId={folderId || 0}
           basePath={location.pathname}
           scope={homeScope}
-          metaPath={filesMeta?.path}
+          metaPath={metaPath}
           labelText="You are here:"
         />
-      </FilesListBreadcrumbHeader>
+        {folderId && (
+          <CopyText
+            value={folderId.toString()}
+            className={styles.folderIdPill}
+            onCopy={() => toast.info('Folder ID copied to clipboard')}
+          >
+            <span className={clsx(styles.currentFolderIdLabel, 'flex', 'items-center')}>Folder ID:</span>{' '}
+            <span className={styles.currentFolderId}>{folderId}</span>
+          </CopyText>
+        )}
+      </div>
       <StyledPageTable>
         <Table<IFile>
           isLoading={isLoading}

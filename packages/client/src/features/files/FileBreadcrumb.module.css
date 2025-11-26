@@ -1,0 +1,62 @@
+.breadcrumbContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 32px;
+}
+
+.pathContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.divider {
+  color: var(--c-text-300);
+  font-weight: 900;
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.breadcrumbPillLink {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.breadcrumbPillLink:hover {
+  text-decoration: none;
+}
+
+.breadcrumbPillLink:focus {
+  outline: 2px solid var(--primary-400);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+.fileNameItem {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--c-text-600);
+  background-color: transparent;
+}
+
+.droppable {
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  transition: all 150ms ease;
+}
+
+.droppable[data-is-over='true'] {
+  background-color: var(--highlight-100);
+  border: 1px solid var(--highlight-500);
+}

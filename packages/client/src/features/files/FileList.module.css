@@ -1,0 +1,46 @@
+.folderIdPill {
+  background-color: none;
+  border: none;
+  padding: 3px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: all 150ms ease;
+  user-select: none;
+}
+.currentFolderId {
+  display: flex;
+  align-items: center;
+  color: var(--c-text-900);
+}
+.currentFolderIdLabel {
+  color: var(--c-primary-800);
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+}
+.breadcrumbHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 16px;
+  padding-bottom: 8px;
+}
+
+.copyVal {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--c-link);
+  gap: 8px;
+}
+.copyVal:focus {
+  outline: none;
+}
