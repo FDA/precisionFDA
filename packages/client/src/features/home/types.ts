@@ -58,6 +58,7 @@ export type ResourceTypeUrlNames =
 
 export type APIResource =
   | 'admin-users'
+  | 'admin-spaces'
   | 'admin-invitations'
   | 'files'
   | 'folders'

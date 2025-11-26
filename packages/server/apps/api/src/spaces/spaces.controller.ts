@@ -2,6 +2,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Inject,
@@ -40,6 +41,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
 import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { AdminRequestDTO } from '@shared/domain/admin/dto/admin-request.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
@@ -58,6 +60,12 @@ export class SpacesController {
   async create(@Body() space: CreateSpaceDTO): Promise<{ id: number }> {
     const spaceId = await this.spaceService.create(space)
     return { id: spaceId }
+  }
+
+  @UseGuards(SiteAdminGuard)
+  @Delete()
+  async delete(@Body() spacesToDelete: AdminRequestDTO): Promise<void> {
+    await this.spaceService.deleteSpaces(spacesToDelete.ids)
   }
 
   @Put('/:id')

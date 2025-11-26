@@ -1,4 +1,4 @@
-import { wrap } from '@mikro-orm/core'
+import { EntityManager, wrap } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -9,11 +9,31 @@ import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { Space } from '@shared/domain/space/space.entity'
 
 @Injectable()
 export class EventHelper {
   @ServiceLogger()
   private readonly logger: Logger
+
+  constructor(private readonly em: EntityManager) {}
+
+  async createAndPersistDeleteSpaceEvent(user: User, space: Space): Promise<Event> {
+    this.logger.log(`Creating SPACE_DELETED event for space ID ${space.id} and user ${user.dxuser}`)
+    const event = new Event()
+    const organization = user.organization.isInitialized()
+      ? user.organization.getEntity()
+      : await user.organization.load()
+    wrap(event).assign({
+      type: EVENT_TYPES.SPACE_DELETED,
+      orgHandle: organization.handle,
+      dxuser: user.dxuser,
+      param1: space.id.toString(),
+      param2: space.name,
+    })
+    await this.em.persistAndFlush(event)
+    return event
+  }
 
   async createFileEvent(
     eventType: EVENT_TYPES,
@@ -70,6 +90,8 @@ export class EventHelper {
     return event
   }
 }
+
+// standalone functions, should be refactored into the component above
 
 const createAppCreated = async (user: User, app: App): Promise<Event> => {
   const event = new Event()

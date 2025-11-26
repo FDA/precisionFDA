@@ -2,7 +2,6 @@ import { useMutation, UseQueryResult } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import Menu from '../../../components/Menu/Menu'
 import { ArrowIcon } from '../../../components/icons/ArrowIcon'
@@ -17,13 +16,7 @@ import { bulkActivate, bulkDeactivate, bulkUnlock, setJobLimit, setTotalLimit } 
 import { AxiosError } from 'axios'
 import { BackendError } from '../../../api/errors'
 import { resourceCountString } from '../../../utils/formatting'
-
-const ButtonsRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  margin: 16px 0;
-  gap: 8px;
-`
+import { ButtonsRow } from '../common'
 
 const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button>>(
   (props, ref) => {

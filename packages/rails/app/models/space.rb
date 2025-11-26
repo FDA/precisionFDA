@@ -29,6 +29,7 @@
 #           It is also used for Private Spaces which points back to itself
 
 class Space < ActiveRecord::Base
+  default_scope { where.not(state: :deleted) }
   paginates_per 25
 
   include Auditor
@@ -93,6 +94,8 @@ class Space < ActiveRecord::Base
   scope :admin_spaces, -> { where(space_type: :administrator) }
   scope :undeleted, -> { where.not(state: :deleted) }
   scope :restricted, -> { confidential.where(restrict_to_template: true) }
+  scope :with_deleted, -> { unscope(where: :state) }
+  scope :only_deleted, -> { with_deleted.where(state: :deleted) }
   scope :editable_by, lambda { |context|
     return none unless context.logged_in?
 

@@ -36,6 +36,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { StringUtils } from '@shared/utils/string.utils'
 import { Logger } from 'nestjs-pino'
 import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
+import { EventHelper } from '@shared/domain/event/event.helper'
 
 type SpaceFilter = FilterQuery<Space> & {
   spaceMemberships?: {
@@ -64,7 +65,22 @@ export class SpaceService {
     private readonly spaceMembershipRepository: SpaceMembershipRepository,
     private readonly userRepository: UserRepository,
     private readonly spaceGroupService: SpaceGroupService,
+    private readonly eventHelper: EventHelper,
   ) {}
+
+  async deleteSpaces(spaceIds: number[]): Promise<void> {
+    this.logger.log(`Deleting spaces with ids ${spaceIds}`)
+
+    const user = await this.userContext.loadEntity()
+
+    await this.em.transactional(async () => {
+      for (const spaceId of spaceIds) {
+        const space = await this.spaceRepository.findEditableOne({ id: spaceId })
+        space.state = SPACE_STATE.DELETED
+        await this.eventHelper.createAndPersistDeleteSpaceEvent(user, space)
+      }
+    })
+  }
 
   private async validateUpdate(currentUser: User, space: Space): Promise<void> {
     const hostLead = await space.findHostLead()
