@@ -1,0 +1,130 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: all 150ms ease;
+  user-select: none;
+}
+
+.pillDefault {
+  background-color: var(--tertiary-100);
+  color: var(--c-text-600);
+  border-color: var(--tertiary-200);
+}
+
+.pillDefault:hover {
+  background-color: var(--tertiary-200);
+  border-color: var(--tertiary-300);
+}
+
+.pillPrimary {
+  background-color: var(--primary-100);
+  color: var(--primary-700);
+  border-color: var(--primary-200);
+}
+
+.pillPrimary:hover {
+  background-color: var(--primary-200);
+  border-color: var(--primary-300);
+}
+
+.pillSecondary {
+  background-color: transparent;
+  color: var(--c-text-500);
+  border-color: var(--tertiary-300);
+}
+
+.pillSecondary:hover {
+  background-color: var(--tertiary-50);
+  border-color: var(--tertiary-400);
+}
+
+.pillSuccess {
+  background-color: var(--success-100);
+  color: var(--success-700);
+  border-color: var(--success-200);
+}
+
+.pillSuccess:hover {
+  background-color: var(--success-200);
+  border-color: var(--success-300);
+}
+
+.pillOrange {
+  background-color: var(--highlight-100);
+  color: var(--highlight-700);
+  border-color: var(--highlight-200);
+}
+
+.pillOrange:hover {
+  background-color: var(--highlight-200);
+  border-color: var(--highlight-300);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.pillSmall {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.pillLarge {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.pillDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pillDefault {
+    background-color: var(--tertiary-100);
+    color: var(--c-text-500);
+    border-color: var(--tertiary-300);
+  }
+
+  .pillDefault:hover {
+    background-color: var(--tertiary-200);
+    border-color: var(--tertiary-400);
+  }
+
+  .pillSecondary {
+    background-color: transparent;
+    color: var(--c-text-500);
+    border-color: var(--tertiary-400);
+  }
+
+  .pillSecondary:hover {
+    background-color: var(--tertiary-100);
+    border-color: var(--tertiary-500);
+  }
+
+  .pillOrange {
+    background-color: var(--highlight-100);
+    color: var(--highlight-700);
+    border-color: var(--highlight-200);
+  }
+
+  .pillOrange:hover {
+    background-color: var(--highlight-200);
+    border-color: var(--highlight-300);
+  }
+}

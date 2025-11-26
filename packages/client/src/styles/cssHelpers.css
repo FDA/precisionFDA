@@ -30,3 +30,5 @@
 .gap-6 { gap: 1.5rem; }
 .gap-8 { gap: 2rem; }
 .gap-10 { gap: 2.5rem; }
+
+.pointer { cursor: pointer; }

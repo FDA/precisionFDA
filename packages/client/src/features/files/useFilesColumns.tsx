@@ -5,8 +5,6 @@ import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
 import { AreaChartIcon } from '../../components/icons/AreaChartIcon'
-import { ClipboardCheckIcon } from '../../components/icons/ClipboardCheckIcon'
-import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
 import { CogsIcon } from '../../components/icons/Cogs'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FolderIcon } from '../../components/icons/FolderIcon'
@@ -18,6 +16,8 @@ import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { colors } from '../../styles/theme'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
 import { IFile } from './files.types'
+import { CopyText } from '../../components/CopyText/CopyText'
+import styles from './FileList.module.css'
 
 const StyledLocked = styled.div<{ $isLocked: boolean }>`
   flex: 1 0 auto;
@@ -88,23 +88,15 @@ export const useFilesColumns = ({
       enableSorting: false,
       enableColumnFilter: false,
       size: 280,
-      cell: ({ cell }) => {
-        const [isCopiedId, setIsCopiedId] = React.useState<boolean>(false)
-        const val = cell.getValue<string>()
+      cell: ({ row }) => {
+        const node = row.original
+        const val = node.type === 'Folder' ? node.id.toString() : node.uid
         return (
           <div style={{}}>
             {val && (
-              <StyledNameCell
-                onClick={() => {
-                  navigator.clipboard.writeText(val)
-                  setIsCopiedId(true)
-                  setTimeout(() => setIsCopiedId(false), 5000)
-                }}
-              >
-                {isCopiedId && <ClipboardCheckIcon height={14} />}
-                {!isCopiedId && <ClipboardIcon height={14} />}
+              <CopyText className={styles.copyVal} value={val}>
                 <span>{val}</span>
-              </StyledNameCell>
+              </CopyText>
             )}
           </div>
         )

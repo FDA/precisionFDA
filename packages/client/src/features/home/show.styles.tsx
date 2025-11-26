@@ -75,6 +75,8 @@ export const FilesListResourceHeader = styled(ResourceHeader)`
   gap: 16px;
 `
 export const FilesListBreadcrumbHeader = styled(FilesListResourceHeader)`
+  align-items: center;
+  flex-direction: row;
   padding-top: 0;
 `
 

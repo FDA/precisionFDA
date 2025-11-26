@@ -27,7 +27,6 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   transition: all 0.2s ease;
   box-shadow: 0 1px 2px var(--base-opacity-06);
   border-color: var(--tertiary-300);
-  min-width: 100px;
 
   &:active {
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);

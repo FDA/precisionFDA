@@ -123,7 +123,6 @@ export const Fill = styled.div`
 export const QuickActions = styled.div`
   display: flex;
   gap: 4px;
-  margin-right: 16px;
   ${Svg} {
     margin-right: 4px;
   }

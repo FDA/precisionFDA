@@ -1,0 +1,19 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animatedCheck {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.icon {
+    width: 12px;
+    flex-shrink: 0;
+}
