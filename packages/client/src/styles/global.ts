@@ -36,9 +36,7 @@ const GlobalStyle = createGlobalStyle<{ railsAlertHeight: number }>`
   a {
     color: var(--c-link);
     text-decoration: none;
-    &:hover {
-      color: var(--c-link-hover);
-    }
+
   }
   main {
     display: flex;

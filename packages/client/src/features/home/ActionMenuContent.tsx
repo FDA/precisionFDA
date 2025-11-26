@@ -3,14 +3,12 @@ import styled, { css } from 'styled-components'
 import { CloudResourcesConditionalAnchor } from '../../components/ConditionalAnchor'
 import { CheckIcon } from '../../components/icons/CheckIcon'
 import { NavLink } from '../../components/NavLink'
-import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { colors } from '../../styles/theme'
 import {
   Action,
   ActionGroup,
   FunctionAction,
   LinkAction as LinkActionType,
-  Link as LinkType,
   ModalAction,
   RouteAction,
   SelectionAction,
@@ -125,33 +123,6 @@ export const StyledActionsMessage = styled.div`
   color: var(--c-text-700);
 `
 
-const LinkAction = ({
-  children,
-  link,
-  disabled = false,
-  cloudResourcesConditionType,
-}: {
-  link: LinkType
-  disabled?: boolean
-  cloudResourcesConditionType?: CloudResourcesConditionType
-  children: React.ReactNode
-}) => {
-  if (disabled) {
-    return <>{children}</>
-  }
-  const url = typeof link === 'string' ? link : link.url
-  const method = typeof link === 'string' ? 'GET' : link.method
-  return cloudResourcesConditionType ? (
-    <CloudResourcesConditionalAnchor href={url} data-turbolinks="false" conditionType={cloudResourcesConditionType}>
-      {children}
-    </CloudResourcesConditionalAnchor>
-  ) : (
-    <a data-turbolinks="false" href={url} data-method={method}>
-      {children}
-    </a>
-  )
-}
-
 const ActionItem = ({ action }: { action: Action }) => {
   const isDisabled = action?.isDisabled ?? false
 
@@ -159,23 +130,40 @@ const ActionItem = ({ action }: { action: Action }) => {
     case 'route': {
       const routeAction = action as RouteAction
       return (
-        <ActionsMenu.Item key={action.name} disabled={isDisabled}>
-          {isDisabled ? <span>{action.name}</span> : <NavLink to={routeAction.to}>{action.name}</NavLink>}
-        </ActionsMenu.Item>
+        <ActionsMenu.Item 
+          key={action.name} 
+          disabled={isDisabled}
+          render={<NavLink to={routeAction.to}>{action.name}</NavLink>}
+        />
       )
     }
     case 'link': {
       const linkAction = action as LinkActionType
-      return (
-        <ActionsMenu.Item key={action.name} disabled={isDisabled}>
-          <LinkAction
+      const url = typeof linkAction.link === 'string' ? linkAction.link : linkAction.link.url
+      const method = typeof linkAction.link === 'string' ? 'GET' : linkAction.link.method
+      if (linkAction.cloudResourcesConditionType) {
+        return (
+          <ActionsMenu.Item 
+            key={action.name}
             disabled={isDisabled}
-            link={linkAction.link}
-            cloudResourcesConditionType={linkAction.cloudResourcesConditionType}
-          >
-            {action.name}
-          </LinkAction>
-        </ActionsMenu.Item>
+            render={
+              <CloudResourcesConditionalAnchor 
+                href={url} 
+                data-turbolinks="false" 
+                conditionType={linkAction.cloudResourcesConditionType}
+              >
+                {action.name}
+              </CloudResourcesConditionalAnchor>
+            }
+          />
+        )
+      }
+      return (
+        <ActionsMenu.Item 
+          key={action.name}
+          disabled={isDisabled}
+          render={<a data-turbolinks="false" href={url} data-method={method}>{action.name}</a>}
+        />
       )
     }
     case 'selection': {
