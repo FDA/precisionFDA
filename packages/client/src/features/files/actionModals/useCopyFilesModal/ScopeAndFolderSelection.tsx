@@ -183,9 +183,15 @@ export const ScopeAndFolderSelection = ({
     setFolderId(folder.id)
     onSelectFolder(folder.id)
     setSearchQuery('')
+
+    if (!folder.path?.length) {
+      setBreadcrumbs([...breadcrumbs, { id: folder.id, name: folder.name }])
+      return
+    }
+
     const previousFolder = folder.path[1]
     const nearestFolder = breadcrumbs[breadcrumbs.length - 1]
-    if (!previousFolder.id || previousFolder.id === nearestFolder.id) {
+    if (!previousFolder?.id || previousFolder.id === nearestFolder.id) {
       setBreadcrumbs([...breadcrumbs, folder.path[0]])
     }
   }
