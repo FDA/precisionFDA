@@ -75,8 +75,11 @@ runs:
         fi
 
         # Determine ECR repository name
-        if [[ "$BRANCH_NAME" == "master" ]]; then
-          REPO_NAME="pfda/prod/${{ inputs.package }}"
+        if [[ "$BRANCH_NAME" == "master" ]] || \
+         [[ "$BRANCH_NAME" == "production" ]] || \
+         [[ "$BRANCH_NAME" == staging-release* ]] || \
+         [[ "$BRANCH_NAME" == release-* ]]; then
+        REPO_NAME="pfda/prod/${{ inputs.package }}"
         else
           REPO_NAME="pfda/${{ inputs.package }}"
         fi
