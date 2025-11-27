@@ -82,17 +82,15 @@ export async function fetchDiscussionRequest(discussionId: number) {
   return axios.get<Discussion>(`/api/v2/discussions/${discussionId}`).then(r => r.data)
 }
 
-export async function fetchAttachmentsRequest(noteId?: number) {
-  if (!noteId) return []
-  // yes this is wrong - i just want to avoid creating another ruby endpoint class for now.
-  return axios.get(`/api/v2/discussions/${noteId}/attachments`).then(r => r.data as Attachment[])
+export async function fetchDiscussionAttachmentsRequest(noteIds: number[]) {
+  return axios.post('/api/v2/notes/attachments', { ids: noteIds }).then(r => r.data as Record<number, Attachment[]>)
 }
 
 export async function deleteDiscussionRequest(discussionId: number) {
   return axios.delete(`/api/v2/discussions/${discussionId}`).then(r => r.data) // no response except http code
 }
 
-export async function deleteAnswerRequest(discussionId: number, replyId: number) {
+export async function deleteReplyRequest(discussionId: number, replyId: number) {
   return axios.delete(`/api/v2/discussions/${discussionId}/replies/${replyId}`).then(r => r.data) // no response except http code
 }
 

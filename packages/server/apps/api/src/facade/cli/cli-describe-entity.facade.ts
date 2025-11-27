@@ -1,5 +1,6 @@
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { Injectable } from '@nestjs/common'
+import { AppRepository } from '@shared/domain/app/app.repository'
+import { DiscussionAttachmentDTO } from '@shared/domain/attachment/dto/discussion-attachment.dto'
 import {
   CliAnswerDTO,
   CliAppDescribeDTO,
@@ -11,22 +12,20 @@ import {
   CliFolderDescribeDTO,
   CliWorkflowDescribeDTO,
 } from '@shared/domain/cli/dto/cli-describe.dto'
-import { AppRepository } from '@shared/domain/app/app.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
-import { PlatformClient } from '@shared/platform-client'
-import { DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
+import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
-import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
-import { Injectable } from '@nestjs/common'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { JobRepository } from '@shared/domain/job/job.repository'
 import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
-import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { AttachmentRetrieveFacade } from '@shared/facade/discussion/attachment-retrieve.facade'
+import { PlatformClient } from '@shared/platform-client'
 
 @Injectable()
 export class CliDescribeEntityFacade {
@@ -39,7 +38,7 @@ export class CliDescribeEntityFacade {
     private readonly workflowRepository: WorkflowRepository,
     private readonly dbclusterRepository: DbClusterRepository,
     private readonly platformClient: PlatformClient,
-    private readonly attachmentsFacade: AttachmentManagementFacade,
+    private readonly attachmentRetrieveFacade: AttachmentRetrieveFacade,
     private readonly discussionService: DiscussionService,
     private readonly nodeHelper: NodeHelper,
   ) {}
@@ -203,25 +202,25 @@ export class CliDescribeEntityFacade {
       name: string
     }[]
   > {
-    const attachments = await this.attachmentsFacade.getAttachments(noteId)
-    return attachments.map((attachment: DiscussionAttachment) => ({
+    const attachments = await this.attachmentRetrieveFacade.getAttachments(noteId)
+    return attachments.map((attachment: DiscussionAttachmentDTO) => ({
       uid: attachment.uid ?? attachment.id,
       type: attachment.type,
       name: attachment.name,
     }))
   }
 
-  private mapComments(comments: CommentDTO[]): CliCommentDTO[] {
+  private mapComments(comments: DiscussionReplyDTO[]): CliCommentDTO[] {
     return comments.map((comment) => ({
       id: comment.id,
       user: comment.user,
-      content: comment.body,
+      content: comment.content,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
     }))
   }
 
-  private async mapAnswers(answers: AnswerDTO[]): Promise<CliAnswerDTO[]> {
+  private async mapAnswers(answers: DiscussionReplyDTO[]): Promise<CliAnswerDTO[]> {
     return Promise.all(
       answers.map(async (answer) => ({
         id: answer.id,

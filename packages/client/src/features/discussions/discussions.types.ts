@@ -14,16 +14,19 @@ export interface Comment {
   updatedAt: string
 }
 
-export interface Answer {
+export interface DiscussionReply {
   id: number
   discussionId: number
   title: string
   content: string
   noteId: number
   user: SimpleUser
-  comments: Comment[]
   createdAt: string
   updatedAt: string
+}
+
+export interface Answer extends DiscussionReply {
+  comments: DiscussionReply[]
 }
 
 export interface Discussion {
@@ -37,7 +40,7 @@ export interface Discussion {
   createdAt: string
   updatedAt: string
   answers: Answer[]
-  comments: Comment[]
+  comments: DiscussionReply[]
   commentsCount: number
   answersCount: number
 }

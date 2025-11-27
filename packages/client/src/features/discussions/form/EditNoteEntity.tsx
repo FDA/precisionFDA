@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { NotePayload, NoteScope, editDiscussionRequest, editReplyRequest, fetchAttachmentsRequest } from '../api'
+import { NotePayload, NoteScope, editDiscussionRequest, editReplyRequest, fetchDiscussionAttachmentsRequest } from '../api'
 
 import { Button } from '../../../components/Button'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
@@ -67,12 +67,12 @@ export const EditNoteForm = ({
 
   const { isLoading, data: attachmentsData } = useQuery({
     queryKey: ['attachments', noteId],
-    queryFn: () => fetchAttachmentsRequest(noteId),
+    queryFn: () => fetchDiscussionAttachmentsRequest([noteId]),
     enabled: !!noteId,
   })
 
   useEffect(() => {
-    setValue('attachments', groupByAttachmentType(attachmentsData ?? []))
+    setValue('attachments', groupByAttachmentType(attachmentsData?.[noteId] ?? []))
   }, [attachmentsData])
 
   const onSubmitForm = async () => {
@@ -147,7 +147,7 @@ export const EditNoteEntity = ({
         queryKey: ['discussion'],
       })
       await queryClient.invalidateQueries({
-        queryKey: ['attachments'],
+        queryKey: ['attachments', discussionId],
       })
     },
     onError: () => {

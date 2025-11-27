@@ -14,6 +14,7 @@ import { ComparisonRepository } from '@shared/domain/comparison/comparison.repos
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { DxId } from '../entity/domain/dxid'
 
 enum COMPARISON_STATE {
   DONE = 'done',
@@ -61,8 +62,8 @@ class Comparison extends ScopedEntity {
   })
   inputFiles = new Collection<UserFile>(this)
 
-  @ManyToOne({ entity: () => App, fieldName: 'app_dxid', nullable: false })
-  app: Ref<App>
+  @Property({ fieldName: 'app_dxid' })
+  appDxid: DxId<'app'>
 
   @ManyToOne({ entity: () => User, fieldName: 'user_id', nullable: false })
   user: Ref<User>
@@ -74,7 +75,7 @@ class Comparison extends ScopedEntity {
   constructor(user: User, app: App) {
     super()
     this.user = Reference.create(user)
-    this.app = Reference.create(app)
+    this.appDxid = app.dxid
   }
 }
 

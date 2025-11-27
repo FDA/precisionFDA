@@ -1,24 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { AppRepository } from '@shared/domain/app/app.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
-import * as errors from '@shared/errors'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
 import { AttachmentRepository } from '@shared/domain/attachment/attachment.repository'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { NoteRepository } from '@shared/domain/note/note.repository'
-import type { DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { Job } from '@shared/domain/job/job.entity'
-import { Comparison } from '@shared/domain/comparison/comparison.entity'
-import { App } from '@shared/domain/app/app.entity'
-import { EntityService } from '@shared/domain/entity/entity.service'
 import { CliAttachmentsDTO } from '@shared/domain/cli/dto/cli-attachments.dto'
-import { FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { NotFoundError } from '@shared/errors'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
+import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { NoteRepository } from '@shared/domain/note/note.repository'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
+import * as errors from '@shared/errors'
+import { NotFoundError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class AttachmentManagementFacade {
@@ -32,7 +26,6 @@ export class AttachmentManagementFacade {
     private readonly jobRepository: JobRepository,
     private readonly comparisonRepository: ComparisonRepository,
     private readonly attachmentRepository: AttachmentRepository,
-    private readonly entityService: EntityService,
   ) {}
 
   async createAttachments(noteId: number, attachmentsToSave: AttachmentsDTO): Promise<void> {
@@ -213,80 +206,5 @@ export class AttachmentManagementFacade {
       attachments.comparisons.push(id)
     }
     return attachments
-  }
-
-  async getAttachments(noteId: number): Promise<DiscussionAttachment[]> {
-    this.logger.log(`Getting attachments for note id: ${noteId}`)
-    const note = await this.noteRepository.findAccessibleOne(
-      { id: noteId },
-      { populate: ['attachments'] },
-    )
-    if (!note) {
-      throw new errors.NotFoundError(
-        'Unable to get attachments: note not found or insufficient permissions.',
-      )
-    }
-
-    const response: DiscussionAttachment[] = []
-    for (const attachment of note.attachments) {
-      if (attachment.itemType === 'Node') {
-        const attachmentEntity: Node | null = await this.nodeRepository.findOne({
-          id: attachment.itemId,
-        })
-        if (!attachmentEntity) {
-          throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
-        }
-        response.push({
-          id: attachment.itemId,
-          uid: attachmentEntity.uid,
-          type: attachmentEntity.stiType,
-          name: attachmentEntity.name,
-          link: await this.entityService.getEntityUiLink(attachmentEntity as FileOrAsset),
-        })
-      } else if (attachment.itemType === 'Job') {
-        const attachmentEntity: Job | null = await this.jobRepository.findOne({
-          id: attachment.itemId,
-        })
-        if (!attachmentEntity) {
-          throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
-        }
-        response.push({
-          id: attachment.itemId,
-          uid: attachmentEntity.uid,
-          type: attachment.itemType,
-          name: attachmentEntity.name,
-          link: await this.entityService.getEntityUiLink(attachmentEntity),
-        })
-      } else if (attachment.itemType === 'Comparison') {
-        const attachmentEntity: Comparison | null = await this.comparisonRepository.findOne({
-          id: attachment.itemId,
-        })
-        if (!attachmentEntity) {
-          throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
-        }
-        response.push({
-          id: attachment.itemId,
-          uid: attachmentEntity.id.toString(),
-          type: attachment.itemType,
-          name: attachmentEntity.name,
-          link: await this.entityService.getEntityUiLink(attachmentEntity),
-        })
-      } else if (attachment.itemType === 'App') {
-        const appAttachment: App | null = await this.appRepository.findOne({
-          id: attachment.itemId,
-        })
-        if (!appAttachment) {
-          throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
-        }
-        response.push({
-          id: attachment.itemId,
-          uid: appAttachment.uid,
-          type: attachment.itemType,
-          name: appAttachment.title,
-          link: await this.entityService.getEntityUiLink(appAttachment),
-        })
-      }
-    }
-    return response
   }
 }

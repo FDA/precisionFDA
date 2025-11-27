@@ -1,9 +1,10 @@
-import { UpdateDiscussionFacade } from '../discussion/update-discussion.facade'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
-import { CliEditDiscussionDTO } from '@shared/domain/cli/dto/cli-edit-discussion.dto'
-import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
 import { Injectable } from '@nestjs/common'
+import { CliEditDiscussionDTO } from '@shared/domain/cli/dto/cli-edit-discussion.dto'
+import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
+import { AttachmentRetrieveFacade } from '@shared/facade/discussion/attachment-retrieve.facade'
+import { UpdateDiscussionFacade } from '../discussion/update-discussion.facade'
 
 @Injectable()
 export class CliUpdateDiscussionFacade {
@@ -11,6 +12,7 @@ export class CliUpdateDiscussionFacade {
     private readonly updateDiscussionFacade: UpdateDiscussionFacade,
     private readonly discussionService: DiscussionService,
     private readonly attachmentFacade: AttachmentManagementFacade,
+    private readonly attachmentRetrieveFacade: AttachmentRetrieveFacade,
   ) {}
 
   async updateDiscussion(discussionId: number, dto: CliEditDiscussionDTO): Promise<string> {
@@ -26,7 +28,9 @@ export class CliUpdateDiscussionFacade {
     }
     if (dto.attachments) {
       const newAttachments = await this.attachmentFacade.transformCliAttachments(dto.attachments)
-      const existingAttachments = await this.attachmentFacade.getAttachments(discussion.noteId)
+      const existingAttachments = await this.attachmentRetrieveFacade.getAttachments(
+        discussion.noteId,
+      )
       attachments = {
         files: existingAttachments.filter((a) => a.type === 'UserFile').map((a) => a.id),
         folders: existingAttachments.filter((a) => a.type === 'Folder').map((a) => a.id),

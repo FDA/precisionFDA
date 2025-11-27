@@ -8,8 +8,6 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
-import { Answer } from '@shared/domain/answer/answer.entity'
-import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
 import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 import { Note } from '@shared/domain/note/note.entity'
@@ -28,15 +26,12 @@ export class Discussion extends BaseEntity {
   @OneToMany({ entity: () => DiscussionReply, mappedBy: 'discussion', cascade: [Cascade.REMOVE] })
   discussionReplies = new Collection<DiscussionReply>(this)
 
-  @OneToMany({ entity: () => Answer, mappedBy: 'discussion', cascade: [Cascade.REMOVE] })
-  answers = new Collection<Answer>(this)
-
   @OneToMany({
-    entity: () => DiscussionComment,
-    mappedBy: (dc) => dc.commentable,
+    entity: () => DiscussionReply,
+    mappedBy: 'discussion',
     cascade: [Cascade.REMOVE],
   })
-  comments = new Collection<DiscussionComment>(this)
+  replies = new Collection<DiscussionReply>(this)
 
   @OneToMany({
     entity: () => DiscussionFollow,

@@ -1,58 +1,59 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useState } from 'react'
+import { toast } from 'react-toastify'
 import { Markdown } from '../../../components/Markdown'
 import { ReplyArrowIcon } from '../../../components/icons/ReplyArrowIcon'
 import { StyledMarkdown } from '../../../styles/commonStyles'
 import { useConfirm } from '../../modal/useConfirm'
 import { AttachmentsList } from '../AttachmentsList'
-import { deleteAnswerRequest, fetchAttachmentsRequest, NoteScope } from '../api'
-import { Answer } from '../discussions.types'
+import { useDiscussionContext } from '../DiscussionShow'
+import { deleteReplyRequest, NoteScope } from '../api'
+import { DiscussionReply } from '../discussions.types'
 import { EditNoteEntity } from '../form/EditNoteEntity'
 import { groupByAttachmentType } from '../helpers'
 import { StyledCommentCard, StyledReplyButton } from '../styles'
 import { CardHeader } from './CardHeader'
 
-export function AnswerCard({
+export function ReplyCard({
   canEdit,
   canReply,
-  answer,
+  reply,
   onReply,
-  onDelete,
   scope,
+  replyType = 'comment',
 }: {
   canEdit: boolean
   canReply: boolean
-  answer: Answer
-  onReply: () => void
-  onDelete: () => void
+  reply: DiscussionReply
+  onReply?: () => void
   scope: NoteScope
+  replyType: 'answer' | 'comment'
 }) {
   const [editMode, setEditMode] = useState(false)
   const queryClient = useQueryClient()
 
-  const { data: attachments } = useQuery({
-    queryKey: ['attachments', answer.noteId],
-    queryFn: () => fetchAttachmentsRequest(answer.noteId),
-    select: groupByAttachmentType,
-    enabled: !!answer.noteId,
-  })
+  const { attachments: replyAttachments } = useDiscussionContext()
+  const attachments = groupByAttachmentType(replyAttachments?.[reply.noteId] ?? [])
 
   const deleteMutation = useMutation({
-    mutationKey: ['delete-discussion-answer'],
+    mutationKey: ['delete-discussion-reply'],
     mutationFn: () => {
       queryClient.invalidateQueries({
         queryKey: ['space'],
       })
-      return deleteAnswerRequest(answer.discussionId, answer.id)
+      return deleteReplyRequest(reply.discussionId, reply.id)
     },
     onSuccess: () => {
-      if (onDelete) onDelete()
+      queryClient.invalidateQueries({
+        queryKey: ['discussion'],
+      })
+      toast.success(`${replyType === 'answer' ? 'Answer' : 'Comment'} successfully removed`)
     },
   })
   const { open: openConfirmation, Confirm: ConfirmSubmit } = useConfirm({
     onOk: deleteMutation.mutate,
     okText: 'OK',
-    headerText: 'You are about to delete this answer',
+    headerText: `You are about to delete this ${replyType.toLowerCase()}`,
     body: (
       <div>
         <p>Are you sure you would like to continue?</p>
@@ -65,27 +66,27 @@ export function AnswerCard({
       <EditNoteEntity
         onSuccess={() => setEditMode(false)}
         onCancel={() => setEditMode(false)}
-        discussionId={answer.discussionId}
-        content={answer.content}
+        discussionId={reply.discussionId}
+        content={reply.content}
         scope={scope}
-        answerId={answer.id}
-        noteId={answer.noteId}
+        answerId={reply.id}
+        noteId={reply.noteId}
       />
     )
   }
 
   return (
-    <StyledCommentCard $isAnswer>
+    <StyledCommentCard $isAnswer={replyType === 'answer'}>
       <CardHeader
-        timestamp={answer.createdAt}
-        cardType="answer"
+        timestamp={reply.createdAt}
+        cardType={replyType}
         canUserEdit={canEdit}
-        user={answer.user}
+        user={reply.user}
         onClickEdit={() => setEditMode(true)}
         onClickDelete={openConfirmation}
       />
       <StyledMarkdown>
-        <Markdown data={answer.content} />
+        <Markdown data={reply.content} />
       </StyledMarkdown>
       <AttachmentsList attachments={attachments} />
       {canReply && (

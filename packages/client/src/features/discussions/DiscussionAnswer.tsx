@@ -1,12 +1,9 @@
-import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useRef, useState } from 'react'
-import { CommentCard } from './card/CommentCard'
+import { NoteScope } from './api'
+import { ReplyCard } from './card/ReplyCard'
 import { Answer } from './discussions.types'
 import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { StyledCardList } from './styles'
-import { AnswerCard } from './card/AnswerCard'
-import { NoteScope } from './api'
-import { toast } from 'react-toastify'
 
 export const DiscussionAnswer = ({
   canEdit,
@@ -23,15 +20,6 @@ export const DiscussionAnswer = ({
   isLead: boolean
   scope: NoteScope
 }) => {
-  const queryClient = useQueryClient()
-
-  const handleDelete = () => {
-    queryClient.invalidateQueries({
-      queryKey: ['discussion'],
-    })
-    toast.success('Answer successfully removed')
-  }
-
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -43,26 +31,31 @@ export const DiscussionAnswer = ({
 
   return (
     <>
-      <AnswerCard
+      <ReplyCard
         canEdit={canEdit}
         canReply={canReply}
-        answer={answer}
+        reply={answer}
+        replyType="answer"
         scope={scope}
         onReply={() => {
           inputRef.current?.focus()
           setIsEditing(true)
         }}
-        onDelete={handleDelete}
       />
       <StyledCardList>
         {answer.comments &&
           answer.comments.map(comment => (
-            <CommentCard
+            <ReplyCard
               key={comment.id}
-              canUserEdit={currentUserId === comment.user.id || isLead}
-              comment={comment}
-              answerId={answer.id}
-              discussionId={answer.discussionId}
+              canEdit={currentUserId === comment.user.id || isLead}
+              canReply={false}
+              reply={comment}
+              scope={scope}
+              replyType="comment"
+              onReply={() => {
+                inputRef.current?.focus()
+                setIsEditing(true)
+              }}
             />
           ))}
         {isEditing && (

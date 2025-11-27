@@ -16,12 +16,12 @@ export interface SpaceReportPartDiscussionResultComment {
   content: string
   createdBy: SpaceReportPartDiscussionResultCommentCreatedBy
   createdAt: Date
+  attachments: SpaceReportPartDiscussionResultAttachment[]
 }
 
 export interface SpaceReportPartDiscussionResultAnswer
   extends SpaceReportPartDiscussionResultComment {
   comments: SpaceReportPartDiscussionResultComment[]
-  attachments: SpaceReportPartDiscussionResultAttachment[]
 }
 
 export type SpaceReportPartDiscussionResult = SpaceReportPartResultBase &

@@ -26,7 +26,7 @@ export class CliCreateDiscussionReplyFacade {
     }
 
     if (body.answerId) {
-      const answer = await this.discussionService.getAnswer(body.answerId)
+      const answer = await this.discussionService.getDiscussionReply(body.answerId)
       body.discussionId = answer.discussionId
     }
 

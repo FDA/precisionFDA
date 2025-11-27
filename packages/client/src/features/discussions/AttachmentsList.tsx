@@ -79,7 +79,7 @@ export const AttachmentsList = ({
     return null
   }
 
-  const { files = [], folders = [], assets = [], apps = [], jobs = [], comparisons = []} = attachments!
+  const { files = [], folders = [], assets = [], apps = [], jobs = [], comparisons = [] } = attachments!
 
   const typeIcon = {
     UserFile: <FileIcon height={14} />,
