@@ -1,8 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query'
-import React, { useRef, useState } from 'react'
+import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-toastify'
+import { Tooltip } from 'react-tooltip'
+import { useToggleFollowDiscussionMutation } from '../../api/mutations/discussion'
+import {
+  getFetchDiscussionQueryKey,
+  useFetchDiscussionAttachmentsQuery,
+  useFetchDiscussionQuery,
+} from '../../api/queries/discussion'
 import { Button } from '../../components/Button'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { PencilIcon } from '../../components/icons/PencilIcon'
@@ -11,19 +17,36 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { HomeLoader, NotFound } from '../home/show.styles'
 import { ISpace } from '../spaces/spaces.types'
 import { DiscussionAnswer } from './DiscussionAnswer'
-import { CommentCard } from './card/CommentCard'
+import { DiscussionCard } from './card/DiscussionCard'
+import { ReplyCard } from './card/ReplyCard'
+import { Attachment } from './discussions.types'
 import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { EditDiscussionTitle } from './form/EditDiscussionTitle'
 import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
-import { DiscussionCard } from './card/DiscussionCard'
-import { useToggleFollowDiscussionMutation } from '../../api/mutations/discussion'
-import { getFetchDiscussionQueryKey, useFetchDiscussionQuery } from '../../api/queries/discussion'
+
+interface DiscussionContextType {
+  attachments: Record<number, Attachment[]>
+}
 
 const getTooltipContent = (following: boolean) => {
   return following
     ? 'Unfollow this discussion to stop receiving email notifications'
     : 'Follow this discussion to receive email notifications when new replies are added'
 }
+
+const DiscussionContext = createContext<DiscussionContextType | undefined>(undefined)
+
+export const useDiscussionContext = () => {
+  const context = useContext(DiscussionContext)
+  if (!context) {
+    throw new Error('useDiscussionContext must be used within a DiscussionProvider')
+  }
+  return context
+}
+
+const DiscussionProvider = ({ children, value }: { children: ReactNode; value: DiscussionContextType }) => (
+  <DiscussionContext.Provider value={value}>{children}</DiscussionContext.Provider>
+)
 
 export const DiscussionShow = ({ space }: { space?: ISpace }) => {
   const navigate = useNavigate()
@@ -35,6 +58,16 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
   const user = useAuthUser()
 
   const { data: discussion, isLoading, error } = useFetchDiscussionQuery(discussionId)
+
+  const attachmentsQuery = useFetchDiscussionAttachmentsQuery(discussion!)
+
+  useEffect(() => {
+    if (discussion?.id) {
+      attachmentsQuery.refetch()
+    }
+  }, [discussion?.id, discussion?.commentsCount, discussion?.answersCount])
+
+  const attachments = attachmentsQuery.data
 
   const handleSuccess = () => {
     if (markdownInputRef.current) {
@@ -87,84 +120,90 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
   const canUserAnswer = !discussion.answers.map(a => a.user.id).includes(user!.id)
 
   return (
-    <PageContent>
-      <BackLink linkTo={backPath}>Back to Discussions</BackLink>
-      <DiscussionTitle>
-        {isEditing ? (
-          <EditDiscussionTitle discussionId={discussionId} defaultValue={discussion.title} setIsEditing={setIsEditing} />
-        ) : (
-          <>
-            <StyledTitle>
-              <div data-testid="discussion-title">{discussion.title}</div>
-              {canUserEdit(discussion.user.id) && (
-                <Button data-testid="discussion-edit-title" data-variant='link' onClick={() => setIsEditing(true)}>
-                  <PencilIcon height={16} />
-                </Button>
-              )}
-            </StyledTitle>
-            <Button
-              data-variant="primary"
-              data-tooltip-id="follow-tooltip"
-              data-tooltip-content={getTooltipContent(discussion.following)}
-              onClick={handleToggleFollow}
-            >
-              {discussion.following ? 'Unfollow discussion' : 'Follow discussion'}
-            </Button>
-            <Tooltip id="follow-tooltip" delayShow={100} />
-          </>
-        )}
-      </DiscussionTitle>
-      <div>
-        <UsernameLink href={`/users/${discussion.user.dxuser}`}>{discussion.user.fullName}</UsernameLink> started this discussion
-      </div>
-      <DiscussionCard
-        canEdit={canUserEdit(discussion.user.id)}
-        canReply={canReply}
-        discussion={discussion}
-        onReply={() => markdownInputRef?.current?.focus()}
-        onDelete={handleDeleteDiscussion}
-      />
-      <StyledCardList>
-        <CommentCount>
-          {discussion.comments.length} {pluralize('Comment', discussion.comments.length)} and {discussion.answers.length}{' '}
-          {pluralize('Answer', discussion.answers.length)}
-        </CommentCount>
-        {discussion.answers.length > 0 && (
-          <>
-            {discussion.answers.map(answer => (
-              <DiscussionAnswer
-                canEdit={canUserEdit(answer.user.id)}
-                canReply={canReply}
-                key={answer.id}
-                currentUserId={user!.id}
-                answer={answer}
-                isLead={isLead}
+    <DiscussionProvider value={{ attachments: attachments || {} }}>
+      <PageContent>
+        <BackLink linkTo={backPath}>Back to Discussions</BackLink>
+        <DiscussionTitle>
+          {isEditing ? (
+            <EditDiscussionTitle discussionId={discussionId} defaultValue={discussion.title} setIsEditing={setIsEditing} />
+          ) : (
+            <>
+              <StyledTitle>
+                <div data-testid="discussion-title">{discussion.title}</div>
+                {canUserEdit(discussion.user.id) && (
+                  <Button data-testid="discussion-edit-title" data-variant="link" onClick={() => setIsEditing(true)}>
+                    <PencilIcon height={16} />
+                  </Button>
+                )}
+              </StyledTitle>
+              <Button
+                data-variant="primary"
+                data-tooltip-id="follow-tooltip"
+                data-tooltip-content={getTooltipContent(discussion.following)}
+                onClick={handleToggleFollow}
+              >
+                {discussion.following ? 'Unfollow discussion' : 'Follow discussion'}
+              </Button>
+              <Tooltip id="follow-tooltip" delayShow={100} />
+            </>
+          )}
+        </DiscussionTitle>
+        <div>
+          <UsernameLink href={`/users/${discussion.user.dxuser}`}>{discussion.user.fullName}</UsernameLink> started this
+          discussion
+        </div>
+        <DiscussionCard
+          canEdit={canUserEdit(discussion.user.id)}
+          canReply={canReply}
+          discussion={discussion}
+          onReply={() => markdownInputRef?.current?.focus()}
+          onDelete={handleDeleteDiscussion}
+          discussionAttachments={attachments?.[discussion.noteId]}
+        />
+        <StyledCardList>
+          <CommentCount>
+            {discussion.comments.length} {pluralize('Comment', discussion.comments.length)} and {discussion.answers.length}{' '}
+            {pluralize('Answer', discussion.answers.length)}
+          </CommentCount>
+          {discussion.answers.length > 0 && (
+            <>
+              {discussion.answers.map(answer => (
+                <DiscussionAnswer
+                  canEdit={canUserEdit(answer.user.id)}
+                  canReply={canReply}
+                  key={answer.id}
+                  currentUserId={user!.id}
+                  answer={answer}
+                  isLead={isLead}
+                  scope={discussion.scope}
+                />
+              ))}
+            </>
+          )}
+          {discussion.comments.length > 0 &&
+            discussion.comments.map(comment => (
+              <ReplyCard
+                key={comment.id}
+                canEdit={canUserEdit(comment.user.id)}
+                canReply={false}
+                reply={comment}
                 scope={discussion.scope}
+                replyType="comment"
               />
             ))}
-          </>
-        )}
-        {discussion.comments &&
-          discussion.comments.map(comment => (
-            <CommentCard
-              key={comment.id}
-              canUserEdit={canUserEdit(comment.user.id)}
-              comment={comment}
-              discussionId={discussion.id}
+          {canReply && (
+            <CreateCommentEntity
+              canUserAnswer={canUserAnswer}
+              onSuccess={handleSuccess}
+              onCancel={() => setIsEditing(false)}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              markdownInputRef={markdownInputRef as any}
+              discussionId={discussionId}
+              scope={discussion.scope}
             />
-          ))}
-        {canReply && (
-          <CreateCommentEntity
-            canUserAnswer={canUserAnswer}
-            onSuccess={handleSuccess}
-            onCancel={() => setIsEditing(false)}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            markdownInputRef={markdownInputRef as any}
-            discussionId={discussionId}
-            scope={discussion.scope}
-          />
-        )}
-      </StyledCardList>
-    </PageContent>
+          )}
+        </StyledCardList>
+      </PageContent>
+    </DiscussionProvider>
   )
 }

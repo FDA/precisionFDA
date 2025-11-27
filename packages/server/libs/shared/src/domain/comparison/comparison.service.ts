@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { InvalidStateError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { Comparison } from './comparison.entity'
 
 @Injectable()
 export class ComparisonService {
@@ -10,6 +11,14 @@ export class ComparisonService {
   private readonly logger: Logger
 
   constructor(private readonly comparisonRepository: ComparisonRepository) {}
+
+  getEditableEntityById(id: number): Promise<Comparison | null> {
+    return this.comparisonRepository.findEditableOne({ id })
+  }
+
+  getAccessibleEntityById(id: number): Promise<Comparison | null> {
+    return this.comparisonRepository.findAccessibleOne({ id })
+  }
 
   async validateComparisons(fileToRemove: UserFile): Promise<void> {
     this.logger.log(`Validating comparisons for file ${fileToRemove.name}`)

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
 import { Answer } from '@shared/domain/answer/answer.entity'
+import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
 
 @Injectable()
 export class AnswerEntityLinkProvider extends EntityLinkProvider<'answer'> {
-  protected async getRelativeLink(answer: Answer) {
+  protected async getRelativeLink(answer: Answer): Promise<`/${string}`> {
     const scope = await answer.note.loadProperty('scope')
 
     if (this.MY_HOME_SCOPES.includes(scope)) {
@@ -14,12 +14,12 @@ export class AnswerEntityLinkProvider extends EntityLinkProvider<'answer'> {
     return await this.getSpaceLink(answer)
   }
 
-  private getHomeLink(answer: Answer) {
+  private getHomeLink(answer: Answer): `/${string}` {
     const discussionID = answer.discussion.id
     return `/discussions/${discussionID}/${this.getUrlSegment(answer)}` as const
   }
 
-  private async getSpaceLink(answer: Answer) {
+  private async getSpaceLink(answer: Answer): Promise<`/${string}`> {
     const note = await answer.note.load()
     const spaceID = note.getSpaceId()
     const discussionID = answer.discussion.id

@@ -1,10 +1,10 @@
 import { EntityManager, MySqlDriver, Reference } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { Answer } from '@shared/domain/answer/answer.entity'
-import AnswerRepository from '@shared/domain/answer/answer.repository'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
 import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
 import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
+import { DiscussionReplyComment } from '@shared/domain/discussion-reply/discussion-reply-comment.entity'
 import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
 import { DiscussionReplyRepository } from '@shared/domain/discussion-reply/discussion-reply.repository'
 import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
@@ -38,16 +38,14 @@ describe('DiscussionService tests', () => {
   let discussionService: DiscussionService
   let entityLinkService: EntityLinkService
   let discussionReplyRepository: DiscussionReplyRepository
-  let answerRepository: AnswerRepository
   let discussionRepository: DiscussionRepository
 
   const findOneStub = stub()
   const findEditableOneStub = stub()
   const findAccessibleOneStub = stub()
-  const answerFindAccessibleOneStub = stub()
-  const answerFindEditableOneStub = stub()
-  const answerFindOneStub = stub()
-  const discussionReplyEditableOneStub = stub()
+  const discussionReplyFindOneStub = stub()
+  const discussionReplyFindAccessibleOneStub = stub()
+  const discussionReplyFindEditableOneStub = stub()
 
   beforeEach(async () => {
     // TODO PFDA-5997 - part 1: use only stubs and remove the database
@@ -57,13 +55,10 @@ describe('DiscussionService tests', () => {
     await em.flush()
     userContext = create.contextHelper.create(user)
     await em.flush()
-    answerRepository = {
-      findAccessibleOne: answerFindAccessibleOneStub,
-      findEditableOne: answerFindEditableOneStub,
-      findOne: answerFindOneStub,
-    } as unknown as AnswerRepository
     discussionReplyRepository = {
-      findEditableOne: discussionReplyEditableOneStub,
+      findOne: discussionReplyFindOneStub,
+      findEditableOne: discussionReplyFindEditableOneStub,
+      findAccessibleOne: discussionReplyFindAccessibleOneStub,
     } as unknown as DiscussionReplyRepository
 
     entityLinkService = {} as unknown as EntityLinkService
@@ -78,7 +73,6 @@ describe('DiscussionService tests', () => {
       em,
       userContext,
       discussionRepository,
-      answerRepository,
       discussionReplyRepository,
       entityLinkService,
     )
@@ -86,10 +80,9 @@ describe('DiscussionService tests', () => {
     findOneStub.reset()
     findEditableOneStub.reset()
     findAccessibleOneStub.reset()
-    answerFindAccessibleOneStub.reset()
-    answerFindOneStub.reset()
-    answerFindEditableOneStub.reset()
-    discussionReplyEditableOneStub.reset()
+    discussionReplyFindOneStub.reset()
+    discussionReplyFindAccessibleOneStub.reset()
+    discussionReplyFindEditableOneStub.reset()
   })
 
   it('create discussion in space', async () => {
@@ -109,7 +102,7 @@ describe('DiscussionService tests', () => {
     const loadedDiscussion = await em.findOneOrFail(
       Discussion,
       { id: result.id },
-      { populate: ['note', 'answers', 'comments'] },
+      { populate: ['note'] },
     )
     const note = loadedDiscussion.note.getEntity()
     expect(note.title).eq(createDiscussionInput.title)
@@ -202,6 +195,125 @@ describe('DiscussionService tests', () => {
     expect(note.noteType).eq('Discussion')
   })
 
+  it('create an answer in a space discussion', async () => {
+    const space = await createBasicSpace()
+    const discussion = create.discussionHelper.createInSpace(em, { user, space })
+
+    // const scope = space.scope
+    // const attachments = await generateAttachments(scope)
+
+    await em.flush()
+
+    const createReplyDTO: CreateReplyDTO = {
+      title: 'answer',
+      content: 'test-content',
+      notify: [],
+      attachments: null,
+      type: DISCUSSION_REPLY_TYPE.ANSWER,
+    }
+
+    findAccessibleOneStub.resolves(discussion)
+    const result = await discussionService.createReply(discussion.id, createReplyDTO)
+
+    const loadedAnswer = await em.findOneOrFail(Answer, { id: result.id }, { populate: ['note'] })
+    const note = loadedAnswer.note.getEntity()
+    expect(note.content).eq(createReplyDTO.content)
+    expect(note.noteType).eq('Answer')
+    expect(note.scope).eq(space.scope)
+  })
+
+  it('create 2nd answer in a space discussion', async () => {
+    const space = await createBasicSpace()
+    const discussion = create.discussionHelper.createInSpace(em, { user, space })
+    await em.flush()
+
+    const createReplyDTO: CreateReplyDTO = {
+      title: 'answer',
+      content: 'test-content',
+      notify: [],
+      attachments: null,
+      type: DISCUSSION_REPLY_TYPE.ANSWER,
+    }
+
+    findAccessibleOneStub.resolves(discussion)
+    await discussionService.createReply(discussion.id, createReplyDTO)
+    try {
+      await discussionService.createReply(discussion.id, createReplyDTO)
+    } catch (error) {
+      expect(error.name).to.equal('ValidationError')
+      expect(error.message).to.equal(
+        'Unable to create reply: user already has an answer for this discussion.',
+      )
+    }
+  })
+
+  it('create a discussion comment in a space discussion', async () => {
+    const space = await createBasicSpace()
+    const discussion = create.discussionHelper.createInSpace(em, { user, space })
+
+    findAccessibleOneStub.resolves(discussion)
+
+    await em.flush()
+
+    const createReplyDTO: CreateReplyDTO = {
+      title: 'comment',
+      content: 'test-content',
+      notify: [],
+      attachments: null,
+      type: DISCUSSION_REPLY_TYPE.COMMENT,
+    }
+
+    const result = await discussionService.createReply(discussion.id, createReplyDTO)
+    const loadedComment = await em.findOneOrFail(DiscussionComment, { id: result.id })
+    expect(loadedComment.body).eq(createReplyDTO.content)
+    expect(loadedComment.commentableType).eq('Discussion')
+    expect(loadedComment.commentable.id).eq(discussion.id)
+  })
+
+  it('create an answer comment in a space discussion', async () => {
+    const space = await createBasicSpace()
+    const discussion = create.discussionHelper.createInSpace(em, { user, space })
+    const answer = create.discussionHelper.createAnswer(em, {
+      user,
+      discussion,
+      scope: `space-${space.id}`,
+    })
+    await em.flush()
+    findAccessibleOneStub.resolves(discussion)
+    discussionReplyFindAccessibleOneStub.resolves(answer)
+
+    const createReplyDTO: CreateReplyDTO = {
+      title: 'comment',
+      content: 'test-content',
+      notify: [],
+      attachments: null,
+      type: DISCUSSION_REPLY_TYPE.COMMENT,
+      parentId: answer.id,
+    }
+    const result = await discussionService.createReply(discussion.id, createReplyDTO)
+
+    const loadedComment = await em.findOneOrFail(
+      DiscussionReplyComment,
+      { id: result.id },
+      {
+        populate: ['note'],
+      },
+    )
+    expect(loadedComment.note.getEntity().content).eq(createReplyDTO.content)
+    expect(loadedComment.parent.id).eq(answer.id)
+  })
+
+  it('create a new follow for a discussion', async () => {
+    const space = await createBasicSpace()
+    const discussion = create.discussionHelper.createInSpace(em, { user, space })
+    await em.flush()
+
+    findAccessibleOneStub.resolves(discussion)
+
+    await discussionService.followDiscussion(discussion.id)
+    expect(await em.count(DiscussionFollow, { followableId: discussion.id })).eq(1)
+  })
+
   it('remove a public discussion as author', async () => {
     const discussion = create.discussionHelper.createPublic(em, { user })
     findEditableOneStub.resolves(discussion)
@@ -232,7 +344,6 @@ describe('DiscussionService tests', () => {
       em,
       adminUserCtx,
       discussionRepository,
-      answerRepository,
       discussionReplyRepository,
       entityLinkService,
     )
@@ -351,7 +462,7 @@ describe('DiscussionService tests', () => {
       }
 
       findAccessibleOneStub.resolves(discussion)
-      answerFindOneStub.resolves(answer)
+      discussionReplyFindOneStub.resolves(answer)
 
       await expect(discussionService.createReply(discussion.id, createReplyDTO)).to.be.rejectedWith(
         ValidationError,
@@ -379,7 +490,7 @@ describe('DiscussionService tests', () => {
 
       const loadedComment = await em.findOneOrFail(
         DiscussionReply,
-        { oldComment: result.id },
+        { id: result.id },
         { populate: ['note'] },
       )
       expect(loadedComment.discussion.id).eq(discussion.id)
@@ -388,7 +499,9 @@ describe('DiscussionService tests', () => {
       expect(loadedComment.note.getEntity().noteType).eq('Comment')
       expect(loadedComment.note.getEntity().scope).eq(space.scope)
 
-      const loadedOldComment = await em.findOneOrFail(DiscussionComment, { id: result.id })
+      const loadedOldComment = await em.findOneOrFail(DiscussionComment, {
+        id: loadedComment.oldComment.id,
+      })
       expect(loadedOldComment.body).eq(createReplyDTO.content)
       expect(loadedOldComment.commentableType).eq('Discussion')
       expect(loadedOldComment.commentable.id).eq(discussion.id)
@@ -424,7 +537,7 @@ describe('DiscussionService tests', () => {
       })
       await em.flush()
       findAccessibleOneStub.resolves(discussion)
-      answerFindAccessibleOneStub.resolves(answer)
+      discussionReplyFindAccessibleOneStub.resolves(answer)
 
       const createReplyDTO: CreateReplyDTO = {
         title: 'comment',
@@ -438,7 +551,7 @@ describe('DiscussionService tests', () => {
 
       const loadedComment = await em.findOneOrFail(
         DiscussionReply,
-        { oldComment: result.id },
+        { id: result.id },
         { populate: ['note'] },
       )
       expect(loadedComment.discussion.id).eq(discussion.id)
@@ -448,7 +561,9 @@ describe('DiscussionService tests', () => {
       expect(loadedComment.note.getEntity().noteType).eq('Comment')
       expect(loadedComment.note.getEntity().scope).eq(space.scope)
 
-      const loadedOldComment = await em.findOneOrFail(AnswerComment, { id: result.id })
+      const loadedOldComment = await em.findOneOrFail(AnswerComment, {
+        id: loadedComment.oldComment.id,
+      })
       expect(loadedOldComment.body).eq(createReplyDTO.content)
       expect(loadedOldComment.commentableType).eq('Answer')
       expect(loadedOldComment.commentable.id).eq(answer.id)
@@ -484,7 +599,7 @@ describe('DiscussionService tests', () => {
       })
       await em.flush()
 
-      discussionReplyEditableOneStub.resolves(answer)
+      discussionReplyFindEditableOneStub.resolves(answer)
 
       const updateReplyDTO: UpdateReplyDTO = {
         content: 'updated-content',
@@ -516,7 +631,7 @@ describe('DiscussionService tests', () => {
       await em.persistAndFlush(oldComment)
       comment.oldComment = Reference.create(oldComment)
 
-      discussionReplyEditableOneStub.resolves(comment)
+      discussionReplyFindEditableOneStub.resolves(comment)
 
       const updateReplyDTO: CreateReplyDTO = {
         title: 'updated-comment',
@@ -530,11 +645,13 @@ describe('DiscussionService tests', () => {
 
       const loadedComment = await em.findOneOrFail(
         DiscussionReply,
-        { oldComment: result.id },
+        { id: result.id },
         { populate: ['note'] },
       )
       expect(loadedComment.note.getEntity().content).eq(updateReplyDTO.content)
-      const loadedOldComment = await em.findOneOrFail(DiscussionComment, { id: result.id })
+      const loadedOldComment = await em.findOneOrFail(DiscussionComment, {
+        id: loadedComment.oldComment.id,
+      })
       expect(loadedOldComment.body).eq(updateReplyDTO.content)
     })
   })
@@ -542,16 +659,12 @@ describe('DiscussionService tests', () => {
   context('deleteReply', () => {
     it('fail to delete a reply if it does not exist', async () => {
       const replyId = 1
-      await expect(
-        discussionService.deleteReply(replyId, DISCUSSION_REPLY_TYPE.ANSWER),
-      ).to.be.rejectedWith(
+      await expect(discussionService.deleteReply(replyId)).to.be.rejectedWith(
         NotFoundError,
         'Unable to delete reply: not found or insufficient permissions.',
       )
 
-      await expect(
-        discussionService.deleteReply(replyId, DISCUSSION_REPLY_TYPE.COMMENT),
-      ).to.be.rejectedWith(
+      await expect(discussionService.deleteReply(replyId)).to.be.rejectedWith(
         NotFoundError,
         'Unable to delete reply: not found or insufficient permissions.',
       )
@@ -567,9 +680,9 @@ describe('DiscussionService tests', () => {
       })
       await em.flush()
 
-      answerFindEditableOneStub.resolves(answer)
+      discussionReplyFindEditableOneStub.resolves(answer)
 
-      await discussionService.deleteReply(answer.id, DISCUSSION_REPLY_TYPE.ANSWER)
+      await discussionService.deleteReply(answer.id)
       expect(await em.count(Answer, { id: answer.id })).eq(0)
     })
 
@@ -591,11 +704,11 @@ describe('DiscussionService tests', () => {
       comment.oldComment = Reference.create(oldComment)
       await em.populate(comment, ['note', 'oldComment'])
 
-      discussionReplyEditableOneStub.resolves(comment)
+      discussionReplyFindEditableOneStub.resolves(comment)
 
-      await discussionService.deleteReply(oldComment.id, DISCUSSION_REPLY_TYPE.COMMENT)
+      await discussionService.deleteReply(comment.id)
 
-      expect(discussionReplyEditableOneStub.calledOnce).to.be.true()
+      expect(discussionReplyFindEditableOneStub.calledOnce).to.be.true()
       expect(await em.count(DiscussionReply, { id: comment.id })).eq(0)
       expect(await em.count(Note, { id: comment.note.getEntity().id })).eq(0)
       expect(await em.count(DiscussionComment, { id: oldComment.id })).eq(0)
@@ -618,31 +731,29 @@ describe('DiscussionService tests', () => {
       await em.flush()
 
       // PFDA-5997 - part 1: remove this after deprecating `comment` table
-      const oldComment = new DiscussionComment(user)
+      const oldComment = new AnswerComment(user)
       oldComment.body = comment.note.getEntity().content
-      oldComment.commentable = Reference.create(discussion)
+      oldComment.commentable = Reference.create(answer)
       await em.persistAndFlush(oldComment)
       comment.oldComment = Reference.create(oldComment)
 
       const populatedAnswer = await em.findOneOrFail(
-        Answer,
+        DiscussionReply,
         { id: answer.id },
         {
-          populate: [
-            'note',
-            'note.attachments',
-            'comments',
-            'newComments',
-            'newComments.note',
-            'newComments.note.attachments',
-          ],
+          populate: ['note', 'note.attachments'],
         },
       )
 
-      answerFindEditableOneStub.resolves(populatedAnswer)
+      await em.populate(populatedAnswer, [
+        'comments',
+        'comments.note',
+        'comments.note.attachments',
+        'comments.oldComment',
+      ])
 
-      discussionReplyEditableOneStub.resolves(comment)
-      await discussionService.deleteReply(answer.id, DISCUSSION_REPLY_TYPE.ANSWER)
+      discussionReplyFindEditableOneStub.resolves(populatedAnswer)
+      await discussionService.deleteReply(answer.id)
       expect(await em.count(DiscussionReply, { id: answer.id })).eq(0)
       expect(await em.count(DiscussionReply, { parent: answer.id })).eq(0)
       expect(await em.count(Note, { id: { $in: [answer.note.id, comment.note.id] } })).eq(0)

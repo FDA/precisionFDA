@@ -39,8 +39,12 @@ export class DiscussionReply extends BaseEntity {
   @ManyToOne({ entity: () => DiscussionReply, nullable: true })
   parent: Ref<DiscussionReply>
 
-  @OneToMany({ entity: () => DiscussionReply, mappedBy: 'parent', cascade: [Cascade.REMOVE] })
-  newComments = new Collection<DiscussionReply>(this)
+  @OneToMany({
+    entity: () => DiscussionReply,
+    mappedBy: 'parent',
+    cascade: [Cascade.REMOVE],
+  })
+  comments = new Collection<DiscussionReply>(this)
 
   // TODO PFDA-5997 - Part 1: remove this field after deprecating `comments` table
   @OneToOne({ entity: () => Comment, nullable: true, cascade: [Cascade.REMOVE] })

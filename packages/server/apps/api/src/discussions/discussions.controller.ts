@@ -11,13 +11,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
-import { DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
-import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
 import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
 import { CreateReplyDTO } from '@shared/domain/discussion/dto/create-reply.dto'
 import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
+import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { SimpleDiscussionDTO } from '@shared/domain/discussion/dto/simple-discussion.dto'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { UpdateReplyDTO } from '@shared/domain/discussion/dto/update-reply.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
@@ -44,7 +43,7 @@ export class DiscussionsController {
   @Get()
   async listDiscussions(
     @Query() query: DiscussionPaginationDTO,
-  ): Promise<PaginatedResult<DiscussionDTO>> {
+  ): Promise<PaginatedResult<SimpleDiscussionDTO>> {
     return await this.discussionService.listDiscussions(query)
   }
 
@@ -53,18 +52,9 @@ export class DiscussionsController {
     return await this.discussionService.getDiscussion(id)
   }
 
-  // TODO Jiri: refactor - we are using noteId where API standard expects discussionId.
-  //  This is because we use this for both discussions and answers attachments fetch via noteId.
-  @Get('/:noteId/attachments')
-  async getNoteAttachments(
-    @Param('noteId', ParseIntPipe) noteId: number,
-  ): Promise<DiscussionAttachment[]> {
-    return await this.attachmentFacade.getAttachments(noteId)
-  }
-
-  @Get('/:id/answers/:answerId')
-  async getAnswer(@Param('answerId', ParseIntPipe) answerId: number): Promise<AnswerDTO> {
-    return await this.discussionService.getAnswer(answerId)
+  @Get('/:id/replies/:replyId')
+  async getReply(@Param('replyId', ParseIntPipe) replyId: number): Promise<DiscussionReplyDTO> {
+    return await this.discussionService.getDiscussionReply(replyId)
   }
 
   @HttpCode(201)
@@ -114,20 +104,7 @@ export class DiscussionsController {
   @HttpCode(204)
   @Delete('/:discussionId/replies/:id')
   async deleteDiscussionReply(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.discussionService.deleteReply(id, DISCUSSION_REPLY_TYPE.ANSWER)
-  }
-
-  // TODO PFDA-5997 - part 1: remove delete routes after deprecating `comments` table
-  @HttpCode(204)
-  @Delete('/:discussionId/comments/:id')
-  async deleteDiscussionComment(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.discussionService.deleteReply(id, DISCUSSION_REPLY_TYPE.COMMENT)
-  }
-
-  @HttpCode(204)
-  @Delete('/:discussionId/answers/:answerId/comments/:id')
-  async deleteAnswerComment(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.discussionService.deleteReply(id, DISCUSSION_REPLY_TYPE.COMMENT)
+    await this.discussionService.deleteReply(id)
   }
 
   @HttpCode(204)

@@ -7,6 +7,7 @@ import { AppSeriesRepository } from '@shared/domain/app-series/app-series.reposi
 import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -37,7 +38,6 @@ import { ENTITY_TYPE } from '../app.enum'
 import { constructDxid, constructDxName } from '../app.helper'
 import { PlatformSpec, Spec } from '../app.input'
 import { AppRepository } from '../app.repository'
-import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 
 @Injectable()
 export class AppService implements SearchableByUid<'app'> {
@@ -59,6 +59,14 @@ export class AppService implements SearchableByUid<'app'> {
 
   getEditableEntityByUid(uid: Uid<'app'>): Promise<App | null> {
     return this.appRepository.findEditableOne({ uid })
+  }
+
+  getEditableEntityById(id: number): Promise<App | null> {
+    return this.appRepository.findEditableOne({ id })
+  }
+
+  getAccessibleEntityById(id: number): Promise<App | null> {
+    return this.appRepository.findAccessibleOne({ id })
   }
 
   private validateSpec(spec: Spec, type: string, alreadySeenSpec: string[]): void {
@@ -189,7 +197,7 @@ export class AppService implements SearchableByUid<'app'> {
   }
 
   private getAssetDxids(assets: Asset[]): DxId<'file'>[] {
-    return assets.map(asset => asset.dxid)
+    return assets.map((asset) => asset.dxid)
   }
 
   private getEntityType(entityType: string): ENTITY_TYPE {

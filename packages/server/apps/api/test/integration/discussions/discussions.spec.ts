@@ -224,7 +224,7 @@ describe('/discussions', async () => {
       })
       .expect(201)
 
-    expect(body.id).to.equal(1)
+    expect(body.id).to.equal(2)
   })
 
   it('should create a comment in space discussion', async () => {
@@ -304,7 +304,7 @@ describe('/discussions', async () => {
       })
       .expect(201)
 
-    expect(body.id).to.equal(1)
+    expect(body.id).to.equal(2)
   })
 
   it('follows a discussion', async () => {

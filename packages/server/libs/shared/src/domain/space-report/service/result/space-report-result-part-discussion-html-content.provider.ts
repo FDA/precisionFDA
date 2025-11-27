@@ -36,7 +36,10 @@ export class SpaceReportResultPartDiscussionHtmlContentProvider extends SpaceRep
     }
   }
 
-  private async getAnswer(answer: SpaceReportPartDiscussionResultAnswer, document: Document) {
+  private async getAnswer(
+    answer: SpaceReportPartDiscussionResultAnswer,
+    document: Document,
+  ): Promise<HTMLDivElement> {
     const container = await this.getItemContainer(answer, document, 'answered on')
     container.classList.add('answer')
 
@@ -47,7 +50,10 @@ export class SpaceReportResultPartDiscussionHtmlContentProvider extends SpaceRep
     return container
   }
 
-  private async getComment(comment: SpaceReportPartDiscussionResultComment, document: Document) {
+  private async getComment(
+    comment: SpaceReportPartDiscussionResultComment,
+    document: Document,
+  ): Promise<HTMLDivElement> {
     const container = await this.getItemContainer(comment, document, 'commented on')
     container.classList.add('comment')
 
@@ -63,7 +69,7 @@ export class SpaceReportResultPartDiscussionHtmlContentProvider extends SpaceRep
     },
     document: Document,
     headerSeparator: string,
-  ) {
+  ): Promise<HTMLDivElement> {
     const container = document.createElement('div')
     container.classList.add('discussion-item')
 

@@ -1,12 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { Markdown } from '../../../components/Markdown'
 import { ReplyArrowIcon } from '../../../components/icons/ReplyArrowIcon'
 import { StyledMarkdown } from '../../../styles/commonStyles'
 import { useConfirm } from '../../modal/useConfirm'
 import { AttachmentsList } from '../AttachmentsList'
-import { deleteDiscussionRequest, fetchAttachmentsRequest } from '../api'
-import { Discussion } from '../discussions.types'
+import { deleteDiscussionRequest } from '../api'
+import { Attachment, Discussion } from '../discussions.types'
 import { EditNoteEntity } from '../form/EditNoteEntity'
 import { groupByAttachmentType } from '../helpers'
 import { StyledCommentCard, StyledReplyButton } from '../styles'
@@ -16,24 +16,21 @@ export function DiscussionCard({
   canEdit,
   canReply,
   discussion,
+  discussionAttachments,
   onReply,
   onDelete,
 }: {
   canEdit: boolean
   canReply: boolean
   discussion: Discussion
+  discussionAttachments?: Attachment[]
   onReply: () => void
   onDelete: () => void
 }) {
   const [editMode, setEditMode] = useState(false)
   const queryClient = useQueryClient()
 
-  const { data: attachments } = useQuery({
-    queryKey: ['attachments', discussion.noteId],
-    queryFn: () => fetchAttachmentsRequest(discussion.noteId),
-    select: groupByAttachmentType,
-    enabled: !!discussion.noteId,
-  })
+  const attachments = groupByAttachmentType(discussionAttachments ?? [])
 
   const deleteMutation = useMutation({
     mutationKey: ['delete-discussion'],

@@ -1,26 +1,23 @@
 import { Injectable } from '@nestjs/common'
+import { DiscussionReplyComment } from '@shared/domain/discussion-reply/discussion-reply-comment.entity'
 import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
-import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
-import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
-import { Comment } from '@shared/domain/comment/comment.entity'
 
 @Injectable()
 export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
-  protected async getRelativeLink(comment: Comment) {
-    if (comment instanceof AnswerComment) {
+  protected async getRelativeLink(comment: DiscussionReplyComment): Promise<`/${string}`> {
+    if (comment.parent) {
       return this.getAnswerCommentLink(comment)
-    } else if (comment instanceof DiscussionComment) {
+    } else {
       return this.getDiscussionCommentLink(comment)
     }
   }
 
-  private async getAnswerCommentLink(comment: AnswerComment) {
-    const answer = await comment.commentable.load()
-    const note = await answer.note.load()
+  private async getAnswerCommentLink(comment: DiscussionReplyComment): Promise<`/${string}`> {
+    const note = await comment.note.load()
     const scope = note.scope
 
-    const answerID = comment.commentable.id
-    const discussionID = answer.discussion.id
+    const answerID = comment.parent.id
+    const discussionID = comment.discussion.id
     const commentSegment = this.getCommentUrlSegment(comment)
 
     if (this.MY_HOME_SCOPES.includes(scope)) {
@@ -34,11 +31,10 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
     }
   }
 
-  private async getDiscussionCommentLink(comment: DiscussionComment) {
-    const discussion = await comment.commentable.load()
-    const note = await discussion.note.load()
+  private async getDiscussionCommentLink(comment: DiscussionReplyComment): Promise<`/${string}`> {
+    const note = await comment.note.load()
     const scope = note.scope
-    const discussionID = discussion.id
+    const discussionID = comment.discussion.id
     const commentSegment = this.getCommentUrlSegment(comment)
 
     if (this.MY_HOME_SCOPES.includes(scope)) {
@@ -46,7 +42,7 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
       const url = this.getDiscussionUrlSegment(discussionID, undefined, undefined)
       return `/${url}/${commentSegment}` as const
     } else {
-      const note = comment.commentable.getProperty('note').getEntity()
+      const note = comment.note.getEntity()
       const spaceID = note.getSpaceId()
       const url = this.getDiscussionUrlSegment(discussionID, spaceID, undefined)
       return `/${url}/${commentSegment}` as const
@@ -63,7 +59,7 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
     return `${spaceSegment}discussions/${discussionID}${answerSegment}`
   }
 
-  private getCommentUrlSegment(comment: Comment): string {
+  private getCommentUrlSegment(comment: DiscussionReplyComment): string {
     return 'comments/' + comment.id
   }
 }

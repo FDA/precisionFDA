@@ -1,21 +1,21 @@
+import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { ChangeEvent, useEffect } from 'react'
 import { Controller, RefCallBack, useForm } from 'react-hook-form'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { ErrorMessage } from '@hookform/error-message'
 import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
+import ExternalLink from '../../../components/Controls/ExternalLink'
 import { MarkdownEditor, StyledMarkdownHelper, WeMarkdown } from '../../../components/Markdown/MarkdownEditor'
 import { CheckboxLabel, InputError } from '../../../components/form/styles'
+import { MarkdownIcon } from '../../../components/icons/MarkdownIcon'
 import { AttachmentsList } from '../AttachmentsList'
 import { NoteScope } from '../api'
 import { AttachmentKey, NoteForm } from '../discussions.types'
 import { Attachments } from './Attachments'
 import { NotifyMembersSelect } from './NotifyMembersSelect'
-import ExternalLink from '../../../components/Controls/ExternalLink'
-import { MarkdownIcon } from '../../../components/icons/MarkdownIcon'
 
 const StyledForm = styled.form`
   display: flex;
@@ -46,8 +46,7 @@ const ButtonRowActions = styled.div`
   align-items: flex-start;
   align-self: stretch;
 `
-const ContentGroup = styled.div`
-`
+const ContentGroup = styled.div``
 
 const validationSchema = Yup.object().shape({
   content: Yup.string().max(100000).required(),
@@ -109,12 +108,13 @@ export const MarkdownForm = ({
 
   const onSubmitForm = async () => onSubmit(getValues())
 
-  const deleteAttachment = (key: `attachments.${AttachmentKey}`, id: number|string) => {
+  const deleteAttachment = (key: `attachments.${AttachmentKey}`, id: number | string) => {
     const values = getValues(key)
-    setValue(key, values.filter((a: { id: number }) => a.id !== id))
+    setValue(
+      key,
+      values.filter((a: { id: number }) => a.id !== id),
+    )
   }
-
-  const { attachments, isAnswer } = watch()
 
   return (
     <>
@@ -128,14 +128,11 @@ export const MarkdownForm = ({
             )}
           />
         </ContentGroup>
-
-        {isAnswer && (
-          <Controller
-            name="attachments"
-            control={control}
-            render={({ field }) => <AttachmentsList attachments={field.value} onRemoveAttachment={deleteAttachment} />}
-          />
-        )}
+        <Controller
+          name="attachments"
+          control={control}
+          render={() => <AttachmentsList attachments={watch().attachments} onRemoveAttachment={deleteAttachment} />}
+        />
 
         <ButtonRow>
           <StyledMarkdownHelper>
@@ -148,7 +145,7 @@ export const MarkdownForm = ({
           </StyledMarkdownHelper>
 
           <div className="flex gap-2">
-            {isAnswer && <Attachments scope={scope} setValue={setValue} attachments={attachments} />}
+            <Attachments scope={scope} setValue={setValue} attachments={getValues('attachments')} />
 
             {!isEdit && !isAnswerComment && isComment && (
               <MarkAsAnswer>
@@ -176,7 +173,7 @@ export const MarkdownForm = ({
             <Controller
               name="notify"
               control={control}
-              render={({ field: { onChange, onBlur, value }}) => (
+              render={({ field: { onChange, onBlur, value } }) => (
                 <NotifyMembersSelect
                   onChange={onChange}
                   onBlur={onBlur}

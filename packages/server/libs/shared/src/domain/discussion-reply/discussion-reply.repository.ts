@@ -1,8 +1,9 @@
-import { FilterQuery } from '@mikro-orm/core'
+import { FilterQuery, sql } from '@mikro-orm/core'
 import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { DiscussionReply } from './discussion-reply.entity'
+import { DISCUSSION_REPLY_TYPE } from './discussion-reply.types'
 
 export class DiscussionReplyRepository extends AccessControlRepository<DiscussionReply> {
   protected async getAccessibleWhere(): Promise<FilterQuery<DiscussionReply>> {
@@ -44,5 +45,22 @@ export class DiscussionReplyRepository extends AccessControlRepository<Discussio
         ],
       },
     }
+  }
+
+  async getCountByDiscussionIds(
+    discussionIds: number[],
+    replyType: DISCUSSION_REPLY_TYPE,
+  ): Promise<Record<number, number>> {
+    const qb = this.createQueryBuilder('dr')
+      .select(['dr.discussion_id as discussionId', sql`count(id)`.as('count')])
+      .where({ discussion: { id: { $in: discussionIds } }, replyType })
+      .groupBy('dr.discussion_id')
+
+    const result = await qb.execute()
+    const countMap: Record<number, number> = {}
+    result.forEach((row: DiscussionReply & { discussionId: number; count: string }) => {
+      countMap[row.discussionId] = parseInt(row.count, 10)
+    })
+    return countMap
   }
 }

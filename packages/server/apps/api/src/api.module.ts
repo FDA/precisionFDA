@@ -26,6 +26,7 @@ import { LicenseApiModule } from './licenses/license.api.module'
 import { RailsLoggerInterceptor } from './logger/interceptor/rails-logger.interceptor'
 import { NewsApiModule } from './news/news.api.module'
 import { NodesApiModule } from './nodes/nodes.api.module'
+import { NotesApiModule } from './notes/notes.api.module'
 import { NotificationsApiModule } from './notifications/notifications.api.module'
 import { PropertiesApiModule } from './properties/properties.api.module'
 import { PublishApiModule } from './publish/publish.api.module'
@@ -74,6 +75,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     NewsApiModule,
     NodesApiModule,
     NotificationsApiModule,
+    NotesApiModule,
     PropertiesApiModule,
     SiteSettingsApiModule,
     SpacesApiModule,

@@ -1,11 +1,11 @@
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { AttachmentRetrieveFacade } from '@shared/facade/discussion/attachment-retrieve.facade'
 import { SpaceReportPartDiscussionResultProviderService } from '@shared/facade/space-report/service/space-report-part-discussion-result-provider.service'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
-import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 
 describe('SpaceReportPartDiscussionResultProviderService', () => {
   const ID = 1
@@ -21,19 +21,31 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
 
   const CREATED_AT = 'CREATED_AT'
 
-  const COMMENT_1_BODY = 'COMMENT_1_BODY'
+  const COMMENT_1_CONTENT = 'COMMENT_1_CONTENT'
   const COMMENT_1_CREATED_AT = 'COMMENT_1_CREATED_AT'
   const COMMENT_1_USER_FULL_NAME = 'COMMENT_1_USER_FULL_NAME'
   const COMMENT_1_USER_DXUSER = 'COMMENT_1_USER_DXUSER'
+  const COMMENT_1_NOTE_ID = 21
   const COMMENT_1_USER = { fullName: COMMENT_1_USER_FULL_NAME, dxuser: COMMENT_1_USER_DXUSER }
-  const COMMENT_1 = { body: COMMENT_1_BODY, createdAt: COMMENT_1_CREATED_AT, user: COMMENT_1_USER }
+  const COMMENT_1 = {
+    content: COMMENT_1_CONTENT,
+    createdAt: COMMENT_1_CREATED_AT,
+    user: COMMENT_1_USER,
+    noteId: COMMENT_1_NOTE_ID,
+  }
 
-  const COMMENT_2_BODY = 'COMMENT_2_BODY'
+  const COMMENT_2_CONTENT = 'COMMENT_2_CONTENT'
   const COMMENT_2_CREATED_AT = 'COMMENT_2_CREATED_AT'
   const COMMENT_2_USER_FULL_NAME = 'COMMENT_2_USER_FULL_NAME'
   const COMMENT_2_USER_DXUSER = 'COMMENT_2_USER_DXUSER'
+  const COMMENT_2_NOTE_ID = 22
   const COMMENT_2_USER = { fullName: COMMENT_2_USER_FULL_NAME, dxuser: COMMENT_2_USER_DXUSER }
-  const COMMENT_2 = { body: COMMENT_2_BODY, createdAt: COMMENT_2_CREATED_AT, user: COMMENT_2_USER }
+  const COMMENT_2 = {
+    content: COMMENT_2_CONTENT,
+    createdAt: COMMENT_2_CREATED_AT,
+    user: COMMENT_2_USER,
+    noteId: COMMENT_2_NOTE_ID,
+  }
 
   const COMMENTS = [COMMENT_1, COMMENT_2]
 
@@ -44,18 +56,20 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
   const ANSWER_USER_DXUSER = 'ANSWER_USER_DXUSER'
   const ANSWER_USER = { fullName: ANSWER_USER_FULL_NAME, dxuser: ANSWER_USER_DXUSER }
   const ANSWER_CREATED_AT = 'ANSWER_CREATED_AT'
-  const ANSWER_COMMENT_BODY = 'ANSWER_COMMENT_BODY'
+  const ANSWER_COMMENT_CONTENT = 'ANSWER_COMMENT_CONTENT'
   const ANSWER_COMMENT_CREATED_AT = 'ANSWER_COMMENT_CREATED_AT'
   const ANSWER_COMMENT_USER_FULL_NAME = 'ANSWER_COMMENT_USER_FULL_NAME'
   const ANSWER_COMMENT_USER_DXUSER = 'ANSWER_COMMENT_USER_DXUSER'
+  const ANSWER_COMMENT_NOTE_ID = 31
   const ANSWER_COMMENT_USER = {
     fullName: ANSWER_COMMENT_USER_FULL_NAME,
     dxuser: ANSWER_COMMENT_USER_DXUSER,
   }
   const ANSWER_COMMENT = {
-    body: ANSWER_COMMENT_BODY,
+    content: ANSWER_COMMENT_CONTENT,
     createdAt: ANSWER_COMMENT_CREATED_AT,
     user: ANSWER_COMMENT_USER,
+    noteId: ANSWER_COMMENT_NOTE_ID,
   }
   const ANSWER = {
     content: ANSWER_NOTE.content,
@@ -63,7 +77,7 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
     user: ANSWER_USER,
     createdAt: ANSWER_CREATED_AT,
     comments: [ANSWER_COMMENT],
-  } as unknown as AnswerDTO
+  } as unknown as DiscussionReplyDTO
 
   const ATTACHMENT_1_NAME = 'ATTACHMENT_1_NAME'
   const ATTACHMENT_1_LINK = 'ATTACHMENT_1_LINK'
@@ -119,6 +133,12 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
       .resolves([ATTACHMENT_1])
       .withArgs(ANSWER_NOTE_ID)
       .resolves([ATTACHMENT_2, ATTACHMENT_3, ATTACHMENT_4, ATTACHMENT_5])
+      .withArgs(COMMENT_1_NOTE_ID)
+      .resolves([])
+      .withArgs(COMMENT_2_NOTE_ID)
+      .resolves([])
+      .withArgs(ANSWER_COMMENT_NOTE_ID)
+      .resolves([])
   })
 
   describe('getHTMLResult', () => {
@@ -129,7 +149,7 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
     testResults('JSON')
   })
 
-  function testResults(format) {
+  function testResults(format): void {
     it('should provide correct result', async () => {
       const res = await getInstance().getResult(DISCUSSION_ENTITY, null, format)
 
@@ -145,9 +165,10 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
             createdAt: ANSWER_CREATED_AT,
             comments: [
               {
-                content: ANSWER_COMMENT_BODY,
+                content: ANSWER_COMMENT_CONTENT,
                 createdAt: ANSWER_COMMENT_CREATED_AT,
                 createdBy: ANSWER_COMMENT_USER,
+                attachments: [],
               },
             ],
             attachments: [
@@ -176,14 +197,16 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
         ],
         comments: [
           {
-            content: COMMENT_1_BODY,
+            content: COMMENT_1_CONTENT,
             createdAt: COMMENT_1_CREATED_AT,
             createdBy: COMMENT_1_USER,
+            attachments: [],
           },
           {
-            content: COMMENT_2_BODY,
+            content: COMMENT_2_CONTENT,
             createdAt: COMMENT_2_CREATED_AT,
             createdBy: COMMENT_2_USER,
+            attachments: [],
           },
         ],
         attachments: [
@@ -213,7 +236,8 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
             createdAt: ANSWER_CREATED_AT,
             comments: [
               {
-                content: ANSWER_COMMENT_BODY,
+                attachments: [],
+                content: ANSWER_COMMENT_CONTENT,
                 createdAt: ANSWER_COMMENT_CREATED_AT,
                 createdBy: ANSWER_COMMENT_USER,
               },
@@ -266,14 +290,16 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
         answers: [],
         comments: [
           {
-            content: COMMENT_1_BODY,
+            content: COMMENT_1_CONTENT,
             createdAt: COMMENT_1_CREATED_AT,
             createdBy: COMMENT_1_USER,
+            attachments: [],
           },
           {
-            content: COMMENT_2_BODY,
+            content: COMMENT_2_CONTENT,
             createdAt: COMMENT_2_CREATED_AT,
             createdBy: COMMENT_2_USER,
+            attachments: [],
           },
         ],
         attachments: [
@@ -304,7 +330,8 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
             createdAt: ANSWER_CREATED_AT,
             comments: [
               {
-                content: ANSWER_COMMENT_BODY,
+                attachments: [],
+                content: ANSWER_COMMENT_CONTENT,
                 createdAt: ANSWER_COMMENT_CREATED_AT,
                 createdBy: ANSWER_COMMENT_USER,
               },
@@ -314,12 +341,14 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
         ],
         comments: [
           {
-            content: COMMENT_1_BODY,
+            attachments: [],
+            content: COMMENT_1_CONTENT,
             createdAt: COMMENT_1_CREATED_AT,
             createdBy: COMMENT_1_USER,
           },
           {
-            content: COMMENT_2_BODY,
+            attachments: [],
+            content: COMMENT_2_CONTENT,
             createdAt: COMMENT_2_CREATED_AT,
             createdBy: COMMENT_2_USER,
           },
@@ -349,15 +378,18 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
     })
   }
 
-  function getInstance() {
+  function getInstance(): SpaceReportPartDiscussionResultProviderService {
     const discussionService = {
       getDiscussion: getDiscussionStub,
     } as unknown as DiscussionService
 
-    const attachmentsFacade = {
+    const attachmentRetrieveFacade = {
       getAttachments: getAttachmentsStub,
-    } as unknown as AttachmentManagementFacade
+    } as unknown as AttachmentRetrieveFacade
 
-    return new SpaceReportPartDiscussionResultProviderService(discussionService, attachmentsFacade)
+    return new SpaceReportPartDiscussionResultProviderService(
+      discussionService,
+      attachmentRetrieveFacade,
+    )
   }
 })

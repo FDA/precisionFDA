@@ -3,23 +3,33 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { EmailSendInput } from '@shared/domain/email/email.config'
-import { EmailService } from '@shared/domain/email/email.service'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import {
   reportStaleJobsTemplate,
   ReportStaleJobsTemplateInput,
 } from '@shared/domain/email/templates/mjml/report-stale-jobs.template'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { Job } from '@shared/domain/job/job.entity'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
+import { Job as BullJob } from 'bull'
 import { difference } from 'ramda'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 import * as errors from '../../errors'
@@ -37,16 +47,6 @@ import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { Job as BullJob } from 'bull'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { EVENT_TYPES } from '@shared/domain/event/event.entity'
-import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
-import { Uid } from '@shared/domain/entity/domain/uid'
 
 @Injectable()
 export class JobService implements SearchableByUid<'job'> {
@@ -68,11 +68,21 @@ export class JobService implements SearchableByUid<'job'> {
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
     private readonly eventHelper: EventHelper,
   ) {}
+
   getAccessibleEntityByUid(uid: Uid<'job'>): Promise<Job | null> {
     return this.jobRepo.findAccessibleOne({ uid })
   }
+
   getEditableEntityByUid(uid: Uid<'job'>): Promise<Job | null> {
     return this.jobRepo.findEditableOne({ uid })
+  }
+
+  getEditableEntityById(id: number): Promise<Job | null> {
+    return this.jobRepo.findEditableOne({ id })
+  }
+
+  getAccessibleEntityById(id: number): Promise<Job | null> {
+    return this.jobRepo.findAccessibleOne({ id })
   }
 
   async synchronizeJob(jobDxid: DxId<'job'>, bullJob: BullJob): Promise<Maybe<Job>> {
