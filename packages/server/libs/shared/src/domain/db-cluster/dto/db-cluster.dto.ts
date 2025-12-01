@@ -13,6 +13,8 @@ import { DbCluster } from '../db-cluster.entity'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { invertObj } from 'ramda'
 import { Space } from '@shared/domain/space/space.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { spaceMembershipTypeToNameMap } from '@shared/domain/space-membership/space-membership-type-to-name.map'
 
 export class DbClusterDTO {
   id: number
@@ -46,7 +48,7 @@ export class DbClusterDTO {
   }
   scope: EntityScope
 
-  static mapToDTO(dbcluster: DbCluster, space?: Space): DbClusterDTO {
+  static mapToDTO(dbcluster: DbCluster, space?: Space, membership?: SpaceMembership): DbClusterDTO {
     return {
       id: dbcluster.id,
       dxid: dbcluster.dxid,
@@ -87,6 +89,7 @@ export class DbClusterDTO {
         stop: '/api/dbclusters/stop',
         terminate: '/api/dbclusters/terminate',
       },
+      ...(membership && { currentUserRole: spaceMembershipTypeToNameMap[membership.role] }),
     }
   }
 }

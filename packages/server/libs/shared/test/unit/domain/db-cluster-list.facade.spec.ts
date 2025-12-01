@@ -4,6 +4,7 @@ import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.reposi
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { SpaceMembershipService } from '@shared/domain/space-membership/space-membership.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -31,10 +32,12 @@ describe('DbClusterListFacade', () => {
 
   const paginateStub = stub()
   const getAccessibleByIdStub = stub()
-
+  const getCurrentMembershipStub = stub()
+  const isInSpace = stub()
   const getProperty = stub()
   const getEntity = stub()
   const getItems = stub()
+  const getSpaceId = stub()
 
   beforeEach(async () => {
     paginateStub.reset()
@@ -48,12 +51,20 @@ describe('DbClusterListFacade', () => {
 
     loadEntity.reset()
     loadEntity.throws()
+
+    getCurrentMembershipStub.reset()
+    getCurrentMembershipStub.throws()
+
+    isInSpace.reset()
+    isInSpace.throws()
     getEntity.reset()
     getEntity.throws()
-    getItems.reset()
-    getItems.throws()
     getProperty.reset()
     getProperty.throws()
+    getItems.reset()
+    getItems.throws()
+    getSpaceId.reset()
+    getSpaceId.throws()
   })
 
   it('lists private db clusters', async () => {
@@ -67,6 +78,7 @@ describe('DbClusterListFacade', () => {
       user: { getProperty, getEntity },
       taggings: [],
       properties: { getItems },
+      isInSpace,
     }
     const dbCluster2 = {
       dxid: 'dbcluster-xxx2' as DxId<'dbcluster'>,
@@ -78,9 +90,11 @@ describe('DbClusterListFacade', () => {
       user: { getProperty, getEntity },
       taggings: [],
       properties: { getItems },
+      isInSpace,
     }
     loadEntity.resolves(USER)
     paginateStub.withArgs(match({ scope: 'private' })).resolves({ data: [dbCluster1, dbCluster2] })
+    isInSpace.returns(false)
     getProperty.withArgs('dxuser').returns(USER.dxuser)
     getProperty.withArgs('fullName').returns(USER.fullName)
     getItems.returns([])
@@ -91,6 +105,8 @@ describe('DbClusterListFacade', () => {
     expect(result.data).to.have.length(2)
     expect(result.data.map((c) => c.name)).to.include.members([dbCluster1.name, dbCluster2.name])
     expect(result.data.every((c) => c.scope === STATIC_SCOPE.PRIVATE)).to.be.true()
+    expect(result.data[0].dxid).eq('dbcluster-xxx1')
+    expect(result.data[1].dxid).eq('dbcluster-xxx2')
   })
 
   it('lists db clusters in space', async () => {
@@ -104,6 +120,8 @@ describe('DbClusterListFacade', () => {
       user: { getProperty, getEntity },
       taggings: [],
       properties: { getItems },
+      isInSpace,
+      getSpaceId,
     }
     const dbCluster2 = {
       dxid: 'dbcluster-xxx2' as DxId<'dbcluster'>,
@@ -115,20 +133,27 @@ describe('DbClusterListFacade', () => {
       user: { getProperty, getEntity },
       taggings: [],
       properties: { getItems },
+      isInSpace,
+      getSpaceId,
     }
     loadEntity.resolves(USER)
     getAccessibleByIdStub.withArgs(1).resolves({ id: 1 })
     paginateStub.withArgs(match({ scope: 'space-1' })).resolves({ data: [dbCluster1, dbCluster2] })
+    isInSpace.returns(true)
     getProperty.withArgs('dxuser').returns(USER.dxuser)
     getProperty.withArgs('fullName').returns(USER.fullName)
     getItems.returns([])
     getEntity.returns(USER)
+    getSpaceId.returns(1)
+    getCurrentMembershipStub.withArgs(1, 0).resolves({ role: 0 })
 
     const result = await getInstance().listDbClusters({ scope: 'space-1' })
 
     expect(result.data).to.have.length(2)
     expect(result.data.map((c) => c.name)).to.include.members([dbCluster1.name, dbCluster2.name])
     expect(result.data.every((c) => c.scope === 'space-1')).to.be.true()
+    expect(result.data[0].dxid).eq('dbcluster-xxx1')
+    expect(result.data[1].dxid).eq('dbcluster-xxx2')
   })
 
   it('filter private db clusters by name', async () => {
@@ -142,6 +167,8 @@ describe('DbClusterListFacade', () => {
       user: { getProperty, getEntity },
       taggings: [],
       properties: { getItems },
+      isInSpace,
+      getSpaceId,
     }
 
     loadEntity.resolves(USER)
@@ -152,6 +179,7 @@ describe('DbClusterListFacade', () => {
     getProperty.withArgs('fullName').returns(USER.fullName)
     getItems.returns([])
     getEntity.returns(USER)
+    isInSpace.returns(false)
 
     const result = await getInstance().listDbClusters({ scope: 'private', filters: { name: 'db' } })
 
@@ -181,6 +209,8 @@ describe('DbClusterListFacade', () => {
       user: { getProperty, getEntity },
       taggings: [],
       properties: { getItems },
+      isInSpace,
+      getSpaceId,
     }
     const dbCluster2 = {
       dxid: 'dbcluster-xxx2' as DxId<'dbcluster'>,
@@ -192,6 +222,8 @@ describe('DbClusterListFacade', () => {
       user: { getProperty, getEntity },
       taggings: [],
       properties: { getItems },
+      isInSpace,
+      getSpaceId,
     }
 
     loadEntity.resolves(USER)
@@ -208,6 +240,11 @@ describe('DbClusterListFacade', () => {
     getProperty.withArgs('fullName').returns(USER.fullName)
     getItems.returns([])
     getEntity.returns(USER)
+    isInSpace.returns(true)
+    getSpaceId.onFirstCall().returns(1)
+    getSpaceId.onSecondCall().returns(2)
+    getCurrentMembershipStub.withArgs(1, 0).resolves({ role: 0 })
+    getCurrentMembershipStub.withArgs(2, 0).resolves({ role: 2 })
 
     const result = await getInstance().listDbClusters({ scope: 'spaces' })
 
@@ -231,11 +268,19 @@ describe('DbClusterListFacade', () => {
     const dbClusterRepo = {
       paginate: paginateStub,
     } as unknown as DbClusterRepository
+    const spaceMembershipService = {
+      getCurrentMembership: getCurrentMembershipStub,
+    } as unknown as SpaceMembershipService
     const dbClusterService = new DbClusterService(em, dbClusterRepo)
     const spaceService = {
       getAccessibleById: getAccessibleByIdStub,
     } as unknown as SpaceService
 
-    return new DbClusterListFacade(dbClusterService, userContext, spaceService)
+    return new DbClusterListFacade(
+      dbClusterService,
+      userContext,
+      spaceService,
+      spaceMembershipService,
+    )
   }
 })

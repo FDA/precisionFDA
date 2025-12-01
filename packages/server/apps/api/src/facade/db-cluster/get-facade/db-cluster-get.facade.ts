@@ -7,6 +7,7 @@ import { getIdFromScopeName } from '@shared/domain/space/space.helper'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { DbClusterDTO } from '@shared/domain/db-cluster/dto/db-cluster.dto'
+import { SpaceMembershipService } from '@shared/domain/space-membership/space-membership.service'
 
 @Injectable()
 export class DbClusterGetFacade {
@@ -17,6 +18,7 @@ export class DbClusterGetFacade {
     private readonly dbClusterService: DbClusterService,
     private readonly userContext: UserContext,
     private readonly spaceService: SpaceService,
+    private readonly spaceMembershipService: SpaceMembershipService,
   ) {}
 
   async getDbCluster(uid: Uid<'dbcluster'>): Promise<DbClusterDTO> {
@@ -48,6 +50,11 @@ export class DbClusterGetFacade {
       })
     }
 
-    return DbClusterDTO.mapToDTO(dbCluster, space)
+    const membership = await this.spaceMembershipService.getCurrentMembership(
+      spaceId,
+      this.userContext.id,
+    )
+
+    return DbClusterDTO.mapToDTO(dbCluster, space, membership)
   }
 }

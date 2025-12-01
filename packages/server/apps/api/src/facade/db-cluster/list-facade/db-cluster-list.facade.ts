@@ -9,6 +9,9 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { FilterQuery } from '@mikro-orm/core'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { SpaceMembershipService } from '@shared/domain/space-membership/space-membership.service'
 
 @Injectable()
 export class DbClusterListFacade {
@@ -19,6 +22,7 @@ export class DbClusterListFacade {
     private readonly dbClusterService: DbClusterService,
     private readonly userContext: UserContext,
     private readonly spaceService: SpaceService,
+    private readonly spaceMembershipService: SpaceMembershipService,
   ) {}
 
   async listDbClusters(pagination: DbClusterPaginationDTO): Promise<PaginatedResult<DbClusterDTO>> {
@@ -55,6 +59,26 @@ export class DbClusterListFacade {
       { userId: user.id, pagination: pagination, where: where },
       'Getting DbClusters for following query.',
     )
-    return this.dbClusterService.paginate(pagination, where)
+    return this.paginate(pagination, where)
+  }
+
+  private async paginate(
+    pagination: DbClusterPaginationDTO,
+    where: FilterQuery<DbCluster>,
+  ): Promise<PaginatedResult<DbClusterDTO>> {
+    const response = await this.dbClusterService.paginate(pagination, where)
+    const dbclusters = await Promise.all(
+      response.data.map(async (dbcluster) => {
+        if (dbcluster.isInSpace()) {
+          const membership = await this.spaceMembershipService.getCurrentMembership(
+            dbcluster.getSpaceId(),
+            this.userContext.id,
+          )
+          return DbClusterDTO.mapToDTO(dbcluster, null, membership)
+        }
+        return DbClusterDTO.mapToDTO(dbcluster)
+      }),
+    )
+    return { ...response, data: dbclusters }
   }
 }

@@ -1,4 +1,4 @@
-import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
+import { FilterQuery, Loaded, SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
@@ -22,7 +22,6 @@ import { getMainQueue } from '@shared/queue'
 import { invertObj } from 'ramda'
 import { DbClusterRepository } from '../db-cluster.repository'
 import { DbClusterPaginationDTO } from '../dto/db-cluster-pagination.dto'
-import { DbClusterDTO } from '../dto/db-cluster.dto'
 import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 
 @Injectable()
@@ -168,13 +167,13 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
   async paginate(
     pagination: DbClusterPaginationDTO,
     where: FilterQuery<DbCluster>,
-  ): Promise<PaginatedResult<DbClusterDTO>> {
-    const response = await this.dbClusterRepo.paginate(pagination, where, {
+  ): Promise<
+    PaginatedResult<Loaded<DbCluster, 'user' | 'properties' | 'taggings.tag', '*', never>>
+  > {
+    return await this.dbClusterRepo.paginate(pagination, where, {
       orderBy: { createdAt: 'DESC' },
       populate: ['user', 'properties', 'taggings.tag'],
     })
-    const dbclusters = response.data.map((dbcluster) => DbClusterDTO.mapToDTO(dbcluster))
-    return { ...response, data: dbclusters }
   }
 
   private getMatchedEnumValues = (

@@ -139,7 +139,11 @@ export const useDatabaseSelectActions = ({
     {
       name: 'Start',
       type: 'modal',
-      isDisabled: selected.length !== 1 || !selected[0]?.links.start || isDisabledByStatus(selected[0].status).start,
+      isDisabled:
+        selected.length !== 1 ||
+        !selected[0]?.links.start ||
+        isDisabledByStatus(selected[0].status).start ||
+        selected[0]?.currentUserRole === 'Viewer',
       func: () => setMethodStartModal(true),
       modal: methodStartModal,
       showModal: isShownMethodStartModal,
@@ -147,7 +151,11 @@ export const useDatabaseSelectActions = ({
     {
       name: 'Stop',
       type: 'modal',
-      isDisabled: selected.length !== 1 || !selected[0]?.links.stop || isDisabledByStatus(selected[0].status).stop,
+      isDisabled:
+        selected.length !== 1 ||
+        !selected[0]?.links.stop ||
+        isDisabledByStatus(selected[0].status).stop ||
+        selected[0]?.currentUserRole === 'Viewer',
       func: () => setMethodStopModal(true),
       modal: methodStopModal,
       showModal: isShownMethodStopModal,
@@ -155,7 +163,11 @@ export const useDatabaseSelectActions = ({
     {
       name: 'Terminate',
       type: 'modal',
-      isDisabled: selected.length !== 1 || !selected[0]?.links.terminate || isDisabledByStatus(selected[0].status).terminate,
+      isDisabled:
+        selected.length !== 1 ||
+        !selected[0]?.links.terminate ||
+        isDisabledByStatus(selected[0].status).terminate ||
+        selected[0]?.currentUserRole === 'Viewer',
       func: () => setMethodTerminateModal(true),
       modal: methodTerminateModal,
       showModal: isShownMethodTerminateModal,
@@ -201,7 +213,7 @@ export const useDatabaseSelectActions = ({
     {
       name: 'Edit Database Info',
       type: 'modal',
-      isDisabled: selected.length !== 1 || !selected[0]?.links.update,
+      isDisabled: selected.length !== 1 || !selected[0]?.links.update || selected[0]?.currentUserRole === 'Viewer',
       func: () => setEditDBModal(true),
       modal: editDBModal,
       showModal: isShownEditDBModal,
@@ -210,7 +222,7 @@ export const useDatabaseSelectActions = ({
       name: 'Edit tags',
       type: 'modal',
       func: () => setTagsModal(true),
-      isDisabled: selected.length !== 1,
+      isDisabled: selected.length !== 1 || selected[0]?.currentUserRole === 'Viewer',
       modal: tagsModal,
       showModal: isShownTagsModal,
     },
@@ -218,7 +230,7 @@ export const useDatabaseSelectActions = ({
       name: 'Edit properties',
       type: 'modal',
       func: () => setPropertiesModal(true),
-      isDisabled: selected.length === 0,
+      isDisabled: selected.length === 0 || selected[0]?.currentUserRole === 'Viewer',
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
     },
