@@ -4,6 +4,7 @@ import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.reposi
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { SpaceMembershipService } from '@shared/domain/space-membership/space-membership.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -30,6 +31,7 @@ describe('DbClusterGetFacade', () => {
   }
   const getAccessibleByIdStub = stub()
   const findAccessibleOneStub = stub()
+  const getCurrentMembershipStub = stub()
 
   const isConfidential = stub()
   const isPrivate = stub()
@@ -54,6 +56,8 @@ describe('DbClusterGetFacade', () => {
     getItems.throws()
     getProperty.reset()
     getProperty.throws()
+    getCurrentMembershipStub.reset()
+    getCurrentMembershipStub.throws()
   })
 
   it('gets private db cluster for owner', async () => {
@@ -126,6 +130,8 @@ describe('DbClusterGetFacade', () => {
     getItems.returns([])
     getEntity.returns(USER)
 
+    getCurrentMembershipStub.withArgs(1, 1).resolves({ role: 3 })
+
     const result = await getInstance().getDbCluster(dbCluster.uid)
 
     expect(result).to.exist
@@ -160,11 +166,19 @@ describe('DbClusterGetFacade', () => {
     const dbClusterRepo = {
       findAccessibleOne: findAccessibleOneStub,
     } as unknown as DbClusterRepository
+    const spaceMembershipService = {
+      getCurrentMembership: getCurrentMembershipStub,
+    } as unknown as SpaceMembershipService
     const dbClusterService = new DbClusterService(em, dbClusterRepo)
     const spaceService = {
       getAccessibleById: getAccessibleByIdStub,
     } as unknown as SpaceService
 
-    return new DbClusterGetFacade(dbClusterService, userContext, spaceService)
+    return new DbClusterGetFacade(
+      dbClusterService,
+      userContext,
+      spaceService,
+      spaceMembershipService,
+    )
   }
 })

@@ -7,12 +7,7 @@ import { SPACE_MEMBERSHIP_ROLE } from './space-membership.enum'
 
 export class SpaceMembershipRepository extends PaginatedRepository<SpaceMembership> {
   async getMembership(spaceId: number, userId: number): Promise<SpaceMembership> {
-    const qb = this.em.createQueryBuilder(SpaceMembership)
-    qb.select('*')
-      .where({ spaces: { id: spaceId } })
-      .where({ user: { id: userId } })
-      .where({ active: true })
-    const memberships = await qb.execute()
+    const memberships = await this.find({ spaces: spaceId, user: userId, active: true })
     if (memberships.length > 0) {
       return memberships[0]
     }

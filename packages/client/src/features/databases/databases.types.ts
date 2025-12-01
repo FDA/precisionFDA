@@ -60,6 +60,7 @@ export interface IDatabase {
   links: Links
   scope: ServerScope
   featured: boolean
+  currentUserRole?: string
 }
 
 export type MethodType = 'start' | 'stop' | 'terminate'
