@@ -1,11 +1,9 @@
-import React from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import Menu from '../../components/Menu/Menu'
 import { Loader } from '../../components/Loader'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
-import { SyncIcon } from '../../components/icons/SyncIcon'
-import { Refresh } from '../../components/Page/styles'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
 import { RESOURCE_LABELS } from '../../types/user'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
@@ -30,12 +28,12 @@ import {
 import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
-import { EmitScope, HomeScope } from '../home/types'
-import { Button } from '../../components/Button'
+import { EmitScope, HomeScope, NOTIFICATION_ACTION } from '../home/types'
 import { DBStatus } from './DbStatus'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { getSpaceIdFromScope } from '../../utils'
 import { format } from 'date-fns'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 import { ActionsMenu } from '../../components/Menu'
 
 const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
@@ -137,6 +135,21 @@ export const DatabaseShow = ({ emitScope, homeScope, spaceId }: { homeScope?: Ho
       }),
   })
 
+  const queryCache = useQueryClient()
+
+  const lastJsonMessage = useLastWSNotification([
+      NOTIFICATION_ACTION.DB_CLUSTER_UPDATED,
+    ])
+
+  useEffect(() => {
+    if (lastJsonMessage == null) {
+      return
+    }
+    queryCache.invalidateQueries({
+      queryKey: ['dbclusters'],
+    })
+  }, [lastJsonMessage])
+
   if (isLoading) return <HomeLoader />
 
   const backPath = getBackPathNext({
@@ -171,14 +184,6 @@ export const DatabaseShow = ({ emitScope, homeScope, spaceId }: { homeScope?: Ho
           </HeaderLeft>
           <div>
             <StyledRight>
-              {data.status !== 'terminated' && (
-                <Button data-testid="db-refresh-status" onClick={() => refetch()} disabled={isFetching}>
-                  <Refresh $spin={isFetching}>
-                    <SyncIcon />
-                  </Refresh>
-                  Refresh
-                </Button>
-              )}
               {<DetailActionsDropdown db={data} />}
             </StyledRight>
           </div>
@@ -226,6 +231,18 @@ export const DatabaseShow = ({ emitScope, homeScope, spaceId }: { homeScope?: Ho
                 <MetadataKey>Info</MetadataKey>
                 <Description>
                   This database cluster is currently stopped. Seven days after it was stopped, the database cluster will automatically re-activate and begin incurring charges. If you do not wish to keep this database cluster, use the Terminate action to permanently stop it and delete its contents.
+                </Description>
+              </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
+        {data.failureReason && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                <MetadataKey>Database failure</MetadataKey>
+                <Description>
+                  {data.failureReason}
                 </Description>
               </MetadataItem>
             </MetadataRow>

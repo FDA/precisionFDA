@@ -60,6 +60,7 @@ export interface IDatabase {
   links: Links
   scope: ServerScope
   featured: boolean
+  failureReason: string
   currentUserRole?: string
 }
 

@@ -9,6 +9,8 @@ import { match, stub } from 'sinon'
 import * as queue from '@shared/queue'
 import { config } from '@shared/config'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 describe('DbClusterCheckNonTerminatedFacade', () => {
   const USER_ID = 0
@@ -17,6 +19,14 @@ describe('DbClusterCheckNonTerminatedFacade', () => {
     id: USER_ID,
     dxuser: 'user',
     getEntity: getEntityStub,
+  }
+
+  const loadEntity = stub()
+  const userContext: UserContext = {
+    ...USER,
+    accessToken: 'accessToken',
+    dxuser: 'dxuser',
+    loadEntity,
   }
 
   let getMainQueueStub
@@ -126,7 +136,13 @@ describe('DbClusterCheckNonTerminatedFacade', () => {
     const dbClusterRepo = {
       find: findStub,
     } as unknown as DbClusterRepository
-    const dbClusterService = new DbClusterService(em, dbClusterRepo)
+    const notificationService = {} as unknown as NotificationService
+    const dbClusterService = new DbClusterService(
+      em,
+      dbClusterRepo,
+      userContext,
+      notificationService,
+    )
     const emailsJobProducer = {
       createSendEmailTask: createSendEmailTaskStub,
     } as unknown as EmailQueueJobProducer

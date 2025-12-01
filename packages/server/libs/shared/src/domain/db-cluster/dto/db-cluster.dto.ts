@@ -47,6 +47,7 @@ export class DbClusterDTO {
     [key: string]: string
   }
   scope: EntityScope
+  failureReason: string
 
   static mapToDTO(dbcluster: DbCluster, space?: Space, membership?: SpaceMembership): DbClusterDTO {
     return {
@@ -89,6 +90,7 @@ export class DbClusterDTO {
         stop: '/api/dbclusters/stop',
         terminate: '/api/dbclusters/terminate',
       },
+      failureReason: dbcluster.failureReason,
       ...(membership && { currentUserRole: spaceMembershipTypeToNameMap[membership.role] }),
     }
   }

@@ -3,6 +3,7 @@ import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -440,7 +441,13 @@ describe('DbClusterActionFacade', () => {
     const dbClusterRepo = {
       findEditableOne: findEditableOneStub,
     } as unknown as DbClusterRepository
-    const dbClusterService = new DbClusterService(em, dbClusterRepo)
+    const notificationService = {} as unknown as NotificationService
+    const dbClusterService = new DbClusterService(
+      em,
+      dbClusterRepo,
+      userContext,
+      notificationService,
+    )
     const spaceService = {
       getEditableById: getEditableByIdStub,
     } as unknown as SpaceService

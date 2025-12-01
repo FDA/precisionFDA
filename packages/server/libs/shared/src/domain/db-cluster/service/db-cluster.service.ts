@@ -4,6 +4,7 @@ import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import {
   DB_SYNC_STATUS,
+  DB_SYNC_STATUSES,
   ENGINE,
   ENGINES,
   STATUS,
@@ -23,6 +24,9 @@ import { invertObj } from 'ramda'
 import { DbClusterRepository } from '../db-cluster.repository'
 import { DbClusterPaginationDTO } from '../dto/db-cluster-pagination.dto'
 import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 
 @Injectable()
 export class DbClusterService implements SearchableByUid<'dbcluster'> {
@@ -32,6 +36,8 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly dbClusterRepo: DbClusterRepository,
+    private readonly userContext: UserContext,
+    private readonly notificationService: NotificationService,
   ) {}
   getAccessibleEntityByUid(uid: Uid<'dbcluster'>): Promise<DbCluster | null> {
     return this.dbClusterRepo.findAccessibleOne({ uid: uid })
@@ -214,6 +220,14 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
       })
       dbCluster.syncStatus = newSyncStatus
       await transactionalEntityManager.persistAndFlush(dbCluster)
+    })
+
+    await this.notificationService.createNotification({
+      message: `${dbClusterUid} updated. New synchronization status - ${DB_SYNC_STATUSES[invertObj(DB_SYNC_STATUS)[newSyncStatus]]}`,
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.DB_CLUSTER_UPDATED,
+      userId: this.userContext.id,
+      sessionId: this.userContext.sessionId,
     })
   }
 }

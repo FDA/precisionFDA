@@ -6,6 +6,7 @@ import { UserModule } from '@shared/domain/user/user.module'
 import { UsersDbClustersSaltModule } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.module'
 import { DbClusterSynchronizeFacade } from './db-cluster-synchronize.facade'
 import { DbClusterModule } from '@shared/domain/db-cluster/db-cluster.module'
+import { NotificationModule } from '@shared/domain/notification/notification.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DbClusterModule } from '@shared/domain/db-cluster/db-cluster.module'
     UserModule,
     SpaceModule,
     UsersDbClustersSaltModule,
+    NotificationModule,
   ],
   providers: [DbClusterSynchronizeFacade],
   exports: [DbClusterSynchronizeFacade],

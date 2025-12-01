@@ -10,6 +10,7 @@ import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { DB_SYNC_STATUS, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { isStateTerminal } from '@shared/domain/job/job.helper'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceService } from '@shared/domain/space/service/space.service'
@@ -18,6 +19,7 @@ import { getIdFromScopeName } from '@shared/domain/space/space.helper'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
 import { UserService } from '@shared/domain/user/user.service'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { ClientRequestError, ErrorCodes, NotFoundError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
@@ -49,6 +51,7 @@ export class DbClusterSynchronizeFacade {
     private readonly spaceService: SpaceService,
     private readonly saltService: UsersDbClustersSaltService,
     private readonly mainJobProducer: MainQueueJobProducer,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async synchronizeInSpace(spaceId: number): Promise<void> {
@@ -394,10 +397,29 @@ export class DbClusterSynchronizeFacade {
         statusAsOf: new Date(describeDbClusterRes.statusAsOf),
         host: describeDbClusterRes.endpoint,
         port: describeDbClusterRes.port?.toString(),
+        ...(describeDbClusterRes.failureReason && {
+          failureReason: describeDbClusterRes.failureReason,
+        }),
       },
       { em: this.em },
     )
     await this.em.flush()
+
+    const statusChangedToDesired =
+      currentStatus !== describeDbClusterRes.status &&
+      ['available', 'stopped', 'terminated'].includes(describeDbClusterRes.status)
+
+    const message = statusChangedToDesired
+      ? `Database "${dbCluster.name}" updated. Current status - ${describeDbClusterRes.status}`
+      : `Database "${dbCluster.name}" updated.`
+
+    await this.notificationService.createNotification({
+      message: message,
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.DB_CLUSTER_UPDATED,
+      userId: this.userContext.id,
+      sessionId: this.userContext.sessionId,
+    })
 
     this.logger.debug({ dbCluster: updatedDbCluster }, 'Updated DbCluster')
   }

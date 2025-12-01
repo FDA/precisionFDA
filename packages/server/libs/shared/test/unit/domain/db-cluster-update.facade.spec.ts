@@ -4,6 +4,7 @@ import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.reposi
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError } from '@shared/errors'
 import { DbClusterUpdateFacade } from 'apps/api/src/facade/db-cluster/update-facade/db-cluster-update.facade'
@@ -120,7 +121,13 @@ describe('DbClusterUpdateFacade', () => {
     const dbClusterRepo = {
       findEditableOne: findEditableOneStub,
     } as unknown as DbClusterRepository
-    const dbClusterService = new DbClusterService(em, dbClusterRepo)
+    const notificationService = {} as unknown as NotificationService
+    const dbClusterService = new DbClusterService(
+      em,
+      dbClusterRepo,
+      userContext,
+      notificationService,
+    )
 
     return new DbClusterUpdateFacade(dbClusterService, userContext)
   }

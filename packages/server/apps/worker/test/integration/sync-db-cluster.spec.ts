@@ -3,7 +3,7 @@ import { Job } from 'bull'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { SyncDbClusterJob, TASK_TYPE } from '@shared/queue/task.input'
-import sinon, { stub } from 'sinon'
+import sinon, { match, stub } from 'sinon'
 import { EntityManager } from '@mikro-orm/mysql'
 import { PlatformClient } from '@shared/platform-client'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
@@ -16,6 +16,8 @@ import { create, db } from '@shared/test'
 import { database } from '@shared/database'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { NOTIFICATION_ACTION } from '@shared/enums'
 
 describe('DbClusterService', () => {
   let removeRepeatableStub: sinon.SinonStub
@@ -31,6 +33,7 @@ describe('DbClusterService', () => {
   const getUserByIdStub = stub()
   const dbClusterDescribeStub = stub()
   const findAccessibleOneStub = stub()
+  const createNotificationStub = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -61,6 +64,8 @@ describe('DbClusterService', () => {
     getUserByIdStub.throws()
     dbClusterDescribeStub.reset()
     dbClusterDescribeStub.throws()
+    createNotificationStub.reset()
+    createNotificationStub.throws()
   })
 
   afterEach(() => {
@@ -142,10 +147,19 @@ describe('DbClusterService', () => {
       dbClusterDescribeStub
         .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
         .resolves({
-          status: 'available',
+          status: 'terminated',
           endpoint: dbCluster.host,
           port: 1111,
         })
+
+      createNotificationStub
+        .withArgs(
+          match({
+            action: NOTIFICATION_ACTION.DB_CLUSTER_UPDATED,
+            userId: userContext.id,
+          }),
+        )
+        .resolves({})
 
       const service = getInstance()
       // Replace the logger's log method
@@ -158,6 +172,7 @@ describe('DbClusterService', () => {
       expect(logStub.callCount).to.equal(4)
       sinon.assert.calledWith(debugStub.lastCall, { dbCluster: dbCluster }, 'Updated DbCluster')
       expect(dbCluster.port).to.equal('1111')
+      expect(createNotificationStub.callCount).to.equal(1)
     })
 
     describe('error states', () => {
@@ -197,7 +212,15 @@ describe('DbClusterService', () => {
     const dbClusterRepo = {
       findAccessibleOne: findAccessibleOneStub,
     } as unknown as DbClusterRepository
-    const dbClusterService = new DbClusterService(em, dbClusterRepo)
+    const notificationService = {
+      createNotification: createNotificationStub,
+    } as unknown as NotificationService
+    const dbClusterService = new DbClusterService(
+      em,
+      dbClusterRepo,
+      userContext,
+      notificationService,
+    )
     const userClient = {
       dbClusterDescribe: dbClusterDescribeStub,
     } as unknown as PlatformClient
@@ -218,6 +241,7 @@ describe('DbClusterService', () => {
       spaceService,
       usersDbClustersSaltService,
       mainJobProducer,
+      notificationService,
     )
   }
 })

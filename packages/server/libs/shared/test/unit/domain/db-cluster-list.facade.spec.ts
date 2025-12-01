@@ -4,6 +4,7 @@ import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.reposi
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceMembershipService } from '@shared/domain/space-membership/space-membership.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -268,10 +269,16 @@ describe('DbClusterListFacade', () => {
     const dbClusterRepo = {
       paginate: paginateStub,
     } as unknown as DbClusterRepository
+    const notificationService = {} as unknown as NotificationService
+    const dbClusterService = new DbClusterService(
+      em,
+      dbClusterRepo,
+      userContext,
+      notificationService,
+    )
     const spaceMembershipService = {
       getCurrentMembership: getCurrentMembershipStub,
     } as unknown as SpaceMembershipService
-    const dbClusterService = new DbClusterService(em, dbClusterRepo)
     const spaceService = {
       getAccessibleById: getAccessibleByIdStub,
     } as unknown as SpaceService

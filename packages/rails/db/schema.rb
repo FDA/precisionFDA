@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_10_03_113217) do
+ActiveRecord::Schema.define(version: 2025_10_15_140344) do
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
     t.integer "user_id"
@@ -303,6 +303,7 @@ ActiveRecord::Schema.define(version: 2025_10_03_113217) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "salt"
     t.integer "sync_status", default: 0, null: false
+    t.string "failure_reason"
     t.index ["dxid"], name: "index_dbclusters_on_dxid", unique: true
     t.index ["uid"], name: "index_dbclusters_on_uid", unique: true
     t.index ["user_id"], name: "index_dbclusters_on_user_id"
