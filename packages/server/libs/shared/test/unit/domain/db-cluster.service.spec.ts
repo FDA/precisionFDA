@@ -11,8 +11,10 @@ import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.reposi
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
-import { STATIC_SCOPE } from '@shared/enums'
+import { NOTIFICATION_ACTION, STATIC_SCOPE } from '@shared/enums'
 import { expect } from 'chai'
 import { invertObj } from 'ramda'
 import { match, stub } from 'sinon'
@@ -26,10 +28,19 @@ describe('DbClusterService', () => {
     dxuser: 'john_doe',
   }
 
+  const loadEntity = stub()
+  const userContext: UserContext = {
+    ...USER,
+    accessToken: 'accessToken',
+    dxuser: 'dxuser',
+    loadEntity,
+  }
+
   const createStub = stub()
   const persistAndFlushStub = stub()
   const transactionalStub = stub()
   const findOneOrFailStub = stub()
+  const createNotificationStub = stub()
 
   beforeEach(async () => {
     createStub.reset()
@@ -40,6 +51,8 @@ describe('DbClusterService', () => {
     findOneOrFailStub.throws()
     transactionalStub.reset()
     transactionalStub.throws()
+    createNotificationStub.reset()
+    createNotificationStub.throws()
   })
 
   describe('#persistDbCluster', () => {
@@ -140,6 +153,15 @@ describe('DbClusterService', () => {
         .withArgs(match({ ...dbCluster, syncStatus: DB_SYNC_STATUS.COMPLETED }))
         .resolves()
 
+      createNotificationStub
+        .withArgs(
+          match({
+            action: NOTIFICATION_ACTION.DB_CLUSTER_UPDATED,
+            userId: userContext.id,
+          }),
+        )
+        .resolves({})
+
       await getInstance().updateSyncStatus(dbCluster.uid, DB_SYNC_STATUS.COMPLETED)
 
       expect(transactionalStub.calledOnce).to.be.true()
@@ -176,6 +198,15 @@ describe('DbClusterService', () => {
         .withArgs(match({ ...dbCluster, syncStatus: DB_SYNC_STATUS.FAILED }))
         .resolves()
 
+      createNotificationStub
+        .withArgs(
+          match({
+            action: NOTIFICATION_ACTION.DB_CLUSTER_UPDATED,
+            userId: userContext.id,
+          }),
+        )
+        .resolves({})
+
       await getInstance().updateSyncStatus(dbCluster.uid, DB_SYNC_STATUS.FAILED)
 
       expect(transactionalStub.calledOnce).to.be.true()
@@ -196,7 +227,10 @@ describe('DbClusterService', () => {
     const dbClusterRepo = {
       create: createStub,
     } as unknown as DbClusterRepository
+    const notificationService = {
+      createNotification: createNotificationStub,
+    } as unknown as NotificationService
 
-    return new DbClusterService(em, dbClusterRepo)
+    return new DbClusterService(em, dbClusterRepo, userContext, notificationService)
   }
 })

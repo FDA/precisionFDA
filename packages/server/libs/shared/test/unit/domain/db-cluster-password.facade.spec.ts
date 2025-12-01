@@ -6,6 +6,7 @@ import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.reposi
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { DbClusterPasswordFacade } from 'apps/api/src/facade/db-cluster/password-facade/db-cluster-password.facade'
@@ -43,7 +44,8 @@ describe('DbClusterPasswordFacade', () => {
     const dbClusterRepo = {
       findAccessibleOne: findAccessibleOneStub,
     } as unknown as DbClusterRepository
-    dbClusterService = new DbClusterService(em, dbClusterRepo)
+    const notificationService = {} as unknown as NotificationService
+    dbClusterService = new DbClusterService(em, dbClusterRepo, userContext, notificationService)
     createPasswordRotatedEventStub = stub(dbClusterService, 'createPasswordRotatedEvent')
 
     syncDbClusterStub.reset()

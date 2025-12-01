@@ -67,7 +67,25 @@ export const useToastWSHandler = () => {
     const notification = lastJsonMessage.data as Notification
 
     console.log(`Received notification ${JSON.stringify(notification)}`)
-    if (!NO_TOAST_NOTIFICATIONS.includes(notification.action)) {
+
+    if (NO_TOAST_NOTIFICATIONS.includes(notification.action)) {
+      confirmNotification(notification.id).then(() => console.log(`Notification with id: ${notification.id} has been confirmed`))
+      return
+    }
+
+    let shouldShowToast = true
+
+    if (notification.action === NOTIFICATION_ACTION.DB_CLUSTER_UPDATED) {
+      const statuses = ['available', 'terminated', 'stopped']
+
+      const statusMessage = statuses.some(status => notification.message.toLowerCase().includes(status.toLowerCase()))
+
+      if (!statusMessage) {
+        shouldShowToast = false
+      }
+    }
+
+    if (shouldShowToast) {
       const toastContent =
         notification.meta?.linkTitle && notification.meta?.linkUrl
           ? ToastWithLink({

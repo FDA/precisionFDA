@@ -1,22 +1,20 @@
 import { ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { BackLink } from '../../components/Page/PageBackLink'
-import { Refresh } from '../../components/Page/styles'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { SyncIcon } from '../../components/icons/SyncIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions, StyledRight } from '../home/home.styles'
-import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { HomeScope, MetaV2 } from '../home/types'
+import { ResourceHeader } from '../home/show.styles'
+import { HomeScope, MetaV2, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { getBasePath } from '../home/utils'
@@ -25,9 +23,12 @@ import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import Menu from '../../components/Menu/Menu'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
+import { useQueryClient } from '@tanstack/react-query'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 import { ActionsMenu } from '../../components/Menu'
+import { Refresh } from '../../components/Page/styles'
+import { SyncIcon } from '../../components/icons/SyncIcon'
 
 const DBStyledRight = styled(StyledRight)`
   gap: 20px;
@@ -76,6 +77,21 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
   })
   const { isLoading, data, error } = query
   const { data: propertiesData } = usePropertiesQuery('dbCluster', homeScope)
+
+  const queryCache = useQueryClient()
+
+  const lastJsonMessage = useLastWSNotification([
+      NOTIFICATION_ACTION.DB_CLUSTER_UPDATED,
+    ])
+
+  useEffect(() => {
+    if (lastJsonMessage == null) {
+      return
+    }
+    queryCache.invalidateQueries({
+      queryKey: ['dbclusters'],
+    })
+  }, [lastJsonMessage])
 
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data)
   const { actions, modals } = useDatabaseSelectActions({

@@ -4,8 +4,9 @@ import { IChallenge } from '../../types/challenge'
 import { IOSpec } from '../apps/apps.types'
 import { License } from '../licenses/types'
 
-
-export interface ResponseError { response?: { status: number; data?: { error?: { code?: string; message?: string } } } }
+export interface ResponseError {
+  response?: { status: number; data?: { error?: { code?: string; message?: string } } }
+}
 
 export interface ApiErrorResponse {
   error?: {
@@ -226,6 +227,7 @@ export enum NOTIFICATION_ACTION {
   USER_PROVISIONING_DONE = 'USER_PROVISIONING_DONE',
   USER_PROVISIONING_ERROR = 'USER_PROVISIONING_ERROR',
   ALL_USER_PROVISIONINGS_COMPLETED = 'ALL_USER_PROVISIONINGS_COMPLETED',
+  DB_CLUSTER_UPDATED = 'DB_CLUSTER_UPDATED',
 }
 
 export type NotificationMeta = {

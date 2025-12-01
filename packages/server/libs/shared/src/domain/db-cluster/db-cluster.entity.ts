@@ -88,6 +88,9 @@ export class DbCluster extends ScopedEntity {
   @OneToMany(() => Tagging, (tagging) => tagging.dbCluster, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
 
+  @Property({ nullable: true })
+  failureReason?: string
+
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
