@@ -2,7 +2,7 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
-import { unstable_usePrompt } from 'react-router-dom'
+import { unstable_usePrompt } from 'react-router'
 import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import { FieldGroup, InputError } from '../../../components/form/styles'
@@ -92,18 +92,18 @@ export const ProposeChallengeForm = ({
 
   unstable_usePrompt({
     message: 'There are unsaved changes, are you sure you want to leave?',
-    when: ({ currentLocation, nextLocation }: any) => 
+    when: ({ currentLocation, nextLocation }: any) =>
       (!isSubmitting && Object.keys(dirtyFields).length > 0) &&
       currentLocation.pathname !== nextLocation.pathname,
   })
 
   return (
-      <div>
-        <SectionTitle>PrecisionFDA Challenge Inquiry</SectionTitle>
-        <p>Please complete this form for your new challenge proposal. Thank you!</p>
-        <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-          <FieldGroup>
-            <label>Name (required):</label>
+    <div>
+      <SectionTitle>PrecisionFDA Challenge Inquiry</SectionTitle>
+      <p>Please complete this form for your new challenge proposal. Thank you!</p>
+      <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+        <FieldGroup>
+          <label>Name (required):</label>
             <InputText
               placeholder="Enter your name"
               {...register('name')}
@@ -114,10 +114,10 @@ export const ProposeChallengeForm = ({
               name="name"
               render={({ message }) => <InputError>{message}</InputError>}
             />
-          </FieldGroup>
+        </FieldGroup>
 
-          <FieldGroup>
-            <label>Contact email:</label>
+        <FieldGroup>
+          <label>Contact email:</label>
             <InputText
               placeholder="Enter your contact email"
               {...register('email')}
@@ -128,9 +128,9 @@ export const ProposeChallengeForm = ({
               name="email"
               render={({ message }) => <InputError>{message}</InputError>}
             />
-          </FieldGroup>
-          <FieldGroup>
-            <label>Organisation / Institute:</label>
+        </FieldGroup>
+        <FieldGroup>
+          <label>Organisation / Institute:</label>
             <InputText
               placeholder="Enter your organisation / institute"
               {...register('organisation')}
@@ -141,102 +141,102 @@ export const ProposeChallengeForm = ({
               name="organisation"
               render={({ message }) => <InputError>{message}</InputError>}
             />
-          </FieldGroup>
+        </FieldGroup>
 
 
           <FieldGroup >
-            <label>Do you have specific scientific question driving the challenge?</label>
-            <Controller
-              name="specificQuestion"
-              control={control}
+          <label>Do you have specific scientific question driving the challenge?</label>
+          <Controller
+            name="specificQuestion"
+            control={control}
               render={({ field: { value, onChange, onBlur }}) => (
-                <RadioButtonGroup
-                  name="specificQuestion"
+              <RadioButtonGroup
+                name="specificQuestion"
                   ariaLabel='challenge-question'
-                  onChange={onChange}
-                  value={value}
-                  onBlur={onBlur}
-                  options={[
-                    { value: 'Yes', label: 'Yes' },
-                    { value: 'No', label: 'No' },
-                  ]}
-                />
-              )}
-            />
+                onChange={onChange}
+                value={value}
+                onBlur={onBlur}
+                options={[
+                  { value: 'Yes', label: 'Yes' },
+                  { value: 'No', label: 'No' },
+                ]}
+              />
+            )}
+          />
             <ErrorMessage
               errors={errors}
               name="specificQuestion"
               render={({ message }) => <InputError>{message}</InputError>}
             />
-          </FieldGroup>
+        </FieldGroup>
 
-          <FieldGroup>
-            <label>Please provide question details:</label>
-            <InputText
-              type="textarea"
-              disabled={hasQuestion === 'No'}
-              placeholder="Enter the question details"
-              {...register('specificQuestionText')}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="specificQuestionText"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </FieldGroup>
+        <FieldGroup>
+          <label>Please provide question details:</label>
+          <InputText
+            type="textarea"
+            disabled={hasQuestion === 'No'}
+            placeholder="Enter the question details"
+            {...register('specificQuestionText')}
+          />
+          <ErrorMessage
+            errors={errors}
+            name="specificQuestionText"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
+        </FieldGroup>
 
           <FieldGroup >
-            <label>Do you have access to data for the challenge?</label>
-            <Controller
-              name="dataDetails"
-              control={control}
+          <label>Do you have access to data for the challenge?</label>
+          <Controller
+            name="dataDetails"
+            control={control}
               render={({ field: { value, onChange, onBlur }}) => (
-                <RadioButtonGroup
-                  name="dataDetails"
+              <RadioButtonGroup
+                name="dataDetails"
                   ariaLabel='data-details'
-                  onChange={onChange}
-                  value={value}
-                  onBlur={onBlur}
-                  options={[
-                    { value: 'Yes', label: 'Yes' },
-                    { value: 'No', label: 'No' },
-                  ]}
-                />
-              )}
-            />
+                onChange={onChange}
+                value={value}
+                onBlur={onBlur}
+                options={[
+                  { value: 'Yes', label: 'Yes' },
+                  { value: 'No', label: 'No' },
+                ]}
+              />
+            )}
+          />
             <ErrorMessage
               errors={errors}
               name="dataDetails"
               render={({ message }) => <InputError>{message}</InputError>}
             />
-          </FieldGroup>
+        </FieldGroup>
 
-          <FieldGroup>
-            <label>Please provide details about the data (e.g. data type, sample number, etc):</label>
-            <InputText
-              type="textarea"
-              disabled={hasData === 'No'}
-              placeholder="Enter the data details"
-              {...register('dataDetailsText')}
-            />
+        <FieldGroup>
+          <label>Please provide details about the data (e.g. data type, sample number, etc):</label>
+          <InputText
+            type="textarea"
+            disabled={hasData === 'No'}
+            placeholder="Enter the data details"
+            {...register('dataDetailsText')}
+          />
             <ErrorMessage
               errors={errors}
               name="dataDetailsText"
               render={({ message }) => <InputError>{message}</InputError>}
             />
-          </FieldGroup>
+        </FieldGroup>
 
-          <Row>
+        <Row>
             <Button
               data-variant="primary"
               disabled={Object.keys(errors).length > 0 || isSubmitting}
               type="submit"
             >
-              Submit Inquiry
-            </Button>
-            {isSubmitting && <Loader />}
-          </Row>
-        </StyledForm>
-      </div>
+            Submit Inquiry
+          </Button>
+          {isSubmitting && <Loader />}
+        </Row>
+      </StyledForm>
+    </div>
   )
 }

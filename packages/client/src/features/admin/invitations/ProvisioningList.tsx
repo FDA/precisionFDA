@@ -1,12 +1,12 @@
 import React from 'react'
-import { useLocation } from 'react-router-dom'
-import { StringParam, useQueryParam } from 'use-query-params'
+import { useLocation, useSearchParams } from 'react-router'
 import { InvitationsTable } from './InvitationsTable'
 import { useInvitationColumns } from './useInvitationColumns'
 
 export const ProvisioningList = () => {
-  const [ids] = useQueryParam('invitations', StringParam)
   const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const ids = searchParams.get('invitations')
   const columns = useInvitationColumns(false)
 
   const breadcrumbs = [

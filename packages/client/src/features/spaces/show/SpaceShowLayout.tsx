@@ -1,6 +1,6 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
-import React, { useMemo, useState } from 'react'
-import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import React from 'react'
+import { Outlet, useOutletContext } from 'react-router'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { MenuCounter } from '../../../components/MenuCounter'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
@@ -14,38 +14,13 @@ import { NetworkIcon } from '../../../components/icons/NetworkIcon'
 import { SpaceReportIcon } from '../../../components/icons/SpaceReportIcon'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
 import { useLocalStorage } from '../../../hooks/useLocalStorage'
-import { usePrevious } from '../../../hooks/usePrevious'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
-import { UserLayout } from '../../../layouts/UserLayout'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
-import { AppList } from '../../apps/AppList'
-import { AppsShow } from '../../apps/AppsShow'
-import { EditAppPage } from '../../apps/form/EditAppPage'
-import { ForkAppPage } from '../../apps/form/ForkAppPage'
-import { RunJobPage } from '../../apps/run/RunJobPage'
-import { DatabaseList } from '../../databases/DatabaseList'
-import { DatabaseShow } from '../../databases/DatabaseShow'
-import { CreateDatabase } from '../../databases/create/CreateDatabase'
-import { DiscussionList } from '../../discussions/DiscussionList'
-import { DiscussionShow } from '../../discussions/DiscussionShow'
-import { CreateDiscussionPage } from '../../discussions/form/CreateDiscussionPage'
-import { ExecutionList } from '../../executions/ExecutionList'
-import { ExecutionDetails } from '../../executions/details/ExecutionDetails'
-import { FileList } from '../../files/FileList'
-import { FileShow } from '../../files/show/FileShow'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../../home/home.styles'
 import { HomeLoader } from '../../home/show.styles'
 import { ApiErrorResponse } from '../../home/types'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
-import { SpaceReportList } from '../../space-reports/SpaceReportList'
-import { TrackInHome } from '../../tracks/TrackInHome'
-import { WorkflowList } from '../../workflows/WorkflowList'
-import { WorkflowShow } from '../../workflows/WorkflowShow'
-import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
-import { ProtectedIcon } from '../ProtectedIcon'
-import { MembersList } from '../members/MembersList'
-import { fixGuestPermissions, spaceRequest } from '../spaces.api'
-import { ISpace } from '../spaces.types'
+import { fixGuestPermissions } from '../spaces.api'
 import { useSpaceActions } from '../useSpaceActions'
 import { Activation } from './SpaceActivation'
 import { SpaceLocked } from './SpaceLocked'
@@ -63,8 +38,14 @@ import {
   SpaceTopRight,
   TopSpaceHeader,
 } from './styles'
+import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
+import { ProtectedIcon } from '../ProtectedIcon'
+import type { SpaceOutletContext } from '../routes'
 
-const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) => {
+
+export const SpaceShowLayout = () => {
+  const context = useOutletContext<SpaceOutletContext>()
+  const { space } = context
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedSpacesSidebar', true)
   useToastWSHandler()
 
@@ -87,14 +68,8 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
 
   const showDiscussions = !((space.type === 'review' && space.restricted_discussions) || space.type === 'private_type')
   const showMembers = space.type !== 'private_type'
-  const isContributorOrHigher = ['lead', 'admin', 'contributor'].includes(space.current_user_membership.role)
-  const canCreateDiscussion = isContributorOrHigher && !space.restricted_discussions
   const isSharedReviewSpace = space.type === 'review' && !!space.private_space_id
   const isPrivateReviewSpace = space.type === 'review' && !!space.shared_space_id
-
-  if (space.state === 'unactivated') {
-    return <Activation space={space} />
-  }
 
   return (
     <>
@@ -203,62 +178,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
         </StyledMenu>
         <Main>
           <ErrorBoundary>
-            {isLoading ? (
-              <HomeLoader />
-            ) : (
-              <Routes>
-                <Route path="files" element={<FileList space={space} showFolderActions={isContributorOrHigher} />} />
-                <Route path="files/:fileId" element={<FileShow space={space} />} />
-                <Route path="files/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
-
-                <Route path="databases" element={<DatabaseList spaceId={space.id} />} />
-                <Route path="databases/create" element={<CreateDatabase spaceId={space.id} />} />
-                <Route path="databases/:uid" element={<DatabaseShow spaceId={space.id} />} />
-                {/* <Route path="databases/:identifier/track" element={<TrackInHome entityType="database" />} /> */}
-
-                <Route
-                  path="apps"
-                  element={<AppList spaceId={space.id.toString()} isContributorOrHigher={isContributorOrHigher} />}
-                />
-                <Route path="apps/:appIdentifier/jobs/new" element={<RunJobPage spaceId={space.id} />} />
-                <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id.toString()} />} />
-                <Route path="apps/:appUid/fork" element={<ForkAppPage spaceId={space.id} />} />
-                <Route
-                  path="apps/:appUid/*"
-                  element={<AppsShow spaceId={space.id.toString()} isContributorOrHigher={isContributorOrHigher} />}
-                />
-                <Route path="apps/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
-                <Route
-                  path="workflows"
-                  element={<WorkflowList spaceId={space.id.toString()} isContributorOrHigher={isContributorOrHigher} />}
-                />
-                <Route path="workflows/:workflowUid/*" element={<WorkflowShow spaceId={space.id} />} />
-                <Route path="executions" element={<ExecutionList spaceId={space.id.toString()} />} />
-                <Route path="executions/:executionUid/*" element={<ExecutionDetails spaceId={space.id} />} />
-                <Route path="executions/:identifier/track" element={<TrackInHome entityType="execution" spaceId={space.id} />} />
-                <Route path="members" element={<MembersList space={space} />} />
-                <Route
-                  path="reports"
-                  element={<SpaceReportList scope={`space-${space.id}`} isContributorOrHigher={isContributorOrHigher} />}
-                />
-                <Route
-                  path="discussions"
-                  element={<DiscussionList canCreateDiscussion={canCreateDiscussion} spaceId={space.id} />}
-                />
-                <Route
-                  path="discussions/create"
-                  element={
-                    <CreateDiscussionPage
-                      displayWarning={space.type === 'review' && Boolean(space.private_space_id)}
-                      scope={`space-${space.id}`}
-                    />
-                  }
-                />
-                <Route path="discussions/:discussionId/*" element={<DiscussionShow space={space} />} />
-
-                <Route path="/" element={<Navigate to="files" replace />} />
-              </Routes>
-            )}
+            <Outlet context={context} />
           </ErrorBoundary>
         </Main>
       </Row>
@@ -266,42 +186,4 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
   )
 }
 
-export const SpaceShow = () => {
-  const { spaceId } = useParams<{ spaceId: string }>()
-  const [isNotAllowed, setIsNotAllowed] = useState<boolean>(false)
-  const [isLocked, setIsLocked] = useState<boolean>(false)
-  const { data, isLoading } = useQuery({
-    queryKey: ['space', spaceId],
-    queryFn: () => spaceRequest({ id: spaceId! }),
-    retry: (failureCount, error: { response: { status: number } }) => {
-      if (error.response.status === 403) {
-        setIsNotAllowed(true)
-        return false
-      }
-      if (error.response.status === 422) {
-        setIsLocked(true)
-        return false
-      }
-      return failureCount > 3
-    },
-  })
-
-  const space = data?.space
-
-  // Lazy load the space if it's not loaded yet
-  const prevSpace = usePrevious(space!)
-  const s = useMemo(() => space || prevSpace, [space])
-
-  if (isLoading) return <HomeLoader />
-  if (isNotAllowed) return <SpaceNotAllowed />
-  if (isLocked || s?.state === 'locked') return <SpaceLocked space={s} />
-  if (!s) return <SpaceNotAllowed />
-
-  return (
-    <UserLayout innerScroll>
-      <Spaces2 space={s} isLoading={isLoading} />
-    </UserLayout>
-  )
-}
-
-export default SpaceShow
+export default SpaceShowLayout

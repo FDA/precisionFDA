@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
@@ -33,10 +33,10 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
       queryClient.invalidateQueries({
         queryKey: ['news-item'],
       })
-      toast.success('Edited news item')
+      toast.success('Successfully edited news item')
     },
     onError: () => {
-      toast.error('Error: Adding news item')
+      toast.error('Error: Editing news item')
     },
   })
 

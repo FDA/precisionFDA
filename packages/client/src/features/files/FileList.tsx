@@ -9,8 +9,7 @@ import {
   VisibilityState,
 } from '@tanstack/react-table'
 import React, { useEffect, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useQueryParam } from 'use-query-params'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '../../components/Button'
 import { ActionsMenu } from '../../components/Menu'
 import { ContentFooter } from '../../components/Page/ContentFooter'
@@ -52,17 +51,18 @@ export const FileList = ({
   homeScope,
   space,
   showFolderActions = false,
+  isAdmin,
 }: {
   homeScope?: HomeScope
   space?: ISpace
   showFolderActions?: boolean
+  isAdmin?: boolean
 }) => {
   const location = useLocation()
   const queryCache = useQueryClient()
 
-  const [folderIdParam, setFolderIdParam] = useQueryParam<string | undefined>('folder_id')
-  const user = useAuthUser()
-  const isAdmin = user?.isAdmin ?? false
+  const [searchParams] = useSearchParams()
+  const folderIdParam = searchParams.get('folder_id') ?? undefined
 
   const navigate = useNavigate()
 
@@ -85,10 +85,10 @@ export const FileList = ({
   } = useList<ListType>({
     fetchList: fetchFiles,
     resource: 'files',
+    scope: homeScope,
     params: {
       folderId: folderIdParam || undefined,
       spaceId: space?.id || undefined,
-      scope: homeScope || undefined,
     },
   })
 
@@ -143,15 +143,6 @@ export const FileList = ({
     navigate({ search })
   }
 
-  // If the component is rendering for the first time, skip setting folderIdParam
-  const first = useRef(true)
-  useEffect(() => {
-    if (first.current) {
-      first.current = false
-      return
-    }
-    setFolderIdParam(undefined, 'pushIn')
-  }, [homeScope])
 
   // @ts-expect-error sometimes shows as entries instead of files
   const files: IFile[] = data?.files || data?.entries
@@ -239,7 +230,7 @@ export const FileList = ({
       </FilesListResourceHeader>
 
       <FilesListTable
-        isAdmin={isAdmin}
+        isAdmin={isAdmin ?? false}
         homeScope={homeScope}
         spaceId={space?.id}
         isLoading={isLoading}
@@ -270,8 +261,8 @@ export const FileList = ({
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, 'replaceIn')}
-          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+          setPage={p => setPageParam(p, true)}
+          onPerPageSelect={p => setPerPageParam(p, true)}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>

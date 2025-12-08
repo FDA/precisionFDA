@@ -1,8 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
 import { DataNode } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { useImmer } from 'use-immer'
-import { useQueryParam } from 'use-query-params'
 import { Button } from '../../../components/Button'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, StyledModalScroll } from '../../modal/styles'
@@ -14,7 +14,9 @@ import { findById } from '../file.utils'
 import { CustomDataNode, IFile } from '../files.types'
 
 export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
-  const [folderId] = useQueryParam<string | undefined>('folder_id')
+  const [searchParams] = useSearchParams()
+  const folderId = searchParams.get('folder_id') ?? undefined
+
   const { isShown, setShowModal } = useModal()
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [treeData, setTreeData] = useImmer<CustomDataNode[]>([

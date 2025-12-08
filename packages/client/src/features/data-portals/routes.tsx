@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { useToastWSHandler } from '../../hooks/useToastWSHandler'
 import DataPortalsListPage from './list/DataPortalsListPage'

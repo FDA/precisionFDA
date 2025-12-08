@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { DataPortal } from './types'
@@ -36,7 +36,7 @@ const CardName = styled.div`
   line-height: 1.2;
   margin-bottom: 12px;
   text-wrap: pretty;
-  `
+`
 
 const CardDesc = styled.div`
   font-size: 14px;

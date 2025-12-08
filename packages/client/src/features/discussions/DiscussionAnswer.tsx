@@ -10,13 +10,13 @@ export const DiscussionAnswer = ({
   canReply,
   answer,
   currentUserId,
-  isLead,
+  isLead = false,
   scope,
 }: {
   canEdit: boolean
   canReply: boolean
   answer: Answer
-  currentUserId: number
+  currentUserId?: number
   isLead: boolean
   scope: NoteScope
 }) => {

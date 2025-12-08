@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown } from '../../components/Markdown'
@@ -28,7 +28,7 @@ import {
   Title,
   Topbox,
 } from '../home/show.styles'
-import { EmitScope, HomeScope } from '../home/types'
+import { HomeScope } from '../home/types'
 import { getBasePath } from '../home/utils'
 import { AppExecutionsList } from './AppExecutionsList'
 import { SpecTab } from './SpecTab'
@@ -36,6 +36,8 @@ import { IApp } from './apps.types'
 import { StyledMarkdownAppShow } from './form/styles'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
+import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
+import { getHomeScopeFromServerScope } from '../home/getHomeScopeFromServerScope'
 
 const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(app.scope)
@@ -78,7 +80,7 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
     })
   }
 
-  const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
+  const scopeParamLink = `?scope=${getHomeScopeFromServerScope(app.scope, app.featured)}`
 
   const list = columns.map(e => (
     <MetadataItem key={e.header}>
@@ -87,7 +89,7 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
         <MetadataVal data-testid={e.dataTestId}>
           <Link to={`/home/apps${scopeParamLink}`}>
             {/* @ts-expect-error dynamic key */}
-            {homeScope === 'featured' ? 'Featured' : app[e.value]}
+            {app.featured ? 'Featured' : app[e.value]}
           </Link>
         </MetadataVal>
       ) : e.link ? (
@@ -163,25 +165,25 @@ const DetailActionsDropdown = ({
 }
 
 export const AppsShow = ({
+  appUid,
   spaceId,
-  emitScope,
-  homeScope,
   isContributorOrHigher,
+  homeContext = defaultHomeContext
 }: {
-  homeScope?: HomeScope
+  appUid: string
   spaceId?: string
-  emitScope?: EmitScope
   isContributorOrHigher?: boolean
+  homeContext?: HomeScopeContextValue
 }) => {
+  const { isHome, homeScopeChangeHandler, homeScope } = homeContext
   const location = useLocation()
-  const { appUid } = useParams<{ appUid: string }>()
-  const { data, isLoading } = useFetchAppQuery(appUid!)
+  const { data, isLoading, isFetched } = useFetchAppQuery(appUid!)
 
   useEffect(() => {
-    if (data) {
-      if (emitScope) emitScope(data.app.scope, data.app.featured)
+    if (isHome && data) {
+      homeScopeChangeHandler(data.app.scope, data.app.featured)
     }
-  }, [data])
+  }, [isFetched])
 
   const app = data?.app
   const meta = data?.meta

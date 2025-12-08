@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Loader } from '../../components/Loader'
 import { usePaginationState } from '../../hooks/usePaginationState'
 import {

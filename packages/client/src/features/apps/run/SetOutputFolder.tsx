@@ -22,7 +22,7 @@ export const SetOutputFolder = ({
   spec,
   setShowModal,
 }: {
-  control: Control<RunJobFormType>
+  control: Control<RunJobFormType, unknown, unknown>
   isSubmitting: boolean
   spec: AppSpec
   setShowModal: (val: boolean) => void

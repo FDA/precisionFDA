@@ -9,7 +9,7 @@ import {
   Topbox,
   TopLeft,
 } from '../styles'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import Table from '../../../components/Table'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { hidePagination, Pagination } from '../../../components/Pagination'

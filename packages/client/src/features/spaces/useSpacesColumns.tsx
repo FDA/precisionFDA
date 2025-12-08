@@ -1,6 +1,6 @@
 import { Column, ColumnDef } from '@tanstack/react-table'
 import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { SwitchButton } from '../../components/Button'
 import SelectFilter, { selectFilterFn } from '../../components/Table/components/SelectFilter'

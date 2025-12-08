@@ -7,7 +7,7 @@ const SCOPE_DICT: Record<string, HomeScope> = {
   'spaces': 'spaces',
 }
 
-export function getHomeScopeFromServerScope(serverScope: ServerScope, feature: boolean): HomeScope {
+export function getHomeScopeFromServerScope(serverScope: ServerScope, feature?: boolean): HomeScope {
   let key: string = serverScope || 'private'
   if (serverScope === 'public' && feature) {
     key = 'featured'

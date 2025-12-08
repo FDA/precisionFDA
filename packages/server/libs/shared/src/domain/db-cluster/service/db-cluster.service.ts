@@ -143,7 +143,7 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
 
   public buildCommonFilters(pagination: DbClusterPaginationDTO): ObjectFilterQuery<DbCluster> {
     const where: ObjectFilterQuery<DbCluster> = {}
-    const { name, status, type, instance, tags } = pagination.filters ?? {}
+    const { name, status, engine, instance, tags } = pagination.filters ?? {}
 
     if (name) {
       where.name = { $like: `%${name}%` }
@@ -152,9 +152,9 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
       const statusArr = this.getMatchedEnumValues(STATUS, status)
       where.status = { $in: statusArr }
     }
-    if (type) {
-      const typeArr = this.getMatchedEnumValues(ENGINE, type)
-      where.engine = { $in: typeArr }
+    if (engine) {
+      const engineArr = this.getMatchedEnumValues(ENGINE, engine)
+      where.engine = { $in: engineArr }
     }
     if (instance) {
       where.dxInstanceClass = { $like: `%${instance}%` }

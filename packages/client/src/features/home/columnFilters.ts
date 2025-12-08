@@ -5,6 +5,7 @@ export const columnFilters = {
   state: 'string',
   engine: 'string',
   dx_instance_class: 'string',
+  dxInstanceClass: 'string',
   tags: 'string',
   status: 'string',
   featured: 'string',

@@ -20,7 +20,7 @@ export function SelectSpaceScope<T extends { scope: SelectType }>({
   selectableSpaces,
   errors,
 }: {
-  control: Control<T>
+  control: Control<T, unknown, unknown>
   isSubmitting: boolean
   selectableSpaces: SelectableSpace[] | undefined
   errors: FieldErrors<T>

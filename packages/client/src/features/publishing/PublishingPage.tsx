@@ -1,8 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'react-toastify'
-import { StringParam, useQueryParam } from 'use-query-params'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { EntityIcon } from '../../components/EntityIcon'
@@ -152,13 +151,16 @@ const PublishingForm = ({ identifier, treeRoot }: { identifier: string; treeRoot
 }
 
 const PublishingPage = () => {
-  const [identifier] = useQueryParam('identifier', StringParam)
-  let [entityType] = useQueryParam('type', StringParam)
+  const [searchParams] = useSearchParams()
+  const identifier = searchParams.get('identifier')
+  let entityType = searchParams.get('type')
+
   if (!entityType) {
     entityType = getEntityTypeFromIdentifier(identifier!)
   }
 
   const { data: treeRoot, isLoading, isError } = usePublishingTreeRootQuery(identifier!, entityType)
+
   if (isLoading) {
     return <HomeLoader />
   }

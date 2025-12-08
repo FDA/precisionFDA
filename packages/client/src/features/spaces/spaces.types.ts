@@ -128,6 +128,7 @@ export interface ISpaceV2 {
 export const columnFilters = {
   name: 'string',
   id: 'number',
+  spaceGroupId: 'number',
   description: 'string',
   state: 'string',
   hidden: 'string',

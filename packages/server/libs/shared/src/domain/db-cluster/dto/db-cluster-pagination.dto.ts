@@ -20,7 +20,7 @@ class DbClusterFilter {
   @IsOptional()
   @IsString()
   @IsIn(allowedEngines)
-  type?: string
+  engine?: string
 
   @IsOptional()
   @IsString()

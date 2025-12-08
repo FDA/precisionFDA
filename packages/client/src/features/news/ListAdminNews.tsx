@@ -1,9 +1,8 @@
 import { format } from 'date-fns'
 import React from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router'
 import { Tooltip } from 'react-tooltip'
 import styled, { css } from 'styled-components'
-import { StringParam, useQueryParam } from 'use-query-params'
 import { Button, TransparentButton } from '../../components/Button'
 import ExternalLink from '../../components/Controls/ExternalLink'
 import { ArrowLeftIcon } from '../../components/icons/ArrowLeftIcon'
@@ -128,8 +127,18 @@ export function SortableItem({ id, newsItem }: { id: number; newsItem: NewsItem 
 }
 
 function ListAdminNews() {
-  const [typeParam, setTypeParam] = useQueryParam('type', StringParam)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const typeParam = searchParams.get('type')
   const { data, isLoading } = useNewsAdminAllRequest({ type: typeParam })
+
+  const setType = (type: string | null) => {
+    if (type) {
+      searchParams.set('type', type)
+    } else {
+      searchParams.delete('type')
+    }
+    setSearchParams(searchParams, { replace: true })
+  }
 
   return (
     <UserLayout mainScroll>
@@ -142,13 +151,13 @@ function ListAdminNews() {
               <Button data-variant="primary">Add News Item</Button>
             </Link>
             <ButtonRow>
-              <TypeSelect selected={!typeParam} onClick={() => setTypeParam(null, 'replaceIn')}>
+              <TypeSelect selected={!typeParam} onClick={() => setType(null)}>
                 All
               </TypeSelect>
-              <TypeSelect selected={typeParam === 'publication'} onClick={() => setTypeParam('publication', 'replaceIn')}>
+              <TypeSelect selected={typeParam === 'publication'} onClick={() => setType('publication')}>
                 Publications
               </TypeSelect>
-              <TypeSelect selected={typeParam === 'article'} onClick={() => setTypeParam('article', 'replaceIn')}>
+              <TypeSelect selected={typeParam === 'article'} onClick={() => setType('article')}>
                 Articles
               </TypeSelect>
             </ButtonRow>
@@ -156,8 +165,8 @@ function ListAdminNews() {
         </PageHeader>
 
         <StyledList>
-          {isLoading ? <Loader /> : (data as NewsItem[])?.map(i => <SortableItem key={i.id} id={i.id} newsItem={i} />)}
-          {!isLoading && (data as NewsItem[])?.length === 0 && <div>No news items found</div>}
+          {isLoading ? <Loader /> : data?.map(i => <SortableItem key={i.id} id={i.id} newsItem={i} />)}
+          {data?.length === 0 && <div>No news items found</div>}
         </StyledList>
         <Tooltip id="news-list-tips" />
       </NewsPageContainerMargin>

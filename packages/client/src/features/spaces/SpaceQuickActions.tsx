@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'

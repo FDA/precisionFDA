@@ -1,11 +1,11 @@
 import React from 'react'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
 import { RichText } from '../styles'
-import { Link } from 'react-router-dom'
 
 const StyledRichText = styled(RichText)`
   padding-top: 32px;
@@ -23,9 +23,9 @@ const Security = () => {
           <p>Last modified: March 15, 2025</p>
           <hr />
           <p>
-            This Portal and Platform have a FISMA &ldquo;Moderate&rdquo; authorization to operate as granted by the FDA. This FISMA moderate
-            authorization is dependent on DNAnexus&apos; FedRAMP &ldquo;Moderate&rdquo; authorization to operate under the sponsorship of HHS as
-            documented{' '}
+            This Portal and Platform have a FISMA &ldquo;Moderate&rdquo; authorization to operate as granted by the FDA. This
+            FISMA moderate authorization is dependent on DNAnexus&apos; FedRAMP &ldquo;Moderate&rdquo; authorization to operate
+            under the sponsorship of HHS as documented{' '}
             <a href="https://marketplace.fedramp.gov/products/FR1814557199" target="_blank" rel="noreferrer">
               here
             </a>

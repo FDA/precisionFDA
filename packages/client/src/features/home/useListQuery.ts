@@ -6,8 +6,8 @@ import { Params, OrderBy } from './utils'
 
 interface IUseListQuery<T> {
   spaceId?: string
-  scope?: HomeScope | string
-  fetchList: (filter: IFilter[], params: Params) => Promise<T>
+  scope?: HomeScope
+  fetchList: (filter: IFilter[], params: Params, scope?: HomeScope) => Promise<T>
   resource: APIResource
   params?: Params
   sort?: SortParams
@@ -22,6 +22,7 @@ interface IUseListQuery<T> {
 export function useListQuery<T>({ 
   fetchList, 
   resource, 
+  scope,
   params = {}, 
   queryOptions, 
   pagination = {}, 
@@ -33,6 +34,7 @@ export function useListQuery<T>({
   return useQuery<T>({
     queryKey: [
       resource, 
+      scope,
       toArrayFromObject(filter), 
       pagination?.page, 
       pagination?.perPage, 
@@ -47,7 +49,7 @@ export function useListQuery<T>({
         perPage: pagination?.perPage,
         sortBy, 
         ...params,
-      }),
+      }, scope),
     refetchOnWindowFocus: false,
     ...queryOptions,
   })

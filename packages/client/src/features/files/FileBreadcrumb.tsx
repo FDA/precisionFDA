@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core'
 import React, { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Pill } from '../../components/Pill'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { HomeIcon } from '../../components/icons/HomeIcon'

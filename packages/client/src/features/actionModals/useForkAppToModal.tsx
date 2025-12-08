@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Button } from '../../components/Button'
 import { getSpaceIdFromScope } from '../../utils'
 import { IApp } from '../apps/apps.types'

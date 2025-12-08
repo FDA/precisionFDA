@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled, { css } from 'styled-components'
 import { breakPoints } from '../../styles/theme'
 import { compactScrollBarV2 } from '../Page/styles'

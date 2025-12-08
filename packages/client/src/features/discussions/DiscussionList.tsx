@@ -7,7 +7,7 @@ import {
   VisibilityState,
 } from '@tanstack/react-table'
 import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import { Button } from '../../components/Button'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ContentFooter } from '../../components/Page/ContentFooter'
@@ -87,12 +87,12 @@ const DiscussionListTable = ({
 
 export const DiscussionList = ({
   spaceId,
-  scope,
-  canCreateDiscussion,
+  homeScope,
+  canCreateDiscussion = false,
 }: {
   spaceId?: number
-  scope?: HomeScope
-  canCreateDiscussion?: boolean
+  homeScope?: HomeScope
+  canCreateDiscussion: boolean
 }) => {
   const {
     query,
@@ -112,7 +112,7 @@ export const DiscussionList = ({
     fetchList: fetchDiscussionsRequest,
     resource: 'discussions',
     params: {
-      entityScope: spaceId ? `space-${spaceId}` : scope === 'spaces' ? 'spaces' : 'everybody',
+      entityScope: spaceId ? `space-${spaceId}` : homeScope === 'spaces' ? 'spaces' : 'everybody',
     },
   })
 
@@ -140,7 +140,7 @@ export const DiscussionList = ({
         </ActionsRow>
       </ResourceHeader>
       <DiscussionListTable
-        homeScope={scope}
+        homeScope={homeScope}
         discussions={query?.data?.data ?? []}
         isLoading={query.isLoading}
         selectedRows={selectedIndexes}
@@ -162,8 +162,8 @@ export const DiscussionList = ({
           perPage={query.data?.meta.pageSize}
           isHidden={false}
           showPerPage={false}
-          setPage={p => setPageParam(p, 'replaceIn')}
-          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+          setPage={p => setPageParam(p, true)}
+          onPerPageSelect={p => setPerPageParam(p, true)}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>

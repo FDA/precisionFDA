@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core'
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router'
 import styled, { css } from 'styled-components'
 import { Button, IconButton, TransparentButton } from '../../components/Button'
 import { Menu } from '../../components/Menu'

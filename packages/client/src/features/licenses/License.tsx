@@ -10,7 +10,7 @@ const StyledTitle = styled.div`
   padding-left: 16px;
   padding-top: 20px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid var(--c-layout-border-200);
 `
 
 const StyledLicense = styled.div``

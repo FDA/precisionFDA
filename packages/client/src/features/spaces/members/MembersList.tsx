@@ -144,12 +144,11 @@ export const MembersList = ({ space }: { space: ISpace }) => {
               <div />
               <Menu
                 trigger={
-                  <Menu.Trigger>
-                    <ActionsButton
-                      data-testid="members-actions-button"
-                      disabled={selectedMembers.length === 0}
-                    />
-                  </Menu.Trigger>
+                  <ActionsButton
+                    as={Menu.Trigger}
+                    data-testid="members-actions-button"
+                    disabled={selectedMembers.length === 0}
+                  />
                 }
               >
                 <ActionsMenuContent actions={actions} />

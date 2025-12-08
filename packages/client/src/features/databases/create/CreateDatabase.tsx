@@ -4,7 +4,7 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
@@ -77,7 +77,7 @@ export const CreateDatabase = ({ spaceId, homeScope }: { spaceId?: number, homeS
   })
 
   const backPath = getBackPathNext({
-    location, 
+    location,
     resourceLocation: 'databases',
     homeScope,
     spaceId,
@@ -103,7 +103,7 @@ export const CreateDatabase = ({ spaceId, homeScope }: { spaceId?: number, homeS
     },
   })
 
-  
+
   const queryClient = useQueryClient()
   const createDatabaseMutation = useMutation({
     mutationKey: ['create-database'],
@@ -158,9 +158,9 @@ export const CreateDatabase = ({ spaceId, homeScope }: { spaceId?: number, homeS
     )
   }
   const dbInstanceOptions = allowedInstances.data?.map((option) => ({
-    ...option,
-    label: replaceNbspSubstring(option.label, 4),
-  })) ?? []
+      ...option,
+      label: replaceNbspSubstring(option.label, 4),
+    })) ?? []
   return (
     <>
       <StyledBackLink linkTo={backPath}>

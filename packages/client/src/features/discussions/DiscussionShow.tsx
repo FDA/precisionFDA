@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import { Tooltip } from 'react-tooltip'
 import { useToggleFollowDiscussionMutation } from '../../api/mutations/discussion'
@@ -13,7 +13,6 @@ import { Button } from '../../components/Button'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { PencilIcon } from '../../components/icons/PencilIcon'
 import { pluralize } from '../../utils/formatting'
-import { useAuthUser } from '../auth/useAuthUser'
 import { HomeLoader, NotFound } from '../home/show.styles'
 import { ISpace } from '../spaces/spaces.types'
 import { DiscussionAnswer } from './DiscussionAnswer'
@@ -23,6 +22,8 @@ import { Attachment } from './discussions.types'
 import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { EditDiscussionTitle } from './form/EditDiscussionTitle'
 import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
+import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
+import { IUser } from '../../types/user'
 
 interface DiscussionContextType {
   attachments: Record<number, Attachment[]>
@@ -48,17 +49,30 @@ const DiscussionProvider = ({ children, value }: { children: ReactNode; value: D
   <DiscussionContext.Provider value={value}>{children}</DiscussionContext.Provider>
 )
 
-export const DiscussionShow = ({ space }: { space?: ISpace }) => {
+export const DiscussionShow = ({
+  discussionId,
+  space,
+  user,
+  homeContext = defaultHomeContext
+}: {
+  discussionId: number,
+  space?: ISpace,
+  user: IUser,
+  homeContext?: HomeScopeContextValue
+}) => {
+  const { isHome, homeScopeChangeHandler } = homeContext
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const markdownInputRef = useRef<HTMLInputElement | null>(null)
-  const { discussionId: discussionIdParam, spaceId } = useParams<{ discussionId: string; spaceId: string }>()
-  const discussionId = parseInt(discussionIdParam!, 10)
-  const user = useAuthUser()
 
   const { data: discussion, isLoading, error } = useFetchDiscussionQuery(discussionId)
 
+  useEffect(() => {
+    if (isHome && discussion) {
+      homeScopeChangeHandler(discussion.scope)
+    }
+  }, [discussion])
   const attachmentsQuery = useFetchDiscussionAttachmentsQuery(discussion!)
 
   useEffect(() => {
@@ -113,11 +127,11 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
     })
   }
 
-  const backPath = space ? `/spaces/${spaceId}/discussions` : '/home/discussions?scope=everybody'
+  const backPath = space ? `/spaces/${space.id}/discussions` : '/home/discussions?scope=everybody'
   const canReply = space?.current_user_membership.role !== 'viewer'
   const isLead = space?.current_user_membership.role === 'lead'
   const canUserEdit = (noteUserId: number) => user?.id === noteUserId || isLead || (user?.can_administer_site ?? false)
-  const canUserAnswer = !discussion.answers.map(a => a.user.id).includes(user!.id)
+  const canUserAnswer = user ? !discussion.answers.map(a => a.user.id).includes(user.id) : false
 
   return (
     <DiscussionProvider value={{ attachments: attachments || {} }}>

@@ -1,18 +1,14 @@
 import React, { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useLocation, useParams } from 'react-router-dom'
-import Menu from '../../components/Menu/Menu'
 import { Loader } from '../../components/Loader'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
-import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
 import { RESOURCE_LABELS } from '../../types/user'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
-  ActionsButton,
   Description,
-  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -20,56 +16,59 @@ import {
   MetadataRow,
   MetadataSection,
   MetadataVal,
+  MetadataValBreakAll,
   NotFound,
+  ResourceHeader,
   Title,
   Topbox,
-  MetadataValBreakAll,
 } from '../home/show.styles'
 import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
-import { EmitScope, HomeScope, NOTIFICATION_ACTION } from '../home/types'
+import { HomeScope, NOTIFICATION_ACTION } from '../home/types'
 import { DBStatus } from './DbStatus'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { getSpaceIdFromScope } from '../../utils'
 import { format } from 'date-fns'
 import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 import { ActionsMenu } from '../../components/Menu'
+import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
+import { Link, useLocation } from 'react-router'
 
 const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(db.scope)
   return (
-  <MetadataSection>
-    <MetadataRow>
-      <MetadataItem>
-        <MetadataKey>Location</MetadataKey>
-        <MetadataVal data-testid="db-location">
+    <MetadataSection>
+      <MetadataRow>
+        <MetadataItem>
+          <MetadataKey>Location</MetadataKey>
+          <MetadataVal data-testid="db-location">
           <Link target="_blank" to={ spaceId ? `/spaces/${spaceId}/databases` : `/home/databases?scope=${homeScope?.toLowerCase()}`}>
-            {homeScope === 'featured' ? 'Featured' : db.location}
-          </Link>
-        </MetadataVal>
-      </MetadataItem>
-      <MetadataItem>
-        <MetadataKey>ID</MetadataKey>
-        <MetadataVal data-testid="db-id">{db.uid}</MetadataVal>
-      </MetadataItem>
-      <MetadataItem>
-        <MetadataKey>Added By</MetadataKey>
-        <MetadataVal data-testid="db-added-by">
-          {' '}
-          <Link target="_blank" to={`/users/${db.addedBy}`}>
-            {db.addedByFullname}
-          </Link>
-        </MetadataVal>
-      </MetadataItem>
-      <MetadataItem>
-        <MetadataKey>Created On</MetadataKey>
-        <MetadataVal data-testid="db-created-on">{format(new Date(db.createdAtDateTime), 'yyyy-MM-dd HH:mm:ss')}</MetadataVal>
-      </MetadataItem>
-    </MetadataRow>
-    <MetadataRow>
-      <MetadataItem>
-        <MetadataKey>Status</MetadataKey>
+              {homeScope === 'featured' ? 'Featured' : db.location}
+            </Link>
+          </MetadataVal>
+        </MetadataItem>
+        <MetadataItem>
+          <MetadataKey>ID</MetadataKey>
+          <MetadataVal data-testid="db-id">{db.uid}</MetadataVal>
+        </MetadataItem>
+        <MetadataItem>
+          <MetadataKey>Added By</MetadataKey>
+          <MetadataVal data-testid="db-added-by">
+            {' '}
+            <Link target="_blank" to={`/users/${db.addedBy}`}>
+              {db.addedByFullname}
+            </Link>
+          </MetadataVal>
+        </MetadataItem>
+        <MetadataItem>
+          <MetadataKey>Created On</MetadataKey>
+          <MetadataVal data-testid="db-created-on">{format(new Date(db.createdAtDateTime), 'yyyy-MM-dd HH:mm:ss')}</MetadataVal>
+        </MetadataItem>
+      </MetadataRow>
+      <MetadataRow>
+        <MetadataItem>
+          <MetadataKey>Status</MetadataKey>
         <MetadataVal data-testid="db-status"><DBStatus status={db.status} /></MetadataVal>
       </MetadataItem>
       <MetadataItem>
@@ -97,13 +96,13 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
       <MetadataItem>
         <MetadataKey>Status Updated</MetadataKey>
         <MetadataVal data-testid="db-status-updated">{format(new Date(db.statusUpdatedDateTime), 'yyyy-MM-dd HH:mm:ss')}</MetadataVal>
-      </MetadataItem>
-      <MetadataItem>
-        <MetadataKey>Host Endpoint</MetadataKey>
-        <MetadataValBreakAll data-testid="db-host">{db.host}</MetadataValBreakAll>
-      </MetadataItem>
-    </MetadataRow>
-  </MetadataSection>
+        </MetadataItem>
+        <MetadataItem>
+          <MetadataKey>Host Endpoint</MetadataKey>
+          <MetadataValBreakAll data-testid="db-host">{db.host}</MetadataValBreakAll>
+        </MetadataItem>
+      </MetadataRow>
+    </MetadataSection>
 )}
 
 const DetailActionsDropdown = ({ db }: { db: IDatabase; refetch?: () => void }) => {
@@ -123,14 +122,25 @@ const DetailActionsDropdown = ({ db }: { db: IDatabase; refetch?: () => void }) 
   )
 }
 
-export const DatabaseShow = ({ emitScope, homeScope, spaceId }: { homeScope?: HomeScope, emitScope?: EmitScope, spaceId?: number }) => {
-  const { uid } = useParams<{ uid: string }>()
+export const DatabaseShow = ({
+  databaseId,
+  spaceId,
+  homeContext = defaultHomeContext
+}: {
+  databaseId: string
+  spaceId?: number
+  homeContext?: HomeScopeContextValue
+}) => {
+  const { isHome, homeScope, homeScopeChangeHandler } = homeContext
+  
   const location = useLocation()
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['dbclusters', uid],
+    queryKey: ['dbclusters', databaseId],
     queryFn: () =>
-      fetchDatabaseRequest(uid!).then(dbCluster => {
-        if (emitScope) emitScope(dbCluster.scope, dbCluster.featured)
+      fetchDatabaseRequest(databaseId).then(dbCluster => {
+        if (isHome) {
+          homeScopeChangeHandler(dbCluster.scope)
+        }
         return dbCluster
       }),
   })
@@ -153,7 +163,7 @@ export const DatabaseShow = ({ emitScope, homeScope, spaceId }: { homeScope?: Ho
   if (isLoading) return <HomeLoader />
 
   const backPath = getBackPathNext({
-    location, 
+    location,
     resourceLocation: 'databases',
     homeScope,
     spaceId,

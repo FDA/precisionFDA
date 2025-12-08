@@ -20,7 +20,7 @@ export const SelectContext = ({
   selectableContexts,
   errors,
 }: {
-  control: Control<RunJobFormType>
+  control: Control<RunJobFormType, unknown, unknown>
   isSubmitting: boolean
   selectableContexts: SelectType[] | undefined,
   errors: FieldErrors<RunJobFormType>,

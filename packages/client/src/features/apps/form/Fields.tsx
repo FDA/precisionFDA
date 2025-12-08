@@ -496,14 +496,13 @@ export const SelectIOClass = ({
     <Menu
       positioner={{ side: 'bottom', align: 'start' }}
       trigger={
-        <Menu.Trigger>
-          <StyledButton
-            type="button"
-          >
-            <PlusIcon height={12} />
-            {children}
-          </StyledButton>
-        </Menu.Trigger>
+        <StyledButton
+          as={Menu.Trigger}
+          type="button"
+        >
+          <PlusIcon height={12} />
+          {children}
+        </StyledButton>
       }
     >
       <StyledDropMenuLinks

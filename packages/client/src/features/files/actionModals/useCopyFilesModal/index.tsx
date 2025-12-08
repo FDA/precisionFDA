@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { toast } from 'react-toastify'
 import { Button } from '../../../../components/Button'
 import { FileCheckIcon } from '../../../../components/icons/FileCheckIcon'

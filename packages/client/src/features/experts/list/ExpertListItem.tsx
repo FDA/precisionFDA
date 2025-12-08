@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Button } from '../../../components/Button'
 import { Content, ItemBody, Title } from '../../../components/Public/styles'
 import { Expert } from '../types'

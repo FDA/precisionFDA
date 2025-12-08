@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { getBasePathFromScope } from '../home/utils'
@@ -109,10 +109,10 @@ const Table = ({ title, config, dataTestId }: { title: string; config: Partial<R
             <>
               {Array.isArray(elementConfig?.value) && elementConfig?.value.map((name: unknown, index: number) => (
                 <Link key={Array.isArray(elementConfig.link) ? elementConfig.link[index] : `${index}`} to={Array.isArray(elementConfig.link) ? elementConfig.link[index] : ''} className="cont link-file">
-                  <FileIcon height={12} />
-                  {String(name)}
-                </Link>
-              ))}
+                    <FileIcon height={12} />
+                    {String(name)}
+                  </Link>
+                ))}
             </>
           )
         default:

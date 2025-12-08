@@ -1,12 +1,10 @@
 import { UseQueryOptions } from '@tanstack/react-query'
-import { useEffect } from 'react'
-import { IColumnWidthLocalStorage, useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
+import { useEffect, useEffectEvent } from 'react'
+import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByParams } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { usePrevious } from '../../hooks/usePrevious'
 import { createLocationKey } from '../../utils'
-import { SortByParams } from '../../types/sorting'
 import { columnFilters } from './columnFilters'
 import { APIResource, HomeScope, IFilter, IMeta, MetaV2 } from './types'
 import { useFilterParams } from './useFilterState'
@@ -16,73 +14,49 @@ import { Params } from './utils'
 
 export type FetchListFn<T = unknown> = (filter: IFilter[], params: Params) => Promise<T>
 
-export interface IListProps {
-  pagination: ReturnType<typeof usePaginationParams>
-  sort: SortByParams
-  filter: Record<string, string>
-  colWidth: IColumnWidthLocalStorage
-}
-
-type ListType = { [key: string]: unknown, meta: IMeta | MetaV2 }
+type ListType = { [key: string]: unknown; meta: IMeta | MetaV2 }
 interface IUseList<T> {
-  spaceId?: string,
-  scope?: HomeScope,
-  fetchList: FetchListFn<T>,
-  resource: APIResource,
+  spaceId?: string
+  scope?: HomeScope
+  fetchList: FetchListFn<T>
+  resource: APIResource
   params?: Params
   queryOptions?: UseQueryOptions<T>
 }
 
-const filterReset: Record<string, undefined> = {}
-Object.keys(columnFilters).forEach(v => {
-  filterReset[v] = undefined
-})
 
-
-export function useList<T extends ListType>({ fetchList, resource, params = {}}: IUseList<T>) {
+export function useList<T extends ListType>({ fetchList, resource, params = {}, scope }: IUseList<T>) {
   const locationKey = createLocationKey(resource, params?.spaceId)
-  const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
+  const pagination = usePaginationParams()
   const { selectedIndexes, setSelectedIndexes } = useListSelect()
   const { sortBy, sort, setSortBy } = useOrderByParams({ onSetSortBy: () => setSelectedIndexes({}) })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
 
-  const resetSelected = () => setSelectedIndexes({})
+  const resetSelected = useEffectEvent(() => setSelectedIndexes({}))
 
   const { filterQuery, setSearchFilter, setFilterParam } = useFilterParams({
     filters: columnFilters,
-    onSetFilter: () => {
-      setSelectedIndexes({})
-      setPageParam(1, 'replaceIn')
-    },
   })
 
   useEffect(() => {
-    // Reset selected rows if pageParam, perPageParam, sort, filterQuery, scope, spaceId change 
     resetSelected()
-  }, [pageParam, perPageParam, sort, params.scope, params.spaceId])
-
-  const prevScope = usePrevious(params.scope)
-  useEffect(() => {
-    // skip first render
-    if (prevScope) {
-      setPageParam(undefined, 'replaceIn')
-      setFilterParam(filterReset, 'replaceIn')
-    }
-  }, [params.scope])
+  }, [JSON.stringify(filterQuery), JSON.stringify(pagination), JSON.stringify(sort), scope, params.spaceId])
 
   const query = useListQuery<T>({
     fetchList,
     resource,
-    pagination: { page: pageParam, perPage: perPageParam },
+    pagination: { page: pagination.pageParam, perPage: pagination.perPageParam },
     sort,
     filter: filterQuery,
+    scope,
     params,
   })
 
   return {
-    setPerPageParam,
-    setPageParam,
+    setPerPageParam: pagination.setPerPageParam,
+    setPageParam: pagination.setPageParam,
+    perPageParam: pagination.perPageParam,
     setSearchFilter,
     setSelectedIndexes,
     resetSelected,
@@ -91,7 +65,6 @@ export function useList<T extends ListType>({ fetchList, resource, params = {}}:
     query,
     selectedIndexes,
     filterQuery,
-    perPageParam,
     saveColumnResizeWidth,
     colWidths,
     columnVisibility,

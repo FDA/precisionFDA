@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
 import { propertiesColumnDef, selectColumnDef } from '../../components/Table/selectColumnDef'

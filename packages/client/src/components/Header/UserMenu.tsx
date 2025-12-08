@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import Menu from '../Menu/Menu'
 import { IUser } from '../../types/user'
 import { StyledLink } from './styles'

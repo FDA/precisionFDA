@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled, { css } from 'styled-components'
 import { NavLink } from '../../components/NavLink'
 import { BackLink } from '../../components/Page/PageBackLink'

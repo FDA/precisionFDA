@@ -1,8 +1,8 @@
 import React from 'react'
-import { Navigate, NavigateProps, generatePath, useParams } from 'react-router-dom'
+import { generatePath, Navigate, NavigateProps, useParams } from 'react-router'
 
 interface Props extends NavigateProps {
-  to: string;
+  to: string
 }
 
 const NavigateWithParams: React.FC<Props> = ({ to, ...props }) => {

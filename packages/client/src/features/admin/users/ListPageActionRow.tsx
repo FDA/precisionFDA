@@ -1,6 +1,6 @@
 import { useMutation, UseQueryResult } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import { Button } from '../../../components/Button'
 import Menu from '../../../components/Menu/Menu'
@@ -22,7 +22,7 @@ const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof
   (props, ref) => {
     return (
       // @ts-expect-error ref type mismatch between Dropdown and Button components
-      <Button data-variant="primary" ref={ref} {...props}>
+      <Button as="div" data-variant="primary" ref={ref} {...props}>
         Resources &nbsp;
         <ArrowIcon />
       </Button>

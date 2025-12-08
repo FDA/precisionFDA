@@ -1,8 +1,6 @@
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
-import { BrowserRouter } from 'react-router-dom'
-import { QueryParamProvider } from 'use-query-params'
-import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
+import { BrowserRouter } from 'react-router'
 import GlobalStyle from '../styles/global'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
 import { ColorModeProvider } from '../utils/ThemeContext'
@@ -23,7 +21,7 @@ export function StorybookProviders({ children }: React.PropsWithChildren) {
         <GlobalStyle railsAlertHeight={0} />
         <QueryClientProvider client={queryClient}>
           <AlertDismissedProvider>
-            <QueryParamProvider adapter={ReactRouter6Adapter}>{children}</QueryParamProvider>
+            {children}
           </AlertDismissedProvider>
         </QueryClientProvider>
       </BrowserRouter>

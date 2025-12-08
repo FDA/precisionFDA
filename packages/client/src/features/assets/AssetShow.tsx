@@ -1,17 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ActionsMenu } from '../../components/Menu'
+import { Link } from 'react-router'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
-import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
-import { ActionsMenuContent } from '../home/ActionMenuContent'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink } from '../home/home.styles'
 import { License } from '../licenses/License'
 import {
   ActionsButton,
-  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -20,10 +17,11 @@ import {
   MetadataSection,
   MetadataVal,
   NotFound,
+  ResourceHeader,
   Title,
   Topbox,
 } from '../home/show.styles'
-import { EmitScope, HomeScope } from '../home/types'
+import { HomeScope } from '../home/types'
 import { ArchiveContents } from './ArchiveContents'
 import { fetchAsset } from './assets.api'
 import { IAsset } from './assets.types'
@@ -31,6 +29,9 @@ import { useAssetActions } from './useAssetSelectActions'
 import { ITab, TabsSwitch } from '../../components/TabsSwitch'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { Filler } from '../../components/Page/styles'
+import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
+import { ActionsMenu } from '../../components/Menu'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 
 const AssetActions = ({ homeScope, asset }: { homeScope?: HomeScope; asset: IAsset }) => {
   const { actions, modals } = useAssetActions({
@@ -49,14 +50,15 @@ const AssetActions = ({ homeScope, asset }: { homeScope?: HomeScope; asset: IAss
   )
 }
 
-export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; emitScope?: EmitScope }) => {
-  const { assetUid } = useParams<{ assetUid: string }>()
-
+export const AssetShow = ({ assetUid, homeContext = defaultHomeContext }: { assetUid: string; homeContext?: HomeScopeContextValue }) => {
+  const { homeScope, isHome, homeScopeChangeHandler } = homeContext
   const { data, isLoading } = useQuery({
     queryKey: ['asset', assetUid],
     queryFn: () =>
       fetchAsset(assetUid!).then(d => {
-        if (emitScope) emitScope(d.asset.scope, d.asset.featured)
+        if(isHome) {
+          homeScopeChangeHandler(d.asset.scope, d.asset.featured)
+        }
         return d
       }),
   })

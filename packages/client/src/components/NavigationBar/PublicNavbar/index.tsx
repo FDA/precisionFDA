@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import { onLogInWithSSO, useSiteSettingsQuery } from '../../../features/auth/useSiteSettingsQuery'
 import { Button } from '../../Button'
 import { PFDALogoDark, PFDALogoLight } from '../PFDALogo'
@@ -88,100 +88,100 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
     <>
       <StyledPublicNavbar>
         <PageContainer>
-        <div className="navbar-content">
-          <div className="brand-section">
-            <PFDALogoLight 
-              className={classNames('brand-logo', 'brand-logo-light', { 
-                hidden: !shouldShowLogo,
-              })}
-            />
+          <div className="navbar-content">
+            <div className="brand-section">
+              <PFDALogoLight
+                className={classNames('brand-logo', 'brand-logo-light', {
+                  hidden: !shouldShowLogo,
+                })}
+              />
             <PFDALogoDark 
               className="brand-logo brand-logo-dark" 
             />
-          </div>
-          
-          <nav className="desktop-nav" role="navigation" aria-label="Primary navigation">
+            </div>
+
+            <nav className="desktop-nav" role="navigation" aria-label="Primary navigation">
             <Link 
               to="/" 
               className={getNavLinkClassName('/')}
             >
-              Home
-            </Link>
+                Home
+              </Link>
             <Link 
               to="/challenges" 
               className={getNavLinkClassName('/challenges')}
             >
-              Challenges
-            </Link>
+                Challenges
+              </Link>
             <Link 
               to="/news" 
               className={getNavLinkClassName('/news')}
             >
-              News
-            </Link>
+                News
+              </Link>
             <Link 
               to="/experts" 
               className={getNavLinkClassName('/experts')}
             >
-              Experts
-            </Link>
+                Experts
+              </Link>
             <a 
               href="/uniisearch" 
               target="_blank" 
               rel="noopener noreferrer"
               className="nav-link"
             >
-              UNII Search
-            </a>
+                UNII Search
+              </a>
             <a 
               href="/ginas/app/ui" 
               target="_blank" 
               rel="noopener noreferrer"
               className="nav-link"
             >
-              GSRS
-            </a>
-          </nav>
-          
-          <div className="desktop-actions">
+                GSRS
+              </a>
+            </nav>
+
+            <div className="desktop-actions">
             <Button 
               className="action-btn action-btn-secondary" 
               onClick={onRequestAccess}
             >
-              Request Access
-            </Button>
+                Request Access
+              </Button>
             <Button 
               className="action-btn"
               data-variant="primary" 
               onClick={onLogIn}
             >
-              Log In
-            </Button>
-            {data?.ssoButton.isEnabled && data.ssoButton.data && (
-              <Button 
-                className="action-btn"
-                data-variant="primary" 
-                onClick={() => onLogInWithSSO(data.ssoButton.data?.ssoUrl || '')}
-              >
-                Log In with SSO
+                Log In
               </Button>
-            )}
-          </div>
-
-          <button 
-            className="mobile-menu-trigger" 
-            onClick={toggleMobileMenu}
-            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={isMobileMenuOpen}
-            type="button"
-          >
-            <div className="hamburger-icon">
-              <div className={classNames('hamburger-line', 'line-1', { 'menu-open': isMobileMenuOpen })}></div>
-              <div className={classNames('hamburger-line', 'line-2', { 'menu-open': isMobileMenuOpen })}></div>
-              <div className={classNames('hamburger-line', 'line-3', { 'menu-open': isMobileMenuOpen })}></div>
+              {data?.ssoButton.isEnabled && data.ssoButton.data && (
+                <Button
+                  className="action-btn"
+                  data-variant="primary"
+                  onClick={() => onLogInWithSSO(data.ssoButton.data?.ssoUrl || '')}
+                >
+                  Log In with SSO
+                </Button>
+              )}
             </div>
-          </button>
-        </div>
+
+            <button
+              className="mobile-menu-trigger"
+              onClick={toggleMobileMenu}
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isMobileMenuOpen}
+              type="button"
+            >
+              <div className="hamburger-icon">
+                <div className={classNames('hamburger-line', 'line-1', { 'menu-open': isMobileMenuOpen })}></div>
+                <div className={classNames('hamburger-line', 'line-2', { 'menu-open': isMobileMenuOpen })}></div>
+                <div className={classNames('hamburger-line', 'line-3', { 'menu-open': isMobileMenuOpen })}></div>
+              </div>
+            </button>
+          </div>
         </PageContainer>
       </StyledPublicNavbar>
 
@@ -189,7 +189,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
         className={classNames({ 'menu-visible': isMobileMenuOpen })}
         onClick={closeMobileMenu}
       >
-        <section 
+        <section
           className={classNames('menu-container', { 'menu-visible': isMobileMenuOpen })}
           role="dialog"
           aria-modal="true"
@@ -206,7 +206,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
               ×
             </button>
           </div>
-          
+
           <nav className="menu-nav" role="navigation" aria-label="Mobile navigation">
             <Link 
               to="/" 
@@ -256,10 +256,10 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
               GSRS
             </a>
           </nav>
-          
+
           <div className="menu-actions">
-            <Button 
-              className="menu-action-btn" 
+            <Button
+              className="menu-action-btn"
               onClick={() => {
                 onRequestAccess()
                 closeMobileMenu()
@@ -267,9 +267,9 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
             >
               Request Access
             </Button>
-            <Button 
+            <Button
               className="menu-action-btn"
-              data-variant="primary" 
+              data-variant="primary"
               onClick={() => {
                 onLogIn()
                 closeMobileMenu()
@@ -278,9 +278,9 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
               Log In
             </Button>
             {data?.ssoButton.isEnabled && data.ssoButton.data && (
-              <Button 
+              <Button
                 className="menu-action-btn"
-                data-variant="primary" 
+                data-variant="primary"
                 onClick={() => {
                   onLogInWithSSO(data.ssoButton.data?.ssoUrl || '')
                   closeMobileMenu()

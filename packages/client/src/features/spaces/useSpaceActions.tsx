@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { Action } from '../home/action-types'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { ISpace } from './spaces.types'

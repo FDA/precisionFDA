@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { CloudResourcesConditionType, useCloudResourcesCondition } from '../hooks/useCloudResourcesCondition'
 
 type Props = {
@@ -34,5 +34,5 @@ export const CloudResourcesConditionalLink = ({ children, to, conditionType }: C
     <ConditionalLink to={to} isAllowed={isAllowed} onViolation={onViolation}>
       {children}
     </ConditionalLink>
-  )  
-}  
+  )
+}

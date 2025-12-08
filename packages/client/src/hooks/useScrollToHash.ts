@@ -1,10 +1,10 @@
 /*
- This hook gets the location hash from react-router-dom and
+ This hook gets the location hash from react-router and
  finds an id with the same name then scrolling to it.
 */
 
 import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 export const useScrollToHash = (dep?: unknown) => {
   const location = useLocation()

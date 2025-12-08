@@ -1,17 +1,11 @@
 import React from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Control, Controller, useForm, UseFormRegister, UseFormSetError } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import {
-  fetchLicensesOnWorkflow,
-  fetchWorkflow,
-  runWorkflow,
-  RunWorkflowInput,
-  RunWorkflowRequest,
-} from '../workflows.api'
+import { fetchLicensesOnWorkflow, fetchWorkflow, runWorkflow, RunWorkflowInput, RunWorkflowRequest } from '../workflows.api'
 import { InputOutput, IWorkflow, Stage } from '../workflows.types'
 import { InputNumber, InputText } from '../../../components/InputText'
 import { HomeLoader, NotFound, Title } from '../../home/show.styles'
@@ -58,13 +52,13 @@ const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[
   }
 
   stages?.flatMap(stage => stage.inputs).forEach(input => {
-    const fieldName = `${input.parent_slot}#${input.name}`
+      const fieldName = `${input.parent_slot}#${input.name}`
 
     const defaultValue = (input.default_workflow_value === null) ? undefined : input.default_workflow_value
-    if (defaultValue !== undefined) {
+      if (defaultValue !== undefined) {
         defaultValues.inputs[fieldName] = getDefaultValueFromServer(input.class, defaultValue)
-    }
-  })
+      }
+    })
   return defaultValues
 }
 
@@ -90,13 +84,13 @@ const prepareValidations = (user?: IUser, stages?: Stage[], scope?: string) => {
     .flatMap(stage => stage.inputs)
     .filter(input => !input.optional)
     .forEach(input => {
-    const fieldName = `${input.parent_slot}#${input.name}`
-    if (input.class === 'boolean') {
+      const fieldName = `${input.parent_slot}#${input.name}`
+      if (input.class === 'boolean') {
       inputs[fieldName] = Yup.boolean().nullable().required(`${getLabel(input)} is required`)
-    } else {
+      } else {
       inputs[fieldName] = Yup.string().nullable().required(`${getLabel(input)} is required`)
-    }
-  })
+      }
+    })
 
   const spaceValidations =
     scope && ['private', 'public'].includes(scope)
@@ -132,30 +126,30 @@ const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, se
     control: Control<any>, register: UseFormRegister<any>, setError: UseFormSetError<RunWorkflowFormType>}) => {
 
   return (<> {hasUnfilledInputs(stage) &&
-    <>
+        <>
       <StyledStageHeader key={stage.app_uid}><GearIcon height={14} />&nbsp;{stage.name}</StyledStageHeader>
-      {stage.inputs.map(input => {
-        const inputSpec: InputOutput = app.spec.input_spec.find(input_spec => input_spec.name === input.name)
-        return (
-          <Controller
-            key={inputSpec.name}
-            control={control}
-            name={`inputs[${input.parent_slot}#${input.name}]`}
-            render={({ field }) => (
-              <FieldGroup label={getLabel(inputSpec)} required={!inputSpec.optional}>
-                <JobRunInput
-                  field={field}
-                  inputSpec={inputSpec}
-                  errors={errors}
-                  disabled={isSubmitting}
-                  setError={setError}
-                  register={register}
-                  scope={app.scope}
-                  />
-              </FieldGroup>
-            )}
-          />
-        )
+          {stage.inputs.map(input => {
+            const inputSpec: InputOutput = app.spec.input_spec.find(input_spec => input_spec.name === input.name)
+            return (
+              <Controller
+                key={inputSpec.name}
+                control={control}
+                name={`inputs[${input.parent_slot}#${input.name}]`}
+                render={({ field }) => (
+                  <FieldGroup label={getLabel(inputSpec)} required={!inputSpec.optional}>
+                    <JobRunInput
+                      field={field}
+                      inputSpec={inputSpec}
+                      errors={errors}
+                      disabled={isSubmitting}
+                      setError={setError}
+                      register={register}
+                      scope={app.scope}
+                    />
+                  </FieldGroup>
+                )}
+              />
+            )
       },
       )}
     </>}
@@ -236,10 +230,10 @@ const RunWorkflowForm = (
           navigate(`/home/workflows/${workflow.uid}/jobs`)
         }
       } else if (res?.error) {
-          toast.error(res.error.message)
-        } else {
-          toast.error('Something went wrong')
-        }
+        toast.error(res.error.message)
+      } else {
+        toast.error('Something went wrong')
+      }
     },
     onError: () => {
       toast.error('Error: Running workflow')
@@ -360,21 +354,21 @@ const WorkflowRunPage = () => {
   const baseLink = spaceId ? `spaces/${spaceId}` : 'home'
 
   return (
-  <FormPageContainer>
-    <Topbox>
+    <FormPageContainer>
+      <Topbox>
       <BackLink linkTo={`/${baseLink}/workflows/${workflow.uid}`}>
         Back to Workflow
       </BackLink>
-      <TopboxItem>
-        <Title>
-          <CubeIcon height={20} />
-          <span>Run Workflow:</span>
-          <span>{workflowTitle}</span>
-        </Title>
-      </TopboxItem>
-    </Topbox>
-    <RunWorkflowForm workflow={workflow} meta={meta} user={user} />
-  </FormPageContainer>
+        <TopboxItem>
+          <Title>
+            <CubeIcon height={20} />
+            <span>Run Workflow:</span>
+            <span>{workflowTitle}</span>
+          </Title>
+        </TopboxItem>
+      </Topbox>
+      <RunWorkflowForm workflow={workflow} meta={meta} user={user} />
+    </FormPageContainer>
   )
 }
 

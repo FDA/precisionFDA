@@ -16,16 +16,16 @@ export const formatNumberUS = (value: number): string => {
 }
 
 export function mapSizeFilter(filters: IFilter[]): IFilter[] {
-  const value = filters.find(f => f.id === 'file_size')?.['value']
-  if(!value || !Array.isArray(value)) {
+  const value = filters.find(f => f.id === 'file_size')?.['value'] as { from?: number | null; to?: number | null } | undefined
+  if (!value || typeof value !== 'object') {
     return filters
   }
 
-  if (value[0] != null) {
-    filters.push({ id: 'size', value: value[0] })
+  if (value.from != null) {
+    filters.push({ id: 'size', value: value.from })
   }
-  if (value[1] != null) {
-    filters.push({ id: 'size2', value: value[1] })
+  if (value.to != null) {
+    filters.push({ id: 'size2', value: value.to })
   }
 
   return filters.filter(f => f.id !== 'file_size')
@@ -92,10 +92,9 @@ export type Params = {
   spaceId?: string | number
   perPage?: number
   page?: number
-  scope?: string
 } & Record<string, unknown>
 
-export type QueryType = Record<string, string>
+export type QueryType = Record<string, any>
 
 export function formatScopeQ(scope?: HomeScope) {
   let scopeQ = ''
@@ -148,7 +147,7 @@ export function prepareListFetch(filters: IFilter[], params: Params): QueryType 
       ? params.sortBy?.order_by?.replace('props.', '')
       : renameOrderByKeys(params?.sortBy?.order_by)
 
-  const queryParams = cleanObject({
+  const queryParams: QueryType = cleanObject({
     scope: params.entityScope,
     folder_id: params?.folderId,
     space_id: params?.spaceId,
@@ -157,7 +156,7 @@ export function prepareListFetch(filters: IFilter[], params: Params): QueryType 
     [order_by_key]: order_by_val,
     order_dir: params?.sortBy?.order_dir,
     ...filterParams,
-  }) as QueryType
+  })
 
   return queryParams
 }

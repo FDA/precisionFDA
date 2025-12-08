@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { ISpace } from '../spaces.types'
 import { Tab, Tabs } from './styles'
 import { ResourceTypeUrlNames } from '../../home/types'

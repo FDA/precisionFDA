@@ -1,10 +1,10 @@
 import React, { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
-import styled, { css } from 'styled-components'
+import { Link } from 'react-router'
+import styled from 'styled-components'
 
 import { ArrowLeftIcon } from '../icons/ArrowLeftIcon'
 
-const backStyles = css`
+const backStyles = `
   font-size: 14px;
   font-weight: bold;
   text-decoration: none;

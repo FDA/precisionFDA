@@ -2,7 +2,7 @@ import { format } from 'date-fns'
 import queryString from 'query-string'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { Pagination } from '../../components/Pagination'
@@ -169,8 +169,8 @@ const ExpertsList = () => {
                   totalCount={response?.meta?.total}
                   totalPages={response?.meta?.totalPages}
                   isHidden={false}
-                  setPage={n => pagination.setPageParam(n, 'replaceIn')}
-                  onPerPageSelect={n => pagination.setPerPageParam(n, 'replaceIn')}
+                  setPage={n => pagination.setPageParam(n, true)}
+                  onPerPageSelect={n => pagination.setPerPageParam(n, true)}
                 />
               </PageList>
             </div>
