@@ -1,0 +1,5 @@
+.editButton {
+    color: var(--c-text-400);
+    padding: 4px;
+    padding-bottom: 2px;
+}

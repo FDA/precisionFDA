@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { Column, ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
 import { propertiesColumnDef, selectColumnDef } from '../../components/Table/selectColumnDef'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
@@ -44,9 +44,7 @@ export const useExecutionColumns = ({
         const pathname = `${getBasePath(spaceId)}/${rowType}/${row.original.uid}`
 
         return rowType === 'workflows' ? (
-          <>
-            {row.original.name}
-          </>
+          <>{row.original.name}</>
         ) : (
           <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
             <BoltIcon height={14} />
@@ -64,19 +62,22 @@ export const useExecutionColumns = ({
       filterFn: selectFilterFn,
       meta: {
         filterElement: (column: Column<IExecution>) => (
-          <SelectFilter column={column} options={[
-            { label: 'done', option: 'done' },
-            { label: 'idle', option: 'idle' },
-            { label: 'runnable', option: 'runnable' },
-            { label: 'running', option: 'running' },
-            { label: 'terminating', option: 'terminating' },
-            { label: 'terminated', option: 'terminated' },
-            { label: 'failed', option: 'failed' },
-          ]} />
+          <SelectFilter
+            column={column}
+            options={[
+              { label: 'done', option: 'done' },
+              { label: 'idle', option: 'idle' },
+              { label: 'runnable', option: 'runnable' },
+              { label: 'running', option: 'running' },
+              { label: 'terminating', option: 'terminating' },
+              { label: 'terminated', option: 'terminated' },
+              { label: 'failed', option: 'failed' },
+            ]}
+          />
         ),
       },
       enableSorting: false,
-      cell: (props) => {
+      cell: props => {
         const { jobs } = props.row.original
         if (jobs) {
           return <StateCell state={jobs[jobs.length - 1].state} />
@@ -99,7 +100,7 @@ export const useExecutionColumns = ({
         if (value === 'N/A') {
           return value
         }
-        if ( rowType === 'executions'){
+        if (rowType === 'executions') {
           return
         }
         return (
@@ -145,7 +146,7 @@ export const useExecutionColumns = ({
         }
 
         return (
-          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`} $disable={!row.original.app_active} >
+          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`} $disable={!row.original.app_active}>
             <CubeIcon height={14} />
             {row.original.app_title}
           </StyledLinkCell>
@@ -242,7 +243,11 @@ export const useExecutionColumns = ({
       enableSorting: false,
       size: 500,
       cell: props => (
-        <StyledTags>{props.row.original.tags?.map(tag => <StyledTagItem key={tag}>{tag}</StyledTagItem>)}</StyledTags>
+        <StyledTags>
+          {props.row.original.tags?.map(tag => (
+            <StyledTagItem key={tag}>{tag}</StyledTagItem>
+          ))}
+        </StyledTags>
       ),
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-tags` } : {}),
     },

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import React, { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Button } from '../../../components/Button'
 
 const StyledLink = styled.div`

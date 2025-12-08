@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { useAuthUser } from '../auth/useAuthUser'
 import ListAdminNews from '../news/ListAdminNews'

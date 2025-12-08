@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
@@ -22,7 +22,7 @@ const CreateNewsItemPage = () => {
       queryClient.invalidateQueries({
         queryKey: ['news'],
       })
-      toast.success('Created news item')
+      toast.success('Successfully created news item')
     },
     onError: () => {
       toast.error('Error: Adding news item')

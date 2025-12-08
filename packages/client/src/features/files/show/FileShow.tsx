@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import queryString from 'query-string'
 import React from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import { ActionsMenu } from '../../../components/Menu'
 import { HomeLabel } from '../../../components/HomeLabel'
 import { Filler } from '../../../components/Page/styles'
@@ -16,7 +16,6 @@ import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
 import { StyledBackLink } from '../../home/home.styles'
 import {
   ActionsButton,
-  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   LockedRow,
@@ -26,11 +25,12 @@ import {
   MetadataSection,
   MetadataVal,
   NotFound,
+  PathSection,
+  ResourceHeader,
   Title,
   Topbox,
-  PathSection,
 } from '../../home/show.styles'
-import { EmitScope, HomeScope } from '../../home/types'
+import { HomeScope } from '../../home/types'
 import { License } from '../../licenses/License'
 import { ISpace } from '../../spaces/spaces.types'
 import { fetchFile } from '../files.api'
@@ -38,6 +38,7 @@ import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription } from './styles'
 import { FileBreadcrumb } from '../FileBreadcrumb'
+import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
 
 const FileActionsDropdown = ({
   homeScope,
@@ -69,14 +70,22 @@ const FileActionsDropdown = ({
   )
 }
 
-export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScope; emitScope?: EmitScope; space?: ISpace }) => {
+export const FileShow = ({
+  fileId,
+  space,
+  homeContext = defaultHomeContext
+}: {
+  fileId: string,
+  space?: ISpace,
+  homeContext?: HomeScopeContextValue
+}) => {
+  const { homeScope, homeScopeChangeHandler } = homeContext
   const location = useLocation()
-  const { fileId } = useParams<{ fileId: string }>()
   const { data, isLoading } = useQuery({
     queryKey: ['file', fileId],
     queryFn: () =>
       fetchFile(fileId!).then(d => {
-        if (emitScope) emitScope(d.files.scope, d.files.featured)
+        homeScopeChangeHandler(d.files.scope, d.files.featured)
         return d
       }),
   })

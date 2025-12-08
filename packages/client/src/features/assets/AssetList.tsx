@@ -1,6 +1,6 @@
 import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Button } from '../../components/Button'
 import { ActionsMenu } from '../../components/Menu'
 import { ContentFooter } from '../../components/Page/ContentFooter'
@@ -10,7 +10,6 @@ import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { KeyIcon } from '../../components/icons/KeyIcon'
 import { QuestionIcon } from '../../components/icons/QuestionIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
-import { useAuthUser } from '../auth/useAuthUser'
 import { useGenerateKeyModal } from '../auth/useGenerateKeyModal'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
@@ -28,10 +27,8 @@ import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { assets: IAsset[]; meta: IMeta }
 
-export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; spaceId?: string }) => {
+export const AssetList = ({ homeScope, spaceId, isAdmin }: { homeScope?: HomeScope; spaceId?: string, isAdmin?: boolean }) => {
   const navigate = useNavigate()
-  const user = useAuthUser()
-  const isAdmin = user?.isAdmin
 
   const onRowClick = (uid: string) => navigate(`/home/assets/${uid}`)
   const {
@@ -97,7 +94,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
       </ResourceHeader>
 
       <AssetsListTable
-        isAdmin={isAdmin}
+        isAdmin={isAdmin ?? false}
         homeScope={homeScope}
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery)}
@@ -122,8 +119,8 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, 'replaceIn')}
-          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+          setPage={p => setPageParam(p, true)}
+          onPerPageSelect={p => setPerPageParam(p, true)}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>

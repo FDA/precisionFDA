@@ -1,19 +1,19 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import { getBaseLink } from '../apps/run/utils'
 import { StyledBackLink } from '../home/home.styles'
-import { ResourceHeader, HeaderLeft, HomeLoader, Title } from '../home/show.styles'
+import { HeaderLeft, HomeLoader, ResourceHeader, Title } from '../home/show.styles'
 import {
+  convertEntityLink,
   EntityIcon,
   EntityType,
+  getEntityTypeFromIdentifier,
   NotFoundEntity,
   TrackHelp,
   TrackIcon,
   TrackProvenanceContent,
   TrackProvenancePageParams,
   TrackWrapper,
-  convertEntityLink,
-  getEntityTypeFromIdentifier,
 } from './TrackProvenanceContent'
 import { useTrackProvenanceQuery } from './useTrackProvenanceQuery'
 

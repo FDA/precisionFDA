@@ -113,7 +113,7 @@ export const ResourceDropdownContent = ({ selectedUsers }: { selectedUsers: User
       : bulkEnableAllResources(selectedUsers.map((user: User) => user.id))
 
   return (
-    <ResourceMenu>
+    <>
       <ResourceDropdownItem status={allResourceState} onClick={handleAllClick} label="All" />
       {resourceStates.map(({ resource, state }) => (
         <ResourceDropdownItem
@@ -133,6 +133,6 @@ export const ResourceDropdownContent = ({ selectedUsers }: { selectedUsers: User
           label={RESOURCE_LABELS[resource]}
         />
       ))}
-    </ResourceMenu>
+    </>
   )
 }

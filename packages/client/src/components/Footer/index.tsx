@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import fdaLogo from '../../assets/logo-fda.svg'
 import { EnvelopeIcon } from '../icons/EnvelopeIcon'
@@ -76,167 +76,167 @@ const StyledFDALogo = styled.a`
 const PFDAFooter = () => {
 
   return (
-  <StyledFooterContainer>
-    <StyledFooterWrapper>
-      <StyledFooter role="contentinfo">
-        <div>
-          <StyledFDALogo href="http://www.fda.gov" title="FDA Home Page">
-            <img src={fdaLogo} alt="FDA Home Page" width="41px" height="46px" />
-          </StyledFDALogo>
-          <StyledFooterAddress>
-            <address>
-              <strong>U.S. Food and Drug Administration</strong>
-              <br />
-              10903 New Hampshire Avenue
-              <br />
-              Silver Spring, MD 20993
-              <br />
-              <span aria-hidden="true" /> 1-888-INFO-FDA (1-888-463-6332)
-              <br />
-              <span aria-hidden="true" />{' '}
-              <a href="http://www.fda.gov/AboutFDA/ContactFDA/default.htm" title="Contact FDA">
-                Contact FDA
-              </a>
-            </address>
-          </StyledFooterAddress>
-        </div>
-        <Center>
+    <StyledFooterContainer>
+      <StyledFooterWrapper>
+        <StyledFooter role="contentinfo">
           <div>
-            <ul>
-              <li>
-                <Link to="/" title="precisionFDA Home Page">
-                  precisionFDA
-                </Link>
-              </li>
-              <li aria-hidden="true">|</li>
-              <li>
-                <a href="/docs" target="_blank">
-                  Docs
+            <StyledFDALogo href="http://www.fda.gov" title="FDA Home Page">
+              <img src={fdaLogo} alt="FDA Home Page" width="41px" height="46px" />
+            </StyledFDALogo>
+            <StyledFooterAddress>
+              <address>
+                <strong>U.S. Food and Drug Administration</strong>
+                <br />
+                10903 New Hampshire Avenue
+                <br />
+                Silver Spring, MD 20993
+                <br />
+                <span aria-hidden="true" /> 1-888-INFO-FDA (1-888-463-6332)
+                <br />
+                <span aria-hidden="true" />{' '}
+                <a href="http://www.fda.gov/AboutFDA/ContactFDA/default.htm" title="Contact FDA">
+                  Contact FDA
                 </a>
-              </li>
-              <li>
-                <Link to="/terms" title="precisionFDA Terms of Service">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link to="/security" title="precisionFDA Security">
-                  Security Statement
-                </Link>
-              </li>
-              <li>
-                <a data-turbolinks="false" href="/guidelines">
-                  Guidelines
-                </a>
-              </li>
-              <li>
-                <a data-turbolinks="false" href="/presskit">
-                  Press Kit
-                </a>
-              </li>
-              <li aria-hidden="true">|</li>
-              <SocialLink>
-                <a href="mailto:precisionfda@fda.hhs.gov">
-                  <EnvelopeIcon />
-                </a>
-              </SocialLink>
-            </ul>
-            <ul>
-              <li>
-                <a
-                  href="http://www.fda.gov/"
-                  target="_blank"
-                  title="FDA Home Page"
-                  aria-label="Navigate to the FDA home page in another window"
-                  rel="noreferrer"
-                >
-                  FDA
-                </a>
-              </li>
-              <li aria-hidden="true">|</li>
-              <li>
-                <a
-                  href="http://www.fda.gov/AboutFDA/AboutThisWebsite/Accessibility/default.htm"
-                  target="_blank"
-                  title="Accessibility"
-                  rel="noreferrer"
-                >
-                  Accessibility
-                </a>
-              </li>
-              <li>
-                <a
-                  href="http://www.fda.gov/AboutFDA/Transparency/Basics/default.htm"
-                  target="_blank"
-                  title="FDA Basics"
-                  rel="noreferrer"
-                >
-                  Basics
-                </a>
-              </li>
-              <li>
-                <a
-                  href="http://www.fda.gov/RegulatoryInformation/FOI/default.htm"
-                  target="_blank"
-                  title="Freedom of Information Act"
-                  rel="noreferrer"
-                >
-                  FOIA
-                </a>
-              </li>
-              <li>
-                <a
-                  href="http://www.fda.gov/AboutFDA/WorkingatFDA/NoFearAct/default.htm"
-                  target="_blank"
-                  title="No Fear Act"
-                  rel="noreferrer"
-                >
-                  No Fear Act
-                </a>
-              </li>
-              <li>
-                <a
-                  href="http://www.fda.gov/AboutFDA/Transparency/default.htm"
-                  target="_blank"
-                  title="Transparency"
-                  rel="noreferrer"
-                >
-                  Transparency
-                </a>
-              </li>
-              <li>
-                <a
-                  href="http://www.fda.gov/AboutFDA/AboutThisWebsite/WebsitePolicies/default.htm"
-                  target="_blank"
-                  title="Website Policies"
-                  rel="noreferrer"
-                >
-                  Website Policies
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://www.hhs.gov/vulnerability-disclosure-policy/index.html"
-                  target="_blank"
-                  title="Vulnerability Disclosure Policy"
-                  rel="noreferrer"
-                >
-                  Vulnerability Disclosure Policy
-                </a>
-              </li>
-            </ul>
-            <div>
-              <p>Some links on this website may direct you to non-FDA locations.</p>
-              <p>FDA does not endorse or guarantee the integrity of information on these external sites.</p>
-            </div>
-            <ThemeToggle />
+              </address>
+            </StyledFooterAddress>
           </div>
-        </Center>
-        <HoverDNAnexusLogo />
-      </StyledFooter>
-    </StyledFooterWrapper>
-  </StyledFooterContainer>
-)
+          <Center>
+            <div>
+              <ul>
+                <li>
+                  <Link to="/" title="precisionFDA Home Page">
+                    precisionFDA
+                  </Link>
+                </li>
+                <li aria-hidden="true">|</li>
+                <li>
+                  <a href="/docs" target="_blank">
+                    Docs
+                  </a>
+                </li>
+                <li>
+                  <Link to="/terms" title="precisionFDA Terms of Service">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/security" title="precisionFDA Security">
+                    Security Statement
+                  </Link>
+                </li>
+                <li>
+                  <a data-turbolinks="false" href="/guidelines">
+                    Guidelines
+                  </a>
+                </li>
+                <li>
+                  <a data-turbolinks="false" href="/presskit">
+                    Press Kit
+                  </a>
+                </li>
+                <li aria-hidden="true">|</li>
+                <SocialLink>
+                  <a href="mailto:precisionfda@fda.hhs.gov">
+                    <EnvelopeIcon />
+                  </a>
+                </SocialLink>
+              </ul>
+              <ul>
+                <li>
+                  <a
+                    href="http://www.fda.gov/"
+                    target="_blank"
+                    title="FDA Home Page"
+                    aria-label="Navigate to the FDA home page in another window"
+                    rel="noreferrer"
+                  >
+                    FDA
+                  </a>
+                </li>
+                <li aria-hidden="true">|</li>
+                <li>
+                  <a
+                    href="http://www.fda.gov/AboutFDA/AboutThisWebsite/Accessibility/default.htm"
+                    target="_blank"
+                    title="Accessibility"
+                    rel="noreferrer"
+                  >
+                    Accessibility
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="http://www.fda.gov/AboutFDA/Transparency/Basics/default.htm"
+                    target="_blank"
+                    title="FDA Basics"
+                    rel="noreferrer"
+                  >
+                    Basics
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="http://www.fda.gov/RegulatoryInformation/FOI/default.htm"
+                    target="_blank"
+                    title="Freedom of Information Act"
+                    rel="noreferrer"
+                  >
+                    FOIA
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="http://www.fda.gov/AboutFDA/WorkingatFDA/NoFearAct/default.htm"
+                    target="_blank"
+                    title="No Fear Act"
+                    rel="noreferrer"
+                  >
+                    No Fear Act
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="http://www.fda.gov/AboutFDA/Transparency/default.htm"
+                    target="_blank"
+                    title="Transparency"
+                    rel="noreferrer"
+                  >
+                    Transparency
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="http://www.fda.gov/AboutFDA/AboutThisWebsite/WebsitePolicies/default.htm"
+                    target="_blank"
+                    title="Website Policies"
+                    rel="noreferrer"
+                  >
+                    Website Policies
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.hhs.gov/vulnerability-disclosure-policy/index.html"
+                    target="_blank"
+                    title="Vulnerability Disclosure Policy"
+                    rel="noreferrer"
+                  >
+                    Vulnerability Disclosure Policy
+                  </a>
+                </li>
+              </ul>
+              <div>
+                <p>Some links on this website may direct you to non-FDA locations.</p>
+                <p>FDA does not endorse or guarantee the integrity of information on these external sites.</p>
+              </div>
+              <ThemeToggle />
+            </div>
+          </Center>
+          <HoverDNAnexusLogo />
+        </StyledFooter>
+      </StyledFooterWrapper>
+    </StyledFooterContainer>
+  )
 }
 
 export default PFDAFooter

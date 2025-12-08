@@ -1,10 +1,19 @@
 import React from 'react'
 import { render, screen, waitFor } from '../../../test/test-utils'
-import Home2 from '../index'
+import { HomeShowLayout } from '../show/HomeShowLayout'
+
+jest.mock('react-router', () => ({
+  ...jest.requireActual('react-router'),
+  useOutletContext: () => ({
+    homeScope: 'me',
+    handleSetHomeScope: jest.fn(),
+  }),
+  useSearchParams: () => [new URLSearchParams({ scope: 'me' }), jest.fn()],
+}))
 
 describe('My Home', () => {
   test('User should be allowed to view My Home and default to files list', async () => {
-    render(<Home2 />, { route: '/home' })
+    render(<HomeShowLayout />, { route: '/home/files' })
 
     await waitFor(() => {
       const linkEl = screen.getByTestId('home-files-link')

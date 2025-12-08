@@ -17,7 +17,7 @@ export const SelectInstanceType = ({
   errors,
   inputId,
 }: {
-  control: Control<RunJobFormType>
+  control: Control<RunJobFormType, unknown, unknown>
   selectedInstance: ComputeInstance | undefined,
   name: keyof RunJobFormType,
   jobLimit: number

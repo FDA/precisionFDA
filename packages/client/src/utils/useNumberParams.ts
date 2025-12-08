@@ -1,4 +1,4 @@
-import { useParams, Params } from 'react-router-dom'
+import { Params, useParams } from 'react-router'
 import { map, when } from 'ramda'
 
 type RecordUndefinedVal<T> = Record<keyof T, number | undefined>

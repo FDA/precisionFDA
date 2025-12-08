@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 import { useAuthUser } from './features/auth/useAuthUser'
 import { useModal } from './features/modal/useModal'
 import PublicLayout from './layouts/PublicLayout'

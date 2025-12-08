@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import { useAuthUser } from '../auth/useAuthUser'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'

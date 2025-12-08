@@ -1,6 +1,6 @@
 import { ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
 import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { ContentFooter } from '../../components/Page/ContentFooter'
@@ -147,8 +147,8 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
           totalPages={data?.meta?.totalPages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, 'replaceIn')}
-          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+          setPage={p => setPageParam(p, true)}
+          onPerPageSelect={p => setPerPageParam(p, true)}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>

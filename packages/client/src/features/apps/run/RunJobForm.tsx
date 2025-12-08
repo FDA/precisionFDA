@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useState } from 'react'
 import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import { Button, TransparentButton } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'

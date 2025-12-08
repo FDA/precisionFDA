@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'

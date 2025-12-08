@@ -1,6 +1,6 @@
-import { ColumnDef } from '@tanstack/react-table'
+import { ColumnDef, Column } from '@tanstack/react-table'
 import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import { propertiesColumnDef, selectColumnDef } from '../../components/Table/selectColumnDef'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
@@ -8,6 +8,22 @@ import { RESOURCE_LABELS } from '../../types/user'
 import { StyledNameCell } from '../home/home.styles'
 import { DBStatus } from './DbStatus'
 import { IDatabase } from './databases.types'
+import BaseSelectFilter, { baseSelectFilterFn } from '../../components/Table/components/BaseSelectFilter'
+
+const DATABASE_STATUS_OPTIONS = [
+  { label: 'Available', value: 'available' },
+  { label: 'Creating', value: 'creating' },
+  { label: 'Stopping', value: 'stopping' },
+  { label: 'Stopped', value: 'stopped' },
+  { label: 'Starting', value: 'starting' },
+  { label: 'Terminating', value: 'terminating' },
+  { label: 'Terminated', value: 'terminated' },
+]
+
+const DATABASE_ENGINE_OPTIONS = [
+  { label: 'MySQL', value: 'aurora-mysql' },
+  { label: 'PostgreSQL', value: 'aurora-postgresql' },
+]
 
 export const useDatabaseColumns = ({ properties = []}: { properties?: string[] }): ColumnDef<IDatabase>[] => {
   const location = useLocation()
@@ -31,13 +47,23 @@ export const useDatabaseColumns = ({ properties = []}: { properties?: string[] }
     {
       header: 'Status',
       accessorKey: 'status',
-      filterFn: 'includesString',
+      filterFn: baseSelectFilterFn,
+      meta: {
+        filterElement: (column: Column<IDatabase>) => (
+          <BaseSelectFilter column={column} options={DATABASE_STATUS_OPTIONS} />
+        ),
+      },
       cell: c => <DBStatus status={c.row.original.status} />,
     },
     {
-      header: 'Type',
+      header: 'Engine',
       accessorKey: 'engine',
-      filterFn: 'includesString',
+      filterFn: baseSelectFilterFn,
+      meta: {
+        filterElement: (column: Column<IDatabase>) => (
+          <BaseSelectFilter column={column} options={DATABASE_ENGINE_OPTIONS} />
+        ),
+      },
       cell: c => (
         <>
           {c.row.original.engine === 'aurora-mysql' && 'MySQL'}

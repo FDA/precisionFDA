@@ -1,19 +1,18 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link, Route, Navigate, Routes, useLocation, useParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
 import Menu from '../../components/Menu/Menu'
 import { RevisionMenu } from '../../components/Menu/RevisionMenu'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
-import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   ActionsButton,
-  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -23,10 +22,11 @@ import {
   MetadataVal,
   NotFound,
   Pill,
+  ResourceHeader,
   Title,
   Topbox,
 } from '../home/show.styles'
-import { EmitScope, HomeScope } from '../home/types'
+import { HomeScope } from '../home/types'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { WorkflowExecutionsList } from './WorkflowExecutionsList'
 import { fetchWorkflow } from './workflows.api'
@@ -35,6 +35,7 @@ import WorkflowsDiagram from './WorkflowsDiagram'
 import HomeWorkflowsSpec from './WorkflowSpec/WorkflowSpec'
 import { getBasePath } from '../home/utils'
 import { NetworkIcon } from '../../components/icons/NetworkIcon'
+import { defaultHomeContext, HomeScopeContextValue, HomeScopeProviderProps } from '../home/HomeScopeContext'
 
 interface IColumn {
   header: string
@@ -140,9 +141,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
       </CloudResourcesHeaderButton>
       <Menu
         trigger={
-          <Menu.Trigger>
-            <ActionsButton />
-          </Menu.Trigger>
+          <ActionsButton as={Menu.Trigger} />
         }
       >
         <ActionsMenuContent 
@@ -156,21 +155,23 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
 }
 
 export const WorkflowShow = ({
+  workflowId,
   spaceId,
-  emitScope,
-  homeScope,
+  homeContext = defaultHomeContext
 }: {
+  workflowId: string
   spaceId?: number
-  homeScope?: HomeScope
-  emitScope?: EmitScope
+  homeContext?: HomeScopeContextValue
 }) => {
+  const { homeScope, homeScopeChangeHandler, isHome } = homeContext
   const location = useLocation()
-  const { workflowUid } = useParams<{ workflowUid: string }>()
   const { data, isLoading } = useQuery({
-    queryKey: ['workflow', workflowUid],
+    queryKey: ['workflow', workflowId],
     queryFn: () =>
-      fetchWorkflow(workflowUid!).then(d => {
-        if (emitScope) emitScope(d.workflow.scope, d.workflow.featured)
+      fetchWorkflow(workflowId).then(d => {
+        if(isHome) {
+          homeScopeChangeHandler(d.workflow.scope, d.workflow.featured)
+        }
         return d
       }),
   })

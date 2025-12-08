@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { SectionTitle } from '../../components/Public/styles'
@@ -51,17 +51,14 @@ const NoChallenges = styled.div`
 `
 
 export default function ChallengesOverviewList() {
-  const { data: current, isLoading: currentIsLoading } = useChallengesListQuery(
-    {
-      timeStatus: 'current',
-      pageSize: 2,
-    },
-  )
-  const { data: upcoming, isLoading: upcomingIsLoading } =
-    useChallengesListQuery({
-      timeStatus: 'upcoming',
-      pageSize: 2,
-    })
+  const { data: current, isLoading: currentIsLoading } = useChallengesListQuery({
+    timeStatus: 'current',
+    pageSize: 2,
+  })
+  const { data: upcoming, isLoading: upcomingIsLoading } = useChallengesListQuery({
+    timeStatus: 'upcoming',
+    pageSize: 2,
+  })
   const { data: ended, isLoading: endedIsLoading } = useChallengesListQuery({
     timeStatus: 'ended',
     pageSize: 2,
@@ -70,35 +67,27 @@ export default function ChallengesOverviewList() {
   return (
     <StyledChallengesOverview>
       {(currentIsLoading || upcomingIsLoading || endedIsLoading) && <Loader className="inline" />}
-      {!currentIsLoading &&
-        current?.data &&
-        current.data?.length > 0 && (
-          <Row>
-            <StyledSectionTitle $tscolor={getTimeStatusColor('current')}>
-              Current Challenges
-            </StyledSectionTitle>
-            <StyledChallengeList>
-              {current?.data?.slice(0, 2).map(c => (
-                <ChallengeListItem key={c.id} challenge={c} />
-              ))}
-            </StyledChallengeList>
-          </Row>
-        )}
+      {!currentIsLoading && current?.data && current.data?.length > 0 && (
+        <Row>
+          <StyledSectionTitle $tscolor={getTimeStatusColor('current')}>Current Challenges</StyledSectionTitle>
+          <StyledChallengeList>
+            {current?.data?.slice(0, 2).map(c => (
+              <ChallengeListItem key={c.id} challenge={c} />
+            ))}
+          </StyledChallengeList>
+        </Row>
+      )}
 
-      {!upcomingIsLoading &&
-        upcoming?.data &&
-        upcoming.data?.length > 0 && (
-          <Row>
-            <StyledSectionTitle $tscolor={getTimeStatusColor('upcoming')}>
-              Upcoming Challenges
-            </StyledSectionTitle>
-            <StyledChallengeList>
-              {upcoming?.data?.slice(0, 2).map(c => (
-                <ChallengeListItem key={c.id} challenge={c} />
-              ))}
-            </StyledChallengeList>
-          </Row>
-        )}
+      {!upcomingIsLoading && upcoming?.data && upcoming.data?.length > 0 && (
+        <Row>
+          <StyledSectionTitle $tscolor={getTimeStatusColor('upcoming')}>Upcoming Challenges</StyledSectionTitle>
+          <StyledChallengeList>
+            {upcoming?.data?.slice(0, 2).map(c => (
+              <ChallengeListItem key={c.id} challenge={c} />
+            ))}
+          </StyledChallengeList>
+        </Row>
+      )}
 
       {!endedIsLoading &&
         ended?.data &&

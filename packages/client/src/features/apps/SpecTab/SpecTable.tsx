@@ -1,9 +1,9 @@
 import classNames from 'classnames'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { IAccessibleFile } from '../../databases/databases.api'
-import { IOSpec, InputSpec } from '../apps.types'
+import { InputSpec, IOSpec } from '../apps.types'
 
 const StyledDefaultValue = styled.div`
   a {

@@ -28,7 +28,7 @@ import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } fr
 
 export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
 
-export const getSchema = (schema: Yup.BaseSchema, input: InputSpec) => {
+export const getSchema = (schema: Yup.Schema, input: InputSpec) => {
   if (input.optional) {
     return schema.optional().nullable()
   }
@@ -36,7 +36,7 @@ export const getSchema = (schema: Yup.BaseSchema, input: InputSpec) => {
 }
 
 export const prepareValidationsForInputs = (inputSpec: InputSpec[]) => {
-  const inputs: Record<string, Yup.BaseSchema> = {}
+  const inputs: Record<string, Yup.Schema> = {}
   inputSpec.forEach(i => {
     if (i.class === 'boolean') {
       inputs[i.name] = getSchema(Yup.boolean(), i).nullable()

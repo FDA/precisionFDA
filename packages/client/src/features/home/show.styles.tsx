@@ -152,10 +152,10 @@ export const ActionsButton = React.forwardRef<
     label?: string
     disabled?: boolean
     active?: boolean | BooleanString
+    as?: React.ElementType
   }
 >(({ label = 'Actions', ...props }, ref) => {
   return (
-    // @ts-expect-error ref type mismatch
     <StyledActionsButton data-variant="primary" ref={ref} {...props}>
       {label} <ArrowIcon />
     </StyledActionsButton>

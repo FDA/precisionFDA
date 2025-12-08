@@ -10,10 +10,10 @@ export interface FetchFilesQuery {
   meta: IMeta
 }
 
-export async function fetchFiles(filters: IFilter[], params: Params) {
+export async function fetchFiles(filters: IFilter[], params: Params, scope?: HomeScope) {
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query).toString()}`
-  const scopeQ = formatScopeQ(params.scope as HomeScope)
+  const scopeQ = formatScopeQ(scope)
   return axios.get<FetchFilesQuery>(`/api/files${scopeQ}${paramQ}`).then(r => r.data)
 }
 

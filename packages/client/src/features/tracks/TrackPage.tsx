@@ -1,18 +1,18 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { theme } from '../../styles/theme'
-import { ResourceHeader, HomeLoader, Title } from '../home/show.styles'
+import { HomeLoader, ResourceHeader, Title } from '../home/show.styles'
 import {
+  convertEntityLink,
   EntityIcon,
+  getEntityTypeFromIdentifier,
   NotFoundEntity,
   TrackHelp,
   TrackIcon,
   TrackProvenanceContent,
   TrackProvenancePageParams,
   TrackWrapper,
-  convertEntityLink,
-  getEntityTypeFromIdentifier,
 } from './TrackProvenanceContent'
 import { useTrackProvenanceQuery } from './useTrackProvenanceQuery'
 

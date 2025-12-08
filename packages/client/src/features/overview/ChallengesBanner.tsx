@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import challengesBannerLeft from '../../assets/ChallengesBannerBackground-Left.png'
 import challengesBannerRight from '../../assets/ChallengesBannerBackground-Right.png'
@@ -12,7 +12,6 @@ const StyledChallengesBanner = styled.div`
   background-color: ${colors.subtleBlue};
   justify-content: space-between;
   margin-bottom: 32px;
-
 `
 
 const StyledChallengesBannerLeft = styled.div`

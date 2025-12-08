@@ -1,17 +1,13 @@
-import { Location } from 'react-router-dom'
+import { Location } from 'react-router'
 import { HomeScope } from '../features/home/types'
 
 export type LocationResource = 'files' | 'apps' | 'workflows' | 'executions' | 'members' | 'discussions' | 'databases'
 
-export function getBackPath(
-  location: Location,
-  resourceLocation?: LocationResource,
-  homeScope: HomeScope = 'me',
-) {
+export function getBackPath(location: Location, resourceLocation?: LocationResource, homeScope: HomeScope = 'me') {
   const { state } = location
   const fromSearch = location?.state?.fromSearch ?? ''
   let backPath = ''
-  if(state?.from) {
+  if (state?.from) {
     // access from a space, or switching scope
     backPath = `${location?.state?.from}${fromSearch}`
   } else {
@@ -28,7 +24,7 @@ export function getBackPathNext({
   resourceLocation,
   homeScope,
 }: {
-  spaceId?: number | string,
+  spaceId?: number | string
   location: Location
   resourceLocation: LocationResource
   homeScope?: HomeScope
@@ -36,16 +32,16 @@ export function getBackPathNext({
   const fromSearch = location?.state?.fromSearch ?? ''
   let backPath = ''
 
-  if(location?.state?.from) {
+  if (location?.state?.from) {
     backPath = `${location?.state?.from}${fromSearch}`
   }
 
-  if(homeScope) {
+  if (homeScope) {
     const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
     backPath = `/home/${resourceLocation ?? ''}${scopeParamLink}`
   }
 
-  if(spaceId) {
+  if (spaceId) {
     backPath = `/spaces/${spaceId}/${resourceLocation}${fromSearch}`
   }
 

@@ -1,19 +1,18 @@
 import React, { ReactNode } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import styled from 'styled-components'
 
 import { MailButton, StyledSocialMediaButtons } from '../SocialMediaButtons'
 import { PublicNavbar } from '../PublicNavbar'
 import { MainBanner } from '../../Banner'
 import { PageContainerMargin } from '../../Page/styles'
+import { IUser } from '../../../types/user'
 
 const NavigationBarBanner = styled(PageContainerMargin)`
   max-width: 1330px;
   display: flex;
   align-items: center;
-  justify-content: center;
   padding: 32px 0;
-  display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -105,7 +104,7 @@ const NavigationBarSubtitle = styled.div`
 interface INavigationBarProps {
   title?: string
   subtitle?: string
-  user?: any
+  user?: IUser | null
   children?: ReactNode
 }
 
@@ -121,17 +120,17 @@ const NavigationBar = ({ children, title, subtitle, user }: INavigationBarProps)
     if (title || subtitle || showSocialMediaButtonText) {
       return (
 
-          <NavigationBarBanner>
-            <NavigationBarLogoAndTitle>
-              <h1>{title}</h1>
-            </NavigationBarLogoAndTitle>
+        <NavigationBarBanner>
+          <NavigationBarLogoAndTitle>
+            <h1>{title}</h1>
+          </NavigationBarLogoAndTitle>
             {!showSocialMediaButtonText && (
               <NavigationBarSubtitle>
                 {subtitle}
               </NavigationBarSubtitle>
             )}
-            {showSocialMediaButtons && <MailButton />}
-          </NavigationBarBanner>
+          {showSocialMediaButtons && <MailButton />}
+        </NavigationBarBanner>
 
       )
     }

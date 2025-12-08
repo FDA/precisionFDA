@@ -3,7 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { toast } from 'react-toastify'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { Divider, InputError } from '../../../components/form/styles'
@@ -130,9 +130,9 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     <StyledForm onSubmit={handleSubmit(onSubmit)}>
       {!lockUnlockAction?.shouldHide && (
         <div>
-          <Button 
-            type="button" 
-            data-testid="lock-space-button" 
+          <Button
+            type="button"
+            data-testid="lock-space-button"
             onClick={() => {
               if (lockUnlockAction && 'func' in lockUnlockAction) {
                 (lockUnlockAction as { func: () => void }).func()

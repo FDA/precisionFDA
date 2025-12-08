@@ -1,8 +1,8 @@
 import React, { useRef } from 'react'
 import { Control, Controller } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
-import { TransparentButton, Button } from '../../../components/Button'
+import { Button, TransparentButton } from '../../../components/Button'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import { FieldGroup, FieldLabelRow, SelectFieldLabel } from '../../../components/form/styles'
 import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
@@ -113,10 +113,12 @@ const AssetSelect = ({
 
 const PackagesInputRow = styled.div`
   display: flex;
+
   button {
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
   }
+
   input {
     max-width: 300px;
     border-right: 0;

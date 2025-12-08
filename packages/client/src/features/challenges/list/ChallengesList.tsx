@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import queryString from 'query-string'
 import React, { useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'

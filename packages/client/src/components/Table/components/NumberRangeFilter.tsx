@@ -1,7 +1,9 @@
 import { Column, FilterFnOption } from '@tanstack/react-table'
-import React, { useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
+import DebouncedInput from './DebouncedInput'
 
+type NumberRangeFilterValue = { from: string | number | null; to: string | number | null }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const numberRangeFilterFn: FilterFnOption<any> = (row, columnId, filterValue) => {
@@ -31,45 +33,57 @@ export const numberRangeFilterFn: FilterFnOption<any> = (row, columnId, filterVa
   return true
 }
 
-const NumberInput = styled.input`
-  min-width: 60px;
-  font-size: 14px;
-  font-weight: 400;
-  padding: 4px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  max-width: 80px;
+const NumberInputWrapper = styled.div`
+  display: inline-block;
   margin-right: 4px;
-  height: 23px;
+
+  input {
+    min-width: 60px;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    max-width: 80px;
+    height: 23px;
+  }
 `
 
 function NumberRangeFilter<T>({ column, fromPlaceholder, toPlaceholder }: { column: Column<T>, fromPlaceholder: string, toPlaceholder: string }) {
-  const [filterValue, setFilterValue] = useState({ from: null, to: null })
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    const nValue = value === '' ? null : value
-    const newFilter = { ...filterValue, [name]: nValue }
-    setFilterValue(newFilter)
-    column.setFilterValue(newFilter)
-  }
+  const filterValue = (column.getFilterValue() as NumberRangeFilterValue) ?? { from: null, to: null }
 
   return (
     <div>
-      <NumberInput
-        type="number"
-        name="from"
-        value={filterValue.from || ''}
-        onChange={handleChange}
-        placeholder={fromPlaceholder}
-      />
-      <NumberInput
-        type="number"
-        name="to"
-        value={filterValue.to || ''}
-        onChange={handleChange}
-        placeholder={toPlaceholder}
-      />
+      <NumberInputWrapper>
+        <DebouncedInput
+          type="number"
+          value={filterValue.from ?? ''}
+          onChange={value => {
+            const nValue = value === '' ? null : value
+            const current = (column.getFilterValue() as NumberRangeFilterValue) ?? { from: null, to: null }
+            column.setFilterValue({
+              from: nValue,
+              to: current.to,
+            })
+          }}
+          placeholder={fromPlaceholder}
+        />
+      </NumberInputWrapper>
+      <NumberInputWrapper>
+        <DebouncedInput
+          type="number"
+          value={filterValue.to ?? ''}
+          onChange={value => {
+            const nValue = value === '' ? null : value
+            const current = (column.getFilterValue() as NumberRangeFilterValue) ?? { from: null, to: null }
+            column.setFilterValue({
+              from: current.from,
+              to: nValue,
+            })
+          }}
+          placeholder={toPlaceholder}
+        />
+      </NumberInputWrapper>
     </div>
   )
 }

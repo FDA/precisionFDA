@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NumberParam, UrlUpdateType, useQueryParam, withDefault } from 'use-query-params'
+import { useSearchParams } from 'react-router'
 
 export interface PaginationParams {
   page: number
@@ -18,55 +18,85 @@ export function usePaginationState() {
   return { page, perPage, setPerPage, setPage }
 }
 
- /** @deprecated use usePaginationParamsV2 instead when endpoints using this are written in Node */
+/** @deprecated use usePaginationParamsV2 instead when endpoints using this are written in Node */
 export function usePaginationParams(initialPerPageCount?: number) {
-  const [pageParam, setPageParam] = useQueryParam(
-    'page',
-    withDefault(NumberParam, defaultPage),
-  )
-  const [perPageParam, setPerPageParam] = useQueryParam(
-    'per_page',
-    withDefault(NumberParam, initialPerPageCount ?? defaultPerPageCount),
-  )
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  const handleSetPageParam = (v: number | undefined, updateType: UrlUpdateType) => {
-    if(v === 1 || v === undefined) {
-      setPageParam(undefined, updateType)
-    } else {
-      setPageParam(v, updateType)
-    }
+  const pageParam = Number(searchParams.get('page')) || defaultPage
+  const perPageParam = Number(searchParams.get('per_page')) || initialPerPageCount || defaultPerPageCount
+
+  const handleSetPageParam = (v: number | undefined, replace: boolean = false) => {
+    setSearchParams(
+      prev => {
+        const newParams = new URLSearchParams(prev)
+        if (v === 1 || v === undefined) {
+          newParams.delete('page')
+        } else {
+          newParams.set('page', String(v))
+        }
+        return newParams
+      },
+      { replace },
+    )
   }
 
-  const handleSetPerPageParam = (v: number, updateType: UrlUpdateType = 'pushIn') => {
-    setPageParam(undefined)
-    setPerPageParam(v, updateType)
+  const handleSetPerPageParam = (v: number, replace: boolean = false) => {
+    setSearchParams(
+      prev => {
+        const newParams = new URLSearchParams(prev)
+        newParams.delete('page')
+        newParams.set('per_page', String(v))
+        return newParams
+      },
+      { replace },
+    )
   }
 
-  return { pageParam, perPageParam, setPerPageParam: handleSetPerPageParam, setPageParam: handleSetPageParam }
+  return {
+    pageParam,
+    perPageParam,
+    setPerPageParam: handleSetPerPageParam,
+    setPageParam: handleSetPageParam,
+  }
 }
 
 export function usePaginationParamsV2() {
-  const [pageParam, setPageParam] = useQueryParam(
-    'page',
-    withDefault(NumberParam, defaultPage),
-  )
-  const [pageSizeParam, setPageSizeParam] = useQueryParam(
-    'pageSize',
-    withDefault(NumberParam, defaultPerPageCount),
-  )
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  const handleSetPageParam = (v: number, updateType: UrlUpdateType) => {
-    if(v === 1) {
-      setPageParam(undefined, updateType)
-    } else {
-      setPageParam(v, updateType)
-    }
+  const pageParam = Number(searchParams.get('page')) || defaultPage
+  const pageSizeParam = Number(searchParams.get('pageSize')) || defaultPerPageCount
+
+  const handleSetPageParam = (v: number, replace: boolean = false) => {
+    setSearchParams(
+      prev => {
+        const newParams = new URLSearchParams(prev)
+        if (v === 1) {
+          newParams.delete('page')
+        } else {
+          newParams.set('page', String(v))
+        }
+        return newParams
+      },
+      { replace },
+    )
   }
 
   const handleSetPageSizeParam = (v: number) => {
-    setPageParam(undefined)
-    setPageSizeParam(v, 'pushIn')
+    setSearchParams(
+      prev => {
+        const newParams = new URLSearchParams(prev)
+        newParams.delete('page')
+        newParams.set('pageSize', String(v))
+        return newParams
+      },
+      { replace: false },
+    )
   }
 
-  return { pageParam, pageSizeParam, setPageSizeParam: handleSetPageSizeParam, setPageParam: handleSetPageParam }
+  return {
+    pageParam,
+    pageSizeParam,
+    setPageSizeParam: handleSetPageSizeParam,
+    setPageParam: handleSetPageParam,
+  }
 }

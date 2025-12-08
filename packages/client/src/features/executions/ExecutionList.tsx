@@ -17,7 +17,6 @@ import Table from '../../components/Table'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
@@ -25,7 +24,7 @@ import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsRow } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta, NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
+import { HomeScope, IMeta, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { fetchExecutions } from './executions.api'
@@ -36,10 +35,7 @@ import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
-export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; spaceId?: string }) => {
-  const user = useAuthUser()
-  const isAdmin = user?.isAdmin
-
+export const ExecutionList = ({ homeScope, spaceId, isAdmin }: { homeScope?: HomeScope; spaceId?: string|number, isAdmin?: boolean }) => {
   const {
     setPerPageParam,
     setPageParam,
@@ -124,8 +120,8 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, 'replaceIn')}
-          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+          setPage={p => setPageParam(p, true)}
+          onPerPageSelect={p => setPerPageParam(p, true)}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>

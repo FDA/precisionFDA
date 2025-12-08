@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -22,12 +22,12 @@ const CreateChallengePage = () => {
     mutationKey: ['create-challenge'],
     mutationFn: (payload: ChallengePayload) => createChallengeRequest(payload),
     onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['challenges'],
-        })
-        navigate('/challenges')
-        toast.success('Challenge has been created')
-      },
+      queryClient.invalidateQueries({
+        queryKey: ['challenges'],
+      })
+      navigate('/challenges')
+      toast.success('Challenge has been created')
+    },
     onError: () => {
       toast.error('Error: Adding challenge')
     },

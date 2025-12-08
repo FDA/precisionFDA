@@ -51,11 +51,12 @@ export type ResourceTypeUrlNames =
   | 'workflows'
   | 'assets'
   | 'databases'
-  | 'jobs'
   | 'members'
   | 'executions'
   | 'reports'
   | 'discussions'
+
+export type HomeResourceType = Exclude<ResourceTypeUrlNames, 'members'>
 
 export type APIResource =
   | 'admin-users'
@@ -82,7 +83,7 @@ export type PropertiesResource = 'files' | 'folders' | 'node' | 'asset' | 'workf
 
 export type DialogType = 'radio' | 'checkbox'
 
-export type EmitScope = (scope: ServerScope, featured: boolean) => void
+export type EmitScope = (scope: HomeScope, featured: boolean) => void
 
 export interface DownloadListResponse {
   id: number

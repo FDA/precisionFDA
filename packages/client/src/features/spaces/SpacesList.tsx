@@ -2,7 +2,7 @@ import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { useQuery } from '@tanstack/react-query'
 import { ColumnDefResolved } from '@tanstack/react-table'
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import styled from 'styled-components'
 import { BannerTitle, MainBanner } from '../../components/Banner'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
@@ -102,12 +102,13 @@ const SpacesList = () => {
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const { filterQuery, setSearchFilter } = useFilterParams({
-    filters: { ...columnFilters, spaceGroupId: 'number' },
-    onSetFilter: () => {
-      setSelectedIndexes({})
-      pagination.setPageParam(1, 'replaceIn')
-    },
+    filters: columnFilters,
   })
+
+  useEffect(() => {
+    setSelectedIndexes({})
+  }, [JSON.stringify(filterQuery), JSON.stringify(pagination), JSON.stringify(sort), setSelectedIndexes])
+
   const query = useListQuery<FetchSpacesListResponse>({
     fetchList: spacesListRequest,
     resource: resource,
@@ -218,8 +219,8 @@ const SpacesList = () => {
                 totalPages={meta?.totalPages}
                 perPage={pagination.perPageParam}
                 isHidden={false}
-                setPage={p => pagination.setPageParam(p, 'replaceIn')}
-                onPerPageSelect={p => pagination.setPerPageParam(p, 'replaceIn')}
+                setPage={p => pagination.setPageParam(p, true)}
+                onPerPageSelect={p => pagination.setPerPageParam(p, true)}
               />
               <HoverDNAnexusLogo opacity height={14} />
             </ContentFooter>

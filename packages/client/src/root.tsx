@@ -1,8 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom'
-import { QueryParamProvider } from 'use-query-params'
-import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
+import { createBrowserRouter, Navigate, Outlet } from 'react-router'
+import { RouterProvider } from 'react-router/dom'
 import AuthWall from './AuthWall'
 import Header from './components/Header/HeaderNext'
 import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
@@ -18,6 +17,9 @@ import queryClient from './utils/queryClient'
 import 'react-tooltip/dist/react-tooltip.css'
 import RequestAccessPage from './features/request-access/RequestAccessPage'
 import { ColorModeProvider } from './utils/ThemeContext'
+import { spacesRoutes } from './features/spaces/routes'
+import homeDetailRoutes from './features/home/show/routes'
+import HomeShowLayout from './features/home/show/HomeShowLayout'
 
 const DataPortalRoutes = React.lazy(() => import('./features/data-portals/routes'))
 const ExpertsSinglePage = React.lazy(() => import('./features/experts/details/index'))
@@ -27,9 +29,7 @@ const ContentEditorPage = React.lazy(() => import('./features/challenges/content
 const PublishingPage = React.lazy(() => import('./features/publishing/PublishingPage'))
 const TrackPage = React.lazy(() => import('./features/tracks/TrackPage'))
 const Admin = React.lazy(() => import('./features/admin'))
-const Home2 = React.lazy(() => import('./features/home'))
 const ChallengesList = React.lazy(() => import('./features/challenges/list/ChallengesList'))
-const Spaces = React.lazy(() => import('./features/spaces'))
 const CreateChallengePage = React.lazy(() => import('./features/challenges/form/CreateChallengePage'))
 const ProposeChallengePage = React.lazy(() => import('./features/challenges/form/ProposeChallengePage'))
 const NewsListPage = React.lazy(() => import('./features/news/NewsPage'))
@@ -69,11 +69,9 @@ const RootComponent = () => {
         >
           <AlertDismissedProvider>
             <Header />
-            <QueryParamProvider adapter={ReactRouter6Adapter}>
-              <React.Suspense fallback={<LayoutLoader />}>
-                <Outlet />
-              </React.Suspense>
-            </QueryParamProvider>
+            <React.Suspense fallback={<LayoutLoader />}>
+              <Outlet />
+            </React.Suspense>
             <PFDAToastContainer />
             <SessionExpiredModal {...sessionExpiredModal} />
             <ExpiringSessionModal modal={expiringSessionModal} />
@@ -128,9 +126,16 @@ const router = createBrowserRouter([
               </UserLayout>
             ),
           },
-          { path: 'home/*', element: <Home2 /> },
+          {
+            path: 'home/*',
+            element: <HomeShowLayout />,
+            children: homeDetailRoutes,
+          },
           { path: 'account/notifications', element: <NotificationsPage /> },
-          { path: 'spaces/*', element: <Spaces /> },
+          {
+            path: 'spaces/*',
+            children: spacesRoutes,
+          },
           { path: 'publish/*', element: <PublishingPage /> },
           { path: 'workflows/:workflowUid/analyses/new', element: <WorkflowRunPage /> },
           { path: 'admin/news', element: <ListAdminNews /> },

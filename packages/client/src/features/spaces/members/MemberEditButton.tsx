@@ -22,11 +22,9 @@ const MemberEditButton: React.FC<MemberEditButtonProps> = ({
     <>
       <Menu
         trigger={
-          <Menu.Trigger>
-            <StyledEditButton data-testid="member-edit-button" tabIndex={0}>
-              <ThreeDotsIcon width={16} />
-            </StyledEditButton>
-          </Menu.Trigger>
+          <StyledEditButton as={Menu.Trigger} data-testid="member-edit-button" tabIndex={0}>
+            <ThreeDotsIcon width={16} />
+          </StyledEditButton>
         }
       >
         <Menu.Item onClick={() => setShowModal(true)}>Change Role</Menu.Item>

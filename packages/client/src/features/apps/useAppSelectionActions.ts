@@ -1,6 +1,6 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import { IChallenge } from '../../types/challenge'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'

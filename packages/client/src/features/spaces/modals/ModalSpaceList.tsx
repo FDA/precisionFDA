@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { VerticalCenter } from '../../../components/Page/styles'
 import { ISpaceV2 } from '../spaces.types'

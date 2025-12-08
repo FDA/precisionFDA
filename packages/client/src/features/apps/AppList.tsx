@@ -7,7 +7,7 @@ import {
   VisibilityState,
 } from '@tanstack/react-table'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Button } from '../../components/Button'
 import { ActionsMenu } from '../../components/Menu'
 import { ContentFooter } from '../../components/Page/ContentFooter'
@@ -39,13 +39,13 @@ export const AppList = ({
   homeScope,
   spaceId,
   isContributorOrHigher,
+  isAdmin,
 }: {
   homeScope?: HomeScope
   spaceId?: string
   isContributorOrHigher?: boolean
+  isAdmin?: boolean
 }) => {
-  const user = useAuthUser()
-  const isAdmin = user?.isAdmin || false
   const {
     setPerPageParam,
     setPageParam,
@@ -133,7 +133,7 @@ export const AppList = ({
         </ActionsRow>
       </ResourceHeader>
       <AppsListTable
-        isAdmin={isAdmin}
+        isAdmin={isAdmin ?? false}
         homeScope={homeScope}
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery).filter(i => i.value !== undefined)}
@@ -157,8 +157,8 @@ export const AppList = ({
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, 'replaceIn')}
-          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+          setPage={p => setPageParam(p, true)}
+          onPerPageSelect={p => setPerPageParam(p, true)}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>

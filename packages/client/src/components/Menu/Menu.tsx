@@ -7,6 +7,8 @@ export interface MenuTriggerProps {
   children: React.ReactNode
   className?: string
   onClick?: (e: React.MouseEvent) => void
+  tabIndex?: number
+  'data-testid'?: string
 }
 
 export interface MenuItemProps {
@@ -58,9 +60,9 @@ export interface MenuProps {
   positioner?: React.ComponentProps<typeof BaseMenu.Positioner>
 }
 
-function MenuTrigger({ children, className, onClick }: MenuTriggerProps) {
+function MenuTrigger({ children, className, onClick, ...props }: MenuTriggerProps) {
   return (
-    <BaseMenu.Trigger className={cn(styles.trigger, className)} onClick={onClick}>
+    <BaseMenu.Trigger className={cn(styles.trigger, className)} {...props}>
       {children}
     </BaseMenu.Trigger>
   )

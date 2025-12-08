@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useParams } from 'react-router'
 import 'react-toastify/dist/ReactToastify.css'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'

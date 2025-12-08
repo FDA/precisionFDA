@@ -1,9 +1,9 @@
+import { Link } from 'react-router'
 import styled, { css } from 'styled-components'
 import { PageContainer, pagePaddingLR } from '../../../components/Page/styles'
 import { breakPoints, colors, theme } from '../../../styles/theme'
 import { TimeStatus } from '../types'
 import { Button } from '../../../components/Button'
-import { Link } from 'react-router-dom'
 
 export const LeftColumn = styled.div`
   display: flex;

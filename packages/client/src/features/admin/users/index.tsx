@@ -1,7 +1,7 @@
 import { Column, ColumnDef } from '@tanstack/react-table'
 import axios from 'axios'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { UsersIcon } from '../../../components/icons/UserIcon'

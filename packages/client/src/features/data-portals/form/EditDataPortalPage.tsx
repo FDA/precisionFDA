@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -63,12 +63,12 @@ const EditDataPortalPage = () => {
   return (
     <UserLayout mainScroll>
       <StyledPageCenter>
-      <StyledPageContent>
+        <StyledPageContent>
 
         <BackLinkMargin linkTo={`/data-portals/${portal.urlSlug}`}>
           Back to Data Portal
         </BackLinkMargin>
-      </StyledPageContent>
+        </StyledPageContent>
       </StyledPageCenter>
       {canEditSettings(user?.dxuser, portal.members) ? (
         <StyledPageCenter>

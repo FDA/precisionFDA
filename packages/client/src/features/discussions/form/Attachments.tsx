@@ -114,11 +114,9 @@ export function Attachments({
       {jobModalComp}
       <Menu
         trigger={
-          <Menu.Trigger>
-            <Button type="button" data-testid="admin-users-resource-button">
-              Select Attachment
-            </Button>
-          </Menu.Trigger>
+          <Button as={Menu.Trigger} type="button" data-testid="admin-users-resource-button">
+            Select Attachment
+          </Button>
         }
       >
         <ActionsMenuContent

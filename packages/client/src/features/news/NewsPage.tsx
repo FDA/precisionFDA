@@ -1,8 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
-import { format } from 'date-fns'
 import React from 'react'
-import { Link } from 'react-router-dom'
-import { StringParam, useQueryParams } from 'use-query-params'
+import { format } from 'date-fns'
+import { Link, useSearchParams } from 'react-router'
+import { useQuery } from '@tanstack/react-query'
 import { Button } from '../../components/Button'
 import ExternalLink from '../../components/Controls/ExternalLink'
 import { InlineError } from '../../components/Error'
@@ -37,8 +36,35 @@ const NewsPage = () => {
   usePageMeta({ title: 'News - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateNews = user && user.can_administer_site
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const query = {
+    year: searchParams.get('year') || undefined,
+    type: searchParams.get('type') || undefined,
+  }
+
+  const setQuery = (params: { year?: string | null; type?: string | null }) => {
+    setSearchParams(
+      prev => {
+        const newParams = new URLSearchParams(prev)
+
+        Object.entries(params).forEach(([key, value]) => {
+          if (value === null || value === undefined) {
+            newParams.delete(key)
+          } else {
+            newParams.set(key, value)
+          }
+        })
+        
+        // Reset to first page when filters change
+        newParams.delete('page')
+
+        return newParams
+      },
+      { replace: true },
+    )
+  }
   const pagination = usePaginationParamsV2()
-  const [query, setQuery] = useQueryParams({ year: StringParam, type: StringParam })
 
   const { data, isLoading, isFetched } = useNewsListQuery({
     year: query.year,
@@ -102,7 +128,7 @@ const NewsPage = () => {
                   isHidden={hidePagination(isFetched, data?.data?.length, data?.meta?.totalPages)}
                   onPerPageSelect={pagination.setPageSizeParam}
                   setPage={n => {
-                    pagination.setPageParam(n, 'replaceIn')
+                    pagination.setPageParam(n, true) // true = replace
                   }}
                 />
               </PageList>
@@ -121,16 +147,13 @@ const NewsPage = () => {
             <RightSideItem>
               <SectionTitle>Filter News</SectionTitle>
               <RightList>
-                <ItemButton selected={!query.type} onClick={() => setQuery({ type: null }, 'replaceIn')}>
+                <ItemButton selected={!query.type} onClick={() => setQuery({ type: null })}>
                   All
                 </ItemButton>
-                <ItemButton
-                  selected={query.type === 'publication'}
-                  onClick={() => setQuery({ type: 'publication' }, 'replaceIn')}
-                >
+                <ItemButton selected={query.type === 'publication'} onClick={() => setQuery({ type: 'publication' })}>
                   Publications
                 </ItemButton>
-                <ItemButton selected={query.type === 'article'} onClick={() => setQuery({ type: 'article' }, 'replaceIn')}>
+                <ItemButton selected={query.type === 'article'} onClick={() => setQuery({ type: 'article' })}>
                   Articles
                 </ItemButton>
               </RightList>
@@ -142,14 +165,14 @@ const NewsPage = () => {
                 <InlineError />
               ) : (
                 <RightList>
-                  <ItemButton selected={!query.year} onClick={() => setQuery({ year: null }, 'replaceIn')}>
+                  <ItemButton selected={!query.year} onClick={() => setQuery({ year: null })}>
                     All
                   </ItemButton>
                   {!isLoadingYearsList &&
                     yearsListData?.map(y => (
                       <ItemButton
                         key={y}
-                        onClick={() => setQuery({ year: y }, 'replaceIn')}
+                        onClick={() => setQuery({ year: y })}
                         selected={y.toString() === query.year?.toString()}
                       >
                         {y}

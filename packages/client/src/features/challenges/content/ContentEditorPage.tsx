@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link, Route, Routes, useMatch, useParams } from 'react-router-dom'
+import { Link, Route, Routes, useMatch, useParams } from 'react-router'
 import styled from 'styled-components'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { useAuthUser } from '../../auth/useAuthUser'

@@ -1,6 +1,7 @@
 import { QueryObserverOptions, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { newsAdminAllRequest, newsListRequest } from './api'
+import { NewsItem } from './types'
 
 type ParamsType = Record<string, number | string | null | undefined>
 
@@ -12,7 +13,7 @@ export const useNewsListQuery = (params: ParamsType) => {
 }
 
 export const useNewsAdminAllRequest = (params: ParamsType, opt?: QueryObserverOptions) =>
-  useQuery({
+  useQuery<NewsItem[]>({
     queryKey: ['news/admin', params],
     queryFn: () =>
       newsAdminAllRequest(params).catch(err => {

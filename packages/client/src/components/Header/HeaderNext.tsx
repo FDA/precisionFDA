@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 import React, { useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import { PlacesType, Tooltip } from 'react-tooltip'
 import { useAlertDismissed } from '../../features/admin/alerts/useAlertDismissedLocalStorage'
 import { CDMHKey, logout } from '../../features/auth/api'

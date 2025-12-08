@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import React, { useCallback, useRef, useState } from 'react'
-import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useParams } from 'react-router'
 import { Loader } from '../../../components/Loader'
 import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
 import { PageContainerMargin } from '../../../components/Page/styles'

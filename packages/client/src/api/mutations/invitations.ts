@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import { pluralize } from '../../utils/formatting'
 import { Invitation, provisionUsers } from '../../features/admin/users/api'
