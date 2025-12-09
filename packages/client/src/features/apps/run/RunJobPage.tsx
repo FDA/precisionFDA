@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
-import { useOutletContext, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { FormPageContainer } from '../../../components/Page/styles'
@@ -10,10 +10,10 @@ import { fetchApp } from '../apps.api'
 import { RunJobForm } from './RunJobForm'
 import { Topbox, TopboxItem } from './styles'
 import { getBaseLink } from './utils'
-import { HomeOutletContext } from '../../home/show/HomeShowLayout'
+import { useHomeScope } from '../../home/HomeScopeContext'
 
 export const RunJobPage = () => {
-  const { isHome, homeScopeChangeHandler } = useOutletContext<HomeOutletContext>()
+  const { isHome, homeScopeChangeHandler } = useHomeScope()
   const { appIdentifier, spaceId } = useParams<{ appIdentifier: string, spaceId: string }>()
   const user = useAuthUser()
   const { data: appData, isLoading } = useQuery({

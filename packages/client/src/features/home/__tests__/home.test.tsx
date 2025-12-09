@@ -4,10 +4,6 @@ import { HomeShowLayout } from '../show/HomeShowLayout'
 
 jest.mock('react-router', () => ({
   ...jest.requireActual('react-router'),
-  useOutletContext: () => ({
-    homeScope: 'me',
-    handleSetHomeScope: jest.fn(),
-  }),
   useSearchParams: () => [new URLSearchParams({ scope: 'me' }), jest.fn()],
 }))
 
