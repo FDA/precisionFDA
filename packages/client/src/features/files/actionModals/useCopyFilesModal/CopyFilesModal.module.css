@@ -1,0 +1,509 @@
+
+/* Modal Layout */
+.modalContainer {
+  display: flex;
+  flex-direction: row;
+  min-height: 400px;
+  max-height: calc(90vh - 120px); /* Account for modal header and footer */
+  overflow: hidden;
+}
+
+/* Panels */
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 350px;
+  overflow: hidden;
+  flex: 1 1 50%;
+  min-height: 300px;
+}
+
+.panelLeft {
+  flex: 0 1 auto;
+  min-width: 300px;
+  max-width: 550px;
+  border-right: 1px solid var(--c-layout-border-200);
+}
+
+@media (max-width: 700px) {
+  .modalContainer {
+    flex-direction: column;
+    max-height: calc(90vh - 120px);
+  }
+
+  .panel {
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 50%;
+    max-height: none;
+    min-height: 150px;
+  }
+
+  .panelLeft {
+    max-width: none;
+    border-right: none;
+    border-bottom: 1px solid var(--c-layout-border-200);
+  }
+}
+
+/* Panel Header */
+.panelHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--background);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--c-layout-border-100);
+  flex-shrink: 0;
+}
+
+.panelTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-700);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Scrollable Content Area */
+.scrollArea {
+  flex: 1 1 0;
+  overflow: auto;
+  padding: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tertiary-300) transparent;
+  min-height: 0;
+}
+
+.scrollArea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollArea::-webkit-scrollbar-thumb {
+  background-color: var(--tertiary-300);
+  border-radius: 3px;
+}
+
+.scrollArea::-webkit-scrollbar-thumb:hover {
+  background-color: var(--tertiary-400);
+}
+
+/* Selected Items List */
+.selectedItemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* File Card */
+.fileCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--c-layout-border-200);
+  background-color: var(--background);
+  transition: all 150ms ease;
+}
+
+
+.fileCardCopied {
+  background-color: var(--success-50);
+  border-color: var(--success-200);
+}
+
+.fileCardCopied:hover {
+  border-color: var(--success-300);
+}
+
+/* File Header (name and icon) */
+.fileHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fileLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-text-900);
+  text-decoration: none;
+  min-width: 0;
+  flex: 1;
+  font-weight: 500;
+}
+
+.fileLink:hover {
+  color: var(--primary-600);
+  text-decoration: underline;
+}
+
+.fileIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--c-text-500);
+}
+
+.fileName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  max-width: 100%;
+}
+
+/* File Metadata */
+.fileMetadata {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 24px;
+}
+
+.metadataItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--c-text-500);
+  font-size: 12px;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.metadataItem:hover {
+  color: var(--c-text-600);
+  text-decoration: underline;
+}
+
+.metadataIcon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metadataText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Folder Card */
+.folderCard {
+  border-radius: 8px;
+  border: 1px solid var(--c-layout-border-200);
+  background-color: var(--background);
+  overflow: hidden;
+  transition: all 150ms ease;
+}
+
+.folderCardCopied {
+  background-color: var(--success-50);
+  border-color: var(--success-200);
+}
+
+.folderHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: var(--tertiary-50);
+  border-bottom: 1px solid var(--c-layout-border-100);
+  min-width: 0;
+}
+
+.folderCardCopied .folderHeader {
+  background-color: var(--success-100);
+  border-bottom-color: var(--success-200);
+}
+
+.folderLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-text-900);
+  text-decoration: none;
+  min-width: 0;
+  flex: 1;
+  font-weight: 600;
+}
+
+.folderLink:hover {
+  color: var(--primary-600);
+  text-decoration: underline;
+}
+
+.folderIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--highlight-500);
+}
+
+.folderName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+/* Folder Children */
+.folderChildren {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.folderChild {
+  padding: 10px 12px 10px 32px;
+  border-bottom: 1px solid var(--c-layout-border-100);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.folderChild:last-child {
+  border-bottom: none;
+}
+
+.folderChildCopied {
+  background-color: var(--success-50);
+}
+
+/* Info Callout */
+.infoCallout {
+  margin: 0 8px 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background-color: var(--highlight-50);
+  border-left: 3px solid var(--highlight-400);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--highlight-800);
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--c-text-500);
+  font-size: 14px;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--c-text-500);
+  max-width: 300px;
+}
+
+.emptyStateText {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ============================
+   Scope and Folder Selection
+   ============================ */
+
+/* Search Bar */
+.searchWrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.searchInput {
+  flex: 1;
+}
+
+.searchClearButton {
+  flex-shrink: 0;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.breadcrumbDivider {
+  color: var(--c-text-400);
+  padding: 0 2px;
+}
+
+.breadcrumbButton {
+  padding: 2px 6px;
+  border: none;
+  background: transparent;
+  color: var(--primary-600);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 150ms ease;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breadcrumbButton:hover {
+  background-color: var(--primary-50);
+  color: var(--primary-700);
+}
+
+.breadcrumbButton:focus-visible {
+  outline: 2px solid var(--primary-300);
+  outline-offset: 1px;
+}
+
+/* Scope/Folder List */
+.selectionList {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: collapse;
+}
+
+.selectionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--c-layout-border-100);
+  cursor: pointer;
+  transition: all 150ms ease;
+  gap: 12px;
+  min-width: max-content;
+}
+
+.selectionRow:first-child {
+  border-top: none;
+}
+
+.selectionRow:hover {
+  background-color: var(--tertiary-50);
+}
+
+.selectionRow:focus-visible {
+  outline: 2px solid var(--primary-300);
+  outline-offset: -2px;
+}
+
+.selectionRowActive {
+  background-color: var(--primary-50);
+}
+
+.selectionCell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.selectionCellName {
+  flex: 1;
+  min-width: 0;
+}
+
+.selectionCellMeta {
+  flex-shrink: 0;
+}
+
+/* Scope/Folder Item */
+.itemName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.itemIcon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-text-600);
+}
+
+.itemLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--c-text-900);
+}
+
+.itemLabelBold {
+  font-weight: 600;
+}
+
+.itemBadges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.scopeLabel {
+  font-size: 12px;
+  color: var(--c-text-500);
+  padding: 2px 8px;
+  background-color: var(--tertiary-100);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.scopeLabelLink {
+  font-size: 12px;
+  color: var(--primary-600);
+  padding: 2px 8px;
+  background-color: var(--tertiary-100);
+  border-radius: 4px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+
+.scopeLabelLink:hover {
+  background-color: var(--primary-50);
+  color: var(--primary-700);
+  text-decoration: underline;
+}
+
+/* Tooltip-like title attributes for truncated text */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

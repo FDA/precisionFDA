@@ -1,67 +1,13 @@
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { TransparentButton } from '../../components/Button'
 import { compactScrollBarV2 } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
 
-export const Wrapper = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 700;
-  outline: 0;
-  width: fit-content;
-  min-width: 400px;
-  max-height: max(100% - 232px, 90%);
-`
-export const Backdrop = styled.div<{ $blur: boolean; $backdropZIndex?: number }>`
-  ${({ $blur }) =>
-    $blur &&
-    css`
-      backdrop-filter: blur(8px);
-    `}
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 500;
-  ${({ $backdropZIndex }) =>
-    $backdropZIndex &&
-    css`
-      z-index: ${$backdropZIndex};
-    `}
-`
-export const StyledModal = styled.div`
-  --modal-padding-LR: 1.5rem;
-  --modal-padding-TB: 1rem;
-  --modal-border-radius: 0.5rem;
-
-  color: var(--c-text-700);
-  z-index: 100;
-  background: var(--background);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--c-modal-border, transparent);
-
-  table {
-    display: table;
-    border-collapse: separate;
-    box-sizing: border-box;
-    text-indent: initial;
-    border-spacing: 2px;
-    border-color: grey;
-  }
-`
-export const Header = styled.div``
 export const HeaderTop = styled.div`
   border-radius: 8px 8px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.3rem;
   border-bottom: 1px solid var(--c-layout-border);
   padding: var(--modal-padding-TB) var(--modal-padding-LR);
 `
@@ -116,20 +62,6 @@ export const Content = styled.div<{ $overflowContent?: boolean }>`
   margin: 24px;
 `
 
-export const StyledHeading = styled.div`
-  font-weight: bolder;
-  font-size: 16px;
-  padding: 8px 12px;
-  display: flex;
-  justify-content: space-between;
-`
-
-export const Sticky = styled.div`
-  position: sticky;
-  top: 0;
-  background-color: var(--background);
-`
-
 export const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
@@ -171,26 +103,15 @@ export const ModalLoaderWrapper = styled.div`
   min-height: 200px;
 `
 
-export const ScrollPlace = styled.div`
-  ${compactScrollBarV2}
-  overflow-y: auto;
-  max-height: 50vh;
-  min-height: 50vh;
-`
-
 export const ModalPageRow = styled.div`
   display: grid;
   grid-template-columns: auto auto;
 `
 
 export const ModalPageCol = styled.div`
-  flex-grow: 1;
-  flex-shrink: 0;
   align-self: stretch;
   min-width: 350px;
-  width: 40vw;
-  height: 100%;
-  border-right: 1px solid var(--c-layout-border-200);
+  width: 50vw;
   &:last-child {
     border: 0;
   }
