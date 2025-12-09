@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
-import { useNavigate, useOutletContext, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -12,10 +12,10 @@ import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
 import { AxiosError } from 'axios'
-import { HomeOutletContext } from '../../home/show/HomeShowLayout'
+import { useHomeScope } from '../../home/HomeScopeContext'
 
 export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
-  const { isHome, homeScopeChangeHandler } = useOutletContext<HomeOutletContext>()
+  const { isHome, homeScopeChangeHandler } = useHomeScope()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { appUid } = useParams<{ appUid: string }>()
