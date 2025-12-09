@@ -21,7 +21,7 @@ aws autoscaling create-auto-scaling-group \
     --min-size $MIN_SIZE \
     --max-size $MAX_SIZE \
     --desired-capacity $DESIRED_CAP \
-    --tags "Key=Environment,Value=${ENVIRONMENT}" "Key=Role,Value=${ENV_INSTANCE_TYPE}" "Key=Namespace,Value=pfda" "Key=Name,Value=pfda-${ENVIRONMENT}-${ENV_INSTANCE_TYPE}-vm" \
+    --tags "Key=Environment,Value=${ENVIRONMENT}" "Key=Role,Value=${ENV_INSTANCE_TYPE}" "Key=Namespace,Value=pfda" "Key=Name,Value=pfda-${ENVIRONMENT}-${ENV_INSTANCE_TYPE}-vm" "Key=CrowdStrikeExempt,Value=ASG" \
     --vpc-zone-identifier "$ENV_SUBNET1","$ENV_SUBNET2","$ENV_SUBNET3" \
     --target-group-arns "${TG_ARRAY[@]}" \
     --health-check-type "ELB" \
