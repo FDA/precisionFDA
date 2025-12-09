@@ -7,35 +7,23 @@ import { Button } from '../../../../components/Button'
 import { FileCheckIcon } from '../../../../components/icons/FileCheckIcon'
 import { FileIcon } from '../../../../components/icons/FileIcon'
 import { FolderOpenIcon } from '../../../../components/icons/FolderOpenIcon'
+import { cn } from '../../../../utils/cn'
 import { displayPayloadMessage, Payload } from '../../../../utils/api'
 import { ApiErrorResponse, HomeScope, ServerScope } from '../../../home/types'
 import { getBasePathFromScope } from '../../../home/utils'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
-import { ButtonRow, Footer, ModalContentPadding } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
 import { copyFilesRequest, fetchSelectedFiles, validateCopyingFiles } from '../../files.api'
 import { IExistingFileSet, ISelectedFile, ISelectedFolder, SelectedNode } from '../../files.types'
 import { ScopeAndFolderSelection } from './ScopeAndFolderSelection'
-import {
-  CopyHelp,
-  CopyModalPageCol,
-  CopyModalPageRow,
-  CopyModalScrollPlace,
-  FileDetailItem,
-  FileListItem,
-  FolderChildrenList,
-  FolderChildrenListItem,
-  FolderHeading,
-  FolderItem,
-  NodeHeading,
-  SelectedList,
-  ShortenName,
-  StyledCopyFileDetail,
-  StyledFileDetailIcon,
-  StyledStickyTop,
-} from './styles'
+import styles from './CopyFilesModal.module.css'
+import { Footer, ModalScroll } from '../../../modal/styles'
 
-const FileListItemContent = ({ file }: { file: ISelectedFile }) => {
+interface FileListItemContentProps {
+  file: ISelectedFile
+}
+
+const FileListItemContent = ({ file }: FileListItemContentProps) => {
   const [searchParams] = useSearchParams()
   const homeScope = searchParams.get('scope') as HomeScope
   const currentPath = window.location.pathname
@@ -44,71 +32,121 @@ const FileListItemContent = ({ file }: { file: ISelectedFile }) => {
   if (file.sourceFolderId) {
     folderQ = `&folder_id=${file.sourceFolderId}`
   }
+
   return (
     <>
-      <NodeHeading href={`${currentPath}/${file.uid}`} target="_blank">
-        <FileIcon width={16} />
-        <ShortenName>{file.name}</ShortenName>
-      </NodeHeading>
-      <StyledCopyFileDetail>
-        <FileDetailItem href={`${pathWithScope}${folderQ}`} target="_blank">
-          <StyledFileDetailIcon>
+      <div className={styles.fileHeader}>
+        <a
+          href={`${currentPath}/${file.uid}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.fileLink}
+          title={file.name}
+        >
+          <FileIcon width={16} />
+          <span className={styles.fileName}>{file.name}</span>
+        </a>
+      </div>
+      <div className={styles.fileMetadata}>
+        <a
+          href={`${pathWithScope}${folderQ}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.metadataItem}
+          title={file.sourceScopePath}
+        >
+          <span className={styles.metadataIcon}>
             <FolderOpenIcon width={14} />
-          </StyledFileDetailIcon>
-          <ShortenName>{file.sourceScopePath}</ShortenName>
-        </FileDetailItem>
-      </StyledCopyFileDetail>
-      {file.isCopied && (
-        <StyledCopyFileDetail>
-          <FileDetailItem href={`${getBasePathFromScope(file.targetScope)}/files/${file.targetUid}`} target="_blank">
-            <StyledFileDetailIcon>
+          </span>
+          <span className={styles.metadataText}>{file.sourceScopePath}</span>
+        </a>
+        {file.isCopied && (
+          <a
+            href={`${getBasePathFromScope(file.targetScope)}/files/${file.targetUid}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.metadataItem}
+            title={file.targetScopePath}
+          >
+            <span className={styles.metadataIcon}>
               <FileCheckIcon width={14} />
-            </StyledFileDetailIcon>
-            <ShortenName>{file.targetScopePath}</ShortenName>
-          </FileDetailItem>
-        </StyledCopyFileDetail>
-      )}
+            </span>
+            <span className={styles.metadataText}>{file.targetScopePath}</span>
+          </a>
+        )}
+      </div>
     </>
   )
 }
 
-const SelectedFile = ({ file }: { file: ISelectedFile }) => {
+interface SelectedFileProps {
+  file: ISelectedFile
+}
+
+const SelectedFile = ({ file }: SelectedFileProps) => {
   return (
-    <FileListItem $isCopied={file.isCopied}>
+    <li className={cn(styles.fileCard, file.isCopied && styles.fileCardCopied)}>
       <FileListItemContent file={file} />
-    </FileListItem>
+    </li>
   )
 }
 
-const SelectedFolder = ({ folder }: { folder: ISelectedFolder }) => {
+interface SelectedFolderProps {
+  folder: ISelectedFolder
+}
+
+const SelectedFolder = ({ folder }: SelectedFolderProps) => {
   const [searchParams] = useSearchParams()
   const homeScope = searchParams.get('scope') as HomeScope
   const currentPath = window.location.pathname
   const pathWithScope = homeScope ? `${currentPath}?scope=${homeScope}&` : `${currentPath}?`
+
   return (
-    <FolderItem $isCopied={folder.isCopied}>
-      <FolderHeading href={`${pathWithScope}folder_id=${folder.id}`} target="_blank">
-        <FolderOpenIcon width={16} />
-        <ShortenName>{folder.name}</ShortenName>
-      </FolderHeading>
-      <FolderChildrenList>
+    <li className={cn(styles.folderCard, folder.isCopied && styles.folderCardCopied)}>
+      <div className={styles.folderHeader}>
+        <a
+          href={`${pathWithScope}folder_id=${folder.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.folderLink}
+          title={folder.name}
+        >
+          <FolderOpenIcon width={16} />
+          <span className={styles.folderName}>{folder.name}</span>
+        </a>
+      </div>
+      <ul className={styles.folderChildren}>
         {folder.children.map((child: ISelectedFile, index: number) => (
-          <FolderChildrenListItem key={index} $isCopied={!folder.isCopied && child.isCopied}>
+          <li
+            key={index}
+            className={cn(
+              styles.folderChild,
+              !folder.isCopied && child.isCopied && styles.folderChildCopied
+            )}
+          >
             <FileListItemContent file={child} />
-          </FolderChildrenListItem>
+          </li>
         ))}
-      </FolderChildrenList>
-    </FolderItem>
+      </ul>
+    </li>
   )
 }
 
-const CopyFileList = ({ nodes }: { nodes: SelectedNode[] }) => {
+interface CopyFileListProps {
+  nodes: SelectedNode[]
+}
+
+const CopyFileList = ({ nodes }: CopyFileListProps) => {
   return (
-    <SelectedList>
+    <ul className={styles.selectedItemsList}>
       {nodes.map((node: SelectedNode, index: number) => {
-        return node.type === 'UserFile' ? <SelectedFile key={index} file={node} /> : <SelectedFolder key={index} folder={node} />
+        return node.type === 'UserFile' ? (
+          <SelectedFile key={index} file={node} />
+        ) : (
+          <SelectedFolder key={index} folder={node} />
+        )
       })}
-    </SelectedList>
+    </ul>
   )
 }
 
@@ -262,30 +300,43 @@ export const useCopyFilesModal = ({
       headerText="Add Files To Space"
       isShown={isShown}
       hide={() => setShowModal(false)}
+      variant='large'
     >
       <ModalHeaderTop headerText="Copy Files" hide={() => setShowModal(false)} />
-      <CopyModalPageRow>
-        <CopyModalPageCol>
-          <CopyModalScrollPlace>
-            <StyledStickyTop>Selected Item(s)</StyledStickyTop>
-            {isLoading && <ModalContentPadding>Loading...</ModalContentPadding>}
+      <div className={styles.modalContainer}>
+        {/* Left Panel - Selected Items */}
+        <div className={cn(styles.panel, styles.panelLeft)}>
+          <div className={styles.panelHeader}>
+            <div className={styles.panelTitle}>Selected Items</div>
+          </div>
+          <div className={styles.scrollArea}>
+            {isLoading && (
+              <div className={styles.loadingContainer}>Loading...</div>
+            )}
             {isSuccess && <CopyFileList nodes={copyFiles} />}
-          </CopyModalScrollPlace>
-          {copyMessage.length > 0 && <CopyHelp data-variant="info">{copyMessage}</CopyHelp>}
-        </CopyModalPageCol>
+          </div>
+          {copyMessage.length > 0 && (
+            <div className={styles.infoCallout}>{copyMessage}</div>
+          )}
+        </div>
+
+        {/* Right Panel - Destination Selection */}
         <ScopeAndFolderSelection
           sourceScopes={sourceScopes}
           onSelectFolder={setSelectedFolderId}
           onSelectScope={setSelectedScope}
         />
-      </CopyModalPageRow>
+      </div>
       <Footer>
-        <ButtonRow>
-          <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button data-variant="primary" type="button" disabled={isLoading || isDisableCopy} onClick={e => handleSubmit(e)}>
-            Copy
-          </Button>
-        </ButtonRow>
+        <Button onClick={() => setShowModal(false)}>Cancel</Button>
+        <Button
+          data-variant="primary"
+          type="button"
+          disabled={isLoading || isDisableCopy}
+          onClick={e => handleSubmit(e)}
+        >
+          Copy
+        </Button>
       </Footer>
     </ModalNext>
   )

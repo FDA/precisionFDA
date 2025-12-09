@@ -1,36 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
-import { BreadcrumbDivider } from '../../../../components/Breadcrumb'
 import { Button } from '../../../../components/Button'
 import { InputText } from '../../../../components/InputText'
-import { StyledName } from '../../../../components/ResourceTable'
 import { FolderIcon } from '../../../../components/icons/FolderIcon'
 import { HomeIcon } from '../../../../components/icons/HomeIcon'
-import { StyledCell } from '../../../actionModals/styles'
+import { cn } from '../../../../utils/cn'
+import { getSpaceIdFromScope } from '../../../../utils'
 import { ServerScope } from '../../../home/types'
-import { ModalContentPadding, ModalPageCol } from '../../../modal/styles'
-import { SearchBar } from '../../../resources/styles'
 import { FdaRestrictedIcon } from '../../../spaces/FdaRestrictedIcon'
 import { ProtectedIcon } from '../../../spaces/ProtectedIcon'
 import { EditableSpace, fetchEditableSpacesList } from '../../../spaces/spaces.api'
 import { findSpaceTypeIcon } from '../../../spaces/useSpacesColumns'
 import { fetchFolderChildren } from '../../files.api'
 import { IFile, IFolder, IFolderPath } from '../../files.types'
-import {
-  CopyModalScrollPlace,
-  ModalSearchBarWrapper,
-  ModalStyledBreadcrumbs,
-  ModalStyledCell,
-  ModalStyledRow,
-  MyHomeStyledName,
-  ShortenFolderName,
-  SpaceAndFolderTable,
-  SpaceStyledName,
-  StyledBreadcrumb,
-  StyledBreadcrumbButton,
-  StyledNameIcon,
-  StyledStickyTop,
-} from './styles'
+import styles from './CopyFilesModal.module.css'
 
 const MY_HOME = {
   name: 'My Home',
@@ -52,7 +35,7 @@ const SpacesList = ({
   })
 
   if (isLoading) {
-    return <ModalContentPadding>Loading...</ModalContentPadding>
+    return <div className={styles.loadingContainer}>Loading...</div>
   }
 
   const spacesList = data.filter(
@@ -62,44 +45,68 @@ const SpacesList = ({
 
   const isFromMyHome = sourceScopes.indexOf('private') > -1
   if (spacesList.length === 0 && isFromMyHome) {
-    return 'You have no spaces.'
+    return <div className={styles.emptyState}><span className={styles.emptyStateText}>You have no spaces.</span></div>
   }
 
   return (
-    <SpaceAndFolderTable>
-      <tbody>
-        {!isFromMyHome && (
-          <ModalStyledRow onClick={() => onSelect(MY_HOME)}>
-            <ModalStyledCell>
-              <MyHomeStyledName data-turbolinks="false">
-                <StyledNameIcon>
-                  <HomeIcon />
-                </StyledNameIcon>
-                {MY_HOME.name}
-              </MyHomeStyledName>
-            </ModalStyledCell>
-            <StyledCell>
-              <MyHomeStyledName>{MY_HOME.scope}</MyHomeStyledName>
-            </StyledCell>
-          </ModalStyledRow>
-        )}
-        {spacesList.map((s, index) => (
-          <ModalStyledRow key={index} onClick={() => onSelect(s)}>
-            <ModalStyledCell>
-              <SpaceStyledName data-turbolinks="false">
-                <StyledNameIcon>{findSpaceTypeIcon(s.type)}</StyledNameIcon>
-                {s.protected && <ProtectedIcon color="var(--c-text-700)" />}
-                {s.restricted_reviewer && <FdaRestrictedIcon color="var(--c-text-700)" />}
-                <ShortenFolderName>{s.name}</ShortenFolderName>
-              </SpaceStyledName>
-            </ModalStyledCell>
-            <StyledCell>
-              <StyledName>{s.scope}</StyledName>
-            </StyledCell>
-          </ModalStyledRow>
-        ))}
-      </tbody>
-    </SpaceAndFolderTable>
+    <div className={styles.selectionList}>
+      {!isFromMyHome && (
+        <div
+          className={styles.selectionRow}
+          onClick={() => onSelect(MY_HOME)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && onSelect(MY_HOME)}
+        >
+          <div className={cn(styles.selectionCell, styles.selectionCellName)}>
+            <div className={styles.itemName}>
+              <span className={styles.itemIcon}>
+                <HomeIcon />
+              </span>
+              <span className={cn(styles.itemLabel, styles.itemLabelBold)}>{MY_HOME.name}</span>
+            </div>
+          </div>
+          <div className={cn(styles.selectionCell, styles.selectionCellMeta)}>
+            <span className={styles.scopeLabel}>{MY_HOME.scope}</span>
+          </div>
+        </div>
+      )}
+      {spacesList.map((s, index) => {
+        const spaceId = getSpaceIdFromScope(s.scope as ServerScope)
+        return (
+          <div
+            key={index}
+            className={styles.selectionRow}
+            onClick={() => onSelect(s)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && onSelect(s)}
+          >
+            <div className={cn(styles.selectionCell, styles.selectionCellName)}>
+              <div className={styles.itemName}>
+                <span className={styles.itemIcon}>{findSpaceTypeIcon(s.type)}</span>
+                <span className={styles.itemBadges}>
+                  {s.protected && <ProtectedIcon color="var(--c-text-700)" />}
+                  {s.restricted_reviewer && <FdaRestrictedIcon color="var(--c-text-700)" />}
+                </span>
+                <span className={cn(styles.itemLabel, styles.truncate)} title={s.title}>{s.title}</span>
+              </div>
+            </div>
+            <div className={cn(styles.selectionCell, styles.selectionCellMeta)}>
+              <a
+                href={`/spaces/${spaceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.scopeLabelLink}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {s.scope}
+              </a>
+            </div>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
@@ -120,32 +127,39 @@ const FolderList = ({
   })
 
   if (isLoading) {
-    return <ModalContentPadding>Loading...</ModalContentPadding>
+    return <div className={styles.loadingContainer}>Loading...</div>
   }
 
   const filteredFolders = data.filter(f => f.name.toLowerCase().includes(filterString.toLowerCase()))
 
   return filteredFolders.length === 0 ? (
-    <ModalContentPadding>
-      There are no folders in this directory. You can copy files directly to this location.
-    </ModalContentPadding>
+    <div className={styles.emptyState}>
+      <span className={styles.emptyStateText}>
+        There are no folders in this directory. You can copy files directly to this location.
+      </span>
+    </div>
   ) : (
-    <SpaceAndFolderTable>
-      <tbody>
-        {filteredFolders?.map(folder => (
-          <ModalStyledRow key={folder.id} onClick={() => onSelect(folder as IFolder)}>
-            <ModalStyledCell>
-              <SpaceStyledName data-turbolinks="false">
-                <StyledNameIcon>
-                  <FolderIcon width={18} />
-                </StyledNameIcon>
-                <ShortenFolderName>{folder.name}</ShortenFolderName>
-              </SpaceStyledName>
-            </ModalStyledCell>
-          </ModalStyledRow>
-        ))}
-      </tbody>
-    </SpaceAndFolderTable>
+    <div className={styles.selectionList}>
+      {filteredFolders?.map(folder => (
+        <div
+          key={folder.id}
+          className={styles.selectionRow}
+          onClick={() => onSelect(folder as IFolder)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && onSelect(folder as IFolder)}
+        >
+          <div className={cn(styles.selectionCell, styles.selectionCellName)}>
+            <div className={styles.itemName}>
+              <span className={styles.itemIcon}>
+                <FolderIcon width={18} />
+              </span>
+              <span className={cn(styles.itemLabel, styles.truncate)} title={folder.name}>{folder.name}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -213,47 +227,56 @@ export const ScopeAndFolderSelection = ({
   }, [selectedTarget?.scope])
 
   return (
-    <ModalPageCol>
-      <CopyModalScrollPlace>
-        <StyledStickyTop>
-          <ModalSearchBarWrapper>
-            <SearchBar>
-              <InputText
-                placeholder={`Search ${searchType}...`}
-                value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              />
-              <Button type="button" onClick={() => setSearchQuery('')}>
-                Clear
-              </Button>
-            </SearchBar>
-          </ModalSearchBarWrapper>
-          <ModalStyledBreadcrumbs>
-            <StyledBreadcrumbButton data-variant="link" onClick={() => setSelectedTarget(undefined)}>
-              All Scopes
-            </StyledBreadcrumbButton>
-            {breadcrumbs.length > BREADCRUMBS_LIMIT && (
-              <StyledBreadcrumb>
-                <BreadcrumbDivider>/</BreadcrumbDivider>
-                <StyledBreadcrumbButton
-                  data-variant="link"
-                  onClick={() => handleSelectBreadcrumb(breadcrumbs[breadcrumbs.length - (BREADCRUMBS_LIMIT + 1)].id)}
-                >
-                  ...
-                </StyledBreadcrumbButton>
-              </StyledBreadcrumb>
-            )}
-            {breadcrumbs.slice(-BREADCRUMBS_LIMIT).map((b, index) => (
-              <StyledBreadcrumb key={`divider-${index}`}>
-                <BreadcrumbDivider>/</BreadcrumbDivider>
-                <StyledBreadcrumbButton data-variant="link" onClick={() => handleSelectBreadcrumb(b.id)}>
-                  {b.name}
-                </StyledBreadcrumbButton>
-              </StyledBreadcrumb>
-            ))}
-          </ModalStyledBreadcrumbs>
-        </StyledStickyTop>
+    <div className={styles.panel}>
+      <div className={styles.panelHeader}>
+        <div className={styles.searchWrapper}>
+          <InputText
+            className={styles.searchInput}
+            placeholder={`Search ${searchType}...`}
+            value={searchQuery}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+          />
+          <Button className={styles.searchClearButton} type="button" onClick={() => setSearchQuery('')}>
+            Clear
+          </Button>
+        </div>
+        <div className={styles.breadcrumbs}>
+          <button
+            type="button"
+            className={styles.breadcrumbButton}
+            onClick={() => setSelectedTarget(undefined)}
+          >
+            All Scopes
+          </button>
+          {breadcrumbs.length > BREADCRUMBS_LIMIT && (
+            <span className={styles.breadcrumbItem}>
+              <span className={styles.breadcrumbDivider}>/</span>
+              <button
+                type="button"
+                className={styles.breadcrumbButton}
+                onClick={() => handleSelectBreadcrumb(breadcrumbs[breadcrumbs.length - (BREADCRUMBS_LIMIT + 1)].id)}
+              >
+                ...
+              </button>
+            </span>
+          )}
+          {breadcrumbs.slice(-BREADCRUMBS_LIMIT).map((b, index) => (
+            <span key={`divider-${index}`} className={styles.breadcrumbItem}>
+              <span className={styles.breadcrumbDivider}>/</span>
+              <button
+                type="button"
+                className={styles.breadcrumbButton}
+                onClick={() => handleSelectBreadcrumb(b.id)}
+                title={b.name}
+              >
+                {b.name}
+              </button>
+            </span>
+          ))}
+        </div>
+      </div>
 
+      <div className={styles.scrollArea}>
         {!selectedTarget && <SpacesList sourceScopes={sourceScopes} onSelect={setSelectedTarget} filterString={searchQuery} />}
         {selectedTarget && (
           <FolderList
@@ -263,7 +286,7 @@ export const ScopeAndFolderSelection = ({
             onSelect={handleSelectFolder}
           />
         )}
-      </CopyModalScrollPlace>
-    </ModalPageCol>
+      </div>
+    </div>
   )
 }

@@ -1,53 +1,11 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { CloudResourcesConditionalAnchor } from '../../components/ConditionalAnchor'
 import { CheckIcon } from '../../components/icons/CheckIcon'
 import { NavLink } from '../../components/NavLink'
 import { colors } from '../../styles/theme'
-import {
-  Action,
-  ActionGroup,
-  FunctionAction,
-  LinkAction as LinkActionType,
-  ModalAction,
-  RouteAction,
-  SelectionAction,
-} from './action-types'
+import { Action, FunctionAction, LinkAction as LinkActionType, ModalAction, RouteAction, SelectionAction } from './action-types'
 import { ActionsMenu } from '../../components/Menu'
-
-export const StyledActionItem = styled.li<{ disabled?: boolean; selected?: boolean }>`
-  margin: 0;
-  list-style: none;
-  color: var(--c-text-700);
-  cursor: pointer;
-  a {
-    color: var(--c-text-700);
-    display: inline-block;
-    width: 100%;
-    &:hover {
-      color: var(--c-text-700);
-    }
-  }
-
-  ${({ disabled }) =>
-    disabled &&
-    css`
-      color: var(--c-dropdown-menu-text-disabled);
-      cursor: not-allowed;
-      a {
-        cursor: not-allowed;
-        color: var(--c-dropdown-menu-text-disabled);
-      }
-    `}
-  ${({ selected }) =>
-    selected &&
-    css`
-      font-weight: 600;
-    `}
-  &:hover {
-    background: var(--tertiary-100);
-  }
-`
 
 const StyleSelection = styled.div`
   width: fit-content;
@@ -64,59 +22,10 @@ const StyleSelectionIcon = styled.div`
   height: 16px;
 `
 
-const StyleGroupActionTitle = styled.div`
-  padding: 8px;
-  line-height: 12px;
-  color: var(--c-text-700);
-  font-style: italic;
-`
-
-const GroupHorizontalSeparator = styled.hr`
-  border-top: 1px solid rgba(0, 0, 0, 0.15);
-  border-bottom: none;
-  margin: 4px 0;
-`
-
-export const ActionMenu = styled.ul`
-  margin: 0;
-  padding: 4px 0px;
-  width: max-content;
-  max-height: 500px;
-  overflow-y: auto;
-  font-size: 14px;
-  ${StyleSelection} {
-    padding: 4px 30px 4px 0;
-  }
-  ${StyledActionItem} {
-    line-height: 23px;
-    padding: 0 20px;
-  }
-`
-
-export const GroupActionMenu = styled.ul`
-  margin: 0;
-  padding: 4px 0px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 3px;
-  max-height: 500px;
-  overflow-y: auto;
-  font-size: 13px;
-  line-height: 23px;
-  min-width: 170px;
-
-  ${StyleSelection} {
-    padding: 0 30px 0 0;
-  }
-  ${StyledActionItem} {
-    padding: 0 12px;
-  }
-`
-
 export const StyledActionsMessage = styled.div`
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   max-width: 200px;
-  padding: 0 20px;
-  padding-bottom: 4px;
+  padding: 0 20px 4px;
   font-style: italic;
   font-size: 14px;
   line-height: 23px;
@@ -130,11 +39,7 @@ const ActionItem = ({ action }: { action: Action }) => {
     case 'route': {
       const routeAction = action as RouteAction
       return (
-        <ActionsMenu.Item 
-          key={action.name} 
-          disabled={isDisabled}
-          render={<NavLink to={routeAction.to}>{action.name}</NavLink>}
-        />
+        <ActionsMenu.Item key={action.name} disabled={isDisabled} render={<NavLink to={routeAction.to}>{action.name}</NavLink>} />
       )
     }
     case 'link': {
@@ -143,13 +48,13 @@ const ActionItem = ({ action }: { action: Action }) => {
       const method = typeof linkAction.link === 'string' ? 'GET' : linkAction.link.method
       if (linkAction.cloudResourcesConditionType) {
         return (
-          <ActionsMenu.Item 
+          <ActionsMenu.Item
             key={action.name}
             disabled={isDisabled}
             render={
-              <CloudResourcesConditionalAnchor 
-                href={url} 
-                data-turbolinks="false" 
+              <CloudResourcesConditionalAnchor
+                href={url}
+                data-turbolinks="false"
                 conditionType={linkAction.cloudResourcesConditionType}
               >
                 {action.name}
@@ -159,10 +64,14 @@ const ActionItem = ({ action }: { action: Action }) => {
         )
       }
       return (
-        <ActionsMenu.Item 
+        <ActionsMenu.Item
           key={action.name}
           disabled={isDisabled}
-          render={<a data-turbolinks="false" href={url} data-method={method}>{action.name}</a>}
+          render={
+            <a data-turbolinks="false" href={url} data-method={method}>
+              {action.name}
+            </a>
+          }
         />
       )
     }
@@ -225,24 +134,5 @@ export function ActionsMenuContent({ actions, message }: { actions: Action[]; me
         <ActionItem key={action.name} action={action} />
       ))}
     </>
-  )
-}
-
-export function ActionsMenuGroupContent({ content }: { content: ActionGroup[] }) {
-  return (
-    <GroupActionMenu>
-      {content.map((item, index) => {
-        const visibleActions = item.actions.filter(action => !action.shouldHide)
-        return (
-          <div key={item.title.toLowerCase().replace(/ /g, '-')}>
-            {item?.title && <StyleGroupActionTitle>{item.title}</StyleGroupActionTitle>}
-            {visibleActions.map(action => (
-              <ActionItem key={action.name} action={action} />
-            ))}
-            {index !== content.length - 1 && <GroupHorizontalSeparator />}
-          </div>
-        )
-      })}
-    </GroupActionMenu>
   )
 }
