@@ -202,8 +202,8 @@ export class UserFileService {
   async closeFile(fileUid: Uid<'file'>, followUpAction?: FOLLOW_UP_ACTION): Promise<void> {
     this.logger.log(`Closing file ${fileUid}`)
 
+    const [file, isChallengeBotFile] = await this.getFile(fileUid)
     await this.em.transactional(async () => {
-      const [file, isChallengeBotFile] = await this.getFile(fileUid)
 
       if (file.state !== FILE_STATE_DX.OPEN) {
         throw new ValidationError(
