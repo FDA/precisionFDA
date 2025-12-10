@@ -237,22 +237,6 @@ module Api
       end
     end
 
-    # Inputs
-    #
-    # name, title, readme, input_spec, output_spec, internet_access,
-    # instance_type, ordered_assets, packages, code, is_new
-    #
-    # Outputs
-    #
-    # id (string, only on success): the id of the created app, if success
-    # failure (string, only on failure): a message that can be shown to the user due to failure
-    def create
-      app_uid = https_apps_client.app_save(unsafe_params)
-      render json: { id: app_uid }
-    rescue HttpsAppsClient::Error => e
-      render status: e.status_code, json: { error: { message: e.message, statusCode: e.status_code, code: e.code } }
-    end
-
     def import
       if presenter.valid?
         asset = DockerImporter.import(
