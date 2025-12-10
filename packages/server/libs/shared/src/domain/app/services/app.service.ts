@@ -313,27 +313,43 @@ export class AppService implements SearchableByUid<'app'> {
     revision: number,
     user: User,
     assets: Asset[],
+    previousVersionAppDxid?: DxId<'app'>,
   ): Promise<DxId<'app'>> {
     this.logger.log(`Creating app in platform for applet id ${appletId}`)
+
+    const appDxId = constructDxName(user.dxuser, appInput.name, appInput.scope)
+    const currentBillTo = user.organization.getEntity().getDxOrg()
     const assetDxids = this.getAssetDxids(assets)
+
+    // It is not possible on the PLATFORM to change billTo while creating a new version of an app.
+    // It has to be changed independently with an update after the new version is created.
+    const previousBillTo = previousVersionAppDxid
+      ? (await this.platformClient.appDescribe(previousVersionAppDxid)).billTo
+      : undefined
+
     const appCreateParams: AppCreateParams = {
       applet: appletId,
-      name: constructDxName(user.dxuser, appInput.name, appInput.scope),
+      name: appDxId,
       title: appInput.title,
       summary: ' ',
-      description: appInput.readme && appInput.readme.length > 1 ? appInput.readme : ' ',
+      description: appInput.readme?.length > 1 ? appInput.readme : ' ',
       version: `r${revision}-${crypto.randomBytes(3).toString('hex')}`,
       resources: assetDxids,
       details: { ordered_assets: assetDxids },
       openSource: false,
-      billTo: user.organization.getEntity().getDxOrg(),
+      billTo: previousBillTo ?? currentBillTo,
       access: appInput.internet_access ? { network: ['*'] } : {},
     }
-    const appCreateResponse = await this.platformClient.appCreate(appCreateParams)
-    this.logger.log(
-      `App with id ${appCreateResponse.id} for applet id ${appletId} created successfully`,
-    )
-    return appCreateResponse.id
+
+    const { id: appId } = await this.platformClient.appCreate(appCreateParams)
+
+    // set billTo to current org if it changed for the new version
+    if (previousBillTo && previousBillTo !== currentBillTo) {
+      await this.platformClient.appUpdate(appId, { billTo: currentBillTo })
+    }
+
+    this.logger.log(`App with id ${appId} for applet id ${appletId} created successfully`)
+    return appId
   }
 
   private async createAppEvent(user: User, app: App): Promise<void> {
@@ -407,6 +423,11 @@ export class AppService implements SearchableByUid<'app'> {
     return app
   }
 
+  private async getLatestRevisionApp(appSeries: AppSeries): Promise<App> {
+    const appId = appSeries.latestRevisionAppId
+    return this.appRepository.findOneOrFail({ id: appId })
+  }
+
   /**
    * Creates app in database and platform.
    * @param appInput properties of newly created app
@@ -430,6 +451,9 @@ export class AppService implements SearchableByUid<'app'> {
       await this.validateForkedApp(appInput.forked_from as Uid<'app'>)
       // - create app series
       let appSeries = await this.getAppSeries(appInput.name, appInput.scope)
+      let previousVersionAppDxid = appSeries
+        ? (await this.getLatestRevisionApp(appSeries)).dxid
+        : null
       this.validateAppSeriesCreation(appSeries, appInput.createAppSeries)
       this.validateAppRevisionCreation(appSeries, appInput.createAppRevision)
       if (!appSeries && appInput.createAppSeries) {
@@ -455,6 +479,7 @@ export class AppService implements SearchableByUid<'app'> {
         revision,
         user,
         assets,
+        previousVersionAppDxid,
       )
 
       // - remove project objects (what the hell does this do???)

@@ -133,9 +133,7 @@ export class CliDescribeEntityFacade {
     if (!app) {
       throw new NotFoundError('App not found or not accessible')
     }
-    const platformAppData = await this.platformClient.appDescribe({
-      dxid: app.dxid,
-    })
+    const platformAppData = await this.platformClient.appDescribe(app.dxid)
 
     return CliAppDescribeDTO.fromEntity(platformAppData, app)
   }

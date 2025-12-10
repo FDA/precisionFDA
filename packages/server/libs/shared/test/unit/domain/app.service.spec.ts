@@ -22,14 +22,20 @@ import { PlatformClient } from '@shared/platform-client'
 import {
   AppCreateParams,
   AppletCreateParams,
+  AppUpdateParams,
   ObjectsParams,
 } from '@shared/platform-client/platform-client.params'
-import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
+import {
+  AppDescribeResponse,
+  ClassIdResponse,
+} from '@shared/platform-client/platform-client.responses'
 import { codeRemap } from '@shared/utils/app'
 import { expect } from 'chai'
 import { create, db } from '../../../src/test'
+import { Organization } from '@shared/domain/org/org.entity'
+import { Reference } from '@mikro-orm/core'
 
-describe('app service tests', () => {
+describe('AppService', () => {
   let em: EntityManager<MySqlDriver>
   let userCtx: UserContext
   let platformClient: PlatformClient
@@ -37,6 +43,7 @@ describe('app service tests', () => {
   let appRepository: AppRepository
   let appSeriesRepository: AppSeriesRepository
   let user: User
+  let org: Organization
 
   let appletCreateParams: AppletCreateParams
   let appCreateParams: AppCreateParams
@@ -55,7 +62,9 @@ describe('app service tests', () => {
     assetRepository = em.getRepository(Asset)
     appRepository = em.getRepository(App)
     appSeriesRepository = em.getRepository(AppSeries)
+    org = create.orgHelper.create(em)
     user = create.userHelper.create(em)
+    user.organization = Reference.create(org)
     user.privateFilesProject = privateFilesProjectId
     await em.flush()
 
@@ -82,7 +91,10 @@ describe('app service tests', () => {
         removeObjectsParam = params
         return { id: containerId }
       },
-    } as PlatformClient
+      async appDescribe(): Promise<AppDescribeResponse> {
+        return { billTo: user.billTo() } as AppDescribeResponse
+      },
+    } as unknown as PlatformClient
   })
 
   const getDefaultApp = (): SaveAppDto => {
@@ -220,7 +232,17 @@ describe('app service tests', () => {
 
   it('save app - test call app revision validation', async () => {
     const appInput = getDefaultApp()
-    create.appSeriesHelper.create(em, { user }, { name: appInput.name, scope: 'private' })
+    const app = create.appHelper.createRegular(em, { user }, { title: 'temporary' })
+    await em.flush()
+    create.appSeriesHelper.create(
+      em,
+      { user },
+      {
+        name: appInput.name,
+        scope: 'private',
+        latestRevisionAppId: app.id,
+      },
+    )
     await em.flush()
 
     const appService = new AppService(
@@ -501,7 +523,7 @@ describe('app service tests', () => {
     }
   })
 
-  const createAppWithNameAndFail = async (name: string, appService: AppService) => {
+  const createAppWithNameAndFail = async (name: string, appService: AppService): Promise<void> => {
     const appInput = getDefaultApp()
     appInput.name = name
 
@@ -517,7 +539,10 @@ describe('app service tests', () => {
     }
   }
 
-  const createAppWithNameAndSucceed = async (name: string, appService: AppService) => {
+  const createAppWithNameAndSucceed = async (
+    name: string,
+    appService: AppService,
+  ): Promise<void> => {
     const appInput = getDefaultApp()
     appInput.name = name
     appId = `app-${name}` // just to make it unique
@@ -710,5 +735,68 @@ describe('app service tests', () => {
     const loadedApp = await em.findOneOrFail(App, { uid: result })
     expect(loadedApp.spec.input_spec[0].class).to.equal('array:file')
     expect(loadedApp.spec.output_spec[0].class).to.equal('array:string')
+  })
+
+  it('save app - create a new revision for app with different billTo', async () => {
+    // create a first app so that we have app series
+    let appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
+    const appInput1 = getDefaultApp()
+    await appService.create(appInput1) // we don't care about the result
+
+    const previousBillTo = 'previousBillTo'
+    let appUpdateParams: AppUpdateParams
+    platformClient = {
+      async appletCreate(params: AppletCreateParams): Promise<ClassIdResponse> {
+        appletCreateParams = params
+        return { id: appletId }
+      },
+      async appCreate(params: AppCreateParams): Promise<ClassIdResponse> {
+        appCreateParams = params
+        return { id: appId }
+      },
+      async appUpdate(appId: DxId<'app'>, params: AppUpdateParams): Promise<ClassIdResponse> {
+        appUpdateParams = params
+        return { id: appId }
+      },
+      async containerRemoveObjects(
+        containerId: DxId,
+        params: ObjectsParams,
+      ): Promise<ClassIdResponse> {
+        removeObjectsContainerParam = containerId
+        removeObjectsParam = params
+        return { id: containerId }
+      },
+      async appDescribe(_appDxId: string): Promise<AppDescribeResponse> {
+        return { billTo: previousBillTo } as AppDescribeResponse
+      },
+    } as unknown as PlatformClient
+
+    // recreate app service with a differently defined client
+    appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
+    const appInput = getDefaultApp()
+
+    const result = await appService.create(appInput)
+    em.clear()
+
+    const loadedApp = await em.findOneOrFail(App, { uid: result })
+    expect(loadedApp).not.to.be.null()
+    // this should be set to current user
+    expect(appCreateParams.billTo).to.eq(previousBillTo)
+    // for the update we need current users bill to
+    expect(appUpdateParams.billTo).to.eq(user.billTo())
   })
 })

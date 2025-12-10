@@ -43,6 +43,10 @@ type AppletCreateParams = {
   access: any
 }
 
+type AppUpdateParams = {
+  billTo?: string
+}
+
 type AppCreateParams = {
   applet: string // deprecated field!
   name?: string
@@ -282,6 +286,7 @@ export {
   AppAddAuthorizedUsersParams,
   AppAddDevelopersParams,
   AppCreateParams,
+  AppUpdateParams,
   AppDescribeParams,
   AppletCreateParams,
   AppPublishParams,

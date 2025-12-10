@@ -15,6 +15,7 @@ import {
   AppDescribeParams,
   AppletCreateParams,
   AppPublishParams,
+  AppUpdateParams,
   CloneObjectsParams,
   CreateFolderParams,
   DbClusterActionParams,
@@ -125,6 +126,21 @@ export class PlatformClient {
    */
   async appCreate(params: AppCreateParams): Promise<ClassIdResponse<'app'>> {
     const url = `${config.platform.apiUrl}/app/new`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['accessToken'], params) },
+      url,
+    }
+    return await this.sendRequest(options)
+  }
+
+  /**
+   * Updates an app.
+   * API: /app-xxx/update
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-update
+   */
+  async appUpdate(appId: DxId<'app'>, params: AppUpdateParams): Promise<ClassIdResponse<'app'>> {
+    const url = `${config.platform.apiUrl}/${appId}/update`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: { ...omit(['accessToken'], params) },
@@ -883,8 +899,8 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
-  async appDescribe(params: AppDescribeParams): Promise<AppDescribeResponse> {
-    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+  async appDescribe(appDxId: string): Promise<AppDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${appDxId}/describe`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {},
