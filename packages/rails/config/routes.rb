@@ -41,6 +41,7 @@ Rails.application.routes.draw do
       end
 
       get "users", to: "users#index"
+      get "spaces", to: "spaces#index"
       get "invitations", to: "invitations#list"
       get "invitations/provisioning", to: "invitations#list_provisioning"
       get "all_users", to: "users#all_users"
