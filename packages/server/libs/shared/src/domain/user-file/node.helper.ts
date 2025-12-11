@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Node } from '@shared/domain/user-file/node.entity'
 import sanitize from 'sanitize-filename'
-import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { FILE_STATE_DX, FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
@@ -33,6 +33,42 @@ export class NodeHelper {
     private readonly folderRepo: FolderRepository,
     private readonly nodeRepo: NodeRepository,
   ) {}
+
+  async findOldOpenFilesAndAssets(): Promise<FileOrAsset[]> {
+    const oneMonthAgo = new Date()
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+
+    return (await this.nodeRepo.find({
+      user: this.userCtx.id,
+      stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET] },
+      state: FILE_STATE_DX.OPEN,
+      createdAt: { $lt: oneMonthAgo },
+    })) as FileOrAsset[]
+  }
+
+  async findOldClosingFilesAndAssets(): Promise<FileOrAsset[]> {
+    const oneMonthAgo = new Date()
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+
+    return (await this.nodeRepo.find({
+      user: this.userCtx.id,
+      stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET] },
+      state: FILE_STATE_DX.CLOSING,
+      createdAt: { $lt: oneMonthAgo },
+    })) as FileOrAsset[]
+  }
+
+  async findRecentClosingFilesAndAssets(): Promise<FileOrAsset[]> {
+    const oneMonthAgo = new Date()
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+
+    return (await this.nodeRepo.find({
+      user: this.userCtx.id,
+      stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET] },
+      state: FILE_STATE_DX.CLOSING,
+      createdAt: { $gte: oneMonthAgo },
+    })) as FileOrAsset[]
+  }
 
   async filterNodesByUser(nodes: Node[]): Promise<Node[]> {
     for (const node of nodes) {

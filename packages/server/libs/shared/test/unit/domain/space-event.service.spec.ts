@@ -2,7 +2,6 @@ import { createStubInstance, stub } from 'sinon'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import {
   SPACE_EVENT_ACTIVITY_TYPE,
@@ -50,10 +49,6 @@ describe('SpaceEvent service tests', () => {
   const spaceRepo = {
     findOne: spaceRepoFindOneStub,
   } as unknown as SpaceRepository
-
-  const userRepo = {
-    findOne: userRepoFindOneStub,
-  } as unknown as UserRepository
 
   const spaceMembershipRepo = {
     getMembership: spaceMembershipRepoGetMembershipStub,
@@ -217,13 +212,6 @@ describe('SpaceEvent service tests', () => {
   })
 
   function getInstance(userContext: UserContext): SpaceEventService {
-    return new SpaceEventService(
-      userContext,
-      em,
-      spaceRepo,
-      userRepo,
-      spaceMembershipRepo,
-      emailService,
-    )
+    return new SpaceEventService(userContext, em, spaceRepo, spaceMembershipRepo, emailService)
   }
 })

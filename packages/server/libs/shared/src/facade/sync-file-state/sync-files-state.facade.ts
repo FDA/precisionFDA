@@ -8,7 +8,6 @@ import { difference, groupBy } from 'ramda'
 import {
   findFileOrAssetsWithDxid,
   findFileOrAssetWithUid,
-  findUnclosedFilesOrAssets,
 } from '@shared/domain/user-file/user-file.helper'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { ChallengeUpdateCardImageUrlOperation } from '@shared/domain/challenge/ops/update-challenge-card-image-url'
@@ -19,6 +18,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserOpsCtx } from '@shared/types'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 @Injectable()
 export class SyncFilesStateFacade {
@@ -32,6 +32,7 @@ export class SyncFilesStateFacade {
     private readonly userCtx: UserContext,
     private readonly platformClient: PlatformClient,
     private readonly challengeRepo: ChallengeRepository,
+    private readonly nodeHelper: NodeHelper,
     private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
@@ -41,22 +42,90 @@ export class SyncFilesStateFacade {
   }
 
   async syncFiles(job: Job): Promise<void> {
-    const user = await this.userCtx.loadEntity()
+    await this.userCtx.loadEntity()
     const dxuser = this.userCtx.dxuser
 
-    let openFiles = await findUnclosedFilesOrAssets(this.em, user.id)
-    if (openFiles.length > this.MAX_FILES_PER_RUN) {
-      this.logger.warn(
-        `Too many open files (${openFiles.length}) for ${dxuser}, processing only first ${this.MAX_FILES_PER_RUN}`,
+    const recentClosingFiles = await this.nodeHelper.findRecentClosingFilesAndAssets()
+    const oldClosingFiles = await this.nodeHelper.findOldClosingFilesAndAssets()
+    const oldOpenFiles = await this.nodeHelper.findOldOpenFilesAndAssets()
+
+    if (recentClosingFiles.length > 0) {
+      const recentClosingResult = await this.resolveRecentClosingFiles(
+        recentClosingFiles,
+        dxuser,
+        job,
       )
-      openFiles = openFiles.slice(0, this.MAX_FILES_PER_RUN)
+      if (recentClosingResult === false) {
+        return
+      }
+    }
+
+    if (oldClosingFiles.length > 0) {
+      await this.resolveOldClosingFiles(oldClosingFiles)
+    }
+
+    if (oldOpenFiles.length > 0) {
+      await this.resolveOldOpenFiles(oldOpenFiles)
+    }
+
+    await this.removeTaskIfNoMoreUnclosedFiles(job)
+  }
+
+  private async resolveOldOpenFiles(oldOpenFiles: FileOrAsset[]): Promise<void> {
+    this.logger.log(
+      {
+        numberOfOldOpenFiles: oldOpenFiles.length,
+        oldOpenFiles: oldOpenFiles.map((f) => f.dxid),
+      },
+      'Resolving old open files',
+    )
+
+    for (const file of oldOpenFiles) {
+      await this.removeNodesFacade.removeFile(file)
+    }
+    // TODO add notification PFDA-6613
+  }
+
+  private async resolveOldClosingFiles(oldClosingFiles: FileOrAsset[]): Promise<void> {
+    this.logger.error(
+      {
+        numberOfOldClosingFiles: oldClosingFiles.length,
+        oldClosingFiles: oldClosingFiles.map((f) => f.dxid),
+      },
+      'Resolving old closing files',
+    )
+
+    for (const file of oldClosingFiles) {
+      await this.removeNodesFacade.removeFile(file)
+    }
+    // TODO add notification PFDA-6613
+  }
+
+  /**
+   * Returns false if another processing should not continue, because something bad happened.
+   *
+   * @param recentClosingFiles
+   * @param dxuser
+   * @param job
+   * @private
+   */
+  private async resolveRecentClosingFiles(
+    recentClosingFiles: FileOrAsset[],
+    dxuser: string,
+    job: Job,
+  ): Promise<boolean> {
+    if (recentClosingFiles.length > this.MAX_FILES_PER_RUN) {
+      this.logger.warn(
+        `Too many closing files (${recentClosingFiles.length}) for ${dxuser}, processing only first ${this.MAX_FILES_PER_RUN}`,
+      )
+      recentClosingFiles = recentClosingFiles.slice(0, this.MAX_FILES_PER_RUN)
     }
 
     this.logger.log(
       {
         dxuser,
-        numberOfOpenFiles: openFiles.length,
-        openFiles: openFiles.map((f) => f.dxid),
+        numberOfOpenFiles: recentClosingFiles.length,
+        openFiles: recentClosingFiles.map((f) => f.dxid),
       },
       `Starting files state sync for ${dxuser}`,
     )
@@ -64,7 +133,7 @@ export class SyncFilesStateFacade {
     try {
       // Group files based on project dxid, this is necessary to provide project hint to the
       // platform API call, which is VERY slow if this is not present
-      const openFilesByProject = groupBy((file: FileOrAsset) => file.project, openFiles)
+      const openFilesByProject = groupBy((file: FileOrAsset) => file.project, recentClosingFiles)
       for (const projectDxid in openFilesByProject) {
         if (openFilesByProject.hasOwnProperty(projectDxid)) {
           const openFilesInProject = openFilesByProject[projectDxid]
@@ -95,10 +164,9 @@ export class SyncFilesStateFacade {
       } else {
         this.logger.log({ error: err }, 'Unhandled error from platform, will retry later')
       }
-      return
+      return false
     }
-
-    await this.removeTaskIfNoMoreUnclosedFiles(job)
+    return true
   }
 
   private async syncFilesInProject(projectDxid: string, files: FileOrAsset[]): Promise<void> {
@@ -186,22 +254,22 @@ export class SyncFilesStateFacade {
 
   private async removeTaskIfNoMoreUnclosedFiles(job: Job): Promise<void> {
     // If user has no more unclosed files, remove this task
-    const openFiles = await findUnclosedFilesOrAssets(this.em, this.userCtx.id)
-    if (openFiles.length === 0) {
+    const recentClosingFiles = await this.nodeHelper.findRecentClosingFilesAndAssets()
+    if (recentClosingFiles.length === 0) {
       this.logger.log('Completed and all user files closed, removing repeatable job')
       await removeRepeatable(job)
     } else {
       this.logger.log(
         {
           dxuser: this.userCtx.dxuser,
-          openFiles: openFiles.map((f) => ({
+          openFiles: recentClosingFiles.map((f) => ({
             name: f.name,
             dxid: f.dxid,
             uid: f.uid,
             createdAt: f.createdAt,
           })),
         },
-        'Completed with open files remaining',
+        'Completed with closing files remaining',
       )
     }
   }

@@ -6,7 +6,6 @@ import { getEntityType, getObjectType } from '@shared/utils/object-utils'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { EmailService } from '@shared/domain/email/email.service'
@@ -48,7 +47,6 @@ export class SpaceEventService {
     private readonly user: UserContext,
     private readonly em: SqlEntityManager,
     private readonly spaceRepo: SpaceRepository,
-    private readonly userRepo: UserRepository,
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
     private readonly emailService: EmailService,
   ) {}
@@ -99,51 +97,51 @@ export class SpaceEventService {
     this.logger.log(
       `Sending notification for space event id: ${event.id} activityType: ${event.activityType}`,
     )
-    if (CONTENT_TYPES.includes(event.activityType)) {
-      const input: TypedEmailBodyDto<EMAIL_TYPES.newContentAdded> = {
-        type: EMAIL_TYPES.newContentAdded,
-        input: { id: event.id },
-        receiverUserIds: [],
-      }
-      await this.emailService.sendEmail(input)
-    } else if (COMMENT_TYPES.includes(event.activityType)) {
-      const input: TypedEmailBodyDto<EMAIL_TYPES.commentAdded> = {
-        type: EMAIL_TYPES.commentAdded,
-        input: { id: event.id },
-        receiverUserIds: [],
-      }
-      await this.emailService.sendEmail(input)
-    } else if (SPACE_TYPES.includes(event.activityType)) {
-      const input: TypedEmailBodyDto<EMAIL_TYPES.spaceChanged> = {
-        type: EMAIL_TYPES.spaceChanged,
-        input: {
-          initUserId: event.user.id,
-          spaceId: event.space.id,
-          activityType: getEnumKeyByValue(SPACE_EVENT_ACTIVITY_TYPE, event.activityType),
-        },
-        receiverUserIds: [],
-      }
-      await this.emailService.sendEmail(input)
-    } else if (MEMBERSHIP_TYPES.includes(event.activityType)) {
-      const input: TypedEmailBodyDto<EMAIL_TYPES.memberChangedAddedRemoved> = {
-        type: EMAIL_TYPES.memberChangedAddedRemoved,
-        input: {
-          initUserId: event.user.id,
-          spaceId: event.space.id,
-          updatedMembershipId: event.entityId,
-          activityType: getEnumKeyByValue(SPACE_EVENT_ACTIVITY_TYPE, event.activityType),
-          newMembershipRole: getEnumKeyByValue(SPACE_MEMBERSHIP_ROLE, event.role),
-        },
-        receiverUserIds: [],
-      }
-      try {
+    try {
+      if (CONTENT_TYPES.includes(event.activityType)) {
+        const input: TypedEmailBodyDto<EMAIL_TYPES.newContentAdded> = {
+          type: EMAIL_TYPES.newContentAdded,
+          input: { id: event.id },
+          receiverUserIds: [],
+        }
         await this.emailService.sendEmail(input)
-      } catch (error) {
-        this.logger.error(
-          `Error sending membership change notification for space event id: ${event.id}`,
-          error,
-        )
+      } else if (COMMENT_TYPES.includes(event.activityType)) {
+        const input: TypedEmailBodyDto<EMAIL_TYPES.commentAdded> = {
+          type: EMAIL_TYPES.commentAdded,
+          input: { id: event.id },
+          receiverUserIds: [],
+        }
+        await this.emailService.sendEmail(input)
+      } else if (SPACE_TYPES.includes(event.activityType)) {
+        const input: TypedEmailBodyDto<EMAIL_TYPES.spaceChanged> = {
+          type: EMAIL_TYPES.spaceChanged,
+          input: {
+            initUserId: event.user.id,
+            spaceId: event.space.id,
+            activityType: getEnumKeyByValue(SPACE_EVENT_ACTIVITY_TYPE, event.activityType),
+          },
+          receiverUserIds: [],
+        }
+        await this.emailService.sendEmail(input)
+      } else if (MEMBERSHIP_TYPES.includes(event.activityType)) {
+        const input: TypedEmailBodyDto<EMAIL_TYPES.memberChangedAddedRemoved> = {
+          type: EMAIL_TYPES.memberChangedAddedRemoved,
+          input: {
+            initUserId: event.user.id,
+            spaceId: event.space.id,
+            updatedMembershipId: event.entityId,
+            activityType: getEnumKeyByValue(SPACE_EVENT_ACTIVITY_TYPE, event.activityType),
+            newMembershipRole: getEnumKeyByValue(SPACE_MEMBERSHIP_ROLE, event.role),
+          },
+          receiverUserIds: [],
+        }
+        await this.emailService.sendEmail(input)
       }
+    } catch (error) {
+      this.logger.error(
+        `Error sending membership change notification for space event id: ${event.id}`,
+        error,
+      )
     }
   }
 }

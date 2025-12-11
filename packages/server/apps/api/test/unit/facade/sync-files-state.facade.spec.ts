@@ -14,6 +14,7 @@ import { FILE_STATE_DX, FileOrAsset } from '@shared/domain/user-file/user-file.t
 import { FileStateResult } from '@shared/platform-client/platform-client.responses'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 describe('SyncFilesStateFacade', () => {
   const user = {
@@ -26,6 +27,9 @@ describe('SyncFilesStateFacade', () => {
   const emFlushStub = stub()
   const emGetRepositoryStub = stub()
   const removeNodesFacadeRemoveFileStub = stub()
+  const nodeHelperFindRecentClosingFilesAndAssetsStub = stub()
+  const nodeHelperFindOldClosingFilesAndAssetsStub = stub()
+  const nodeHelperFindOldOpenFilesAndAssetsStub = stub()
 
   let findUnclosedFilesOrAssetsStub: SinonStub
   let findFileOrAssetWithUidStub: SinonStub
@@ -35,6 +39,11 @@ describe('SyncFilesStateFacade', () => {
     flush: emFlushStub,
     getRepository: emGetRepositoryStub,
   } as unknown as SqlEntityManager
+  const nodeHelper = {
+    findRecentClosingFilesAndAssets: nodeHelperFindRecentClosingFilesAndAssetsStub,
+    findOldClosingFilesAndAssets: nodeHelperFindOldClosingFilesAndAssetsStub,
+    findOldOpenFilesAndAssets: nodeHelperFindOldOpenFilesAndAssetsStub,
+  } as unknown as NodeHelper
   const userCtx = {
     dxuser: user.dxuser,
     async loadEntity(): Promise<User> {
@@ -63,6 +72,15 @@ describe('SyncFilesStateFacade', () => {
 
     findUnclosedFilesOrAssetsStub.reset()
     findUnclosedFilesOrAssetsStub.throws()
+
+    nodeHelperFindRecentClosingFilesAndAssetsStub.reset()
+    nodeHelperFindRecentClosingFilesAndAssetsStub.throws()
+
+    nodeHelperFindOldClosingFilesAndAssetsStub.reset()
+    nodeHelperFindOldClosingFilesAndAssetsStub.throws()
+
+    nodeHelperFindOldOpenFilesAndAssetsStub.reset()
+    nodeHelperFindOldOpenFilesAndAssetsStub.throws()
 
     findFileOrAssetWithUidStub.reset()
     findFileOrAssetWithUidStub.throws()
@@ -94,7 +112,14 @@ describe('SyncFilesStateFacade', () => {
   })
 
   function getInstance(): SyncFilesStateFacade {
-    return new SyncFilesStateFacade(em, userCtx, platformClient, challengeRepo, removeNodesFacade)
+    return new SyncFilesStateFacade(
+      em,
+      userCtx,
+      platformClient,
+      challengeRepo,
+      nodeHelper,
+      removeNodesFacade,
+    )
   }
 
   describe('#getBullJobId', () => {
@@ -126,12 +151,14 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as FileOrAsset
 
-      findUnclosedFilesOrAssetsStub
-        .withArgs(em, user.id)
+      nodeHelperFindRecentClosingFilesAndAssetsStub
         .onFirstCall()
         .resolves([file1, file2, file3])
         .onSecondCall()
         .resolves([])
+      nodeHelperFindOldClosingFilesAndAssetsStub.resolves([])
+      nodeHelperFindOldOpenFilesAndAssetsStub.resolves([])
+
       platformClientFileStatesStub
         .withArgs({
           fileDxids: [file1.dxid, file2.dxid],
@@ -181,12 +208,14 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as FileOrAsset
 
-      findUnclosedFilesOrAssetsStub
-        .withArgs(em, user.id)
+      nodeHelperFindRecentClosingFilesAndAssetsStub
         .onFirstCall()
         .resolves([file1, file2])
         .onSecondCall()
         .resolves([])
+      nodeHelperFindOldClosingFilesAndAssetsStub.resolves([])
+      nodeHelperFindOldOpenFilesAndAssetsStub.resolves([])
+
       platformClientFileStatesStub
         .withArgs({
           fileDxids: [file1.dxid, file2.dxid],
@@ -235,12 +264,14 @@ describe('SyncFilesStateFacade', () => {
           isCreatedByChallengeBot: () => false,
         } as unknown as FileOrAsset)
       }
-      findUnclosedFilesOrAssetsStub
-        .withArgs(em, user.id)
+      nodeHelperFindRecentClosingFilesAndAssetsStub
         .onFirstCall()
         .resolves(files)
         .onSecondCall()
         .resolves([])
+      nodeHelperFindOldClosingFilesAndAssetsStub.resolves([])
+      nodeHelperFindOldOpenFilesAndAssetsStub.resolves([])
+
       platformClientFileStatesStub
         .withArgs({
           fileDxids: files.slice(0, MAX_FILES_PER_RUN).map((f) => f.dxid),
@@ -284,12 +315,14 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as FileOrAsset
 
-      findUnclosedFilesOrAssetsStub
-        .withArgs(em, user.id)
+      nodeHelperFindRecentClosingFilesAndAssetsStub
         .onFirstCall()
         .resolves([file1])
         .onSecondCall()
         .resolves([])
+      nodeHelperFindOldClosingFilesAndAssetsStub.resolves([])
+      nodeHelperFindOldOpenFilesAndAssetsStub.resolves([])
+
       platformClientFileStatesStub
         .withArgs({
           fileDxids: [file1.dxid],
@@ -319,12 +352,14 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => true,
       } as unknown as FileOrAsset
 
-      findUnclosedFilesOrAssetsStub
-        .withArgs(em, user.id)
+      nodeHelperFindRecentClosingFilesAndAssetsStub
         .onFirstCall()
         .resolves([file1])
         .onSecondCall()
         .resolves([])
+      nodeHelperFindOldClosingFilesAndAssetsStub.resolves([])
+      nodeHelperFindOldOpenFilesAndAssetsStub.resolves([])
+
       platformClientFileStatesStub
         .withArgs({
           fileDxids: [file1.dxid],
@@ -356,6 +391,49 @@ describe('SyncFilesStateFacade', () => {
       // it needs to be moved into it's separate service and therefore it doesn't make much
       // sense to test calling the inside of the operation
       expect(emGetRepositoryStub.calledOnce).to.be.true()
+    })
+
+    it('remove abandoned files (open, closing)', async () => {
+      const file1 = {
+        uid: 'file1-dxid-1',
+        dxid: 'file1-dxid',
+        project: 'project-1',
+        isCreatedByChallengeBot: () => false,
+      } as unknown as FileOrAsset
+      const file2 = {
+        uid: 'file2-dxid-1',
+        dxid: 'file2-dxid',
+        project: 'project-1',
+        isCreatedByChallengeBot: () => false,
+      } as unknown as FileOrAsset
+
+      nodeHelperFindRecentClosingFilesAndAssetsStub.resolves([])
+      nodeHelperFindOldClosingFilesAndAssetsStub.resolves([file1])
+      nodeHelperFindOldOpenFilesAndAssetsStub.resolves([file2])
+
+      platformClientFileStatesStub
+        .withArgs({
+          fileDxids: [file1.dxid],
+          projectDxid: file1.project,
+        })
+        .resolves([])
+      platformClientFileStatesStub
+        .withArgs({
+          fileDxids: [file2.dxid],
+          projectDxid: file2.project,
+        })
+        .resolves([])
+
+      findFileOrAssetsWithDxidStub.withArgs(em, file1.dxid).resolves([file1])
+      findFileOrAssetsWithDxidStub.withArgs(em, file2.dxid).resolves([file2])
+      removeNodesFacadeRemoveFileStub.reset()
+
+      const facade = getInstance()
+      await facade.syncFiles({} as unknown as Job)
+
+      expect(removeNodesFacadeRemoveFileStub.callCount).to.eq(2)
+      expect(removeNodesFacadeRemoveFileStub.getCall(0).args[0]).to.deep.eq(file1)
+      expect(removeNodesFacadeRemoveFileStub.getCall(1).args[0]).to.deep.eq(file2)
     })
   })
 })
