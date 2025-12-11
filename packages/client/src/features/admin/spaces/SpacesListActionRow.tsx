@@ -10,6 +10,7 @@ import { ButtonsRow } from '../common'
 import { bulkDelete } from './api'
 import { useConfirm } from '../../modal/useConfirm'
 import { RowSelectionState } from '@tanstack/react-table'
+import { ModalScroll } from '../../modal/styles'
 
 type SpaceListActionRowProps = {
   selectedSpaces: ISpaceV2[]
@@ -43,7 +44,7 @@ export const SpacesListActionRow = ({ selectedSpaces, setSelectedIndexes, refetc
     headerText: 'Delete Spaces',
     dataVariant: 'warning',
     body: (
-      <>
+      <ModalScroll>
         <p>Are you sure you would like to delete following spaces?</p>
         <br />
         {selectedSpaces.map(space => (
@@ -51,7 +52,7 @@ export const SpacesListActionRow = ({ selectedSpaces, setSelectedIndexes, refetc
             {space.name}
           </p>
         ))}
-      </>
+      </ModalScroll>
     ),
   })
 
