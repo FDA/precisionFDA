@@ -203,22 +203,25 @@ export class UserFileService {
     this.logger.log(`Closing file ${fileUid}`)
 
     const [file, isChallengeBotFile] = await this.getFile(fileUid)
+
+    if (file.state === FILE_STATE_DX.CLOSING) {
+      this.logger.log(`File ${fileUid} is in closing state, skipping repeat of close file job`)
+      return
+    }
+    if (file.state !== FILE_STATE_DX.OPEN) {
+      throw new ValidationError(
+        `File ${fileUid} is not in open state. Current state: "${file.state}"`,
+      )
+    }
+
+    await this.closeFileOnPlatform(file.dxid, isChallengeBotFile)
+
     await this.em.transactional(async () => {
-
-      if (file.state !== FILE_STATE_DX.OPEN) {
-        throw new ValidationError(
-          `File ${fileUid} is not in open state. Current state: "${file.state}"`,
-        )
-      }
-
-      if (file.dxid) {
-        await this.closeFileOnPlatform(file.dxid, isChallengeBotFile)
-      }
-
       file.state = FILE_STATE_DX.CLOSING
-
-      await this.startFileSynchronization(fileUid, isChallengeBotFile, this.userCtx, followUpAction)
     })
+    this.logger.log(`File close finished for ${fileUid}`)
+
+    await this.startFileSynchronization(fileUid, isChallengeBotFile, this.userCtx, followUpAction)
   }
 
   /**

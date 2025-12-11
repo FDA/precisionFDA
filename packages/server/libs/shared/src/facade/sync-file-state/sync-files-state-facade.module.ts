@@ -4,9 +4,15 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
 import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes-facade.module'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 
 @Module({
-  imports: [PlatformClientModule, RemoveNodesFacadeModule, MikroOrmModule.forFeature([Challenge])],
+  imports: [
+    PlatformClientModule,
+    RemoveNodesFacadeModule,
+    UserFileModule,
+    MikroOrmModule.forFeature([Challenge]),
+  ],
   providers: [SyncFilesStateFacade],
   exports: [SyncFilesStateFacade],
 })

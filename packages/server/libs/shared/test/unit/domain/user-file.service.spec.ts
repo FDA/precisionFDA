@@ -91,6 +91,8 @@ describe('UserFileService', () => {
   const fileDownloadLinkStub = stub()
   const fileDescribeStub = stub()
   const fileRemoveStub = stub()
+  const userClientFileCloseStub = stub()
+  const challengeBotClientFileCloseStub = stub()
 
   const spaceFindOneStub = stub()
 
@@ -110,11 +112,13 @@ describe('UserFileService', () => {
     fileDownloadLink: fileDownloadLinkStub,
     fileDescribe: fileDescribeStub,
     fileRemove: fileRemoveStub,
+    fileClose: userClientFileCloseStub,
   } as unknown as PlatformClient
 
   const challengeBotFileDescribeStub = stub()
   const challengeBotClient = {
     fileDescribe: challengeBotFileDescribeStub,
+    fileClose: challengeBotClientFileCloseStub,
   } as unknown as PlatformClient
 
   const createNotificationStub = stub()
@@ -246,6 +250,12 @@ describe('UserFileService', () => {
     getLicenseItemsForNodeStub.reset()
     getLicenseItemsForNodeStub.throws()
 
+    userClientFileCloseStub.reset()
+    userClientFileCloseStub.throws()
+
+    challengeBotClientFileCloseStub.reset()
+    challengeBotClientFileCloseStub.throws()
+
     userRepoFindOneOrFailStub.reset()
     userRepoFindOneOrFailStub.throws()
     userRepoFindOneOrFailStub.withArgs(USER_ID).returns(USER)
@@ -278,6 +288,7 @@ describe('UserFileService', () => {
     fileDescribeStub.throws()
     fileRemoveStub.reset()
     fileRemoveStub.throws()
+
     challengeBotFileDescribeStub.reset()
     challengeBotFileDescribeStub.throws()
 
@@ -380,6 +391,7 @@ describe('UserFileService', () => {
   describe('#closeFile', () => {
     it('should close file', async () => {
       const userFile = {
+        uid: 'file-dxid-1',
         state: FILE_STATE_DX.OPEN,
         challengeResources: [stub()],
         isCreatedByChallengeBot: () => false,
@@ -391,18 +403,20 @@ describe('UserFileService', () => {
       fileRepoFindOneOrFailStub.withArgs({ uid: UID }, match.any).returns(userFile)
       nodeLoadIfAccessibleByUserStub.withArgs(USER, UID, spaceIds).returns(userFile)
       createFileSynchronizeJobTaskStub.reset()
+      userClientFileCloseStub.reset()
 
       await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
 
       expect(createFileSynchronizeJobTaskStub.calledOnce).to.be.true()
       expect(createFileSynchronizeJobTaskStub.firstCall.args[0]).deep.eq({
-        fileUid: 'file-dxid-1',
+        fileUid: userFile.uid,
         isChallengeBotFile: false,
         followUpAction: 'UPDATE_DATA_PORTAL_IMAGE_URL',
       })
+      expect(userFile.state).to.eq(FILE_STATE_DX.CLOSING)
     })
 
-    it('should throw ValidationError - file not in open state', async () => {
+    it('should skip closing file - file already in closing state', async () => {
       const userFile = {
         state: FILE_STATE_DX.CLOSING,
         challengeResources: [stub()],
@@ -414,20 +428,15 @@ describe('UserFileService', () => {
 
       fileRepoFindOneOrFailStub.withArgs({ uid: UID }, match.any).returns(userFile)
       nodeLoadIfAccessibleByUserStub.withArgs(USER, UID, spaceIds).returns(userFile)
-      createFileSynchronizeJobTaskStub.reset()
 
-      try {
-        await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
-        expect.fail('should have thrown error')
-      } catch (error) {
-        expect(error.name).to.eq('ValidationError')
-        expect(error.message).to.eq(`File ${UID} is not in open state. Current state: "closing"`)
-      }
+      await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
+      expect(userClientFileCloseStub.calledOnce).to.be.false()
     })
 
     it('should close file created by challenge bot', async () => {
       isChallengeAdminStub.returns(true)
       const userFile = {
+        uid: 'file-dxid-1',
         state: FILE_STATE_DX.OPEN,
         challengeResources: [stub()],
         isCreatedByChallengeBot: () => true,
@@ -435,15 +444,18 @@ describe('UserFileService', () => {
 
       fileRepoFindOneStub.withArgs({ uid: UID }, match.any).returns(userFile)
       createFileSynchronizeJobTaskStub.reset()
+      challengeBotClientFileCloseStub.reset()
 
       await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
 
       expect(createFileSynchronizeJobTaskStub.calledOnce).to.be.true()
       expect(createFileSynchronizeJobTaskStub.firstCall.args[0]).deep.eq({
-        fileUid: 'file-dxid-1',
+        fileUid: userFile.uid,
         isChallengeBotFile: true,
         followUpAction: 'UPDATE_DATA_PORTAL_IMAGE_URL',
       })
+
+      expect(userFile.state).to.eq(FILE_STATE_DX.CLOSING)
     })
   })
 

@@ -236,7 +236,6 @@ export class JobService implements SearchableByUid<'job'> {
           this.user,
           this.em as SqlEntityManager,
           this.spaceRepo,
-          this.userRepo,
           this.spaceMembershipRepo,
           this.emailService,
         )

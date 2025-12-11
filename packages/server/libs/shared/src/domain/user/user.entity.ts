@@ -294,12 +294,14 @@ export class User extends BaseEntity {
   }
 
   async accessibleSpaces(): Promise<Space[]> {
-    await this.spaceMemberships.load({ populate: ['spaces'] })
+    await this.spaceMemberships.load({
+      populate: ['spaces'],
+      where: { spaces: { state: { $ne: SPACE_STATE.DELETED } }, active: true },
+    })
 
     return Array.from(this.spaceMemberships)
-      .filter((m) => m.active)
+      .filter((spaceMembership) => spaceMembership.active)
       .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
-      .filter((space) => space.state !== SPACE_STATE.DELETED)
   }
 
   async accessibleSpaceIds(): Promise<number[]> {
@@ -308,24 +310,28 @@ export class User extends BaseEntity {
   }
 
   async editableSpaces(): Promise<Space[]> {
-    await this.spaceMemberships.load({ populate: ['spaces'] })
+    await this.spaceMemberships.load({
+      populate: ['spaces'],
+      where: { spaces: { state: { $ne: SPACE_STATE.DELETED } }, active: true },
+    })
 
     return Array.from(this.spaceMemberships)
-      .filter((m) => m.active && CAN_EDIT_ROLES.includes(m.role))
+      .filter((spaceMembership) => CAN_EDIT_ROLES.includes(spaceMembership.role))
       .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
-      .filter((space) => space.state !== SPACE_STATE.DELETED)
   }
 
   /**
    * Returns spaces that the user is either lead or admin.
    */
   async manageableSpaces(): Promise<Space[]> {
-    await this.spaceMemberships.load({ populate: ['spaces'] })
+    await this.spaceMemberships.load({
+      populate: ['spaces'],
+      where: { spaces: { state: { $ne: SPACE_STATE.DELETED } }, active: true },
+    })
 
     return Array.from(this.spaceMemberships)
-      .filter((m) => m.active && ADMIN_LEAD_ROLES.includes(m.role))
+      .filter((m) => ADMIN_LEAD_ROLES.includes(m.role))
       .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
-      .filter((space) => space.state !== SPACE_STATE.DELETED)
   }
 
   async leadableSpaces(): Promise<Space[]> {
