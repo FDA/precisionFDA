@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { toast } from 'react-toastify'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
@@ -40,7 +39,7 @@ export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: 
 
     const url = generateCopyUrl(displayData, window.location.href, app, copyType)
 
-    toast.success('The link has been copied into your clipboard')
+    toastSuccess('The link has been copied into your clipboard')
     navigator.clipboard.writeText(url)
   }
 

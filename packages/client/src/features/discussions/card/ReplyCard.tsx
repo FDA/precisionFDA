@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { toast } from 'react-toastify'
 import { Markdown } from '../../../components/Markdown'
 import { ReplyArrowIcon } from '../../../components/icons/ReplyArrowIcon'
 import { StyledMarkdown } from '../../../styles/commonStyles'
@@ -13,6 +12,7 @@ import { EditNoteEntity } from '../form/EditNoteEntity'
 import { groupByAttachmentType } from '../helpers'
 import { StyledCommentCard, StyledReplyButton } from '../styles'
 import { CardHeader } from './CardHeader'
+import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export function ReplyCard({
   canEdit,
@@ -47,7 +47,7 @@ export function ReplyCard({
       queryClient.invalidateQueries({
         queryKey: ['discussion'],
       })
-      toast.success(`${replyType === 'answer' ? 'Answer' : 'Comment'} successfully removed`)
+      toastSuccess(`${replyType === 'answer' ? 'Answer' : 'Comment'} successfully removed`)
     },
   })
   const { open: openConfirmation, Confirm: ConfirmSubmit } = useConfirm({

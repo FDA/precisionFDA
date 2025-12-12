@@ -23,7 +23,7 @@ import {
 } from '../../../components/Public/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { usePaginationParamsV2 } from '../../../hooks/usePaginationState'
-import { useLastWSNotification, useToastWSHandler } from '../../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
 import PublicLayout from '../../../layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { NOTIFICATION_ACTION } from '../../home/types'
@@ -94,7 +94,6 @@ const ChallengesList = () => {
     queryFn: () => challengesYearsListRequest(),
   })
 
-  useToastWSHandler()
   const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED])
 
   useEffect(() => {

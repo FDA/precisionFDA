@@ -33,7 +33,7 @@ import { StateCell } from '../StateCell'
 import { fetchExecution } from '../executions.api'
 import { IExecution } from '../executions.types'
 import { FailureMessage, TitleLeft } from './styles'
-import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
 import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
 
 export const ExecutionDetails = ({
@@ -52,7 +52,7 @@ export const ExecutionDetails = ({
     queryKey: ['execution', executionUid],
     queryFn: () =>
       fetchExecution(executionUid!).then(d => {
-        if(isHome) {
+        if (isHome) {
           homeScopeChangeHandler(d.job.scope, d.job.featured)
         }
         return d

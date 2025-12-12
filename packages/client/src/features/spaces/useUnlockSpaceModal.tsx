@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
 import React from 'react'
-import { toast } from 'react-toastify'
 import { styled } from 'styled-components'
 import { Button } from '../../components/Button'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
@@ -8,34 +7,25 @@ import { Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { unlockSpaceRequest } from './spaces.api'
 import { ISpace } from './spaces.types'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledBody = styled.div`
   padding: 20px;
 `
 
-export const useUnlockSpaceModal = ({
-  space,
-  onSuccess,
-}: {
-  space: ISpace
-  onSuccess?: (isLocked: boolean) => void
-}) => {
+export const useUnlockSpaceModal = ({ space, onSuccess }: { space: ISpace; onSuccess?: (isLocked: boolean) => void }) => {
   const isLocked = space.links.unlock
 
   const { isShown, setShowModal } = useModal()
   const unlockSpaceMutation = useMutation({
     mutationKey: ['lock-unlock-space'],
-    mutationFn: (payload: {
-      id: string
-      op: 'lock' | 'unlock'
-      link?: string
-    }) => unlockSpaceRequest(payload),
+    mutationFn: (payload: { id: string; op: 'lock' | 'unlock'; link?: string }) => unlockSpaceRequest(payload),
     onSuccess: () => {
-      if(onSuccess) onSuccess(!!isLocked)
+      if (onSuccess) onSuccess(!!isLocked)
       setShowModal(false)
     },
-    onError: (err) => {
-      toast.error(`Failed to unlock space: ${err}`)
+    onError: err => {
+      toastError(`Failed to unlock space: ${err}`)
     },
   })
   const handleClose = () => {
@@ -51,9 +41,7 @@ export const useUnlockSpaceModal = ({
       hide={handleClose}
     >
       <ModalHeaderTop headerText={`${isLocked ? 'Unlock' : 'Lock'} space`} hide={handleClose} />
-      <StyledBody>
-        Are you sure you want to {isLocked ? 'unlock' : 'lock'} this space?
-      </StyledBody>
+      <StyledBody>Are you sure you want to {isLocked ? 'unlock' : 'lock'} this space?</StyledBody>
       <Footer>
         <Button type="button" onClick={handleClose}>
           Cancel

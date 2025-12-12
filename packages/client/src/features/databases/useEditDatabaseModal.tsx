@@ -2,7 +2,6 @@ import { ErrorMessage } from '@hookform/error-message'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { FieldGroup, InputError } from '../../components/form/styles'
 import { InputText } from '../../components/InputText'
 import { ButtonRow, Footer, ModalScroll, StyledForm } from '../modal/styles'
@@ -12,14 +11,9 @@ import { IDatabase } from './databases.types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Button } from '../../components/Button'
 import { ApiErrorResponse } from '../home/types'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
-const EditDatabaseInfoForm = ({
-  db,
-  handleClose,
-}: {
-  db: IDatabase
-  handleClose: () => void
-}) => {
+const EditDatabaseInfoForm = ({ db, handleClose }: { db: IDatabase; handleClose: () => void }) => {
   const queryClient = useQueryClient()
 
   const {
@@ -35,8 +29,7 @@ const EditDatabaseInfoForm = ({
 
   const editDbClusterMutation = useMutation({
     mutationKey: ['edit-database'],
-    mutationFn: (payload: EditDatabasePayload) =>
-      editDatabaseRequest(payload, db.uid),
+    mutationFn: (payload: EditDatabasePayload) => editDatabaseRequest(payload, db.uid),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['dbcluster', db.uid],
@@ -45,11 +38,11 @@ const EditDatabaseInfoForm = ({
         queryKey: ['dbclusters'],
       })
       handleClose()
-      toast.success('Success: Editing database info')
+      toastSuccess('Success: Editing database info')
     },
     onError: (error: unknown) => {
       const err = error as ApiErrorResponse
-      toast.error(`Error: ${err?.error?.message}`)
+      toastError(`Error: ${err?.error?.message}`)
     },
   })
 
@@ -71,24 +64,12 @@ const EditDatabaseInfoForm = ({
               placeholder="Enter name..."
               disabled={isSubmitting}
             />
-            <ErrorMessage
-              errors={errors}
-              name="name"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
           <FieldGroup>
             <label>Description</label>
-            <InputText
-              {...register('description')}
-              placeholder="Enter description..."
-              disabled={isSubmitting}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="description"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <InputText {...register('description')} placeholder="Enter description..." disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
         </StyledForm>
       </ModalScroll>
@@ -97,12 +78,7 @@ const EditDatabaseInfoForm = ({
           <Button type="button" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            form="edit-database-form"
-            disabled={isSubmitting}
-          >
+          <Button data-variant="primary" type="submit" form="edit-database-form" disabled={isSubmitting}>
             Edit
           </Button>
         </ButtonRow>
@@ -118,17 +94,8 @@ export const useEditDatabaseModal = (selectedItem: IDatabase) => {
     setShowModal(false)
   }
   const modalComp = (
-    <ModalNext
-      id="modal-dbclusters-edit"
-      data-testid="modal-dbclusters-edit"
-      isShown={isShown}
-      hide={handleClose}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText="Edit database info"
-        hide={() => setShowModal(false)}
-      />
+    <ModalNext id="modal-dbclusters-edit" data-testid="modal-dbclusters-edit" isShown={isShown} hide={handleClose}>
+      <ModalHeaderTop disableClose={false} headerText="Edit database info" hide={() => setShowModal(false)} />
       <EditDatabaseInfoForm db={selected} handleClose={handleClose} />
     </ModalNext>
   )

@@ -1,9 +1,8 @@
 import { useMutation, UseQueryResult } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
-import { Button } from '../../../components/Button'
 import Menu from '../../../components/Menu/Menu'
+import { useNavigate } from 'react-router'
+import { Button } from '../../../components/Button'
 import { ArrowIcon } from '../../../components/icons/ArrowIcon'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { UnlockIcon } from '../../../components/icons/UnlockIcon'
@@ -17,6 +16,7 @@ import { AxiosError } from 'axios'
 import { BackendError } from '../../../api/errors'
 import { resourceCountString } from '../../../utils/formatting'
 import { ButtonsRow } from '../common'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button>>(
   (props, ref) => {
@@ -47,13 +47,13 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     mutationKey: ['bulk-unlock'],
     mutationFn: () => bulkUnlock(selectedIds),
     onSuccess: () => {
-      toast.success(`${resourceCountString('User', selectedIds.length)} successfully unlocked!`)
+      toastSuccess(`${resourceCountString('User', selectedIds.length)} successfully unlocked!`)
     },
     onError: (e: AxiosError<BackendError>) => {
       if (e.response?.data?.error?.message) {
-        toast.error(`Error: ${e.response.data.error.message}`)
+        toastError(`Error: ${e.response.data.error.message}`)
       } else {
-        toast.error('Error unlocking users!')
+        toastError('Error unlocking users!')
       }
     },
   })
@@ -61,14 +61,14 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     mutationKey: ['bulk-deactivate'],
     mutationFn: () => bulkDeactivate(selectedIds),
     onSuccess: () => {
-      toast.success(`${resourceCountString('User', selectedIds.length)} successfully deactivated!`)
+      toastSuccess(`${resourceCountString('User', selectedIds.length)} successfully deactivated!`)
       refetchUsers()
     },
     onError: (e: AxiosError<BackendError>) => {
       if (e.response?.data?.error?.message) {
-        toast.error(`Error: ${e.response.data.error.message}`)
+        toastError(`Error: ${e.response.data.error.message}`)
       } else {
-        toast.error('Error deactivating users')
+        toastError('Error deactivating users')
       }
     },
   })
@@ -76,14 +76,14 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     mutationKey: ['bulk-activate'],
     mutationFn: () => bulkActivate(selectedIds),
     onSuccess: () => {
-      toast.success(`${resourceCountString('User', selectedIds.length)} successfully activated!`)
+      toastSuccess(`${resourceCountString('User', selectedIds.length)} successfully activated!`)
       refetchUsers()
     },
     onError: (e: AxiosError<BackendError>) => {
       if (e.response?.data?.error?.message) {
-        toast.error(`Error: ${e.response.data.error.message}`)
+        toastError(`Error: ${e.response.data.error.message}`)
       } else {
-        toast.error('Error activating users')
+        toastError('Error activating users')
       }
     },
   })
@@ -91,14 +91,14 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     mutationKey: ['set-total-limit'],
     mutationFn: () => setTotalLimit(selectedIds, totalLimitInput),
     onSuccess: () => {
-      toast.success(`Total limit successfully set to $${totalLimitInput}!`)
+      toastSuccess(`Total limit successfully set to $${totalLimitInput}!`)
       refetchUsers()
     },
     onError: (e: AxiosError<BackendError>) => {
       if (e.response?.data?.error?.message) {
-        toast.error(`Error: ${e.response.data.error.message}`)
+        toastError(`Error: ${e.response.data.error.message}`)
       } else {
-        toast.error('Error setting total limit')
+        toastError('Error setting total limit')
       }
     },
   })
@@ -106,14 +106,14 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     mutationKey: ['set-job-limit'],
     mutationFn: () => setJobLimit(selectedIds, jobLimitInput),
     onSuccess: () => {
-      toast.success(`Job limit successfully set to $${jobLimitInput}!`)
+      toastSuccess(`Job limit successfully set to $${jobLimitInput}!`)
       refetchUsers()
     },
     onError: (e: AxiosError<BackendError>) => {
       if (e.response?.data?.error?.message) {
-        toast.error(`Error: ${e.response.data.error.message}`)
+        toastError(`Error: ${e.response.data.error.message}`)
       } else {
-        toast.error('Error setting job limit')
+        toastError('Error setting job limit')
       }
     },
   })
@@ -185,10 +185,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
       <Menu
         trigger={
           <Menu.Trigger>
-            <DropdownButton
-              data-testid="admin-users-resource-button"
-              disabled={selectedUsers.length === 0}
-            />
+            <DropdownButton data-testid="admin-users-resource-button" disabled={selectedUsers.length === 0} />
           </Menu.Trigger>
         }
       >

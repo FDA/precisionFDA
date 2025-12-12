@@ -30,7 +30,7 @@ import { DBStatus } from './DbStatus'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { getSpaceIdFromScope } from '../../utils'
 import { format } from 'date-fns'
-import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { ActionsMenu } from '../../components/Menu'
 import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
 import { Link, useLocation } from 'react-router'
@@ -43,7 +43,10 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
         <MetadataItem>
           <MetadataKey>Location</MetadataKey>
           <MetadataVal data-testid="db-location">
-          <Link target="_blank" to={ spaceId ? `/spaces/${spaceId}/databases` : `/home/databases?scope=${homeScope?.toLowerCase()}`}>
+            <Link
+              target="_blank"
+              to={spaceId ? `/spaces/${spaceId}/databases` : `/home/databases?scope=${homeScope?.toLowerCase()}`}
+            >
               {homeScope === 'featured' ? 'Featured' : db.location}
             </Link>
           </MetadataVal>
@@ -69,33 +72,39 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
       <MetadataRow>
         <MetadataItem>
           <MetadataKey>Status</MetadataKey>
-        <MetadataVal data-testid="db-status"><DBStatus status={db.status} /></MetadataVal>
-      </MetadataItem>
-      <MetadataItem>
-        <MetadataKey>DB Port</MetadataKey>
-        <MetadataVal data-testid="db-port">{db.port}</MetadataVal>
-      </MetadataItem>
-      <MetadataItem>
-        <MetadataKey>Engine</MetadataKey>
-        <MetadataVal data-testid="db-engine">{db.engine}</MetadataVal>
-      </MetadataItem>
-      <MetadataItem>
-        <MetadataKey>Version</MetadataKey>
-        <MetadataVal data-testid="db-version">{db.engineVersion}</MetadataVal>
-      </MetadataItem>
-      <MetadataItem>
-        <MetadataKey>Instance</MetadataKey>
-        <MetadataVal data-testid="db-instance">{RESOURCE_LABELS[db.dxInstanceClass] ?? db.dxInstanceClass}</MetadataVal>
-      </MetadataItem>
-      <MetadataItem>
-        <MetadataKey>Synchronization Status</MetadataKey>
-        <MetadataVal data-testid="db-sync-status"><DBStatus status={db.syncStatus} /></MetadataVal>
-      </MetadataItem>
-    </MetadataRow>
-    <MetadataRow>
-      <MetadataItem>
-        <MetadataKey>Status Updated</MetadataKey>
-        <MetadataVal data-testid="db-status-updated">{format(new Date(db.statusUpdatedDateTime), 'yyyy-MM-dd HH:mm:ss')}</MetadataVal>
+          <MetadataVal data-testid="db-status">
+            <DBStatus status={db.status} />
+          </MetadataVal>
+        </MetadataItem>
+        <MetadataItem>
+          <MetadataKey>DB Port</MetadataKey>
+          <MetadataVal data-testid="db-port">{db.port}</MetadataVal>
+        </MetadataItem>
+        <MetadataItem>
+          <MetadataKey>Engine</MetadataKey>
+          <MetadataVal data-testid="db-engine">{db.engine}</MetadataVal>
+        </MetadataItem>
+        <MetadataItem>
+          <MetadataKey>Version</MetadataKey>
+          <MetadataVal data-testid="db-version">{db.engineVersion}</MetadataVal>
+        </MetadataItem>
+        <MetadataItem>
+          <MetadataKey>Instance</MetadataKey>
+          <MetadataVal data-testid="db-instance">{RESOURCE_LABELS[db.dxInstanceClass] ?? db.dxInstanceClass}</MetadataVal>
+        </MetadataItem>
+        <MetadataItem>
+          <MetadataKey>Synchronization Status</MetadataKey>
+          <MetadataVal data-testid="db-sync-status">
+            <DBStatus status={db.syncStatus} />
+          </MetadataVal>
+        </MetadataItem>
+      </MetadataRow>
+      <MetadataRow>
+        <MetadataItem>
+          <MetadataKey>Status Updated</MetadataKey>
+          <MetadataVal data-testid="db-status-updated">
+            {format(new Date(db.statusUpdatedDateTime), 'yyyy-MM-dd HH:mm:ss')}
+          </MetadataVal>
         </MetadataItem>
         <MetadataItem>
           <MetadataKey>Host Endpoint</MetadataKey>
@@ -103,7 +112,8 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
         </MetadataItem>
       </MetadataRow>
     </MetadataSection>
-)}
+  )
+}
 
 const DetailActionsDropdown = ({ db }: { db: IDatabase; refetch?: () => void }) => {
   const { actions, modals } = useDatabaseSelectActions({
@@ -125,16 +135,16 @@ const DetailActionsDropdown = ({ db }: { db: IDatabase; refetch?: () => void }) 
 export const DatabaseShow = ({
   databaseId,
   spaceId,
-  homeContext = defaultHomeContext
+  homeContext = defaultHomeContext,
 }: {
   databaseId: string
   spaceId?: number
   homeContext?: HomeScopeContextValue
 }) => {
   const { isHome, homeScope, homeScopeChangeHandler } = homeContext
-  
+
   const location = useLocation()
-  const { data, isLoading, refetch, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['dbclusters', databaseId],
     queryFn: () =>
       fetchDatabaseRequest(databaseId).then(dbCluster => {
@@ -147,9 +157,7 @@ export const DatabaseShow = ({
 
   const queryCache = useQueryClient()
 
-  const lastJsonMessage = useLastWSNotification([
-      NOTIFICATION_ACTION.DB_CLUSTER_UPDATED,
-    ])
+  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.DB_CLUSTER_UPDATED])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
@@ -186,16 +194,14 @@ export const DatabaseShow = ({
         <ResourceHeader>
           <HeaderLeft>
             <Title>
-              <DatabaseIcon height={20}/>
+              <DatabaseIcon height={20} />
               &nbsp;<span data-testid="db-name">{data.name}</span>
-              {['creating', 'starting', 'stopping', 'terminating'].includes(data.status) && <Loader/>}
+              {['creating', 'starting', 'stopping', 'terminating'].includes(data.status) && <Loader />}
             </Title>
             <Description data-testid="db-description">{data.description}</Description>
           </HeaderLeft>
           <div>
-            <StyledRight>
-              {<DetailActionsDropdown db={data} />}
-            </StyledRight>
+            <StyledRight>{<DetailActionsDropdown db={data} />}</StyledRight>
           </div>
         </ResourceHeader>
 
@@ -240,7 +246,9 @@ export const DatabaseShow = ({
               <MetadataItem>
                 <MetadataKey>Info</MetadataKey>
                 <Description>
-                  This database cluster is currently stopped. Seven days after it was stopped, the database cluster will automatically re-activate and begin incurring charges. If you do not wish to keep this database cluster, use the Terminate action to permanently stop it and delete its contents.
+                  This database cluster is currently stopped. Seven days after it was stopped, the database cluster will
+                  automatically re-activate and begin incurring charges. If you do not wish to keep this database cluster, use the
+                  Terminate action to permanently stop it and delete its contents.
                 </Description>
               </MetadataItem>
             </MetadataRow>
@@ -251,9 +259,7 @@ export const DatabaseShow = ({
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Database failure</MetadataKey>
-                <Description>
-                  {data.failureReason}
-                </Description>
+                <Description>{data.failureReason}</Description>
               </MetadataItem>
             </MetadataRow>
           </MetadataSection>

@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useMemo, useState } from 'react'
 import { Link } from 'react-router'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
@@ -17,6 +16,7 @@ import { useModal } from '../../modal/useModal'
 import { moveFilesRequest } from '../files.api'
 import { IFile } from '../files.types'
 import { ApiErrorResponse } from '../../home/types'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const StyledLink = styled(Link)`
   display: flex;
@@ -48,10 +48,10 @@ export const useDnDMoveFileModal = ({
     onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error
       if (error?.message) {
-        toast.error(error?.message)
+        toastError(error?.message)
         return
       }
-      toast.error('Moving items has failed')
+      toastError('Moving items has failed')
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -64,7 +64,7 @@ export const useDnDMoveFileModal = ({
       setShowModal(false)
       if (onSuccess) {
         onSuccess()
-        toast.success(`Successfully moved ${memoSelected.length} ${pluralize('item', memoSelected.length)} to ${targetNode.name}`)
+        toastSuccess(`Successfully moved ${memoSelected.length} ${pluralize('item', memoSelected.length)} to ${targetNode.name}`)
       }
     },
   })

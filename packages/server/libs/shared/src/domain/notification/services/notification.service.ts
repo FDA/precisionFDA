@@ -63,12 +63,16 @@ export class NotificationService {
   /**
    * Returns notifications for current user that have empty deliveredAt flag.
    */
-  async getUnreadNotifications(userId: number): Promise<Notification[]> {
+  async getUnreadNotifications(): Promise<Notification[]> {
     logger.log({
-      message: `Getting unread notifications for user id: ${userId}`,
-      userId: userId,
+      message: `Getting unread notifications for user id: ${this.user.id}`,
+      userId: this.user.id,
     })
-    return await this.em.find(Notification, { user: userId, deliveredAt: null })
+    return await this.em.find(
+      Notification,
+      { user: this.user.id, deliveredAt: null },
+      { orderBy: { createdAt: 'DESC' } },
+    )
   }
 
   /**
@@ -78,23 +82,24 @@ export class NotificationService {
    * @param deliveredAt
    */
   async updateDeliveredAt(notificationId: number, deliveredAt?: Date): Promise<Notification> {
-    if (notificationId) {
-      const loadedFromDb = await this.em.findOneOrFail(Notification, notificationId, {
-        populate: ['user'],
-      })
-      if (loadedFromDb.user?.id !== this.user?.id) {
-        throw new PermissionError()
-      }
+    const loadedFromDb = await this.em.findOne(Notification, notificationId, {
+      populate: ['user'],
+    })
 
-      loadedFromDb.updatedAt = new Date()
-      if (deliveredAt) {
-        loadedFromDb.deliveredAt = new Date(deliveredAt.toString())
-      }
-
-      await this.em.flush()
-      return loadedFromDb
-    } else {
+    if (!loadedFromDb) {
       throw new NotFoundError()
     }
+
+    if (loadedFromDb.user?.id !== this.user?.id) {
+      throw new PermissionError()
+    }
+
+    if (deliveredAt) {
+      loadedFromDb.deliveredAt = new Date(deliveredAt.toString())
+    } else {
+      loadedFromDb.deliveredAt = new Date()
+    }
+    await this.em.persistAndFlush(loadedFromDb)
+    return loadedFromDb
   }
 }

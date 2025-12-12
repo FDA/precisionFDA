@@ -6,7 +6,6 @@ import React, { createContext, useCallback, useContext, useState } from 'react'
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'
-import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
@@ -31,6 +30,7 @@ import {
   StyledForm,
 } from './style'
 import { RequestAccess, RequestAccessPayload } from './type'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 const requestAccessValidationSchema = Yup.object().shape({
   firstName: Yup.string().required('First name is required'),
@@ -90,11 +90,11 @@ const RequestAccessForm = () => {
       const errorCode = error?.code ?? ''
       if (errorStatus === 400 && ['E_EMAIL_EXISTS'].includes(errorCode)) {
         setError('email', { message: error!.message })
-        toast.error('Some information is missing or incorrect. Please review and try again.')
+        toastError('Some information is missing or incorrect. Please review and try again.')
       } else if (errorStatus === 400 && ['E_INVALID_CAPTCHA'].includes(errorCode)) {
-        toast.error('Captcha verification failed. Please try again.', { autoClose: false })
+        toastError('Captcha verification failed. Please try again.', { autoClose: false })
       } else {
-        toast.error('An unexpected error occurred. Please try again.', { autoClose: false })
+        toastError('An unexpected error occurred. Please try again.', { autoClose: false })
       }
     },
   })

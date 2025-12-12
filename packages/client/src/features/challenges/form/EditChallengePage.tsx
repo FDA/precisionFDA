@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
@@ -16,6 +15,7 @@ import { useChallengeDetailsQuery } from '../useChallengeDetailsQuery'
 import { ChallengeForm, IChallengeForm } from './ChallengeForm'
 import { mapFormToPayload } from './common'
 import { ApiErrorResponse } from '../../home/types'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const EditChallengePage = () => {
   const navigate = useNavigate()
@@ -35,13 +35,13 @@ const EditChallengePage = () => {
         queryKey: ['challenge', challengeId],
       })
       navigate('/challenges')
-      toast.success('Challenge successfully edited')
+      toastSuccess('Challenge successfully edited')
     },
     onError: (e: AxiosError<ApiErrorResponse>) => {
       if (e?.response?.data?.error?.message) {
-        toast.error(`Error: ${e?.response?.data?.error.message}`)
+        toastError(`Error: ${e?.response?.data?.error.message}`)
       } else {
-        toast.error('An error occurred while editing the challenge')
+        toastError('An error occurred while editing the challenge')
       }
     },
   })

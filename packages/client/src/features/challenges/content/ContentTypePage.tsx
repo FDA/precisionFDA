@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router'
 import { $generateHtmlFromNodes } from '@lexical/html'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { LexiContext } from '../../lexi'
 import Editor from '../../lexi/Editor'
@@ -56,7 +55,7 @@ const ButtonBar = ({
       await queryClient.invalidateQueries({
         queryKey: ['challenge', challengeId, contentType],
       })
-      toast.success('Challenge content updated')
+      toastSuccess('Challenge content updated')
     },
   })
   const [editor] = useLexicalComposerContext()

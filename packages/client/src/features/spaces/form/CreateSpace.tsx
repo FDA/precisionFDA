@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import { AxiosError } from 'axios'
 import { PageTitle } from '../../../components/Page/styles'
 import { createSpaceRequest, spaceRequest } from '../spaces.api'
@@ -9,6 +8,7 @@ import { SpaceForm } from './CreateSpaceForm'
 import { StyledBack, StyledPageCenter, StyledPageContent } from './styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { ApiErrorResponse } from '../../home/types'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const CreateSpace = () => {
   const navigate = useNavigate()
@@ -26,25 +26,25 @@ export const CreateSpace = () => {
           if (err.response && err.response.status === 403) {
             navigate('/spaces')
           } else {
-            toast.error('Error fetching space details')
+            toastError('Error fetching space details')
           }
         }
-        toast.success('Space successfully created')
+        toastSuccess('Space successfully created')
         queryClient.invalidateQueries({
           queryKey: ['spaces'],
         })
       } else if ('errors' in res && res?.errors && Array.isArray(res.errors)) {
-        toast.error(`${res.errors[0]}`)
+        toastError(`${res.errors[0]}`)
       } else {
-        toast.error('Something went wrong')
+        toastError('Something went wrong')
       }
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
       if (error?.response?.data?.error?.message) {
-        toast.error(error?.response?.data?.error?.message)
+        toastError(error?.response?.data?.error?.message)
         return
       }
-      toast.error('Error creating space')
+      toastError('Error creating space')
     },
   })
 

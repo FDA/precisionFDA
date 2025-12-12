@@ -1,13 +1,12 @@
 import React from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, StyledModalContent } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { FileLicense } from '../assets/assets.types'
 import { Button } from '../../components/Button'
 import axios from 'axios'
-
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 type ComparatorActionTypes = 'remove_from_comparators' | 'add_to_comparators' | 'set_app'
 
@@ -39,7 +38,7 @@ const getMessage = (actionType?: ComparatorActionTypes) => {
 }
 
 export type SetShowModalArgs = (isShown: boolean, actionType: ComparatorActionTypes) => void
-export type ComparatorActionRequest = { actionType: ComparatorActionTypes, dxid: string }
+export type ComparatorActionRequest = { actionType: ComparatorActionTypes; dxid: string }
 
 export async function addToComparatorsRequest(payload: ComparatorPayload) {
   const response = await axios.post('/admin/apps/add_to_comparators', payload)
@@ -82,9 +81,7 @@ const comparatorActionText = (actionType?: ComparatorActionTypes) => {
   }
 }
 
-export function useComparatorModal<
-  T extends { uid?: string; dxid?: string; file_license?: FileLicense },
->({
+export function useComparatorModal<T extends { uid?: string; dxid?: string; file_license?: FileLicense }>({
   actionType,
   selected,
   onSuccess,
@@ -100,25 +97,25 @@ export function useComparatorModal<
       return comparatorActionRequest(mutationActionType, dxid)
     },
     onError: () => {
-      toast.error(`Error: ${comparatorActionText(actionType)} request`)
+      toastError(`Error: ${comparatorActionText(actionType)} request`)
     },
     onSuccess: (res: ApiResponse) => {
       if (res.error) {
-        toast.error('Error: ' + res.error)
+        toastError('Error: ' + res.error)
         setShowModal(false)
         return
       }
       const messages = res?.meta?.messages
       if (messages) {
-        messages.forEach((message) => {
+        messages.forEach(message => {
           if (message.type === 'warning') {
-            toast.error(message.message)
+            toastError(message.message)
           }
         })
       } else {
-        if(onSuccess) onSuccess()
+        if (onSuccess) onSuccess()
         setShowModal(false)
-        toast.success(`Success: ${comparatorActionText(actionType)} request`)
+        toastSuccess(`Success: ${comparatorActionText(actionType)} request`)
       }
     },
   })
@@ -133,8 +130,14 @@ export function useComparatorModal<
     setShowModal(modalShown)
   }
 
-  const handleComparatorSubmit = ({ actionType: submitActionType, dxid }: { actionType: ComparatorActionTypes, dxid?: string }) => {
-    if(submitActionType && dxid) mutation.mutateAsync({ actionType: submitActionType, dxid })
+  const handleComparatorSubmit = ({
+    actionType: submitActionType,
+    dxid,
+  }: {
+    actionType: ComparatorActionTypes
+    dxid?: string
+  }) => {
+    if (submitActionType && dxid) mutation.mutateAsync({ actionType: submitActionType, dxid })
   }
 
   const getFooter = () => {
@@ -142,22 +145,46 @@ export function useComparatorModal<
       case 'remove_from_comparators':
         return (
           <ButtonRow>
-            <Button onClick={handleClose} disabled={mutation.isPending}>Cancel</Button>
-            <Button data-variant="warning" onClick={() => handleComparatorSubmit({ actionType: 'remove_from_comparators', dxid: selected.dxid })} disabled={mutation.isPending}>Remove from Comparators</Button>
+            <Button onClick={handleClose} disabled={mutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              data-variant="warning"
+              onClick={() => handleComparatorSubmit({ actionType: 'remove_from_comparators', dxid: selected.dxid })}
+              disabled={mutation.isPending}
+            >
+              Remove from Comparators
+            </Button>
           </ButtonRow>
         )
       case 'add_to_comparators':
         return (
           <ButtonRow>
-            <Button onClick={handleClose} disabled={mutation.isPending}>Cancel</Button>
-            <Button data-variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'add_to_comparators', dxid: selected.dxid })} disabled={mutation.isPending}>Add to Comparators</Button>
+            <Button onClick={handleClose} disabled={mutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              data-variant="primary"
+              onClick={() => handleComparatorSubmit({ actionType: 'add_to_comparators', dxid: selected.dxid })}
+              disabled={mutation.isPending}
+            >
+              Add to Comparators
+            </Button>
           </ButtonRow>
         )
       case 'set_app':
         return (
           <ButtonRow>
-            <Button onClick={handleClose} disabled={mutation.isPending}>No</Button>
-            <Button data-variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'set_app', dxid: selected.dxid })} disabled={mutation.isPending}>Yes</Button>
+            <Button onClick={handleClose} disabled={mutation.isPending}>
+              No
+            </Button>
+            <Button
+              data-variant="primary"
+              onClick={() => handleComparatorSubmit({ actionType: 'set_app', dxid: selected.dxid })}
+              disabled={mutation.isPending}
+            >
+              Yes
+            </Button>
           </ButtonRow>
         )
       default:
@@ -169,23 +196,18 @@ export function useComparatorModal<
     }
   }
 
-
   const modalComp = (
     <ModalNext
       data-testid={`modal-comparator-${actionType}`}
-      headerText='Attention!'
+      headerText="Attention!"
       isShown={isShown}
       hide={handleClose}
       variant="small"
       id={`comparator-modal-${actionType}`}
     >
-      <ModalHeaderTop headerText='Attention!' hide={handleClose} />
-      <StyledModalContent>
-        {getMessage(actionType)}
-      </StyledModalContent>
-      <Footer>
-        {getFooter()}
-      </Footer>
+      <ModalHeaderTop headerText="Attention!" hide={handleClose} />
+      <StyledModalContent>{getMessage(actionType)}</StyledModalContent>
+      <Footer>{getFooter()}</Footer>
     </ModalNext>
   )
   return {

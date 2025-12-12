@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { Checkbox } from '../../components/Checkbox'
@@ -19,6 +18,7 @@ import { useModal } from '../modal/useModal'
 import { workstationSnapshotRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { Button } from '../../components/Button'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledForm = styled.form`
   padding: 24px;
@@ -38,29 +38,24 @@ interface CreateSnapshotForm {
 }
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Name required')
+  name: Yup.string()
+    .required('Name required')
     .matches(/^[a-zA-Z0-9-_ ]+$/, 'Name can only contain alphanumeric, dash, underscore and spaces'),
   terminate: Yup.boolean().required('Terminate required'),
 })
 
 const padZero = (n: number): string => {
-  const prefix = (n < 10) ? '0' : ''
+  const prefix = n < 10 ? '0' : ''
   return `${prefix}${n}`
 }
 
 const getDefaultSnapshotName = (execution: IExecution): string => {
   const now = new Date()
-  const dateString = `${now.getFullYear()}-${padZero(now.getMonth()+1)}-${padZero(now.getDate())}-${padZero(now.getHours())}${padZero(now.getMinutes())}`
+  const dateString = `${now.getFullYear()}-${padZero(now.getMonth() + 1)}-${padZero(now.getDate())}-${padZero(now.getHours())}${padZero(now.getMinutes())}`
   return `${execution.name} ${dateString}`
 }
 
-const SnapshotForm = ({
-  execution,
-  onSubmit,
-}: {
-  execution: IExecution
-  onSubmit: (data: CreateSnapshotForm) => void
-}) => {
+const SnapshotForm = ({ execution, onSubmit }: { execution: IExecution; onSubmit: (data: CreateSnapshotForm) => void }) => {
   const {
     register,
     handleSubmit,
@@ -79,11 +74,7 @@ const SnapshotForm = ({
     <StyledForm onSubmit={handleSubmit(onSubmit)} id="create-snapshot-form">
       <FieldGroup label="Name" required>
         <InputText {...register('name')} disabled={isSubmitting} />
-        <ErrorMessage
-          errors={errors}
-          name="name"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
+        <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
       </FieldGroup>
 
       <FieldGroup>
@@ -91,40 +82,31 @@ const SnapshotForm = ({
           <Checkbox
             {...register('terminate')}
             disabled={isSubmitting}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setValue('terminate', event.target.checked)
-            }
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setValue('terminate', event.target.checked)}
           />
           Terminate
         </CheckboxLabel>
-        <StyledHintText>
-          When enabled the workstation will terminate after creating the snapshot
-        </StyledHintText>
+        <StyledHintText>When enabled the workstation will terminate after creating the snapshot</StyledHintText>
       </FieldGroup>
     </StyledForm>
   )
 }
 
-export function useSnapshotModal({
-  selected,
-}: {
-  selected: IExecution
-}) {
+export function useSnapshotModal({ selected }: { selected: IExecution }) {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const memoSelected = useMemo(() => selected, [isShown])
   const mutation = useMutation({
     mutationKey: ['snapshot-job'],
-    mutationFn: (vals: CreateSnapshotForm) =>
-      workstationSnapshotRequest(selected.dxid, vals),
+    mutationFn: (vals: CreateSnapshotForm) => workstationSnapshotRequest(selected.dxid, vals),
     onError: (e: AxiosError) => {
       const payload = e.response?.data as { error?: { message: string } }
       const message = payload?.error?.message ?? e.message
-      toast.error(`Error creating snapshot: ${message}`)
+      toastError(`Error creating snapshot: ${message}`)
     },
     onSuccess: (res: { meta?: { messages: { message: string }[] } }) => {
       if (res?.meta?.messages[0]) {
-        toast.error(`Error creating snapshot: ${res?.meta?.messages[0].message}`)
+        toastError(`Error creating snapshot: ${res?.meta?.messages[0].message}`)
         return
       }
       queryClient.invalidateQueries({
@@ -136,7 +118,7 @@ export function useSnapshotModal({
       setShowModal(false)
       const isSpaceScope = selected.scope.startsWith('space')
       const scopeString = isSpaceScope ? 'the Space' : 'My Home'
-      toast.success(`Creating snapshot - the snapshot file will appear in ${scopeString} shortly after its completion`)
+      toastSuccess(`Creating snapshot - the snapshot file will appear in ${scopeString} shortly after its completion`)
     },
   })
 
@@ -151,10 +133,7 @@ export function useSnapshotModal({
       isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}
     >
-      <ModalHeaderTop
-        headerText="Create Snapshot"
-        hide={() => setShowModal(false)}
-      />
+      <ModalHeaderTop headerText="Create Snapshot" hide={() => setShowModal(false)} />
       <ModalScroll>
         <SnapshotForm execution={memoSelected} onSubmit={handleSubmit} />
       </ModalScroll>
@@ -162,12 +141,7 @@ export function useSnapshotModal({
         <ButtonRow>
           {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            form="create-snapshot-form"
-            disabled={mutation.isPending}
-          >
+          <Button data-variant="primary" type="submit" form="create-snapshot-form" disabled={mutation.isPending}>
             Create Snapshot
           </Button>
         </ButtonRow>

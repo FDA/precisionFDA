@@ -20,6 +20,8 @@ import { ColorModeProvider } from './utils/ThemeContext'
 import { spacesRoutes } from './features/spaces/routes'
 import homeDetailRoutes from './features/home/show/routes'
 import HomeShowLayout from './features/home/show/HomeShowLayout'
+import { useNotificationCenter } from 'react-toastify/addons/use-notification-center'
+import { initializeToastHelper } from './components/NotificationCenter/ToastHelper'
 
 const DataPortalRoutes = React.lazy(() => import('./features/data-portals/routes'))
 const ExpertsSinglePage = React.lazy(() => import('./features/experts/details/index'))
@@ -49,6 +51,7 @@ const RootComponent = () => {
   const sessionExpiredModal = useModal()
   const expiringSessionModal = useModal()
   const [railsAlertHeight, setRailsAlertHeight] = useState(0)
+  const { markAsRead } = useNotificationCenter()
 
   useEffect(() => {
     // Calculate the height of the rails-alert element
@@ -56,7 +59,8 @@ const RootComponent = () => {
     if (alertElement) {
       setRailsAlertHeight(alertElement.clientHeight as number)
     }
-  }, [])
+    initializeToastHelper(markAsRead)
+  }, [markAsRead])
 
   return (
     <ColorModeProvider>

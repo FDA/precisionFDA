@@ -17,7 +17,7 @@ import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStora
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { createLocationKey } from '../../utils'
 import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
@@ -35,7 +35,7 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
   const resource = 'workflow-executions'
   const locationKey = createLocationKey(resource, spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' }})
+  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' } })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
 

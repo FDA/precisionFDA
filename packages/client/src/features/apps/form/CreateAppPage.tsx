@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
 import { cleanObject } from '../../../utils/object'
 import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { AppForm } from './AppForm'
 import { ApiErrorResponse } from '../../home/types'
 import { AxiosError } from 'axios'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const CreateAppPage = () => {
   const navigate = useNavigate()
@@ -30,7 +30,7 @@ export const CreateAppPage = () => {
       queryClient.invalidateQueries({
         queryKey: ['counters'],
       })
-      toast.success('Your app was created successfully')
+      toastSuccess('Your app was created successfully')
     } catch (err: unknown) {
       // The default error message choice is an error we "intentionally" send from the backend
       // The second choice is a standard Error object message
@@ -39,12 +39,14 @@ export const CreateAppPage = () => {
       if (
         errorWithResponse.response?.status === 400 &&
         errorWithResponse?.response?.data?.error?.code &&
-        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(errorWithResponse.response.data.error.code)
+        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(
+          errorWithResponse.response.data.error.code,
+        )
       ) {
         throw err
       } else {
         const message = errorWithResponse.response?.data?.error?.message || (err as Error).message || 'Unknown error'
-        toast.error(`Error while creating app: ${message}`)
+        toastError(`Error while creating app: ${message}`)
       }
     }
   }

@@ -5,7 +5,7 @@ import { Action } from '../home/action-types'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { ISpace } from './spaces.types'
 import { useUnlockSpaceModal } from './useUnlockSpaceModal'
-import { toast } from 'react-toastify'
+import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 export interface UseSpaceActionsResult {
   actions: Action[]
@@ -18,8 +18,8 @@ export const useSpaceActions = ({ space }: { space: ISpace }): UseSpaceActionsRe
 
   const modal = useUnlockSpaceModal({
     space,
-    onSuccess: (isLocked) => {
-      toast.success(`Space ${isLocked ? 'unlocked' : 'locked'} successfully`)
+    onSuccess: isLocked => {
+      toastSuccess(`Space ${isLocked ? 'unlocked' : 'locked'} successfully`)
       queryClient.invalidateQueries({
         queryKey: ['space', `${space.id}`],
       })

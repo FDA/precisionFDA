@@ -3,14 +3,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import { ApiErrorResponse } from '../../home/types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'
-import { spaceGroupValidationSchema } from '../../space-groups/form/helpers'
-import { ISpaceGroup, SpaceGroupFormData } from '../../space-groups/types'
+import { spaceGroupValidationSchema } from '../form/helpers'
+import { ISpaceGroup, SpaceGroupFormData } from '../types'
 import { updateSpaceGroupRequest } from '../api'
 import { SpaceGroupForm } from '../form/SpaceGroupForm'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const useEditSpaceGroupModal = ({ spaceGroup }: { spaceGroup: ISpaceGroup }) => {
   const queryClient = useQueryClient()
@@ -51,11 +51,11 @@ export const useEditSpaceGroupModal = ({ spaceGroup }: { spaceGroup: ISpaceGroup
       queryClient.invalidateQueries({
         queryKey: ['space-group-list'],
       })
-      toast.success('Space Group updated')
+      toastSuccess('Space Group updated')
     } catch (e: unknown) {
       const err = e as AxiosError<ApiErrorResponse>
       const message = err.response?.data?.error?.message || err.message || 'Unknown error'
-      toast.error(`Error while editing space group: ${message}`)
+      toastError(`Error while editing space group: ${message}`)
     }
     handleClose()
   }

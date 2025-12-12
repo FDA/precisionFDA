@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
@@ -11,6 +10,7 @@ import { deleteNewsItemRequest, editNewsItemRequest, newsItemRequest } from '../
 import { NewsItem, NewsItemPayload } from '../types'
 import { NewsItemForm } from './NewsItemForm'
 import { FormPageContainer } from './styles'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const useNewsItemRequest = (id: string) => {
   return useQuery({
@@ -33,10 +33,10 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
       queryClient.invalidateQueries({
         queryKey: ['news-item'],
       })
-      toast.success('Successfully edited news item')
+      toastSuccess('Successfully edited news item')
     },
     onError: () => {
-      toast.error('Error: Editing news item')
+      toastError('Error: Adding news item')
     },
   })
 
@@ -51,10 +51,10 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
       queryClient.invalidateQueries({
         queryKey: ['news'],
       })
-      toast.success('Deleted news item')
+      toastSuccess('Deleted news item')
     },
     onError: () => {
-      toast.error('Error: deleting news item')
+      toastError('Error: deleting news item')
     },
   })
 

@@ -3,11 +3,9 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { NotePayload, NoteScope, editDiscussionRequest, editReplyRequest, fetchDiscussionAttachmentsRequest } from '../api'
-
 import { Button } from '../../../components/Button'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { InputError } from '../../../components/form/styles'
@@ -16,6 +14,7 @@ import { AttachmentsList } from '../AttachmentsList'
 import { AttachmentKey, NoteForm } from '../discussions.types'
 import { groupByAttachmentType, pickIdsFromFormAttachments } from '../helpers'
 import { Attachments } from './Attachments'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const StyledForm = styled.form`
   display: flex;
@@ -139,7 +138,7 @@ export const EditNoteEntity = ({
       return editDiscussionRequest(discussionId, payload)
     },
     onSuccess: () => {
-      toast.success(`${answerId ? 'Answer' : 'Discussion'} has been updated`)
+      toastSuccess(`${answerId ? 'Answer' : 'Discussion'} has been updated`)
       if (onSuccess) onSuccess()
     },
     onSettled: async () => {
@@ -152,7 +151,7 @@ export const EditNoteEntity = ({
     },
     onError: () => {
       // todo investigate- can we show something less generic?
-      toast.error('Error while editing discussion')
+      toastError('Error while editing discussion')
     },
   })
 

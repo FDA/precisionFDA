@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useState } from 'react'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
@@ -11,6 +10,7 @@ import PublicLayout from '../../../layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ProposeChallengePayload, proposeChallengeRequest } from './api'
 import { ProposeChallengeForm, ProposeChallengeFormValues } from './ProposeChallengeForm'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const StyledProposeChallengePage = styled.div`
   display: flex;
@@ -64,10 +64,10 @@ const ProposeChallengePage = () => {
         queryKey: ['challenges'],
       })
       setSubmissionSuccess(true)
-      toast.success('Your challenge proposal has been received')
+      toastSuccess('Your challenge proposal has been received')
     },
     onError: () => {
-      toast.error('Something went wrong submitting your challenge proposal')
+      toastError('Something went wrong submitting your challenge proposal')
     },
   })
 

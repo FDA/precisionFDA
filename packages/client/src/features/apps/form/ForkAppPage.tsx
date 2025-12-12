@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
-import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
@@ -13,6 +12,7 @@ import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
 import { AxiosError } from 'axios'
+import { toastError } from '../../../components/NotificationCenter/ToastHelper'
 
 export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
   const location = useLocation()
@@ -36,18 +36,20 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
       queryClient.invalidateQueries({
         queryKey: ['apps', 'app'],
       })
-      toast.success('App forked successfully')
+      toastSuccess('App forked successfully')
     } catch (err: unknown) {
       const errorWithResponse = err as AxiosError<ApiErrorResponse>
       const message = errorWithResponse.response?.data?.error?.message || errorWithResponse.message || 'Unknown error'
       if (
         errorWithResponse.response?.status === 400 &&
         errorWithResponse?.response?.data?.error?.code &&
-        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(errorWithResponse.response.data.error.code)
+        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(
+          errorWithResponse.response.data.error.code,
+        )
       ) {
         throw err
       } else {
-        toast.error(`Error while forking app: ${message}`)
+        toastError(`Error while forking app: ${message}`)
       }
     }
   }

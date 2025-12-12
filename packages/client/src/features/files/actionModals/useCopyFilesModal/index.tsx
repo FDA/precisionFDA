@@ -2,7 +2,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { toast } from 'react-toastify'
 import { Button } from '../../../../components/Button'
 import { FileCheckIcon } from '../../../../components/icons/FileCheckIcon'
 import { FileIcon } from '../../../../components/icons/FileIcon'
@@ -17,7 +16,8 @@ import { copyFilesRequest, fetchSelectedFiles, validateCopyingFiles } from '../.
 import { IExistingFileSet, ISelectedFile, ISelectedFolder, SelectedNode } from '../../files.types'
 import { ScopeAndFolderSelection } from './ScopeAndFolderSelection'
 import styles from './CopyFilesModal.module.css'
-import { Footer, ModalScroll } from '../../../modal/styles'
+import { Footer } from '../../../modal/styles'
+import { toastError } from '../../../../components/NotificationCenter/ToastHelper'
 
 interface FileListItemContentProps {
   file: ISelectedFile
@@ -117,13 +117,7 @@ const SelectedFolder = ({ folder }: SelectedFolderProps) => {
       </div>
       <ul className={styles.folderChildren}>
         {folder.children.map((child: ISelectedFile, index: number) => (
-          <li
-            key={index}
-            className={cn(
-              styles.folderChild,
-              !folder.isCopied && child.isCopied && styles.folderChildCopied
-            )}
-          >
+          <li key={index} className={cn(styles.folderChild, !folder.isCopied && child.isCopied && styles.folderChildCopied)}>
             <FileListItemContent file={child} />
           </li>
         ))}
@@ -140,11 +134,7 @@ const CopyFileList = ({ nodes }: CopyFileListProps) => {
   return (
     <ul className={styles.selectedItemsList}>
       {nodes.map((node: SelectedNode, index: number) => {
-        return node.type === 'UserFile' ? (
-          <SelectedFile key={index} file={node} />
-        ) : (
-          <SelectedFolder key={index} folder={node} />
-        )
+        return node.type === 'UserFile' ? <SelectedFile key={index} file={node} /> : <SelectedFolder key={index} folder={node} />
       })}
     </ul>
   )
@@ -280,10 +270,10 @@ export const useCopyFilesModal = ({
     onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error
       if (error?.message) {
-        toast.error(`${error?.type}: ${error?.message}`)
+        toastError(`${error?.type}: ${error?.message}`)
         return
       }
-      toast.error(error?.message)
+      toastError(error?.message)
     },
   })
 
@@ -300,7 +290,7 @@ export const useCopyFilesModal = ({
       headerText="Add Files To Space"
       isShown={isShown}
       hide={() => setShowModal(false)}
-      variant='large'
+      variant="large"
     >
       <ModalHeaderTop headerText="Copy Files" hide={() => setShowModal(false)} />
       <div className={styles.modalContainer}>
@@ -310,14 +300,10 @@ export const useCopyFilesModal = ({
             <div className={styles.panelTitle}>Selected Items</div>
           </div>
           <div className={styles.scrollArea}>
-            {isLoading && (
-              <div className={styles.loadingContainer}>Loading...</div>
-            )}
+            {isLoading && <div className={styles.loadingContainer}>Loading...</div>}
             {isSuccess && <CopyFileList nodes={copyFiles} />}
           </div>
-          {copyMessage.length > 0 && (
-            <div className={styles.infoCallout}>{copyMessage}</div>
-          )}
+          {copyMessage.length > 0 && <div className={styles.infoCallout}>{copyMessage}</div>}
         </div>
 
         {/* Right Panel - Destination Selection */}
@@ -329,12 +315,7 @@ export const useCopyFilesModal = ({
       </div>
       <Footer>
         <Button onClick={() => setShowModal(false)}>Cancel</Button>
-        <Button
-          data-variant="primary"
-          type="button"
-          disabled={isLoading || isDisableCopy}
-          onClick={e => handleSubmit(e)}
-        >
+        <Button data-variant="primary" type="button" disabled={isLoading || isDisableCopy} onClick={e => handleSubmit(e)}>
           Copy
         </Button>
       </Footer>

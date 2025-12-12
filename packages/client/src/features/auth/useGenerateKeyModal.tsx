@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useRef } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { InfoCircleIcon } from '../../components/icons/InfoCircleIcon'
 import { Svg } from '../../components/icons/Svg'
@@ -11,6 +10,7 @@ import { ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { generateKeyRequest } from './api'
 import { Button } from '../../components/Button'
+import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledButtonRow = styled.div`
   display: flex;
@@ -78,7 +78,7 @@ const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
   const copyToClipboard = () => {
     const val = inputRef.current?.value
     if (val) {
-      toast.success('The key has been copied into your clipboard')
+      toastSuccess('The key has been copied into your clipboard')
       navigator.clipboard.writeText(val)
     }
   }

@@ -2,7 +2,6 @@ import { all, any } from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { useImmer } from 'use-immer'
 import { InputError } from '../../../../components/form/styles'
 import { TrashIcon } from '../../../../components/icons/TrashIcon'
@@ -32,6 +31,7 @@ import {
   UploadFilesContainer,
   UploadFilesHeader,
 } from './styles'
+import { toastError, toastSuccess } from '../../../../components/NotificationCenter/ToastHelper'
 
 interface FileUploadTableProps {
   filesMeta: FilesMeta[]
@@ -158,7 +158,7 @@ export const useFileUploadModal = ({ homeScope, folderId, spaceId, isAllowed, on
   useEffect(() => {
     if (!uploadFinished) return
 
-    toast.success(`Successfully uploaded ${itemsCountString('file', filesMeta.length)}`)
+    toastSuccess(`Successfully uploaded ${itemsCountString('file', filesMeta.length)}`)
 
     const keysToInvalidate = [['files'], ['counters'], ...(spaceId ? [['space', spaceId.toString()]] : [])]
 
@@ -206,7 +206,7 @@ export const useFileUploadModal = ({ homeScope, folderId, spaceId, isAllowed, on
         folderId,
       })
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'An error occurred during upload')
+      toastError(error instanceof Error ? error.message : 'An error occurred during upload')
     }
   }
 

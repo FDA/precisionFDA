@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { AxiosError } from 'axios'
 import { ApiErrorResponse, ServerScope } from '../../home/types'
 import { RunJobRequest, runJob } from '../apps.api'
+import { toastError } from '../../../components/NotificationCenter/ToastHelper'
 
 export const useRunJobMutation = (scope: ServerScope) => {
   const queryClient = useQueryClient()
@@ -12,14 +12,14 @@ export const useRunJobMutation = (scope: ServerScope) => {
     onSuccess: () => {
       if (scope.includes('space-')) {
         // space counters are inside the space object, not standalone counters object
-        queryClient.invalidateQueries({ queryKey: ['space', scope.replace('space-', '')]})
+        queryClient.invalidateQueries({ queryKey: ['space', scope.replace('space-', '')] })
       } else {
-        queryClient.invalidateQueries({ queryKey: ['counters']})
+        queryClient.invalidateQueries({ queryKey: ['counters'] })
       }
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
       const errorMessage = error?.response?.data?.error?.message || ''
-      toast.error(`Error running app: ${errorMessage}`)
+      toastError(`Error running app: ${errorMessage}`)
     },
   })
 }

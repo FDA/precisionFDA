@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { addDays, format } from 'date-fns'
 import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import { AlertBanner } from '../../../components/AlertBanner'
 import { Button } from '../../../components/Button'
 import { InputDateTime, InputText } from '../../../components/InputText'
@@ -13,6 +12,7 @@ import { createAlertRequest, deleteAlertRequest, updateAlertRequest } from './al
 import { Form, FormPage, PreviewBanner, StyledRow } from './alerts.styles'
 import { Alert, AlertType } from './alerts.types'
 import { alertTypesArray, alertTypesText, formatInTimeZone, validationSchema } from './alerts.common'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export type AlertFormType = {
   title: string
@@ -84,10 +84,10 @@ const AlertForm = ({
               .filter(a => a !== 'danger')
               .filter(a => a !== 'warning')
               .map(type => (
-              <option key={type} value={type}>
-                {alertTypesText[type]}
-              </option>
-            ))}
+                <option key={type} value={type}>
+                  {alertTypesText[type]}
+                </option>
+              ))}
           </InputSelect>
           <ErrorMessage errors={errors} name="type" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
@@ -140,13 +140,13 @@ export const EditAlertForm = ({
     mutationKey: ['create-alert-item'],
     mutationFn: (payload: AlertFormType) => createAlertRequest(payload),
     onSuccess: r => {
-      queryClient.invalidateQueries({ queryKey: ['site-settings']})
-      queryClient.invalidateQueries({ queryKey: ['alerts-list']})
+      queryClient.invalidateQueries({ queryKey: ['site-settings'] })
+      queryClient.invalidateQueries({ queryKey: ['alerts-list'] })
       onSuccess(r)
-      toast.success('Created site alert')
+      toastSuccess('Created site alert')
     },
     onError: () => {
-      toast.error('Error: Adding site alert')
+      toastError('Error: Adding site alert')
     },
   })
 
@@ -154,13 +154,13 @@ export const EditAlertForm = ({
     mutationKey: ['delete-alert-item'],
     mutationFn: (payload: { id: number }) => deleteAlertRequest(payload.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['alerts-list']})
-      queryClient.invalidateQueries({ queryKey: ['site-settings']})
+      queryClient.invalidateQueries({ queryKey: ['alerts-list'] })
+      queryClient.invalidateQueries({ queryKey: ['site-settings'] })
       onSuccess()
-      toast.success('Removed site alert')
+      toastSuccess('Removed site alert')
     },
     onError: () => {
-      toast.error('Error: Adding site alert')
+      toastError('Error: Adding site alert')
     },
   })
 
@@ -168,12 +168,12 @@ export const EditAlertForm = ({
     mutationKey: ['update-alert-item'],
     mutationFn: (payload: { id: number; vals: AlertFormType }) => updateAlertRequest(payload.id, payload.vals),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['alerts-list']})
-      queryClient.invalidateQueries({ queryKey: ['site-settings']})
-      toast.success('Updated site alert')
+      queryClient.invalidateQueries({ queryKey: ['alerts-list'] })
+      queryClient.invalidateQueries({ queryKey: ['site-settings'] })
+      toastSuccess('Updated site alert')
     },
     onError: () => {
-      toast.error('Error: Updating site alert')
+      toastError('Error: Updating site alert')
     },
   })
 

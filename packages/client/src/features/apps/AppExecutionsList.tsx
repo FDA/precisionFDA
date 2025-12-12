@@ -16,7 +16,7 @@ import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStora
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { createLocationKey } from '../../utils'
 import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
@@ -32,7 +32,7 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string; appUi
   const resource = 'app-executions'
   const locationKey = createLocationKey(resource, spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' }})
+  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' } })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const queryCache = useQueryClient()

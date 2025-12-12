@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useEffect, useMemo, useState } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
@@ -17,6 +16,7 @@ import { ApiErrorResponse, DownloadListResponse } from '../../home/types'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 import { getMessage } from './modal-utils'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 12px;
@@ -98,10 +98,10 @@ export const useDeleteFileModal = ({ selected, onSuccess }: { selected: IFile[];
     onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error
       if (error?.message) {
-        toast.error(error?.message)
+        toastError(error?.message)
         return
       }
-      toast.error(`Deleting of ${getMessage(nodesToBeDeleted)} has failed`)
+      toastError(`Deleting of ${getMessage(nodesToBeDeleted)} has failed`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -112,7 +112,7 @@ export const useDeleteFileModal = ({ selected, onSuccess }: { selected: IFile[];
         queryKey: ['counters'],
       })
       setShowModal(false)
-      toast.success(`Deleting of ${getMessage(nodesToBeDeleted)} has been started`)
+      toastSuccess(`Deleting of ${getMessage(nodesToBeDeleted)} has been started`, {})
       onSuccess()
     },
   })

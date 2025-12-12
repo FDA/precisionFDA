@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useMemo, useState } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
@@ -19,6 +18,7 @@ import { useModal } from '../modal/useModal'
 import { FdaRestrictedIcon } from '../spaces/FdaRestrictedIcon'
 import { ProtectedIcon } from '../spaces/ProtectedIcon'
 import { fetchEditableSpacesList } from '../spaces/spaces.api'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 export interface CopyToSpaceProperties {
   createAppRevision?: boolean
@@ -106,12 +106,12 @@ const CopyToSpaceForm = ({
   onSuccess: (res: ApiResponse) => void
 }) => {
   const [selectedTarget, setSelectedTarget] = useState<string>()
-  
+
   const mutation = useMutation({
     mutationKey: ['copy-to-space', resource],
     mutationFn: ({ space, properties }: { space: string; properties?: CopyToSpaceProperties }) =>
       updateFunction(space, selected, properties),
-    onSuccess: (res) => {
+    onSuccess: res => {
       if (onSuccess) onSuccess(res)
       setShowModal(false)
       displayPayloadMessage(res as Payload)
@@ -124,7 +124,7 @@ const CopyToSpaceForm = ({
         setShowAppRevisionConfirmModal(true)
       } else {
         const message = err.response?.data?.error?.message || err.message || 'Unknown error'
-        toast.error(message)
+        toastError(message)
       }
     },
   })
@@ -134,7 +134,7 @@ const CopyToSpaceForm = ({
     CONFIRM_APP_REVISION,
     async () => {
       setShowAppRevisionConfirmModal(false)
-      await mutation.mutateAsync({ space: selectedTarget!, properties: { createAppRevision: true }})
+      await mutation.mutateAsync({ space: selectedTarget!, properties: { createAppRevision: true } })
     },
   )
 
@@ -143,7 +143,7 @@ const CopyToSpaceForm = ({
     CONFIRM_APP_SERIES,
     async () => {
       setShowAppSeriesConfirmModal(false)
-      await mutation.mutateAsync({ space: selectedTarget!, properties: { createAppSeries: true }})
+      await mutation.mutateAsync({ space: selectedTarget!, properties: { createAppSeries: true } })
     },
   )
 

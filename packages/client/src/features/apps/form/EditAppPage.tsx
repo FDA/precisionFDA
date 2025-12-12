@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { cleanObject } from '../../../utils/object'
@@ -13,6 +12,7 @@ import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
 import { AxiosError } from 'axios'
 import { useHomeScope } from '../../home/HomeScopeContext'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
   const { isHome, homeScopeChangeHandler } = useHomeScope()
@@ -40,11 +40,11 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
       queryClient.invalidateQueries({
         queryKey: ['apps', 'app'],
       })
-      toast.success('New revision created')
+      toastSuccess('New revision created')
     } catch (err: unknown) {
       const errorWithResponse = err as AxiosError<ApiErrorResponse>
       const message = errorWithResponse.response?.data?.error?.message || errorWithResponse.message || 'Unknown error'
-      toast.error(`Error while editing app: ${message}`)
+      toastError(`Error while editing app: ${message}`)
     }
   }
 

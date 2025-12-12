@@ -1,0 +1,196 @@
+.wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 5px;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+    background: var(--warning-500);
+    border-radius: 9px;
+}
+
+.emptyBadge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background: var(--warning-500);
+    border-radius: 50%;
+}
+
+.notificationPanel {
+    width: 385px;
+}
+
+.header {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--c-layout-border-200);
+}
+
+.title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--c-text-700);
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    text-align: center;
+}
+
+.emptyIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+    background: var(--tertiary-100);
+    color: var(--c-text-400);
+}
+
+.emptyText {
+    margin: 0;
+    color: var(--c-text-500);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.notificationList {
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+.notificationList::-webkit-scrollbar {
+    width: 8px;
+}
+
+.notificationList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.notificationList::-webkit-scrollbar-thumb {
+    background: var(--c-scrollbar);
+    border-radius: 4px;
+}
+
+.notificationList::-webkit-scrollbar-thumb:hover {
+    background: var(--c-scrollbar-2);
+}
+
+.notificationItem {
+    padding: 16px 20px;
+    background: var(--background);
+    border-bottom: 1px solid var(--c-layout-border-200);
+    transition: background 0.15s ease;
+    position: relative;
+}
+
+.notificationItem:hover {
+    background: var(--background-shaded-100);
+}
+
+.notificationItem:last-child {
+    border-bottom: none;
+}
+
+.notificationItem.unread::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary-500);
+}
+
+.notificationItem.unread {
+    background: var(--background-shaded-100);
+}
+
+.notificationItem.unread:hover {
+    background: var(--background-shaded);
+}
+
+.notificationContent {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.notificationBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.notificationText {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--c-text-700);
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.notificationTime {
+    margin: 0;
+    font-size: 12px;
+    color: var(--c-text-400);
+    font-weight: 400;
+}
+
+.notificationActions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.notificationItem:hover .notificationActions {
+    opacity: 1;
+}
+
+.deleteButton {
+    padding: 6px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--c-text-400);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.deleteButton:hover {
+    background: var(--warning-50);
+    color: var(--warning-600);
+}
+
+/* Dark mode specific adjustments */
+html[data-theme="dark"] .deleteButton:hover {
+    background: var(--warning-100);
+    color: var(--warning-500);
+}

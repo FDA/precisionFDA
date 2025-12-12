@@ -2,7 +2,6 @@ import { UseMutationResult, useQuery } from '@tanstack/react-query'
 import { ColumnDef } from '@tanstack/react-table'
 import axios from 'axios'
 import React, { MouseEvent, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
@@ -14,6 +13,7 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { Empty } from '../home/home.styles'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledName = styled.div`
   white-space: nowrap;
@@ -64,16 +64,29 @@ function ResourceTable<T extends { id: number; uid: string; name: string; revisi
     },
   ]
 
-  
   useEffect(() => {
     const uids = getSelectedObjectsFromIndexes(selectedIndexes, data).map(i => i.uid)
     setSelectedUids(uids)
   }, [selectedIndexes])
-  if(error) toast.error('Fetching resource data list')
-  if(isLoading) return <div className="p-4"><Loader /></div>
-  if(!data) return <Empty>There are no resources here</Empty>
+  if (error) toastError('Fetching resource data list')
+  if (isLoading)
+    return (
+      <div className="p-4">
+        <Loader />
+      </div>
+    )
+  if (!data) return <Empty>There are no resources here</Empty>
 
-  return <Table<T> enableColumnFilters={false} isLoading={isLoading} columns={col} data={data} rowSelection={selectedIndexes} setSelectedRows={setSelectedIndexes} />
+  return (
+    <Table<T>
+      enableColumnFilters={false}
+      isLoading={isLoading}
+      columns={col}
+      data={data}
+      rowSelection={selectedIndexes}
+      setSelectedRows={setSelectedIndexes}
+    />
+  )
 }
 
 export function useAddResourceToModal({

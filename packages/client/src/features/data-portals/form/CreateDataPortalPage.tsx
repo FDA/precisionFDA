@@ -1,7 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { PageTitle } from '../../../components/Page/styles'
@@ -13,6 +12,7 @@ import { CreateDataPortalData } from '../types'
 import { DataPortalForm } from './DataPortalForm'
 import { AxiosError } from 'axios'
 import { ApiErrorResponse } from '../../home/types'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 interface DataPortalFormData {
   name: string
@@ -54,11 +54,11 @@ const CreateDataPortalPage = () => {
       queryClient.invalidateQueries({
         queryKey: ['data-portal-list'],
       })
-      toast.success('Data Portal created')
+      toastSuccess('Data Portal created')
     } catch (err: unknown) {
       const error = err as AxiosError<ApiErrorResponse>
       const message = error.response?.data?.error?.message || error.message || 'Unknown error'
-      toast.error(`Error while creating data portal: ${message}`)
+      toastError(`Error while creating data portal: ${message}`)
     }
   }
 
@@ -66,9 +66,7 @@ const CreateDataPortalPage = () => {
     <UserLayout mainScroll>
       <StyledPageCenter>
         <StyledPageContent>
-          <BackLinkMargin linkTo="/data-portals">
-            Back to Data Portals
-          </BackLinkMargin>
+          <BackLinkMargin linkTo="/data-portals">Back to Data Portals</BackLinkMargin>
         </StyledPageContent>
       </StyledPageCenter>
       {user?.isAdmin ? (

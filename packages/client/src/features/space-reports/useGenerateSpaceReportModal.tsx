@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { FormEvent, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/CheckboxNext'
@@ -13,6 +12,7 @@ import { ButtonRow, Footer, ModalScroll, StyledForm } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { SpaceReportFormat, SpaceReportFormatToOptionsMap } from './space-report.types'
 import { createReport } from './space-reports.api'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledLabel = styled.label`
   margin-bottom: 0;
@@ -40,7 +40,7 @@ export function useGenerateSpaceReportModal({ scope, onClose }: { scope: string;
       close()
     },
     onError: (e: AxiosError<{ error: { message: string } }>) => {
-      toast.error(e?.response?.data?.error?.message ?? 'Error creating space report')
+      toastError(e?.response?.data?.error?.message ?? 'Error creating space report')
     },
   })
 
@@ -84,7 +84,11 @@ export function useGenerateSpaceReportModal({ scope, onClose }: { scope: string;
             <FieldGroup>
               <label>Options</label>
               <FieldLabelRow>
-                <Checkbox id="newSpaceReportOptionsPrettyPrint" checked={options?.prettyPrint ?? false} onChange={e => setOptions({ prettyPrint: e.target.checked })} />
+                <Checkbox
+                  id="newSpaceReportOptionsPrettyPrint"
+                  checked={options?.prettyPrint ?? false}
+                  onChange={e => setOptions({ prettyPrint: e.target.checked })}
+                />
                 <StyledLabel htmlFor="newSpaceReportOptionsPrettyPrint">Pretty print</StyledLabel>
               </FieldLabelRow>
             </FieldGroup>

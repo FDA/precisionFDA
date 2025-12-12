@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { useAuthUser } from '../features/auth/useAuthUser'
+import { toastError } from '../components/NotificationCenter/ToastHelper'
 
 export type CloudResourcesResponse = {
   computeCharges: number
@@ -58,7 +58,7 @@ export const useCloudResourcesCondition = (condition: CloudResourcesConditionTyp
         '\n---\n',
       )
       const onViolation = () => {
-        toast.error(finalMessage, { toastId: `Cloud resources exceeded - condition "${condition}"` })
+        toastError(finalMessage, { toastId: `Cloud resources exceeded - condition "${condition}"` })
       }
       return {
         query,
@@ -70,7 +70,7 @@ export const useCloudResourcesCondition = (condition: CloudResourcesConditionTyp
     default: {
       const isAllowed = isUsageAvailable
       const onViolation = () => {
-        toast.error(TOTAL_LIMIT_EXCEEDED_TEXT, { toastId: `Cloud resources exceeded - condition "${condition}"` })
+        toastError(TOTAL_LIMIT_EXCEEDED_TEXT, { toastId: `Cloud resources exceeded - condition "${condition}"` })
       }
       return {
         query,

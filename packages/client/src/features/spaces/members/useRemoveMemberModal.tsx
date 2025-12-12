@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { toast } from 'react-toastify'
 import { Button } from '../../../components/Button'
 import { Callout } from '../../../components/Callout'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
@@ -8,15 +7,16 @@ import { useModal } from '../../modal/useModal'
 import { changeMembershipRoleRequest } from './members.api'
 import { StyledFooter } from './members.styles'
 import { SpaceMembership } from './members.types'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
-export const useRemoveMemberModal = ({ 
-  spaceId, 
+export const useRemoveMemberModal = ({
+  spaceId,
   members,
   onSuccess,
-}: { 
-  spaceId: string|number;
-  members: SpaceMembership[];
-  onSuccess?: () => void;
+}: {
+  spaceId: string | number
+  members: SpaceMembership[]
+  onSuccess?: () => void
 }) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
@@ -24,7 +24,7 @@ export const useRemoveMemberModal = ({
   const mutation = useMutation({
     mutationKey: ['remove-members'],
     mutationFn: async () => {
-      const promises = members.map(member => 
+      const promises = members.map(member =>
         changeMembershipRoleRequest({
           spaceId,
           memberId: member.id,
@@ -38,11 +38,11 @@ export const useRemoveMemberModal = ({
         queryKey: ['space-members'],
       })
       setShowModal(false)
-      toast.success(`Successfully removed ${members.length} member${members.length > 1 ? 's' : ''} from the space`)
+      toastSuccess(`Successfully removed ${members.length} member${members.length > 1 ? 's' : ''} from the space`)
       if (onSuccess) onSuccess()
     },
     onError: () => {
-      toast.error('Error: Failed to remove members. Please try again later.')
+      toastError('Error: Failed to remove members. Please try again later.')
     },
   })
 
@@ -51,17 +51,11 @@ export const useRemoveMemberModal = ({
   }
 
   const modalComp = isShown ? (
-    <ModalNext
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-      id="remove-member-modal"
-    >
+    <ModalNext isShown={isShown} hide={() => setShowModal(false)} id="remove-member-modal">
       <ModalHeaderTop headerText="Remove Members" hide={() => setShowModal(false)} />
       <div>
         <Callout data-variant="warning">
-          <p>
-            Are you sure you want to remove {members.length > 1 ? 'these members' : 'this member'} from the space?
-          </p>
+          <p>Are you sure you want to remove {members.length > 1 ? 'these members' : 'this member'} from the space?</p>
           {members.length > 0 && (
             <ul>
               {members.map(member => (
@@ -72,14 +66,8 @@ export const useRemoveMemberModal = ({
           <p>This action cannot be undone.</p>
         </Callout>
         <StyledFooter>
-          <Button onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={onRemove}
-            data-variant="primary"
-            disabled={mutation.isPending}
-          >
+          <Button onClick={() => setShowModal(false)}>Cancel</Button>
+          <Button onClick={onRemove} data-variant="primary" disabled={mutation.isPending}>
             Remove
           </Button>
         </StyledFooter>

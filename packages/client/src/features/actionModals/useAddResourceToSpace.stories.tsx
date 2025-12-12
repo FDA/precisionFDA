@@ -1,9 +1,9 @@
 import { Meta, StoryObj } from '@storybook/react-webpack5'
 import { useMutation } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
-import { toast } from 'react-toastify'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useAddResourceToModal } from './useAddResourceToSpace'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 const meta: Meta = {
   title: 'Modals/Common',
@@ -34,7 +34,7 @@ const AddResourceToSpaceModalWrapper = ({ resource, spaceId }: Props) => {
     mutationKey: ['add-resource-to-space', resource],
     mutationFn: mockAddDataRequest,
     onError: (e: Error) => {
-      toast.error(`Error adding resource to space: ${e.message}`)
+      toastError(`Error adding resource to space: ${e.message}`)
     },
   })
 
@@ -43,7 +43,7 @@ const AddResourceToSpaceModalWrapper = ({ resource, spaceId }: Props) => {
     resource,
     mutation,
     onSuccess: () => {
-      toast.success(`Successfully added ${resource} resource(s) to space`)
+      toastSuccess(`Successfully added ${resource} resource(s) to space`)
       setShowModal(false)
     },
   })

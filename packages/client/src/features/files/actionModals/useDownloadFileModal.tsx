@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useMemo, useState } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { VerticalCenter } from '../../../components/Page/styles'
@@ -15,6 +14,7 @@ import { DownloadListResponse, ServerScope } from '../../home/types'
 import { fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 import { DownloadIcon } from '../../../components/icons/DownloadIcon'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 12px;
@@ -36,7 +36,7 @@ const DownloadFiles = ({
   setNodesToBeDownloaded,
 }: {
   selected: IFile[]
-  setNodesToBeDownloaded: (nodes: DownloadListResponse[]) => void,
+  setNodesToBeDownloaded: (nodes: DownloadListResponse[]) => void
 }) => {
   const { data, isLoading } = useQuery({
     queryKey: ['download_list', selected],
@@ -49,38 +49,32 @@ const DownloadFiles = ({
           return res
         })
         .catch(error => {
-          toast.error('Error: Fetching download list')
+          toastError('Error: Fetching download list')
           throw error
         })
     },
   })
   if (isLoading) return <StyledLoader>Loading...</StyledLoader>
-  return (
-    data ? (
-      <StyledResourceTable
-        rows={data.map((s) => ({
-          name: (
-            <StyledName href={s.viewURL} target="_blank">
-              <VerticalCenter>
-                {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
-              </VerticalCenter>
-              {s.name}
-            </StyledName>
-          ),
-          path: <StyledPath>{s.fsPath}</StyledPath>,
-          action: (
-            <StyledAction
-              data-variant='primary'
-              key={`${s.id}-action`}
-              onClick={() => handleDownloadClick(s.downloadURL)}
-            >
-              <DownloadIcon />
-              Download
-            </StyledAction>
-          ),
-        }))}
-      />
-    ) : <div />
+  return data ? (
+    <StyledResourceTable
+      rows={data.map(s => ({
+        name: (
+          <StyledName href={s.viewURL} target="_blank">
+            <VerticalCenter>{s.type === 'file' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
+            {s.name}
+          </StyledName>
+        ),
+        path: <StyledPath>{s.fsPath}</StyledPath>,
+        action: (
+          <StyledAction data-variant="primary" key={`${s.id}-action`} onClick={() => handleDownloadClick(s.downloadURL)}>
+            <DownloadIcon />
+            Download
+          </StyledAction>
+        ),
+      }))}
+    />
+  ) : (
+    <div />
   )
 }
 
@@ -95,31 +89,26 @@ export const useDownloadFileModal = (selected: IFile[], scope: ServerScope) => {
   }
 
   const modalComp = (
-    <ModalNext
-      id="modal-download"
-      data-test-id="modal-download"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
+    <ModalNext id="modal-download" data-test-id="modal-download" isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop
         disableClose={false}
         headerText={`Download ${nodesToBeDownloaded ? itemsCountString('item', nodesToBeDownloaded.length) : '...'}`}
         hide={() => setShowModal(false)}
       />
       <ModalScroll>
-        <DownloadFiles selected={memoSelected} setNodesToBeDownloaded={setNodesToBeDownloaded}/>
+        <DownloadFiles selected={memoSelected} setNodesToBeDownloaded={setNodesToBeDownloaded} />
       </ModalScroll>
       <Footer>
         <ButtonRow>
-          <Button onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
+          <Button onClick={() => setShowModal(false)}>Cancel</Button>
 
-          <Button onClick={() => {
-            handleDownloadClick(downloadUrl(scope))
-            setShowModal(false)
-            toast.success('Download all has been started')
-          }}>
+          <Button
+            onClick={() => {
+              handleDownloadClick(downloadUrl(scope))
+              setShowModal(false)
+              toastSuccess('Download all has been started')
+            }}
+          >
             Download All as Archive
           </Button>
         </ButtonRow>

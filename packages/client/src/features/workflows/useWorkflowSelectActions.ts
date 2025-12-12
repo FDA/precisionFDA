@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import { useAuthUser } from '../auth/useAuthUser'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
@@ -13,6 +12,7 @@ import { Action } from '../home/action-types'
 import { copyWorkflowsRequest, deleteWorkflowRequest, WorkflowCopyResponse } from './workflows.api'
 import { IWorkflow } from './workflows.types'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
+import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 export const useWorkflowSelectActions = ({
   homeScope,
@@ -46,7 +46,7 @@ export const useWorkflowSelectActions = ({
     updateFunction: copyWorkflowsRequest,
     onSuccess: res => {
       const workflowRes = res as WorkflowCopyResponse
-      toast.success('The workflow has been copied to the space successfully.')
+      toastSuccess('The workflow has been copied to the space successfully.')
       queryClient.invalidateQueries({ queryKey: resourceKeys }).then(() => {
         if (workflowRes.workflows && Array.isArray(workflowRes.workflows) && workflowRes.workflows.length > 0) {
           navigate(`/home/workflows/${workflowRes.workflows[0].uid}`)

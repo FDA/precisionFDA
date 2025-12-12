@@ -18,6 +18,7 @@ import { changeMembershipRoleRequest } from './members.api'
 import { StyledFields, StyledFooter } from './members.styles'
 import { MemberRole, SpaceMembership } from './members.types'
 import { Select } from '../../../components/Select'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 interface FormValues {
   role: { label: string; value: MemberRole }
@@ -64,23 +65,23 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
     onSuccess: res => {
       if (authUser?.dxuser === res.member && res.role === 'disable') {
         navigate('/spaces')
-        toast.success('Disabled yourself from the space')
+        toastSuccess('Disabled yourself from the space')
       } else {
         reset()
-        queryClient.invalidateQueries({ queryKey: ['space-members']})
+        queryClient.invalidateQueries({ queryKey: ['space-members'] })
         onClose()
         const msg = ['enable', 'disable'].includes(res.role)
           ? `${capitalize(res.role)}d member ${res.member} in the space`
           : `Changed ${res.member} member role to ${res.role}`
-        toast.success(msg)
+        toastSuccess(msg)
       }
     },
     onError: (error: unknown) => {
       if (error && typeof error === 'object' && 'response' in error) {
         const err = error as ErrorResponse
-        toast.error(`Change member role. ${err.response?.data?.errors || 'Unknown error'}`)
+        toastError(`Change member role. ${err.response?.data?.errors || 'Unknown error'}`)
       } else {
-        toast.error('Change member role. Unknown error')
+        toastError('Change member role. Unknown error')
       }
     },
   })
@@ -90,13 +91,13 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
     onSuccess: res => {
       if (authUser?.dxuser === res.member && res.role === 'disable') {
         navigate('/spaces')
-        toast.success('Disabled yourself from the space')
+        toastSuccess('Disabled yourself from the space')
       } else {
         reset()
-        queryClient.invalidateQueries({ queryKey: ['space-members']})
+        queryClient.invalidateQueries({ queryKey: ['space-members'] })
         onClose()
         const msg = `${capitalize(res.role)}d member ${res.member} in the space`
-        toast.success(msg)
+        toastSuccess(msg)
       }
     },
   })
@@ -148,12 +149,11 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
               />
             )}
           />
-          <Hint>
-            {member.active === 'Active' && 'Select the members role.'}
-          </Hint>
+          <Hint>{member.active === 'Active' && 'Select the members role.'}</Hint>
           <ErrorHint>
             {member.active === 'Inactive' && 'Enable the member first to change their role.'}
-            {member.active === 'Account deactivated' && 'Account is deactivated in precisionFDA and cannot be modified. An admin must reactivate the account first.'}
+            {member.active === 'Account deactivated' &&
+              'Account is deactivated in precisionFDA and cannot be modified. An admin must reactivate the account first.'}
           </ErrorHint>
           <ErrorMessage errors={errors} name="role" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
@@ -166,7 +166,6 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
       </StyledFields>
       <StyledFooter>
         <div>
-
           {canDisableOrEnable && (
             <Button
               type="button"
@@ -179,7 +178,7 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
             </Button>
           )}
         </div>
-        <div className='flex align-center gap-2'>
+        <div className="flex align-center gap-2">
           <Button type="button" onClick={onCancel} disabled={isSubmitting} aria-label="Close modal">
             Cancel
           </Button>

@@ -3,7 +3,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { InputText } from '../../../components/InputText'
 import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
@@ -17,6 +16,7 @@ import { Button } from '../../../components/Button'
 import { ModalNext, ModalHeaderTop } from '../../modal/ModalNext'
 import { AxiosError } from 'axios'
 import { ApiRailsError } from '../../home/types'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 interface FormValues {
   invitees_role: { label: string; value: MemberRole }
@@ -66,10 +66,10 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
         queryKey: ['space', spaceId.toString()],
       })
       setShowModal(false)
-      toast.success('Success: Adding members')
+      toastSuccess('Success: Adding members')
     },
     onError: (e: AxiosError<ApiRailsError>) => {
-      toast.error(`Error: Adding members. ${e.response?.data.errors}`)
+      toastError(`Error: Adding members. ${e.response?.data.errors}`)
     },
   })
 
@@ -94,53 +94,41 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
           }}
         />
         <StyledFields>
-
-        <FieldGroup>
-          <label>Username List</label>
-          <InputText
-            {...register('invitees')}
-            placeholder=""
-            // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus
-            disabled={mutation.isPending}
-          />
-          <Hint>
-            Enter usernames or emails seperated by commas. For example:
-            first_user, second_user, third_user@email.com
-          </Hint>
-          <ErrorMessage
-            errors={errors}
-            name="invitees"
-            render={({ message }) => <InputError>{message}</InputError>}
-          />
-        </FieldGroup>
-        <FieldGroup>
-          <label>Role</label>
-          <Controller
-            name="invitees_role"
-            control={control}
-            render={({ field: { value, onChange, onBlur }}) => (
-              <Select
-                options={[
-                  { value: 'admin', label: 'Admin' },
-                  { value: 'contributor', label: 'Contributor' },
-                  { value: 'viewer', label: 'Viewer' },
-                ]}
-                onChange={onChange}
-                isLoading={mutation.isPending}
-                onBlur={onBlur}
-                value={value}
-                isDisabled={mutation.isPending}
-              />
-            )}
-          />
-          <Hint>Select the new members role</Hint>
-          <ErrorMessage
-            errors={errors}
-            name="name"
-            render={({ message }) => <InputError>{message}</InputError>}
-          />
-        </FieldGroup>
+          <FieldGroup>
+            <label>Username List</label>
+            <InputText
+              {...register('invitees')}
+              placeholder=""
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+              disabled={mutation.isPending}
+            />
+            <Hint>Enter usernames or emails seperated by commas. For example: first_user, second_user, third_user@email.com</Hint>
+            <ErrorMessage errors={errors} name="invitees" render={({ message }) => <InputError>{message}</InputError>} />
+          </FieldGroup>
+          <FieldGroup>
+            <label>Role</label>
+            <Controller
+              name="invitees_role"
+              control={control}
+              render={({ field: { value, onChange, onBlur } }) => (
+                <Select
+                  options={[
+                    { value: 'admin', label: 'Admin' },
+                    { value: 'contributor', label: 'Contributor' },
+                    { value: 'viewer', label: 'Viewer' },
+                  ]}
+                  onChange={onChange}
+                  isLoading={mutation.isPending}
+                  onBlur={onBlur}
+                  value={value}
+                  isDisabled={mutation.isPending}
+                />
+              )}
+            />
+            <Hint>Select the new members role</Hint>
+            <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
+          </FieldGroup>
         </StyledFields>
         <StyledFooter>
           <ButtonRow>

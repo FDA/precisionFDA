@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { FieldGroup } from '../../components/form/styles'
 import { InputText } from '../../components/InputText'
@@ -11,6 +10,7 @@ import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
 import { Button } from '../../components/Button'
 import axios from 'axios'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledForm = styled.form`
   display: flex;
@@ -65,10 +65,10 @@ const EditTagsForm = ({
     onSuccess: res => {
       if (onSuccess) onSuccess(res)
       hideModal()
-      toast.success(`Successfully edited ${resource} tags`)
+      toastSuccess(`Successfully edited ${resource} tags`)
     },
     onError: () => {
-      toast.error(`Error: editing ${resource} tags`)
+      toastError(`Error: editing ${resource} tags`)
     },
   })
 

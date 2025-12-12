@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
@@ -16,6 +15,7 @@ import { canEditSettings, isUserInMemberRole } from '../utils'
 import { CreateDataPortalForm, DataPortalForm } from './DataPortalForm'
 import { AxiosError } from 'axios'
 import { ApiErrorResponse } from '../../home/types'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const EditDataPortalPage = () => {
   const { portalId } = useParams<{ portalId: string }>()
@@ -23,7 +23,6 @@ const EditDataPortalPage = () => {
   const navigate = useNavigate()
   const user = useAuthUser()
   const queryClient = useQueryClient()
-
 
   const dataPortalMutation = useMutation({ mutationFn: editDataPortalRequest })
 
@@ -48,11 +47,11 @@ const EditDataPortalPage = () => {
       const navigateToUrl: string = portal !== undefined ? `/data-portals/${portal.urlSlug}` : '/data-portals/'
       navigate(navigateToUrl)
 
-      toast.success('Data Portal updated')
+      toastSuccess('Data Portal updated')
     } catch (err: unknown) {
       const error = err as AxiosError<ApiErrorResponse>
       const message = error.response?.data?.error?.message || error.message || 'Unknown error'
-      toast.error(`Error while editing data portal: ${message}`)
+      toastError(`Error while editing data portal: ${message}`)
     }
   }
 
@@ -64,10 +63,7 @@ const EditDataPortalPage = () => {
     <UserLayout mainScroll>
       <StyledPageCenter>
         <StyledPageContent>
-
-        <BackLinkMargin linkTo={`/data-portals/${portal.urlSlug}`}>
-          Back to Data Portal
-        </BackLinkMargin>
+          <BackLinkMargin linkTo={`/data-portals/${portal.urlSlug}`}>Back to Data Portal</BackLinkMargin>
         </StyledPageContent>
       </StyledPageCenter>
       {canEditSettings(user?.dxuser, portal.members) ? (

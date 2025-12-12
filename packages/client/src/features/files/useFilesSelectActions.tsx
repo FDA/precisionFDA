@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
@@ -29,6 +28,7 @@ import { IFile, TreeOnSelectInfo } from './files.types'
 import { displayPayloadMessage, Payload } from '../../utils/api'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { useLicensesListQuery } from '../licenses/queries'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
   if (scope) {
@@ -91,10 +91,10 @@ export const useFilesSelectActions = ({
     onError: (e: AxiosError<BaseAPIResponse>) => {
       const error = e?.response?.data?.error
       if (error?.message) {
-        toast.error(error?.message)
+        toastError(error?.message)
         return
       }
-      toast.error('Moving items has failed')
+      toastError('Moving items has failed')
     },
   })
 
@@ -220,7 +220,7 @@ export const useFilesSelectActions = ({
     scope: getFileScope(homeScope, space),
     onHandleSubmit: (selectedFolderId: number, info: TreeOnSelectInfo) => {
       moveFilesMutation.mutateAsync(selectedFolderId).then(() => {
-        toast.success(`Successfully moved ${selected.length} ${pluralize('item', selected.length)} to ${info.node.title}`)
+        toastSuccess(`Successfully moved ${selected.length} ${pluralize('item', selected.length)} to ${info.node.title}`)
         setMoveFileModal(false)
       })
     },

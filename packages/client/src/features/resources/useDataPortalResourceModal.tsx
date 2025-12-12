@@ -1,7 +1,6 @@
 import { useMutation, UseMutationOptions, useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
-import { toast } from 'react-toastify'
 import { Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
 import { Loader } from '../../components/Loader'
@@ -40,7 +39,8 @@ import {
   TopRow,
 } from './styles'
 import { getExt, isImageFromExt } from './util'
-import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
+import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const ResourcePreview = ({ resource, onCopy }: { resource?: Resource; onCopy: (link: string) => void }) => {
   if (!resource) return <StyledResourcePreview />
@@ -142,7 +142,7 @@ export const DataPortalResources = ({
   const handleCopy = async (link: string | null) => {
     if (link) {
       await navigator.clipboard.writeText(link)
-      toast.success('Copied resource link to your clipboard')
+      toastSuccess('Copied resource link to your clipboard')
     }
   }
 

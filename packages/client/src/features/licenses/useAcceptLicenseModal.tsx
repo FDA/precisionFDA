@@ -1,6 +1,5 @@
 import React from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer } from '../modal/styles'
@@ -9,7 +8,7 @@ import { APIResource } from '../home/types'
 import { acceptLicenseRequest } from './api'
 import { Button } from '../../components/Button'
 import { IFile } from '../files/files.types'
-
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const ScrollWrapper = styled.div`
   overflow-y: scroll;
@@ -17,9 +16,7 @@ const ScrollWrapper = styled.div`
   padding: 1rem;
 `
 
-export function useAcceptLicenseModal<
-  T extends { uid?: string; dxid?: string; file_license?: IFile['file_license'] },
->({
+export function useAcceptLicenseModal<T extends { uid?: string; dxid?: string; file_license?: IFile['file_license'] }>({
   selected,
   onSuccess,
 }: {
@@ -35,14 +32,14 @@ export function useAcceptLicenseModal<
       return acceptLicenseRequest({ licenseId: id })
     },
     onError: () => {
-      toast.error('Error: Accept license')
+      toastError('Error: Accept license')
     },
     onSuccess: (res: unknown) => {
       if (onSuccess) {
         onSuccess(res)
       }
       setShowModal(false)
-      toast.success('Success: Accept License')
+      toastSuccess('Success: Accept License')
     },
   })
 
@@ -68,11 +65,12 @@ export function useAcceptLicenseModal<
       <ModalHeaderTop headerText="Accept License" hide={handleClose} />
       <ScrollWrapper>
         <div>
-          Are you sure you want to accept the license: <p><b>{selected?.file_license?.title}</b></p>
+          Are you sure you want to accept the license:{' '}
+          <p>
+            <b>{selected?.file_license?.title}</b>
+          </p>
         </div>
-        {mutation.isError && mutation.error && (
-          <div>{mutation.error.message}</div>
-        )}
+        {mutation.isError && mutation.error && <div>{mutation.error.message}</div>}
       </ScrollWrapper>
       <Footer>
         <ButtonRow>

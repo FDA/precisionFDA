@@ -2,7 +2,6 @@ import { ErrorMessage } from '@hookform/error-message'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { ButtonRow, Footer, StyledForm } from '../../modal/styles'
@@ -11,14 +10,9 @@ import { editAssetRequest } from '../assets.api'
 import { IAsset } from '../assets.types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { Button } from '../../../components/Button'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
-const EditAssetInfoForm = ({
-  asset,
-  handleClose,
-}: {
-  asset: IAsset
-  handleClose: () => void
-}) => {
+const EditAssetInfoForm = ({ asset, handleClose }: { asset: IAsset; handleClose: () => void }) => {
   const queryClient = useQueryClient()
 
   const {
@@ -27,20 +21,16 @@ const EditAssetInfoForm = ({
     formState: { errors },
   } = useForm<{ name: string }>({
     defaultValues: {
-      name:
-        typeof asset?.origin == 'object'
-          ? asset.origin.text?.trim()
-          : asset.name.trim(),
+      name: typeof asset?.origin == 'object' ? asset.origin.text?.trim() : asset.name.trim(),
     },
   })
 
   const editMutation = useMutation({
     mutationKey: ['edit-asset-info'],
-    mutationFn: (payload: { name: string; uid: string }) =>
-      editAssetRequest(payload),
+    mutationFn: (payload: { name: string; uid: string }) => editAssetRequest(payload),
     onSuccess: res => {
       if (res?.message.type === 'error') {
-        toast.error(`API Error: ${res?.message.text}`)
+        toastError(`API Error: ${res?.message.text}`)
       } else {
         queryClient.invalidateQueries({
           queryKey: ['assets'],
@@ -49,11 +39,11 @@ const EditAssetInfoForm = ({
           queryKey: ['asset', asset.uid],
         })
         handleClose()
-        toast.success('Asset info has been updated')
+        toastSuccess('Asset info has been updated')
       }
     },
     onError: () => {
-      toast.error('Error: Editing asset info')
+      toastError('Error: Editing asset info')
     },
   })
 
@@ -71,28 +61,15 @@ const EditAssetInfoForm = ({
             placeholder="Edit name..."
             disabled={editMutation.isPending}
           />
-          <ErrorMessage
-            errors={errors}
-            name="name"
-            render={({ message }) => <InputError>{message}</InputError>}
-          />
+          <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
       </StyledForm>
       <Footer>
         <ButtonRow>
-          <Button
-            type="button"
-            onClick={handleClose}
-            disabled={editMutation.isPending}
-          >
+          <Button type="button" onClick={handleClose} disabled={editMutation.isPending}>
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            form="edit-asset-form"
-            disabled={editMutation.isPending}
-          >
+          <Button data-variant="primary" type="submit" form="edit-asset-form" disabled={editMutation.isPending}>
             Edit
           </Button>
         </ButtonRow>
@@ -107,17 +84,8 @@ export const useEditAssetModal = (selectedItem: IAsset) => {
   const handleClose = () => setShowModal(false)
 
   const modalComp = (
-    <ModalNext
-      id="modal-asset-edit"
-      data-testid="modal-asset-edit"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText="Edit asset info"
-        hide={() => setShowModal(false)}
-      />
+    <ModalNext id="modal-asset-edit" data-testid="modal-asset-edit" isShown={isShown} hide={() => setShowModal(false)}>
+      <ModalHeaderTop disableClose={false} headerText="Edit asset info" hide={() => setShowModal(false)} />
       <EditAssetInfoForm asset={selected} handleClose={handleClose} />
     </ModalNext>
   )

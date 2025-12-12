@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { ResourceTable, StyledName } from '../../components/ResourceTable'
@@ -14,6 +13,7 @@ import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { Button } from '../../components/Button'
 import { Empty } from '../home/home.styles'
 import { IFile } from '../files/files.types'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const HiddenElement = styled.div`
   width: 16px;
@@ -29,9 +29,7 @@ const ScrollWrapper = styled(ModalScroll)`
   padding-bottom: 12px;
 `
 
-export function useAttachLicensesModal<
-  T extends { uid?: string; dxid?: string; file_license?: IFile['file_license'] },
->({
+export function useAttachLicensesModal<T extends { uid?: string; dxid?: string; file_license?: IFile['file_license'] }>({
   selected,
   resource,
   onSuccess,
@@ -67,16 +65,16 @@ export function useAttachLicensesModal<
     mutationKey: ['attach-license', resource],
     mutationFn: async (payload: { dxid: string; licenseId: string }) => attachLicenseRequest(payload),
     onError: () => {
-      toast.error('Error: Attaching licenses')
+      toastError('Error: Attaching licenses')
     },
-    onSuccess: (res) => {
+    onSuccess: res => {
       queryClient.invalidateQueries({
         queryKey: ['licenses'],
       })
       if (onSuccess) onSuccess(res)
       resetSelected()
       setShowModal(false)
-      toast.success('Success: Attaching Licenses')
+      toastSuccess('Success: Attaching Licenses')
     },
   })
 
@@ -94,10 +92,7 @@ export function useAttachLicensesModal<
       isShown={isShown}
       hide={handleClose}
     >
-      <ModalHeaderTop
-        headerText="Select a license"
-        hide={() => setShowModal(false)}
-      />
+      <ModalHeaderTop headerText="Select a license" hide={() => setShowModal(false)} />
       {licenses && (
         <ScrollWrapper>
           <>
@@ -109,21 +104,12 @@ export function useAttachLicensesModal<
                   const isCurrent = selectedLicense === s.id
                   return {
                     title: (
-                      <StyledName
-                        as="div"
-                        key={`${i}-name`}
-                        onClick={() => handleClickLicense(s)}
-                        isCurrent={isCurrent}
-                      >
+                      <StyledName as="div" key={`${i}-name`} onClick={() => handleClickLicense(s)} isCurrent={isCurrent}>
                         {s.title}
                       </StyledName>
                     ),
                     action: (
-                      <StyledAction
-                        key={`${s.id}-action`}
-                        onClick={() => handleClickLicense(s)}
-                        isCurrent={isCurrent}
-                      >
+                      <StyledAction key={`${s.id}-action`} onClick={() => handleClickLicense(s)} isCurrent={isCurrent}>
                         {isCurrent ? <CircleCheckIcon /> : <HiddenElement />}
                       </StyledAction>
                     ),
@@ -132,9 +118,7 @@ export function useAttachLicensesModal<
               />
             )}
             {mutation.isError && mutation.error && (
-              <div style={{ color: 'red', padding: '12px' }}>
-                {mutation.error.message || 'An error occurred'}
-              </div>
+              <div style={{ color: 'red', padding: '12px' }}>{mutation.error.message || 'An error occurred'}</div>
             )}
           </>
         </ScrollWrapper>
@@ -145,9 +129,7 @@ export function useAttachLicensesModal<
           <Button
             data-variant="primary"
             onClick={() => handleSubmit(selectedLicense)}
-            disabled={
-              !selectedLicense || selectedLicense === selected?.file_license?.id
-            }
+            disabled={!selectedLicense || selectedLicense === selected?.file_license?.id}
           >
             Attach
           </Button>

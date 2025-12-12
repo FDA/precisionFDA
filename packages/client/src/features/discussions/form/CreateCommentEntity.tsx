@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { RefCallBack } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import { CommentPayload, CreateReplyPayload, NoteScope, createReplyRequest } from '../api'
 import { NoteForm } from '../discussions.types'
 import { pickIdsFromFormAttachments } from '../helpers'
 import { MarkdownForm } from './MarkdownForm'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const CreateCommentEntity = ({
   canUserAnswer,
@@ -47,11 +47,11 @@ export const CreateCommentEntity = ({
       queryClient.invalidateQueries({
         queryKey: ['discussion'],
       })
-      toast.success('Reply has been published')
+      toastSuccess('Reply has been published')
     },
     onError: error => {
       // TODO add strong typing to error
-      toast.error(`Failed to create ${error}`)
+      toastError(`Failed to create ${error}`)
     },
   })
 

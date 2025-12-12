@@ -1,6 +1,5 @@
 import React, { ReactElement, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Checkbox } from '../../components/Checkbox'
 import { SideTabs } from '../../components/SideTab/SideTabs'
@@ -13,6 +12,7 @@ import { License } from './types'
 import { ChevronRightIcon } from '../../components/icons/ChevronRightIcon'
 import { AcceptedLicense } from '../apps/apps.types'
 import { Button } from '../../components/Button'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledLicenceTitle = styled.div``
 
@@ -57,17 +57,12 @@ const Text = styled.div`
  * @param licensesToAccept - licenses that need to be accepted
  * @param acceptedLicenses - licenses accepted by current user
  */
-const setLicenseStateAndFilter = (
-  licensesToAccept: License[],
-  acceptedLicenses: AcceptedLicense[],
-): License[] => {
+const setLicenseStateAndFilter = (licensesToAccept: License[], acceptedLicenses: AcceptedLicense[]): License[] => {
   const filteredToAccept: License[] = []
   licensesToAccept.forEach(licenseToAccept => {
     let alreadyAccepted = false
     acceptedLicenses.forEach(acceptedLicense => {
-      if (
-        licenseToAccept.id.toString() === acceptedLicense.license.toString()
-      ) {
+      if (licenseToAccept.id.toString() === acceptedLicense.license.toString()) {
         if (acceptedLicense.state === 'pending') {
           const pendingLicense = { ...licenseToAccept }
           pendingLicense.state = 'pending'
@@ -88,14 +83,8 @@ export const useAcceptLicensesModal = () => {
   const [selectedLicenses, setSelectedLicenses] = useState([] as License[])
   const { isShown, setShowModal } = useModal()
 
-  const setLicensesAndShow = (
-    licensesToAccept: License[],
-    acceptedLicenses: AcceptedLicense[],
-  ) => {
-    const filtered = setLicenseStateAndFilter(
-      licensesToAccept,
-      acceptedLicenses,
-    )
+  const setLicensesAndShow = (licensesToAccept: License[], acceptedLicenses: AcceptedLicense[]) => {
+    const filtered = setLicenseStateAndFilter(licensesToAccept, acceptedLicenses)
     setLicenses(filtered)
     setShowModal(true)
   }
@@ -104,9 +93,7 @@ export const useAcceptLicensesModal = () => {
     if (evt.target.checked) {
       setSelectedLicenses(prev => [...prev, license])
     } else {
-      setSelectedLicenses(prev =>
-        prev.filter(element => element.id !== license.id),
-      )
+      setSelectedLicenses(prev => prev.filter(element => element.id !== license.id))
     }
   }
 
@@ -121,28 +108,22 @@ export const useAcceptLicensesModal = () => {
       </StyledTabTitle>
 
       {license.approval_required && license.state !== 'pending' && (
-        <StyledLink
-          href={`/licenses/${license.id}/request_approval`}
-          target="_blank"
-        >
+        <StyledLink href={`/licenses/${license.id}/request_approval`} target="_blank">
           Request Approval
         </StyledLink>
       )}
-      {license.approval_required && license.state === 'pending' && (
-        <StyledWarning>Pending Approval</StyledWarning>
-      )}
+      {license.approval_required && license.state === 'pending' && <StyledWarning>Pending Approval</StyledWarning>}
     </>
   )
 
   const mutation = useMutation({
-    mutationFn: ({ licenseIds }: { licenseIds: string[] }) =>
-      acceptLicensesRequest({ licenseIds }),
-    onError: (err) => {
-      toast.error(`Accepting licenses: ${err}`)
+    mutationFn: ({ licenseIds }: { licenseIds: string[] }) => acceptLicensesRequest({ licenseIds }),
+    onError: err => {
+      toastError(`Accepting licenses: ${err}`)
     },
-    onSuccess: (res) => {
+    onSuccess: res => {
       setShowModal(false)
-      toast.success(`Accepted ${res.accepted_licenses.length} license(s)`)
+      toastSuccess(`Accepted ${res.accepted_licenses.length} license(s)`)
     },
   })
 
@@ -164,10 +145,7 @@ export const useAcceptLicensesModal = () => {
     >
       <ModalHeaderTop headerText="Accept Licenses" hide={() => setShowModal(false)} />
       <div style={{ padding: '1rem' }}>
-        <Text>
-          The item/s you selected require that you accept the following license/s
-          before proceeding.
-        </Text>
+        <Text>The item/s you selected require that you accept the following license/s before proceeding.</Text>
         <WrapSideTabs>
           <SideTabs>
             {licenses.map(license => (
@@ -189,11 +167,7 @@ export const useAcceptLicensesModal = () => {
           >
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            disabled={selectedLicenses.length === 0}
-            onClick={() => handleSubmit()}
-          >
+          <Button data-variant="primary" disabled={selectedLicenses.length === 0} onClick={() => handleSubmit()}>
             Accept Selected Licenses
           </Button>
         </ButtonRow>

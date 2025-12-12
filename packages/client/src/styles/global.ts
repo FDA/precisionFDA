@@ -103,14 +103,14 @@ const GlobalStyle = createGlobalStyle<{ railsAlertHeight: number }>`
   }
 
   .Toastify__toast-body {
-    padding: 0px;
+    padding: 0;
     width: 100%;
     font-weight: 400;
     font-size: 14px;
     margin: auto 12px !important;
     min-width: 400px !important;
     max-width: 600px !important;
-    
+
     > div {
       display: flex;
     }
@@ -127,7 +127,7 @@ const GlobalStyle = createGlobalStyle<{ railsAlertHeight: number }>`
   }
 
   .Toastify__toast--warning {
-    border: 2px solid ${colors.primaryYellow}  !important;
+    border: 2px solid ${colors.primaryYellow} !important;
     border-radius: 5px !important;
   }
 `

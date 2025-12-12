@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
@@ -12,6 +11,7 @@ import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
 import { ChallengePayload, createChallengeRequest } from '../api'
 import { IChallengeForm, ChallengeForm } from './ChallengeForm'
 import { mapFormToPayload, subtitle, title } from './common'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const CreateChallengePage = () => {
   const navigate = useNavigate()
@@ -26,10 +26,10 @@ const CreateChallengePage = () => {
         queryKey: ['challenges'],
       })
       navigate('/challenges')
-      toast.success('Challenge has been created')
+      toastSuccess('Challenge has been created')
     },
     onError: () => {
-      toast.error('Error: Adding challenge')
+      toastError('Error: Adding challenge')
     },
   })
 
@@ -42,16 +42,11 @@ const CreateChallengePage = () => {
       <NavigationBar title={title} subtitle={subtitle} user={user} />
       <StyledPageCenter>
         <StyledPageContent>
-          <BackLinkMargin linkTo="/challenges">
-            Back to Challenges
-          </BackLinkMargin>
+          <BackLinkMargin linkTo="/challenges">Back to Challenges</BackLinkMargin>
           {user?.can_create_challenges ? (
             <>
               <PageTitle>Create a new challenge</PageTitle>
-              <ChallengeForm
-                onSubmit={handleSubmit}
-                isSaving={mutation.isPending}
-              />
+              <ChallengeForm onSubmit={handleSubmit} isSaving={mutation.isPending} />
             </>
           ) : (
             <NotAllowedPage />

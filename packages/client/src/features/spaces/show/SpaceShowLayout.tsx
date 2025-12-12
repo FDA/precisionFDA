@@ -1,7 +1,6 @@
 import React from 'react'
 import { Outlet, useOutletContext } from 'react-router'
 import { useMutation } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { MenuCounter } from '../../../components/MenuCounter'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
 import { CogsIcon } from '../../../components/icons/Cogs'
@@ -14,17 +13,12 @@ import { NetworkIcon } from '../../../components/icons/NetworkIcon'
 import { SpaceReportIcon } from '../../../components/icons/SpaceReportIcon'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
 import { useLocalStorage } from '../../../hooks/useLocalStorage'
-import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../../home/home.styles'
-import { HomeLoader } from '../../home/show.styles'
 import { ApiErrorResponse } from '../../home/types'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
 import { fixGuestPermissions } from '../spaces.api'
 import { useSpaceActions } from '../useSpaceActions'
-import { Activation } from './SpaceActivation'
-import { SpaceLocked } from './SpaceLocked'
-import { SpaceNotAllowed } from './SpaceNotAllowed'
 import { SpaceTypeTabs } from './SpaceTypeTabs'
 import {
   ActionButton,
@@ -41,13 +35,12 @@ import {
 import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
 import { ProtectedIcon } from '../ProtectedIcon'
 import type { SpaceOutletContext } from '../routes'
-
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const SpaceShowLayout = () => {
   const context = useOutletContext<SpaceOutletContext>()
   const { space } = context
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedSpacesSidebar', true)
-  useToastWSHandler()
 
   const { actions } = useSpaceActions({ space })
   const [activeResource] = useActiveResourceFromUrl('spaces')
@@ -59,10 +52,10 @@ export const SpaceShowLayout = () => {
     mutationKey: ['fix-guest-permissions'],
     mutationFn: (payload: { id: string }) => fixGuestPermissions(payload),
     onSuccess: () => {
-      toast.success('Permissions for guest side successfully updated')
+      toastSuccess('Permissions for guest side successfully updated')
     },
     onError: (e: { response?: { data?: ApiErrorResponse } }) => {
-      toast.error(e.response?.data?.error?.message)
+      toastError(e.response?.data?.error?.message)
     },
   })
 

@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router'
 import { EXPERT_STATE } from '../../../constants'
@@ -13,6 +12,7 @@ import { ExpertAskQuestionModal } from './ExpertAskQuestionModal'
 import { StyledPageRightColumn } from './styles'
 import { Button } from '../../../components/Button'
 import { useConfirm } from '../../modal/useConfirm'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const ActionRow = styled.div`
   display: flex;
@@ -33,13 +33,13 @@ export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails
       askQuestion({ userName, question, captchaValue }, expert.id.toString()),
     onError: error => {
       const errorMessage = error?.message || 'Your question was not submitted due to internal error'
-      toast.error(errorMessage)
+      toastError(errorMessage)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['queryExpertDetails'],
       })
-      toast.success('Your question was submitted successfully')
+      toastSuccess('Your question was submitted successfully')
       modal.setShowModal(false)
       navigate(`/experts/${expert.id}`)
     },
@@ -50,12 +50,12 @@ export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails
     mutationFn: () => deleteExpertRequest(expert.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['experts'] })
-      toast.success('Expert was deleted successfully')
+      toastSuccess('Expert was deleted successfully')
       navigate('/experts')
     },
     onError: error => {
       const errorMessage = error?.message
-      toast.error(errorMessage || 'Expert was not deleted due to internal error')
+      toastError(errorMessage || 'Expert was not deleted due to internal error')
     },
   })
 

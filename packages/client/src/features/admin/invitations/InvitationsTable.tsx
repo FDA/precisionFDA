@@ -5,7 +5,7 @@ import { hidePagination, Pagination } from '../../../components/Pagination'
 import Table from '../../../components/Table'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
-import { useLastWSNotification, useToastWSHandler } from '../../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { IFilter, NOTIFICATION_ACTION } from '../../home/types'
@@ -66,7 +66,6 @@ export const InvitationsTable = ({
   const filters = toArrayFromObject(filterQuery)
   const queryClient = useQueryClient()
 
-  useToastWSHandler()
   const lastJsonMessage = useLastWSNotification([
     NOTIFICATION_ACTION.USER_PROVISIONING_DONE,
     NOTIFICATION_ACTION.USER_PROVISIONING_ERROR,
