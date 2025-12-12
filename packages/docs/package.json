@@ -15,7 +15,7 @@
     "fumadocs-mdx": "11.6.1",
     "fumadocs-ui": "15.2.5",
     "lucide-react": "^0.487.0",
-    "next": "15.5.7",
+    "next": "15.5.9",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "rehype-raw": "^6.1.1"
