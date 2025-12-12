@@ -2,6 +2,7 @@ import { Entity, ManyToOne, Property, Ref } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 export type NotificationMeta = {
   linkTitle?: string
@@ -26,7 +27,7 @@ export class Notification extends BaseEntity {
   @Property()
   sessionId: string
 
-  @Property({ type: 'json', nullable: true })
+  @Property({ type: WorkaroundJsonType, nullable: true })
   meta?: NotificationMeta
 
   @Property()

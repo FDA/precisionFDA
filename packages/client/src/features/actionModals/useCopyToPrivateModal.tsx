@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { AxiosError } from 'axios'
 import { Loader } from '../../components/Loader'
@@ -12,11 +11,9 @@ import { resourceCountString } from '../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Button } from '../../components/Button'
 import { useConfirmModal } from '../files/actionModals/useConfirmModal'
-import {
-  APP_REVISION_CREATION_NOT_REQUESTED,
-  APP_SERIES_CREATION_NOT_REQUESTED,
-} from '../../constants'
+import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../constants'
 import { CONFIRM_APP_REVISION } from '../../constants/consts'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;
@@ -51,23 +48,27 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
     mutationFn: ({ ids, properties }: { ids: number[]; properties?: Record<string, unknown> }) => copyFunction(ids, properties),
     onError: (e: AxiosError<{ error: { code: string; type: string; message: string } }>) => {
       const error = e?.response?.data?.error
-      if (e.response?.status === 400 && error?.code && [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(error.code)) {
+      if (
+        e.response?.status === 400 &&
+        error?.code &&
+        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(error.code)
+      ) {
         setShowConfirmModal(true)
       } else {
         if (error?.message) {
-          toast.error(`${error?.type}: ${error?.message}`)
+          toastError(`${error?.type}: ${error?.message}`)
           return
         }
-        toast.error(error?.message || 'An error occurred')
+        toastError(error?.message || 'An error occurred')
       }
     },
     onSuccess: (res: CopyResponse) => {
       if (res?.meta?.messages[0]?.type === 'error') {
-        toast.error(`Server error: ${res?.meta?.messages[0].message}`)
+        toastError(`Server error: ${res?.meta?.messages[0].message}`)
       } else {
         if (onSuccess) onSuccess(res)
         setShowModal(false)
-        toast.success(`Copied ${resourceCountString(resource, momoSelected.length)} to private area`)
+        toastSuccess(`Copied ${resourceCountString(resource, momoSelected.length)} to private area`)
       }
     },
   })
@@ -77,7 +78,7 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
     CONFIRM_APP_REVISION,
     async () => {
       setShowConfirmModal(false)
-      await mutation.mutateAsync({ ids: momoSelected.map(s => s.id), properties: { createAppRevision: true }})
+      await mutation.mutateAsync({ ids: momoSelected.map(s => s.id), properties: { createAppRevision: true } })
     },
   )
 
@@ -94,10 +95,7 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText={`Copy ${resourceCountString(
-          resource,
-          momoSelected.length,
-        )} to My Home (private)?`}
+        headerText={`Copy ${resourceCountString(resource, momoSelected.length)} to My Home (private)?`}
         hide={() => setShowModal(false)}
       />
       <ModalScroll>

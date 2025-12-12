@@ -36,14 +36,13 @@ import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import styles from './FileList.module.css'
 import { CopyText } from '../../components/CopyText/CopyText'
-import { CopyIcon } from 'lucide-react'
 import { clsx } from 'clsx'
-import { toast } from 'react-toastify'
+import { toastInfo } from '../../components/NotificationCenter/ToastHelper'
 
 type ListType = { files: (IFile | IFolder)[]; meta: IMeta }
 
@@ -127,9 +126,9 @@ export const FileList = ({
       previousMetaRef.current = data.meta.path
     }
   }, [data?.meta?.path, isLoading])
-  
+
   // Use current data if available, otherwise use cached value only during loading
-  const currentMetaPath = !isLoading && data?.meta ? data.meta.path : (isLoading ? previousMetaRef.current : undefined)
+  const currentMetaPath = !isLoading && data?.meta ? data.meta.path : isLoading ? previousMetaRef.current : undefined
 
   const onFolderClick = (folderId: string) => {
     resetSelected()
@@ -372,7 +371,7 @@ export const FilesListTable = ({
           <CopyText
             value={folderId.toString()}
             className={styles.folderIdPill}
-            onCopy={() => toast.info('Folder ID copied to clipboard')}
+            onCopy={() => toastInfo('Folder ID copied to clipboard')}
           >
             <span className={clsx(styles.currentFolderIdLabel, 'flex', 'items-center')}>Folder ID:</span>{' '}
             <span className={styles.currentFolderId}>{folderId}</span>

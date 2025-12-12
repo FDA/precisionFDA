@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useMemo } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
@@ -11,6 +10,7 @@ import { ButtonRow, Content, Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { databaseMethodRequest } from './databases.api'
 import { MethodType } from './databases.types'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const ResourceTableContainer = styled.div`
   margin-bottom: 20px;
@@ -61,7 +61,7 @@ export function useMethodModal<T extends { dxid: string; name: string; location?
       queryClient.invalidateQueries({
         queryKey: ['dbclusters'],
       })
-      toast.error(`${getVerb(method)} the database failed`)
+      toastError(`${getVerb(method)} the database failed`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -69,7 +69,7 @@ export function useMethodModal<T extends { dxid: string; name: string; location?
       })
       if (onSuccess) onSuccess()
       setShowModal(false)
-      toast.success(`${getVerb(method)} database. This may take a moment`)
+      toastSuccess(`${getVerb(method)} database. This may take a moment`)
     },
   })
 

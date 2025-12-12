@@ -7,7 +7,7 @@ import { Loader } from '../../../components/Loader'
 import { PageContainerMargin, PageTitle } from '../../../components/Page/styles'
 import { PageLoaderWrapper } from '../../../components/Public/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
-import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { theme } from '../../../styles/theme'
 import { useAuthUser } from '../../auth/useAuthUser'
@@ -64,7 +64,7 @@ const DataPortalsListPage = () => {
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['data-portals-list']})
+    queryClient.invalidateQueries({ queryKey: ['data-portals-list'] })
   }, [lastJsonMessage])
 
   return (
@@ -89,7 +89,11 @@ const DataPortalsListPage = () => {
               <ListSection>
                 {data?.length === 0 && <AlertText>You have no Data Portals</AlertText>}
                 <ListSectionTitle>{user?.isAdmin ? 'All Data Portals' : 'Your Data Portals'}</ListSectionTitle>
-                <List>{data?.map(portal => <DataPortalListItem key={portal.id} dataPortal={portal} />)}</List>
+                <List>
+                  {data?.map(portal => (
+                    <DataPortalListItem key={portal.id} dataPortal={portal} />
+                  ))}
+                </List>
               </ListSection>
             )}
           </PageMainBody>

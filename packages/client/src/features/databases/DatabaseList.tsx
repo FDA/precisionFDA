@@ -25,7 +25,7 @@ import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
 import { useQueryClient } from '@tanstack/react-query'
-import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { ActionsMenu } from '../../components/Menu'
 import { Refresh } from '../../components/Page/styles'
 import { SyncIcon } from '../../components/icons/SyncIcon'
@@ -80,9 +80,7 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
 
   const queryCache = useQueryClient()
 
-  const lastJsonMessage = useLastWSNotification([
-      NOTIFICATION_ACTION.DB_CLUSTER_UPDATED,
-    ])
+  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.DB_CLUSTER_UPDATED])
 
   useEffect(() => {
     if (lastJsonMessage == null) {

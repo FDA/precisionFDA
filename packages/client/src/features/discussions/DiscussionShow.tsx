@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import { Tooltip } from 'react-tooltip'
 import { useToggleFollowDiscussionMutation } from '../../api/mutations/discussion'
 import {
@@ -24,6 +23,7 @@ import { EditDiscussionTitle } from './form/EditDiscussionTitle'
 import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
 import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
 import { IUser } from '../../types/user'
+import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 interface DiscussionContextType {
   attachments: Record<number, Attachment[]>
@@ -53,11 +53,11 @@ export const DiscussionShow = ({
   discussionId,
   space,
   user,
-  homeContext = defaultHomeContext
+  homeContext = defaultHomeContext,
 }: {
-  discussionId: number,
-  space?: ISpace,
-  user: IUser,
+  discussionId: number
+  space?: ISpace
+  user: IUser
   homeContext?: HomeScopeContextValue
 }) => {
   const { isHome, homeScopeChangeHandler } = homeContext
@@ -95,7 +95,7 @@ export const DiscussionShow = ({
     queryClient.invalidateQueries({
       queryKey: ['discussions'],
     })
-    toast.success('Discussion successfully removed')
+    toastSuccess('Discussion successfully removed')
 
     if (space) {
       navigate(`/spaces/${space.id}/discussions`)
@@ -122,7 +122,7 @@ export const DiscussionShow = ({
     toggleFollow(discussion, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getFetchDiscussionQueryKey(discussionId) })
-        toast.success(`Discussion successfully ${discussion.following ? 'unfollowed' : 'followed'}`)
+        toastSuccess(`Discussion successfully ${discussion.following ? 'unfollowed' : 'followed'}`)
       },
     })
   }

@@ -2,7 +2,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useState } from 'react'
 import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import { Button, TransparentButton } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
@@ -58,6 +57,7 @@ import {
   useUserComputeInstances,
   validateFile,
 } from './utils'
+import { toastError } from '../../../components/NotificationCenter/ToastHelper'
 
 /**
  * If params are specified in the URL, decode them and set them as default values.
@@ -141,7 +141,9 @@ const importFormData = async (
       }
       const validationCache: Record<string, boolean> = {}
 
-      const allFileUids = Array.from(new Set(importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item)))) as string[]
+      const allFileUids = Array.from(
+        new Set(importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item))),
+      ) as string[]
       setTotalFilesToValidate(allFileUids.length)
       for (const fileUid of allFileUids) {
         const valid = await validateFile(fileUid)
@@ -160,7 +162,7 @@ const importFormData = async (
       })
     } catch (error) {
       console.log(error)
-      toast.error('Invalid file format')
+      toastError('Invalid file format')
       clearTimeout(delayDialogTimeout)
       setShowValidationWait(false)
     }
@@ -290,9 +292,9 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
             setExecutedBatchCount(prevCount => prevCount + 1)
 
             if (!data?.id && data?.error) {
-              toast.error(data.error.message)
+              toastError(data.error.message)
             } else if (!data?.id) {
-              toast.error('Something went wrong!')
+              toastError('Something went wrong!')
             }
 
             if (!isBatchRun) {
@@ -316,7 +318,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
           }
         } catch (error) {
           console.error('Error starting job :', error)
-          toast.error('Failed to start job.')
+          toastError('Failed to start job.')
         }
       }
     }

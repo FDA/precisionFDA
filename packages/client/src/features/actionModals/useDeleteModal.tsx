@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
 import React, { useMemo } from 'react'
-import { toast } from 'react-toastify'
 import { Loader } from '../../components/Loader'
 import { ResourceTable } from '../../components/ResourceTable'
 import { itemsCountString } from '../../utils/formatting'
@@ -8,6 +7,7 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { Button } from '../../components/Button'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 export interface DeleteResponse {
   meta?: {
@@ -36,7 +36,7 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
 }: {
   resource: 'app' | 'asset' | 'workflow'
   selected: T[]
-  request: (ids: (string)[]) => Promise<DeleteResponse>
+  request: (ids: string[]) => Promise<DeleteResponse>
   onSuccess?: (res: DeleteResponse) => void
 }) {
   const { isShown, setShowModal } = useModal()
@@ -45,18 +45,18 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
     mutationKey: ['delete-resource', resource],
     mutationFn: request,
     onError: (error: ApiError) => {
-      toast.error(error.response?.data.error.message ?? error.message)
+      toastError(error.response?.data.error.message ?? error.message)
     },
     onSuccess: (res: DeleteResponse) => {
       if (res?.meta?.messages[0].type === 'error') {
-        toast.error(`Server error: ${res?.meta?.messages[0].message}`)
+        toastError(`Server error: ${res?.meta?.messages[0].message}`)
         return
       }
       if (onSuccess) onSuccess(res)
       setShowModal(false)
       if (resource !== 'asset') {
         // asset is handled asynchronously
-        toast.success(`Deleted ${itemsCountString(resource, momoSelected.length)}`)
+        toastSuccess(`Deleted ${itemsCountString(resource, momoSelected.length)}`)
       }
     },
   })

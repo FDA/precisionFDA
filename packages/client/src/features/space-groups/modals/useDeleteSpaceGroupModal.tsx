@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import React from 'react'
 import { useSearchParams } from 'react-router'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { InfoCircleIcon } from '../../../components/icons/InfoCircleIcon'
@@ -12,6 +11,7 @@ import { ButtonRow, Footer } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { deleteSpaceGroupRequest } from '../api'
 import { ISpaceGroup } from '../types'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const Wrapper = styled.div`
   display: flex;
@@ -70,7 +70,7 @@ export const useDeleteSpaceGroupModal = ({ spaceGroup }: { spaceGroup: ISpaceGro
   const handleSubmit = async () => {
     try {
       await mutation.mutateAsync(spaceGroup.id)
-      toast.success(`Space group ${spaceGroup.name} has been deleted`)
+      toastSuccess(`Space group ${spaceGroup.name} has been deleted`)
       setShowModal(false)
       queryClient.invalidateQueries({
         queryKey: ['space-group-list'],
@@ -86,9 +86,9 @@ export const useDeleteSpaceGroupModal = ({ spaceGroup }: { spaceGroup: ISpaceGro
       }
     } catch (err: unknown) {
       if (isAxiosError(err)) {
-        toast.error(`Deleting of space group ${spaceGroup.name} has failed due to: ${err?.response?.data?.error?.message}`)
+        toastError(`Deleting of space group ${spaceGroup.name} has failed due to: ${err?.response?.data?.error?.message}`)
       } else {
-        toast.error(`Deleting of space group ${spaceGroup.name} has failed due to an unknown error`)
+        toastError(`Deleting of space group ${spaceGroup.name} has failed due to an unknown error`)
       }
     }
   }

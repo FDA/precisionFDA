@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
 import React, { useMemo } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { StyledTable, StyledTD } from '../../components/ResourceTable'
@@ -12,19 +11,13 @@ import { ISpaceReport } from './space-report.types'
 import { deleteReports } from './space-reports.api'
 import { reportStateToTextMap } from './useSpaceReportColumns'
 import { Button } from '../../components/Button'
-
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledReportTable = styled(StyledTable)`
   padding: 0.5rem;
 `
 
-export function useDeleteSpaceReportModal({
-  selected,
-  onClose,
-}: {
-  selected: ISpaceReport[]
-  onClose?: () => void
-}) {
+export function useDeleteSpaceReportModal({ selected, onClose }: { selected: ISpaceReport[]; onClose?: () => void }) {
   const { isShown, setShowModal } = useModal()
 
   const close = () => {
@@ -38,13 +31,11 @@ export function useDeleteSpaceReportModal({
     mutationKey: ['delete-space-report'],
     mutationFn: deleteReports,
     onError: () => {
-      toast.error('Error: Deleting space reports')
+      toastError('Error: Deleting space reports')
     },
-    onSuccess: (res) => {
+    onSuccess: res => {
       close()
-      toast.success(
-        `${itemsCountString('report', res?.length ?? 0)} deleted`,
-      )
+      toastSuccess(`${itemsCountString('report', res?.length ?? 0)} deleted`)
     },
   })
 
@@ -53,11 +44,7 @@ export function useDeleteSpaceReportModal({
   }
 
   const modalComp = (
-    <ModalNext
-      id="space-report-delete-modal"
-      isShown={isShown}
-      hide={() => close()}
-    >
+    <ModalNext id="space-report-delete-modal" isShown={isShown} hide={() => close()}>
       <ModalHeaderTop
         disableClose={false}
         headerText={`Delete ${itemsCountString('report', momoSelected.length)}?`}
@@ -66,18 +53,18 @@ export function useDeleteSpaceReportModal({
       <ModalScroll>
         <StyledReportTable>
           <thead>
-          <tr>
-            <th>Created at</th>
-            <th>State</th>
-          </tr>
+            <tr>
+              <th>Created at</th>
+              <th>State</th>
+            </tr>
           </thead>
           <tbody>
-          {momoSelected.map((report) => (
-            <tr key={report.id}>
-              <StyledTD>{formatDate(report.createdAt)}</StyledTD>
-              <StyledTD>{reportStateToTextMap[report.state]}</StyledTD>
-            </tr>
-          ))}
+            {momoSelected.map(report => (
+              <tr key={report.id}>
+                <StyledTD>{formatDate(report.createdAt)}</StyledTD>
+                <StyledTD>{reportStateToTextMap[report.state]}</StyledTD>
+              </tr>
+            ))}
           </tbody>
         </StyledReportTable>
       </ModalScroll>

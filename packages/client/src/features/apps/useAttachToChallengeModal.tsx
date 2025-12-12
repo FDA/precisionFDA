@@ -1,23 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { TrophyIcon } from '../../components/icons/TrophyIcon'
 import { Loader } from '../../components/Loader'
 import { breakPoints } from '../../styles/theme'
-import {
-  displayPayloadMessage,
-  Payload,
-} from '../../utils/api'
-import {
-  CheckCol,
-  ColBody,
-  HeaderRow,
-  Table,
-  TableRow,
-  TitleCol,
-} from '../modal/ModalCheckList'
+import { displayPayloadMessage, Payload } from '../../utils/api'
+import { CheckCol, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../modal/ModalCheckList'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
@@ -25,6 +14,7 @@ import { APIResource } from '../home/types'
 import { assignToChallengeRequest, fetchApp } from './apps.api'
 import { IApp } from './apps.types'
 import { Button } from '../../components/Button'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledCheckCol = styled(CheckCol)`
   justify-content: flex-end;
@@ -57,11 +47,7 @@ const ChallengesList = ({
           <CheckCol />
         </HeaderRow>
         {meta!.challenges.map((s, i) => (
-          <TableRow
-            $isSelected={selected === s.id.toString()}
-            key={i}
-            onClick={() => onSelect(s.id.toString())}
-          >
+          <TableRow $isSelected={selected === s.id.toString()} key={i} onClick={() => onSelect(s.id.toString())}>
             <TitleCol>
               <ColBody>
                 <TrophyIcon height={14} />
@@ -69,9 +55,7 @@ const ChallengesList = ({
               </ColBody>
             </TitleCol>
             <StyledCheckCol>
-              <CheckedColBody>
-                {selected === s.id.toString() && <CircleCheckIcon height={16} />}
-              </CheckedColBody>
+              <CheckedColBody>{selected === s.id.toString() && <CircleCheckIcon height={16} />}</CheckedColBody>
             </StyledCheckCol>
           </TableRow>
         ))}
@@ -106,13 +90,13 @@ const ChallengeAppForm = ({
   const mutation = useMutation({
     mutationKey: ['challenge-app-form'],
     mutationFn: assignToChallengeRequest,
-    onSuccess: (res) => {
+    onSuccess: res => {
       if (onSuccess) onSuccess(res)
       setShowModal(false)
       displayPayloadMessage(res as Payload)
     },
-    onError: (error) => {
-      toast.error(error.message)
+    onError: error => {
+      toastError(error.message)
     },
   })
 
@@ -138,20 +122,13 @@ const ChallengeAppForm = ({
     <>
       <ModalScroll>
         <StyledForm id="attach-to-challenge-form" onSubmit={handleSubmit}>
-          <ChallengesList
-            appUid={app.uid}
-            selected={selectedId}
-            onSelect={handleSelect}
-          />
+          <ChallengesList appUid={app.uid} selected={selectedId} onSelect={handleSelect} />
         </StyledForm>
       </ModalScroll>
       <Footer>
         <ButtonRow>
           {mutation.isPending && <Loader height={14} />}
-          <Button
-            onClick={() => setShowModal(false)}
-            disabled={mutation.isPending}
-          >
+          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
           <Button
@@ -181,22 +158,13 @@ export function useAttachToChallengeModal({
 
   const modalComp = (
     <ModalNext
-      id='attach-to-challenge-modal'
+      id="attach-to-challenge-modal"
       data-testid={`modal-${resource}-attach-to-challenge`}
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText="Assign to challenge: "
-        hide={() => setShowModal(false)}
-      />
-      <ChallengeAppForm
-        resource={resource}
-        app={selected}
-        setShowModal={setShowModal}
-        onSuccess={onSuccess}
-      />
+      <ModalHeaderTop disableClose={false} headerText="Assign to challenge: " hide={() => setShowModal(false)} />
+      <ChallengeAppForm resource={resource} app={selected} setShowModal={setShowModal} onSuccess={onSuccess} />
     </ModalNext>
   )
   return {

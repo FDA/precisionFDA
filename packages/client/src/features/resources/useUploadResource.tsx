@@ -1,16 +1,14 @@
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { InputText } from '../../components/InputText'
 import { processFile } from './uploadImage'
-import {
-  useCreateResourceMutation,
-} from './useCreateResourceMutation'
+import { useCreateResourceMutation } from './useCreateResourceMutation'
 import { getExt, isImageFromExt } from './util'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileThumb } from './styles'
 import { FileWithPreview } from './resources.types'
 import { Button } from '../../components/Button'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 // Convert file to base64
 const toBase64 = (file: File) =>
@@ -21,24 +19,14 @@ const toBase64 = (file: File) =>
     reader.onerror = error => reject(error)
   })
 
-export const useUploadResource = ({
-  id,
-  onSuccess,
-}: {
-  id: string|number
-  onSuccess: () => void
-}) => {
+export const useUploadResource = ({ id, onSuccess }: { id: string | number; onSuccess: () => void }) => {
   const createResourceMutation = useCreateResourceMutation(id)
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  const processFileWithStatusUpdate = async (
-    s: FileWithPreview,
-    index: number,
-  ) => {
+  const processFileWithStatusUpdate = async (s: FileWithPreview, index: number) => {
     const name = s.customName === '' ? s.originalName : s.customName
-    const { fileUid } =
-      await createResourceMutation.mutateAsync({ name })
+    const { fileUid } = await createResourceMutation.mutateAsync({ name })
     const newFiles = [...selectedFiles]
 
     newFiles[index].uploadStatus = 'uploading'
@@ -71,10 +59,7 @@ export const useUploadResource = ({
     }
   }
 
-  const handleNameChange = (
-    event: ChangeEvent<HTMLInputElement>,
-    index: number,
-  ) => {
+  const handleNameChange = (event: ChangeEvent<HTMLInputElement>, index: number) => {
     const newFiles = [...selectedFiles]
     newFiles[index].customName = event.target.value
     setSelectedFiles(newFiles)
@@ -83,18 +68,16 @@ export const useUploadResource = ({
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setIsLoading(true)
-    const promises = selectedFiles.map((selected, index) =>
-      processFileWithStatusUpdate(selected, index),
-    )
+    const promises = selectedFiles.map((selected, index) => processFileWithStatusUpdate(selected, index))
     return Promise.all(promises)
       .then(() => {
         setIsLoading(false)
         setSelectedFiles([])
         if (onSuccess) onSuccess()
-        toast.success('All files have been processed')
+        toastSuccess('All files have been processed')
       })
       .catch(error => {
-        toast.error(`Error processing files: ${error}`)
+        toastError(`Error processing files: ${error}`)
       })
   }
 
@@ -141,7 +124,7 @@ export const Item = ({
   removeItemByIndex,
   handleNameChange,
 }: {
-  file: FileWithPreview,
+  file: FileWithPreview
   disabled: boolean
   index: number
   removeItemByIndex: (rid: string) => void
@@ -149,7 +132,14 @@ export const Item = ({
 }) => {
   return (
     <FileRow key={file.rid}>
-      {isImageFromExt(getExt(file.originalName)) ? <Image src={file.preview} alt="resource item" width="100" /> : <FileThumb><FileIcon height={80} /><div className="ext">{getExt(file.originalName)}</div></FileThumb>}
+      {isImageFromExt(getExt(file.originalName)) ? (
+        <Image src={file.preview} alt="resource item" width="100" />
+      ) : (
+        <FileThumb>
+          <FileIcon height={80} />
+          <div className="ext">{getExt(file.originalName)}</div>
+        </FileThumb>
+      )}
       <Info>
         <Status>
           <b>Upload Status:</b> {file.uploadStatus}

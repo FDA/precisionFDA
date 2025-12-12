@@ -18,12 +18,11 @@ import { StyledPageTable } from '../../components/Table/components/styles'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
-import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsRow } from '../home/home.styles'
-import { ActionsButton, ResourceHeader } from '../home/show.styles'
+import { ResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -31,11 +30,19 @@ import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionSelectActions } from './useExecutionSelectActions'
-import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
-export const ExecutionList = ({ homeScope, spaceId, isAdmin }: { homeScope?: HomeScope; spaceId?: string|number, isAdmin?: boolean }) => {
+export const ExecutionList = ({
+  homeScope,
+  spaceId,
+  isAdmin,
+}: {
+  homeScope?: HomeScope
+  spaceId?: string | number
+  isAdmin?: boolean
+}) => {
   const {
     setPerPageParam,
     setPageParam,

@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { toast } from 'react-toastify'
 import { Tooltip } from 'react-tooltip'
 import { Button } from '../../components/Button'
-import { ActionsMenu, Menu } from '../../components/Menu'
+import { ActionsMenu } from '../../components/Menu'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { Running } from '../../components/icons/StateIcons'
 import { getSpaceIdFromScope } from '../../utils'
 import { getBaseLink, useSelectableSpaces, useUserComputeInstances } from '../apps/run/utils'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ActionsButton } from '../home/show.styles'
 import { HomeScope } from '../home/types'
 import { StyledRefresh, StyledStatusText } from './details/styles'
 import { IExecution } from './executions.types'
 import { useExecutionSelectActions } from './useExecutionSelectActions'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 export const ExecutionActionsRow = ({
   homeScope,
@@ -42,7 +41,7 @@ export const ExecutionActionsRow = ({
     if (execution.launched_by === user?.full_name) {
       window.open(execution.links.open_external, '_blank', 'noopener,noreferrer')
     } else {
-      toast.error(
+      toastError(
         `This Workstation was launched by ${execution.launched_by} and can only be accessed by them. If you wish to use a Workstation in this Space, please launch your own execution`,
       )
     }

@@ -1,6 +1,5 @@
 import React from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { PageContainer } from '../../../components/Page/styles'
@@ -12,6 +11,7 @@ import { ProtectedIcon } from '../ProtectedIcon'
 import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
 import { Button } from '../../../components/Button'
 import { ApiErrorResponse } from '../../home/types'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const Row = styled.div`
   display: flex;
@@ -56,28 +56,15 @@ const Col = styled.div`
   margin-top: 64px;
 `
 
-const acceptedLabel = (isAccepted: boolean) =>
-  isAccepted ? 'Accepted' : 'Pending'
+const acceptedLabel = (isAccepted: boolean) => (isAccepted ? 'Accepted' : 'Pending')
 
-const hostLeadLabel = (spaceType: ISpace['type']) =>
-  `${
-    spaceType === 'review' ? 'Reviewer Lead' : getHostLeadLabel(spaceType)
-  }`
+const hostLeadLabel = (spaceType: ISpace['type']) => `${spaceType === 'review' ? 'Reviewer Lead' : getHostLeadLabel(spaceType)}`
 
 const guestLeadLabel = (spaceType: ISpace['type']) => {
-  if (
-    [
-      'review',
-      'groups',
-      'government',
-      'administrator',
-    ].includes(spaceType as string)
-  ) {
-    return `${
-      spaceType === 'review' ? 'Sponsor Lead' : getGuestLeadLabel(spaceType)
-    }`
+  if (['review', 'groups', 'government', 'administrator'].includes(spaceType as string)) {
+    return `${spaceType === 'review' ? 'Sponsor Lead' : getGuestLeadLabel(spaceType)}`
   }
-    return ''
+  return ''
 }
 
 const getHostLeadLabel = (type: ISpace['type']): string => {
@@ -105,15 +92,15 @@ export function Activation({ space }: { space: ISpace }) {
   const acceptSpaceMutation = useMutation({
     mutationKey: ['accept-space'],
     mutationFn: acceptSpaceRequest,
-    onSuccess: (res) => {
+    onSuccess: res => {
       const response = res as ApiErrorResponse
       if (response?.error) {
-        toast.error('Error: Service is unavailable. Please try again later')
+        toastError('Error: Service is unavailable. Please try again later')
       } else {
         queryCache.invalidateQueries({
           queryKey: ['space', space.id.toString()],
         })
-        toast.success('Successfully activated space')
+        toastSuccess('Successfully activated space')
       }
     },
   })
@@ -121,11 +108,8 @@ export function Activation({ space }: { space: ISpace }) {
     return acceptSpaceMutation.mutateAsync({ id: space.id })
   }
 
-  const { name, description, created_at, id, type, host_lead, guest_lead } =
-    space
-  const currentUser = [host_lead, guest_lead].filter(
-    u => u && u.id === user?.id,
-  )[0]
+  const { name, description, created_at, id, type, host_lead, guest_lead } = space
+  const currentUser = [host_lead, guest_lead].filter(u => u && u.id === user?.id)[0]
   const isAcceptedByUser = currentUser && currentUser.is_accepted
   const hostLabel = hostLeadLabel(type)
   const guestLabel = guestLeadLabel(type)

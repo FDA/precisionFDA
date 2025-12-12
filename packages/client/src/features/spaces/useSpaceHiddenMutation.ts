@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
-import { toast } from 'react-toastify'
 import { updateSpacesHidden } from './spaces.api'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 export const useSpaceHiddenMutation = () => {
   const queryClient = useQueryClient()
@@ -11,13 +11,13 @@ export const useSpaceHiddenMutation = () => {
       return updateSpacesHidden(payload.ids, payload.hidden)
     },
     onSuccess: async (data: void, variables: { ids: number[]; hidden: boolean }) => {
-      toast.success(
+      toastSuccess(
         `${variables.ids.length > 0 ? 'Spaces have' : 'Space has'} been ${variables.hidden ? 'hidden' : 'unhidden'} successfully`,
       )
-      queryClient.invalidateQueries({ queryKey: ['spaces']})
+      queryClient.invalidateQueries({ queryKey: ['spaces'] })
     },
     onError: (e: AxiosError<{ error: { message: string } }>) => {
-      toast.error(e?.response?.data?.error?.message ?? 'Error hiding spaces')
+      toastError(e?.response?.data?.error?.message ?? 'Error hiding spaces')
     },
   })
   return hiddenMutation

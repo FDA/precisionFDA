@@ -26,6 +26,7 @@ import {
 import { usePublishingTreeRootQuery } from './usePublishingTreeQuery'
 import { AxiosError } from 'axios'
 import { BackendError } from '../../api/errors'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const ShowParent = ({ tree, onSelectItem }: { tree: TreeRoot; onSelectItem: (identifier: string) => void }) => {
   const [selected, setSelected] = useState<boolean>(false)
@@ -88,7 +89,7 @@ const PublishingForm = ({ identifier, treeRoot }: { identifier: string; treeRoot
     mutationKey: ['publish-objects'],
     mutationFn: () => publishFolder(identifier),
     onError: (e: AxiosError<BackendError>) => {
-      toast.error(`${e.response?.data.error.message}`)
+      toastError(`${e.response?.data.error.message}`)
     },
     onSuccess: () => {
       navigate('/home/files?scope=everybody&per_page=20')
@@ -99,7 +100,7 @@ const PublishingForm = ({ identifier, treeRoot }: { identifier: string; treeRoot
     mutationKey: ['publish-objects'],
     mutationFn: () => publishObjects(identifier!, publishedObjects),
     onError: () => {
-      toast.error('Unable to publish selected object(s)')
+      toastError('Unable to publish selected object(s)')
     },
     onSuccess: res => {
       if (['comparison', 'note'].includes(treeRoot.data.type)) {
@@ -116,7 +117,7 @@ const PublishingForm = ({ identifier, treeRoot }: { identifier: string; treeRoot
     } else {
       mutation.mutate()
     }
-    toast.success('Publishing of selected object(s) has started.')
+    toastSuccess('Publishing of selected object(s) has started.')
   }
 
   return (

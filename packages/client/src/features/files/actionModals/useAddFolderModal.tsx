@@ -2,7 +2,6 @@ import { ErrorMessage } from '@hookform/error-message'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { Button } from '../../../components/Button'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
@@ -11,6 +10,7 @@ import { useConditionalModal } from '../../modal/useModal'
 import { HomeScope } from '../../home/types'
 import { addFolderRequest } from '../files.api'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 type FolderModalArgs = {
   folderId?: string
@@ -20,13 +20,7 @@ type FolderModalArgs = {
   onViolation: () => void
 }
 
-export const useAddFolderModal = ({
-  folderId,
-  spaceId,
-  homeScope,
-  isAllowed,
-  onViolation,
-}: FolderModalArgs) => {
+export const useAddFolderModal = ({ folderId, spaceId, homeScope, isAllowed, onViolation }: FolderModalArgs) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useConditionalModal(isAllowed, onViolation)
   const {
@@ -35,16 +29,15 @@ export const useAddFolderModal = ({
     formState: { errors },
     reset,
     setError,
-  } = useForm({ defaultValues: { name: '' }})
+  } = useForm({ defaultValues: { name: '' } })
   const mutation = useMutation({
     mutationKey: ['add-folder'],
-    mutationFn: (payload: { name: string }) =>
-      addFolderRequest(payload, folderId, spaceId, homeScope),
+    mutationFn: (payload: { name: string }) => addFolderRequest(payload, folderId, spaceId, homeScope),
     onSuccess: res => {
       if (res?.message?.type === 'error') {
         const errorMessage = res.message?.text ?? 'Unknown error adding folder'
         setError('name', { message: errorMessage, type: 'validate' })
-        toast.error(errorMessage)
+        toastError(errorMessage)
         return
       }
       reset()
@@ -52,16 +45,16 @@ export const useAddFolderModal = ({
         queryKey: ['files'],
       })
       setShowModal(false)
-      toast.success('Folder has been created')
+      toastSuccess('Folder has been created')
     },
     onError: () => {
-      toast.error('Error: Adding folder')
+      toastError('Error: Adding folder')
     },
   })
 
-  const onSubmit = ((vals: { name: string }) => {
+  const onSubmit = (vals: { name: string }) => {
     mutation.mutateAsync({ name: vals.name })
-  })
+  }
 
   const modalComp = (
     <ModalNext
@@ -70,10 +63,7 @@ export const useAddFolderModal = ({
       isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}
     >
-      <ModalHeaderTop
-        headerText="Create new folder"
-        hide={() => setShowModal(false)}
-      />
+      <ModalHeaderTop headerText="Create new folder" hide={() => setShowModal(false)} />
       <ModalScroll>
         <StyledForm id="add-folder-form" onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
@@ -84,29 +74,16 @@ export const useAddFolderModal = ({
               autoFocus
               disabled={mutation.isPending}
             />
-            <ErrorMessage
-              errors={errors}
-              name="name"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
         </StyledForm>
       </ModalScroll>
       <Footer>
         <ButtonRow>
-          <Button
-            type="button"
-            onClick={() => setShowModal(false)}
-            disabled={mutation.isPending}
-          >
+          <Button type="button" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            form="add-folder-form"
-            disabled={mutation.isPending}
-          >
+          <Button data-variant="primary" type="submit" form="add-folder-form" disabled={mutation.isPending}>
             Add
           </Button>
         </ButtonRow>

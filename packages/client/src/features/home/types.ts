@@ -239,14 +239,13 @@ export type NotificationMeta = {
 
 export type Notification = {
   id: number
+  createdAt: Date
+  updatedAt: Date
   action: NOTIFICATION_ACTION
   message: string
   severity: SEVERITY
   meta?: NotificationMeta
-  // TODO currently not being sent from backend
-  // createdAt: Date
-  // updatedAt: Date
-  // deliveredAt: Date
+  deliveredAt?: Date
 }
 
 export type JobLogItem = {

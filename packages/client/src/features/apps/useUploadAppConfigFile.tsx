@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { ChangeEvent, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
@@ -30,30 +29,27 @@ const filetypeName = {
   wdl: 'WDL',
 } satisfies Record<FileType, string>
 
-const CustomHeaderTop = ({ filetype, fileName, handleFileChange }: { filetype: FileType, fileName?: string, handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void }) => {
+const CustomHeaderTop = ({
+  filetype,
+  fileName,
+  handleFileChange,
+}: {
+  filetype: FileType
+  fileName?: string
+  handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void
+}) => {
   return (
     <StyledUploadModalHeader>
       <span>Import {filetypeName[filetype]} file</span>
       <label>
-        <input
-          style={{ display: 'none' }}
-          type="file"
-          accept={`.${filetype}`}
-          onChange={handleFileChange}
-        />
+        <input style={{ display: 'none' }} type="file" accept={`.${filetype}`} onChange={handleFileChange} />
         <Button as="div">{fileName || 'Select File'}</Button>
       </label>
     </StyledUploadModalHeader>
   )
 }
 
-const FileUpload = ({
-  setShowModal,
-  filetype,
-}: {
-  setShowModal: (show: boolean) => void
-  filetype: FileType
-}) => {
+const FileUpload = ({ setShowModal, filetype }: { setShowModal: (show: boolean) => void; filetype: FileType }) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [text, setText] = useState<string>()
@@ -74,9 +70,7 @@ const FileUpload = ({
           queryKey: ['apps'],
         })
         navigate(`/home/apps/${res.id}`)
-        toast.success(
-          `Created app by importing ${filetypeName[filetype]} file`,
-        )
+        toastSuccess(`Created app by importing ${filetypeName[filetype]} file`)
       }
     },
   })
@@ -98,13 +92,7 @@ const FileUpload = ({
     <>
       <ModalHeaderTop
         disableClose={false}
-        headerText={
-          <CustomHeaderTop
-            filetype={filetype}
-            fileName={fileName}
-            handleFileChange={handleFileChange}
-          />
-        }
+        headerText={<CustomHeaderTop filetype={filetype} fileName={fileName} handleFileChange={handleFileChange} />}
         hide={() => setShowModal(false)}
       />
       <StyledFileUpload>
@@ -140,21 +128,12 @@ const FileUpload = ({
   )
 }
 
-export function useUploadAppConfigFile({
-  filetype,
-}: {
-  filetype: FileType
-}) {
+export function useUploadAppConfigFile({ filetype }: { filetype: FileType }) {
   const { isShown, setShowModal } = useModal()
   const id = `modal-${filetype}-import`
 
   const modalComp = (
-    <ModalNext
-      id={id}
-      data-testid={id}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
+    <ModalNext id={id} data-testid={id} isShown={isShown} hide={() => setShowModal(false)}>
       <FileUpload filetype={filetype} setShowModal={setShowModal} />
     </ModalNext>
   )

@@ -49,12 +49,14 @@ export const PFDAToastContainer = () => {
   return (
     <ToastContainer
       position="top-right"
+      stacked
       closeOnClick
       pauseOnHover
       limit={5}
       theme={theme}
       closeButton={CloseAllButton}
       toastStyle={{
+        marginTop: '40px',
         paddingRight: '25px',
         width: '400px',
       }}

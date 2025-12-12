@@ -2,35 +2,24 @@ import React, { useMemo } from 'react'
 import * as Yup from 'yup'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText, InputTextArea } from '../../../components/InputText'
-import {
-  ButtonRow,
-  Footer,
-  StyledForm,
-  StyledModalScroll,
-} from '../../modal/styles'
+import { ButtonRow, Footer, StyledForm, StyledModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { editFileRequest } from '../files.api'
 import { IFile } from '../files.types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { Button } from '../../../components/Button'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const editFileSchema = Yup.object().shape({
-    name: Yup.string().min(1).max(255).required(),
-    description: Yup.string().max(65535).nullable(),
+  name: Yup.string().min(1).max(255).required(),
+  description: Yup.string().max(65535).nullable(),
 })
 
-const EditFileInfoForm = ({
-  file,
-  handleClose,
-}: {
-  file: IFile
-  handleClose: () => void
-}) => {
+const EditFileInfoForm = ({ file, handleClose }: { file: IFile; handleClose: () => void }) => {
   const queryClient = useQueryClient()
 
   const {
@@ -47,14 +36,10 @@ const EditFileInfoForm = ({
 
   const editFileMutation = useMutation({
     mutationKey: ['edit-file'],
-    mutationFn: (payload: {
-      name: string
-      description: string
-      fileId: string
-    }) => editFileRequest(payload),
+    mutationFn: (payload: { name: string; description: string; fileId: string }) => editFileRequest(payload),
     onSuccess: res => {
       if (res?.message?.type === 'error') {
-        toast.error(`API Error: ${res.message.text}`)
+        toastError(`API Error: ${res.message.text}`)
       } else {
         queryClient.invalidateQueries({
           queryKey: ['files'],
@@ -63,15 +48,15 @@ const EditFileInfoForm = ({
           queryKey: ['file', file.uid],
         })
         handleClose()
-        toast.success('Success: Editing file info')
+        toastSuccess('Success: Editing file info')
       }
     },
     onError: () => {
-      toast.error('Error: Editing file info')
+      toastError('Error: Editing file info')
     },
   })
 
-  const onSubmit = (vals: {name: string, description: string | null}) => {
+  const onSubmit = (vals: { name: string; description: string | null }) => {
     return editFileMutation.mutateAsync({
       name: vals.name,
       description: vals.description ?? '',
@@ -90,24 +75,12 @@ const EditFileInfoForm = ({
               placeholder="Enter name..."
               disabled={isSubmitting}
             />
-            <ErrorMessage
-              errors={errors}
-              name="name"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
           <FieldGroup>
             <label>Description</label>
-            <InputTextArea
-              {...register('description')}
-              placeholder="Enter description..."
-              disabled={isSubmitting}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="description"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <InputTextArea {...register('description')} placeholder="Enter description..." disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
         </StyledForm>
       </StyledModalScroll>
@@ -138,7 +111,7 @@ export const useEditFileModal = (selectedItem: IFile) => {
       headerText="Edit file info"
       isShown={isShown}
       hide={handleClose}
-      variant='medium'
+      variant="medium"
     >
       <ModalHeaderTop headerText="Edit file info" hide={handleClose} />
       <EditFileInfoForm file={selected} handleClose={handleClose} />

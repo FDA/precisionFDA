@@ -43,12 +43,8 @@ import {
   SiteNavBody,
   SiteNavBottom,
   SiteNavTop,
-  StyledDivider,
-  StyledDropMenuLinks,
   StyledHeader,
   StyledHeaderLogo,
-  StyledLink,
-  StyledOnClickModalDiv,
   StyledSiteNav,
   SubLink,
 } from './styles'
@@ -58,6 +54,7 @@ import { useUserSiteNavItems } from './useUserSiteNavItems'
 import { useSearchModal } from '../GlobalSearch/useSearchModal'
 import { SearchIcon } from '../icons/SearchIcon'
 import { UserMenu } from './UserMenu'
+import { NotificationCenter } from '../NotificationCenter/NotificationCenter'
 
 const isActiveLink = (linkPath: string, pathname: string) => {
   if (linkPath === '/') {
@@ -393,6 +390,8 @@ const Header: React.FC = () => {
             >
               <SearchIcon />
             </HeaderMenuItem>
+
+            <NotificationCenter />
             <Menu
               positioner={{ sideOffset: 3, side: 'bottom', align: 'end' }}
               trigger={

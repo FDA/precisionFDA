@@ -3,7 +3,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Button } from '../../../../components/Button'
 import { FieldGroup, InputError } from '../../../../components/form/styles'
@@ -12,6 +11,7 @@ import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 import { ButtonRow, Footer, StyledForm, StyledModalScroll } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
 import { editInvitationBasicInfo, Invitation } from '../../users/api'
+import { toastError, toastSuccess } from '../../../../components/NotificationCenter/ToastHelper'
 
 const editInvitationSchema = Yup.object().shape({
   firstName: Yup.string().min(1).max(255).required(),
@@ -44,10 +44,10 @@ const EditInvitationInfoForm = ({ invitation, handleClose }: { invitation: Invit
         queryKey: ['admin-invitations'],
       })
       handleClose()
-      toast.success('Updated invitation information successfully')
+      toastSuccess('Updated invitation information successfully')
     },
     onError: () => {
-      toast.error('Failed to update invitation information')
+      toastError('Failed to update invitation information')
     },
   })
 

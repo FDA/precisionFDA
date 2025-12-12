@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { toast } from 'react-toastify'
+import { toastError, toastSuccess, toastWarning } from '../components/NotificationCenter/ToastHelper'
 
 export enum MESSAGE_TYPE {
   SUCCESS = 'success',
@@ -40,19 +40,19 @@ export const displayPayloadMessage = (payload: Payload) => {
     console.log(errorMessage)
     switch (message.type) {
       case MESSAGE_TYPE.SUCCESS:
-        toast.success(errorMessage)
+        toastSuccess(errorMessage)
         break
       case MESSAGE_TYPE.WARNING:
-        toast.warning(errorMessage)
+        toastWarning(errorMessage)
         break
       case MESSAGE_TYPE.ERROR:
-        toast.error(errorMessage)
+        toastError(errorMessage)
         break
       default:
         break
     }
   } else if (payload.error) {
-    toast.error(payload.error.message)
+    toastError(payload.error.message)
   }
 }
 

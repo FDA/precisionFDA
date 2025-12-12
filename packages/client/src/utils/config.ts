@@ -17,9 +17,7 @@ export const getNodeWsUrl = (): string | null => {
 /**
  * Toastify configuration for notifications.
  */
-export const notificationsConfig: ToastOptions = {
-  autoClose: false,
-}
+export const notificationsConfig: ToastOptions = {}
 
 export const DEFAULT_RECONNECT_INTERVAL = 1000 // ms
 export const DEFAULT_RECONNECT_ATTEMPTS = 1000 // ms

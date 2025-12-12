@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import React, { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Callout } from '../../../components/Callout'
@@ -14,6 +13,7 @@ import { useModal } from '../../modal/useModal'
 import { addSpacesToSpaceGroup } from '../../space-groups/api'
 import { ISpaceV2 } from '../spaces.types'
 import { ModalSpaceList } from './ModalSpaceList'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const ModalCallout = styled(Callout)`
   margin-top: 8px;
@@ -34,7 +34,7 @@ export const useAddSpacesToSpaceGroupModal = ({ spaces }: { spaces: ISpaceV2[] }
   const handleSubmit = async () => {
     try {
       await mutation.mutateAsync(targetSpaceGroup.id)
-      toast.success(`Selected spaces were successfully added into ${targetSpaceGroup.name}`)
+      toastSuccess(`Selected spaces were successfully added into ${targetSpaceGroup.name}`)
       queryClient.invalidateQueries({
         queryKey: ['space-group-list'],
       })
@@ -48,11 +48,11 @@ export const useAddSpacesToSpaceGroupModal = ({ spaces }: { spaces: ISpaceV2[] }
       }
     } catch (err: unknown) {
       if (isAxiosError(err)) {
-        toast.error(
+        toastError(
           `Adding spaces to space group ${targetSpaceGroup.name} has failed due to: ${err?.response?.data?.error?.message}`,
         )
       } else {
-        toast.error(`Adding spaces to space group ${targetSpaceGroup.name} has failed due to an unknown error`)
+        toastError(`Adding spaces to space group ${targetSpaceGroup.name} has failed due to an unknown error`)
       }
     }
     setShowModal(false)

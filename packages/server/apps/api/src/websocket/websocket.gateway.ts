@@ -54,7 +54,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   }
 
   @CreateRequestContext(() => database.orm())
-  async handleConnection(client: PfdaWebSocket, message: IncomingMessage) {
+  async handleConnection(client: PfdaWebSocket, message: IncomingMessage): Promise<void> {
     try {
       this.logger.verbose(`WebSocket client connected, IP: ${message.socket.remoteAddress}`)
 
@@ -105,22 +105,23 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
         userId: userId,
       })
 
-      const unreadNotifications = await this.notificationService.getUnreadNotifications(userId)
-      unreadNotifications.forEach((notification) => {
-        client.send(
-          JSON.stringify({
-            type: WEBSOCKET_EVENTS.NOTIFICATION,
-            data: notification,
-          }),
-        )
-      })
+      // move to endpoint call.
+      // const unreadNotifications = await this.notificationService.getUnreadNotifications(userId)
+      // unreadNotifications.forEach((notification) => {
+      //   client.send(
+      //     JSON.stringify({
+      //       type: WEBSOCKET_EVENTS.NOTIFICATION,
+      //       data: notification,
+      //     }),
+      //   )
+      // })
     } catch (e) {
       this.logger.error({ message: 'WebSocket connection error', error: e.message })
       client.close(4001, e.message)
     }
   }
 
-  handleDisconnect(client: PfdaWebSocket) {
+  handleDisconnect(client: PfdaWebSocket): void {
     try {
       const userId = client.pfdaUserContext.id
 
@@ -153,7 +154,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   async fetchJobLog(
     @ConnectedSocket() client: PfdaWebSocket,
     @MessageBody() data: { jobUid: Uid<'job'> },
-  ) {
+  ): Promise<void> {
     try {
       const job = await this.jobRepository.findAccessibleOne({ uid: data.jobUid })
       if (!job) {
@@ -165,7 +166,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     }
   }
 
-  private async setupRedisSubscriber() {
+  private async setupRedisSubscriber(): Promise<void> {
     const client = await createRedisClient()
 
     client.subscribe(NOTIFICATIONS_QUEUE, (notificationJson: string) => {
@@ -192,7 +193,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     })
   }
 
-  private sendNotification(userId: number, notification: string, sessionId?: string) {
+  private sendNotification(userId: number, notification: string, sessionId?: string): void {
     this.clientConnections.get(userId)?.forEach((connection) => {
       if (sessionId && connection.pfdaUserContext.sessionId !== sessionId) {
         // CLI doesn't set sessionId, and we don't send notifications to CLI

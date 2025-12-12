@@ -1,12 +1,12 @@
 import React from 'react'
 import { MutationFunction, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { RESOURCES, RESOURCE_LABELS } from '../../../types/user'
 import { bulkDisableAllResources, bulkDisableResource, bulkEnableAllResources, bulkEnableResource } from './api'
 import { User } from './types'
 import { BackendError } from '../../../api/errors'
 import { AxiosError } from 'axios'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export type ResourceState = 'all' | 'some' | 'none'
 
@@ -62,7 +62,7 @@ const getAllResourceState = (users: User[]) =>
   getCheckboxValue(users, user => RESOURCES.every(resource => user.cloudResourceSettings.resources.includes(resource)))
 
 type ResourceDropdownItemProps = {
-  status: 'none' | 'some' | 'all',
+  status: 'none' | 'some' | 'all'
   onClick: MutationFunction<unknown, void>
   label: string
 }
@@ -73,15 +73,15 @@ const ResourceDropdownItem = ({ status, onClick, label }: ResourceDropdownItemPr
     mutationFn: () => onClick(),
     mutationKey: ['resource-dropdown', label],
     onSuccess: () => {
-      toast.success('User resources were successfully updated')
+      toastSuccess('User resources were successfully updated')
       queryClient.invalidateQueries({ queryKey: ['admin-users'] })
     },
     onError: (e: AxiosError<BackendError>) => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] })
       if (e.response?.data?.error?.message) {
-        toast.error(`Error: ${e.response.data.error.message}`)
+        toastError(`Error: ${e.response.data.error.message}`)
       } else {
-        toast.error('Error while updating user resources!')
+        toastError('Error while updating user resources!')
       }
     },
   })

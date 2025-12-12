@@ -9,7 +9,7 @@ import { NOTIFICATION_ACTION } from '../../home/types'
 import { useDataPortalByIdQuery } from '../queries'
 import { DataPortalError } from './DataPortalNotFound'
 
-import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
+import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import {
   canEditContent as canEditContentCheck,
@@ -35,7 +35,7 @@ const DataPortalDetailsPage = () => {
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['data-portals', portalId]})
+    queryClient.invalidateQueries({ queryKey: ['data-portals', portalId] })
   }, [lastJsonMessage])
 
   // URLs /data-portals/main and /data-portals/{id} are redirected to /data-portals/{slug}

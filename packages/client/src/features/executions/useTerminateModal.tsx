@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { ResourceTable } from '../../components/ResourceTable'
@@ -10,17 +9,14 @@ import { useModal } from '../modal/useModal'
 import { terminateJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { Button } from '../../components/Button'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;
   min-width: 300px;
 `
 
-export function useTerminateModal({
-  selected,
-}: {
-  selected: IExecution[]
-}) {
+export function useTerminateModal({ selected }: { selected: IExecution[] }) {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const memoSelected = useMemo(() => selected, [isShown])
@@ -28,11 +24,11 @@ export function useTerminateModal({
     mutationKey: ['terminate-job'],
     mutationFn: terminateJobsRequest,
     onError: () => {
-      toast.error('Error: terminating execution')
+      toastError('Error: terminating execution')
     },
-    onSuccess: (res) => {
+    onSuccess: res => {
       if (res?.meta?.messages[0]) {
-        toast.error(`Server error: ${res?.meta?.messages[0].message}`)
+        toastError(`Server error: ${res?.meta?.messages[0].message}`)
         return
       }
       queryClient.invalidateQueries({
@@ -42,7 +38,7 @@ export function useTerminateModal({
         queryKey: ['execution', selected[0].uid],
       })
       setShowModal(false)
-      toast.success(`Success: ${res?.message?.text}`)
+      toastSuccess(`Success: ${res?.message?.text}`)
     },
   })
 

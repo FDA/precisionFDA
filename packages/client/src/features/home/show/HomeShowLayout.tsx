@@ -20,7 +20,6 @@ import { FlapIcon } from '../../../components/icons/FlapIcon'
 import { NetworkIcon } from '../../../components/icons/NetworkIcon'
 import { SpaceReportIcon } from '../../../components/icons/SpaceReportIcon'
 import { useLocalStorage } from '../../../hooks/useLocalStorage'
-import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { counterRequest } from '../counterRequest'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../home.styles'
@@ -43,8 +42,6 @@ const HomeShowContent = () => {
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
   const { homeScope } = useHomeScope()
   const [activeResource] = useActiveResourceFromUrl('myhome')
-
-  useToastWSHandler()
 
   // Fetch counters for current scope
   const { data: counterData } = useQuery({

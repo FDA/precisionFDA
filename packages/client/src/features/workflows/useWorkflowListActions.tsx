@@ -1,10 +1,10 @@
 import { AxiosError } from 'axios'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { addDataRequest } from '../spaces/spaces.api'
 import { useAddResourceToModal } from '../actionModals/useAddResourceToSpace'
 import { Action } from '../home/action-types'
 import { useCreateWorkflowModal } from './useCreateWorkflowModal'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
   const queryClient = useQueryClient()
@@ -13,7 +13,7 @@ export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
     mutationKey: ['add-resource-to-space', 'workflows'],
     mutationFn: addDataRequest,
     onError: (e: AxiosError) => {
-      toast.error(`Error adding resource to space: ${e.message}`)
+      toastError(`Error adding resource to space: ${e.message}`)
     },
   })
 
@@ -22,7 +22,7 @@ export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
     spaceId,
     resource: 'workflows',
     onSuccess: () => {
-      toast.success('Successfully added workflow resource(s) to space')
+      toastSuccess('Successfully added workflow resource(s) to space')
       queryClient.invalidateQueries({
         queryKey: ['space', spaceId?.toString()],
       })

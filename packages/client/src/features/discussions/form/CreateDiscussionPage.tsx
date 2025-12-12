@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { PageTitle } from '../../../components/Page/styles'
 import { getSpaceIdFromScope } from '../../../utils'
@@ -11,6 +10,7 @@ import { createDiscussionRequest, NoteScope } from '../api'
 import { DiscussionForm as DiscussionFormType } from '../discussions.types'
 import { pickIdsFromFormAttachments } from '../helpers'
 import { DiscussionForm } from './DiscussionForm'
+import { toastError } from '../../../components/NotificationCenter/ToastHelper'
 
 const WarningSection = styled.div`
   background-color: var(--highlight-100);
@@ -60,15 +60,15 @@ export const CreateDiscussionPage = ({ scope, displayWarning = false }: { scope:
     mutationFn: createDiscussionRequest,
     onSuccess: async data => {
       if (scope === 'public') {
-        queryClient.invalidateQueries({ queryKey: ['discussions']})
+        queryClient.invalidateQueries({ queryKey: ['discussions'] })
         navigate(`/home/discussions/${data.id}`)
       } else {
-        queryClient.invalidateQueries({ queryKey: ['space']})
+        queryClient.invalidateQueries({ queryKey: ['space'] })
         navigate(`/spaces/${getSpaceIdFromScope(scope)}/discussions/${data.id}`)
       }
     },
     onError: () => {
-      toast.error('Error while creating discussion.')
+      toastError('Error while creating discussion.')
     },
   })
 

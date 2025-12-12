@@ -4,7 +4,6 @@ import axios from 'axios'
 import { get } from 'lodash'
 import React, { useMemo } from 'react'
 import { FieldErrors, useFieldArray, useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
@@ -197,7 +196,7 @@ const EditPropertiesForm = ({
 
     if (onSuccess) onSuccess(mutation.data)
     if (setShowModal) setShowModal(false)
-    toast.success('Properties updated')
+    toastSuccess('Properties updated')
   }
 
   const handleAppendProperty = (e: React.MouseEvent<HTMLButtonElement>) => {

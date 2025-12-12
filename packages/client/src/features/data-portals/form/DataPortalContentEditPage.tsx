@@ -3,7 +3,6 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
@@ -15,6 +14,7 @@ import { UpdateDataPortalRequest, updateDataPortalRequest } from '../api'
 import { useDataPortalByIdQuery } from '../queries'
 import { DataPortal } from '../types'
 import { canEditContent } from '../utils'
+import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const ContentEditButtonRow = styled.div`
   display: flex;
@@ -41,7 +41,6 @@ const SubmitRow = styled.div`
   align-items: center;
 `
 
-
 const ButtonBar = ({ data }: { data: DataPortal }) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -53,7 +52,7 @@ const ButtonBar = ({ data }: { data: DataPortal }) => {
         queryKey: ['data-portals', data.urlSlug],
       })
       navigate(`/data-portals/${data.urlSlug}`)
-      toast.success('Data Portal content updated')
+      toastSuccess('Data Portal content updated')
     },
   })
   const [editor] = useLexicalComposerContext()

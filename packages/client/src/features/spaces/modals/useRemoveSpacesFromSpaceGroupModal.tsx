@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useMemo } from 'react'
-import { toast } from 'react-toastify'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { itemsCountString } from '../../../utils/formatting'
@@ -12,6 +11,7 @@ import { removeSpaces } from '../../space-groups/api'
 import { ISpaceGroup } from '../../space-groups/types'
 import { ISpaceV2 } from '../spaces.types'
 import { ModalSpaceList } from './ModalSpaceList'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const useRemoveSpacesFromSpaceGroupModal = ({ spaces, spaceGroup }: { spaces: ISpaceV2[]; spaceGroup?: ISpaceGroup }) => {
   const queryClient = useQueryClient()
@@ -25,12 +25,12 @@ export const useRemoveSpacesFromSpaceGroupModal = ({ spaces, spaceGroup }: { spa
       return removeSpaces(payload.spaceGroupId, payload.spaceIds)
     },
     onSuccess: async () => {
-      toast.success('Spaces have been removed successfully')
+      toastSuccess('Spaces have been removed successfully')
       queryClient.invalidateQueries({ queryKey: ['spaces'] })
       queryClient.invalidateQueries({ queryKey: ['space-group-list'] })
     },
     onError: (e: AxiosError<{ error: { message: string } }>) => {
-      toast.error(e?.response?.data?.error?.message ?? 'Error removing spaces')
+      toastError(e?.response?.data?.error?.message ?? 'Error removing spaces')
     },
   })
 

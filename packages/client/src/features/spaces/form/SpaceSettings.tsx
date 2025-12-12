@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router'
-import { toast } from 'react-toastify'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { Divider, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
@@ -21,8 +20,9 @@ import { editValidationSchema } from './helpers'
 import { HintText, Row, StyledButton, StyledForm, StyledPageCenter, StyledPageContent } from './styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { Button } from '../../../components/Button'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
-const EditTags = ({ spaceId, tags = []}: { spaceId: number, tags?: string[] }) => {
+const EditTags = ({ spaceId, tags = [] }: { spaceId: number; tags?: string[] }) => {
   const queryClient = useQueryClient()
   const { modalComp: tagsModal, setShowModal: setTagsModal } = useEditTagsModal({
     resource: 'spaces',
@@ -101,17 +101,17 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
         queryClient.invalidateQueries({
           queryKey: ['spaces'],
         })
-        toast.success('Space settings has been saved')
+        toastSuccess('Space settings has been saved')
       } else if (res?.errors) {
         const errorMessages = res.errors.flatMap(error => error.messages || []).join('\r\n')
-        toast.error(`Error: ${errorMessages}`)
+        toastError(`Error: ${errorMessages}`)
         setFormError(`Error: ${errorMessages}`)
       } else {
-        toast.error('Something went wrong')
+        toastError('Something went wrong')
       }
     },
     onError: () => {
-      toast.error('Error: Editing space settings')
+      toastError('Error: Editing space settings')
     },
   })
 
@@ -135,7 +135,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
             data-testid="lock-space-button"
             onClick={() => {
               if (lockUnlockAction && 'func' in lockUnlockAction) {
-                (lockUnlockAction as { func: () => void }).func()
+                ;(lockUnlockAction as { func: () => void }).func()
               }
             }}
           >

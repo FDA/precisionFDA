@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useEffect, useMemo, useState } from 'react'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FolderIcon } from '../../../components/icons/FolderIcon'
@@ -16,6 +15,7 @@ import { ApiErrorResponse, DownloadListResponse, ServerScope } from '../../home/
 import { fetchFilesListLockingRequest, LockUnlockActionType, lockUnlockFilesRequest } from '../files.api'
 import { IFile } from '../files.types'
 import { Button } from '../../../components/Button'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding-left: 12px;
@@ -33,14 +33,7 @@ const ActionTypeName: Record<LockUnlockActionType, string> = {
   unlock: 'Unlock',
 }
 
-const LockUnlockFiles = ({
-  files,
-  statusText,
-}: {
-  files: DownloadListResponse[] | undefined,
-  statusText: string | null,
-}) => {
-
+const LockUnlockFiles = ({ files, statusText }: { files: DownloadListResponse[] | undefined; statusText: string | null }) => {
   if (statusText) return <Spacing>{statusText}</Spacing>
   if (!files?.length) return null
   return (
@@ -48,7 +41,7 @@ const LockUnlockFiles = ({
       rows={files.map(s => ({
         name: (
           <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
-            <VerticalCenter>{s.type === 'file' ? <FileIcon/> : <FolderIcon/>}</VerticalCenter>
+            <VerticalCenter>{s.type === 'file' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
             {s.name}
           </StyledName>
         ),
@@ -72,19 +65,17 @@ export const useLockUnlockFileModal = ({
   type: LockUnlockActionType
 }) => {
   const { isShown, setShowModal } = useModal()
-  const memoSelected = useMemo(() => selected, [ isShown ])
-  const [ numberOfFiles, setNumberOfFiles ] = useState<number>()
+  const memoSelected = useMemo(() => selected, [isShown])
+  const [numberOfFiles, setNumberOfFiles] = useState<number>()
   const mutation = useMutation({
-    mutationKey: [ 'lock-unlock-files', type ],
+    mutationKey: ['lock-unlock-files', type],
     mutationFn: (ids: number[]) => lockUnlockFilesRequest(ids, type),
     onError: () => {
-      toast.error('Error: locking or unlocking')
+      toastError('Error: locking or unlocking')
     },
     onSuccess: () => {
       setShowModal(false)
-      toast.success(
-        `${ActionTypeName[type]}ing ${numberOfFiles} ${pluralize('file', numberOfFiles ?? 1)}`,
-      )
+      toastSuccess(`${ActionTypeName[type]}ing ${numberOfFiles} ${pluralize('file', numberOfFiles ?? 1)}`)
       if (onSuccess) onSuccess()
     },
   })
@@ -93,14 +84,19 @@ export const useLockUnlockFileModal = ({
     if (!isShown) mutation.reset()
   }, [isShown])
 
-  const { data, status: downloadStatus, isLoading, error } = useQuery({
-    queryKey: [ 'download_list', type, selected ],
+  const {
+    data,
+    status: downloadStatus,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['download_list', type, selected],
     queryFn: () =>
       fetchFilesListLockingRequest(
         selected.map(s => s.id),
         scope,
         type,
-      ).then((d) => {
+      ).then(d => {
         setNumberOfFiles(d.length)
         return d
       }),
@@ -155,10 +151,10 @@ export const useLockUnlockFileModal = ({
       />
 
       <ModalScroll>
-        <LockUnlockFiles files={data} statusText={getStatusText()}/>
+        <LockUnlockFiles files={data} statusText={getStatusText()} />
       </ModalScroll>
       <Footer>
-        {mutation.isPending && <Loader/>}
+        {mutation.isPending && <Loader />}
         <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
           Cancel
         </Button>

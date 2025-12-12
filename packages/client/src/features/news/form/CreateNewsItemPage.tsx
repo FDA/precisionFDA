@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
@@ -10,6 +9,7 @@ import { createNewsItemRequest } from '../api'
 import { NewsItemPayload } from '../types'
 import { NewsItemForm } from './NewsItemForm'
 import { FormPageContainer } from './styles'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const CreateNewsItemPage = () => {
   const navigate = useNavigate()
@@ -22,10 +22,10 @@ const CreateNewsItemPage = () => {
       queryClient.invalidateQueries({
         queryKey: ['news'],
       })
-      toast.success('Successfully created news item')
+      toastSuccess('Successfully created news item')
     },
     onError: () => {
-      toast.error('Error: Adding news item')
+      toastError('Error: Adding news item')
     },
   })
 

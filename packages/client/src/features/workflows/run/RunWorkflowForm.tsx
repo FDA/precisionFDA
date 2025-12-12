@@ -1,7 +1,6 @@
 import React from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Control, Controller, useForm, UseFormRegister, UseFormSetError } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -31,34 +30,35 @@ import { getDefaultValueFromServer } from '../../apps/form/common'
 import { Button } from '../../../components/Button'
 import { ErrorMessageForField } from '../../apps/run/ErrorMessageForField'
 import { SelectSpaceScope } from '../../apps/run/SelectSpaceScope'
+import { toastError } from '../../../components/NotificationCenter/ToastHelper'
 
 export interface RunWorkflowFormType {
-  analysisName: string;
-  jobLimit: number;
-  scope: SelectType;
-  inputs: { // TODO add support for arrays, PFDA-5136
-    [key: string]: string | boolean | FileUid | undefined,
-  };
+  analysisName: string
+  jobLimit: number
+  scope: SelectType
+  inputs: {
+    // TODO add support for arrays, PFDA-5136
+    [key: string]: string | boolean | FileUid | undefined
+  }
 }
 
-const getLabel = (input: InputOutput) =>
-  input.label ? input.label : input.name
+const getLabel = (input: InputOutput) => (input.label ? input.label : input.name)
 
 const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[]): RunWorkflowFormType => {
   const defaultValues: RunWorkflowFormType = {
     analysisName: workflow ? workflow.name : '',
-    jobLimit: user ? user.job_limit: 0,
+    jobLimit: user ? user.job_limit : 0,
     inputs: {},
   }
 
   stages?.flatMap(stage => stage.inputs).forEach(input => {
-      const fieldName = `${input.parent_slot}#${input.name}`
+    const fieldName = `${input.parent_slot}#${input.name}`
 
     const defaultValue = (input.default_workflow_value === null) ? undefined : input.default_workflow_value
-      if (defaultValue !== undefined) {
-        defaultValues.inputs[fieldName] = getDefaultValueFromServer(input.class, defaultValue)
-      }
-    })
+    if (defaultValue !== undefined) {
+      defaultValues.inputs[fieldName] = getDefaultValueFromServer(input.class, defaultValue)
+    }
+  })
   return defaultValues
 }
 
@@ -80,7 +80,8 @@ const hasUnfilledInputs = (stage: Stage) => {
 
 const prepareValidations = (user?: IUser, stages?: Stage[], scope?: string) => {
   const inputs: any = {}
-  stages?.filter(stage => hasUnfilledInputs(stage))
+  stages
+    ?.filter(stage => hasUnfilledInputs(stage))
     .flatMap(stage => stage.inputs)
     .filter(input => !input.optional)
     .forEach(input => {
@@ -99,8 +100,10 @@ const prepareValidations = (user?: IUser, stages?: Stage[], scope?: string) => {
 
   const validationObject = {
     analysisName: Yup.string().required('Analysis name required'),
-    jobLimit: Yup.number().required('Execution cost limit required')
-      .positive().typeError('You must specify a number')
+    jobLimit: Yup.number()
+      .required('Execution cost limit required')
+      .positive()
+      .typeError('You must specify a number')
       .max(user?.job_limit ?? 99, `Maximum job limit for current user is ${user?.job_limit ?? 99}`),
     inputs: Yup.object().shape(inputs),
     scope: spaceValidations,
@@ -109,16 +112,11 @@ const prepareValidations = (user?: IUser, stages?: Stage[], scope?: string) => {
   return Yup.object().shape(validationObject)
 }
 
-const getLicensesToAccept = (
-  licensesToAccept: License[],
-  acceptedLicenses: AcceptedLicense[],
-): License[] => {
+const getLicensesToAccept = (licensesToAccept: License[], acceptedLicenses: AcceptedLicense[]): License[] => {
   const acceptedIds = acceptedLicenses
     .filter(item => item.state === 'active' || item.state === null)
     .map(item => item.license.toString())
-  return licensesToAccept.filter(
-    license => !acceptedIds.includes(license.id.toString()),
-  )
+  return licensesToAccept.filter(license => !acceptedIds.includes(license.id.toString()))
 }
 
 const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, setError }:
@@ -157,8 +155,9 @@ const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, se
 }
 
 const createRequestObject = (workflowId: string, vals: RunWorkflowFormType, stages?: Stage[]): RunWorkflowRequest => {
-  const classes = new Map<string, string>(stages?.flatMap(stage => stage.inputs)
-    .map(input => [`${input.parent_slot}#${input.name}`, input.class]))
+  const classes = new Map<string, string>(
+    stages?.flatMap(stage => stage.inputs).map(input => [`${input.parent_slot}#${input.name}`, input.class]),
+  )
   const inputs: RunWorkflowInput[] = []
 
   Object.keys(vals.inputs).forEach(key => {
@@ -188,10 +187,7 @@ const createRequestObject = (workflowId: string, vals: RunWorkflowFormType, stag
   } as RunWorkflowRequest
 }
 
-const RunWorkflowForm = (
-  { workflow, meta, user }:
-    { workflow: IWorkflow, meta: any, user: IUser },
-) => {
+const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: any; user: IUser }) => {
   const { stages }: { stages: Stage[] } = meta.spec.input_spec
   const { apps }: { apps: [] } = meta
   const navigate = useNavigate()
@@ -220,7 +216,7 @@ const RunWorkflowForm = (
 
   const runWorkflowMutation = useMutation({
     mutationFn: (payload: RunWorkflowRequest) => runWorkflow(payload),
-    onSuccess: (res) => {
+    onSuccess: res => {
       if (res?.id) {
         const scope = getValues().scope.value
         if (scope.includes('space-')) {
@@ -230,13 +226,13 @@ const RunWorkflowForm = (
           navigate(`/home/workflows/${workflow.uid}/jobs`)
         }
       } else if (res?.error) {
-        toast.error(res.error.message)
+        toastError(res.error.message)
       } else {
-        toast.error('Something went wrong')
+        toastError('Something went wrong')
       }
     },
     onError: () => {
-      toast.error('Error: Running workflow')
+      toastError('Error: Running workflow')
     },
   })
 
@@ -245,10 +241,7 @@ const RunWorkflowForm = (
 
     if (valid) {
       try {
-        const r = await Promise.all([
-          fetchLicensesOnWorkflow(workflow.uid),
-          fetchLicensesOnFiles(getValues()),
-        ])
+        const r = await Promise.all([fetchLicensesOnWorkflow(workflow.uid), fetchLicensesOnFiles(getValues())])
 
         const acceptedLicenses = await fetchAcceptedLicenses()
         const licensesToAccept = getLicensesToAccept(r.flat(), acceptedLicenses)
@@ -259,7 +252,7 @@ const RunWorkflowForm = (
           await runWorkflowMutation.mutateAsync(req)
         }
       } catch (e) {
-        toast.error('Failed to run workflow')
+        toastError('Failed to run workflow')
       }
     }
   }
@@ -316,7 +309,10 @@ const RunWorkflowForm = (
         <Button
           data-variant="primary"
           disabled={isSubmitting}
-          type="submit" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
+          type="submit"
+          form="submitJobForm"
+          onClick={handleSubmit(onSubmit)}
+        >
           {isSubmitting ? 'Running' : 'Run Workflow'}
         </Button>
       </StyledForm>

@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { isSafeInteger, uniq } from 'lodash'
 import React, { useEffect } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { IUser } from '../../../types/user'
 import { cleanObject } from '../../../utils/object'
@@ -25,6 +24,7 @@ import {
 } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
+import { toastError } from '../../../components/NotificationCenter/ToastHelper'
 
 export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
 
@@ -273,7 +273,7 @@ export const useSelectableContexts = (appScope: ServerScope, entityType: string)
     queryKey: ['selectable-contexts', appScope],
     queryFn: () =>
       fetchAndConvertSelectableContexts(entityType).catch(e => {
-        toast.error('Error loading contexts')
+        toastError('Error loading contexts')
         throw e
       }),
   })
@@ -284,7 +284,7 @@ export const useUserComputeInstances = () => {
     queryKey: ['user-compute-instances'],
     queryFn: () =>
       fetchUserComputeInstances().catch(e => {
-        toast.error('Error loading compute instances')
+        toastError('Error loading compute instances')
         throw e
       }),
   })
@@ -295,7 +295,7 @@ export const useSelectableSpaces = (appScope: ServerScope) => {
     queryKey: ['selectable-spaces', appScope],
     queryFn: () =>
       fetchAndConvertSelectableSpaces(appScope).catch(e => {
-        toast.error('Error loading spaces')
+        toastError('Error loading spaces')
         throw e
       }),
   })
@@ -355,7 +355,7 @@ export const exportFormData = (event: React.MouseEvent<HTMLButtonElement>, formD
 }
 
 export const validateFile = async (fileUid: string) => {
-  const data = await fetchAccessibleFilesByUID({ uid: [fileUid]})
+  const data = await fetchAccessibleFilesByUID({ uid: [fileUid] })
 
   return data && data.length > 0
 }

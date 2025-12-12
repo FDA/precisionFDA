@@ -1,29 +1,25 @@
 import { ReactNode } from 'react'
 import { AxiosError } from 'axios'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { addDataRequest } from '../spaces/spaces.api'
 import { useAddResourceToModal } from '../actionModals/useAddResourceToSpace'
 import { Action } from '../home/action-types'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 export interface UseAppListActionsResult {
   actions: Action[]
   modals: Record<string, ReactNode>
 }
 
-export const useAppListActions = ({
-  spaceId,
-}: {
-  spaceId: string,
-}): UseAppListActionsResult => {
+export const useAppListActions = ({ spaceId }: { spaceId: string }): UseAppListActionsResult => {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationKey: ['add-resource-to-space', 'apps'],
     mutationFn: addDataRequest,
     onError: (e: AxiosError) => {
-      toast.error(`Error adding resource to space. ${e.message}`)
+      toastError(`Error adding resource to space. ${e.message}`)
     },
   })
 
@@ -31,7 +27,7 @@ export const useAppListActions = ({
     spaceId,
     resource: 'apps',
     onSuccess: () => {
-      toast.success('Successfully added app resource(s) to space.')
+      toastSuccess('Successfully added app resource(s) to space.', {})
       queryClient.invalidateQueries({
         queryKey: ['space', spaceId?.toString()],
       })

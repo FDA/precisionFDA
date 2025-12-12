@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Controller, useForm, Path, PathValue } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import { Checkbox } from '../../../components/CheckboxNext'
 import { Loader } from '../../../components/Loader'
 import { PageActions, PageHeader, PageTitle } from '../../../components/Page/styles'
@@ -9,9 +8,18 @@ import { FieldLabelRow } from '../../../components/form/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
-import { FieldGroup, SectionTitle, SectionTitleSmall, StyledNotifications, StyledPageContainer, NotificationSectionRow, NotificationSectionColumn } from './styles'
+import {
+  FieldGroup,
+  SectionTitle,
+  SectionTitleSmall,
+  StyledNotifications,
+  StyledPageContainer,
+  NotificationSectionRow,
+  NotificationSectionColumn,
+} from './styles'
 import { AllNotification, NotificationPreferences, NotificationPreferencesPayload } from './types'
 import { Button } from '../../../components/Button'
+import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 type NotificationLabelType = Record<string, string>
 
@@ -197,7 +205,9 @@ const NotificationForm = ({
                         {...field}
                         disabled={isSubmitting}
                         checked={!!field.value}
-                        onChange={e => handleSetValue(`group_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                        onChange={e =>
+                          handleSetValue(`group_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                        }
                       />
                       {NotificationLabel[notification]}
                     </FieldLabelRow>
@@ -220,7 +230,9 @@ const NotificationForm = ({
                         {...field}
                         disabled={isSubmitting}
                         checked={!!field.value}
-                        onChange={e => handleSetValue(`group_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                        onChange={e =>
+                          handleSetValue(`group_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                        }
                       />
                       {NotificationLabel[notification]}
                     </FieldLabelRow>
@@ -272,7 +284,9 @@ const NotificationForm = ({
                         {...field}
                         disabled={isSubmitting}
                         checked={!!field.value}
-                        onChange={e => handleSetValue(`shared_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                        onChange={e =>
+                          handleSetValue(`shared_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                        }
                       />
                       {NotificationLabel[notification]}
                     </FieldLabelRow>
@@ -295,7 +309,9 @@ const NotificationForm = ({
                         {...field}
                         disabled={isSubmitting}
                         checked={!!field.value}
-                        onChange={e => handleSetValue(`shared_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                        onChange={e =>
+                          handleSetValue(`shared_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                        }
                       />
                       {NotificationLabel[notification]}
                     </FieldLabelRow>
@@ -330,7 +346,7 @@ const NotificationsPage = () => {
       queryCache.invalidateQueries({
         queryKey: ['notifications'],
       })
-      toast.success('Saved notification preferences')
+      toastSuccess('Saved notification preferences')
     },
   })
 
