@@ -34,7 +34,7 @@ import {
 } from './styles'
 import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
 import { ProtectedIcon } from '../ProtectedIcon'
-import type { SpaceOutletContext } from '../routes'
+import type { SpaceOutletContext } from '../../../routes/spaces'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const SpaceShowLayout = () => {

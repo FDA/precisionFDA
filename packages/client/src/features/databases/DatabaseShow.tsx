@@ -141,15 +141,15 @@ export const DatabaseShow = ({
   spaceId?: number
   homeContext?: HomeScopeContextValue
 }) => {
-  const { isHome, homeScope, homeScopeChangeHandler } = homeContext
-
+  const { homeScope, setDisplayScope, isHome } = homeContext
+  
   const location = useLocation()
   const { data, isLoading } = useQuery({
     queryKey: ['dbclusters', databaseId],
     queryFn: () =>
       fetchDatabaseRequest(databaseId).then(dbCluster => {
         if (isHome) {
-          homeScopeChangeHandler(dbCluster.scope)
+          setDisplayScope(dbCluster.scope)
         }
         return dbCluster
       }),

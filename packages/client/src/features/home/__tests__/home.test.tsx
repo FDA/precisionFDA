@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen, waitFor } from '../../../test/test-utils'
-import { HomeShowLayout } from '../show/HomeShowLayout'
+import HomeShowLayout from '../HomeShowLayout'
 
 jest.mock('react-router', () => ({
   ...jest.requireActual('react-router'),

@@ -1,21 +1,21 @@
-import React, { createContext, useContext, ReactNode, useMemo, useCallback, useRef, startTransition } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import React, { createContext, useContext, ReactNode, useMemo, useCallback, useState } from 'react'
+import { useLocation } from 'react-router'
 import { HomeScope, ServerScope } from './types'
 import { getHomeScopeFromServerScope } from './getHomeScopeFromServerScope'
 
 export interface HomeScopeContextValue {
   isHome: boolean
   homeScope?: HomeScope
-  homeScopeChangeHandler: (rs: ServerScope, featured?: boolean) => void
+  setDisplayScope: (rs: ServerScope, featured?: boolean) => void
 }
 
 export const defaultHomeContext: HomeScopeContextValue = { 
   isHome: false, 
-  homeScopeChangeHandler: () => {}, 
-  homeScope: undefined 
+  setDisplayScope: () => {}, 
+  homeScope: undefined
 }
 
-const HomeScopeContext = createContext<HomeScopeContextValue | undefined>(defaultHomeContext)
+const HomeScopeContext = createContext<HomeScopeContextValue>(defaultHomeContext)
 
 export interface HomeScopeProviderProps {
   children: ReactNode
@@ -23,39 +23,32 @@ export interface HomeScopeProviderProps {
 
 export const HomeScopeProvider = ({ children }: HomeScopeProviderProps) => {
   const location = useLocation()
-  const navigate = useNavigate()
-  const lastScopeRef = useRef<HomeScope | undefined>(undefined)
+  
+  // State for display scope (used on show pages where we don't want URL params)
+  const [displayScope, setDisplayScopeState] = useState<HomeScope | undefined>(undefined)
   
   // Read directly from location.search for the most current value
-  // This avoids stale values during navigation in React Router v7
   const searchParams = useMemo(
     () => new URLSearchParams(location.search),
     [location.search]
   )
   
   const scopeParam = searchParams.get('scope') as HomeScope | undefined
-  const homeScope = scopeParam ?? undefined
   
-  // Update ref with current scope
-  lastScopeRef.current = homeScope
+  // Use displayScope if set, otherwise fall back to URL param
+  // Reset displayScope when URL param changes (navigating to list page)
+  const homeScope = scopeParam ?? displayScope ?? undefined
 
-  const homeScopeChangeHandler = useCallback((newScope: ServerScope, featured?: boolean) => {
+  // Handler to set display scope without modifying URL (for show pages)
+  const setDisplayScope = useCallback((newScope: ServerScope, featured?: boolean) => {
     const targetScope = getHomeScopeFromServerScope(newScope, featured)
-    
-    // Use startTransition to prevent race conditions
-    startTransition(() => {
-      // Read current URL at call time, not from closure
-      const currentUrl = new URL(window.location.href)
-      const newSearchParams = new URLSearchParams(currentUrl.search)
-      newSearchParams.set('scope', targetScope)
-      navigate(`${currentUrl.pathname}?${newSearchParams.toString()}`, { replace: true })
-    })
-  }, [navigate])
+    setDisplayScopeState(targetScope)
+  }, [])
 
   const value: HomeScopeContextValue = {
     isHome: true,
     homeScope,
-    homeScopeChangeHandler,
+    setDisplayScope,
   }
 
   return <HomeScopeContext.Provider value={value}>{children}</HomeScopeContext.Provider>
@@ -63,8 +56,5 @@ export const HomeScopeProvider = ({ children }: HomeScopeProviderProps) => {
 
 export const useHomeScope = (): HomeScopeContextValue => {
   const context = useContext(HomeScopeContext)
-  if (context === undefined) {
-    throw new Error('useHomeScope must be used within a HomeScopeProvider')
-  }
   return context
 }

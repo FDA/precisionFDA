@@ -22,6 +22,7 @@ import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { EditDiscussionTitle } from './form/EditDiscussionTitle'
 import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
 import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
+import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
 import { IUser } from '../../types/user'
 import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
@@ -60,7 +61,7 @@ export const DiscussionShow = ({
   user: IUser
   homeContext?: HomeScopeContextValue
 }) => {
-  const { isHome, homeScopeChangeHandler } = homeContext
+  
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
@@ -68,11 +69,7 @@ export const DiscussionShow = ({
 
   const { data: discussion, isLoading, error } = useFetchDiscussionQuery(discussionId)
 
-  useEffect(() => {
-    if (isHome && discussion) {
-      homeScopeChangeHandler(discussion.scope)
-    }
-  }, [discussion])
+  useHomeDisplayScope(homeContext, discussion?.scope)
   const attachmentsQuery = useFetchDiscussionAttachmentsQuery(discussion!)
 
   useEffect(() => {

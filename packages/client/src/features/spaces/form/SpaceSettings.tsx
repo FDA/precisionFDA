@@ -97,7 +97,6 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     mutationFn: (payload: EditSpacePayload) => editSpaceRequest(space.id, payload),
     onSuccess: res => {
       if (res?.id) {
-        navigate(`/spaces/${res?.id}`)
         queryClient.invalidateQueries({
           queryKey: ['spaces'],
         })
@@ -199,7 +198,7 @@ export const SpaceSettings = () => {
     <UserLayout mainScroll>
       <StyledPageCenter>
         <StyledPageContent>
-          <BackLinkMargin linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLinkMargin>
+          <div className='pt-2'></div>
           <PageTitle>Space Settings</PageTitle>
           <SpaceSettingsForm space={data.space} />
         </StyledPageContent>

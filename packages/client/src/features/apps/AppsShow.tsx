@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Link, Navigate, Route, Routes, useLocation } from 'react-router'
+import { Link, Outlet, useLocation } from 'react-router'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown } from '../../components/Markdown'
@@ -30,14 +30,19 @@ import {
 } from '../home/show.styles'
 import { HomeScope } from '../home/types'
 import { getBasePath } from '../home/utils'
-import { AppExecutionsList } from './AppExecutionsList'
-import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
-import { StyledMarkdownAppShow } from './form/styles'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
 import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
+import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
 import { getHomeScopeFromServerScope } from '../home/getHomeScopeFromServerScope'
+
+export type AppShowOutletContext = {
+  spaceId?: string
+  spec: any
+  readme: string
+  appUid: string
+}
 
 const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(app.scope)
@@ -175,15 +180,11 @@ export const AppsShow = ({
   isContributorOrHigher?: boolean
   homeContext?: HomeScopeContextValue
 }) => {
-  const { isHome, homeScopeChangeHandler, homeScope } = homeContext
+  const { homeScope } = homeContext
   const location = useLocation()
-  const { data, isLoading, isFetched } = useFetchAppQuery(appUid!)
+  const { data, isLoading } = useFetchAppQuery(appUid!)
 
-  useEffect(() => {
-    if (isHome && data) {
-      homeScopeChangeHandler(data.app.scope, data.app.featured)
-    }
-  }, [isFetched])
+  useHomeDisplayScope(homeContext, data?.app.scope, data?.app.featured)
 
   const app = data?.app
   const meta = data?.meta
@@ -319,19 +320,7 @@ export const AppsShow = ({
         </StyledTab>
       </StyledTabList>
       <StyledTabPanel>
-        <Routes>
-          <Route path="/" element={<SpecTab spaceId={spaceId} spec={meta.spec} />} />
-          <Route path="spec" element={<Navigate to={`${location.pathname}`} replace />} />
-          <Route
-            path="readme"
-            element={
-              <StyledMarkdownAppShow>
-                <Markdown data={app.readme} />
-              </StyledMarkdownAppShow>
-            }
-          />
-          <Route path="jobs" element={<AppExecutionsList appUid={app.uid} />} />
-        </Routes>
+        <Outlet context={{ spaceId, spec: meta.spec, readme: app.readme, appUid: app.uid } satisfies AppShowOutletContext} />
       </StyledTabPanel>
     </>
   )

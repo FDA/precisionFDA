@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -11,22 +11,17 @@ import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
 import { AxiosError } from 'axios'
-import { useHomeScope } from '../../home/HomeScopeContext'
+import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
+import { useHomeDisplayScope } from '../../home/useHomeDisplayScope'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
-export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
-  const { isHome, homeScopeChangeHandler } = useHomeScope()
+export const EditAppPage = ({ spaceId, homeContext = defaultHomeContext }: { spaceId?: string; homeContext?: HomeScopeContextValue }) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { appUid } = useParams<{ appUid: string }>()
 
   const { data, isError, isLoading } = useFetchAppQuery(appUid!)
-
-  useEffect(() => {
-    if (isHome && data) {
-      homeScopeChangeHandler(data.app.scope)
-    }
-  }, [data])
+  useHomeDisplayScope(homeContext, data?.app.scope, data?.app.featured)
 
   const appMutation = useMutation({ mutationFn: createEditAppRequest })
 

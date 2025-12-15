@@ -5,7 +5,7 @@ import React from 'react'
 import Axios from 'axios'
 import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
-import Root from './root'
+import Root from './routes/root'
 import { getAuthenticityToken } from './utils/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 

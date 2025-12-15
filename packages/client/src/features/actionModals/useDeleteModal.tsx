@@ -7,7 +7,7 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { Button } from '../../components/Button'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 export interface DeleteResponse {
   meta?: {

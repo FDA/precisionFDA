@@ -10,7 +10,7 @@ import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
 import { Button } from '../../components/Button'
 import axios from 'axios'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledForm = styled.form`
   display: flex;

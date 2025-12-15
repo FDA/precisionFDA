@@ -10,13 +10,6 @@ export const StyledForm = styled.form`
     max-width: 580px;
   }
   margin-bottom: 48px;
-  padding: 20px;
-  background: var(--background);
-  border-radius: 16px;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--tertiary-200);
 `
 
 export const HintText = styled.div`
