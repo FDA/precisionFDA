@@ -79,13 +79,15 @@ export const FileShow = ({
   space?: ISpace,
   homeContext?: HomeScopeContextValue
 }) => {
-  const { homeScope, homeScopeChangeHandler } = homeContext
+  const { homeScope, setDisplayScope, isHome } = homeContext
   const location = useLocation()
   const { data, isLoading } = useQuery({
     queryKey: ['file', fileId],
     queryFn: () =>
       fetchFile(fileId!).then(d => {
-        homeScopeChangeHandler(d.files.scope, d.files.featured)
+        if (isHome) {
+          setDisplayScope(d.files.scope, d.files.featured)
+        }
         return d
       }),
   })

@@ -51,13 +51,13 @@ const AssetActions = ({ homeScope, asset }: { homeScope?: HomeScope; asset: IAss
 }
 
 export const AssetShow = ({ assetUid, homeContext = defaultHomeContext }: { assetUid: string; homeContext?: HomeScopeContextValue }) => {
-  const { homeScope, isHome, homeScopeChangeHandler } = homeContext
+  const { homeScope, setDisplayScope, isHome } = homeContext
   const { data, isLoading } = useQuery({
     queryKey: ['asset', assetUid],
     queryFn: () =>
       fetchAsset(assetUid!).then(d => {
-        if(isHome) {
-          homeScopeChangeHandler(d.asset.scope, d.asset.featured)
+        if (isHome) {
+          setDisplayScope(d.asset.scope, d.asset.featured)
         }
         return d
       }),

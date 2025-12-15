@@ -45,7 +45,7 @@ export const ExecutionDetails = ({
   homeContext?: HomeScopeContextValue
   spaceId?: number
 }) => {
-  const { homeScope, isHome, homeScopeChangeHandler } = homeContext
+  const { homeScope, isHome, setDisplayScope } = homeContext
   const location = useLocation()
 
   const { data, isLoading, refetch, isFetching } = useQuery({
@@ -53,7 +53,7 @@ export const ExecutionDetails = ({
     queryFn: () =>
       fetchExecution(executionUid!).then(d => {
         if (isHome) {
-          homeScopeChangeHandler(d.job.scope, d.job.featured)
+          setDisplayScope(d.job.scope, d.job.featured)
         }
         return d
       }),

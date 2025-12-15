@@ -163,14 +163,14 @@ export const WorkflowShow = ({
   spaceId?: number
   homeContext?: HomeScopeContextValue
 }) => {
-  const { homeScope, homeScopeChangeHandler, isHome } = homeContext
+  const { homeScope, setDisplayScope, isHome } = homeContext
   const location = useLocation()
   const { data, isLoading } = useQuery({
     queryKey: ['workflow', workflowId],
     queryFn: () =>
       fetchWorkflow(workflowId).then(d => {
-        if(isHome) {
-          homeScopeChangeHandler(d.workflow.scope, d.workflow.featured)
+        if (isHome) {
+          setDisplayScope(d.workflow.scope, d.workflow.featured)
         }
         return d
       }),

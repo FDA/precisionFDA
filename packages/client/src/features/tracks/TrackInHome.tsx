@@ -2,7 +2,9 @@ import React from 'react'
 import { useParams } from 'react-router'
 import { getBaseLink } from '../apps/run/utils'
 import { StyledBackLink } from '../home/home.styles'
+import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
 import { HeaderLeft, HomeLoader, ResourceHeader, Title } from '../home/show.styles'
+import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
 import {
   convertEntityLink,
   EntityIcon,
@@ -16,6 +18,7 @@ import {
   TrackWrapper,
 } from './TrackProvenanceContent'
 import { useTrackProvenanceQuery } from './useTrackProvenanceQuery'
+import { useEntityScopeQuery } from './useEntityScopeQuery'
 
 const BackLink = ({ spaceId, entityType, identifier }: { spaceId?: number; entityType: EntityType; identifier: string }) => {
   const linkTo = `/${getBaseLink(spaceId)}/${convertEntityLink(entityType, identifier)}`
@@ -23,10 +26,22 @@ const BackLink = ({ spaceId, entityType, identifier }: { spaceId?: number; entit
   return <StyledBackLink linkTo={linkTo}>Back to {entityType}</StyledBackLink>
 }
 
-export const TrackInHome = ({ entityType, spaceId }: { entityType?: EntityType; spaceId?: number }) => {
+export const TrackInHome = ({
+  entityType,
+  spaceId,
+  homeContext = defaultHomeContext,
+}: {
+  entityType?: EntityType
+  spaceId?: number
+  homeContext?: HomeScopeContextValue
+}) => {
   const identifier = useParams<TrackProvenancePageParams>()?.identifier
   const resolvedEntityType = entityType ?? getEntityTypeFromIdentifier(identifier!)
   const { data, isLoading, isError } = useTrackProvenanceQuery(identifier!)
+  const { data: entityData } = useEntityScopeQuery(identifier!, resolvedEntityType)
+
+  useHomeDisplayScope(homeContext, entityData?.scope, entityData?.featured)
+
   if (isLoading) {
     return <HomeLoader />
   }

@@ -50,7 +50,7 @@ export const FileList = ({
   homeScope,
   space,
   showFolderActions = false,
-  isAdmin,
+  isAdmin = false,
 }: {
   homeScope?: HomeScope
   space?: ISpace

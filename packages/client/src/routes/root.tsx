@@ -2,50 +2,50 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import { createBrowserRouter, Navigate, Outlet } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
-import AuthWall from './AuthWall'
-import Header from './components/Header/HeaderNext'
-import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
-import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
-import { SessionExpiredModal } from './features/auth/SessionExpiredModal'
-import { useModal } from './features/modal/useModal'
-import { LayoutLoader, UserLayout } from './layouts/UserLayout'
-import NoFoundPage from './pages/NoFoundPage'
-import GlobalStyle from './styles/global'
-import { PFDAToastContainer } from './utils/PFDAToastContainer'
-import queryClient from './utils/queryClient'
+import AuthWall from '../AuthWall'
+import Header from '../components/Header/HeaderNext'
+import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
+import { ExpiringSessionModal } from '../features/auth/ExpiringSessionModal'
+import { SessionExpiredModal } from '../features/auth/SessionExpiredModal'
+import { useModal } from '../features/modal/useModal'
+import { LayoutLoader, UserLayout } from '../layouts/UserLayout'
+import NoFoundPage from '../pages/NoFoundPage'
+import GlobalStyle from '../styles/global'
+import { PFDAToastContainer } from '../utils/PFDAToastContainer'
+import queryClient from '../utils/queryClient'
 
 import 'react-tooltip/dist/react-tooltip.css'
-import RequestAccessPage from './features/request-access/RequestAccessPage'
-import { ColorModeProvider } from './utils/ThemeContext'
-import { spacesRoutes } from './features/spaces/routes'
-import homeDetailRoutes from './features/home/show/routes'
-import HomeShowLayout from './features/home/show/HomeShowLayout'
+import RequestAccessPage from '../features/request-access/RequestAccessPage'
 import { useNotificationCenter } from 'react-toastify/addons/use-notification-center'
-import { initializeToastHelper } from './components/NotificationCenter/ToastHelper'
+import { initializeToastHelper } from '../components/NotificationCenter/ToastHelper'
+import { ColorModeProvider } from '../utils/ThemeContext'
+import HomeShowLayout from '../features/home/HomeShowLayout'
+import { homeRoutes } from './home'
+import spacesRoutes from './spaces'
 
-const DataPortalRoutes = React.lazy(() => import('./features/data-portals/routes'))
-const ExpertsSinglePage = React.lazy(() => import('./features/experts/details/index'))
-const EditChallengePage = React.lazy(() => import('./features/challenges/form/EditChallengePage'))
-const ChallengeDetailsLayout = React.lazy(() => import('./features/challenges/details/ChallengeDetailsLayout'))
-const ContentEditorPage = React.lazy(() => import('./features/challenges/content/ContentEditorPage'))
-const PublishingPage = React.lazy(() => import('./features/publishing/PublishingPage'))
-const TrackPage = React.lazy(() => import('./features/tracks/TrackPage'))
-const Admin = React.lazy(() => import('./features/admin'))
-const ChallengesList = React.lazy(() => import('./features/challenges/list/ChallengesList'))
-const CreateChallengePage = React.lazy(() => import('./features/challenges/form/CreateChallengePage'))
-const ProposeChallengePage = React.lazy(() => import('./features/challenges/form/ProposeChallengePage'))
-const NewsListPage = React.lazy(() => import('./features/news/NewsPage'))
-const CreateNewsItemPage = React.lazy(() => import('./features/news/form/CreateNewsItemPage'))
-const LandingPage = React.lazy(() => import('./features/overview/OverviewPage'))
-const AboutPage = React.lazy(() => import('./pages/AboutPage'))
-const NotificationsPage = React.lazy(() => import('./pages/Account/Notifications'))
-const ExpertsListPage = React.lazy(() => import('./features/experts/ExpertsList'))
-const WorkflowRunPage = React.lazy(() => import('./features/workflows/run/RunWorkflowForm'))
-const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
-const ListAdminNews = React.lazy(() => import('./features/news/ListAdminNews'))
+const DataPortalRoutes = React.lazy(() => import('../features/data-portals/routes'))
+const ExpertsSinglePage = React.lazy(() => import('../features/experts/details/index'))
+const EditChallengePage = React.lazy(() => import('../features/challenges/form/EditChallengePage'))
+const ChallengeDetailsLayout = React.lazy(() => import('../features/challenges/details/ChallengeDetailsLayout'))
+const ContentEditorPage = React.lazy(() => import('../features/challenges/content/ContentEditorPage'))
+const PublishingPage = React.lazy(() => import('../features/publishing/PublishingPage'))
+const TrackPage = React.lazy(() => import('../features/tracks/TrackPage'))
+const Admin = React.lazy(() => import('../features/admin'))
+const ChallengesList = React.lazy(() => import('../features/challenges/list/ChallengesList'))
+const CreateChallengePage = React.lazy(() => import('../features/challenges/form/CreateChallengePage'))
+const ProposeChallengePage = React.lazy(() => import('../features/challenges/form/ProposeChallengePage'))
+const NewsListPage = React.lazy(() => import('../features/news/NewsPage'))
+const CreateNewsItemPage = React.lazy(() => import('../features/news/form/CreateNewsItemPage'))
+const LandingPage = React.lazy(() => import('../features/overview/OverviewPage'))
+const AboutPage = React.lazy(() => import('../pages/AboutPage'))
+const NotificationsPage = React.lazy(() => import('../pages/Account/Notifications'))
+const ExpertsListPage = React.lazy(() => import('../features/experts/ExpertsList'))
+const WorkflowRunPage = React.lazy(() => import('../features/workflows/run/RunWorkflowForm'))
+const EditNewsItemPage = React.lazy(() => import('../features/news/form/EditNewsItemPage'))
+const ListAdminNews = React.lazy(() => import('../features/news/ListAdminNews'))
 
-const ToS = React.lazy(() => import('./pages/ToS'))
-const Security = React.lazy(() => import('./pages/Security'))
+const ToS = React.lazy(() => import('../pages/ToS'))
+const Security = React.lazy(() => import('../pages/Security'))
 
 const RootComponent = () => {
   const sessionExpiredModal = useModal()
@@ -133,7 +133,7 @@ const router = createBrowserRouter([
           {
             path: 'home/*',
             element: <HomeShowLayout />,
-            children: homeDetailRoutes,
+            children: homeRoutes,
           },
           { path: 'account/notifications', element: <NotificationsPage /> },
           {

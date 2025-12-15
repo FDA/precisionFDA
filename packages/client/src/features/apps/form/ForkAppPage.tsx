@@ -12,7 +12,7 @@ import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
 import { AxiosError } from 'axios'
-import { toastError } from '../../../components/NotificationCenter/ToastHelper'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
   const location = useLocation()

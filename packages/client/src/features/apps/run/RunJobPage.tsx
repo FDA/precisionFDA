@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useParams } from 'react-router'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { BackLink } from '../../../components/Page/PageBackLink'
@@ -10,10 +10,10 @@ import { fetchApp } from '../apps.api'
 import { RunJobForm } from './RunJobForm'
 import { Topbox, TopboxItem } from './styles'
 import { getBaseLink } from './utils'
-import { useHomeScope } from '../../home/HomeScopeContext'
+import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
+import { useHomeDisplayScope } from '../../home/useHomeDisplayScope'
 
-export const RunJobPage = () => {
-  const { isHome, homeScopeChangeHandler } = useHomeScope()
+export const RunJobPage = ({ homeContext = defaultHomeContext }: { homeContext?: HomeScopeContextValue }) => {
   const { appIdentifier, spaceId } = useParams<{ appIdentifier: string, spaceId: string }>()
   const user = useAuthUser()
   const { data: appData, isLoading } = useQuery({
@@ -22,14 +22,10 @@ export const RunJobPage = () => {
     enabled: !!appIdentifier,
   })
 
-  useEffect(() => {
-    if (isHome && appData) {
-      homeScopeChangeHandler(appData.app.scope)
-    }
-  }, [appData])
-
   const app = appData?.app
   const spec = appData?.meta.spec
+
+  useHomeDisplayScope(homeContext, app?.scope, app?.featured)
 
   if (isLoading || user === undefined) {
     return <HomeLoader />
