@@ -17,6 +17,7 @@ import { useModal } from '../modal/useModal'
 import { InputTextS } from '../apps/form/Fields'
 import { ServerScope } from '../home/types'
 import { RequestResponse } from './useFeatureMutation'
+import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledForm = styled.form`
   min-width: 450px;

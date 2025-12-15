@@ -9,6 +9,7 @@ import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { IApp } from '../apps.types'
 import { generateCopyUrl } from './utils'
+import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const StyledButtonRow = styled(ButtonRow)`
   justify-content: space-between;
