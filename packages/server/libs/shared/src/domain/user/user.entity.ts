@@ -299,9 +299,9 @@ export class User extends BaseEntity {
       where: { spaces: { state: { $ne: SPACE_STATE.DELETED } }, active: true },
     })
 
-    return Array.from(this.spaceMemberships)
-      .filter((spaceMembership) => spaceMembership.active)
-      .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+    return Array.from(this.spaceMemberships).flatMap((spaceMembership) =>
+      Array.from(spaceMembership.spaces),
+    )
   }
 
   async accessibleSpaceIds(): Promise<number[]> {
@@ -312,12 +312,16 @@ export class User extends BaseEntity {
   async editableSpaces(): Promise<Space[]> {
     await this.spaceMemberships.load({
       populate: ['spaces'],
-      where: { spaces: { state: { $ne: SPACE_STATE.DELETED } }, active: true },
+      where: {
+        active: true,
+        role: { $in: CAN_EDIT_ROLES },
+        spaces: {
+          state: { $ne: SPACE_STATE.DELETED },
+        },
+      },
     })
 
-    return Array.from(this.spaceMemberships)
-      .filter((spaceMembership) => CAN_EDIT_ROLES.includes(spaceMembership.role))
-      .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+    return Array.from(this.spaceMemberships).flatMap((membership) => Array.from(membership.spaces))
   }
 
   /**
@@ -326,21 +330,31 @@ export class User extends BaseEntity {
   async manageableSpaces(): Promise<Space[]> {
     await this.spaceMemberships.load({
       populate: ['spaces'],
-      where: { spaces: { state: { $ne: SPACE_STATE.DELETED } }, active: true },
+      where: {
+        active: true,
+        role: { $in: ADMIN_LEAD_ROLES },
+        spaces: {
+          state: { $ne: SPACE_STATE.DELETED },
+        },
+      },
     })
 
-    return Array.from(this.spaceMemberships)
-      .filter((m) => ADMIN_LEAD_ROLES.includes(m.role))
-      .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+    return Array.from(this.spaceMemberships).flatMap((membership) => Array.from(membership.spaces))
   }
 
   async leadableSpaces(): Promise<Space[]> {
-    await this.spaceMemberships.load({ populate: ['spaces'] })
+    await this.spaceMemberships.load({
+      populate: ['spaces'],
+      where: {
+        active: true,
+        role: SPACE_MEMBERSHIP_ROLE.LEAD,
+        spaces: {
+          state: { $ne: SPACE_STATE.DELETED },
+        },
+      },
+    })
 
-    return Array.from(this.spaceMemberships)
-      .filter((m) => m.active && m.role === SPACE_MEMBERSHIP_ROLE.LEAD)
-      .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
-      .filter((space) => space.state !== SPACE_STATE.DELETED)
+    return Array.from(this.spaceMemberships).flatMap((membership) => Array.from(membership.spaces))
   }
 
   isChallengeBot(): boolean {
