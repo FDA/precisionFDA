@@ -122,4 +122,39 @@ describe('User space methods', () => {
     const result = await loadedUser.manageableSpaces()
     expect(result.map((s) => s.id)).to.have.members([space1.id, space3.id])
   })
+
+  it('leadableSpaces returns spaces for LEAD role and active memberships', async () => {
+    // Setup memberships
+    create.spacesHelper.addMember(
+      em,
+      { space: space1, user },
+      { active: true, role: SPACE_MEMBERSHIP_ROLE.LEAD },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { space: space2, user },
+      { active: true, role: SPACE_MEMBERSHIP_ROLE.ADMIN },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { space: space3, user },
+      { active: true, role: SPACE_MEMBERSHIP_ROLE.LEAD },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { space: space1, user },
+      { active: true, role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { space: space3, user },
+      { active: false, role: SPACE_MEMBERSHIP_ROLE.LEAD },
+    )
+    await em.flush()
+    em.clear()
+
+    const loadedUser = await em.findOneOrFail(User, user.id)
+    const result = await loadedUser.leadableSpaces()
+    expect(result.map((s) => s.id)).to.have.members([space1.id, space3.id])
+  })
 })
