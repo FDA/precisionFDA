@@ -1,9 +1,9 @@
 import { Meta, StoryObj } from '@storybook/react-webpack5'
 import { useMutation } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useAddResourceToModal } from './useAddResourceToSpace'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 const meta: Meta = {
   title: 'Modals/Common',

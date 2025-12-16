@@ -5,8 +5,8 @@ import SelectFilter, { selectFilterFn } from '../../../components/Table/componen
 import { selectColumnDef } from '../../../components/Table/selectColumnDef'
 import { Done, Failed, Runnable, Running } from '../../../components/icons/StateIcons'
 import { convertDateToUserTime } from '../../../utils/datetime'
-import { Invitation } from '../admin.api'
 import { StateLabel } from '../styles'
+import { Invitation } from '../users/api'
 
 export const ProvisionStateCell = ({ provisionState }: { provisionState: string }) => {
   const icon = {

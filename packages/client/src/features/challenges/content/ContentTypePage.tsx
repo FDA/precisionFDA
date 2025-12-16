@@ -1,15 +1,16 @@
-import React from 'react'
-import { useNavigate } from 'react-router'
 import { $generateHtmlFromNodes } from '@lexical/html'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import React from 'react'
+import { useNavigate } from 'react-router'
 import styled from 'styled-components'
-import { LexiContext } from '../../lexi'
-import Editor from '../../lexi/Editor'
-import { useChallengeByIDQuery } from '../useChallengeDetailsQuery'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
+import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import { LexiContext } from '../../lexi'
+import Editor from '../../lexi/Editor'
 import { ContentType, UpdateChallengeContent, updateChallengeContentRequest } from '../api'
+import { useChallengeByIDQuery } from '../useChallengeDetailsQuery'
 
 const SubmitRow = styled.div`
   flex: 1;
