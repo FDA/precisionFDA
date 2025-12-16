@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react'
 import { formatDistanceToNow } from 'date-fns'
+import React, { useEffect } from 'react'
 import { useNotificationCenter } from 'react-toastify/addons/use-notification-center'
-import Menu from '../Menu/Menu'
-import { BellIcon } from '../icons/BellIcon'
-import { Button } from '../Button'
-import { TrashIcon } from '../icons/TrashIcon'
-import { DropdownMenuItem } from '../Header/styles'
-import styles from './NotificationCenter.module.css'
+import { useFetchUnreadNotificationsQuery } from '../../api/queries/notification'
 import { Notification, NOTIFICATION_ACTION } from '../../features/home/types'
 import { confirmNotification } from '../../features/notifications/notifications.api'
 import { useLastWSNotification } from '../../hooks/useLastWSNotification'
+import { Button } from '../Button'
+import { DropdownMenuItem } from '../Header/styles'
+import Menu from '../Menu/Menu'
 import { BasicToast, ToastWithLink } from '../Toast'
-import { useFetchUnreadNotificationsQuery } from '../../api/queries/notification'
-import { toastHandlers } from './ToastHelper'
+import { BellIcon } from '../icons/BellIcon'
+import { TrashIcon } from '../icons/TrashIcon'
+import styles from './NotificationCenter.module.css'
+import { initializeToastHelper, toastHandlers } from './ToastHelper'
 
 // List of notifications that do not show a toast
 const NO_TOAST_NOTIFICATIONS = [
@@ -41,17 +41,21 @@ const createToastContent = (message: string, meta?: Notification['meta']) => {
 }
 
 export const NotificationCenter = () => {
-  const { notifications, clear, markAllAsRead, remove, unreadCount, add } = useNotificationCenter()
+  const { notifications, clear, markAllAsRead, markAsRead, remove, unreadCount, add } = useNotificationCenter()
   const lastJsonMessage = useLastWSNotification()
 
   const { data } = useFetchUnreadNotificationsQuery()
+
+  useEffect(() => {
+    initializeToastHelper(markAsRead)
+  }, [markAsRead])
 
   // Add fetched notifications to center on mount
   useEffect(() => {
     data?.forEach(notification => {
       const toastContent = createToastContent(notification.message, notification.meta)
       add({
-        createdAt: notification.createdAt,
+        createdAt: new Date(notification.createdAt).getTime(),
         read: false,
         content: toastContent,
         type: 'success',

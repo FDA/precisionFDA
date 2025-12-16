@@ -15,11 +15,9 @@ import { PFDAToastContainer } from '../utils/PFDAToastContainer'
 import queryClient from '../utils/queryClient'
 
 import 'react-tooltip/dist/react-tooltip.css'
-import RequestAccessPage from '../features/request-access/RequestAccessPage'
-import { useNotificationCenter } from 'react-toastify/addons/use-notification-center'
-import { initializeToastHelper } from '../components/NotificationCenter/ToastHelper'
-import { ColorModeProvider } from '../utils/ThemeContext'
 import HomeShowLayout from '../features/home/HomeShowLayout'
+import RequestAccessPage from '../features/request-access/RequestAccessPage'
+import { ColorModeProvider } from '../utils/ThemeContext'
 import { homeRoutes } from './home'
 import spacesRoutes from './spaces'
 
@@ -51,7 +49,6 @@ const RootComponent = () => {
   const sessionExpiredModal = useModal()
   const expiringSessionModal = useModal()
   const [railsAlertHeight, setRailsAlertHeight] = useState(0)
-  const { markAsRead } = useNotificationCenter()
 
   useEffect(() => {
     // Calculate the height of the rails-alert element
@@ -59,8 +56,7 @@ const RootComponent = () => {
     if (alertElement) {
       setRailsAlertHeight(alertElement.clientHeight as number)
     }
-    initializeToastHelper(markAsRead)
-  }, [markAsRead])
+  }, [])
 
   return (
     <ColorModeProvider>

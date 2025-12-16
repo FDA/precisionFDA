@@ -1,11 +1,11 @@
 import { RowSelectionState } from '@tanstack/react-table'
 import React from 'react'
 import styled from 'styled-components'
+import { useProvisionMutation } from '../../../api/mutations/invitations'
 import { Button } from '../../../components/Button'
-import { Invitation } from '../admin.api'
+import { Invitation } from '../users/api'
 import { useEditInvitationModal } from './modals/useEditInvitationModal'
 import { useProvisioningModal } from './modals/useProvisioningModal'
-import { useProvisionMutation } from '../../../api/mutations/invitations'
 
 const ButtonsRow = styled.div`
   display: flex;

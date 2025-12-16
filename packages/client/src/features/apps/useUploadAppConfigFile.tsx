@@ -2,14 +2,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { ChangeEvent, useState } from 'react'
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
+import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
+import MonacoEditor from '../../components/MonacoEditor/MonacoEditor'
+import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { uploadAppConfigFileRequest } from './apps.api'
 import { FileType } from './apps.types'
-import MonacoEditor from '../../components/MonacoEditor/MonacoEditor'
-import { Button } from '../../components/Button'
 
 const StyledFileUpload = styled.div`
   padding-bottom: 0;

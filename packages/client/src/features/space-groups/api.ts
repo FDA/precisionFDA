@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { IdResponse } from '../discussions/api'
-import { ISpaceGroup } from './spaceGroups.types'
+import { ISpaceGroup } from './types'
 
 export interface SpaceGroupPayload {
   id?: number
