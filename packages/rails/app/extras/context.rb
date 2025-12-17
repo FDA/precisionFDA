@@ -38,8 +38,13 @@ class Context
     if logged_in?
       @user = User.find(@user_id)
 
-      @user.expiration = @expiration
-      @user.save!(validate: false)
+      current_db_expiration = @user.expiration.to_i
+      new_session_expiration = @expiration.to_i
+
+      # Only update if the difference is greater than 300 seconds
+      if (current_db_expiration - new_session_expiration).abs > 300
+        @user.update_column(:expiration, @expiration)
+      end
     end
   end
 
