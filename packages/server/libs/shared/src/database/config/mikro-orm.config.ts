@@ -21,7 +21,17 @@ class SQLQueryLogger extends DefaultLogger {
     this.logger = new Logger('SQL Logger')
   }
 
+  // MikroORM calls this for most ORM-generated queries
   logQuery(context: LogContext): void {
+    this.logger.log(this.formatQuery(context))
+  }
+
+  // MikroORM calls this for raw/populate loader queries
+  logQueryRaw(context: LogContext): void {
+    this.logger.log(this.formatQuery(context))
+  }
+
+  private formatQuery(context: LogContext): string {
     const queryText = this.printValues
       ? this.fillParams(context.query, context.params || [])
       : context.query
@@ -32,11 +42,12 @@ class SQLQueryLogger extends DefaultLogger {
       parts.push(`[took ${context.took} ms]`)
     }
 
-    this.logger.log(parts.join(' '))
+    return parts.join(' ')
   }
 
   private fillParams(query: string, params: unknown[]): string {
     let i = 0
+
     return query.replace(/\?/g, () => {
       if (i >= params.length) {
         throw new Error('Not enough parameters for query placeholders')
@@ -44,17 +55,9 @@ class SQLQueryLogger extends DefaultLogger {
 
       const param = params[i++]
 
-      if (param === null || param === undefined) {
-        return 'NULL'
-      }
-
-      if (typeof param === 'string') {
-        return `'${param.replace(/'/g, "''")}'`
-      }
-
-      if (typeof param === 'number' || typeof param === 'boolean') {
-        return String(param)
-      }
+      if (param === null || param === undefined) return 'NULL'
+      if (typeof param === 'string') return `'${param.replace(/'/g, "''")}'`
+      if (typeof param === 'number' || typeof param === 'boolean') return String(param)
 
       return `'${JSON.stringify(param).replace(/'/g, "''")}'`
     })
