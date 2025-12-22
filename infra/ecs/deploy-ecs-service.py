@@ -589,6 +589,8 @@ class EcsDeployer:
                 ecs_secrets.append({"name": "SSL_KEY", "valueFrom": param["Name"]})
             elif param["Name"].endswith("/ssl_configuration/certificate"):
                 ecs_secrets.append({"name": "SSL_CERT", "valueFrom": param["Name"]})
+            elif param["Name"].endswith("/environment/UNII_HOST"):
+                ecs_secrets.append({"name": "UNII_HOST", "valueFrom": param["Name"]})
             elif not any(excl in service_name.lower() for excl in exclusions):
                 # Include other parameters only if service is not Nginx
                 ecs_secrets.append({"name": param["Name"].split("/")[-1], "valueFrom": param["Name"]})
@@ -691,11 +693,15 @@ class EcsDeployer:
 
     def get_image_uri(self, image_key, tag):
         """
-        Returns the ECR image URI, adding 'prod/' for production branches.
+        Returns the ECR image URI, adding 'production/' for production branches.
+        Web uses the env as prefix as we are building separate images for each env.
         Matches branch against regex patterns in self.prod_branches_patterns.
         """
-        if any(re.match(pattern, self.branch) for pattern in self.prod_branches_patterns):
-            prefix = "prod/"
+
+        if image_key.lower() == "web":
+            prefix = f"{self.environment}/"
+        elif any(re.match(pattern, self.branch) for pattern in self.prod_branches_patterns):
+            prefix = "production/"
         else:
             prefix = ""
         return f"{self.ecr_account}.dkr.ecr.{self.region}.amazonaws.com/pfda/{prefix}{image_key.lower()}:{tag}"

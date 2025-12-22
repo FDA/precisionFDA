@@ -21,7 +21,10 @@ The workflow consists of two main stages:
   - `nginx`
   - `docs`
 
-> 🟡 Only images that have actual changes are rebuilt, which speeds up the deployment
+> 🟡 Only images that have actual changes are rebuilt, which speeds up the deployment.
+> The web image is rebuilt for each environment. This is because the web image relies on env specific variables during build time.
+> The web images are therefore stored in separate ECR repositories with the naming convention `pfda/<ENVIRONMENT>/web`.
+> The other images are stored in `pfda/<image name>` or `pfda/production/<image name>`. 
 ---
 
 ### 2. 🚢 ECS Deployment
