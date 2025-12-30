@@ -27,6 +27,7 @@ import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { Organization } from '@shared/domain/org/org.entity'
+import { Profile } from '@shared/domain/profile/profile.entity'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Session } from '@shared/domain/session/session.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
@@ -938,6 +939,21 @@ const invitationHelper = {
   },
 }
 
+const profileHelper = {
+  create: (em: EntityManager, references: { user: User }, data?: Partial<Profile>): Profile => {
+    const profile = wrap(new Profile()).assign(
+      {
+        ...data,
+        user: references.user,
+      },
+      { em },
+    )
+
+    em.persist(profile)
+    return profile
+  },
+}
+
 const expertHelper = {
   create: (em: EntityManager, references: { user: User }, data?: Partial<Expert>): Expert => {
     const defaults = generate.expert.simple()
@@ -1011,6 +1027,7 @@ export {
   newsHelper,
   noteHelper,
   orgHelper,
+  profileHelper,
   sessionHelper,
   spacesHelper,
   tagsHelper,
