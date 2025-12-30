@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { ORG_EVERYONE } from '@shared/config/consts'
 import { database } from '@shared/database'
+import { EmailService } from '@shared/domain/email/email.service'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
@@ -15,13 +16,12 @@ import { User } from '@shared/domain/user/user.entity'
 import { constructOrgFromUsername, constructUsername } from '@shared/domain/user/user.helper'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { PlatformClient } from '@shared/platform-client'
 import { create, db } from '@shared/test'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { EmailService } from '@shared/domain/email/email.service'
-import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
 
 describe('UserProvisionFacade', () => {
   let em: EntityManager
@@ -44,7 +44,9 @@ describe('UserProvisionFacade', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork() as EntityManager
+    em = database.orm().em.fork({
+      useContext: true,
+    }) as EntityManager
     em.clear()
 
     userRepo = new UserRepository(em, User)
@@ -320,6 +322,48 @@ describe('UserProvisionFacade', () => {
     })
     createOrgStub.withArgs(orgHandle, proposedOrg.orgName).throws({
       props: { clientStatusCode: 400 },
+    })
+
+    await getInstance().provision(invitation.id, [], [invitation.id])
+    const updatedInvitation = await invitationRepo.findOne({ id: invitation.id })
+    expect(updatedInvitation.provisioningState).to.equal(PROVISIONING_STATE.FAILED)
+    expect(createNotificationStub.firstCall.args[0]).to.deep.eq({
+      message: `Provisioning failed for the email: ${invitation.email}`,
+      severity: SEVERITY.ERROR,
+      action: NOTIFICATION_ACTION.USER_PROVISIONING_ERROR,
+      userId: siteAdmin.id,
+      sessionId: 'sessionId',
+    })
+  })
+
+  it('should run into catch block and update invitation if storing user data fails', async () => {
+    const invitation = create.invitationHelper.create(em, {
+      provisioningState: PROVISIONING_STATE.IN_PROGRESS,
+    })
+    const existingUser = create.userHelper.create(em, {
+      email: invitation.email,
+    })
+    create.profileHelper.create(
+      em,
+      {
+        user: existingUser,
+      },
+      { email: invitation.email },
+    )
+    await em.flush()
+
+    const username = constructUsername(invitation.firstName, invitation.lastName)
+    const proposedOrg = constructOrgFromUsername(username)
+    const orgDxid = constructDxOrg(proposedOrg.orgBaseHandle)
+    const orgHandle = getHandle(orgDxid)
+    userDescribeStub.withArgs({ dxid: `user-${username}` }).throws({
+      props: { clientStatusCode: 404 },
+    })
+    orgDescribeStub.withArgs({ dxid: orgDxid }).throws({
+      props: { clientStatusCode: 404 },
+    })
+    createOrgStub.withArgs(orgHandle, proposedOrg.orgName).resolves({
+      id: orgDxid,
     })
 
     await getInstance().provision(invitation.id, [], [invitation.id])

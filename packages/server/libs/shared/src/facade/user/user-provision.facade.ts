@@ -1,6 +1,9 @@
 import { Reference, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ORG_EVERYONE } from '@shared/config/consts'
+import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
@@ -10,6 +13,10 @@ import { Organization } from '@shared/domain/org/org.entity'
 import { OrgRepository } from '@shared/domain/org/org.repository'
 import { constructDxOrg, getHandle } from '@shared/domain/org/org.utils'
 import { Profile } from '@shared/domain/profile/profile.entity'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import {
   CURRENT_SCHEMA_VERSION,
@@ -24,19 +31,12 @@ import {
 } from '@shared/domain/user/user.helper'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { UserCreateData } from '@shared/platform-client/platform-client.params'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { getPluralizedTerm } from '@shared/utils/format'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { EmailService } from '@shared/domain/email/email.service'
-import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
-import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 
 @Injectable()
 export class UserProvisionFacade {
@@ -86,7 +86,11 @@ export class UserProvisionFacade {
       const { orgName, orgBaseHandle: proposedBaseHandle } = constructOrgFromUsername(username)
       const orgBaseHandle = await this.findUnusedOrgName(proposedBaseHandle)
       await this.provisionOrgOnPlatform(invitation, username, orgBaseHandle, orgName)
-      await this.storeData(invitation, username, orgBaseHandle, orgName)
+      const user = await this.storeUserData(invitation, username, orgBaseHandle, orgName)
+      invitation.user = Reference.create(user)
+      invitation.provisioningState = PROVISIONING_STATE.FINISHED
+      await this.em.persistAndFlush(invitation)
+      this.logger.log(`Provisioned user ${username} with org ${orgBaseHandle}`)
 
       // if email is gov email, send provision email to user
       if (isGovEmail(invitation.email)) {
@@ -237,26 +241,17 @@ export class UserProvisionFacade {
     })
   }
 
-  private async createOrg(
-    invitation: Invitation,
-    orgName: string,
-    orgBaseHandle: string,
-  ): Promise<Organization> {
+  private createOrg(invitation: Invitation, orgName: string, orgBaseHandle: string): Organization {
     const org = new Organization()
     org.name = orgName
     org.handle = orgBaseHandle
     org.duns = invitation.duns
     org.singular = true
     org.state = 'complete'
-    this.em.persist(org)
     return org
   }
 
-  private async createUser(
-    invitation: Invitation,
-    org: Organization,
-    username: string,
-  ): Promise<User> {
+  private createUser(invitation: Invitation, org: Organization, username: string): User {
     const user = new User(org)
     user.dxuser = username
     user.schemaVersion = CURRENT_SCHEMA_VERSION
@@ -266,39 +261,38 @@ export class UserProvisionFacade {
     user.normalizedEmail = invitation.email.toLowerCase()
     user.cloudResourceSettings = DEFAULT_CLOUD_RESOURCE_SETTINGS
     user.extras = DEFAULT_USER_EXTRAS
-    this.userRepo.persist(user)
     return user
   }
 
-  private async createProfile(invitation: Invitation, user: User): Promise<Profile> {
+  private createProfile(invitation: Invitation, user: User): Profile {
     const profile = new Profile()
     profile.email = invitation.email
     profile.user = Reference.create(user)
-    this.em.persist(profile)
     return profile
   }
 
-  private async createNotificationPreference(user: User): Promise<NotificationPreference> {
+  private createNotificationPreference(user: User): NotificationPreference {
     const notificationPreference = new NotificationPreference(user)
-    this.em.persist(notificationPreference)
     return notificationPreference
   }
 
-  private async storeData(
+  private async storeUserData(
     invitation: Invitation,
     username: string,
     orgBaseHandle: string,
     orgName: string,
-  ): Promise<void> {
+  ): Promise<User> {
     return await this.em.transactional(async () => {
-      const org = await this.createOrg(invitation, orgName, orgBaseHandle)
-      const user = await this.createUser(invitation, org, username)
-      org.admin = Reference.create(user)
+      const org = this.createOrg(invitation, orgName, orgBaseHandle)
       this.em.persist(org)
-      await this.createProfile(invitation, user)
-      await this.createNotificationPreference(user)
-      invitation.user = Reference.create(user)
-      invitation.provisioningState = PROVISIONING_STATE.FINISHED
+      const user = this.createUser(invitation, org, username)
+      this.em.persist(user)
+      org.admin = Reference.create(user)
+      const profile = this.createProfile(invitation, user)
+      this.em.persist(profile)
+      const notificationPreference = this.createNotificationPreference(user)
+      this.em.persist(notificationPreference)
+      return user
     })
   }
 
