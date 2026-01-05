@@ -11,6 +11,7 @@ class SpaceMembershipSerializer < ApplicationSerializer
     :created_at,
     :links,
     :to_roles,
+    :shared_membership_id,
   )
 
   def active
@@ -69,6 +70,13 @@ class SpaceMembershipSerializer < ApplicationSerializer
         role,
       )
     end
+  end
+
+  def shared_membership_id
+    return object.id if !space.review? || space.shared?
+
+    shared_membership = Space.find_by(id: space.space_id).space_memberships.find_by(user: object.user)
+    shared_membership&.id
   end
 
   private

@@ -1,6 +1,7 @@
 import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import {
   ENTITY_TYPE,
@@ -36,7 +37,6 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { StringUtils } from '@shared/utils/string.utils'
 import { Logger } from 'nestjs-pino'
 import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
-import { EventHelper } from '@shared/domain/event/event.helper'
 
 type SpaceFilter = FilterQuery<Space> & {
   spaceMemberships?: {
@@ -235,6 +235,14 @@ export class SpaceService {
           ' it is part of Locked Verification space.',
       )
     }
+  }
+
+  async getSharedSpace(spaceId: number): Promise<Space | null> {
+    const space = await this.spaceRepository.findOneOrFail({ id: spaceId })
+    if (space.spaceId === null) {
+      return space
+    }
+    return this.spaceRepository.findOneOrFail({ id: space.spaceId })
   }
 
   /**

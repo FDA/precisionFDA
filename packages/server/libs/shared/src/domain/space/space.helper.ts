@@ -29,13 +29,13 @@ const scopeContainsId = (name: string): boolean => {
   }
 }
 
-const getOrgDxid = (space: Space, spaceMembership: SpaceMembership): string =>
+const getOrgDxid = (space: Space, spaceMembership: SpaceMembership): DxId<'org'> =>
   spaceMembership.isHost() ? space.hostDxOrg : space.guestDxOrg
 
 const getOppositeOrgDxid = (space: Space, spaceMembership: SpaceMembership): string =>
   spaceMembership.isHost() ? space.guestDxOrg : space.hostDxOrg
 
-const setOrgDxid = (space: Space, spaceMembership: SpaceMembership, value: string): void => {
+const setOrgDxid = (space: Space, spaceMembership: SpaceMembership, value: DxId<'org'>): void => {
   spaceMembership.isHost() ? (space.hostDxOrg = value) : (space.guestDxOrg = value)
 }
 

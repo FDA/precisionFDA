@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import styled from 'styled-components'
 import { ISpace } from '../spaces.types'
 import MemberEditButton from './MemberEditButton'
+import { StatusPill } from './members.styles'
 import { getSpaceMembershipSideAlias, SpaceMembership } from './members.types'
 
 const Card = styled.div<{ $isDeactivated: boolean }>`
@@ -38,16 +39,6 @@ const UserInfo = styled.div<{ $isDeactivated: boolean }>`
   align-items: center;
   gap: 8px;
   ${({ $isDeactivated }) => $isDeactivated && 'opacity: 0.7;'}
-`
-
-const StatusPill = styled.div<{ $active: boolean }>`
-  border-radius: 7px;
-  background-color: ${props => (props.$active ? 'var(--success-500)' : 'var(--warning-500)')};
-  color: white;
-  font-size: 0.7rem;
-  font-weight: bold;
-  padding: 2px 6px;
-  display: inline-block;
 `
 
 const Details = styled.div<{ $isDeactivated: boolean }>`
@@ -93,7 +84,6 @@ const DetailItem = ({ label, value, isLink = false, username = '' }: DetailItemP
 
 export function MemberCard({ member, space }: { member: SpaceMembership; space: ISpace }) {
   const isDeactivated = member.active === 'Inactive' || member.active === 'Account deactivated'
-
   return (
     <Card $isDeactivated={isDeactivated} data-testid="member-card">
       <CardHeader>
@@ -101,9 +91,7 @@ export function MemberCard({ member, space }: { member: SpaceMembership; space: 
           <Link to={`/users/${member.user_name}`} target="_blank" rel="noopener noreferrer">
             {member.title}
           </Link>
-          <StatusPill $active={member.active === 'Active'}>
-            {member.active}
-          </StatusPill>
+          <StatusPill $active={member.active === 'Active'}>{member.active}</StatusPill>
         </UserInfo>
         {member.to_roles.length > 0 && <MemberEditButton spaceId={space.id} member={member} />}
       </CardHeader>

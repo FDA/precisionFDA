@@ -1,28 +1,18 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Button } from '../../../components/Button'
 import { Callout } from '../../../components/Callout'
 import { InputText } from '../../../components/InputText'
+import { Select } from '../../../components/Select'
 import { ErrorHint, FieldGroup, Hint, InputError } from '../../../components/form/styles'
-import { capitalize } from '../../../utils/formatting'
-import { useAuthUser } from '../../auth/useAuthUser'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'
-import { changeMembershipRoleRequest } from './members.api'
 import { StyledFields, StyledFooter } from './members.styles'
-import { MemberRole, SpaceMembership } from './members.types'
-import { Select } from '../../../components/Select'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
-
-interface FormValues {
-  role: { label: string; value: MemberRole }
-}
+import { MemberRole, SpaceMembership, UpdateRolesFormValues } from './members.types'
+import { useUpdateMemberRolesMutation } from './useUpdateMemberRolesMutation'
 
 const LABEL: Record<MemberRole, string> = {
   admin: 'Admin',
@@ -36,71 +26,34 @@ const LABEL: Record<MemberRole, string> = {
 const validationSchema = Yup.object().shape({
   role: Yup.object()
     .shape({
-      value: Yup.string().required('Role required'),
+      label: Yup.string().required('Role label required'),
+      value: Yup.string()
+        .oneOf([...Object.keys(LABEL)] as MemberRole[])
+        .required('Role value required'),
     })
     .required('Required'),
 })
 
-type ErrorResponse = { response?: { data?: { errors?: string } } }
 interface ChangeMemberRoleFormProps {
-  spaceId: string | number
+  spaceId: number
   member: SpaceMembership
   onClose: () => void
 }
 
 const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, member, onClose }) => {
-  const authUser = useAuthUser()
-  const queryClient = useQueryClient()
-  const navigate = useNavigate()
   const {
     handleSubmit,
     control,
     formState: { errors },
     reset,
     watch,
-  } = useForm<FormValues>({ resolver: yupResolver(validationSchema) })
+  } = useForm<UpdateRolesFormValues>({ resolver: yupResolver(validationSchema) })
   const isLeadSelected = watch('role')?.value === 'lead'
-  const mutation = useMutation({
-    mutationFn: ({ role }: FormValues) => changeMembershipRoleRequest({ spaceId, memberId: member.id, role: role.value }),
-    onSuccess: res => {
-      if (authUser?.dxuser === res.member && res.role === 'disable') {
-        navigate('/spaces')
-        toastSuccess('Disabled yourself from the space')
-      } else {
-        reset()
-        queryClient.invalidateQueries({ queryKey: ['space-members'] })
-        onClose()
-        const msg = ['enable', 'disable'].includes(res.role)
-          ? `${capitalize(res.role)}d member ${res.member} in the space`
-          : `Changed ${res.member} member role to ${res.role}`
-        toastSuccess(msg)
-      }
-    },
-    onError: (error: unknown) => {
-      if (error && typeof error === 'object' && 'response' in error) {
-        const err = error as ErrorResponse
-        toastError(`Change member role. ${err.response?.data?.errors || 'Unknown error'}`)
-      } else {
-        toastError('Change member role. Unknown error')
-      }
-    },
-  })
-
-  const disableMutation = useMutation({
-    mutationFn: (action: 'disable' | 'enable') => changeMembershipRoleRequest({ spaceId, memberId: member.id, role: action }),
-    onSuccess: res => {
-      if (authUser?.dxuser === res.member && res.role === 'disable') {
-        navigate('/spaces')
-        toastSuccess('Disabled yourself from the space')
-      } else {
-        reset()
-        queryClient.invalidateQueries({ queryKey: ['space-members'] })
-        onClose()
-        const msg = `${capitalize(res.role)}d member ${res.member} in the space`
-        toastSuccess(msg)
-      }
-    },
-  })
+  const onMutationSuccess = () => {
+    reset()
+    onClose()
+  }
+  const mutation = useUpdateMemberRolesMutation(spaceId, [member], onMutationSuccess)
 
   const roleOptions = [
     { value: 'admin' as MemberRole, label: LABEL.admin },
@@ -109,19 +62,19 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
     { value: 'lead' as MemberRole, label: LABEL.lead },
   ].filter(r => member.to_roles.includes(r.value))
 
-  const onSubmit = (data: FormValues) => mutation.mutate(data)
+  const onSubmit = (data: UpdateRolesFormValues) => mutation.mutate(data)
   const onCancel = () => {
     reset()
     onClose()
   }
 
   const onDisableToggle = () => {
-    const action = member.active === 'Active' ? 'disable' : 'enable'
-    disableMutation.mutate(action)
+    const action = member.active === 'Active' ? 'disable' : ('enable' as MemberRole)
+    mutation.mutate({ role: { label: LABEL[action], value: action } })
   }
 
   const canDisableOrEnable = member.to_roles.includes('disable') || member.to_roles.includes('enable')
-  const isSubmitting = mutation.isPending || disableMutation.isPending
+  const isSubmitting = mutation.isPending
   const isMemberDisabled = member.active === 'Inactive' || member.active === 'Account deactivated'
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -196,7 +149,7 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
   )
 }
 
-export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string | number; member: SpaceMembership }) => {
+export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: number; member: SpaceMembership }) => {
   const { isShown, setShowModal } = useModal()
   const modalComp = isShown && (
     <ModalNext

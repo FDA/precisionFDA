@@ -1,22 +1,12 @@
 import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
 import { Link } from 'react-router'
-import styled from 'styled-components'
-import { selectColumnDef } from '../../../components/Table/selectColumnDef'
-import { getSpaceMembershipSideAlias, SpaceMembership } from './members.types'
-import { ISpace } from '../spaces.types'
-import { StyledNameCell } from '../../home/home.styles'
 import { UsersIcon } from '../../../components/icons/UserIcon'
-
-const StatusPill = styled.div<{ $active: boolean }>`
-  border-radius: 7px;
-  background-color: ${props => (props.$active ? 'var(--success-500)' : 'var(--warning-500)')};
-  color: white;
-  font-size: 0.7rem;
-  font-weight: bold;
-  padding: 2px 6px;
-  display: inline-block;
-`
+import { selectColumnDef } from '../../../components/Table/selectColumnDef'
+import { StyledNameCell } from '../../home/home.styles'
+import { ISpace } from '../spaces.types'
+import { StatusPill } from './members.styles'
+import { getSpaceMembershipSideAlias, SpaceMembership } from './members.types'
 
 export const useMembersColumns = ({
   space,

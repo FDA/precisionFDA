@@ -8,9 +8,9 @@ class SpaceInviteForm
   validate :validate_invitees,
            :validate_dxusers,
            :validate_space_admin,
-           :validate_users_sides,
            :check_emails_already_in_space,
-           :check_dxusers_already_in_space
+           :check_dxusers_already_in_space,
+           :validate_review_space_user_side
 
   # @param membership [SpaceMembership] Inviter's membership object.
   # @param api [DNAnexusAPI] Inviter's api object.
@@ -114,23 +114,12 @@ class SpaceInviteForm
   # @param side [String] a side selected by a client, provided from UI, when adding to shared area
   # @param space [Space object] current space
   # @return The validation result. Passed Ok or errors [Object] with a list of messages.
-  def validate_users_sides
-    members_ids_exist = []
+  def validate_review_space_user_side
+    return if !space.review? || (space.review? && space.shared?)
 
-    if space.review?
-      if space.shared?
-        all_members = space.space_memberships.active
-
-        members = all_members.where(side: selected_side) if side
-        members_ids_exist = (all_members - members).pluck(:user_id) if members
-      else
-        shared_space = space.shared_space
-        space_members_ids = space.space_memberships.active.pluck(:user_id)
-        opposite_private_space = space.opposite_private_space(shared_space)
-        private_members_ids = opposite_private_space.space_memberships.active.pluck(:user_id)
-        members_ids_exist = space_members_ids + private_members_ids if private_members_ids
-      end
-    end
+    shared_space = space.shared_space
+    opposite_private_space = space.opposite_private_space(shared_space)
+    members_ids_exist = opposite_private_space.space_memberships.pluck(:user_id)
 
     invalid_users = collect_invalid_users(members_ids_exist)
 
@@ -188,7 +177,7 @@ class SpaceInviteForm
 
   def check_emails_already_in_space
     emails_in_space = space.
-      space_memberships.active.joins(:user).
+      space_memberships.joins(:user).
       where(users: { email: invitees[:email] }).pluck(:email)
 
     return if emails_in_space.blank?
@@ -202,7 +191,7 @@ class SpaceInviteForm
 
   def check_dxusers_already_in_space
     dxusers_in_space = space.
-      space_memberships.active.joins(:user).
+      space_memberships.joins(:user).
       where(users: { dxuser: invitees[:dxuser] }).pluck(:dxuser)
 
     return if dxusers_in_space.blank?

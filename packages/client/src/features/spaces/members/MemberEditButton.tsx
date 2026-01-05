@@ -1,19 +1,16 @@
 import React from 'react'
+import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
 import Menu from '../../../components/Menu/Menu'
 import { StyledEditButton } from '../../discussions/styles'
-import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
-import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
 import { SpaceMembership } from './members.types'
+import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
 
 interface MemberEditButtonProps {
   member: SpaceMembership
   spaceId: number
 }
 
-const MemberEditButton: React.FC<MemberEditButtonProps> = ({
-  member,
-  spaceId,
-}) => {
+const MemberEditButton: React.FC<MemberEditButtonProps> = ({ member, spaceId }) => {
   const { modalComp, setShowModal } = useChangeMemberRoleModal({
     spaceId,
     member,

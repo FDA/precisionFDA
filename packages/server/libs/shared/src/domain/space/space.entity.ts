@@ -9,17 +9,17 @@ import {
   OneToOne,
   Property,
 } from '@mikro-orm/core'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SpaceGroup } from '@shared/domain/space/space-group.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
+import { DxId } from '../entity/domain/dxid'
 import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { SpaceRepository } from './space.repository'
-import { SpaceGroup } from '@shared/domain/space/space-group.entity'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
-import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 type SpaceMeta = {
   cts: string
@@ -41,10 +41,10 @@ export class Space extends BaseEntity {
   description: string
 
   @Property({ fieldName: 'host_dxorg' })
-  hostDxOrg: string
+  hostDxOrg: DxId<'org'>
 
   @Property({ fieldName: 'guest_dxorg' })
-  guestDxOrg: string
+  guestDxOrg: DxId<'org'>
 
   // this should never be null I think??
   @Property({ fieldName: 'host_project', nullable: true })
@@ -127,6 +127,15 @@ export class Space extends BaseEntity {
 
   isConfidentialSponsorSpace(): boolean {
     return this.isConfidentialNonPrivateSpace() && this.guestDxOrg !== null
+  }
+
+  getMembershipOrg(membership: SpaceMembership): DxId<'org'>[] {
+    if (this.type === SPACE_TYPE.GROUPS) {
+      return [this.hostDxOrg, this.guestDxOrg]
+    } else {
+      const org = membership.isHost() ? this.hostDxOrg : this.guestDxOrg
+      return [org]
+    }
   }
 
   private isConfidentialNonPrivateSpace(): boolean {

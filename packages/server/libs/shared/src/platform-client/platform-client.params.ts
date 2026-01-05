@@ -177,6 +177,20 @@ type OrgFindMembersParams = {
   limit?: number
 }
 
+type OrgMemberAccess = {
+  level: 'ADMIN' | 'MEMBER'
+  allowBillableActivities?: boolean
+  appAccess?: boolean
+  projectAccess?: 'ADMINISTER' | 'CONTRIBUTE' | 'UPLOAD' | 'VIEW' | 'NONE'
+}
+
+type OrgSetMemberAccessParams = {
+  orgDxId: DxId<'org'>
+  data: {
+    [userDxId: DxId<'user'>]: OrgMemberAccess
+  }
+}
+
 type UserInviteToOrgParams = {
   orgDxId: string
   data: {
@@ -313,6 +327,8 @@ export {
   MoveFilesParams,
   ObjectsParams,
   OrgFindMembersParams,
+  OrgMemberAccess,
+  OrgSetMemberAccessParams,
   PackageMapping,
   ProjectLeaveParams,
   RemoveFolderParams,
