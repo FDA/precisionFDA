@@ -9,13 +9,26 @@ module Permissions
     end
 
     def accessible_by_user(user)
-      query = where(user: user, scope: Scopes::SCOPE_PRIVATE).
-        or(where(scope: Scopes::SCOPE_PUBLIC)).
-        or(where(scope: user.space_uids))
+      # Base user scopes
+      user_scopes = where(user: user, scope: Scopes::SCOPE_PRIVATE)
+      public_scopes = where(scope: Scopes::SCOPE_PUBLIC)
+      space_scopes = where(scope: user.space_uids)
 
-      query = query.or(where(user: User.challenge_bot)) if user.is_challenge_evaluator?
+      combined_scope = user_scopes.or(public_scopes).or(space_scopes)
 
-      query
+      if user.is_challenge_evaluator?
+        deleted_space_scopes = Space.unscoped
+          .where(state: Space::STATE_DELETED)
+          .select(Arel.sql("CONCAT('space-', spaces.id)"))
+
+        challenge_bot_scope = where(user: User.challenge_bot)
+          .where.not(scope: deleted_space_scopes)
+
+        combined_scope = combined_scope.or(challenge_bot_scope)
+      end
+
+
+      combined_scope
     end
 
     def editable_by(context)
