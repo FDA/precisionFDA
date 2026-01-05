@@ -173,6 +173,7 @@ GEM
     crass (1.0.6)
     css_parser (1.14.0)
       addressable
+    csv (3.3.5)
     daemons (1.4.1)
     database_cleaner-active_record (2.2.2)
       activerecord (>= 5.a)
@@ -244,7 +245,8 @@ GEM
       rexml (~> 3.0)
     hashdiff (1.0.1)
     htmlentities (4.3.4)
-    httparty (0.21.0)
+    httparty (0.24.0)
+      csv
       mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
     httpi (3.0.1)
@@ -307,7 +309,8 @@ GEM
     mini_mime (1.1.5)
     minitest (5.25.5)
     msgpack (1.7.0)
-    multi_xml (0.6.0)
+    multi_xml (0.8.0)
+      bigdecimal (>= 3.1, < 5)
     mutex_m (0.3.0)
     mysql2 (0.5.5)
     nenv (0.3.0)
