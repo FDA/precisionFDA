@@ -135,7 +135,7 @@ RSpec.describe SpaceInviteForm, type: :model do
       end
     end
 
-    context "when invitee is from other space side - validate user sides" do
+    context "when invitee is already a member" do
       before do
         params[:invitees] = host_lead.dxuser
         space_invite_form.validate
@@ -146,9 +146,8 @@ RSpec.describe SpaceInviteForm, type: :model do
 
       it {
         expect(space_invite_form.errors).not_to be_empty
-        expect(space_invite_form.errors.messages[:base][0][0..98]).to eq(
-          "The following users could not be added because they" \
-          " exist in other space side already: #{host_lead.dxuser}",
+        expect(space_invite_form.errors.messages[:base][0]).to eq(
+          "The users with the following usernames could not be invited because they are participants already: #{host_lead.dxuser}",
         )
       }
     end
@@ -202,9 +201,8 @@ RSpec.describe SpaceInviteForm, type: :model do
 
         it {
           expect(space_invite_form.errors).not_to be_empty
-          expect(space_invite_form.errors.messages[:base][0][0..98]).to eq(
-            "The following users could not be added because they" \
-            " exist in other space side already: #{guest_lead.dxuser}",
+          expect(space_invite_form.errors.messages[:base][0]).to eq(
+            "The users with the following usernames could not be invited because they are participants already: #{guest_lead.dxuser}",
           )
         }
       end

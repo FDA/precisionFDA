@@ -1,11 +1,10 @@
 import { Meta, StoryObj } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
+import { mockMembers } from '../../../mocks/handlers/spaces.handlers'
 import { StorybookProviders } from '../../../stories/StorybookProviders'
-import { SpaceMembership, MemberRole } from './members.types'
+import { MemberRole, SpaceMembership } from './members.types'
 import { useAddMembersModal } from './useAddMembersModal'
 import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
-import { useRemoveMemberModal } from './useRemoveMemberModal'
-import { mockMembers } from '../../../mocks/handlers/spaces.handlers'
 
 const meta: Meta = {
   title: 'Modals/Spaces',
@@ -24,9 +23,9 @@ type AddMembersProps = {
 type AddMembersStory = StoryObj<AddMembersProps>
 
 const AddMembersModalWrapper = ({ spaceType }: AddMembersProps) => {
-  const spaceId = spaceType === 'verification' ? 'space-verification-123' : 
-                 spaceType === 'review' ? 'space-review-456' : 'space-groups-789'
-                 
+  const spaceId =
+    spaceType === 'verification' ? 'space-verification-123' : spaceType === 'review' ? 'space-review-456' : 'space-groups-789'
+
   const { modalComp, setShowModal } = useAddMembersModal({ spaceId })
 
   useEffect(() => {
@@ -85,40 +84,6 @@ export const ChangeMemberRoleModal: ChangeMemberRoleStory = {
     memberSide: {
       options: ['host', 'guest'],
       control: { type: 'radio' },
-    },
-  },
-}
-
-type RemoveMemberProps = {
-  multipleMembers: boolean
-}
-type RemoveMemberStory = StoryObj<RemoveMemberProps>
-
-const RemoveMemberModalWrapper = ({ multipleMembers }: RemoveMemberProps) => {
-  const membersToRemove = multipleMembers 
-    ? [mockMembers[0], mockMembers[1]] 
-    : [mockMembers[0]]
-
-  const { modalComp, setShowModal } = useRemoveMemberModal({
-    spaceId: 123,
-    members: membersToRemove,
-    onSuccess: () => console.log('Members removed successfully'),
-  })
-
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
-
-  return modalComp
-}
-
-export const RemoveMemberModal: RemoveMemberStory = {
-  render: ({ multipleMembers = false }) => {
-    return <RemoveMemberModalWrapper multipleMembers={multipleMembers} />
-  },
-  argTypes: {
-    multipleMembers: {
-      control: { type: 'boolean' },
     },
   },
 }

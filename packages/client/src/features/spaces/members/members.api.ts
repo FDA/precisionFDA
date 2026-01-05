@@ -1,14 +1,34 @@
 import axios from 'axios'
 import { SideRole } from '../spaces.types'
-import { ListMembersResponse, MemberRole, ChangeMemberRoleResponse } from './members.types'
+import { ListMembersResponse, MEMBER_ROLE, MemberRole } from './members.types'
 
-export async function spacesMembersListRequest({ spaceId, sideRole }: { spaceId: number|string, sideRole?: SideRole }): Promise<ListMembersResponse> {
+export type MembershipRolesChangePayload = {
+  membershipIds: number[]
+  targetRole?: number
+  enabled?: boolean
+}
+
+export async function spacesMembersListRequest({
+  spaceId,
+  sideRole,
+}: {
+  spaceId: number | string
+  sideRole?: SideRole
+}): Promise<ListMembersResponse> {
   const params = sideRole ? { side: sideRole } : {}
 
   return axios.get(`/api/spaces/${spaceId}/members`, { params }).then(r => r.data)
 }
 
-export async function addMembersToSpaceRequest({ spaceId, invitees, invitees_role }: { spaceId: number|string, invitees: string, invitees_role: MemberRole }) {
+export async function addMembersToSpaceRequest({
+  spaceId,
+  invitees,
+  invitees_role,
+}: {
+  spaceId: number | string
+  invitees: string
+  invitees_role: MemberRole
+}) {
   const res = await axios.post(`/api/spaces/${spaceId}/memberships/invite`, {
     invitees,
     invitees_role,
@@ -17,9 +37,6 @@ export async function addMembersToSpaceRequest({ spaceId, invitees, invitees_rol
   return res.data as Promise<unknown>
 }
 
-export async function changeMembershipRoleRequest({ spaceId, memberId, role }: { spaceId: number|string, memberId: number, role: MemberRole }): Promise<ChangeMemberRoleResponse> {
-  const res = await axios.patch(`/api/spaces/${spaceId}/memberships/${memberId}`, {
-    role,
-  })
-  return res.data
+export async function changeMembershipRolesRequest(spaceId: number, payload: MembershipRolesChangePayload): Promise<void> {
+  await axios.patch(`/api/v2/spaces/${spaceId}/memberships`, payload)
 }

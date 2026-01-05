@@ -285,7 +285,7 @@ export class User extends BaseEntity {
   }
 
   @Property({ persist: false })
-  get dxid(): string {
+  get dxid(): DxId<'user'> {
     return `user-${this.dxuser}`
   }
 

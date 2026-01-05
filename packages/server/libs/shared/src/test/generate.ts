@@ -60,7 +60,6 @@ import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
 import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 const chance = new Chance()
 

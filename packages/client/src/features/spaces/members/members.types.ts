@@ -7,6 +7,13 @@ export interface Links {
 export type MemberRole = 'lead' | 'contributor' | 'viewer' | 'admin' | 'disable' | 'enable'
 export type MemberSide = 'host' | 'guest'
 
+export enum MEMBER_ROLE {
+  ADMIN = 0,
+  CONTRIBUTOR = 1,
+  VIEWER = 2,
+  LEAD = 3,
+}
+
 export const getSpaceMembershipSideAlias = (side: MemberSide, space: ISpace) => {
   switch (space.type) {
     case 'review':
@@ -28,14 +35,19 @@ export interface SpaceMembership {
   created_at: string
   links: Links
   to_roles: MemberRole[]
+  shared_membership_id: number
 }
 
 export interface ListMembersResponse {
   space_memberships: SpaceMembership[]
 }
 
-export interface ChangeMemberRoleResponse {
-  member: string
+export interface ChangeMemberRolesResponse {
+  membershipIds: number[]
   role: MemberRole
-  active: 'Active' | 'Inactive'
+  active: boolean
+}
+
+export interface UpdateRolesFormValues {
+  role: { label: string; value: MemberRole }
 }

@@ -23,6 +23,8 @@ export enum TASK_TYPE {
   SYNC_FILE_STATE = 'sync_file_state',
   SYNC_JOB_STATUS = 'sync_job_status',
   SYNC_JOB_OUTPUTS = 'sync_job_outputs',
+  SYNC_SPACE_MEMBER_ACCESS = 'sync_space_member_access',
+  SYNC_SPACE_LEAD_BILLTO = 'sync_space_lead_billto',
   SEND_EMAIL = 'send_email',
   CLOSE_FILE = 'close_file',
   CHECK_CHALLENGE_JOBS = 'check_challenge_jobs',
@@ -86,6 +88,16 @@ export type SyncDbClusterJobOutput = TaskWithAuth & {
 
 export type SyncSpacesPermissionsJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_SPACES_PERMISSIONS
+}
+
+export type SyncSpaceMemberAccessJob = TaskWithAuth & {
+  type: TASK_TYPE.SYNC_SPACE_MEMBER_ACCESS
+  payload: { spaceId: number; memberIds: number[] }
+}
+
+export type SyncSpaceLeadBillToJob = TaskWithAuth & {
+  type: TASK_TYPE.SYNC_SPACE_LEAD_BILLTO
+  payload: { membershipId: number }
 }
 
 export type GenerateSpaceReportBatchJob = TaskWithAuth & {

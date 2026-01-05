@@ -1,14 +1,14 @@
 import { MemberRole, MemberSide } from './members/members.types'
 
 export interface Counters {
-  files: number;
-  apps: number;
-  workflows: number;
-  jobs: number;
-  members: number;
-  reports: number;
-  discussions: number;
-  dbclusters: number;
+  files: number
+  apps: number
+  workflows: number
+  jobs: number
+  members: number
+  reports: number
+  discussions: number
+  dbclusters: number
 }
 
 export interface Links {
@@ -100,8 +100,8 @@ export interface ISpace {
   current_user_membership: SpaceMembership
   host_lead?: HostLead
   guest_lead?: GuestLead
-  private_space_id?: string
-  shared_space_id?: string
+  private_space_id?: number
+  shared_space_id?: number
   confidential_space?: ConfidentialSpace | null
   restricted_reviewer?: boolean | null
   restricted_discussions?: boolean | null

@@ -2,19 +2,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Button } from '../../../components/Button'
 import { Callout } from '../../../components/Callout'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'
-import { changeMembershipRoleRequest } from './members.api'
+import { changeMembershipRolesRequest } from './members.api'
 import { StyledFooter } from './members.styles'
 import { SpaceMembership } from './members.types'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const useRemoveMemberModal = ({
   spaceId,
   members,
   onSuccess,
 }: {
-  spaceId: string | number
+  spaceId: number
   members: SpaceMembership[]
   onSuccess?: () => void
 }) => {
@@ -25,10 +25,9 @@ export const useRemoveMemberModal = ({
     mutationKey: ['remove-members'],
     mutationFn: async () => {
       const promises = members.map(member =>
-        changeMembershipRoleRequest({
-          spaceId,
-          memberId: member.id,
-          role: 'disable',
+        changeMembershipRolesRequest(spaceId, {
+          membershipIds: [member.id],
+          enabled: false,
         }),
       )
       return Promise.all(promises)

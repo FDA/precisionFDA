@@ -12,7 +12,6 @@ import {
   AppAddAuthorizedUsersParams,
   AppAddDevelopersParams,
   AppCreateParams,
-  AppDescribeParams,
   AppletCreateParams,
   AppPublishParams,
   AppUpdateParams,
@@ -37,6 +36,7 @@ import {
   MoveFilesParams,
   OrgDescribeParams,
   OrgFindMembersParams,
+  OrgSetMemberAccessParams,
   ProjectLeaveParams,
   RemoveFolderParams,
   RenameFolderParams,
@@ -606,6 +606,21 @@ export class PlatformClient {
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: { ...omit(['orgDxid'], params) },
+      url,
+    }
+    return await this.sendRequest(options)
+  }
+
+  /**
+   * Set member access in the org
+   * API: /org-xxxx/setMemberAccess
+   * See https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-setmemberaccess
+   */
+  async orgSetMemberAccess(params: OrgSetMemberAccessParams): Promise<ClassIdResponse<'org'>> {
+    const url = `${config.platform.apiUrl}/${params.orgDxId}/setMemberAccess`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...params.data },
       url,
     }
     return await this.sendRequest(options)

@@ -37,6 +37,7 @@ import { SessionApiModule } from './session/session.api.module'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpaceEventsApiModule } from './space-events/space-events.api.module'
 import { SpaceGroupsApiModule } from './space-groups/space-groups.api.module'
+import { SpaceMembershipsApiModule } from './space-memberships/space-memberships.api.module'
 import { SpacesApiModule } from './spaces/spaces.api.module'
 import { TracksApiModule } from './tracks/tracks.api.module'
 import { CSRFVerificationMiddleware } from './user-context/middleware/csrf-verification.middleware'
@@ -79,6 +80,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     PropertiesApiModule,
     SiteSettingsApiModule,
     SpacesApiModule,
+    SpaceMembershipsApiModule,
     SpaceGroupsApiModule,
     TracksApiModule,
     AlertsApiModule,

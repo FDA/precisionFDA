@@ -3,9 +3,15 @@ import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
-import { BasicUserJob, TASK_TYPE } from '@shared/queue/task.input'
+import {
+  BasicUserJob,
+  SyncSpaceLeadBillToJob,
+  SyncSpaceMemberAccessJob,
+  SyncSpacesPermissionsJob,
+  TASK_TYPE,
+} from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
-import { JobOptions, Queue } from 'bull'
+import { Job, JobOptions, Queue } from 'bull'
 
 @Injectable()
 export class MaintenanceQueueJobProducer extends QueueJobProducer {
@@ -17,7 +23,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     super()
   }
 
-  async createCheckAdminDataConsistencyReportTask() {
+  async createCheckAdminDataConsistencyReportTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT as const,
       payload: undefined as any,
@@ -32,7 +38,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createCheckChallengeJobsTask() {
+  async createCheckChallengeJobsTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.CHECK_CHALLENGE_JOBS as const,
       payload: undefined as any,
@@ -47,7 +53,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createCheckNonTerminatedDbClustersTask() {
+  async createCheckNonTerminatedDbClustersTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const,
       payload: undefined as any,
@@ -62,7 +68,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createUserInactivityAlertTask() {
+  async createUserInactivityAlertTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.USER_INACTIVITY_ALERT as const,
       payload: undefined as any,
@@ -77,7 +83,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createCheckStaleJobsTask(user: UserCtx) {
+  async createCheckStaleJobsTask(user: UserCtx): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.CHECK_STALE_JOBS as const,
       payload: undefined as any,
@@ -88,7 +94,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createSyncSpacesPermissionsTask() {
+  async createSyncSpacesPermissionsTask(): Promise<Job<SyncSpacesPermissionsJob>> {
     const wrapped = {
       type: TASK_TYPE.SYNC_SPACES_PERMISSIONS as const,
       payload: undefined as any,
@@ -99,7 +105,36 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createUserCheckupTask() {
+  async createSyncSpaceMemberAccessTask(
+    spaceId: number,
+    memberIds: number[],
+  ): Promise<Job<SyncSpaceMemberAccessJob>> {
+    const wrapped = {
+      type: TASK_TYPE.SYNC_SPACE_MEMBER_ACCESS as const,
+      payload: { spaceId, memberIds },
+      user: this.user,
+    }
+
+    const options: JobOptions = {
+      jobId: `${wrapped.type}.${spaceId}`,
+    }
+    return await this.addToQueue(wrapped, options)
+  }
+
+  async createSyncSpaceLeadBillToTask(membershipId: number): Promise<Job<SyncSpaceLeadBillToJob>> {
+    const wrapped = {
+      type: TASK_TYPE.SYNC_SPACE_LEAD_BILLTO as const,
+      payload: { membershipId },
+      user: this.user,
+    }
+
+    const options: JobOptions = {
+      jobId: `${wrapped.type}.${membershipId}`,
+    }
+    return await this.addToQueue(wrapped, options)
+  }
+
+  async createUserCheckupTask(): Promise<Job<BasicUserJob>> {
     const wrapped = {
       type: TASK_TYPE.USER_CHECKUP as const,
       user: this.user,
@@ -108,7 +143,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createCheckUserJobsTask(data: BasicUserJob) {
+  async createCheckUserJobsTask(data: BasicUserJob): Promise<Job<BasicUserJob>> {
     const wrapped = {
       type: TASK_TYPE.CHECK_USER_JOBS as const,
       user: data.user,
@@ -119,7 +154,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createTestMaxMemoryTask(): Promise<any> {
+  async createTestMaxMemoryTask(): Promise<Job> {
     await this.removeJobs(TASK_TYPE.DEBUG_MAX_MEMORY)
 
     const data = {

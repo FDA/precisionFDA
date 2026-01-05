@@ -1,30 +1,33 @@
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { EmailSendService } from '@shared/domain/email/email-send.service'
 import { JobService } from '@shared/domain/job/job.service'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserService } from '@shared/domain/user/user.service'
+import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
-import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
 import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
 import { Task, TASK_TYPE } from '@shared/queue/task.input'
+import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
 import { Job } from 'bull'
 import { EmailQueueProcessor } from '../../src/domain/email/processor/email-queue.processor'
 import { FileSyncQueueProcessor } from '../../src/domain/user-file/processor/file-sync-queue.processor'
 import { MainQueueProcessor } from '../../src/queues/processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from '../../src/queues/processor/maintenance-queue.processor'
-import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
-import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
-const dbClusterService = {
-  syncDbClusterStatus: () => {},
+const dbClusterCheckNonTerminatedFacade = {
+  checkNonTerminatedDbClusters: () => {},
 } as unknown as DbClusterCheckNonTerminatedFacade
 
 const adminDataConsistencyReportService = {
   createReport: () => {},
 } as AdminDataConsistencyReportService
+
+const spaceMembershipService = {} as unknown as SpaceMembershipService
 
 const userService = {
   sendUserInactivityAlerts: () => {},
@@ -59,8 +62,9 @@ const processor = {
   MAINTENANCE: (): MaintenanceQueueProcessor =>
     new MaintenanceQueueProcessor(
       adminDataConsistencyReportService,
-      dbClusterService,
+      dbClusterCheckNonTerminatedFacade,
       userService,
+      spaceMembershipService,
       userCheckupFacade,
       jobServiceUserClient,
       jobSyncService,
