@@ -25,7 +25,7 @@ export function ReplyCard({
   canEdit: boolean
   canReply: boolean
   reply: DiscussionReply
-  onReply?: () => void
+  onReply: () => void
   scope: NoteScope
   replyType: 'answer' | 'comment'
 }) {
@@ -47,7 +47,7 @@ export function ReplyCard({
       queryClient.invalidateQueries({
         queryKey: ['discussion'],
       })
-      toastSuccess(`${replyType === 'answer' ? 'Answer' : 'Comment'} successfully removed`)
+      toastSuccess('Reply successfully removed')
     },
   })
   const { open: openConfirmation, Confirm: ConfirmSubmit } = useConfirm({
@@ -69,7 +69,7 @@ export function ReplyCard({
         discussionId={reply.discussionId}
         content={reply.content}
         scope={scope}
-        answerId={reply.id}
+        replyId={reply.id}
         noteId={reply.noteId}
       />
     )

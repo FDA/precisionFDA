@@ -21,7 +21,6 @@ import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discus
 import { UpdateReplyDTO } from '@shared/domain/discussion/dto/update-reply.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { CreateDiscussionReplyFacade } from '../facade/discussion/create-discussion-reply.facade'
 import { CreateDiscussionFacade } from '../facade/discussion/create-discussion.facade'
 import { UpdateDiscussionFacade } from '../facade/discussion/update-discussion.facade'
@@ -37,7 +36,6 @@ export class DiscussionsController {
     private readonly createDiscussionReplyFacade: CreateDiscussionReplyFacade,
     private readonly updateDiscussionFacade: UpdateDiscussionFacade,
     private readonly updateDiscussionReplyFacade: UpdateDiscussionReplyFacade,
-    private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
 
   @Get()

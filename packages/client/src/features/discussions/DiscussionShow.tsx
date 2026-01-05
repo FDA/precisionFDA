@@ -200,6 +200,7 @@ export const DiscussionShow = ({
                 reply={comment}
                 scope={discussion.scope}
                 replyType="comment"
+                onReply={() => {}}
               />
             ))}
           {canReply && (

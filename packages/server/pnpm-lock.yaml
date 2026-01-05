@@ -12,17 +12,17 @@ importers:
   .:
     dependencies:
       '@bull-board/api':
-        specifier: ^6.13.0
-        version: 6.13.0(@bull-board/ui@6.13.0)
+        specifier: ^6.15.0
+        version: 6.15.0(@bull-board/ui@6.15.0)
       '@bull-board/express':
-        specifier: ^6.13.0
-        version: 6.13.0
+        specifier: ^6.15.0
+        version: 6.15.0
       '@bull-board/nestjs':
-        specifier: ^6.13.0
-        version: 6.13.0(@bull-board/api@6.13.0(@bull-board/ui@6.13.0))(@nestjs/bull-shared@11.0.4(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9))(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.1.14)(rxjs@7.8.2)
+        specifier: ^6.15.0
+        version: 6.15.0(@bull-board/api@6.15.0(@bull-board/ui@6.15.0))(@nestjs/bull-shared@11.0.4(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9))(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.1.14)(rxjs@7.8.2)
       '@bull-board/ui':
-        specifier: ^6.13.0
-        version: 6.13.0
+        specifier: ^6.15.0
+        version: 6.15.0
       '@mikro-orm/core':
         specifier: 6.5.3
         version: 6.5.3
@@ -37,7 +37,7 @@ importers:
         version: 6.5.3(@mikro-orm/core@6.5.3)
       '@nestjs/axios':
         specifier: ^4.0.1
-        version: 4.0.1(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(axios@1.12.2)(rxjs@7.8.2)
+        version: 4.0.1(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(axios@1.13.2)(rxjs@7.8.2)
       '@nestjs/bull':
         specifier: ^11.0.4
         version: 11.0.4(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9)(bull@4.16.5)
@@ -78,11 +78,11 @@ importers:
         specifier: ^6.0.1
         version: 6.0.2
       axios:
-        specifier: ^1.12.2
-        version: 1.12.2
+        specifier: ^1.13.2
+        version: 1.13.2
       axios-cookiejar-support:
-        specifier: ^6.0.4
-        version: 6.0.4(axios@1.12.2)(tough-cookie@4.1.4)
+        specifier: ^6.0.5
+        version: 6.0.5(axios@1.13.2)(tough-cookie@4.1.4)
       bull:
         specifier: ^4.8.5
         version: 4.16.5
@@ -139,7 +139,7 @@ importers:
         version: 3.3.11
       nestjs-pino:
         specifier: ^4.0.0
-        version: 4.4.1(@nestjs/common@11.1.6(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.1.14)(rxjs@7.8.2))(pino-http@10.3.0)(pino@8.21.0)(rxjs@7.8.2)
+        version: 4.4.1(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(pino-http@10.3.0)(pino@8.21.0)(rxjs@7.8.2)
       nodemailer:
         specifier: ^7.0.11
         version: 7.0.11
@@ -651,26 +651,26 @@ packages:
   '@borewit/text-codec@0.1.1':
     resolution: {integrity: sha512-5L/uBxmjaCIX5h8Z+uu+kA9BQLkc/Wl06UGR5ajNRxu+/XjonB5i8JpgFMrPj3LXTCPA0pv8yxUvbUi+QthGGA==}
 
-  '@bull-board/api@6.13.0':
-    resolution: {integrity: sha512-GZ0On0VeL5uZVS1x7UdU90F9GV1kdmHa1955hW3Ow1PmslCY/2YwmvnapVdbvCUSVBqluTfbVZsE9X3h79r1kw==}
+  '@bull-board/api@6.15.0':
+    resolution: {integrity: sha512-z8qLZ4uv83hZNu+0YnHzhVoWv1grULuYh80FdC2xXLg8M1EwsOZD9cJ5CNpgBFqHb+NVByTmf5FltIvXdOU8tQ==}
     peerDependencies:
-      '@bull-board/ui': 6.13.0
+      '@bull-board/ui': 6.15.0
 
-  '@bull-board/express@6.13.0':
-    resolution: {integrity: sha512-PAbzD3dplV2NtN8ETs00bp++pBOD+cVb1BEYltXrjyViA2WluDBVKdlh/2wM+sHbYO2TAMNg8bUtKxGNCmxG7w==}
+  '@bull-board/express@6.15.0':
+    resolution: {integrity: sha512-c/nnxr5evLNgqoSSEvTwPb+6WaTB3PN3Bq2oMTBtwCUJlZr+s1UX7gx0wVIYHjeZyUdYR7fX7hhh2cRLO5vqeg==}
 
-  '@bull-board/nestjs@6.13.0':
-    resolution: {integrity: sha512-GSRhbpUe1PVR77vrpDay7yIvaqkq20+12JRnAAwbNXG+8lfFd/iX1Jxh3IRTbZ6YvXtYkaADjIc/11c2ypVo0w==}
+  '@bull-board/nestjs@6.15.0':
+    resolution: {integrity: sha512-mke7VPE1eM/7kqmHPOh/uGylNSPK/Z34/EPGWb/xqqoYcHG4TRi/5hsLScRLCG2og/jywjhhXIE/KmAqZDXWEg==}
     peerDependencies:
-      '@bull-board/api': ^6.13.0
+      '@bull-board/api': ^6.15.0
       '@nestjs/bull-shared': ^10.0.0 || ^11.0.0
       '@nestjs/common': ^9.0.0 || ^10.0.0 || ^11.0.0
       '@nestjs/core': ^9.0.0 || ^10.0.0 || ^11.0.0
       reflect-metadata: ^0.1.13 || ^0.2.0
       rxjs: ^7.8.1
 
-  '@bull-board/ui@6.13.0':
-    resolution: {integrity: sha512-63I6b3nZnKWI5ok6mw/Tk2rIObuzMTY/tLGyO51p0GW4rAImdXxrK6mT7j4SgEuP2B+tt/8L1jU7sLu8MMcCNw==}
+  '@bull-board/ui@6.15.0':
+    resolution: {integrity: sha512-bb/j6VMq2cfPoE/ZiUO7AcYTL0IjtxvKxkYV0zu+i1pc+JEv3ct4BItCII57knJR/YjZKGmdfr079KJFvzXC5A==}
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -2579,15 +2579,15 @@ packages:
     resolution: {integrity: sha512-NZKeq9AfyQvEeNlN0zSYAaWrmBffJh3IELMZfRpJVWgrpEbtEpnjvzqBPf+mxoI287JohRDoa+/nsfqqiZmF6g==}
     engines: {node: '>= 6.0.0'}
 
-  axios-cookiejar-support@6.0.4:
-    resolution: {integrity: sha512-4Bzj+l63eGwnWDBFdJHeGS6Ij3ytpyqvo//ocsb5kCLN/rKthzk27Afh2iSkZtuudOBkHUWWIcyCb4GKhXqovQ==}
+  axios-cookiejar-support@6.0.5:
+    resolution: {integrity: sha512-ldPOQCJWB0ipugkTNVB8QRl/5L2UgfmVNVQtS9en1JQJ1wW588PqAmymnwmmgc12HLDzDtsJ28xE2ppj4rD4ng==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       axios: '>=0.20.0'
       tough-cookie: '>=4.0.0'
 
-  axios@1.12.2:
-    resolution: {integrity: sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==}
+  axios@1.13.2:
+    resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
 
   b4a@1.6.6:
     resolution: {integrity: sha512-5Tk1HLk6b6ctmjIkAcU/Ujv/1WqiDl0F0JdRCR80VsOcUlHcu7pWeWRlOqQLHfDEsVx9YH/aif5AG4ehoCtTmg==}
@@ -2639,6 +2639,10 @@ packages:
 
   body-parser@2.2.0:
     resolution: {integrity: sha512-02qvAaxv8tp7fBa/mw1ga98OGm+eCbqzJOKoRt70sLmfEEi+jyBYVTDGfCL/k06/4EMk/z01gCe7HoCH/f2LTg==}
+    engines: {node: '>=18'}
+
+  body-parser@2.2.1:
+    resolution: {integrity: sha512-nfDwkulwiZYQIGwxdy0RUmowMhKcFVcYXUU7m4QlKYim1rUtg83xm2yjZ40QjDuc291AJjjeSc9b++AWHSgSHw==}
     engines: {node: '>=18'}
 
   boolbase@1.0.0:
@@ -3702,6 +3706,10 @@ packages:
     resolution: {integrity: sha512-DT9ck5YIRU+8GYzzU5kT3eHGA5iL+1Zd0EutOmTE9Dtk+Tvuzd23VBU+ec7HPNSTxXYO55gPV/hq4pSBJDjFpA==}
     engines: {node: '>= 18'}
 
+  express@5.2.1:
+    resolution: {integrity: sha512-hIS4idWWai69NezIdRt2xFVofaF4j+6INOpJlVOLDO8zXGpUVEVzIYk12UUi2JzjEzWL3IOAxcTubgz9Po0yXw==}
+    engines: {node: '>= 18'}
+
   fast-copy@3.0.2:
     resolution: {integrity: sha512-dl0O9Vhju8IrcLndv2eU4ldt1ftXMqqfgN4H1cpmGV7P6jeB9FwpN9a2c8DPGE1Ys88rNUJVYDHq73CGAGOPfQ==}
 
@@ -4065,11 +4073,11 @@ packages:
   htmlparser2@9.1.0:
     resolution: {integrity: sha512-5zfg6mHUoaer/97TxnGpxmbR7zJtPwIYFMZ/H5ucTlPZhKvtum05yiPK3Mgai3a0DyVxv7qYqoweaEd2nrYQzQ==}
 
-  http-cookie-agent@7.0.2:
-    resolution: {integrity: sha512-aHaES6SOFtnSlmWu0yEaaQvu+QexUG2gscSAvMhJ7auzW8r/jYOgGrzuAm9G9nHbksuhz7Lw4zOwDHmfQaxZvw==}
+  http-cookie-agent@7.0.3:
+    resolution: {integrity: sha512-EeZo7CGhfqPW6R006rJa4QtZZUpBygDa2HZH3DJqsTzTjyRE6foDBVQIv/pjVsxHC8z2GIdbB1Hvn9SRorP3WQ==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
-      tough-cookie: ^4.0.0 || ^5.0.0
+      tough-cookie: ^4.0.0 || ^5.0.0 || ^6.0.0
       undici: ^7.0.0
     peerDependenciesMeta:
       undici:
@@ -4077,6 +4085,10 @@ packages:
 
   http-errors@2.0.0:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
+    engines: {node: '>= 0.8'}
+
+  http-errors@2.0.1:
+    resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
     engines: {node: '>= 0.8'}
 
   http-proxy-agent@7.0.2:
@@ -5403,6 +5415,10 @@ packages:
     resolution: {integrity: sha512-RmkhL8CAyCRPXCE28MMH0z2PNWQBNk2Q09ZdxM9IOOXwxwZbN+qbWaatPkdkWIKL2ZVDImrN/pK5HTRz2PcS4g==}
     engines: {node: '>= 0.8'}
 
+  raw-body@3.0.2:
+    resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
+    engines: {node: '>= 0.10'}
+
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
@@ -5684,9 +5700,6 @@ packages:
   slick@1.12.2:
     resolution: {integrity: sha512-4qdtOGcBjral6YIBCWJ0ljFSKNLz9KkhbWtuGvUyRowl1kxfuE1x/Z/aJcaiilpb3do9bl5K7/1h9XC5wWpY/A==}
 
-  slow-redact@0.3.0:
-    resolution: {integrity: sha512-cf723wn9JeRIYP9tdtd86GuqoR5937u64Io+CYjlm2i7jvu7g0H+Cp0l0ShAf/4ZL+ISUTVT+8Qzz7RZmp9FjA==}
-
   sonic-boom@2.8.0:
     resolution: {integrity: sha512-kuonw1YOYYNOve5iHdSahXPOK49GqwA+LZhI6Wz/l0rP57iKyXXIHaRagOBHAPmGwJC6od2Z9zgvZ5loSgMlVg==}
 
@@ -5730,6 +5743,10 @@ packages:
 
   statuses@2.0.1:
     resolution: {integrity: sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==}
+    engines: {node: '>= 0.8'}
+
+  statuses@2.0.2:
+    resolution: {integrity: sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==}
     engines: {node: '>= 0.8'}
 
   stop-iteration-iterator@1.1.0:
@@ -7026,7 +7043,7 @@ snapshots:
       '@babel/parser': 7.27.0
       '@babel/template': 7.27.0
       '@babel/types': 7.27.0
-      debug: 4.4.1
+      debug: 4.4.3
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -7040,32 +7057,32 @@ snapshots:
 
   '@borewit/text-codec@0.1.1': {}
 
-  '@bull-board/api@6.13.0(@bull-board/ui@6.13.0)':
+  '@bull-board/api@6.15.0(@bull-board/ui@6.15.0)':
     dependencies:
-      '@bull-board/ui': 6.13.0
+      '@bull-board/ui': 6.15.0
       redis-info: 3.1.0
 
-  '@bull-board/express@6.13.0':
+  '@bull-board/express@6.15.0':
     dependencies:
-      '@bull-board/api': 6.13.0(@bull-board/ui@6.13.0)
-      '@bull-board/ui': 6.13.0
+      '@bull-board/api': 6.15.0(@bull-board/ui@6.15.0)
+      '@bull-board/ui': 6.15.0
       ejs: 3.1.10
-      express: 5.1.0
+      express: 5.2.1
     transitivePeerDependencies:
       - supports-color
 
-  '@bull-board/nestjs@6.13.0(@bull-board/api@6.13.0(@bull-board/ui@6.13.0))(@nestjs/bull-shared@11.0.4(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9))(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.1.14)(rxjs@7.8.2)':
+  '@bull-board/nestjs@6.15.0(@bull-board/api@6.15.0(@bull-board/ui@6.15.0))(@nestjs/bull-shared@11.0.4(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9))(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.1.14)(rxjs@7.8.2)':
     dependencies:
-      '@bull-board/api': 6.13.0(@bull-board/ui@6.13.0)
+      '@bull-board/api': 6.15.0(@bull-board/ui@6.15.0)
       '@nestjs/bull-shared': 11.0.4(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9)
       '@nestjs/common': 11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2)
       '@nestjs/core': 11.1.9(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@11.1.9)(@nestjs/websockets@11.1.9)(reflect-metadata@0.1.14)(rxjs@7.8.2)
       reflect-metadata: 0.1.14
       rxjs: 7.8.2
 
-  '@bull-board/ui@6.13.0':
+  '@bull-board/ui@6.15.0':
     dependencies:
-      '@bull-board/api': 6.13.0(@bull-board/ui@6.13.0)
+      '@bull-board/api': 6.15.0(@bull-board/ui@6.15.0)
 
   '@colors/colors@1.5.0':
     optional: true
@@ -7705,10 +7722,10 @@ snapshots:
       '@tybys/wasm-util': 0.9.0
     optional: true
 
-  '@nestjs/axios@4.0.1(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(axios@1.12.2)(rxjs@7.8.2)':
+  '@nestjs/axios@4.0.1(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(axios@1.13.2)(rxjs@7.8.2)':
     dependencies:
       '@nestjs/common': 11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2)
-      axios: 1.12.2
+      axios: 1.13.2
       rxjs: 7.8.2
 
   '@nestjs/bull-shared@11.0.4(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.9)':
@@ -8940,7 +8957,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.1
+      debug: 4.4.3
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
@@ -9317,15 +9334,15 @@ snapshots:
 
   aws-ssl-profiles@1.1.2: {}
 
-  axios-cookiejar-support@6.0.4(axios@1.12.2)(tough-cookie@4.1.4):
+  axios-cookiejar-support@6.0.5(axios@1.13.2)(tough-cookie@4.1.4):
     dependencies:
-      axios: 1.12.2
-      http-cookie-agent: 7.0.2(tough-cookie@4.1.4)
+      axios: 1.13.2
+      http-cookie-agent: 7.0.3(tough-cookie@4.1.4)
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - undici
 
-  axios@1.12.2:
+  axios@1.13.2:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.4
@@ -9417,6 +9434,20 @@ snapshots:
       on-finished: 2.4.1
       qs: 6.14.0
       raw-body: 3.0.0
+      type-is: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+
+  body-parser@2.2.1:
+    dependencies:
+      bytes: 3.1.2
+      content-type: 1.0.5
+      debug: 4.4.3
+      http-errors: 2.0.0
+      iconv-lite: 0.7.0
+      on-finished: 2.4.1
+      qs: 6.14.0
+      raw-body: 3.0.2
       type-is: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -10704,6 +10735,39 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  express@5.2.1:
+    dependencies:
+      accepts: 2.0.0
+      body-parser: 2.2.1
+      content-disposition: 1.0.0
+      content-type: 1.0.5
+      cookie: 0.7.1
+      cookie-signature: 1.2.2
+      debug: 4.4.3
+      depd: 2.0.0
+      encodeurl: 2.0.0
+      escape-html: 1.0.3
+      etag: 1.8.1
+      finalhandler: 2.1.0
+      fresh: 2.0.0
+      http-errors: 2.0.0
+      merge-descriptors: 2.0.0
+      mime-types: 3.0.1
+      on-finished: 2.4.1
+      once: 1.4.0
+      parseurl: 1.3.3
+      proxy-addr: 2.0.7
+      qs: 6.14.0
+      range-parser: 1.2.1
+      router: 2.2.0
+      send: 1.2.0
+      serve-static: 2.2.0
+      statuses: 2.0.1
+      type-is: 2.0.1
+      vary: 1.1.2
+    transitivePeerDependencies:
+      - supports-color
+
   fast-copy@3.0.2: {}
 
   fast-deep-equal@3.1.3: {}
@@ -11113,7 +11177,7 @@ snapshots:
       domutils: 3.2.2
       entities: 4.5.0
 
-  http-cookie-agent@7.0.2(tough-cookie@4.1.4):
+  http-cookie-agent@7.0.3(tough-cookie@4.1.4):
     dependencies:
       agent-base: 7.1.4
       tough-cookie: 4.1.4
@@ -11124,6 +11188,14 @@ snapshots:
       inherits: 2.0.4
       setprototypeof: 1.2.0
       statuses: 2.0.1
+      toidentifier: 1.0.1
+
+  http-errors@2.0.1:
+    dependencies:
+      depd: 2.0.0
+      inherits: 2.0.4
+      setprototypeof: 1.2.0
+      statuses: 2.0.2
       toidentifier: 1.0.1
 
   http-proxy-agent@7.0.2:
@@ -12458,7 +12530,7 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  nestjs-pino@4.4.1(@nestjs/common@11.1.6(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.1.14)(rxjs@7.8.2))(pino-http@10.3.0)(pino@8.21.0)(rxjs@7.8.2):
+  nestjs-pino@4.4.1(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2))(pino-http@10.3.0)(pino@8.21.0)(rxjs@7.8.2):
     dependencies:
       '@nestjs/common': 11.1.9(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.1.14)(rxjs@7.8.2)
       pino: 8.21.0
@@ -12770,7 +12842,6 @@ snapshots:
       quick-format-unescaped: 4.0.4
       real-require: 0.2.0
       safe-stable-stringify: 2.5.0
-      slow-redact: 0.3.0
       sonic-boom: 4.2.0
       thread-stream: 3.1.0
 
@@ -12868,6 +12939,13 @@ snapshots:
       bytes: 3.1.2
       http-errors: 2.0.0
       iconv-lite: 0.6.3
+      unpipe: 1.0.0
+
+  raw-body@3.0.2:
+    dependencies:
+      bytes: 3.1.2
+      http-errors: 2.0.1
+      iconv-lite: 0.7.0
       unpipe: 1.0.0
 
   react-is@18.3.1: {}
@@ -13207,8 +13285,6 @@ snapshots:
 
   slick@1.12.2: {}
 
-  slow-redact@0.3.0: {}
-
   sonic-boom@2.8.0:
     dependencies:
       atomic-sleep: 1.0.0
@@ -13248,6 +13324,8 @@ snapshots:
   standard-as-callback@2.1.0: {}
 
   statuses@2.0.1: {}
+
+  statuses@2.0.2: {}
 
   stop-iteration-iterator@1.1.0:
     dependencies:
