@@ -117,7 +117,7 @@ export const EditNoteEntity = ({
   scope,
   content,
   discussionId,
-  answerId,
+  replyId: replyId,
 }: {
   onSuccess?: () => void
   onCancel: (vals: NoteForm) => void
@@ -125,20 +125,20 @@ export const EditNoteEntity = ({
   content: string
   discussionId: number
   noteId: number
-  answerId?: number
+  replyId?: number
 }) => {
   const queryClient = useQueryClient()
 
   const editNoteMutation = useMutation({
     mutationKey: ['edit-discussion'],
     mutationFn: (payload: NotePayload) => {
-      if (answerId) {
-        return editReplyRequest(discussionId, answerId, { ...payload, type: 'Answer' })
+      if (replyId) {
+        return editReplyRequest(discussionId, replyId, { ...payload, type: 'Answer' })
       }
       return editDiscussionRequest(discussionId, payload)
     },
     onSuccess: () => {
-      toastSuccess(`${answerId ? 'Answer' : 'Discussion'} has been updated`)
+      toastSuccess(`${replyId ? 'Reply' : 'Discussion'} has been updated`)
       if (onSuccess) onSuccess()
     },
     onSettled: async () => {

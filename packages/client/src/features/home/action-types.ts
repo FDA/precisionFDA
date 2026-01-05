@@ -50,8 +50,3 @@ export interface FunctionAction extends BaseAction {
 }
 
 export type Action = ModalAction | RouteAction | LinkAction | SelectionAction | FunctionAction
-
-export type ActionGroup = {
-  actions: Action[]
-  title: string
-}

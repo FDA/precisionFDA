@@ -4,10 +4,6 @@ import { IChallenge } from '../../types/challenge'
 import { IOSpec } from '../apps/apps.types'
 import { License } from '../licenses/types'
 
-export interface ResponseError {
-  response?: { status: number; data?: { error?: { code?: string; message?: string } } }
-}
-
 export interface ApiErrorResponse {
   error?: {
     code?: string
@@ -142,11 +138,6 @@ export type ActionType = {
 
 export type ActionFunctionsType<KeyT extends string> = {
   [key in KeyT]?: ActionType
-}
-
-export type ActionGroupType = {
-  actions: ActionFunctionsType<string>
-  title: string
 }
 
 export interface MetaPath {

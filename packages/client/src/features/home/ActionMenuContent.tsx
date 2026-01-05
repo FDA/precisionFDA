@@ -38,9 +38,7 @@ const ActionItem = ({ action }: { action: Action }) => {
   switch (action?.type) {
     case 'route': {
       const routeAction = action as RouteAction
-      return (
-        <ActionsMenu.Item key={action.name} disabled={isDisabled} render={<NavLink to={routeAction.to}>{action.name}</NavLink>} />
-      )
+      return <ActionsMenu.Item disabled={isDisabled} render={<NavLink to={routeAction.to}>{action.name}</NavLink>} />
     }
     case 'link': {
       const linkAction = action as LinkActionType
@@ -49,7 +47,6 @@ const ActionItem = ({ action }: { action: Action }) => {
       if (linkAction.cloudResourcesConditionType) {
         return (
           <ActionsMenu.Item
-            key={action.name}
             disabled={isDisabled}
             render={
               <CloudResourcesConditionalAnchor
@@ -65,7 +62,6 @@ const ActionItem = ({ action }: { action: Action }) => {
       }
       return (
         <ActionsMenu.Item
-          key={action.name}
           disabled={isDisabled}
           render={
             <a data-turbolinks="false" href={url} data-method={method}>

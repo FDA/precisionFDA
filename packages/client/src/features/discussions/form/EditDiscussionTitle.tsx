@@ -6,7 +6,6 @@ import { Discussion } from '../discussions.types'
 import { InputText } from '../../../components/InputText'
 import { Button } from '../../../components/Button'
 
-
 export const StyledTitleEdit = styled.div`
   display: flex;
   flex: 1;
@@ -40,10 +39,7 @@ export function EditDiscussionTitle({
       await queryClient.cancelQueries({
         queryKey: ['discussion', { id: discussionId }],
       })
-      const prevDiscu = queryClient.getQueryData<Discussion>([
-        'discussion',
-        { id: discussionId },
-      ])
+      const prevDiscu = queryClient.getQueryData<Discussion>(['discussion', { id: discussionId }])
       let newDiscu
       if (prevDiscu) {
         newDiscu = { ...prevDiscu }
@@ -56,10 +52,7 @@ export function EditDiscussionTitle({
     },
     onError(_1, _2, ctx) {
       if (ctx?.prevDiscu) {
-        queryClient.setQueryData(
-          ['discussion', { id: discussionId }],
-          ctx.prevDiscu,
-        )
+        queryClient.setQueryData(['discussion', { id: discussionId }], ctx.prevDiscu)
       }
     },
     onSettled() {
@@ -70,18 +63,8 @@ export function EditDiscussionTitle({
   })
   return (
     <StyledTitleEdit>
-      <InputText
-        ref={inputRef}
-        type="text"
-        defaultValue={defaultValue}
-        disabled={editTitleMutation.isPending}
-        autoFocus
-      />
-      <Button
-        disabled={editTitleMutation.isPending}
-        type="button"
-        onClick={() => setIsEditing(false)}
-      >
+      <InputText ref={inputRef} type="text" defaultValue={defaultValue} disabled={editTitleMutation.isPending} autoFocus />
+      <Button disabled={editTitleMutation.isPending} type="button" onClick={() => setIsEditing(false)}>
         Cancel
       </Button>
       <Button
@@ -91,10 +74,7 @@ export function EditDiscussionTitle({
           inputRef.current?.value &&
           editTitleMutation.mutate({
             title: inputRef?.current?.value,
-            id:
-              typeof discussionId === 'string'
-                ? parseInt(discussionId, 10)
-                : discussionId,
+            id: typeof discussionId === 'string' ? parseInt(discussionId, 10) : discussionId,
           })
         }
         disabled={editTitleMutation.isPending}

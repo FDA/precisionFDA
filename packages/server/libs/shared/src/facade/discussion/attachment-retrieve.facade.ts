@@ -35,7 +35,7 @@ export class AttachmentRetrieveFacade {
   async getAttachments(noteId: number): Promise<DiscussionAttachmentDTO[]> {
     this.logger.log(`Getting attachments for note id: ${noteId}`)
     const notes = await this.noteService.findAccessibleNotesAndAttachments([noteId])
-    if (!notes || notes.length === 0) {
+    if (!notes?.length) {
       throw new NotFoundError(
         'Unable to get attachments: note not found or insufficient permissions.',
       )

@@ -56,17 +56,6 @@ export async function editReplyRequest(discussionId: number, replyId: number, pa
   return axios.patch<IdResponse>(`/api/v2/discussions/${discussionId}/replies/${replyId}`, payload).then(r => r.data)
 }
 
-export async function editAnswerCommentRequest(
-  discussionId: number,
-  answerId: number,
-  commentId: number,
-  payload: CommentPayload,
-) {
-  return axios
-    .put<IdResponse>(`/api/v2/discussions/${discussionId}/answers/${answerId}/comments/${commentId}`, payload)
-    .then(r => r.data)
-}
-
 export interface DiscussionListResponse {
   data: Discussion[]
   meta: MetaV2
@@ -92,14 +81,6 @@ export async function deleteDiscussionRequest(discussionId: number) {
 
 export async function deleteReplyRequest(discussionId: number, replyId: number) {
   return axios.delete(`/api/v2/discussions/${discussionId}/replies/${replyId}`).then(r => r.data) // no response except http code
-}
-
-export async function deleteDiscussionCommentRequest(discussionId: number, commentId: number) {
-  return axios.delete(`/api/v2/discussions/${discussionId}/comments/${commentId}`).then(r => r.data) // no response except http code
-}
-
-export async function deleteAnswerCommentRequest(discussionId: number, answerId: number, commentId: number) {
-  return axios.delete(`/api/v2/discussions/${discussionId}/answers/${answerId}/comments/${commentId}`).then(r => r.data) // no response except http code
 }
 
 export async function followDiscussionRequest(discussionId: number) {
