@@ -1,5 +1,6 @@
 import { MikroOrmMiddleware } from '@mikro-orm/nestjs'
 import { MiddlewareConsumer, Module } from '@nestjs/common'
+import { CacheModule } from '@nestjs/cache-manager'
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { DatabaseModule } from '@shared/database/database.module'
 import { UserContextModule } from '@shared/domain/user-context/user-context.module'
@@ -51,6 +52,9 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     DatabaseModule.forRoot({
       distPath: './dist/apps/api',
       sourcePath: './apps/api/src',
+    }),
+    CacheModule.register({
+      isGlobal: true,
     }),
     LoggerModule,
     QueueModule,

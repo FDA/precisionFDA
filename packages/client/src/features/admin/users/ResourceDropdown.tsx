@@ -4,18 +4,11 @@ import styled from 'styled-components'
 import { RESOURCES, RESOURCE_LABELS } from '../../../types/user'
 import { bulkDisableAllResources, bulkDisableResource, bulkEnableAllResources, bulkEnableResource } from './api'
 import { User } from './types'
-import { BackendError } from '../../../api/errors'
 import { AxiosError } from 'axios'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import { BackendError } from '../../../api/types'
 
 export type ResourceState = 'all' | 'some' | 'none'
-
-const ResourceMenu = styled.ul`
-  margin: 0;
-  padding: 4px 0;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 3px;
-`
 
 const ResourceItem = styled.li`
   padding: 0 20px;

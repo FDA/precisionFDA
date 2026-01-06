@@ -6,7 +6,7 @@ import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-licens
 import { AcceptedLicenseRepository } from '@shared/domain/accepted-license/accepted-license.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { EmailClient } from '@shared/services/email-client'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { License } from '@shared/domain/license/license.entity'
 import { IdWithReceiversInputDTO } from '@shared/domain/email/dto/id-with-receivers-input.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'

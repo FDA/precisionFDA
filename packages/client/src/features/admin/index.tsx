@@ -11,6 +11,7 @@ import { InvitationsList } from './invitations'
 import { ProvisioningList } from './invitations/ProvisioningList'
 import UsersList from './users'
 import { SpacesList } from './spaces'
+import PendingUsersList from './pendingUsers'
 
 const Admin = () => {
   usePageMeta({ title: 'Admin Dashboard - precisionFDA' })
@@ -29,6 +30,7 @@ const Admin = () => {
       <Route path="/" element={<AdminDashboard />} />
       <Route path="/alerts" element={<AlertsPage />} />
       <Route path="/users" element={<UsersList />} />
+      <Route path="/users/pending" element={<PendingUsersList />} />
       <Route path="/invitations" element={<InvitationsList />} />
       <Route path="/spaces" element={<SpacesList />} />
       <Route path="/invitations/provisioning" element={<ProvisioningList />} />

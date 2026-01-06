@@ -3,6 +3,7 @@ import { Space } from './space.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
+import { CountStats } from '@shared/database/statistics.type'
 
 export class SpaceRepository extends AccessControlRepository<Space> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Space>> {
@@ -46,5 +47,36 @@ export class SpaceRepository extends AccessControlRepository<Space> {
       .where({ 'space.id': spaceIds })
       .andWhere({ 'sm.user_id': userId })
     return await qb.execute()
+  }
+
+  async getStatistics(): Promise<CountStats> {
+    const now = new Date()
+
+    const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate())
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+    const yearToDateStart = new Date(now.getFullYear(), 0, 1)
+
+    const result = await this.em.getConnection().execute(
+      `
+    SELECT
+      COUNT(*) as total,
+      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_month,
+      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_six_months,
+      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as year_to_date,
+      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_year
+    FROM spaces
+    WHERE state != 3 -- Exclude deleted spaces
+  `,
+      [oneMonthAgo, sixMonthsAgo, yearToDateStart, oneYearAgo],
+    )
+
+    return {
+      total: Number(result[0].total),
+      lastMonth: Number(result[0].last_month),
+      lastSixMonths: Number(result[0].last_six_months),
+      yearToDate: Number(result[0].year_to_date),
+      lastYear: Number(result[0].last_year),
+    }
   }
 }

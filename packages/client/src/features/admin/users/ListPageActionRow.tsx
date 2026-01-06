@@ -11,24 +11,22 @@ import { MetaV2 } from '../../home/types'
 import { ResourceDropdownContent } from './ResourceDropdown'
 import { User } from './types'
 import { UserLimitForm } from './UserLimitForm'
-import { bulkActivate, bulkDeactivate, bulkUnlock, setJobLimit, setTotalLimit } from './api'
+import { bulkActivate, bulkDeactivate, setJobLimit, setTotalLimit, userUnlock } from './api'
 import { AxiosError } from 'axios'
-import { BackendError } from '../../../api/errors'
-import { resourceCountString } from '../../../utils/formatting'
+import { itemsCountString } from '../../../utils/formatting'
 import { ButtonsRow } from '../common'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import { BackendError } from '../../../api/types'
 
-const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button>>(
-  (props, ref) => {
-    return (
-      // @ts-expect-error ref type mismatch between Dropdown and Button components
-      <Button as="div" data-variant="primary" ref={ref} {...props}>
-        Resources &nbsp;
-        <ArrowIcon />
-      </Button>
-    )
-  },
-)
+const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button>>((props, ref) => {
+  return (
+    // @ts-expect-error ref type mismatch between Dropdown and Button components
+    <Button as="div" data-variant="primary" ref={ref} {...props}>
+      Resources &nbsp;
+      <ArrowIcon />
+    </Button>
+  )
+})
 DropdownButton.displayName = 'DropdownButton'
 
 type UserListActionRowProps = {
@@ -44,10 +42,10 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
   const currentUserCtx = useAuthUser()
   const selectedIds = selectedUsers.map(({ id }) => id)
   const unlockMutation = useMutation({
-    mutationKey: ['bulk-unlock'],
-    mutationFn: () => bulkUnlock(selectedIds),
+    mutationKey: ['unlock'],
+    mutationFn: () => userUnlock(selectedIds[0]),
     onSuccess: () => {
-      toastSuccess(`${resourceCountString('User', selectedIds.length)} successfully unlocked!`)
+      toastSuccess('User was successfully unlocked!')
     },
     onError: (e: AxiosError<BackendError>) => {
       if (e.response?.data?.error?.message) {
@@ -61,7 +59,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     mutationKey: ['bulk-deactivate'],
     mutationFn: () => bulkDeactivate(selectedIds),
     onSuccess: () => {
-      toastSuccess(`${resourceCountString('User', selectedIds.length)} successfully deactivated!`)
+      toastSuccess(`${itemsCountString('user', selectedIds.length)} successfully deactivated!`)
       refetchUsers()
     },
     onError: (e: AxiosError<BackendError>) => {
@@ -76,7 +74,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     mutationKey: ['bulk-activate'],
     mutationFn: () => bulkActivate(selectedIds),
     onSuccess: () => {
-      toastSuccess(`${resourceCountString('User', selectedIds.length)} successfully activated!`)
+      toastSuccess(`${itemsCountString('user', selectedIds.length)} successfully activated!`)
       refetchUsers()
     },
     onError: (e: AxiosError<BackendError>) => {
@@ -121,8 +119,6 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'deactivated')
   const areAllSelectedUsersInEnabledState =
     selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'active')
-  const areAllSelectedUsersInLockedState =
-    selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'locked')
   const isCurrentUserSelected = selectedUsers.some(({ id }) => id === currentUserCtx?.id)
 
   return (
@@ -161,7 +157,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
       <Button
         data-variant="primary"
         data-testid="admin-users-unlock-button"
-        disabled={selectedUsers.length === 0 || !areAllSelectedUsersInLockedState}
+        disabled={selectedUsers.length !== 1}
         onClick={() => unlockMutation.mutateAsync()}
         style={{ marginRight: 16 }}
       >

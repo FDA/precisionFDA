@@ -3,7 +3,7 @@ import { SpaceActivationEmailHandler } from '@shared/domain/email/templates/hand
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { EmailClient } from '@shared/services/email-client'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { User } from '@shared/domain/user/user.entity'
 import {
   SPACE_MEMBERSHIP_ROLE,
@@ -12,9 +12,9 @@ import {
 import { expect } from 'chai'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { ObjectIdInputDTO } from '@shared/domain/email/email.helper'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { config } from '@shared/config'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 
 describe('SpaceActivationHandler', () => {
   const SPACE_MEMBERSHIP_ID = 10

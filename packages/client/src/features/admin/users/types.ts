@@ -1,6 +1,7 @@
 import { IUser } from '../../../types/user'
 import { MapKeysByObj } from '../../../utils/generics'
 import { snakeToCamelMapping } from '../../../utils/snakeCaseMapping'
+import { MetaV2 } from '../../home/types'
 
 // NOTE(samuel) duplicate from backend - ideally generate these types
 export const RESOURCE_TYPES = [
@@ -41,3 +42,5 @@ export type User = MapKeysByObj<IUser, typeof snakeToCamelMapping> & {
     total_limit: number
   }
 }
+
+export type AdminUserListType = { data: User[]; meta: MetaV2 }

@@ -9,7 +9,7 @@ import { ChallengeOpenedDTO } from '@shared/domain/email/dto/challenge-opened.dt
 import { expect } from 'chai'
 import { InternalError } from '@shared/errors'
 import { User } from '@shared/domain/user/user.entity'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'

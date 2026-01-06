@@ -31,7 +31,7 @@ import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-it
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 
 describe('UserFileService', () => {
   const USER_ID = 0

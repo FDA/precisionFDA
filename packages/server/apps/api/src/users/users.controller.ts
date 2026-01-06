@@ -1,5 +1,5 @@
 import { Body, Controller, Get, ParseArrayPipe, Put, UseGuards } from '@nestjs/common'
-import { UserService } from '@shared/domain/user/user.service'
+import { UserService } from '@shared/domain/user/service/user.service'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { HeaderItem } from '@shared/domain/user/header-item'
 import { UserCloudResourcesDTO } from '@shared/domain/user/dto/user-cloud-resources.dto'

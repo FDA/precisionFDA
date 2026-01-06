@@ -1,5 +1,3 @@
-import { ReactNode } from 'react'
-import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { IChallenge } from '../../types/challenge'
 import { IOSpec } from '../apps/apps.types'
 import { License } from '../licenses/types'
@@ -79,8 +77,6 @@ export type PropertiesResource = 'files' | 'folders' | 'node' | 'asset' | 'workf
 
 export type DialogType = 'radio' | 'checkbox'
 
-export type EmitScope = (scope: HomeScope, featured: boolean) => void
-
 export interface DownloadListResponse {
   id: number
   name: string
@@ -92,53 +88,12 @@ export interface DownloadListResponse {
   uid: string
 }
 
-interface IModal {
-  showModal?: boolean
-}
-
 export type Link =
   | string
   | {
       url: string
       method: 'GET' | 'POST'
     }
-
-export type ActionType = {
-  isDisabled?: boolean
-  key?: string
-  shouldHide?: boolean
-  modal?: ReactNode | null
-  cloudResourcesConditionType?: CloudResourcesConditionType
-} & (
-  | {
-      func: (arg?: IModal) => void
-    }
-  | {
-      type: 'route'
-      to: string
-    }
-  | {
-      type: 'link'
-      link: Link
-      cloudResourcesConditionType?: CloudResourcesConditionType
-    }
-  | {
-      type: 'modal'
-      func: (arg?: IModal) => void
-      modal?: ReactNode | null
-      showModal?: boolean
-    }
-  | {
-      type: 'selection'
-      title: string
-      isSelected: boolean
-      func: (isSelected: boolean) => void
-    }
-)
-
-export type ActionFunctionsType<KeyT extends string> = {
-  [key in KeyT]?: ActionType
-}
 
 export interface MetaPath {
   id: number
@@ -181,11 +136,6 @@ export type FilterVal = NonNullable<string | string[] | number | number[] | unde
 export interface IFilter {
   id: string
   value: FilterVal
-}
-
-export interface SortBy {
-  order_by: string
-  order_dir: string
 }
 
 export enum SEVERITY {
@@ -258,5 +208,3 @@ export type WebSocketMessage = {
   type: WEBSOCKET_MESSAGE_TYPE
   data: Notification | JobLogItem
 }
-
-export type KeyVal = { [key: string]: number | string | boolean }

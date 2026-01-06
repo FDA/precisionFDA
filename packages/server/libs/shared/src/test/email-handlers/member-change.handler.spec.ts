@@ -9,7 +9,7 @@ import { stub } from 'sinon'
 import { MemberChangedDTO } from '@shared/domain/email/dto/member-changed.dto'
 import { NotFoundError } from '@shared/errors'
 import { Space } from '@shared/domain/space/space.entity'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {

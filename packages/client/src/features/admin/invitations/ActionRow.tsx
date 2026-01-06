@@ -1,7 +1,7 @@
 import { RowSelectionState } from '@tanstack/react-table'
 import React from 'react'
 import styled from 'styled-components'
-import { useProvisionMutation } from '../../../api/mutations/invitations'
+import { useProvisionMutation } from '../../../api/mutations/invitation'
 import { Button } from '../../../components/Button'
 import { Invitation } from '../users/api'
 import { useEditInvitationModal } from './modals/useEditInvitationModal'

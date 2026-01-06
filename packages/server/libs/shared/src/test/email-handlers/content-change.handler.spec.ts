@@ -8,7 +8,7 @@ import { SpaceMembershipRepository } from '@shared/domain/space-membership/space
 import { EmailClient } from '@shared/services/email-client'
 import { stub } from 'sinon'
 import { expect } from 'chai'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import {
   ENTITY_TYPE,
   SPACE_EVENT_ACTIVITY_TYPE,

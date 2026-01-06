@@ -7,7 +7,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLocation, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { BackendError } from '../../../api/errors'
 import { FieldLabelRow, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -21,6 +20,7 @@ import { FieldGroup } from '../../../components/form/FieldGroup'
 import { getBackPathNext } from '../../../utils/getBackPath'
 import { HomeScope } from '../../home/types'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import { BackendError } from '../../../api/types'
 
 const StyledForm = styled.form`
   margin: 16px;

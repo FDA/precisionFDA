@@ -2,9 +2,9 @@ import { Collection, Entity, ManyToOne, OneToMany, Property, Ref } from '@mikro-
 import { User } from '@shared/domain/user/user.entity'
 
 import { BaseEntity } from '../../database/base.entity'
-import { OrgRepository } from './org.repository'
+import { OrganizationRepository } from './organization.repository'
 
-@Entity({ tableName: 'orgs', repository: () => OrgRepository })
+@Entity({ tableName: 'orgs', repository: () => OrganizationRepository })
 export class Organization extends BaseEntity {
   // N.B handle is not the dxid of the org on platform
   //     See createDxOrg() below for the format of org dxid on platform

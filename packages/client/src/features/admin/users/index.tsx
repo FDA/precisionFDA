@@ -1,5 +1,4 @@
 import { Column, ColumnDef } from '@tanstack/react-table'
-import axios from 'axios'
 import React from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
@@ -14,50 +13,61 @@ import { selectColumnDef } from '../../../components/Table/selectColumnDef'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
-import { IFilter, MetaV2 } from '../../home/types'
 import { useList } from '../../home/useList'
-import { formatNumberUS, Params, prepareListFetchV2 } from '../../home/utils'
+import { formatNumberUS } from '../../home/utils'
 import { AdminSectionBreadcrumbDivider, AdminSectionBreadcrumbs, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
 import { UsersListActionRow } from './ListPageActionRow'
-import { User } from './types'
+import { AdminUserListType, User } from './types'
+import { fetchUsers } from './api'
+import { DEFAULT_PAGINATED_DATA } from '../../../api/types'
 
-type AdminUserListType = { data: User[]; meta: MetaV2 }
-
-export async function fetchUsers(filters: IFilter[], params: Params) {
-  const query = prepareListFetchV2(filters, params)
-  const paramQ = `?${new URLSearchParams(query).toString()}`
-  return axios.get<AdminUserListType>(`/api/v2/admin/users/${paramQ}`).then(r => r.data)
-}
-
-export const StyledLinkCell = styled.a`
+const StyledLinkCell = styled.a`
   display: flex;
   align-items: center;
   gap: 5px;
 `
 
-export const getAdminUserColumns = (): ColumnDef<User>[] => [
+const UserLinkCell = ({ dxuser, children }: { dxuser: string; children: React.ReactNode }) => (
+  <StyledLinkCell data-turbolinks="false" href={`/users/${dxuser}`}>
+    {children}
+  </StyledLinkCell>
+)
+
+const USER_STATUS_OPTIONS = [
+  { label: 'Active', option: 0 },
+  { label: 'Locked', option: 1 },
+  { label: 'Deactivated', option: 2 },
+]
+
+const formatLastLogin = (lastLogin: string | null) => {
+  if (!lastLogin) return null
+
+  return new Date(lastLogin).toLocaleDateString('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+    hour12: true,
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  })
+}
+
+const getAdminUserColumns = (): ColumnDef<User>[] => [
   selectColumnDef<User>(),
   {
     header: 'Username',
     accessorKey: 'dxuser',
     filterFn: 'includesString',
     size: 200,
-    cell: c => (
-      <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
-        {c.row.original.dxuser}
-      </StyledLinkCell>
-    ),
+    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{row.original.dxuser}</UserLinkCell>,
   },
   {
     header: 'Email ID',
     accessorKey: 'email',
     filterFn: 'includesString',
     size: 300,
-    cell: c => (
-      <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
-        {c.row.original.email}
-      </StyledLinkCell>
-    ),
+    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{row.original.email}</UserLinkCell>,
   },
   {
     header: 'Last Login Date',
@@ -67,45 +77,17 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
       filterElement: (column: Column<User>) => <DateTimeRangeFilter column={column} />,
     },
     size: 300,
-    cell: c => {
-      return (
-        <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
-          {c.row.original.lastLogin &&
-            new Date(c.row.original.lastLogin).toLocaleDateString('en-US', {
-              month: 'short',
-              day: '2-digit',
-              year: 'numeric',
-              hour12: true,
-              hour: 'numeric',
-              minute: 'numeric',
-              second: 'numeric',
-            })}
-        </StyledLinkCell>
-      )
-    },
+    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{formatLastLogin(row.original.lastLogin)}</UserLinkCell>,
   },
   {
     header: 'Status',
     accessorKey: 'userState',
     filterFn: selectFilterFn,
     meta: {
-      filterElement: (column: Column<User>) => (
-        <SelectFilter
-          column={column}
-          options={[
-            { label: 'Active', option: 0 },
-            { label: 'Locked', option: 1 },
-            { label: 'Deactivated', option: 2 },
-          ]}
-        />
-      ),
+      filterElement: (column: Column<User>) => <SelectFilter column={column} options={USER_STATUS_OPTIONS} />,
     },
     size: 250,
-    cell: c => (
-      <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
-        {c.row.original.userState.toUpperCase()}
-      </StyledLinkCell>
-    ),
+    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{row.original.userState.toUpperCase()}</UserLinkCell>,
   },
   {
     header: 'Total Limit',
@@ -113,10 +95,8 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     id: 'totalLimit',
     size: 250,
     enableColumnFilter: false,
-    cell: props => (
-      <StyledLinkCell data-turbolinks="false" href={`/users/${props.row.original.dxuser}`}>
-        {`$${formatNumberUS(props.row.original.cloudResourceSettings.total_limit)}`}
-      </StyledLinkCell>
+    cell: ({ row }) => (
+      <UserLinkCell dxuser={row.original.dxuser}>${formatNumberUS(row.original.cloudResourceSettings.total_limit)}</UserLinkCell>
     ),
   },
   {
@@ -125,10 +105,8 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     accessorKey: 'cloudResourceSettings.job_limit',
     enableColumnFilter: false,
     size: 250,
-    cell: c => (
-      <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
-        {`$${formatNumberUS(c.row.original.cloudResourceSettings.job_limit)}`}
-      </StyledLinkCell>
+    cell: ({ row }) => (
+      <UserLinkCell dxuser={row.original.dxuser}>${formatNumberUS(row.original.cloudResourceSettings.job_limit)}</UserLinkCell>
     ),
   },
 ]
@@ -155,15 +133,16 @@ const UsersList = () => {
     params: {},
   })
 
-  const columns = getAdminUserColumns()
-  const { data, isLoading, error } = query
+  const { data = DEFAULT_PAGINATED_DATA, isLoading, error } = query
+
   if (error) {
     return <div>{JSON.stringify(error)}</div>
   }
 
-  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data)
-
+  const columns = getAdminUserColumns()
+  const selectedUsers = getSelectedObjectsFromIndexes(selectedIndexes, data.data)
   const filters = toArrayFromObject(filterQuery)
+
   return (
     <UserLayout innerScroll>
       <AdminSectionBreadcrumbs>
@@ -175,18 +154,19 @@ const UsersList = () => {
           Users
         </Link>
       </AdminSectionBreadcrumbs>
+
       <Topbox>
         <TopLeft>
           <UsersIcon height={20} />
           <Title>User Management</Title>
         </TopLeft>
-        <UsersListActionRow selectedUsers={selectedObjects} refetchUsers={query.refetch} />
+        <UsersListActionRow selectedUsers={selectedUsers} refetchUsers={query.refetch} />
       </Topbox>
 
       <AdminStyledPageTable>
         <Table<User>
           isLoading={isLoading}
-          data={data?.data ?? []}
+          data={data.data}
           columns={columns}
           columnSizing={colWidths}
           setColumnSizing={saveColumnResizeWidth}
@@ -201,11 +181,11 @@ const UsersList = () => {
 
       <ContentFooter>
         <Pagination
-          page={data?.meta?.page}
-          totalCount={data?.meta?.total}
-          totalPages={data?.meta?.totalPages}
+          page={data.meta.page}
+          totalCount={data.meta.total}
+          totalPages={data.meta.totalPages}
           perPage={perPageParam}
-          isHidden={hidePagination(query.isFetched, data?.data?.length, data?.meta?.totalPages)}
+          isHidden={hidePagination(query.isFetched, data.data.length, data.meta.totalPages)}
           setPage={setPageParam as (n: number) => void}
           onPerPageSelect={setPerPageParam as (n: number) => void}
           showListCount

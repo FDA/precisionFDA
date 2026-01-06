@@ -24,8 +24,8 @@ import {
 } from './styles'
 import { usePublishingTreeRootQuery } from './usePublishingTreeQuery'
 import { AxiosError } from 'axios'
-import { BackendError } from '../../api/errors'
 import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import { BackendError } from '../../api/types'
 
 const ShowParent = ({ tree, onSelectItem }: { tree: TreeRoot; onSelectItem: (identifier: string) => void }) => {
   const [selected, setSelected] = useState<boolean>(false)

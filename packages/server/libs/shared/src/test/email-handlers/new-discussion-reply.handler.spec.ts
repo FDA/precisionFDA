@@ -8,7 +8,7 @@ import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handle
 import { stub } from 'sinon'
 import { expect } from 'chai'
 import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { Note } from '@shared/domain/note/note.entity'
