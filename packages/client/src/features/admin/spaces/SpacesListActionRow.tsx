@@ -2,7 +2,6 @@ import { useMutation, UseQueryResult } from '@tanstack/react-query'
 import { MetaV2 } from '../../home/types'
 import { ISpaceV2 } from '../../spaces/spaces.types'
 import { AxiosError } from 'axios'
-import { BackendError } from '../../../api/errors'
 import { Button } from '../../../components/Button'
 import React from 'react'
 import { ButtonsRow } from '../common'
@@ -11,6 +10,7 @@ import { useConfirm } from '../../modal/useConfirm'
 import { RowSelectionState } from '@tanstack/react-table'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { ModalScroll } from '../../modal/styles'
+import { BackendError } from '../../../api/types'
 
 type SpaceListActionRowProps = {
   selectedSpaces: ISpaceV2[]

@@ -1,12 +1,8 @@
 import { FindOptions, raw } from '@mikro-orm/core'
 import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
 import { config } from '../../config'
-import { DNANEXUS_INVALID_EMAIL, ORG_EVERYONE } from '../../config/consts'
-import { MfaAlreadyResetError, ValidationError } from '../../errors'
-import { PlatformClient } from '../../platform-client'
-import { UserCtx } from '../../types'
-import { classifyErrorTypes } from '../../utils/classify-error-types'
-import { RESOURCE_TYPES, User, USER_STATE } from './user.entity'
+import { RESOURCE_TYPES, User } from './user.entity'
+import { CountStats } from '@shared/database/statistics.type'
 
 type Resource = (typeof RESOURCE_TYPES)[number]
 
@@ -58,154 +54,6 @@ export class UserRepository extends PaginatedRepository<User> {
       .execute()
   }
 
-  // TODO - Refactor business logic to service layer instead of using repository
-  async bulkUpdateReset2fa(
-    ids: number[],
-    client: PlatformClient,
-    userCtx: UserCtx,
-  ): Promise<
-    {
-      dxuser: string
-      result:
-        | {
-            status: 'success'
-            value: unknown
-            errorType?: undefined
-            message?: undefined
-            error?: undefined
-          }
-        | {}
-    }[]
-  > {
-    const users = await this.em.find(User, {
-      id: {
-        $in: ids,
-      },
-    })
-
-    const results = await Promise.allSettled(
-      users.map((user) =>
-        client.userResetMfa({
-          dxid: `user-${userCtx.dxuser}`,
-          data: {
-            user_id: user.dxuser,
-            org_id: ORG_EVERYONE,
-          },
-        }),
-      ),
-    )
-    return results.map((result, index) => ({
-      dxuser: users[index].dxuser,
-      result: classifyErrorTypes([MfaAlreadyResetError], result),
-    }))
-  }
-
-  async bulkUpdateUnlock(
-    ids: number[],
-    client: PlatformClient,
-    userCtx: UserCtx,
-  ): Promise<
-    {
-      dxuser: string
-      result: {
-        status: 'success' | 'unhandledError' | 'handledError'
-        value?: unknown
-        errorType?: undefined
-        message?: undefined
-        error?: undefined
-      }
-    }[]
-  > {
-    const users = await this.em.find(User, {
-      id: {
-        $in: ids,
-      },
-    })
-    return Promise.allSettled(
-      users.map((user) =>
-        client.userUnlock({
-          dxid: `user-${userCtx.dxuser}`,
-          data: {
-            user_id: user.dxuser,
-            org_id: ORG_EVERYONE,
-          },
-        }),
-      ),
-    ).then((results) =>
-      results.map((result, index) => ({
-        dxuser: users[index].dxuser,
-        result: classifyErrorTypes([], result),
-      })),
-    )
-  }
-
-  // NOTE(samuel) this assumes that user isn't activating self
-  async bulkActivate(ids: number[]): Promise<void> {
-    const users = await this.em.find(User, {
-      id: {
-        $in: ids,
-      },
-    })
-    const invalidUsers = users.filter((user) => user.userState !== USER_STATE.DEACTIVATED)
-    if (invalidUsers.length > 0) {
-      throw new ValidationError(
-        `Cannot activate other than deactivated users: "${JSON.stringify(
-          users.map((user) => user.dxuser),
-        )}"`,
-      )
-    }
-    users.forEach((user) => {
-      user.disableMessage = null
-      if (user.email) {
-        user.email = Buffer.from(
-          user.email.replace(DNANEXUS_INVALID_EMAIL, '\n'),
-          'base64',
-        ).toString('utf8')
-      }
-      if (user.normalizedEmail) {
-        user.normalizedEmail = Buffer.from(
-          user.normalizedEmail.replace(DNANEXUS_INVALID_EMAIL, '\n'),
-          'base64',
-        ).toString('utf8')
-      }
-      user.userState = USER_STATE.ENABLED
-      this.em.persist(user)
-    })
-    return this.em.flush()
-  }
-
-  async bulkDeactivate(ids: number[]): Promise<void> {
-    const users = await this.em.find(User, {
-      id: { $in: ids },
-    })
-
-    const invalidUsers = users.filter((user) => user.userState !== USER_STATE.ENABLED)
-    if (invalidUsers.length > 0) {
-      throw new ValidationError(
-        `Cannot deactivate non-enabled users: ${invalidUsers.map((user) => user.dxuser).join(', ')}`,
-      )
-    }
-
-    const encodeEmail = (email: string): string =>
-      Buffer.from(email, 'utf8').toString('base64').replace('\n', '') + DNANEXUS_INVALID_EMAIL
-
-    users.forEach((user) => {
-      user.disableMessage = 'Deactivated by admin'
-      user.userState = USER_STATE.DEACTIVATED
-
-      if (user.email) {
-        user.email = encodeEmail(user.email)
-      }
-      if (user.normalizedEmail) {
-        user.normalizedEmail = encodeEmail(user.normalizedEmail)
-      }
-
-      this.em.persist(user)
-    })
-
-    await this.em.flush()
-  }
-
   async bulkEnableResourceType(ids: number[], resource: Resource): Promise<void> {
     await this.createQueryBuilder()
       .update({
@@ -222,7 +70,7 @@ export class UserRepository extends PaginatedRepository<User> {
       .execute()
   }
 
-  async bulkEnableAll(ids: number[]): Promise<void> {
+  async bulkEnableAllResources(ids: number[]): Promise<void> {
     // Convert RESOURCE_TYPES array to a JSON array string for MySQL
     const resourcesJson = JSON.stringify(RESOURCE_TYPES)
 
@@ -261,7 +109,7 @@ export class UserRepository extends PaginatedRepository<User> {
     await this.em.flush()
   }
 
-  async bulkDisableAll(ids: number[]): Promise<void> {
+  async bulkDisableAllResources(ids: number[]): Promise<void> {
     await this.createQueryBuilder()
       .update({
         cloudResourceSettings: raw(
@@ -275,5 +123,36 @@ export class UserRepository extends PaginatedRepository<User> {
         },
       })
       .execute()
+  }
+
+  async getStatistics(): Promise<CountStats> {
+    const now = new Date()
+
+    const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate())
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+    const yearToDateStart = new Date(now.getFullYear(), 0, 1)
+
+    const result = await this.em.getConnection().execute(
+      `
+    SELECT
+      COUNT(*) as total,
+      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_month,
+      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_six_months,
+      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as year_to_date,
+      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_year
+    FROM users
+    WHERE user_state = 0 -- Only active users
+  `,
+      [oneMonthAgo, sixMonthsAgo, yearToDateStart, oneYearAgo],
+    )
+
+    return {
+      total: Number(result[0].total),
+      lastMonth: Number(result[0].last_month),
+      lastSixMonths: Number(result[0].last_six_months),
+      yearToDate: Number(result[0].year_to_date),
+      lastYear: Number(result[0].last_year),
+    }
   }
 }

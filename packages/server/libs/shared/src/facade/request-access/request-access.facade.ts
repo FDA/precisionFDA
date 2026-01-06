@@ -4,7 +4,7 @@ import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { RequestAccessDTO } from '@shared/domain/invitation/dto/request-access.dto'
 import { InvitationService } from '@shared/domain/invitation/services/invitation.service'
-import { UserService } from '@shared/domain/user/user.service'
+import { UserService } from '@shared/domain/user/service/user.service'
 import { ErrorCodes, InvalidCaptchaError, InvalidRequestError } from '@shared/errors'
 
 @Injectable()

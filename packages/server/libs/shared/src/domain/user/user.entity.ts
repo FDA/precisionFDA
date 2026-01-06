@@ -17,7 +17,7 @@ import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
   ADMIN_LEAD_ROLES,
@@ -159,8 +159,6 @@ export const DEFAULT_USER_EXTRAS: UserExtras = {
   has_seen_guidelines: true,
 }
 
-// contains the bare minimum to work with the user instance
-// might need to add more fields in the time
 @Entity({ tableName: 'users', repository: () => UserRepository })
 export class User extends BaseEntity {
   @Property()

@@ -50,7 +50,7 @@ Rails.application.routes.draw do
       post "toggle_activate_user", to: "users#toggle_activate_user"
       get "unlock_user", to: "users#unlock_user"
       post "unlock_user", to: "users#unlock_user"
-      get "pending_users", to: "users#pending_users"
+      get "pending", to: "users#pending"
       get "org_action_requests", to: "org_requests#index"
       get "deactivated_users", to: "users#deactivated_users"
       get "resend_activation_email", to: "users#resend_activation_email"

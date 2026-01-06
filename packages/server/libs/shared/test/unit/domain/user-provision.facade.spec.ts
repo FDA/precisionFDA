@@ -6,8 +6,8 @@ import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { Organization } from '@shared/domain/org/org.entity'
-import { OrgRepository } from '@shared/domain/org/org.repository'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { OrganizationRepository } from '@shared/domain/org/organization.repository'
 import { constructDxOrg, getBaseHandle, getHandle } from '@shared/domain/org/org.utils'
 import { Profile } from '@shared/domain/profile/profile.entity'
 import { ProfileRepository } from '@shared/domain/profile/profile.repository'
@@ -27,7 +27,7 @@ describe('UserProvisionFacade', () => {
   let em: EntityManager
   let siteAdmin: User
   let userRepo: UserRepository
-  let orgRepo: OrgRepository
+  let orgRepo: OrganizationRepository
   let invitationRepo: InvitationRepository
   let profileRepo: ProfileRepository
   let emailService: EmailService
@@ -50,7 +50,7 @@ describe('UserProvisionFacade', () => {
     em.clear()
 
     userRepo = new UserRepository(em, User)
-    orgRepo = new OrgRepository(em, Organization)
+    orgRepo = new OrganizationRepository(em, Organization)
     invitationRepo = new InvitationRepository(em, Invitation)
     profileRepo = new ProfileRepository(em, Profile)
     siteAdmin = create.userHelper.createAdmin(em)

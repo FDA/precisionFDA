@@ -37,6 +37,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { StringUtils } from '@shared/utils/string.utils'
 import { Logger } from 'nestjs-pino'
 import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
+import { CountStats } from '@shared/database/statistics.type'
 
 type SpaceFilter = FilterQuery<Space> & {
   spaceMemberships?: {
@@ -503,5 +504,9 @@ export class SpaceService {
         spaces.data.map((space) => SpaceListItemDTO.fromEntity(space, this.userContext.id)),
       ),
     }
+  }
+
+  async getStatistics(): Promise<CountStats> {
+    return this.spaceRepository.getStatistics()
   }
 }

@@ -30,6 +30,7 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { CountStats } from '@shared/database/statistics.type'
 
 @Injectable()
 export class NodeService {
@@ -277,5 +278,9 @@ export class NodeService {
 
   async getFolderEntity(folderId: number): Promise<Folder | null> {
     return await this.folderService.getFolderEntity(folderId)
+  }
+
+  async getStatistics(): Promise<CountStats> {
+    return await this.nodeRepository.getStatistics()
   }
 }

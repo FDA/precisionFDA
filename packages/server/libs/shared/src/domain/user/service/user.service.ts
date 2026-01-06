@@ -24,6 +24,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { StringUtils } from '@shared/utils/string.utils'
+import { CountStats } from '@shared/database/statistics.type'
 
 @Injectable()
 export class UserService {
@@ -40,6 +41,11 @@ export class UserService {
     private readonly adminClient: PlatformClient,
   ) {}
 
+  async getStatistics(): Promise<CountStats> {
+    return await this.userRepo.getStatistics()
+  }
+
+  // move this to user-management.service.ts later
   async paginateUsers(query: UserPaginationDto): Promise<PaginatedResult<User>> {
     const where: ObjectFilterQuery<User> = {}
     if (query.filter?.dxuser) {
@@ -267,5 +273,3 @@ export class UserService {
     return {}
   }
 }
-
-

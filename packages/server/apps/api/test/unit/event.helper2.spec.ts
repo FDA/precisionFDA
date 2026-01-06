@@ -4,7 +4,7 @@ import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
 import { stub } from 'sinon'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 
 /**

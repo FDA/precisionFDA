@@ -32,7 +32,7 @@ import {
 import { codeRemap } from '@shared/utils/app'
 import { expect } from 'chai'
 import { create, db } from '../../../src/test'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { Reference } from '@mikro-orm/core'
 
 describe('AppService', () => {

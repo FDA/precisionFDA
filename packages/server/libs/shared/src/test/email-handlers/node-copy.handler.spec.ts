@@ -5,7 +5,7 @@ import { expect } from 'chai'
 import { stub } from 'sinon'
 import { EmailClient } from '@shared/services/email-client'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import { Organization } from '@shared/domain/org/org.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 describe('NodeCopyHandler', () => {

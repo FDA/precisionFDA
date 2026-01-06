@@ -5,7 +5,7 @@ import { JobSynchronizationService } from '@shared/domain/job/services/job-synch
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { UserService } from '@shared/domain/user/user.service'
+import { UserService } from '@shared/domain/user/service/user.service'
 import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'

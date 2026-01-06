@@ -9,8 +9,8 @@ import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
 import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { Organization } from '@shared/domain/org/org.entity'
-import { OrgRepository } from '@shared/domain/org/org.repository'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { OrganizationRepository } from '@shared/domain/org/organization.repository'
 import { constructDxOrg, getHandle } from '@shared/domain/org/org.utils'
 import { Profile } from '@shared/domain/profile/profile.entity'
 import {
@@ -50,7 +50,7 @@ export class UserProvisionFacade {
     @Inject(ADMIN_PLATFORM_CLIENT)
     private readonly adminClient: PlatformClient,
     private readonly userRepo: UserRepository,
-    private readonly orgRepo: OrgRepository,
+    private readonly orgRepo: OrganizationRepository,
     private readonly invitationRepo: InvitationRepository,
     private readonly emailService: EmailService,
     private readonly notificationService: NotificationService,

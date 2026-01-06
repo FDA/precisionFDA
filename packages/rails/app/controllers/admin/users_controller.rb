@@ -2,9 +2,11 @@ module Admin
   # Responsible for users related actions.
   class UsersController < BaseController
     skip_before_action  :check_admin, only: :toggle_activate_user
-    layout "react", only: %i(index)
+    layout "react", only: %i(index pending)
 
     def index; end
+
+    def pending; end
 
     # TODO(samuel) unify this method
     # POST
@@ -76,15 +78,6 @@ module Admin
         format.html { render "admin/users/deactivated" }
         format.json { render json: { users: @users } }
       end
-    end
-
-    # GET
-    # Renders pending users.
-    def pending_users
-      @users = User.where(private_files_project: nil)
-
-      @users_grid = initialize_grid(@users)
-      render "admin/users/pending"
     end
 
     # POST

@@ -1,10 +1,22 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import { User } from './types'
+import { AdminUserListType, User } from './types'
 import { InvitationListType } from '../invitations/types'
+import { IFilter } from '../../home/types'
+import { Params, prepareListFetchV2 } from '../../home/utils'
+
+interface CountStats {
+  total: number
+  lastMonth: number
+  lastSixMonths: number
+  yearToDate: number
+  lastYear: number
+}
 
 export interface AdminStats {
-  usersCount: number
+  usersCount: CountStats
   orgsCount: number
+  spacesCount: CountStats
+  filesCount: CountStats
 }
 
 export type Invitation = {
@@ -70,23 +82,18 @@ export async function editInvitationBasicInfo(id: number, data: Partial<{ firstN
 }
 
 export async function setTotalLimit(ids: User['id'][], limit: number) {
-  return axios.put('/api/v2/admin/users/set-total-limit', { ids, limit }).then(res => res.data)
+  return axios.put('/api/v2/admin/users/total-limit', { ids, limit }).then(res => res.data)
 }
 
 export const setJobLimit = async (ids: User['id'][], limit: number) =>
   axios
-    .put('/api/v2/admin/users/set-job-limit', {
+    .put('/api/v2/admin/users/job-limit', {
       ids,
       limit,
     })
     .then(res => res.data)
 
-export const bulkUnlock = async (ids: User['id'][]) =>
-  axios
-    .post('/api/v2/admin/users/unlock', {
-      ids,
-    })
-    .then(res => res.data)
+export const userUnlock = async (id: User['id']) => axios.post(`/api/v2/admin/users/${id}/unlock`).then(res => res.data)
 
 export const bulkActivate = async (ids: User['id'][]) =>
   axios
@@ -101,3 +108,9 @@ export const bulkDeactivate = async (ids: User['id'][]) =>
       ids,
     })
     .then(res => res.data)
+
+export async function fetchUsers(filters: IFilter[], params: Params) {
+  const query = prepareListFetchV2(filters, params)
+  const paramQ = `?${new URLSearchParams(query).toString()}`
+  return axios.get<AdminUserListType>(`/api/v2/admin/users/${paramQ}`).then(r => r.data)
+}
