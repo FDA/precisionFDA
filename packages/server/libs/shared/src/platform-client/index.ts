@@ -792,6 +792,30 @@ export class PlatformClient {
   }
 
   /**
+   * Clones source project
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/cloning#api-method-class-xxxx-clone
+   * @param {string} source - source project dxid
+   * @param {string} destination - destination project dxid
+   * @param {string[]} dxIds - IDs to be cloned
+   */
+  async projectClone(
+    source: DxId<'project'>,
+    destination: DxId<'project'>,
+    dxIds: DxId[],
+  ): Promise<ClassIdResponse<'project'>> {
+    const url = `${config.platform.apiUrl}/${source}/clone`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        project: destination,
+        objects: dxIds,
+      },
+      url,
+    }
+    return await this.sendRequest(options)
+  }
+
+  /**
    * Invite org or user in project.
    *  @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-invite
    *  @param {string} projectDxid - dxid of the project

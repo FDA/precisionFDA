@@ -10,13 +10,14 @@ import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
+import { CheckStatusJob, CopyNodesJob, TASK_TYPE } from '@shared/queue/task.input'
 import { TypeUtils } from '@shared/utils/type-utils'
 import { Job } from 'bull'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 import { BaseQueueProcessor } from '../../../queues/processor/base-queue.processor'
 import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
 import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
+import { CopyNodesFacade } from '@shared/facade/node-copy/copy-nodes.facade'
 
 @Processor(config.workerJobs.queues.fileSync.name)
 export class FileSyncQueueProcessor extends BaseQueueProcessor {
@@ -29,10 +30,17 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
     private readonly lockNodeFacade: LockNodeFacade,
     private readonly unlockNodeFacade: UnlockNodeFacade,
     private readonly removeNodesFacade: RemoveNodesFacade,
+    private readonly copyNodesFacade: CopyNodesFacade,
     private readonly notificationService: NotificationService,
     private readonly jobServiceWithPlatformClient: JobService,
   ) {
     super()
+  }
+
+  @ProcessWithContext(TASK_TYPE.COPY_NODES)
+  async copyNodes(job: Job<CopyNodesJob>): Promise<void> {
+    const input = job.data.payload
+    await this.copyNodesFacade.copyNodes(input.ids, input.scope, input.folderId)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_OUTPUTS)

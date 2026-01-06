@@ -5,11 +5,13 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError } from '@shared/errors'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { getJobStatusMessage } from '@shared/queue/queue.utils'
-import { CheckStatusJob, Task, TASK_TYPE } from '@shared/queue/task.input'
+import { CheckStatusJob, CopyNodesJob, Task, TASK_TYPE } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { formatDuration } from '@shared/utils/format'
-import { JobOptions, Queue } from 'bull'
+import { Job, JobOptions, Queue } from 'bull'
 
+// TODO originally this was file sync job producer, but now it handles other user file related jobs as well
+// might be worth renaming the class to better reflect its purpose
 @Injectable()
 export class FileSyncQueueJobProducer extends QueueJobProducer {
   constructor(
@@ -20,7 +22,22 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
     super()
   }
 
-  async createSyncOutputsTask(data: CheckStatusJob['payload'], user: UserCtx) {
+  async createCopyNodesTask(
+    data: CopyNodesJob['payload'],
+    user: UserCtx,
+  ): Promise<Job<CopyNodesJob>> {
+    const wrapped: CopyNodesJob = {
+      type: TASK_TYPE.COPY_NODES,
+      payload: data,
+      user,
+    }
+    const options: JobOptions = {
+      jobId: `${wrapped.type}.${user.dxuser}-${+new Date()}`,
+    }
+    return await this.addToQueue(wrapped, options)
+  }
+
+  async createSyncOutputsTask(data: CheckStatusJob['payload'], user: UserCtx): Promise<void> {
     const wrapped: CheckStatusJob = {
       type: TASK_TYPE.SYNC_JOB_OUTPUTS,
       payload: data,
@@ -29,7 +46,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
     await this.createSyncTask(wrapped, data.dxid)
   }
 
-  async createRemoveNodesJobTask(ids: number[], user: UserCtx) {
+  async createRemoveNodesJobTask(ids: number[], user: UserCtx): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.REMOVE_NODES as const,
       payload: ids,

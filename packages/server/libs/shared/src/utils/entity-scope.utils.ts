@@ -1,4 +1,4 @@
-import { SpaceScope } from '@shared/types/common'
+import { EntityScope, SpaceScope } from '@shared/types/common'
 
 export class EntityScopeUtils {
   static isSpaceScope(scope: string): scope is SpaceScope {
@@ -21,5 +21,13 @@ export class EntityScopeUtils {
 
   static getScopeFromSpaceId(spaceId: number): SpaceScope {
     return `space-${spaceId}` as SpaceScope
+  }
+
+  static isPrivate(scope: EntityScope): scope is 'private' {
+    return scope === 'private'
+  }
+
+  static isPublic(scope: EntityScope): scope is 'public' {
+    return scope === 'public'
   }
 }

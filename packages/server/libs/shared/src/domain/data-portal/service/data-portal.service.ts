@@ -30,6 +30,7 @@ import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
 import { CreateResourceResponse, DataPortalMemberParam, DataPortalParam } from './data-portal.types'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { EntityService } from '@shared/domain/entity/entity.service'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 @Injectable()
 export class DataPortalService {
@@ -148,7 +149,7 @@ export class DataPortalService {
   private createFile = async (
     input: CreateFileParamDTO,
     user: User,
-    projectId: string,
+    projectId: DxId<'project'>,
     scope: SCOPE,
   ): Promise<UserFile> => {
     const response = await this.platformClient.fileCreate({

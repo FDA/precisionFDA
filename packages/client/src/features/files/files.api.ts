@@ -83,7 +83,7 @@ export async function featureFileRequest({ ids, uids, featured }: { ids: string[
 }
 
 export async function copyFilesRequest(scope: string, ids: number[], folderId?: number) {
-  return axios.post('/api/files/copy', { item_ids: ids, scope, folder_id: folderId }).then(r => r.data)
+  return axios.post('/api/v2/nodes/copy', { ids, scope, folderId }).then(r => r.data)
 }
 
 export async function editFileRequest({ name, description, fileId }: { name: string; description: string; fileId: string }) {

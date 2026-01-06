@@ -97,6 +97,7 @@ class CopyService
 
             raise WorkflowCopyError, "Can't remap workflow stage inputs" unless app_input
 
+            # when rewriting to Node don't forget to handle deleted file (now it crashes)
             file_to_copy = UserFile.find_by!(uid: input["default_workflow_value"])
             copied_file = file_copy_service.copy(file_to_copy, scope).first
             input["default_workflow_value"] = copied_file.uid

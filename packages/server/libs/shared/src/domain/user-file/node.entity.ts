@@ -5,6 +5,7 @@ import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 @Entity({
   abstract: true,
@@ -33,7 +34,7 @@ export class Node extends ScopedEntity {
   fileSize?: number
 
   @Property()
-  project?: string
+  project?: DxId<'project'>
 
   @ManyToOne(() => Node, { nullable: true })
   parentFolder: Node

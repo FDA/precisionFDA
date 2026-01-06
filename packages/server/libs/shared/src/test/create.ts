@@ -758,39 +758,6 @@ const dataPortalsHelper = {
   },
 }
 
-const tagsHelper = {
-  create: (em: EntityManager, data?: Partial<Tag>): Tag => {
-    const newTag = wrap(new Tag()).assign({
-      ...generate.tag.simple(),
-      ...data,
-    })
-
-    em.persist(newTag)
-    return newTag
-  },
-
-  createTagging: (
-    em: EntityManager,
-    references: { tag: Tag },
-    data?: Partial<Tagging>,
-  ): Tagging => {
-    const tagging = new Tagging()
-    wrap(tagging).assign(
-      {
-        ...generate.tagging.userfileDefaults(),
-        tag: references.tag,
-        ...data,
-      },
-      { em },
-    )
-
-    references.tag.taggings.add(tagging)
-    references.tag.taggingCount++
-    em.persist(tagging)
-    return tagging
-  },
-}
-
 const spacesHelper = {
   create: (em: EntityManager, data?: Partial<Space>): Space => {
     const space = wrap(new Space()).assign({

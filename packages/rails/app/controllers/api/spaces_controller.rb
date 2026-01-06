@@ -124,7 +124,7 @@ module Api
       user_files, assets, apps, workflows = grouped.values_at("file", "asset", "app", "workflow")
       files = Array(user_files) + Array(assets)
 
-      copy_files_to_space(files)
+      https_apps_client.copy_nodes(files.map(&:id), @space.scope, params[:folder_id])
       workflows&.each { |workflow| workflow_copy_service.copy(workflow, @space.scope, params[:properties]) }
       apps&.each { |app| app_copy_service.copy(app, @space.scope, params[:properties]) }
 
@@ -194,43 +194,6 @@ module Api
     def send_emails(space)
       space.leads.find_each do |lead|
         https_apps_client.email_send(NotificationPreference.email_types[:space_activated], { id: lead.id }) # id is membership id
-      end
-    end
-
-    # Copy files to a space using the worker.
-    def copy_files_to_space(files)
-      return if files.blank?
-
-      prepare_files_to_copy(files)
-
-      forward_header = RequestContext.instance.forward_header
-      FileCopyWorker.perform_async(
-        @space.scope,
-        files.map(&:id),
-        params[:folder_id],
-        session_auth_params,
-        forward_header,
-      )
-    end
-
-    # Create initial copies of files with a COPYING state, in order to show them in the UI.
-    def prepare_files_to_copy(files)
-      destination_project = UserFile.publication_project!(current_user, @space.scope)
-
-      UserFile.transaction do
-        files.each do |file|
-          next if !file.closed? ||
-                  file.project == destination_project ||
-                  UserFile.exists?(dxid: file.dxid, project: destination_project)
-
-          CopyService::FileCopier.copy_record(
-            file,
-            @space.scope,
-            destination_project,
-            state: UserFile::STATE_COPYING,
-            scoped_parent_folder_id: params[:folder_id],
-          )
-        end
       end
     end
 

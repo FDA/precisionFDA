@@ -63,7 +63,7 @@ export class Job extends ScopedEntity {
   dxid: DxId<'job'>
 
   @Property()
-  project: string
+  project: DxId<'project'>
 
   @Property()
   state: JOB_STATE

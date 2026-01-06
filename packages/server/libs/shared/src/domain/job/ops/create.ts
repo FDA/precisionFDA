@@ -27,11 +27,12 @@ import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from '@shared/config/constants'
 import { getPluralizedTerm } from '@shared/utils/format'
 import { JobCreateResponse } from '@shared/platform-client/platform-client.responses'
 import { AppRepository } from '@shared/domain/app/app.repository'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
   private jobInput: AnyObject
-  private projectId: string
+  private projectId: DxId<'project'>
   private instance: typeof allowedInstanceTypes
   private readonly inputFiles: UserFile[] = []
 

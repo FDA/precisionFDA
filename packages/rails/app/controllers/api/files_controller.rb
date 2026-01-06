@@ -359,33 +359,6 @@ module Api
       render json: @file, adapter: :json
     end
 
-    # POST /api/files/copy
-    # Copies selected files and/or folders to another scope (space, public, private).
-    def copy
-      nodes = Node.accessible_by(@context).where(id: params[:item_ids])
-
-      verify_nodes_for_protection(nodes, "copy")
-      verify_nodes_for_locked(nodes, "copy")
-      verify_target_scope_for_protection(nodes, params[:scope])
-
-      forward_header = RequestContext.instance.forward_header
-      NodeCopyWorker.perform_async(
-        params[:scope],
-        nodes.pluck(:id),
-        params[:folder_id] || nil,
-        session_auth_params,
-        forward_header,
-      )
-
-      render json: nodes, root: "nodes", adapter: :json,
-             meta: {
-               messages: [{
-                 type: "success",
-                 message: I18n.t("api.files.copy.files_are_copying"),
-               }],
-             }
-    end
-
     # used in POST /api/files/download_list
     # Filtering nodes for locking and unlocking.
     def process_nodes(task)
