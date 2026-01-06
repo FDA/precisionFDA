@@ -124,69 +124,6 @@ RSpec.describe Api::FilesController, type: :controller do
     end
   end
 
-  describe "POST copy" do
-    context "when user is authenticated" do
-      let(:space) { create(:space, :review, :active, host_lead_id: user.id) }
-
-      let(:file_one) { create(:user_file, :private, user: user) }
-      let(:folder_one) { create(:folder, :private, user: user) }
-      let(:file_two) { create(:user_file, :private, user: user, scoped_parent_folder: folder_one) }
-      let(:file_other) { create(:user_file, :private, user: create(:user)) }
-
-      before do
-        travel_to Time.current
-        authenticate!(user)
-      end
-
-      it "copies files and folders" do
-        allow(NodeCopyWorker).to receive(:perform_async)
-
-        node_ids = [file_one.id, folder_one.id, file_two.id, file_other.id]
-
-        post :copy, params: {
-          scope: space.uid,
-          item_ids: node_ids,
-        }, format: :json
-
-        user_session = context_attributes_for(user).stringify_keys
-
-        expect(NodeCopyWorker).to have_received(:perform_async).
-          with(space.scope, node_ids[0..-2], nil, user_session, {})
-
-        expect(response).to be_successful
-      end
-
-      context "when user doesn't have contributor access to a scope" do
-        let(:space) do
-          another_user = create(:user)
-          create(
-            :space,
-            :review,
-            :active,
-            host_lead_id: another_user.id,
-          )
-        end
-
-        it "responds with an error" do
-          post :copy, params: {
-            scope: space.uid,
-            item_ids: [1, 2],
-          }
-
-          expect(response).to be_unprocessable
-        end
-      end
-    end
-
-    context "when user is not authenticated" do
-      before do
-        post :copy, params: { scope: "space-1", node_ids: [1, 2] }
-      end
-
-      it_behaves_like "unauthenticated"
-    end
-  end
-
   describe "PUT feature files and folders" do
     context "when user is authenticated" do
       let(:folder_one) { create(:folder, :public, user: admin) }

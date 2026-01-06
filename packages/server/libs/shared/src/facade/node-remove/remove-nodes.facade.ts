@@ -144,6 +144,7 @@ export class RemoveNodesFacade {
     return await this.em.transactional(async () => {
       await this.licensedItemService.removeItemLicensedForNode(fileToRemove.id)
       await this.taggingService.removeTaggings(fileToRemove.id, TAGGABLE_TYPE.NODE)
+
       if (fileToRemove.stiType === FILE_STI_TYPE.ASSET) {
         await this.archiveEntryService.removeArchiveEntriesForNode(fileToRemove.id)
       }

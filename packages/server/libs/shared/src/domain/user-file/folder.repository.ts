@@ -4,13 +4,14 @@ import { SCOPE } from '@shared/types/common'
 import { Folder } from './folder.entity'
 import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { User } from '@shared/domain/user/user.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 type FindForUser = {
   userId: number
 }
 
 type FindForSynchronization = FindForUser & {
-  projectDxid: string
+  projectDxid: DxId<'project'>
 }
 
 type FindRemote = {

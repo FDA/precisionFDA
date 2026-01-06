@@ -13,6 +13,8 @@ import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 
 interface FilesByFolder {
   [key: string]: Node[]
@@ -33,6 +35,25 @@ export class NodeHelper {
     private readonly folderRepo: FolderRepository,
     private readonly nodeRepo: NodeRepository,
   ) {}
+
+  async generateUid(dxId: DxId<'file'>): Promise<Uid<'file'>> {
+    const allNodes = await this.nodeRepo.find({ dxid: dxId } as Partial<Node>, {
+      orderBy: { uid: 'DESC' },
+      limit: 1,
+    })
+
+    if (allNodes.length > 0) {
+      const latestUid = allNodes[0].uid
+      const match = latestUid.match(/^(.*-)(\d+)$/)
+      if (match) {
+        const prefix = match[1]
+        const num = parseInt(match[2], 10)
+        return `${prefix}${num + 1}` as Uid<'file'>
+      }
+    }
+
+    return `${dxId}-1` as Uid<'file'>
+  }
 
   async findOldOpenFilesAndAssets(): Promise<FileOrAsset[]> {
     const oneMonthAgo = new Date()

@@ -18,12 +18,40 @@ export class EventHelper {
 
   constructor(private readonly em: EntityManager) {}
 
+  async createFileCopyEvent(
+    sourceFile: FileOrAsset,
+    sourcePath: string,
+    targetFile: FileOrAsset,
+    targetPath: string,
+    user: User,
+  ): Promise<Event> {
+    const event = new Event()
+    const organization = await user.organization.load()
+    const data = JSON.stringify({
+      source_uid: sourceFile.uid,
+      source_name: sourceFile.name,
+      source_path: sourcePath,
+      source_scope: sourceFile.scope,
+      target_uid: targetFile.uid,
+      target_name: targetFile.name,
+      target_path: targetPath,
+      target_scope: targetFile.scope,
+    })
+    wrap(event).assign({
+      type: EVENT_TYPES.FILE_COPIED,
+      orgHandle: organization.handle,
+      dxuser: user.dxuser,
+      param1: sourceFile.dxid,
+      param2: targetFile.dxid,
+      data,
+    })
+    return event
+  }
+
   async createAndPersistDeleteSpaceEvent(user: User, space: Space): Promise<Event> {
     this.logger.log(`Creating SPACE_DELETED event for space ID ${space.id} and user ${user.dxuser}`)
     const event = new Event()
-    const organization = user.organization.isInitialized()
-      ? user.organization.getEntity()
-      : await user.organization.load()
+    const organization = await user.organization.load()
     wrap(event).assign({
       type: EVENT_TYPES.SPACE_DELETED,
       orgHandle: organization.handle,
@@ -43,9 +71,7 @@ export class EventHelper {
     param3?: string,
   ): Promise<Event> {
     const event = new Event()
-    const organization = user.organization.isInitialized()
-      ? user.organization.getEntity()
-      : await user.organization.load()
+    const organization = await user.organization.load()
     const data = JSON.stringify({
       id: file.id,
       scope: file.scope,
@@ -71,9 +97,7 @@ export class EventHelper {
     user: User,
   ): Promise<Event> {
     const event = new Event()
-    const organization = user.organization.isInitialized()
-      ? user.organization.getEntity()
-      : await user.organization.load()
+    const organization = await user.organization.load()
     const data = JSON.stringify({
       id: folder.id,
       scope: folder.scope,
@@ -95,9 +119,7 @@ export class EventHelper {
 
 const createAppCreated = async (user: User, app: App): Promise<Event> => {
   const event = new Event()
-  const organization = user.organization.isInitialized()
-    ? user.organization.getEntity()
-    : await user.organization.load()
+  const organization = await user.organization.load()
   wrap(event).assign({
     type: EVENT_TYPES.APP_CREATED,
     orgHandle: organization.handle,
@@ -110,9 +132,7 @@ const createAppCreated = async (user: User, app: App): Promise<Event> => {
 
 const createAppPublished = async (app: App, user: User, scope: string): Promise<Event> => {
   const event = new Event()
-  const organization = user.organization.isInitialized()
-    ? user.organization.getEntity()
-    : await user.organization.load()
+  const organization = await user.organization.load()
   wrap(event).assign({
     type: EVENT_TYPES.APP_PUBLISHED,
     orgHandle: organization.handle,
@@ -125,9 +145,7 @@ const createAppPublished = async (app: App, user: User, scope: string): Promise<
 
 const createDbClusterPasswordRotated = async (user: User, dbCluster: DbCluster): Promise<Event> => {
   const event = new Event()
-  const organization = user.organization.isInitialized()
-    ? user.organization.getEntity()
-    : await user.organization.load()
+  const organization = await user.organization.load()
   wrap(event).assign({
     type: EVENT_TYPES.DBCLUSTER_PASSWORD_ROTATED,
     orgHandle: organization.handle,
@@ -149,7 +167,7 @@ const createJobClosed = async (
       ? job.app.getEntity()
       : await job.app.load()
     : undefined
-  const organization = await user.organization?.load()
+  const organization = await user.organization.load()
   wrap(event).assign({
     type: EVENT_TYPES.JOB_CLOSED,
     orgHandle: organization ? organization.handle : 'no-org',

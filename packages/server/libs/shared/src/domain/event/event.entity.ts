@@ -9,6 +9,7 @@ export enum EVENT_TYPES {
   FOLDER_UNLOCKED = 'Event::FolderUnlocked',
   FILE_ABANDONED = 'Event::FileAbandoned',
   FILE_DELETED = 'Event::FileDeleted',
+  FILE_COPIED = 'Event::FileCopied',
   FILE_BULK_DOWNLOAD = 'Event::FileBulkDownload',
   FILE_LOCKED = 'Event::FileLocked',
   FILE_UNLOCKED = 'Event::FileUnlocked',

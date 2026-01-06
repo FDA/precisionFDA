@@ -41,21 +41,7 @@ RSpec.describe Api::SpacesController, type: :controller do
       allow(CopyService::AppCopier).to receive(:new).and_return(app_copy_service)
       allow(ActiveRecord::Base.connection).to receive(:commit_db_transaction)
       stub_request(:post, "https://localhost:3001/emails/typed")
-    end
-
-    it "copies files" do
-      file = create(:user_file, :private, user: user)
-      folder = create(:folder, scope: space.scope, scoped_parent_folder_id: nil)
-
-      allow(FileCopyWorker).to receive(:perform_async)
-
-      post :add_data, params: { id: space.id, uids: [file.uid], folder_id: folder.id }, format: :json
-
-      user_session = context_attributes_for(user).stringify_keys
-
-      expect(FileCopyWorker).to have_received(:perform_async).
-        with(space.scope, [file.id], folder.id.to_s, user_session, {})
-      expect(response).to be_successful
+      stub_request(:post, "https://localhost:3001/nodes/copy")
     end
 
     it "copies apps" do

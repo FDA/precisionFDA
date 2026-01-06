@@ -10,6 +10,8 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
 import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
+import { NodesCopyDTO } from '@shared/domain/user-file/dto/nodes-copy.dto'
+import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 
 @UseGuards(UserContextGuard)
 @Controller('/nodes')
@@ -21,7 +23,14 @@ export class NodesController {
     private readonly removeNodesFacade: RemoveNodesFacade,
     private readonly lockNodeFacade: LockNodeFacade,
     private readonly unlockNodeFacade: UnlockNodeFacade,
+    private readonly fileSyncQueueJobProducer: FileSyncQueueJobProducer,
   ) {}
+
+  @HttpCode(204)
+  @Post('/copy')
+  async copyNodes(@Body() input: NodesCopyDTO): Promise<void> {
+    await this.fileSyncQueueJobProducer.createCopyNodesTask(input, this.user)
+  }
 
   @HttpCode(204)
   @Post('/lock')

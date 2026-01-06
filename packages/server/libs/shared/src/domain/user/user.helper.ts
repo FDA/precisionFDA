@@ -1,9 +1,10 @@
 import { ErrorCodes, NotFoundError } from '../../errors'
 import { ORG_HANDLE_MAX_LENGTH, PFDA_PREFIX } from '../org/org.utils'
 import { User } from './user.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 // right now, we run everything under user private project
-const getProjectToRunApp = (user: User): string => {
+const getProjectToRunApp = (user: User): DxId<'project'> => {
   const projectId = user.privateFilesProject
   if (!projectId) {
     throw new NotFoundError('Private project is not set for given user', {

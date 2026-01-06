@@ -24,7 +24,7 @@ void
     if (!user) {
       throw new UserNotFoundError()
     }
-    const projectId = user.privateFilesProject || ''
+    const projectId = user.privateFilesProject
     // todo: run for more than this project?
     // todo: this will still not work properly for scopes -> make sure we know about that
 

@@ -29,9 +29,9 @@ const CopyToPrivateModalWrapper = ({ type }: Props) => {
     type === 'apps'
       ? copyAppsToPrivate
       : (ids: number[]) =>
-          fetch('/api/files/copy', {
+          fetch('/api/v2/nodes/copy', {
             method: 'POST',
-            body: JSON.stringify({ item_ids: ids, scope: 'private' }),
+            body: JSON.stringify({ ids, scope: 'private' }),
             headers: { 'Content-Type': 'application/json' },
           }).then(r => r.json())
 

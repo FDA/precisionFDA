@@ -224,7 +224,7 @@ export class JobService implements SearchableByUid<'job'> {
       const remappedOutput = this.remapFiles(output)
 
       const projectDxId = job.project ? job.project : user.privateFilesProject
-      const outputFiles = await this.getOutputFiles(uniqueFileDxIds, projectDxId!, user, job)
+      const outputFiles = await this.getOutputFiles(uniqueFileDxIds, projectDxId, user, job)
 
       await this.persistFiles(outputFiles, user)
 
@@ -279,7 +279,7 @@ export class JobService implements SearchableByUid<'job'> {
 
   private async getOutputFiles(
     fileDxids: string[],
-    projectDxid: string,
+    projectDxid: DxId<'project'>,
     user: User,
     job: Job,
   ): Promise<UserFile[]> {
@@ -345,7 +345,7 @@ export class JobService implements SearchableByUid<'job'> {
 
   private createFile(
     user: User,
-    projectDxId: string,
+    projectDxId: DxId<'project'>,
     fileStateResult: FileStateResult,
     job: Job,
     parentFolder: Folder | null,
@@ -358,7 +358,7 @@ export class JobService implements SearchableByUid<'job'> {
     const file = new UserFile(user)
     file.dxid = fileStateResult.id
     file.uid = `${fileStateResult.id}-1`
-    file.project = projectDxId!
+    file.project = projectDxId
     file.name = fileStateResult.describe.name
     file.state = FILE_STATE_DX.CLOSED
     file.fileSize = fileStateResult.describe.size

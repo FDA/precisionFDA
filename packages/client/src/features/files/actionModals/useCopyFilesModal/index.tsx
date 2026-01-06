@@ -262,10 +262,10 @@ export const useCopyFilesModal = ({
   const mutation = useMutation({
     mutationKey: ['copy-to-space', 'files'],
     mutationFn: (space: string) => copyFilesRequest(space, Array.from(copyIds.values()), selectedFolderId),
-    onSuccess: (res: unknown) => {
+    onSuccess: () => {
       if (onSuccess) onSuccess()
       setShowModal(false)
-      displayPayloadMessage(res as Payload)
+      toast.success('Copying has started')
     },
     onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error

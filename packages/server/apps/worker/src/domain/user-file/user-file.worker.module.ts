@@ -13,6 +13,7 @@ import { FollowUpDecider } from './follow-up-decider'
 import { FileSyncQueueProcessor } from './processor/file-sync-queue.processor'
 import { NodeUnlockFacadeModule } from '@shared/facade/node-unlock/node-unlock-facade.module'
 import { NodeLockFacadeModule } from '@shared/facade/node-lock/node-lock-facade.module'
+import { CopyNodesFacadeModule } from '@shared/facade/node-copy/copy-nodes-facade.module'
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { NodeLockFacadeModule } from '@shared/facade/node-lock/node-lock-facade.
     NotificationModule,
     RemoveNodesFacadeModule,
     NodeUnlockFacadeModule,
+    CopyNodesFacadeModule,
     NodeLockFacadeModule,
     UserFacadeModule,
   ],

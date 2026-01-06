@@ -7,6 +7,7 @@ import { APIResource } from '../home/types'
 import { mockCopyToSpaceFiles } from '../../mocks/handlers/files.handlers'
 import { mockCopyToSpaceApps } from '../../mocks/handlers/apps.handlers'
 import { useCopyToSpaceModal } from './useCopyToSpace'
+import { toast } from 'react-toastify'
 
 const meta: Meta = {
   title: 'Modals/Common',
@@ -33,8 +34,8 @@ const CopyToSpaceModalWrapper = ({ type }: Props) => {
     selected: mockData,
     resource: type,
     updateFunction,
-    onSuccess: (res) => {
-      console.log('Copy successful:', res)
+    onSuccess: () => {
+      toast.success('Copying to space started')
     },
   })
 

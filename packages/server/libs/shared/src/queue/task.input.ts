@@ -3,6 +3,7 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import type { EmailSendInput } from '../domain/email/email.config'
 import type { UserCtx } from '../types'
+import { NodesCopyDTO } from '@shared/domain/user-file/dto/nodes-copy.dto'
 
 export type Task = {
   type: TASK_TYPE
@@ -42,6 +43,7 @@ export enum TASK_TYPE {
   WORKSTATION_SNAPSHOT = 'workstation_snapshot',
   LOCK_NODES = 'lock_nodes',
   UNLOCK_NODES = 'unlock_nodes',
+  COPY_NODES = 'copy_nodes',
   ADMIN_DATA_CONSISTENCY_REPORT = 'admin_data_consistency_report',
   USER_INACTIVITY_ALERT = 'user_inactivity_alert',
   USER_DATA_CONSISTENCY_REPORT = 'user_data_consistency_report',
@@ -55,6 +57,11 @@ export enum TASK_TYPE {
 // will be used in the sub-handler
 export type BasicUserJob = TaskWithAuth & {
   type: TASK_TYPE.USER_CHECKUP | TASK_TYPE.CHECK_USER_JOBS
+}
+
+export type CopyNodesJob = TaskWithAuth & {
+  type: TASK_TYPE.COPY_NODES
+  payload: NodesCopyDTO
 }
 
 export type CheckStatusJob = TaskWithAuth & {
