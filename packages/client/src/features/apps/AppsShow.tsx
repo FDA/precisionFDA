@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
 import { HomeLabel } from '../../components/HomeLabel'
-import { Markdown } from '../../components/Markdown'
 import { ActionsMenu } from '../../components/Menu'
 import { RevisionMenu } from '../../components/Menu/RevisionMenu'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
@@ -44,7 +43,7 @@ export type AppShowOutletContext = {
   appUid: string
 }
 
-const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeScope) => {
+const renderOptions = (app: IApp, meta: { release: string }) => {
   const spaceId = getSpaceIdFromScope(app.scope)
   const columns = [
     {
@@ -173,7 +172,7 @@ export const AppsShow = ({
   appUid,
   spaceId,
   isContributorOrHigher,
-  homeContext = defaultHomeContext
+  homeContext = defaultHomeContext,
 }: {
   appUid: string
   spaceId?: string
@@ -259,7 +258,7 @@ export const AppsShow = ({
           </div>
         </ResourceHeader>
 
-        {renderOptions(app, meta, homeScope)}
+        {renderOptions(app, meta)}
         {app.tags.length > 0 && (
           <MetadataSection>
             <MetadataRow>

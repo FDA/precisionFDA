@@ -19,7 +19,6 @@ export const BooleanRadioButtons = ({
   value,
   onChange,
   onBlur,
-  disabled,
   optional,
 }: {
   value?: 'true' | 'false' | boolean

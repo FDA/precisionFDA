@@ -3,11 +3,12 @@ import storybook from 'eslint-plugin-storybook'
 
 // @ts-check
 import eslint from '@eslint/js'
-import tseslint from 'typescript-eslint'
+import eslintConfigPrettier from 'eslint-config-prettier'
+import eslintPluginImport from 'eslint-plugin-import'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import eslintPluginReact from 'eslint-plugin-react'
 import * as reactHooks from 'eslint-plugin-react-hooks'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
-import eslintConfigPrettier from 'eslint-config-prettier'
+import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -17,15 +18,15 @@ export default tseslint.config(
   jsxA11y.flatConfigs.recommended,
   eslintConfigPrettier,
   {
-    plugins: { 'react-hooks': reactHooks },
+    plugins: { 'react-hooks': reactHooks, import: eslintPluginImport },
     rules: {
-      // '@typescript-eslint/no-explicit-any': 'off',
-      // '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'no-shadow': 'off',
       'dot-notation': 'off',
       '@typescript-eslint/no-shadow': ['error'],
       '@typescript-eslint/no-empty-function': 'off',
-      'camelcase': 'off',
+      camelcase: 'off',
       'react/prop-types': 'off',
       'react/require-default-props': 'off',
       'react/jsx-props-no-spreading': 'off',
@@ -33,12 +34,15 @@ export default tseslint.config(
       'comma-dangle': ['error', 'always-multiline'],
       'no-redeclare': 'off',
       'no-plusplus': 'off',
+      'import/no-unresolved': 'error',
+      'import/no-cycle': 'warn',
+      'import/no-self-import': 'error',
       'react/function-component-definition': 'off',
       'react/destructuring-assignment': 'off',
       'no-prototype-builtins': 'off',
       'arrow-body-style': 'off',
-      'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.jsx']}],
-      'object-curly-spacing': ['error', 'always', { objectsInObjects: false, arraysInObjects: false }],
+      'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.jsx'] }],
+      'object-curly-spacing': ['error', 'always', { objectsInObjects: true, arraysInObjects: true }],
       'no-param-reassign': [
         2,
         {
