@@ -74,7 +74,7 @@ export class Folder extends Node {
   // All of its children are stored at the root of the dx project instead of inside the correct
   // platform folder.
   isPFDAOnly(): boolean {
-    return this.project === undefined
+    return this.project === null
   }
 
   isPublishable(): boolean {

@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
@@ -7,7 +6,8 @@ import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '@shared/test'
 import { expect } from 'chai'
-import { database } from '../../../src/database'
+import { database } from '@shared/database'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 
 describe('FolderRepository tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -63,7 +63,7 @@ describe('FolderRepository tests', () => {
   })
 
   it('findForUser', async () => {
-    const repo = em.getRepository(Folder)
+    const repo: FolderRepository = em.getRepository(Folder)
     let result1 = await repo.findForUser({ userId: user1.id })
     expect(result1).to.have.length(2)
     expect(result1[0].name).to.equal('user1_folder1')
@@ -76,7 +76,7 @@ describe('FolderRepository tests', () => {
   })
 
   it('findAllPFDAOnlyFolders', async () => {
-    const repo = em.getRepository(Folder)
+    const repo: FolderRepository = em.getRepository(Folder)
     const results = await repo.findAllPFDAOnlyFolders()
     expect(results[0].isPFDAOnly()).to.be.true()
     expect(results[1].isPFDAOnly()).to.be.true()
@@ -85,7 +85,7 @@ describe('FolderRepository tests', () => {
   })
 
   it('findPFDAOnlyFoldersForUser', async () => {
-    const repo = em.getRepository(Folder)
+    const repo: FolderRepository = em.getRepository(Folder)
     const results = await repo.findPFDAOnlyFoldersForUser({ userId: user1.id })
     expect(results[0].isPFDAOnly()).to.be.true()
     const names = results.map((x) => x.name)
