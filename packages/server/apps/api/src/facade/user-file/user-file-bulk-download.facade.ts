@@ -48,7 +48,6 @@ export class UserFileBulkDownloadFacade {
   ): Promise<BulkDownloadFiles> {
     this.logger.log(`composing files for bulk download fileIds ${fileIds}, folderId ${folderId}`)
     const loadedUser = await this.userCtx.loadEntity()
-    await this.em.populate(loadedUser, ['spaceMemberships', 'spaceMemberships.spaces'])
     let nodes = await this.getAccessibleNodes(fileIds)
 
     const warnings = this.nodeHelper.getWarningsForUnclosedFiles(nodes)
