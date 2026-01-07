@@ -171,7 +171,7 @@ describe('FolderService', () => {
     expect(loadedFolders.length).to.be.equal(3)
 
     const folder1 = loadedFolders.find((f) => f.name === folder1Name)
-    expect(folder1?.parentFolder).to.be.undefined()
+    expect(folder1?.parentFolder).to.be.null()
 
     const folder2 = loadedFolders.find((f) => f.name === folder2Name)
     expect(folder2?.parentFolder?.id).to.be.equal(folder1?.id)

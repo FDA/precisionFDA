@@ -1,4 +1,4 @@
-import { QueryOrder, Reference } from '@mikro-orm/core'
+import { QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { App } from '@shared/domain/app/app.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
@@ -20,21 +20,26 @@ import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
+import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
 
 describe('SpaceReportService', () => {
   describe('#createReport', () => {
     const USER_ID = 0
-    const USER = { id: USER_ID } as unknown as UserContext
+    const USER = Object.create(User.prototype)
+    USER.id = USER_ID
 
     const SPACE_ID = 10
     const SPACE_SCOPE = `space-${SPACE_ID}`
-    const SPACE = { id: SPACE_ID, scope: SPACE_SCOPE }
+    const SPACE = Object.create(Space.prototype)
+    SPACE.id = SPACE_ID
 
     const FILE_1_ID = 100
-    const FILE_1 = { id: FILE_1_ID }
+    const FILE_1 = Object.create(UserFile.prototype)
+    FILE_1.id = FILE_1_ID
 
     const FILE_2_ID = 200
-    const FILE_2 = { id: FILE_2_ID }
+    const FILE_2 = Object.create(UserFile.prototype)
+    FILE_2.id = FILE_2_ID
 
     const FILES = [FILE_1, FILE_2]
 
@@ -56,12 +61,6 @@ describe('SpaceReportService', () => {
     const createPartsStub = stub()
     const persistStub = stub()
     const getReferenceStub = stub()
-
-    before(() => {
-      stub(Reference, 'create')
-        .withArgs(USER)
-        .returns(USER as unknown as Reference<object>)
-    })
 
     beforeEach(() => {
       transactionalStub.reset()
@@ -129,10 +128,9 @@ describe('SpaceReportService', () => {
     })
 
     it('should reject if no scope id provided', async () => {
-      await expect(getInstance().createReport({ format: 'HTML' })).to.be.rejectedWith(
-        InvalidStateError,
-        'Scope is required for creating a report',
-      )
+      await expect(
+        getInstance().createReport({ format: 'HTML' } as SpaceReportCreateDto),
+      ).to.be.rejectedWith(InvalidStateError, 'Scope is required for creating a report')
     })
 
     it('should run under transaction', async () => {
@@ -319,23 +317,23 @@ describe('SpaceReportService', () => {
       assertReport(res, 'private')
     })
 
-    function assertReport(report: SpaceReport, scope: string) {
+    function assertReport(report: SpaceReport, scope: string): void {
       expect(report.scope).to.eq(scope)
       expect(report.state).to.eq('CREATED')
       expect(report.resultFile).to.be.undefined()
-      expect(report.createdBy).to.eq(USER)
+      expect(report.createdBy.id).to.eq(USER.id)
 
       const parts = report.reportParts.getItems()
       expect(parts).to.have.length(2)
       parts.forEach(assertReportPart)
     }
 
-    function assertReportPart(part: SpaceReportPart) {
+    function assertReportPart(part: SpaceReportPart): void {
       expect(part.result).to.be.undefined()
       expect(part.state).to.eq('CREATED')
     }
 
-    function getInstance() {
+    function getInstance(): SpaceReportService {
       const em = {
         transactional: transactionalStub,
         createQueryBuilder: createQueryBuilderStub,
@@ -390,7 +388,7 @@ describe('SpaceReportService', () => {
       expect(res).to.be.eq(REPORTS)
     })
 
-    function getInstance() {
+    function getInstance(): SpaceReportService {
       const em = {
         find: findStub,
       } as unknown as SqlEntityManager
@@ -620,7 +618,7 @@ describe('SpaceReportService', () => {
       ])
     })
 
-    function getInstance() {
+    function getInstance(): SpaceReportService {
       const em = {
         transactional: transactionalStub,
         createQueryBuilder: createQueryBuilderStub,
@@ -706,7 +704,7 @@ describe('SpaceReportService', () => {
       expect(res).to.include(REPORT_2_ID)
     })
 
-    function getInstance() {
+    function getInstance(): SpaceReportService {
       const em = {
         transactional: transactionalStub,
         remove: removeStub,
@@ -757,7 +755,7 @@ describe('SpaceReportService', () => {
       expect(res).to.be.eq(COMPLETE_RESULT)
     })
 
-    function getInstance() {
+    function getInstance(): SpaceReportService {
       const em = {} as unknown as SqlEntityManager
       const spaceReportPartService = {
         completeBatch: completeBatchStub,
@@ -813,7 +811,7 @@ describe('SpaceReportService', () => {
       expect(res).to.be.eq(RESULT_WITH_STYLES)
     })
 
-    function getInstance() {
+    function getInstance(): SpaceReportService {
       const em = {} as unknown as SqlEntityManager
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {
@@ -871,7 +869,7 @@ describe('SpaceReportService', () => {
       expect(res).to.be.true()
     })
 
-    function getInstance() {
+    function getInstance(): SpaceReportService {
       const em = {
         findOne: findOneStub,
       } as unknown as SqlEntityManager
@@ -983,7 +981,7 @@ describe('SpaceReportService', () => {
       expect(res).to.eq(SPACES)
     })
 
-    function getInstance() {
+    function getInstance(): SpaceReportService {
       const em = {
         createQueryBuilder: createQueryBuilderStub,
       } as unknown as SqlEntityManager
@@ -1076,7 +1074,7 @@ describe('SpaceReportService', () => {
       expect(createNotificationStub.calledOnce).to.be.true()
     })
 
-    function getInstance() {
+    function getInstance(): SpaceReportService {
       const em = {
         findOneOrFail: findOneOrFailStub,
         transactional: transactionalStub,

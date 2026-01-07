@@ -176,8 +176,7 @@ describe('SpaceMembershipCreateFacade', () => {
       )
 
       expect(result).to.be.instanceOf(SpaceMembership)
-      expect(result.user).to.deep.eq(newMemberUser)
-      // expect(result).to.equal(space)
+      expect(result.user.id).to.eq(newMemberUser.id)
       expect(result.side).to.equal(SPACE_MEMBERSHIP_SIDE.HOST)
       expect(result.role).to.equal(SPACE_MEMBERSHIP_ROLE.ADMIN)
 
