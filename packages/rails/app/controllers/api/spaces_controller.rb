@@ -124,7 +124,14 @@ module Api
       user_files, assets, apps, workflows = grouped.values_at("file", "asset", "app", "workflow")
       files = Array(user_files) + Array(assets)
 
-      https_apps_client.copy_nodes(files.map(&:id), @space.scope, params[:folder_id])
+      if files.any?
+        https_apps_client.copy_nodes(
+          files.map(&:id),
+          @space.scope,
+          params[:folder_id]
+        )
+      end
+
       workflows&.each { |workflow| workflow_copy_service.copy(workflow, @space.scope, params[:properties]) }
       apps&.each { |app| app_copy_service.copy(app, @space.scope, params[:properties]) }
 
