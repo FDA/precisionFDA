@@ -15,11 +15,9 @@
 #  space_id             :integer
 #  state                :integer          default("unactivated"), not null
 #  space_type           :integer          default("groups"), not null
-#  verified             :boolean          default(FALSE), not null
 #  protected            :boolean          default(FALSE)
 #  hidden               :boolean          default(FALSE)
 #  sponsor_org_id       :integer
-#  restrict_to_template :boolean          default(FALSE)
 #  inactivity_notified  :boolean          default(FALSE)
 #
 #
@@ -93,7 +91,6 @@ class Space < ActiveRecord::Base
   scope :non_groups, -> { where.not(space_type: :groups) }
   scope :admin_spaces, -> { where(space_type: :administrator) }
   scope :undeleted, -> { where.not(state: :deleted) }
-  scope :restricted, -> { confidential.where(restrict_to_template: true) }
   scope :with_deleted, -> { unscope(where: :state) }
   scope :only_deleted, -> { with_deleted.where(state: :deleted) }
   scope :editable_by, lambda { |context|
@@ -105,7 +102,7 @@ class Space < ActiveRecord::Base
         user: context.user,
         role: SpaceMembership::ROLES_CAN_EDIT,
       },
-    ).where.not(id: restricted)
+    )
 
     query.joins(:space_memberships).distinct
   }
@@ -276,8 +273,7 @@ class Space < ActiveRecord::Base
   end
 
   def verified?
-    return false if space_type != "verification"
-    verified ? true : false
+    false
   end
 
   # this is always false for confidential review spaces
@@ -492,14 +488,9 @@ class Space < ActiveRecord::Base
       space_memberships.active.exists?(
         user: user,
         role: SpaceMembership::ROLES_CAN_EDIT,
-      ) &&
-      !(restrict_to_template? && confidential?)
+      )
   end
 
-  # def updatable_by?(user)
-  #   active? && (user.review_space_admin? && reviewer? ||
-  #     space_memberships.active.lead_or_admin.exists?(user: user))
-  # end
 
   # Checks if user is able to update a space via Edit page.
   # @return [Boolean] Returns true if user is able to update a space, false otherwise.

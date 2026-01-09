@@ -15,9 +15,7 @@
 #  space_id             :integer
 #  state                :integer          default("unactivated"), not null
 #  space_type           :integer          default("groups"), not null
-#  verified             :boolean          default(FALSE), not null
 #  sponsor_org_id       :integer
-#  restrict_to_template :boolean          default(FALSE)
 #  inactivity_notified  :boolean          default(FALSE)
 #
 

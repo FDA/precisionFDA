@@ -15,7 +15,7 @@ RSpec.describe ApiController, type: :controller do
   let(:folder_one) { create(:folder, :private) }
   let(:folder_two) { create(:folder) }
   let(:verified_space) do
-    FactoryBot.create(:space, :verification, :verified, host_lead_id: user.id)
+    FactoryBot.create(:space, :verification, host_lead_id: user.id)
   end
   let(:verified_space_uid) { verified_space.uid }
   let(:review_space) do

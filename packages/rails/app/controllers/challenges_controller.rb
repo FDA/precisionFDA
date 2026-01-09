@@ -3,9 +3,9 @@
 class ChallengesController < ApplicationController
   skip_before_action :require_login,
                      only: %i(index consistency truth appathons join show treasure_old)
-  before_action :check_on_challenge_admin, only: %i(new create)
+  before_action :check_on_challenge_admin, only: %i(new)
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
-  before_action :check_scope_accessibility, only: %i(create update)
+  before_action :check_scope_accessibility, only: %i(update)
   layout "react", only: %i(index show)
 
   def index; end
@@ -16,52 +16,10 @@ class ChallengesController < ApplicationController
     js time_zone: time_zone
   end
 
-  def create
-    ActiveRecord::Base.transaction do
-      @challenge = Challenge.new(challenge_params)
-
-      if @challenge.save
-        @challenge.update_card_image_url!
-        @challenge.provision_space!(
-          @context,
-          challenge_params[:host_lead_dxuser],
-          challenge_params[:guest_lead_dxuser],
-        )
-        redirect_to challenge_path(@challenge)
-      else
-        js challenge_params.to_h
-        render action: :new
-      end
-    end
-  end
 
   def edit
     time_zone = ActiveSupport::TimeZone.find_tzinfo(@context.user.time_zone).to_s
     js card_image_url: @challenge.card_image_url, card_image_id: @challenge.card_image_id, time_zone: time_zone
-  end
-
-  def update
-    ActiveRecord::Base.transaction do
-      if @challenge.update(update_challenge_params)
-        @challenge.update_card_image_url!
-        @challenge.update_order(challenge_params["replacement_id"])
-
-        unless @challenge.space
-          @challenge.provision_space!(
-            @context,
-            challenge_params[:host_lead_dxuser],
-            challenge_params[:guest_lead_dxuser],
-          )
-        end
-
-        flash[:success] = "The challenge was updated successfully."
-        redirect_to challenge_path(@challenge)
-      else
-        time_zone = ActiveSupport::TimeZone.find_tzinfo(@context.user.time_zone).to_s
-        js update_challenge_params.to_h, time_zone: time_zone
-        render action: :edit
-      end
-    end
   end
 
   # rubocop:todo Metrics/MethodLength

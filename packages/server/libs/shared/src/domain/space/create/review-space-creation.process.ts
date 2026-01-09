@@ -93,7 +93,6 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
       guestDxOrg: sharedSpace.guestDxOrg,
       spaceId: sharedSpace.id,
       sponsorOrgId: null,
-      restrictToTemplate: false,
       spaceMemberships: [],
       spaceGroups: [],
       meta: {
