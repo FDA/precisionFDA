@@ -23,11 +23,9 @@ import { SpaceEventService } from '@shared/domain/space-event/space-event.servic
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
-import { InvalidStateError } from '@shared/errors'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import {
-  SpaceMembershipRepository
-} from '@shared/domain/space-membership/space-membership.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 
 /**
  * Facade for copying nodes (files and folders) between different scopes. If user specifies
@@ -75,7 +73,14 @@ export class CopyNodesFacade {
       .filter((node) => node.isFile || node.isAsset)
       .map((n: FileOrAsset) => n.dxid)
 
-    await this.platformClient.projectClone(sourceProject, destinationProject, fileDxIds)
+    try {
+      await this.platformClient.projectClone(sourceProject, destinationProject, fileDxIds)
+    } catch (error: unknown) {
+      // permissions are most likely missing - log and notify user
+      this.logger.error('An error occurred while copying nodes', error as Error)
+      await this.processErrorNotification()
+      return
+    }
 
     let newlyCreatedNodesCount = 0
     let nodesExistingInTarget = []
@@ -148,15 +153,15 @@ export class CopyNodesFacade {
   private async validateNode(node: Node): Promise<void> {
     const result = await this.nodeService.getAccessibleEntityById(node.id)
     if (!result) {
-      throw new Error(`Node with id ${node.id} is not accessible or does not exist`)
+      throw new NotFoundError(`Node with id ${node.id} is not accessible or does not exist`)
     }
 
     await this.nodeService.validateProtectedSpaces('copy', this.user.id, node)
     if ((result.isFile || result.isAsset) && result.state !== 'closed') {
-      throw new Error(`Only files in 'closed' state can be copied.`)
+      throw new InvalidStateError(`Only files in 'closed' state can be copied.`)
     }
     if (result.isFolder && result.state === 'removing') {
-      throw new Error(`Folder in 'removing' state cannot be copied.`)
+      throw new InvalidStateError(`Folder in 'removing' state cannot be copied.`)
     }
   }
 

@@ -124,6 +124,12 @@ module Api
       user_files, assets, apps, workflows = grouped.values_at("file", "asset", "app", "workflow")
       files = Array(user_files) + Array(assets)
 
+      if files.any?(&:created_by_challenge_bot?)
+        render status: :forbidden,
+               json: { error: { message: "Cannot copy challenge-bot files." } }
+        return
+      end
+
       if files.any?
         https_apps_client.copy_nodes(
           files.map(&:id),
