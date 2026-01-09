@@ -75,9 +75,6 @@ export class Space extends BaseEntity {
   meta?: SpaceMeta
 
   @Property()
-  restrictToTemplate?: boolean
-
-  @Property()
   protected?: boolean
 
   @Property()

@@ -36,7 +36,6 @@ RSpec.describe App, type: :model do
     create(
       :space,
       :verification,
-      :verified,
       host_lead_id: host_lead.id,
       guest_lead_id: guest_lead.id,
     )
@@ -45,7 +44,6 @@ RSpec.describe App, type: :model do
     create(
       :space,
       :verification,
-      :non_verified,
       host_lead_id: host_lead.id,
       guest_lead_id: guest_lead.id,
     )

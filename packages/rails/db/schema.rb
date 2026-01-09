@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_10_15_140344) do
+ActiveRecord::Schema.define(version: 2026_01_07_090807) do
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
     t.integer "user_id"
@@ -777,9 +777,7 @@ ActiveRecord::Schema.define(version: 2025_10_15_140344) do
     t.integer "space_id"
     t.integer "state", default: 0, null: false
     t.integer "space_type", default: 0, null: false
-    t.boolean "verified", default: false, null: false
     t.integer "sponsor_org_id"
-    t.boolean "restrict_to_template", default: false
     t.boolean "inactivity_notified", default: false
     t.boolean "protected", default: false
     t.boolean "hidden", default: false

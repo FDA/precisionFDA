@@ -91,20 +91,6 @@ RSpec.describe Permissions do
         end
       end
 
-      context "space restrict_to_template and not shared" do
-        describe "files" do
-          let!(:confid_space) { space.confidential_space(host_contributor_membership) }
-          let!(:file_from_contributor) { create(:user_file, scope: confid_space.uid, parent_id: host_contributor.id, user_id: host_contributor.id) }
-
-          it "nobody can edit content" do
-            confid_space.update(restrict_to_template: true)
-            context = Context.new(host_contributor2.id, host_contributor2.dxuser, "token", 1.hour.from_now.to_i, host_contributor2.org_id)
-
-            expect(file_from_contributor.editable_by?(context)).to eq(false)
-          end
-        end
-      end
-
     end
 
     context "groups space" do
@@ -179,19 +165,6 @@ RSpec.describe Permissions do
 
             expect(file_from_contributor.editable_by?(context)).to eq(true)
             expect(file_from_admin.editable_by?(context)).to eq(true)
-          end
-        end
-      end
-
-      context "space not verified" do
-        describe "files" do
-          let!(:file_from_contributor) { create(:user_file, scope: space.uid, parent_id: host_contributor.id, user_id: host_contributor.id) }
-
-          it "nobody can edit content in verified space" do
-            space.update(verified: true)
-            context = Context.new(host_contributor2.id, host_contributor2.dxuser, "token", 1.hour.from_now.to_i, host_contributor2.org_id)
-
-            expect(file_from_contributor.editable_by?(context)).to eq(false)
           end
         end
       end

@@ -603,7 +603,6 @@ RSpec.describe UserFile, type: :model do
         create(
           :space,
           :verification,
-          :verified,
           host_lead_id: host_lead.id,
           guest_lead_id: guest_lead.id,
         )
@@ -612,7 +611,6 @@ RSpec.describe UserFile, type: :model do
         create(
           :space,
           :verification,
-          :non_verified,
           host_lead_id: host_lead.id,
           guest_lead_id: guest_lead.id,
         )
@@ -623,8 +621,8 @@ RSpec.describe UserFile, type: :model do
       context "when a file is in verified space" do
         before { file_private_one.update(scope: verified.uid) }
 
-        it "is not deletable" do
-          expect(file_private_one.deletable?).to be_falsy
+        it "is deletable" do
+          expect(file_private_one.deletable?).to be_truthy
         end
       end
 
