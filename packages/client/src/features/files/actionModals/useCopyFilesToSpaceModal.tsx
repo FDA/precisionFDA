@@ -12,6 +12,9 @@ import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
 import { findById } from '../file.utils'
 import { CustomDataNode, IFile } from '../files.types'
+import { toastError } from '../../../components/NotificationCenter/ToastHelper'
+import { AxiosError } from 'axios'
+import { BackendError } from '../../../api/types'
 
 export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   const [searchParams] = useSearchParams()
@@ -19,9 +22,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
 
   const { isShown, setShowModal } = useModal()
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
-  const [treeData, setTreeData] = useImmer<CustomDataNode[]>([
-    { key: 'ROOT', title: '/', checkable: false, children: []},
-  ])
+  const [treeData, setTreeData] = useImmer<CustomDataNode[]>([{ key: 'ROOT', title: '/', checkable: false, children: [] }])
   const { mutateAsync, isPending } = useMutation({
     mutationKey: ['copy-files-to-space-add'],
     mutationFn: () =>
@@ -32,6 +33,13 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
       }),
     onSuccess: () => {
       setShowModal(false)
+    },
+    onError: (e: AxiosError<BackendError>) => {
+      if (e.response?.data?.error?.message) {
+        toastError(`Error: ${e.response.data.error.message}`)
+      } else {
+        toastError('Error copying files to space')
+      }
     },
   })
 
@@ -56,7 +64,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
         key: d.id.toString(),
         title: d.name,
         isLeaf: d.stiType !== 'Folder',
-        uid: (d.stiType === 'UserFile') ? (d as IFile).uid : '',
+        uid: d.stiType === 'UserFile' ? (d as IFile).uid : '',
         checkable: d.stiType !== 'Folder',
       }),
     )
@@ -78,10 +86,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
       hide={() => setShowModal(false)}
       variant="medium"
     >
-      <ModalHeaderTop
-        headerText="Add Files To Space"
-        hide={() => setShowModal(false)}
-      />
+      <ModalHeaderTop headerText="Add Files To Space" hide={() => setShowModal(false)} />
       <StyledModalScroll>
         <FileTree
           // @ts-expect-error not use
@@ -95,19 +100,10 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
       </StyledModalScroll>
       <Footer>
         <ButtonRow>
-          <Button
-            type="button"
-            onClick={() => setShowModal(false)}
-            disabled={isPending}
-          >
+          <Button type="button" onClick={() => setShowModal(false)} disabled={isPending}>
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            onClick={() => mutateAsync()}
-            disabled={isPending}
-          >
+          <Button data-variant="primary" type="submit" onClick={() => mutateAsync()} disabled={isPending}>
             Add
           </Button>
         </ButtonRow>
