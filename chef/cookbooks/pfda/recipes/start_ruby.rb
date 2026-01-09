@@ -45,36 +45,3 @@ service 'pfda-puma' do
   # user node[:deploy_user]
   action %i[enable start]
 end
-
-# Setting up sidekiq service
-
-systemd_unit 'pfda-sidekiq.service' do
-  content(lazy do
-            {
-              Unit: {
-                Description: 'pFDA sidekiq service'
-              },
-              Service: {
-                EnvironmentFile: ruby_environment_file,
-                ExecStartPre: "/bin/bash -c 'rm /srv/www/precision_fda/current/log/sidekiq.log'",
-                ExecStart: "/usr/local/bin/bundle exec sidekiq -e #{ENV['RAILS_ENV']} -C #{rails_dir}/config/sidekiq.yml",
-                ExecStop: "ps -ef | grep sidekiq | grep -v grep | awk '{print $2}' | xargs kill -TERM",
-                Restart: 'always',
-                StandardOutput: 'file:/srv/www/precision_fda/current/log/sidekiq.log',
-                StandardError: 'file:/srv/www/precision_fda/current/log/sidekiq.log',
-                SyslogIdentifier: 'sidekiq',
-                WorkingDirectory: rails_dir
-                # User: node[:deploy_user]
-              },
-              Install: {
-                WantedBy: 'multi-user.target'
-              }
-            }
-          end)
-  action %i[create]
-end
-
-service 'pfda-sidekiq' do
-  # user node[:deploy_user]
-  action %i[enable start]
-end

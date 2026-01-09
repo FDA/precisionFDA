@@ -66,7 +66,7 @@ class EcsDeployer:
         self.stages = [
             ["pfda-db-migrate"],
             ["pfda-nodejs-api", "pfda-nodejs-api-internal", "pfda-nodejs-worker", "pfda-nodejs-admin-platform-client"],
-            ["pfda-sidekiq", "pfda-web", "pfda-docs"],
+            ["pfda-web", "pfda-docs"],
             ["pfda-nginx"],
         ]
 

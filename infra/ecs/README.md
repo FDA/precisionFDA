@@ -61,7 +61,7 @@ You can do this by setting the `FORCE_DEPLOY_SERVICES` workflow input:
 FORCE_DEPLOY_SERVICES:
   description: |
     Comma-separated list of services to force redeploy:
-    pfda-pfda-db-migrate, pfda-docs, pfda-nodejs-api, pfda-nodejs-api-internal, pfda-nodejs-worker, pfda-nodejs-admin-platform-client, pfda-sidekiq, pfda-web, pfda-nginx
+    pfda-pfda-db-migrate, pfda-docs, pfda-nodejs-api, pfda-nodejs-api-internal, pfda-nodejs-worker, pfda-nodejs-admin-platform-client, pfda-web, pfda-nginx
 ```
 
 ## ⚠️ Deployment Order
@@ -81,7 +81,7 @@ In our setup:
 To handle this correctly, the deployment script uses **parallel stages with a fixed order**:
 
 1. **Node processes** (e.g., `node-api`, `node-api-internal`, etc.)
-2. **Web and Sidekiq**
+2. **Web**
 3. **Nginx**
 
 ---

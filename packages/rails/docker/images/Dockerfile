@@ -63,7 +63,6 @@ RUN gem install bundler -v "$BUNDLER_VERSION" --no-document && \
 COPY packages/rails/ $APP_DIR
 
 RUN chmod +x ./docker/entrypoint/prod.entrypoint.sh
-RUN chmod +x ./docker/entrypoint/sidekiq.entrypoint.sh
 
 # =========================
 # Build frontend assets

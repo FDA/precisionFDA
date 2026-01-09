@@ -84,18 +84,6 @@ services:
         securityGroups:
           - name: web-sg
 
-    pfda-sidekiq:
-      imageName: web
-      desiredCount: 1
-      container:
-        cpu: 256
-        memoryReservation: 512
-      containerPort: 3000
-      serviceConnect:
-        securityGroups:
-          - name: common-sg
-      entryPoint: ["./docker/entrypoint/sidekiq.entrypoint.sh"]
-
     pfda-docs:
       imageName: docs
       desiredCount: 1

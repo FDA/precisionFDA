@@ -1,9 +1,5 @@
-require "sidekiq/web"
-Sidekiq::Web.app_url = "/"
-
 Rails.application.routes.draw do
   get "data_portals/index"
-  mount Sidekiq::Web => "/admin/sidekiq", constraints: AdminConstraint.new
 
   default_url_options Rails.configuration.action_mailer.default_url_options
 
@@ -115,7 +111,7 @@ Rails.application.routes.draw do
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
-    get "db_stats" => "main#db_stats", constraints: AdminConstraint.new
+
     post "/spaces/:id/copy_to_cooperative",
          to: "main#copy_to_cooperative",
          as: :copy_to_cooperative_space

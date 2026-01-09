@@ -86,14 +86,6 @@ services:
     command: ["make", "run-admin-platform-client-dist"]
     ports:
       - 3002:3002
-  sidekiq:
-    extends:
-      service: base_ruby
-    volumes:
-      - type: bind
-        source: ../packages/rails
-        target: /precision-fda
-    entrypoint: ./docker/entrypoint/sidekiq.entrypoint.sh
   db:
     image: mysql:8.0
     environment:

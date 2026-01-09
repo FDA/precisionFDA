@@ -55,7 +55,7 @@ DOCKER_COMPOSE_FILE_FLAGS= -f $(DOCKER_COMPOSE_FILE)
 # for qa - precision-fda-qa
 DOCKER_COMPOSE_PREFIX := precision-fda$(subst -dev,,-$(PFDA_ROLE))
 
-SERVICES := web frontend nodejs-api nodejs-worker db redis sidekiq
+SERVICES := web frontend nodejs-api nodejs-worker db redis
 PREPARE_DB_SERVICES := web db
 # NOTE - web container needs to be stopped as well as db volume is mounted in web container for some reason
 # TODO - investigate if it can be removed
@@ -154,7 +154,7 @@ image-cleanup-full:
 # └─────────────────────────────────────────┘
 
 WEB_SIDEKIQ__TARGET_SUFFIX := ruby-sidekiq
-WEB_SIDEKIQ__SERVICES := web sidekiq
+WEB_SIDEKIQ__SERVICES := web
 WEB_SIDEKIQ__VOLUME_CLEANUPS := BUNDLER_DEPS
 WEB_SIDEKIQ__BUNDLER_DEPS__VOLUME := bundler-deps-cache-ruby
 WEB_SIDEKIQ__BUNDLER_DEPS__ALLOWED_CONFIGURATIONS := dev qa arm64v8.dev arm64v8.qa

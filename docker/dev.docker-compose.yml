@@ -8,7 +8,6 @@ services:
     depends_on:
       - db
       - redis
-      - sidekiq
     extends:
       file: ./base.services.yml
       service: web
@@ -105,20 +104,6 @@ services:
     extends:
       file: ./base.services.yml
       service: redis
-  sidekiq:
-    depends_on:
-      - redis
-    extends:
-      file: ./base.services.yml
-      service: sidekiq
-    environment:
-      - RAILS_ENV=development
-      - SKIP_RUBY_DEPS_SETUP=${SKIP_RUBY_DEPS_SETUP}
-      - SKIP_DB_SETUP=${SKIP_DB_SETUP}
-    volumes:
-      - type: volume
-        source: bundler-deps-cache-ruby
-        target: /usr/local/bundle
   nginx:
     extends:
       file: ./base.services.yml
