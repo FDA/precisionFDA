@@ -1,4 +1,3 @@
-require "sidekiq/testing"
 require "simplecov"
 require "webmock/rspec"
 require "database_cleaner/active_record"
@@ -54,8 +53,6 @@ RSpec.configure do |config|
   config.filter_run_when_matching :focus
 
   config.before do
-    Sidekiq::Worker.clear_all
-
     stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/invite").to_return(status: 404)
   end
 

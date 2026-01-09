@@ -10,7 +10,6 @@ services:
     depends_on:
       - db
       - redis
-      - sidekiq
     extends:
       file: ./base.services.yml
       service: web
@@ -65,21 +64,6 @@ services:
     extends:
       file: ./base.services.yml
       service: redis
-  sidekiq:
-    depends_on:
-      - redis
-    extends:
-      file: ./base.services.yml
-      service: sidekiq
-    build:
-      context: ../
-      dockerfile: docker/images/isolation.arm64v8.Dockerfile
-    environment:
-      - RAILS_ENV=ui_test
-    volumes:
-      - type: volume
-        source: bundler-deps-cache-ruby
-        target: /usr/local/bundle
   nginx:
     extends:
       file: ./base.services.yml

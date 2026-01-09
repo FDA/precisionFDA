@@ -225,12 +225,6 @@ export function AdminDashboard() {
               </div>
               <div className={styles.actionLabel}>Participants</div>
             </button>
-            <button className={styles.actionButton} onClick={() => (window.location.href = '/admin/sidekiq')}>
-              <div className={styles.actionIcon}>
-                <ChartColumnIcon height={22} />
-              </div>
-              <div className={styles.actionLabel}>Sidekiq</div>
-            </button>
             <button className={styles.actionButton} onClick={() => (window.location.href = '/admin/comparator_settings')}>
               <div className={styles.actionIcon}>
                 <BullsEyeIcon height={22} />

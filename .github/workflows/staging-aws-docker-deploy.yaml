@@ -10,7 +10,7 @@ on:
       FORCE_DEPLOY_SERVICES:
         description: |
           Comma-separated list of services to force redeploy:
-          pfda-pfda-db-migrate, pfda-docs, pfda-nodejs-api, pfda-nodejs-api-internal, pfda-nodejs-worker, pfda-nodejs-admin-platform-client, pfda-sidekiq, pfda-web, pfda-nginx
+          pfda-pfda-db-migrate, pfda-docs, pfda-nodejs-api, pfda-nodejs-api-internal, pfda-nodejs-worker, pfda-nodejs-admin-platform-client, pfda-web, pfda-nginx
         required: false
         default: ""
 

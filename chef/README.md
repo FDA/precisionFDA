@@ -10,7 +10,6 @@ Deployment of pFDA and GSRS code are done using user 'deploy'
 
 Processes managed by systemd/systemctl:
 - puma (Ruby backend)
-- sidekiq
 - ginas (GSRS)
 
 Processes managed by pm2:

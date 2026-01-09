@@ -25,7 +25,6 @@ make restart-nodejs-api
 make restart-nodejs-worker
 make restart-db
 make restart-redis
-make restart-sidekiq
 
 # Extra restarts when running with GSRS
 make restart-gsrs
@@ -38,7 +37,6 @@ make hook-into-nodejs-api
 make hook-into-nodejs-worker
 make hook-into-db
 make hook-into-redis
-make hook-into-sidekiq
 
 # Extra hooks (exec bash) when running with GSRS
 make hook-into-gsrs
@@ -55,7 +53,6 @@ make image-cleanup-nodejs-api
 make image-cleanup-nodejs-worker
 make image-cleanup-db
 make image-cleanup-redis
-make image-cleanup-sidekiq
 
 # Image cleanup for GSRS
 make image-cleanup-gsrs

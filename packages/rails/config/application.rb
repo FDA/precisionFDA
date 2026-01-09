@@ -4,7 +4,6 @@ require_relative "../app/middleware/rack/capture_session"
 
 require "logger"
 require "rails/all"
-require "sidekiq/rails"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -55,8 +54,6 @@ module PrecisionFda
     ::SassC::Script::Value::Number.precision = [8, ::SassC::Script::Value::Number.precision].max
 
     config.active_record.belongs_to_required_by_default = false
-
-    config.active_job.queue_adapter = :sidekiq
 
     # Don't force requests from old versions of IE to be UTF-8 encoded.
     config.action_view.default_enforce_utf8 = false

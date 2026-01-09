@@ -525,14 +525,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     redirect_back(fallback_location: _space_path(space))
   end
 
-  # prints info about the usage of db connections in the pool
-  def db_stats
-    pool_stats = ActiveRecord::Base.connection_pool.stat
-
-    pool_stats[:pool_size_from_config] = Rails.configuration.database_configuration[Rails.env]["pool"]
-    render json: pool_stats
-  end
-
   private
 
   def logout_from_gsrs
