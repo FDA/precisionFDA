@@ -93,6 +93,12 @@ module PrecisionFda
     # of the relation's cache key into the cache version to support recycling cache key.
     config.active_record.collection_cache_versioning = true
 
+
+    # Minimal Permissions-Policy header
+    config.action_dispatch.default_headers.merge!(
+      "Permissions-Policy" => "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+    )
+
     # Logging configuration
     log_directory_path = ENV.fetch("RAILS_LOG_DIRECTORY_PATH", "../../log/")
     log_output = File.join(log_directory_path, "backend.log")
