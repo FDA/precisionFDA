@@ -13,6 +13,7 @@ SecureHeaders::Configuration.default do |config|
   config.x_permitted_cross_domain_policies = "none"
   config.referrer_policy = "no-referrer-when-downgrade"
   config.cookies = SecureHeaders::OPT_OUT
+
   config.csp = {
     base_uri: %w('self'),
     block_all_mixed_content: true, # see [http://www.w3.org/TR/mixed-content/](http://www.w3.org/TR/mixed-content/)
@@ -54,8 +55,6 @@ SecureHeaders::Configuration.default do |config|
     object_src: %w('none'),
     script_src: %w(
       'self'
-      'unsafe-inline'
-      'unsafe-eval'
       https://www.gstatic.com
       https://www.google.com
       https://www.google-analytics.com
@@ -68,8 +67,6 @@ SecureHeaders::Configuration.default do |config|
     ),
     script_src_elem: %w(
       'self'
-      'unsafe-inline'
-      'unsafe-eval'
       https://drugs.ncats.io
       https://dnanexus.github.io
       https://www.recaptcha.net/recaptcha/
