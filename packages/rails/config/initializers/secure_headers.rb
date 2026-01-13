@@ -55,6 +55,7 @@ SecureHeaders::Configuration.default do |config|
     object_src: %w('none'),
     script_src: %w(
       'self'
+      'unsafe-eval'
       https://www.gstatic.com
       https://www.google.com
       https://www.google-analytics.com
@@ -64,7 +65,7 @@ SecureHeaders::Configuration.default do |config|
       https://dnanexus.github.io
       https://www.recaptcha.net/recaptcha/
       https://www.gstatic.com/recaptcha/
-    ),
+    ), #TODO remove unsafe_eval - PFDA-6713
     script_src_elem: %w(
       'self'
       https://drugs.ncats.io
