@@ -81,7 +81,7 @@ export class SyncFilesStateFacade {
     )
 
     for (const file of oldOpenFiles) {
-      await this.removeNodesFacade.removeFile(file)
+      await this.removeNodesFacade.removeFile(file, true)
     }
     // TODO add notification PFDA-6613
   }
@@ -96,7 +96,7 @@ export class SyncFilesStateFacade {
     )
 
     for (const file of oldClosingFiles) {
-      await this.removeNodesFacade.removeFile(file)
+      await this.removeNodesFacade.removeFile(file, true)
     }
     // TODO add notification PFDA-6613
   }

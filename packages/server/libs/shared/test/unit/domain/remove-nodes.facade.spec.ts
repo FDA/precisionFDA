@@ -533,5 +533,62 @@ describe('RemoveNodesFacade', () => {
       expect(nodeServiceRollbackRemovingStateStub.calledOnce).to.be.true()
       expect(nodeServiceRollbackRemovingStateStub.calledWith([node2, node3])).to.be.true()
     })
+
+    it('should not create space event when skipCreateSpaceEvent is true', async () => {
+      const node1 = {
+        id: 1,
+        name: 'node1',
+        isInSpace: () => true,
+        getSpaceId: () => 111,
+        dxid: 'file-1',
+        project: 'project-id',
+        stiType: FILE_STI_TYPE.USERFILE,
+      } as unknown as UserFile
+      const nodes = [node1]
+
+      nodeHelperGetNodePathStub.callsFake((node: Node) => {
+        return `/path/to/${node.name}`
+      })
+
+      eventHelperCreateFileEventStub.reset()
+      nodeServiceLoadNodesStub.withArgs([node1.id]).returns(nodes)
+      emClearStub.reset()
+      userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
+      userRepositoryFindOneStub.returns({ id: USER_ID })
+      licensedItemServiceRemoveItemLicensedForNodeStub.reset()
+      taggingServiceRemoveTaggingsStub.reset()
+      emPersistStub.reset()
+      userClientFileRemoveStub.reset()
+      spaceEventServiceCreateAndSendSpaceEventStub.reset()
+      emRemoveStub.reset()
+      nodeServiceValidateProtectedSpacesStub.reset()
+      nodeServiceValidateEditableByStub.reset()
+      spaceServiceValidateVerificationSpaceStub.reset()
+      comparisonServiceValidateComparisonsStub.reset()
+      nodeServiceValidateSpaceReportsStub.reset()
+
+      const removeNodesFacade = createRemoveNodesFacade()
+
+      const result = await removeNodesFacade.removeFile(node1, true)
+
+      expect(result).to.deep.equal(1)
+
+      expect(spaceEventServiceCreateAndSendSpaceEventStub.called).to.be.false()
+
+      expect(emRemoveStub.calledOnce).to.be.true()
+      expect(emRemoveStub.calledWith(node1)).to.be.true()
+
+      expect(eventHelperCreateFileEventStub.calledOnce).to.be.true()
+      expect(
+        eventHelperCreateFileEventStub.calledWith(
+          EVENT_TYPES.FILE_DELETED,
+          node1,
+          '/path/to/node1',
+          userCtx,
+        ),
+      ).to.be.true()
+
+      expect(userClientFileRemoveStub.calledOnce).to.be.true()
+    })
   })
 })
