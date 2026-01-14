@@ -1,4 +1,3 @@
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import {
   Collection,
   Entity,
@@ -45,11 +44,6 @@ export class Folder extends Node {
 
   @Property()
   userId: number
-
-  @OneToMany(() => Tagging, (tagging) => tagging.folder, {
-    orphanRemoval: true,
-  })
-  taggings = new Collection<Tagging>(this)
 
   /**
    * Children collection always has to be initialized by caller using 'init()'

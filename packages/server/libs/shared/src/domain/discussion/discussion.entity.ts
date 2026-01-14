@@ -14,6 +14,7 @@ import { Note } from '@shared/domain/note/note.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { DiscussionReply } from '../discussion-reply/discussion-reply.entity'
+import { DiscussionTagging } from '@shared/domain/tagging/discussion-tagging.entity'
 
 @Entity({ tableName: 'discussions', repository: () => DiscussionRepository })
 export class Discussion extends BaseEntity {
@@ -39,6 +40,9 @@ export class Discussion extends BaseEntity {
     cascade: [Cascade.REMOVE],
   })
   follows = new Collection<DiscussionFollow>(this)
+
+  @OneToMany(() => DiscussionTagging, (tagging) => tagging.discussion, { orphanRemoval: true })
+  taggings = new Collection<Discussion>(this)
 
   constructor(note: Note, user: User) {
     super()

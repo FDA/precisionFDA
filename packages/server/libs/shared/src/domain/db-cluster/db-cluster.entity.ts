@@ -17,8 +17,8 @@ import { DxId } from '../entity/domain/dxid'
 import { User } from '../user/user.entity'
 import { DB_SYNC_STATUS, ENGINE, STATUS } from './db-cluster.enum'
 import { ScopedEntity } from '@shared/database/scoped.entity'
-import { Tagging } from '../tagging/tagging.entity'
 import { DbClusterRepository } from './db-cluster.repository'
+import { DbClusterTagging } from '@shared/domain/tagging/db-cluster-tagging.entity'
 
 @Entity({ tableName: 'dbclusters', repository: () => DbClusterRepository })
 @Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
@@ -85,8 +85,8 @@ export class DbCluster extends ScopedEntity {
   })
   properties = new Collection<DbClusterProperty>(this)
 
-  @OneToMany(() => Tagging, (tagging) => tagging.dbCluster, { orphanRemoval: true })
-  taggings = new Collection<Tagging>(this)
+  @OneToMany(() => DbClusterTagging, (tagging) => tagging.dbCluster, { orphanRemoval: true })
+  taggings = new Collection<DbClusterTagging>(this)
 
   @Property({ nullable: true })
   failureReason?: string

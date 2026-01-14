@@ -22,10 +22,10 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { NodeTagging } from '@shared/domain/tagging/node-tagging.entity'
 
 /**
  * Facade for copying nodes (files and folders) between different scopes. If user specifies
@@ -63,7 +63,8 @@ export class CopyNodesFacade {
 
     // Validate that all nodes are from the same project
     const sourceProject = nodes[0]?.project
-    const allSameProject = nodes.every((node) => node.project === sourceProject)
+    const fileNodes = nodes.filter((node) => node.isFile)
+    const allSameProject = fileNodes.every((node) => node.project === sourceProject)
     if (!allSameProject) {
       throw new InvalidStateError('All nodes to be copied must belong to the same source project.')
     }
@@ -82,7 +83,8 @@ export class CopyNodesFacade {
       return
     }
 
-    let newlyCreatedNodesCount = 0
+    let newlyCreatedFilesCount = 0
+    let newlyCreatedFoldersCount = 0
     let nodesExistingInTarget = []
 
     const nodesToProcess = [...nodes].reverse()
@@ -120,17 +122,26 @@ export class CopyNodesFacade {
             targetFolderId,
           )
 
-          await tem.persistAndFlush(newlyCreatedNode)
+          tem.persist(newlyCreatedNode)
+          await tem.flush()
 
           await this.possiblyProcessArchiveEntries(sourceNode, newlyCreatedNode)
           await this.copyProperties(sourceNode, newlyCreatedNode)
           await this.copyTags(sourceNode as UserFile | Asset | Folder, newlyCreatedNode)
           await this.processEvents(newlyCreatedNode, user, sourceNode, sourceFoldersMap)
 
-          newlyCreatedNodesCount++
+          if (newlyCreatedNode.isFile) {
+            newlyCreatedFilesCount++
+          } else {
+            newlyCreatedFoldersCount++
+          }
         }
       })
-      await this.processInfoNotification(nodesExistingInTarget.length, newlyCreatedNodesCount)
+      await this.processInfoNotification(
+        nodesExistingInTarget.length,
+        newlyCreatedFilesCount,
+        newlyCreatedFoldersCount,
+      )
     } catch (error: unknown) {
       // collect all dxids of cloned files and rollback
       const dxids = nodes.filter((node) => node.isFile).map((n: FileOrAsset) => n.dxid)
@@ -191,7 +202,7 @@ export class CopyNodesFacade {
     await this.em.populate(sourceNode, ['taggings'])
 
     for (const sourceTagging of sourceNode.taggings) {
-      const newTagging = new Tagging()
+      const newTagging = new NodeTagging()
 
       newTagging.tagId = sourceTagging.tagId
       newTagging.taggerId = this.user.id
@@ -245,10 +256,15 @@ export class CopyNodesFacade {
 
   private async processInfoNotification(
     existingNodesCount: number,
-    newlyCreatedNodesCount: number,
+    newlyCreatedFilesCount: number,
+    newlyCreatedFoldersCount: number,
   ): Promise<void> {
     await this.notificationService.createNotification({
-      message: this.getNotificationMessage(existingNodesCount, newlyCreatedNodesCount),
+      message: this.getNotificationMessage(
+        existingNodesCount,
+        newlyCreatedFilesCount,
+        newlyCreatedFoldersCount,
+      ),
       severity: SEVERITY.INFO,
       action: NOTIFICATION_ACTION.NODES_COPIED,
       userId: this.user.id,
@@ -314,7 +330,8 @@ export class CopyNodesFacade {
         user,
       )
     }
-    await this.em.persistAndFlush(event)
+    this.em.persist(event)
+    await this.em.flush()
   }
 
   private createCorrectType(sourceNode: Node, user: User): Asset | UserFile | Folder {
@@ -338,11 +355,14 @@ export class CopyNodesFacade {
 
   private getNotificationMessage(
     existingNodesCount: number,
-    newlyCreatedNodesCount: number,
+    newlyCreatedFilesCount: number,
+    newlyCreatedFoldersCount: number,
   ): string {
     const parts: string[] = []
-    if (newlyCreatedNodesCount > 0) {
-      parts.push(getSuccessMessage(newlyCreatedNodesCount, 0, 'Successfully copied'))
+    if (newlyCreatedFilesCount > 0) {
+      parts.push(
+        getSuccessMessage(newlyCreatedFilesCount, newlyCreatedFoldersCount, 'Successfully copied'),
+      )
     }
     if (existingNodesCount > 0) {
       parts.push(

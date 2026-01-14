@@ -3,6 +3,7 @@ import { ScopedEntity } from '@shared/database/scoped.entity'
 import { AppSeriesProperty } from '@shared/domain/property/app-series-property.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { AppSeriesRepository } from './app-series.repository'
+import { AppSeriesTagging } from '@shared/domain/tagging/app-series-tagging.entity'
 
 @Entity({ tableName: 'app_series', repository: () => AppSeriesRepository })
 export class AppSeries extends ScopedEntity {
@@ -32,6 +33,9 @@ export class AppSeries extends ScopedEntity {
 
   @ManyToOne({ entity: () => User, serializedName: 'userId' })
   user?: Ref<User>
+
+  @OneToMany(() => AppSeriesTagging, (tagging) => tagging.appSeries, { orphanRemoval: true })
+  taggings = new Collection<AppSeriesTagging>(this)
 
   constructor(user?: User) {
     super()

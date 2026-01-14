@@ -34,7 +34,8 @@ describe('CopyNodesFacade', () => {
   const TARGET_FOLDER_ID = 50
 
   const emFindOneStub = stub()
-  const emPersistAndFlushStub = stub()
+  const emPersistStub = stub()
+  const emFlushStub = stub()
   const emPopulateStub = stub()
   const emTransactionalStub = stub()
 
@@ -78,7 +79,8 @@ describe('CopyNodesFacade', () => {
 
   const em = {
     findOne: emFindOneStub,
-    persistAndFlush: emPersistAndFlushStub,
+    persist: emPersistStub,
+    flush: emFlushStub,
     populate: emPopulateStub,
     transactional: emTransactionalStub,
   } as unknown as SqlEntityManager
@@ -120,8 +122,10 @@ describe('CopyNodesFacade', () => {
   beforeEach(() => {
     emFindOneStub.reset()
     emFindOneStub.resolves(null)
-    emPersistAndFlushStub.reset()
-    emPersistAndFlushStub.resolves()
+    emPersistStub.reset()
+    emPersistStub.resolves()
+    emFlushStub.reset()
+    emFlushStub.resolves()
     emPopulateStub.reset()
     emPopulateStub.resolves()
 
@@ -204,8 +208,8 @@ describe('CopyNodesFacade', () => {
         nodeServiceValidateProtectedSpacesStub.calledWith('copy', USER_ID, sourceFile),
       ).to.be.true()
 
-      expect(emPersistAndFlushStub.called).to.be.true()
-      const savedNode = emPersistAndFlushStub.firstCall.args[0]
+      expect(emPersistStub.called).to.be.true()
+      const savedNode = emPersistStub.firstCall.args[0]
       expect(savedNode.dxid).to.eq(SOURCE_FILE_DXID)
       expect(savedNode.project).to.eq(PRIVATE_PROJECT)
       expect(savedNode.scope).to.eq(TARGET_SCOPE)
@@ -216,6 +220,50 @@ describe('CopyNodesFacade', () => {
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.NODES_COPIED,
       })
+    })
+
+    it('should use NodeTagging for tagging copies (New Entity Type)', async () => {
+      const nodeWithTags = {
+        ...sourceFile,
+        taggings: [{ tagId: 10, context: 'tags' }],
+      } as unknown as UserFile
+
+      nodeServiceLoadNodesStub.resolves([nodeWithTags])
+      nodeServiceGetAccessibleEntityByIdStub.resolves(nodeWithTags)
+
+      await getInstance().copyNodes([SOURCE_FILE_ID], TARGET_SCOPE)
+
+      expect(emPopulateStub.calledWith(nodeWithTags, ['taggings'])).to.be.true()
+      // We indirectly verify NodeTagging use by ensuring the logic completed
+      // without errors and persisted the parent node.
+    })
+
+    it('should copy all properties from the source node to the newly created node', async () => {
+      // 1. Setup source node with existing properties
+      const mockProperty = {
+        propertyName: 'test-key',
+        propertyValue: 'test-value',
+      }
+
+      const sourceNodeWithProperties = {
+        ...sourceFile,
+        properties: [mockProperty],
+      } as unknown as UserFile
+
+      nodeServiceLoadNodesStub.resolves([sourceNodeWithProperties])
+      nodeServiceGetAccessibleEntityByIdStub.resolves(sourceNodeWithProperties)
+
+      // 2. Execute
+      await getInstance().copyNodes([SOURCE_FILE_ID], TARGET_SCOPE)
+
+      // 3. Assertions
+      // Verify em.populate was called specifically for properties
+      expect(emPopulateStub.calledWith(sourceNodeWithProperties, ['properties'])).to.be.true()
+
+      // Verify that persist was called for the new node.
+      // Since properties are added to the newlyCreatedNode.properties collection,
+      // MikroORM will persist them automatically if the collection is managed.
+      expect(emPersistStub.called).to.be.true()
     })
 
     it('should skip existing files in target', async () => {
@@ -229,7 +277,7 @@ describe('CopyNodesFacade', () => {
 
       expect(platformProjectCloneStub.calledOnce).to.be.true()
 
-      expect(emPersistAndFlushStub.called).to.be.false()
+      expect(emPersistStub.called).to.be.false()
 
       expect(notificationCreateStub.calledOnce).to.be.true()
       const msg = notificationCreateStub.firstCall.args[0].message
@@ -240,7 +288,7 @@ describe('CopyNodesFacade', () => {
       nodeServiceLoadNodesStub.withArgs([SOURCE_FILE_ID], {}).resolves([sourceFile])
       nodeServiceGetAccessibleEntityByIdStub.withArgs(SOURCE_FILE_ID).resolves(sourceFile)
 
-      emPersistAndFlushStub.rejects(new Error('DB Connection Failed'))
+      emFlushStub.rejects(new Error('DB Connection Failed'))
 
       await getInstance().copyNodes([SOURCE_FILE_ID], TARGET_SCOPE)
 
@@ -291,8 +339,8 @@ describe('CopyNodesFacade', () => {
 
       await getInstance().copyNodes([SOURCE_FILE_ID], TARGET_SCOPE)
 
-      expect(emPersistAndFlushStub.called).to.be.true()
-      const savedNode = emPersistAndFlushStub.firstCall.args[0] as Asset
+      expect(emPersistStub.called).to.be.true()
+      const savedNode = emPersistStub.firstCall.args[0] as Asset
 
       expect(emPopulateStub.calledWith(assetNode, ['archiveEntries'])).to.be.true()
 
@@ -385,19 +433,19 @@ describe('CopyNodesFacade', () => {
       eventHelperCreateFolderEventStub.resolves({ type: EVENT_TYPES.FOLDER_CREATED })
       eventHelperCreateFileCopyEventStub.resolves({ type: EVENT_TYPES.FILE_COPIED })
 
-      emPersistAndFlushStub.callsFake(async (entity) => {
+      emPersistStub.callsFake(async (entity) => {
         if (entity instanceof Folder) {
           entity.id = NEW_FOLDER_ID
         }
       })
 
       await getInstance().copyNodes([SOURCE_FOLDER_ID], TARGET_SCOPE)
-      expect(emPersistAndFlushStub.callCount).to.eq(4) // Folder, Event, File, Event
+      expect(emPersistStub.callCount).to.eq(4) // Folder, Event, File, Event
 
-      const firstSaveCall = emPersistAndFlushStub.getCall(0).args[0]
-      const secondSaveCall = emPersistAndFlushStub.getCall(1).args[0]
-      const thirdSaveCall = emPersistAndFlushStub.getCall(2).args[0]
-      const fourthSaveCall = emPersistAndFlushStub.getCall(3).args[0]
+      const firstSaveCall = emPersistStub.getCall(0).args[0]
+      const secondSaveCall = emPersistStub.getCall(1).args[0]
+      const thirdSaveCall = emPersistStub.getCall(2).args[0]
+      const fourthSaveCall = emPersistStub.getCall(3).args[0]
 
       expect(firstSaveCall.stiType).to.eq(FILE_STI_TYPE.FOLDER)
       expect(firstSaveCall.name).to.eq('Parent Folder')

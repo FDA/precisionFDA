@@ -4,6 +4,7 @@ import {
   Filter,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   Property,
   Ref,
   Reference,
@@ -15,6 +16,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { DxId } from '../entity/domain/dxid'
+import { ComparisonTagging } from '@shared/domain/tagging/comparison-tagging.entity'
 
 enum COMPARISON_STATE {
   DONE = 'done',
@@ -67,6 +69,9 @@ class Comparison extends ScopedEntity {
 
   @ManyToOne({ entity: () => User, fieldName: 'user_id', nullable: false })
   user: Ref<User>
+
+  @OneToMany(() => ComparisonTagging, (tagging) => tagging.comparison, { orphanRemoval: true })
+  taggings = new Collection<ComparisonTagging>(this)
 
   isPublishable(): boolean {
     return this.state === COMPARISON_STATE.DONE

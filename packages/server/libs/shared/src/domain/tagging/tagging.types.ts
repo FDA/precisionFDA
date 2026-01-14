@@ -6,6 +6,5 @@ export enum TAGGABLE_TYPE {
   JOB = 'Job',
   NODE = 'Node',
   SPACE = 'Space',
-  WORKFLOW = 'Workflow',
   WORKFLOW_SERIES = 'WorkflowSeries',
 }

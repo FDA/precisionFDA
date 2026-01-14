@@ -5,7 +5,6 @@ import { User } from '@shared/domain/user/user.entity'
 import { AssetRepository } from './asset.repository'
 import { FILE_STATE_DX, FILE_STI_TYPE } from './user-file.types'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 @Entity({
@@ -23,11 +22,6 @@ class Asset extends UserFile {
 
   @ManyToMany(() => App, (app) => app.assets)
   apps = new Collection<App>(this)
-
-  @OneToMany(() => Tagging, (tagging) => tagging.asset, {
-    orphanRemoval: true,
-  })
-  taggings = new Collection<Tagging>(this)
 
   constructor(user: User) {
     super(user)

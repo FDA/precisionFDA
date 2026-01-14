@@ -15,7 +15,6 @@ import { ChallengeResource } from '../challenge/challenge-resource.entity'
 import { Node } from './node.entity'
 import { UserFileRepository } from './user-file.repository'
 import { FILE_STATE_DX, FILE_STATE_PFDA, FILE_STI_TYPE } from './user-file.types'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 
 @Filter({
   name: 'unclosed',
@@ -52,11 +51,6 @@ class UserFile extends Node {
 
   @OneToOne(() => Resource, (resource) => resource.userFile, { orphanRemoval: true })
   resource!: Resource
-
-  @OneToMany(() => Tagging, (tagging) => tagging.userFile, {
-    orphanRemoval: true,
-  })
-  taggings = new Collection<Tagging>(this)
 
   constructor(user: User) {
     super()
