@@ -55,6 +55,7 @@ SecureHeaders::Configuration.default do |config|
     object_src: %w('none'),
     script_src: %w(
       'self'
+      'unsafe-inline'
       'unsafe-eval'
       https://www.gstatic.com
       https://www.google.com
