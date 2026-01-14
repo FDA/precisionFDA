@@ -25,6 +25,7 @@ import { isStateActive, isStateTerminal } from './job.helper'
 import { Provenance } from './job.input'
 import { JobRepository } from './job.repository'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
+import { JobTagging } from '@shared/domain/tagging/job-tagging.entity'
 
 @Entity({ tableName: 'jobs', repository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
@@ -83,6 +84,9 @@ export class Job extends ScopedEntity {
     orphanRemoval: true,
   })
   properties = new Collection<JobProperty>(this)
+
+  @OneToMany(() => JobTagging, (tagging) => tagging.job, { orphanRemoval: true })
+  taggings = new Collection<JobTagging>(this)
 
   @Property({ type: WorkaroundJsonType })
   runData: JobRunData

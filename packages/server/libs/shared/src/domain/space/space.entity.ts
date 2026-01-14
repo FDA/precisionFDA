@@ -13,13 +13,13 @@ import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SpaceGroup } from '@shared/domain/space/space-group.entity'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { DxId } from '../entity/domain/dxid'
 import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { SpaceRepository } from './space.repository'
+import { SpaceTagging } from '@shared/domain/tagging/space-tagging.entity'
 
 type SpaceMeta = {
   cts: string
@@ -89,8 +89,8 @@ export class Space extends BaseEntity {
   @ManyToMany(() => SpaceGroup, (spaceGroup) => spaceGroup.spaces)
   spaceGroups = new Collection<SpaceGroup>(this)
 
-  @OneToMany(() => Tagging, (tagging) => tagging.space, { orphanRemoval: true })
-  taggings = new Collection<Tagging>(this)
+  @OneToMany(() => SpaceTagging, (tagging) => tagging.space, { orphanRemoval: true })
+  taggings = new Collection<SpaceTagging>(this)
 
   @OneToOne(() => DataPortal, (dataPortal: DataPortal) => dataPortal.space)
   dataPortal?: DataPortal

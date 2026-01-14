@@ -9,7 +9,6 @@ import {
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -48,6 +47,7 @@ import {
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
 import { CHALLENGE_BOT_USER_CONTEXT } from '@shared/domain/user-context/provider/challenge-bot-user-context.provider'
 import * as errors from '@shared/errors'
+import { NodeTagging } from '@shared/domain/tagging/node-tagging.entity'
 
 /**
  * JobSynchronizationService is responsible for synchronizing the job status with the platform.
@@ -458,7 +458,7 @@ export class JobSynchronizationService {
       )
 
       files.forEach((file) => {
-        const tagging = <Tagging>file.taggings.getItems().find((t) => t.tag.name === lockedKey)
+        const tagging = <NodeTagging>file.taggings.getItems().find((t) => t.tag.name === lockedKey)
         file.taggings.remove(tagging)
       })
 
