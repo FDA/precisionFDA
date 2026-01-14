@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import { IUser } from '../../../types/user'
@@ -7,27 +7,33 @@ import { ButtonRow, Footer } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { SubmissionInputFile, SubmissionV2 } from './submission.types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { Svg } from '../../../components/icons/Svg'
 
-const StyledFileList = styled.ul`
-  margin-left: 14px;
+const StyledFileList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 `
 
-const StyledNameCell = styled.div<{ color?: string }>`
+const StyledFileItem = styled.div`
   display: flex;
   align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+
+  a {
+    color: var(--c-link);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`
+
+const StyledNameCell = styled.div`
   cursor: pointer;
   color: var(--c-link);
-
-  ${({ color }) =>
-    color &&
-    css`
-      color: ${color};
-    `}
-  ${Svg} {
-    margin-right: 7px;
-    width: 15px;
-  }
 `
 
 export const NameCell = ({ submission }: { submission: SubmissionV2 }) => {
@@ -71,14 +77,14 @@ export const InputFileCell = ({
 
         if (userCanAccessFile(file)) {
           return (
-            <li key={file.id}>
+            <StyledFileItem key={file.id}>
               <a href={`/home/files/${file.uid}`} target="_blank" rel="noreferrer">
                 {file.name}
               </a>
-            </li>
+            </StyledFileItem>
           )
         }
-        return <li key={file.id}>{file.name}</li>
+        return <StyledFileItem key={file.id}>{file.name}</StyledFileItem>
       })}
     </StyledFileList>
   )
