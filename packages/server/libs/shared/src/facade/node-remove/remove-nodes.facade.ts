@@ -134,7 +134,10 @@ export class RemoveNodesFacade {
     }
   }
 
-  public async removeFile(fileToRemove: FileOrAsset): Promise<number> {
+  public async removeFile(
+    fileToRemove: FileOrAsset,
+    skipCreateSpaceEvent?: boolean,
+  ): Promise<number> {
     this.logger.log(`Removing file with uid: ${fileToRemove.uid}`)
 
     const lastNode = (await this.userFileRepository.count({ dxid: fileToRemove.dxid })) === 1
@@ -176,7 +179,7 @@ export class RemoveNodesFacade {
         }
       }
 
-      if (fileToRemove.isInSpace()) {
+      if (fileToRemove.isInSpace() && !skipCreateSpaceEvent) {
         await this.spaceEventService.createAndSendSpaceEvent({
           entity: { type: 'userFile', value: fileToRemove },
           spaceId: fileToRemove.getSpaceId(),
