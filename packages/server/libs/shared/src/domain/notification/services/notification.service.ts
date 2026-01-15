@@ -1,25 +1,28 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Injectable, Optional } from '@nestjs/common'
+import { Injectable, Logger, Optional } from '@nestjs/common'
 import { Notification } from '@shared/domain/notification/notification.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
 import { NotFoundError, PermissionError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
 import { createClient } from 'redis'
-import { defaultLogger as logger } from '../../../logger'
 import { NotificationInput } from '../notification.input'
 
 export type RedisClientType = ReturnType<typeof createClient>
 
 @Injectable()
 export class NotificationService {
+  @ServiceLogger()
+  private readonly logger: Logger
+
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user?: UserContext,
     @Optional() private redisClient?: RedisClientType,
   ) {
-    logger.debug('NotificationService initialized')
+    this.logger.debug('NotificationService initialized')
   }
 
   /**
@@ -27,9 +30,9 @@ export class NotificationService {
    * @param notificationInput notification data
    */
   async createNotification(notificationInput: NotificationInput): Promise<void> {
-    logger.debug(`NotificationService: creating notification ${JSON.stringify(notificationInput)}`)
+    this.logger.debug(`Creating notification ${JSON.stringify(notificationInput)}`)
     if (!this.redisClient) {
-      logger.debug('NotificationService: creating new Redis Client')
+      this.logger.debug('Creating new Redis Client')
       this.redisClient = await createRedisClient()
     }
 
@@ -57,14 +60,14 @@ export class NotificationService {
 
     this.redisClient?.publish(NOTIFICATIONS_QUEUE, JSON.stringify(notificationMessage))
 
-    logger.debug('NotificationService: notification published')
+    this.logger.debug('Notification published')
   }
 
   /**
    * Returns notifications for current user that have empty deliveredAt flag.
    */
   async getUnreadNotifications(): Promise<Notification[]> {
-    logger.log({
+    this.logger.log({
       message: `Getting unread notifications for user id: ${this.user.id}`,
       userId: this.user.id,
     })

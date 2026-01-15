@@ -1,3 +1,4 @@
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -51,6 +52,7 @@ export enum TASK_TYPE {
   GENERATE_SPACE_REPORT_RESULT = 'generate_space_report_result',
   NOTIFY_NEW_DISCUSSION = 'notify_new_discussion',
   NOTIFY_NEW_DISCUSSION_REPLY = 'notify_new_discussion_reply',
+  UI_NOTIFY_NEW_DISCUSSION_REPLY = 'ui_notify_new_discussion_reply',
   PROVISION_NEW_USERS = 'provision_new_users',
 }
 
@@ -122,6 +124,15 @@ export type NotifyNewDiscussionJob = TaskWithAuth & {
   payload: {
     discussionId: number
     notify: NotifyType
+  }
+}
+
+export type UiNotifyNewDiscussionReplyJob = TaskWithAuth & {
+  type: TASK_TYPE.UI_NOTIFY_NEW_DISCUSSION_REPLY
+  payload: {
+    spaceId: number
+    type: DISCUSSION_REPLY_TYPE
+    replyUrl: string
   }
 }
 

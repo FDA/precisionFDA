@@ -1,13 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { RefCallBack } from 'react-hook-form'
+import { getFetchDiscussionQueryKey } from '../../../api/queries/discussion'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { CommentPayload, CreateReplyPayload, NoteScope, createReplyRequest } from '../api'
 import { NoteForm } from '../discussions.types'
 import { pickIdsFromFormAttachments } from '../helpers'
 import { MarkdownForm } from './MarkdownForm'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
-export const CreateCommentEntity = ({
+export const CreateReplyEntity = ({
   canUserAnswer,
   scope,
   markdownInputRef,
@@ -26,7 +27,7 @@ export const CreateCommentEntity = ({
 }) => {
   const queryClient = useQueryClient()
 
-  const createCommentMutation = useMutation({
+  const createReplyMutation = useMutation({
     mutationKey: ['create-comment'],
     mutationFn: ({ isAnswer, ...payload }: CommentPayload) => {
       const p = payload as CreateReplyPayload
@@ -45,7 +46,7 @@ export const CreateCommentEntity = ({
     onSuccess: () => {
       if (onSuccess) onSuccess()
       queryClient.invalidateQueries({
-        queryKey: ['discussion'],
+        queryKey: getFetchDiscussionQueryKey(discussionId),
       })
       toastSuccess('Reply has been published')
     },
@@ -61,7 +62,7 @@ export const CreateCommentEntity = ({
         ? vals.notify[0].value
         : vals.notify.map(n => n.value)
 
-    return createCommentMutation.mutateAsync({
+    return createReplyMutation.mutateAsync({
       ...vals,
       attachments: pickIdsFromFormAttachments(vals.attachments),
       notify,

@@ -6,15 +6,16 @@ import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { NotePayload, NoteScope, editDiscussionRequest, editReplyRequest, fetchDiscussionAttachmentsRequest } from '../api'
+
 import { Button } from '../../../components/Button'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { InputError } from '../../../components/form/styles'
 import { ButtonRow } from '../../modal/styles'
 import { AttachmentsList } from '../AttachmentsList'
 import { AttachmentKey, NoteForm } from '../discussions.types'
 import { groupByAttachmentType, pickIdsFromFormAttachments } from '../helpers'
 import { Attachments } from './Attachments'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const StyledForm = styled.form`
   display: flex;

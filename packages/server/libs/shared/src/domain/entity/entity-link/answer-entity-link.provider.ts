@@ -16,7 +16,7 @@ export class AnswerEntityLinkProvider extends EntityLinkProvider<'answer'> {
 
   private getHomeLink(answer: Answer): `/${string}` {
     const discussionID = answer.discussion.id
-    return `/discussions/${discussionID}/${this.getUrlSegment(answer)}` as const
+    return `/home/discussions/${discussionID}/${this.getUrlSegment(answer)}` as const
   }
 
   private async getSpaceLink(answer: Answer): Promise<`/${string}`> {

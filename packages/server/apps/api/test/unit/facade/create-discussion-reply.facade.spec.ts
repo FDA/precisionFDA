@@ -26,17 +26,23 @@ describe('CreateDiscussionReplyFacade', () => {
   const getDiscussionStub = stub()
   const createAttachmentsStub = stub()
   const createNewReplyNotificationTaskStub = stub()
+  const createNewReplyUINotificationTaskStub = stub()
+  const getCommentUiLinkStub = stub()
+  const getAnswerUiLinkStub = stub()
 
   // Mock dependencies
   const discussionService = {
     createReply: createReplyStub,
     getDiscussion: getDiscussionStub,
+    getCommentUiLink: getCommentUiLinkStub,
+    getAnswerUiLink: getAnswerUiLinkStub,
   } as unknown as DiscussionService
   const attachmentFacade = {
     createAttachments: createAttachmentsStub,
   } as unknown as AttachmentManagementFacade
   const mainQueueJobProducer = {
     createNewReplyNotificationTask: createNewReplyNotificationTaskStub,
+    createNewReplyUINotificationTask: createNewReplyUINotificationTaskStub,
   } as unknown as MainQueueJobProducer
 
   beforeEach(() => {
@@ -53,6 +59,9 @@ describe('CreateDiscussionReplyFacade', () => {
     getDiscussionStub.reset()
     createAttachmentsStub.reset()
     createNewReplyNotificationTaskStub.reset()
+    createNewReplyUINotificationTaskStub.reset()
+    getCommentUiLinkStub.reset()
+    getAnswerUiLinkStub.reset()
   })
 
   it('should call create discussion with public scope, create attachments and notify', async () => {
@@ -94,6 +103,58 @@ describe('CreateDiscussionReplyFacade', () => {
     expect(createAttachmentsStub.firstCall.args[0]).to.equal(newAnswer.noteId)
     expect(createAttachmentsStub.firstCall.args[1]).to.deep.equal(dto.attachments)
     expect(createNewReplyNotificationTaskStub.firstCall.args[0]).to.equal(newAnswer.id)
+    expect(createNewReplyUINotificationTaskStub.notCalled).to.be.true()
     expect(result).to.deep.equal(newAnswer)
+  })
+
+  it('should call create discussion reply and notify space members for space scoped discussion', async () => {
+    const dto = {
+      title: 'Test Comment',
+      content: 'This is a test comment.',
+      attachments: EMPTY_ATTACHMENTS,
+      notify: [],
+      type: DISCUSSION_REPLY_TYPE.COMMENT,
+    }
+
+    const simpleUser = {
+      id: 2,
+      dxuser: 'spaceuser',
+      firstName: 'Space',
+      lastName: 'User',
+      fullName: 'Space User',
+    } as unknown as SimpleUserDTO
+
+    const newComment = {
+      id: 2,
+      title: dto.title,
+      content: dto.content,
+      noteId: 2,
+      discussionId: 2,
+      scope: 'space-10',
+      user: simpleUser,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as unknown as DiscussionReplyDTO
+
+    const replyUrl = `http://pfda/discussions/${newComment.discussionId}/comments/${newComment.id}`
+
+    createReplyStub.withArgs(2, dto).resolves(newComment)
+    getCommentUiLinkStub.withArgs(newComment.id).resolves(replyUrl)
+
+    const result = await createDiscussionReplyFacade.createReply(2, dto)
+
+    expect(createReplyStub.calledOnce).to.be.true()
+    expect(createAttachmentsStub.calledOnce).to.be.true()
+    expect(createNewReplyNotificationTaskStub.calledOnce).to.be.true()
+    expect(createNewReplyUINotificationTaskStub.calledOnce).to.be.true()
+    expect(createReplyStub.firstCall.args[0]).to.equal(2)
+    expect(createReplyStub.firstCall.args[1]).to.deep.equal(dto)
+    expect(createAttachmentsStub.firstCall.args[0]).to.equal(newComment.noteId)
+    expect(createAttachmentsStub.firstCall.args[1]).to.deep.equal(dto.attachments)
+    expect(createNewReplyNotificationTaskStub.firstCall.args[0]).to.equal(newComment.id)
+    expect(createNewReplyUINotificationTaskStub.firstCall.args[0]).to.equal(10)
+    expect(createNewReplyUINotificationTaskStub.firstCall.args[1]).to.equal(dto.type)
+    expect(createNewReplyUINotificationTaskStub.firstCall.args[2]).to.equal(replyUrl)
+    expect(result).to.deep.equal(newComment)
   })
 })

@@ -1,34 +1,48 @@
 import React from 'react'
 import { Navigate, useLocation, useOutletContext, useParams, useSearchParams } from 'react-router'
+import { Markdown } from '../components/Markdown'
 import { AppShowOutletContext } from '../features/apps/AppsShow'
 import { StyledMarkdownAppShow } from '../features/apps/form/styles'
-import { Markdown } from '../components/Markdown'
-import { HomeScopeContextValue, useHomeScope } from '../features/home/HomeScopeContext'
-import { SpaceOutletContext } from './spaces'
 import { useAuthUser } from '../features/auth/useAuthUser'
+import { HomeScopeContextValue, useHomeScope } from '../features/home/HomeScopeContext'
 import { ISpace } from '../features/spaces/spaces.types'
+import { SpaceOutletContext } from './spaces'
 
 const MembersList = React.lazy(() => import('../features/spaces/members/MembersList').then(m => ({ default: m.MembersList })))
 const AppList = React.lazy(() => import('../features/apps/AppList').then(m => ({ default: m.AppList })))
 const AppsShow = React.lazy(() => import('../features/apps/AppsShow').then(m => ({ default: m.AppsShow })))
 const SpecTab = React.lazy(() => import('../features/apps/SpecTab').then(m => ({ default: m.SpecTab })))
-const AppExecutionsList = React.lazy(() => import('../features/apps/AppExecutionsList').then(m => ({ default: m.AppExecutionsList })))
+const AppExecutionsList = React.lazy(() =>
+  import('../features/apps/AppExecutionsList').then(m => ({ default: m.AppExecutionsList })),
+)
 const EditAppPage = React.lazy(() => import('../features/apps/form/EditAppPage').then(m => ({ default: m.EditAppPage })))
 const ForkAppPage = React.lazy(() => import('../features/apps/form/ForkAppPage').then(m => ({ default: m.ForkAppPage })))
 const RunJobPage = React.lazy(() => import('../features/apps/run/RunJobPage').then(m => ({ default: m.RunJobPage })))
 const DatabaseList = React.lazy(() => import('../features/databases/DatabaseList').then(m => ({ default: m.DatabaseList })))
 const DatabaseShow = React.lazy(() => import('../features/databases/DatabaseShow').then(m => ({ default: m.DatabaseShow })))
-const CreateDatabase = React.lazy(() => import('../features/databases/create/CreateDatabase').then(m => ({ default: m.CreateDatabase })))
+const CreateDatabase = React.lazy(() =>
+  import('../features/databases/create/CreateDatabase').then(m => ({ default: m.CreateDatabase })),
+)
 const AssetList = React.lazy(() => import('../features/assets/AssetList').then(m => ({ default: m.AssetList })))
 const AssetShow = React.lazy(() => import('../features/assets/AssetShow').then(m => ({ default: m.AssetShow })))
 const WorkflowList = React.lazy(() => import('../features/workflows/WorkflowList').then(m => ({ default: m.WorkflowList })))
 const WorkflowShow = React.lazy(() => import('../features/workflows/WorkflowShow').then(m => ({ default: m.WorkflowShow })))
 const ExecutionList = React.lazy(() => import('../features/executions/ExecutionList').then(m => ({ default: m.ExecutionList })))
-const ExecutionDetails = React.lazy(() => import('../features/executions/details/ExecutionDetails').then(m => ({ default: m.ExecutionDetails })))
-const DiscussionList = React.lazy(() => import('../features/discussions/DiscussionList').then(m => ({ default: m.DiscussionList })))
-const DiscussionShow = React.lazy(() => import('../features/discussions/DiscussionShow').then(m => ({ default: m.DiscussionShow })))
-const CreateDiscussionPage = React.lazy(() => import('../features/discussions/form/CreateDiscussionPage').then(m => ({ default: m.CreateDiscussionPage })))
-const SpaceReportList = React.lazy(() => import('../features/space-reports/SpaceReportList').then(m => ({ default: m.SpaceReportList })))
+const ExecutionDetails = React.lazy(() =>
+  import('../features/executions/details/ExecutionDetails').then(m => ({ default: m.ExecutionDetails })),
+)
+const DiscussionList = React.lazy(() =>
+  import('../features/discussions/DiscussionList').then(m => ({ default: m.DiscussionList })),
+)
+const DiscussionShow = React.lazy(() =>
+  import('../features/discussions/DiscussionShow').then(m => ({ default: m.DiscussionShow })),
+)
+const CreateDiscussionPage = React.lazy(() =>
+  import('../features/discussions/form/CreateDiscussionPage').then(m => ({ default: m.CreateDiscussionPage })),
+)
+const SpaceReportList = React.lazy(() =>
+  import('../features/space-reports/SpaceReportList').then(m => ({ default: m.SpaceReportList })),
+)
 const TrackInHome = React.lazy(() => import('../features/tracks/TrackInHome').then(m => ({ default: m.TrackInHome })))
 const FileList = React.lazy(() => import('../features/files/FileList').then(m => ({ default: m.FileList })))
 const FileShow = React.lazy(() => import('../features/files/show/FileShow').then(m => ({ default: m.FileShow })))
@@ -107,7 +121,14 @@ export const AppsListPage = () => {
   const isContributorOrHigher = context.space
     ? ['lead', 'admin', 'contributor'].includes(context.space.current_user_membership.role)
     : undefined
-  return <AppList homeScope={context.homeContext?.homeScope} spaceId={context.space?.id.toString()} isAdmin={user?.isAdmin} isContributorOrHigher={isContributorOrHigher} />
+  return (
+    <AppList
+      homeScope={context.homeContext?.homeScope}
+      spaceId={context.space?.id.toString()}
+      isAdmin={user?.isAdmin}
+      isContributorOrHigher={isContributorOrHigher}
+    />
+  )
 }
 
 export const AppShowPage = () => {
@@ -221,7 +242,13 @@ export const WorkflowListPage = () => {
   const isContributorOrHigher = context.space
     ? ['lead', 'admin', 'contributor'].includes(context.space.current_user_membership.role)
     : undefined
-  return <WorkflowList homeScope={context.homeContext?.homeScope} spaceId={context.space?.id.toString()} isContributorOrHigher={isContributorOrHigher} />
+  return (
+    <WorkflowList
+      homeScope={context.homeContext?.homeScope}
+      spaceId={context.space?.id.toString()}
+      isContributorOrHigher={isContributorOrHigher}
+    />
+  )
 }
 
 export const WorkflowShowPage = () => {
@@ -256,15 +283,30 @@ export const DiscussionListPage = () => {
   const canCreateDiscussion = context.isHome
     ? context?.homeContext?.homeScope === 'everybody'
     : ['lead', 'admin', 'contributor'].includes(context.space!.current_user_membership.role)
-  return <DiscussionList homeScope={context.homeContext?.homeScope} spaceId={context.space?.id} canCreateDiscussion={canCreateDiscussion} />
+  return (
+    <DiscussionList
+      homeScope={context.homeContext?.homeScope}
+      spaceId={context.space?.id}
+      canCreateDiscussion={canCreateDiscussion}
+    />
+  )
 }
 
 export const DiscussionShowPage = () => {
   const context = useUnifiedRouteContext()
   const user = useAuthUser()
-  const { discussionId } = useParams<{ discussionId: string }>()
+  const { discussionId, answerId, commentId } = useParams<{ discussionId: string; answerId?: string; commentId?: string }>()
 
-  return <DiscussionShow user={user!} homeContext={context.homeContext} space={context.space} discussionId={parseInt(discussionId!, 10)} />
+  return (
+    <DiscussionShow
+      user={user!}
+      homeContext={context.homeContext}
+      space={context.space}
+      discussionId={parseInt(discussionId!, 10)}
+      answerId={parseInt(answerId || '', 10) || undefined}
+      commentId={parseInt(commentId || '', 10) || undefined}
+    />
+  )
 }
 
 export const CreateDiscussionPageWrapper = () => {

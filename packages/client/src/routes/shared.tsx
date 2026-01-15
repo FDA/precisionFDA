@@ -2,30 +2,30 @@ import React from 'react'
 import { type RouteObject, Navigate } from 'react-router'
 
 import {
-  FilesListPage,
-  FileShowPage,
-  AppsListPage,
+  AppJobsPage,
+  AppReadmePage,
   AppShowPage,
+  AppsListPage,
   AppSpecPage,
   AppSpecRedirect,
-  AppReadmePage,
-  AppJobsPage,
-  EditAppPageWrapper,
-  ForkAppPageWrapper,
-  RunJobPageWrapper,
+  CreateDatabasePage,
+  CreateDiscussionPageWrapper,
   DatabaseListPage,
   DatabaseShowPage,
-  CreateDatabasePage,
-  WorkflowListPage,
-  WorkflowShowPage,
-  ExecutionListPage,
-  ExecutionDetailsPage,
   DiscussionListPage,
   DiscussionShowPage,
-  CreateDiscussionPageWrapper,
+  EditAppPageWrapper,
+  ExecutionDetailsPage,
+  ExecutionListPage,
+  FileShowPage,
+  FilesListPage,
+  ForkAppPageWrapper,
+  RunJobPageWrapper,
   SpaceReportListPage,
-  TrackInHomePage,
   TrackExecutionInHomePage,
+  TrackInHomePage,
+  WorkflowListPage,
+  WorkflowShowPage,
 } from './resource-pages'
 
 /**
@@ -137,6 +137,18 @@ export const commonResourceRoutes: RouteObject[] = [
   },
   {
     path: 'discussions/:discussionId/*',
+    Component: DiscussionShowPage,
+  },
+  {
+    path: 'discussions/:discussionId/answers/:answerId',
+    Component: DiscussionShowPage,
+  },
+  {
+    path: 'discussions/:discussionId/comments/:commentId',
+    Component: DiscussionShowPage,
+  },
+  {
+    path: 'discussions/:discussionId/answers/:answerId/comments/:commentId',
     Component: DiscussionShowPage,
   },
 ]

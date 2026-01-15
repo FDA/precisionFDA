@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Markdown } from '../../../components/Markdown'
+import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { ReplyArrowIcon } from '../../../components/icons/ReplyArrowIcon'
 import { StyledMarkdown } from '../../../styles/commonStyles'
 import { useConfirm } from '../../modal/useConfirm'
@@ -12,7 +13,6 @@ import { EditNoteEntity } from '../form/EditNoteEntity'
 import { groupByAttachmentType } from '../helpers'
 import { StyledCommentCard, StyledReplyButton } from '../styles'
 import { CardHeader } from './CardHeader'
-import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export function ReplyCard({
   canEdit,
@@ -21,6 +21,7 @@ export function ReplyCard({
   onReply,
   scope,
   replyType = 'comment',
+  isHighlight = false,
 }: {
   canEdit: boolean
   canReply: boolean
@@ -28,9 +29,17 @@ export function ReplyCard({
   onReply: () => void
   scope: NoteScope
   replyType: 'answer' | 'comment'
+  isHighlight?: boolean
 }) {
   const [editMode, setEditMode] = useState(false)
   const queryClient = useQueryClient()
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isHighlight && cardRef.current) {
+      cardRef.current.scrollIntoView()
+    }
+  }, [isHighlight])
 
   const { attachments: replyAttachments } = useDiscussionContext()
   const attachments = groupByAttachmentType(replyAttachments?.[reply.noteId] ?? [])
@@ -76,7 +85,7 @@ export function ReplyCard({
   }
 
   return (
-    <StyledCommentCard $isAnswer={replyType === 'answer'}>
+    <StyledCommentCard ref={cardRef} $isAnswer={replyType === 'answer'} $isHighlight={isHighlight}>
       <CardHeader
         timestamp={reply.createdAt}
         cardType={replyType}
@@ -90,7 +99,7 @@ export function ReplyCard({
       </StyledMarkdown>
       <AttachmentsList attachments={attachments} />
       {canReply && (
-        <StyledReplyButton data-testid="reply-answer" onClick={() => onReply()}>
+        <StyledReplyButton data-testid="reply-answer" onClick={() => onReply?.()}>
           <ReplyArrowIcon height={12} />
           Reply
         </StyledReplyButton>

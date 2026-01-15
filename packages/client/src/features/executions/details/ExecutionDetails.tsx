@@ -5,10 +5,12 @@ import { HomeLabel } from '../../../components/HomeLabel'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../../components/Tabs'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../../components/Tags'
 import { CogsIcon } from '../../../components/icons/Cogs'
+import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
 import { RESOURCE_LABELS } from '../../../types/user'
 import { pluralize } from '../../../utils/formatting'
 import { getBackPathNext } from '../../../utils/getBackPath'
 import { PricingMap } from '../../apps/apps.types'
+import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
 import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
 import {
   HeaderLeft,
@@ -33,8 +35,6 @@ import { StateCell } from '../StateCell'
 import { fetchExecution } from '../executions.api'
 import { IExecution } from '../executions.types'
 import { FailureMessage, TitleLeft } from './styles'
-import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
-import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
 
 export const ExecutionDetails = ({
   executionUid,

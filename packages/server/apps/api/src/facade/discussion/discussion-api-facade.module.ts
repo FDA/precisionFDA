@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
 import { EmailModule } from '@shared/domain/email/email.module'
+import { NotificationModule } from '@shared/domain/notification/notification.module'
 import { SpaceModule } from '@shared/domain/space/space.module'
 import { AttachmentsFacadeModule } from '@shared/facade/discussion/attachments-facade.module'
 import { CliCreateDiscussionReplyFacade } from '../cli/cli-create-discussion-reply.facade'
@@ -13,7 +14,13 @@ import { UpdateDiscussionFacade } from './update-discussion.facade'
 import { UpdateDiscussionReplyFacade } from './update-reply.facade'
 
 @Module({
-  imports: [DiscussionModule, EmailModule, SpaceModule, AttachmentsFacadeModule],
+  imports: [
+    DiscussionModule,
+    EmailModule,
+    SpaceModule,
+    AttachmentsFacadeModule,
+    NotificationModule,
+  ],
   providers: [
     CreateDiscussionFacade,
     UpdateDiscussionFacade,

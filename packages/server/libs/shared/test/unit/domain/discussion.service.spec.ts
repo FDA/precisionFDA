@@ -1,9 +1,7 @@
-import { EntityManager, MySqlDriver, Reference } from '@mikro-orm/mysql'
+import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { Answer } from '@shared/domain/answer/answer.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
-import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
-import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
 import { DiscussionReplyComment } from '@shared/domain/discussion-reply/discussion-reply-comment.entity'
 import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
 import { DiscussionReplyRepository } from '@shared/domain/discussion-reply/discussion-reply.repository'
@@ -48,7 +46,6 @@ describe('DiscussionService tests', () => {
   const discussionReplyFindEditableOneStub = stub()
 
   beforeEach(async () => {
-    // TODO PFDA-5997 - part 1: use only stubs and remove the database
     await db.dropData(database.connection())
     em = database.orm().em.fork({ useContext: true }) as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
@@ -264,10 +261,14 @@ describe('DiscussionService tests', () => {
     }
 
     const result = await discussionService.createReply(discussion.id, createReplyDTO)
-    const loadedComment = await em.findOneOrFail(DiscussionComment, { id: result.id })
-    expect(loadedComment.body).eq(createReplyDTO.content)
-    expect(loadedComment.commentableType).eq('Discussion')
-    expect(loadedComment.commentable.id).eq(discussion.id)
+    const loadedComment = await em.findOneOrFail(
+      DiscussionReply,
+      { id: result.id },
+      { populate: ['note'] },
+    )
+    expect(loadedComment.note.getEntity().content).eq(createReplyDTO.content)
+    expect(loadedComment.replyType).eq(DISCUSSION_REPLY_TYPE.COMMENT)
+    expect(loadedComment.discussion.id).eq(discussion.id)
   })
 
   it('create an answer comment in a space discussion', async () => {
@@ -351,6 +352,7 @@ describe('DiscussionService tests', () => {
     await discussionService.deleteDiscussion(discussion.id)
     expect(await em.count(Discussion, { id: discussion.id })).eq(0)
   })
+
   it('fail removing a public discussion as non-author', async () => {
     const differentUser = create.userHelper.create(em)
     const discussion = create.discussionHelper.createPublic(em, { user: differentUser })
@@ -368,6 +370,7 @@ describe('DiscussionService tests', () => {
       )
     }
   })
+
   it('remove a space discussion as author', async () => {
     const space = await createBasicSpace()
     const discussion = create.discussionHelper.createInSpace(em, { user, space })
@@ -498,13 +501,6 @@ describe('DiscussionService tests', () => {
       expect(loadedComment.note.getEntity().content).eq(createReplyDTO.content)
       expect(loadedComment.note.getEntity().noteType).eq('Comment')
       expect(loadedComment.note.getEntity().scope).eq(space.scope)
-
-      const loadedOldComment = await em.findOneOrFail(DiscussionComment, {
-        id: loadedComment.oldComment.id,
-      })
-      expect(loadedOldComment.body).eq(createReplyDTO.content)
-      expect(loadedOldComment.commentableType).eq('Discussion')
-      expect(loadedOldComment.commentable.id).eq(discussion.id)
     })
 
     it('fail to create a comment in a discussion without parent', async () => {
@@ -560,13 +556,6 @@ describe('DiscussionService tests', () => {
       expect(loadedComment.note.getEntity().content).eq(createReplyDTO.content)
       expect(loadedComment.note.getEntity().noteType).eq('Comment')
       expect(loadedComment.note.getEntity().scope).eq(space.scope)
-
-      const loadedOldComment = await em.findOneOrFail(AnswerComment, {
-        id: loadedComment.oldComment.id,
-      })
-      expect(loadedOldComment.body).eq(createReplyDTO.content)
-      expect(loadedOldComment.commentableType).eq('Answer')
-      expect(loadedOldComment.commentable.id).eq(answer.id)
     })
   })
 
@@ -623,14 +612,6 @@ describe('DiscussionService tests', () => {
       })
       await em.flush()
 
-      // PFDA-5997 - part 1: remove this after deprecating `comment` table
-      const oldComment = new DiscussionComment(user)
-      oldComment.body = comment.note.getEntity().content
-      oldComment.commentableType = 'Discussion'
-      oldComment.commentable = Reference.create(discussion)
-      await em.persistAndFlush(oldComment)
-      comment.oldComment = Reference.create(oldComment)
-
       discussionReplyFindEditableOneStub.resolves(comment)
 
       const updateReplyDTO: CreateReplyDTO = {
@@ -649,10 +630,6 @@ describe('DiscussionService tests', () => {
         { populate: ['note'] },
       )
       expect(loadedComment.note.getEntity().content).eq(updateReplyDTO.content)
-      const loadedOldComment = await em.findOneOrFail(DiscussionComment, {
-        id: loadedComment.oldComment.id,
-      })
-      expect(loadedOldComment.body).eq(updateReplyDTO.content)
     })
   })
 
@@ -696,14 +673,6 @@ describe('DiscussionService tests', () => {
       })
       await em.flush()
 
-      // PFDA-5997 - part 1: remove this after deprecating `comment` table
-      const oldComment = new DiscussionComment(user)
-      oldComment.body = comment.note.getEntity().content
-      oldComment.commentable = Reference.create(discussion)
-      await em.persistAndFlush(oldComment)
-      comment.oldComment = Reference.create(oldComment)
-      await em.populate(comment, ['note', 'oldComment'])
-
       discussionReplyFindEditableOneStub.resolves(comment)
 
       await discussionService.deleteReply(comment.id)
@@ -711,7 +680,6 @@ describe('DiscussionService tests', () => {
       expect(discussionReplyFindEditableOneStub.calledOnce).to.be.true()
       expect(await em.count(DiscussionReply, { id: comment.id })).eq(0)
       expect(await em.count(Note, { id: comment.note.getEntity().id })).eq(0)
-      expect(await em.count(DiscussionComment, { id: oldComment.id })).eq(0)
     })
 
     it('delete an answer and its comment in a space discussion', async () => {
@@ -730,13 +698,6 @@ describe('DiscussionService tests', () => {
       })
       await em.flush()
 
-      // PFDA-5997 - part 1: remove this after deprecating `comment` table
-      const oldComment = new AnswerComment(user)
-      oldComment.body = comment.note.getEntity().content
-      oldComment.commentable = Reference.create(answer)
-      await em.persistAndFlush(oldComment)
-      comment.oldComment = Reference.create(oldComment)
-
       const populatedAnswer = await em.findOneOrFail(
         DiscussionReply,
         { id: answer.id },
@@ -745,12 +706,7 @@ describe('DiscussionService tests', () => {
         },
       )
 
-      await em.populate(populatedAnswer, [
-        'comments',
-        'comments.note',
-        'comments.note.attachments',
-        'comments.oldComment',
-      ])
+      await em.populate(populatedAnswer, ['comments', 'comments.note', 'comments.note.attachments'])
 
       discussionReplyFindEditableOneStub.resolves(populatedAnswer)
       await discussionService.deleteReply(answer.id)
@@ -760,7 +716,6 @@ describe('DiscussionService tests', () => {
       expect(
         await em.count(Attachment, { note: { id: { $in: [answer.note.id, comment.note.id] } } }),
       ).eq(0)
-      expect(await em.count(DiscussionComment, { id: oldComment.id })).eq(0)
     })
   })
 

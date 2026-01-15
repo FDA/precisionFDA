@@ -1,10 +1,8 @@
-import { OrderDefinition, Reference, Transactional } from '@mikro-orm/core'
+import { OrderDefinition, Transactional } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { Answer } from '@shared/domain/answer/answer.entity'
-import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
-import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
 import { DiscussionReplyComment } from '@shared/domain/discussion-reply/discussion-reply-comment.entity'
 import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
 import { DiscussionReplyRepository } from '@shared/domain/discussion-reply/discussion-reply.repository'
@@ -21,7 +19,6 @@ import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity
 import { Note } from '@shared/domain/note/note.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User } from '@shared/domain/user/user.entity'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import * as errors from '../../../errors'
@@ -133,7 +130,6 @@ export class DiscussionService {
           'discussionReplies',
           'discussionReplies.note',
           'discussionReplies.note.attachments',
-          'discussionReplies.oldComment', // TODO PFDA-5997 - part 1: remove this after deprecating `comments` table
         ],
       },
     )
@@ -285,13 +281,6 @@ export class DiscussionService {
       this.em.persist(newNote)
       const newReply = new DiscussionReply(newNote, discussion, user, parentReply)
       newReply.replyType = dto.type
-
-      // TODO PFDA-5997 - part 1: remove this after deprecating `comments` table
-      if (dto.type === DISCUSSION_REPLY_TYPE.COMMENT) {
-        const oldComment = this.createComment(user, dto, discussion, parentReply)
-        newReply.oldComment = Reference.create(oldComment)
-      }
-
       await this.em.persistAndFlush(newReply)
       return DiscussionReplyDTO.fromEntity(newReply)
     })
@@ -311,20 +300,10 @@ export class DiscussionService {
       )
     }
 
-    // TODO PFDA-5997 - part 1: remove this after deprecating `comments` table
-    if (input.type === DISCUSSION_REPLY_TYPE.COMMENT) {
-      await this.em.populate(reply, ['oldComment'])
-    }
-
-    return await this.em.transactional(async () => {
+    const updatedReply = await this.em.transactional(async () => {
       const note = reply.note.getEntity()
       if (input?.content) {
         note.content = input.content
-      }
-
-      // TODO PFDA-5997 - part 1: remove this after deprecating `comments` table
-      if (input.type === DISCUSSION_REPLY_TYPE.COMMENT) {
-        reply.oldComment.getEntity().body = input.content
       }
 
       await this.em.persistAndFlush(note)
@@ -332,6 +311,8 @@ export class DiscussionService {
 
       return DiscussionReplyDTO.fromEntity(reply)
     })
+
+    return updatedReply
   }
 
   async deleteReply(replyId: number): Promise<void> {
@@ -350,21 +331,13 @@ export class DiscussionService {
       )
     }
 
-    // TODO PFDA-5997 - part 1: query DiscussionReply only and load comments if type is ANSWER
-    if (reply.replyType === DISCUSSION_REPLY_TYPE.COMMENT) {
-      await this.em.populate(reply, ['oldComment'])
-    } else {
-      await this.em.populate(reply, [
-        'comments',
-        'comments.note',
-        'comments.note.attachments',
-        'comments.oldComment',
-      ])
+    if (reply.replyType === DISCUSSION_REPLY_TYPE.ANSWER) {
+      await this.em.populate(reply, ['comments', 'comments.note', 'comments.note.attachments'])
     }
 
     // TODO PFDA-5997 - part 1: cleanup answerVotes and noteVotes
 
-    return this.em.removeAndFlush(reply)
+    await this.em.removeAndFlush(reply)
   }
 
   async getDiscussionReply(replyId: number): Promise<DiscussionReplyDTO> {
@@ -444,25 +417,5 @@ export class DiscussionService {
     return this.entityLinkService.getUiLink(
       Object.setPrototypeOf(comment, DiscussionReplyComment.prototype),
     )
-  }
-
-  private createComment(
-    user: User,
-    commentInput: CreateReplyDTO,
-    discussion: Discussion,
-    parentReply?: Answer,
-  ): DiscussionComment | AnswerComment {
-    let commentClass: typeof DiscussionComment | typeof AnswerComment = DiscussionComment
-    let target: Discussion | Answer = discussion
-    if (parentReply) {
-      commentClass = AnswerComment
-      target = parentReply
-    }
-
-    const newComment = new commentClass(user)
-    newComment.body = commentInput.content
-    newComment.commentable = Reference.create(target)
-    // other params are intentionally null.
-    return newComment
   }
 }

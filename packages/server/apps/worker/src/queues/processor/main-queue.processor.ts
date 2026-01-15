@@ -3,22 +3,28 @@ import { Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { JobService } from '@shared/domain/job/job.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodeService } from '@shared/domain/user-file/node.service'
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
+import { SpaceMemberNotificationFacade } from '@shared/facade/space-member-notification/space-member-notification.facade'
+import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { createRunFollowUpActionJobTask } from '@shared/queue'
-import { NotifyNewDiscussionJob, ProvisionNewUserJob, TASK_TYPE } from '@shared/queue/task.input'
+import {
+  NotifyNewDiscussionJob,
+  ProvisionNewUserJob,
+  TASK_TYPE,
+  UiNotifyNewDiscussionReplyJob,
+} from '@shared/queue/task.input'
+import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
 import { Job } from 'bull'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
-import { EmailService } from '@shared/domain/email/email.service'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
-import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
-import { JobService } from '@shared/domain/job/job.service'
-import { NodeService } from '@shared/domain/user-file/node.service'
 
 @Processor(config.workerJobs.queues.default.name)
 export class MainQueueProcessor extends BaseQueueProcessor {
@@ -35,6 +41,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly emailService: EmailService,
     private readonly jobService: JobService,
     private readonly userProvisionFacade: UserProvisionFacade,
+    private readonly spaceMemberNotificationFacade: SpaceMemberNotificationFacade,
   ) {
     super()
   }
@@ -133,6 +140,12 @@ export class MainQueueProcessor extends BaseQueueProcessor {
       },
       receiverUserIds: [],
     })
+  }
+
+  @ProcessWithContext(TASK_TYPE.UI_NOTIFY_NEW_DISCUSSION_REPLY)
+  async notifyNewDiscussionReplyOnUI(job: Job<UiNotifyNewDiscussionReplyJob>): Promise<void> {
+    const { spaceId, type, replyUrl } = job.data.payload
+    await this.spaceMemberNotificationFacade.notifyNewDiscussionReply(spaceId, type, replyUrl)
   }
 
   @ProcessWithContext(TASK_TYPE.PROVISION_NEW_USERS)
