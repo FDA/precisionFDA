@@ -1,8 +1,8 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
-import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
-import { SqlEntityManager } from '@mikro-orm/mysql'
 
 @Injectable()
 export class UpdateDiscussionFacade {

@@ -14,8 +14,8 @@ import { COOKIE_SESSION_KEY } from '@shared/config/consts'
 import { database } from '@shared/database'
 import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.interceptor'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { JobRepository } from '@shared/domain/job/job.repository'
 import { JobLogService } from '@shared/domain/job/services/job-log.service'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Session } from '@shared/domain/session/session.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PermissionError } from '@shared/errors'
@@ -28,7 +28,6 @@ import { PfdaWebSocket, WEBSOCKET_EVENTS } from '@shared/websocket/model/pfda-we
 import { IncomingMessage } from 'http'
 import { Server } from 'ws'
 import { UserContextTokenInterceptor } from '../user-context/interceptor/user-context-token.interceptor'
-import { JobRepository } from '@shared/domain/job/job.repository'
 
 @UseInterceptors(UserContextTokenInterceptor, OrmContextInterceptor)
 @WebSocketGateway()
@@ -41,13 +40,13 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   private clientConnections = new Map<number, Set<PfdaWebSocket>>()
 
   constructor(
-    private readonly notificationService: NotificationService,
+    // private readonly notificationService: NotificationService,
     private readonly jobRepository: JobRepository,
     private readonly jobLogService: JobLogService,
     private readonly em: SqlEntityManager,
   ) {}
 
-  afterInit() {
+  afterInit(): void {
     this.setupRedisSubscriber().catch((err) =>
       this.logger.error({ message: 'Failed to setup Redis subscriber', error: err.message }),
     )
@@ -172,6 +171,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     client.subscribe(NOTIFICATIONS_QUEUE, (notificationJson: string) => {
       const notification: { user: number; sessionId?: string } = JSON.parse(notificationJson)
       const userId = notification.user
+
       const sessionId = notification.sessionId
 
       delete notification.user // not sending user info to client
@@ -196,7 +196,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   private sendNotification(userId: number, notification: string, sessionId?: string): void {
     this.clientConnections.get(userId)?.forEach((connection) => {
       if (sessionId && connection.pfdaUserContext.sessionId !== sessionId) {
-        // CLI doesn't set sessionId, and we don't send notifications to CLI
+        // PFDA-5816: if sessionId is provided, only send to the connection with the same sessionId
         return
       }
       try {

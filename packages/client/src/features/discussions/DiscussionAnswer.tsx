@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { NoteScope } from './api'
 import { ReplyCard } from './card/ReplyCard'
 import { Answer } from './discussions.types'
-import { CreateCommentEntity } from './form/CreateCommentEntity'
+import { CreateReplyEntity } from './form/CreateReplyEntity'
 import { StyledCardList } from './styles'
 
 export const DiscussionAnswer = ({
@@ -12,6 +12,8 @@ export const DiscussionAnswer = ({
   currentUserId,
   isLead = false,
   scope,
+  answerId,
+  commentId,
 }: {
   canEdit: boolean
   canReply: boolean
@@ -19,6 +21,8 @@ export const DiscussionAnswer = ({
   currentUserId?: number
   isLead: boolean
   scope: NoteScope
+  answerId?: number
+  commentId?: number
 }) => {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -41,6 +45,7 @@ export const DiscussionAnswer = ({
           inputRef.current?.focus()
           setIsEditing(true)
         }}
+        isHighlight={answer.id === answerId}
       />
       <StyledCardList>
         {answer.comments &&
@@ -56,10 +61,11 @@ export const DiscussionAnswer = ({
                 inputRef.current?.focus()
                 setIsEditing(true)
               }}
+              isHighlight={comment.id === commentId}
             />
           ))}
         {isEditing && (
-          <CreateCommentEntity
+          <CreateReplyEntity
             canUserAnswer
             scope={scope}
             onSuccess={() => setIsEditing(false)}

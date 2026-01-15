@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useRef } from 'react'
 import styled from 'styled-components'
+import { Button } from '../../../components/Button'
+import { InputText } from '../../../components/InputText'
 import { editDiscussionRequest } from '../api'
 import { Discussion } from '../discussions.types'
-import { InputText } from '../../../components/InputText'
-import { Button } from '../../../components/Button'
 
 export const StyledTitleEdit = styled.div`
   display: flex;

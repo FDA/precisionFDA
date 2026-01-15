@@ -1,7 +1,8 @@
+import { useMutation } from '@tanstack/react-query'
 import React from 'react'
 import { Outlet, useOutletContext } from 'react-router'
-import { useMutation } from '@tanstack/react-query'
 import { MenuCounter } from '../../../components/MenuCounter'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
 import { CogsIcon } from '../../../components/icons/Cogs'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
@@ -13,10 +14,13 @@ import { NetworkIcon } from '../../../components/icons/NetworkIcon'
 import { SpaceReportIcon } from '../../../components/icons/SpaceReportIcon'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
 import { useLocalStorage } from '../../../hooks/useLocalStorage'
+import { SpaceOutletContext } from '../../../routes/spaces'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../../home/home.styles'
 import { ApiErrorResponse } from '../../home/types'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
+import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
+import { ProtectedIcon } from '../ProtectedIcon'
 import { fixGuestPermissions } from '../spaces.api'
 import { useSpaceActions } from '../useSpaceActions'
 import { SpaceTypeTabs } from './SpaceTypeTabs'
@@ -32,10 +36,6 @@ import {
   SpaceTopRight,
   TopSpaceHeader,
 } from './styles'
-import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
-import { ProtectedIcon } from '../ProtectedIcon'
-import type { SpaceOutletContext } from '../../../routes/spaces'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const SpaceShowLayout = () => {
   const context = useOutletContext<SpaceOutletContext>()

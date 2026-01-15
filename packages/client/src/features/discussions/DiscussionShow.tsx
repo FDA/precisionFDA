@@ -9,22 +9,24 @@ import {
   useFetchDiscussionQuery,
 } from '../../api/queries/discussion'
 import { Button } from '../../components/Button'
+import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { PencilIcon } from '../../components/icons/PencilIcon'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
+import { IUser } from '../../types/user'
 import { pluralize } from '../../utils/formatting'
+import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
 import { HomeLoader, NotFound } from '../home/show.styles'
+import { NOTIFICATION_ACTION } from '../home/types'
+import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
 import { ISpace } from '../spaces/spaces.types'
 import { DiscussionAnswer } from './DiscussionAnswer'
 import { DiscussionCard } from './card/DiscussionCard'
 import { ReplyCard } from './card/ReplyCard'
 import { Attachment } from './discussions.types'
-import { CreateCommentEntity } from './form/CreateCommentEntity'
+import { CreateReplyEntity } from './form/CreateReplyEntity'
 import { EditDiscussionTitle } from './form/EditDiscussionTitle'
 import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
-import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
-import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
-import { IUser } from '../../types/user'
-import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 interface DiscussionContextType {
   attachments: Record<number, Attachment[]>
@@ -52,16 +54,19 @@ const DiscussionProvider = ({ children, value }: { children: ReactNode; value: D
 
 export const DiscussionShow = ({
   discussionId,
+  answerId,
+  commentId,
   space,
   user,
   homeContext = defaultHomeContext,
 }: {
   discussionId: number
+  answerId?: number
+  commentId?: number
   space?: ISpace
   user: IUser
   homeContext?: HomeScopeContextValue
 }) => {
-  
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
@@ -77,6 +82,17 @@ export const DiscussionShow = ({
       attachmentsQuery.refetch()
     }
   }, [discussion?.id, discussion?.commentsCount, discussion?.answersCount])
+
+  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.DISCUSSION_REPLY_ADDED])
+
+  useEffect(() => {
+    if (lastJsonMessage == null) {
+      return
+    }
+    queryClient.invalidateQueries({
+      queryKey: getFetchDiscussionQueryKey(discussionId),
+    })
+  }, [lastJsonMessage])
 
   const attachments = attachmentsQuery.data
 
@@ -187,6 +203,8 @@ export const DiscussionShow = ({
                   answer={answer}
                   isLead={isLead}
                   scope={discussion.scope}
+                  answerId={answerId}
+                  commentId={commentId}
                 />
               ))}
             </>
@@ -201,10 +219,11 @@ export const DiscussionShow = ({
                 scope={discussion.scope}
                 replyType="comment"
                 onReply={() => {}}
+                isHighlight={commentId === comment.id}
               />
             ))}
           {canReply && (
-            <CreateCommentEntity
+            <CreateReplyEntity
               canUserAnswer={canUserAnswer}
               onSuccess={handleSuccess}
               onCancel={() => setIsEditing(false)}

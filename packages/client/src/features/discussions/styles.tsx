@@ -71,7 +71,7 @@ export const AttachmentsLabel = styled.span`
   padding-right: 8px;
 `
 
-export const StyledCommentCard = styled.div<{ $isAnswer?: boolean }>`
+export const StyledCommentCard = styled.div<{ $isAnswer?: boolean; $isHighlight?: boolean }>`
   font-size: 14px;
   display: flex;
   padding: 8px 16px;
@@ -81,11 +81,18 @@ export const StyledCommentCard = styled.div<{ $isAnswer?: boolean }>`
   border-radius: 6px;
   border: 1px solid var(--c-layout-border);
   background: var(--background);
+  scroll-margin-top: 30px;
+  ${({ $isHighlight }) =>
+    $isHighlight &&
+    css`
+      border-width: 2px;
+      border-color: var(--primary-500);
+    `}
   ${({ $isAnswer }) =>
     $isAnswer &&
     css`
       background: var(--c-discussion-answer-bg);
-      border: 1px solid var(--c-discussion-answer-300);
+      border-color: var(--c-discussion-answer-300);
     `}
 `
 

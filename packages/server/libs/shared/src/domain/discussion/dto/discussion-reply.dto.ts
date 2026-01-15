@@ -1,6 +1,7 @@
 import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 import { InternalError } from '@shared/errors'
+import { SCOPE } from '@shared/types/common'
 
 export class DiscussionReplyDTO {
   id: number
@@ -9,6 +10,7 @@ export class DiscussionReplyDTO {
   content: string
   noteId: number
   user: SimpleUserDTO
+  scope: SCOPE
   comments?: DiscussionReplyDTO[]
   createdAt: Date
   updatedAt: Date
@@ -27,6 +29,7 @@ export class DiscussionReplyDTO {
     dto.noteId = note.id
     dto.title = note.title
     dto.content = note.content
+    dto.scope = note.scope
     dto.user = SimpleUserDTO.fromEntity(reply.user.getEntity())
     dto.comments = []
     if (reply.comments?.isInitialized()) {
