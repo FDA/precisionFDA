@@ -72,6 +72,7 @@ const TextInput: React.FC<TextInputProps> = ({
         onChange={value => setFilterValue(value)}
         className="filter-input"
         list={dataListId}
+        data-testid={`filter-input-${columnId}`}
       />
     </div>
   )

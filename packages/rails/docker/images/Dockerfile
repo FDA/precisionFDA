@@ -6,16 +6,12 @@ ARG NODE_VERSION=22
 ARG BUNDLER_VERSION=2.4.10
 ARG GIT_BRANCH
 ARG GIT_REVISION
-ARG RECAPTCHA_SITE_KEY
-ARG NODE_ENV
+
 FROM ruby:${RUBY_IMAGE_TAG}-alpine AS builder
-ARG RECAPTCHA_SITE_KEY
-ARG NODE_ENV
 
 ENV RAILS_ENV=production
 ENV DOCKER_BUILD=true
-ENV RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
-ENV NODE_ENV=${NODE_ENV}
+ENV NODE_ENV=production
 
 ARG NODE_VERSION
 ENV APP_DIR=/precision-fda
@@ -63,6 +59,7 @@ RUN gem install bundler -v "$BUNDLER_VERSION" --no-document && \
 COPY packages/rails/ $APP_DIR
 
 RUN chmod +x ./docker/entrypoint/prod.entrypoint.sh
+RUN chmod +x ./docker/entrypoint/runtime-env.sh
 
 # =========================
 # Build frontend assets

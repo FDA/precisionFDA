@@ -79,17 +79,17 @@ export function InsertImageUriDialogBody({
         placeholder="i.e. https://example.com/image.jpg"
         onChange={setSrc}
         value={src}
-        data-test-id="image-modal-url-input"
+        data-testid="image-modal-url-input"
       />
       <TextInput
         label="Alt Text"
         onChange={setAltText}
         value={altText}
-        data-test-id="image-modal-alt-text-input"
+        data-testid="image-modal-alt-text-input"
       />
       <DialogActions>
         <Button
-          data-test-id="image-modal-confirm-btn"
+          data-testid="image-modal-confirm-btn"
           disabled={isDisabled}
           onClick={() => onClick({altText, src})}>
           Confirm

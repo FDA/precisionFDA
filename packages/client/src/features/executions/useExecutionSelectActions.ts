@@ -136,16 +136,13 @@ export const useExecutionSelectActions = ({
     },
     {
       name: 'Make Public',
-      type: 'link',
+      type: 'route',
       isDisabled:
         selected.length !== 1 ||
         !selected[0]?.links?.publish ||
         (selected[0].jobs && selected[0].scope === 'private') ||
         !user?.allowed_to_publish,
-      link: {
-        method: 'GET',
-        url: `/publish?identifier=${selected[0]?.uid}&type=job`,
-      },
+      to: `/publish?identifier=${selected[0]?.uid}&type=job`,
       shouldHide: selected.length !== 1 || homeScope !== 'me',
     },
     {

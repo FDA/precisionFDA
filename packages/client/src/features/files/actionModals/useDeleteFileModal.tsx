@@ -122,7 +122,7 @@ export const useDeleteFileModal = ({ selected, onSuccess }: { selected: IFile[];
   }
 
   const modalComp = (
-    <ModalNext id="modal-files-delete" data-test-id="modal-files-delete" isShown={isShown} hide={() => setShowModal(false)}>
+    <ModalNext id="modal-files-delete" data-testid="modal-files-delete" isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop
         disableClose={false}
         headerText={`Delete ${nodesToBeDeleted ? itemsCountString('item', nodesToBeDeleted.length) : '...'}`}

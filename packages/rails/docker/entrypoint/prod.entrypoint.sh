@@ -2,6 +2,11 @@
 set -e
 
 # ------------------------------
+# Generate runtime environment for frontend
+# ------------------------------
+source /precision-fda/docker/entrypoint/runtime-env.sh
+
+# ------------------------------
 # Generate database.yml from DATABASE_URL
 # ------------------------------
 
@@ -52,7 +57,7 @@ echo "DB connection established"
 # ------------------------------
 # If the command is a rake/rails task, just exec it (e.g. migrations)
 # ------------------------------
-if [[ "$1" == "bundle" && "$2" == "exec" && "$3" == "rake" ]]; then
+if [[ "${1:-}" == "bundle" && "${2:-}" == "exec" && "${3:-}" == "rake" ]]; then
   echo "Running rake task: $*"
   exec "$@"
 fi

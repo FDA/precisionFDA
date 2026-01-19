@@ -136,7 +136,7 @@ export function UpdateInlineImageDialog({
           placeholder="Descriptive alternative text"
           onChange={setAltText}
           value={altText}
-          data-test-id="image-modal-alt-text-input"
+          data-testid="image-modal-alt-text-input"
         />
       </div>
 
@@ -164,7 +164,7 @@ export function UpdateInlineImageDialog({
 
       <DialogActions>
         <Button
-          data-test-id="image-modal-file-upload-btn"
+          data-testid="image-modal-file-upload-btn"
           onClick={() => handleOnConfirm()}>
           Confirm
         </Button>

@@ -75,19 +75,13 @@ runs:
         fi
 
         # Determine ECR repository name
-        if [ "${{ inputs.package }}" == "web" ]; then
-          # Always use environment for web. This is because we use env specific variables for building the image.
-          REPO_NAME="pfda/${{ inputs.environment }}/web"
+        if [[ "$BRANCH_NAME" == "master" ]] || \
+           [[ "$BRANCH_NAME" == "production" ]] || \
+           [[ "$BRANCH_NAME" == staging-release* ]] || \
+           [[ "$BRANCH_NAME" == release-* ]]; then
+          REPO_NAME="pfda/production/${{ inputs.package }}"
         else
-          # Existing logic for all other packages
-          if [[ "$BRANCH_NAME" == "master" ]] || \
-             [[ "$BRANCH_NAME" == "production" ]] || \
-             [[ "$BRANCH_NAME" == staging-release* ]] || \
-             [[ "$BRANCH_NAME" == release-* ]]; then
-            REPO_NAME="pfda/production/${{ inputs.package }}"
-          else
-            REPO_NAME="pfda/${{ inputs.package }}"
-          fi
+          REPO_NAME="pfda/${{ inputs.package }}"
         fi
 
         # Export values for other steps
@@ -117,7 +111,9 @@ runs:
         if [ -z "$EXISTING_IMAGE" ] || [ "$EXISTING_IMAGE" = "None" ]; then
           echo "Image does not exist, need to build."
           TIMESTAMP=$(date +%Y%m%dT%H%M)
-          IMAGE_TAG="${{ env.BRANCH_NAME }}-${{ steps.calc_tag.outputs.short_sha }}-${TIMESTAMP}"
+        # Replace / with - in the branch name as tags cannot contain /
+          DERIVED_BRANCH_TAG=$(echo "${{ env.BRANCH_NAME }}" | sed 's/\//-/g')
+          IMAGE_TAG="${DERIVED_BRANCH_TAG}-${{ steps.calc_tag.outputs.short_sha }}-${TIMESTAMP}"
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           echo "build_needed=true" >> $GITHUB_OUTPUT
         else
@@ -130,25 +126,6 @@ runs:
     - name: Skip build if image exists
       if: steps.check_ecr.outputs.build_needed == 'false'
       run: echo "Docker image already exists in ECR. Skipping build."
-      shell: bash
-
-    - name: Load SSM variables for frontend build
-      if: steps.check_ecr.outputs.build_needed == 'true'
-      id: load_ssm
-      run: |
-        RECAPTCHA_SITE_KEY=$(aws ssm get-parameter \
-          --name "/pfda/${{ inputs.environment }}/app/environment/RECAPTCHA_SITE_KEY" \
-          --with-decryption \
-          --query "Parameter.Value" \
-          --output text)
-
-        NODE_ENV=$(aws ssm get-parameter \
-          --name "/pfda/${{ inputs.environment }}/app/environment/NODE_ENV" \
-          --query "Parameter.Value" \
-          --output text)
-
-        echo "RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY" >> $GITHUB_ENV
-        echo "NODE_ENV=$NODE_ENV" >> $GITHUB_ENV
       shell: bash
 
     - name: Set Docker build paths
@@ -177,8 +154,6 @@ runs:
         build-args: |
           GIT_BRANCH=${{ github.ref_name }}
           GIT_REVISION=${{ github.sha }}
-          RECAPTCHA_SITE_KEY=${{ env.RECAPTCHA_SITE_KEY }}
-          NODE_ENV=${{ env.NODE_ENV }}
         cache-from: |
           type=gha,scope=gems,key=${{ runner.os }}-gems-${{ hashFiles('packages/rails/Gemfile.lock') }}
           type=gha,scope=pnpm,key=${{ runner.os }}-pnpm-${{ hashFiles('packages/client/pnpm-lock.yaml') }}

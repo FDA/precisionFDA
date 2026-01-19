@@ -1,0 +1,158 @@
+{
+  "substanceClass": "protein",
+  "references": [
+    {
+      "tags": [
+        
+      ],
+      "access": [
+        
+      ],
+      "docType": "WORMS",
+      "citation": "Wikipedia",
+      "publicDomain": true,
+      "uuid": "ca684863-ee4a-45e3-97c4-abcdef100000"
+    },
+    {
+      "tags": [
+        
+      ],
+      "access": [
+        
+      ],
+      "docType": "BIOSYSTEMATIC DATABASE of WORLD DIPTERA",
+      "citation": "Wikipedia",
+      "publicDomain": true,
+      "uuid": "b6d55c05-bdb9-44ab-8131-abcdef100000"
+    },
+    {
+      "tags": [
+        
+      ],
+      "access": [
+        
+      ],
+      "docType": "BRITISH PHARMACOPOEIA",
+      "citation": "Wikipedia",
+      "publicDomain": true,
+      "url": "https://google.com",
+      "uuid": "0927f74f-3611-41e7-ad2e-abcdef100000"
+    }
+  ],
+  "names": [
+    {
+      "references": [
+        "0927f74f-3611-41e7-ad2e-abcdef100000",
+        "ca684863-ee4a-45e3-97c4-abcdef100000"
+      ],
+      "access": [
+        
+      ],
+      "languages": [
+        "pt"
+      ],
+      "type": "cn",
+      "name": "Protein Prova abcdef100000"
+    },
+    {
+      "references": [
+        "b6d55c05-bdb9-44ab-8131-abcdef100000"
+      ],
+      "access": [
+        
+      ],
+      "languages": [
+        "en"
+      ],
+      "type": "cn",
+      "name": "Protein Test abcdef100000"
+    }
+  ],
+  "protein": {
+    "proteinType": "ENZYME",
+    "references": [
+      "0927f74f-3611-41e7-ad2e-abcdef100000"
+    ],
+    "subunits": [
+      {
+        "references": [
+          
+        ],
+        "access": [
+          
+        ],
+        "sequence": "GGGGGGGG",
+        "subunitIndex": 1
+      }
+    ],
+    "otherLinks": [
+      
+    ],
+    "disulfideLinks": [
+      
+    ],
+    "glycosylation": {
+      
+    },
+    "proteinSubType": "AMYLIN ANALOG",
+    "sequenceOrigin": "MOUSE CHIMERIC",
+    "sequenceType": "COMPLETE"
+  },
+  "codes": [
+    
+  ],
+  "relationships": [
+    
+  ],
+  "properties": [
+    {
+      "value": {
+        "type": "MOL RATIO"
+      },
+      "references": [
+        
+      ],
+      "access": [
+        
+      ],
+      "name": "BOILING POINT",
+      "propertyType": "ENZYMATIC"
+    },
+    {
+      "value": {
+        "type": "Site Range"
+      },
+      "propertyType": "PROTEIN FEATURE",
+      "name": "BOILING POINT",
+      "references": [
+        
+      ],
+      "access": [
+        
+      ]
+    }
+  ],
+  "access": [
+    "protected"
+  ],
+  "definitionLevel": "COMPLETE",
+  "definitionType": "PRIMARY",
+  "tags": [
+    "131I",
+    "67Ga"
+  ],
+  "modifications": {
+    "agentModifications": [
+      
+    ],
+    "structuralModifications": [
+      
+    ],
+    "physicalModifications": [
+      
+    ]
+  },
+  "notes": [
+    
+  ]
+}

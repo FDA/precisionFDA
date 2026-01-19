@@ -1,7 +1,7 @@
 volumes:
   bundler-deps-cache-ruby:
   db-pfda-mysql-volume:
-  webpack-cache-client:
+  vite-cache-client:
 
 services:
   web:
@@ -30,13 +30,11 @@ services:
     build:
       context: ../packages/client
       dockerfile: ./docker/images/isolation.Dockerfile
-    environment:
-      - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
     volumes:
       - type: volume
-        source: webpack-cache-client
-        target: /precision-fda/.build_cache/
-    command: pnpm run watch:docker
+        source: vite-cache-client
+        target: /precision-fda/node_modules/.vite/
+    command: pnpm run build
   nodejs-api:
     depends_on:
       - db
@@ -47,7 +45,7 @@ services:
     build:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-dev.Dockerfile
-    command: ["make", "watch"]
+    command: ["pnpm", "run", "start:dev:api"]
     environment:
       - NODE_ENV=development
       - NODE_DATABASE_NAME=precision-fda
@@ -68,7 +66,7 @@ services:
     build:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-dev.Dockerfile
-    command: ["make", "watch-worker"]
+    command: ["pnpm", "run", "start:dev:worker"]
     environment:
       - NODE_ENV=development
       - NODE_DATABASE_NAME=precision-fda
@@ -86,7 +84,7 @@ services:
     build:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-dev.Dockerfile
-    command: ["make", "watch-admin-platform-client"]
+    command: ["pnpm", "run", "start:dev:admin-platform-client"]
     environment:
       - NODE_ENV=development
       - SKIP_NODEJS_DB_WAITING=1

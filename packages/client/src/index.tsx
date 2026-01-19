@@ -8,9 +8,11 @@ import ReactModal from 'react-modal'
 import Root from './routes/root'
 import { getAuthenticityToken } from './utils/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ENABLE_DEV_MSW } from '@/utils/env'
+import { loadRuntimeEnv } from '@/utils/runtimeEnv'
 
 async function enableMocking() {
-  if (!process.env.ENABLE_DEV_MSW) {
+  if (!ENABLE_DEV_MSW) {
     return
   }
 
@@ -51,13 +53,15 @@ const renderApp = () => {
 
   if (container) {
     ReactModal.setAppElement('#app-root')
-    enableMocking().then(() => {
-      initializeApp().then(() => {
-        root.render(
-          <QueryClientProvider client={queryClient}>
-            <Root />
-          </QueryClientProvider>,
-        )
+    loadRuntimeEnv().then(() => {
+      enableMocking().then(() => {
+        initializeApp().then(() => {
+          root.render(
+            <QueryClientProvider client={queryClient}>
+              <Root />
+            </QueryClientProvider>,
+          )
+        })
       })
     })
   }
@@ -65,6 +69,3 @@ const renderApp = () => {
 document.addEventListener('DOMContentLoaded', renderApp)
 document.addEventListener('page:load', renderApp)
 
-if (NODE_ENV === 'development' && module.hot) {
-  module.hot.accept()
-}

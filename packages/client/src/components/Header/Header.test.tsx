@@ -1,11 +1,7 @@
-import React from 'react'
-import { render, screen, waitFor } from '../../test/test-utils'
+import { render } from '../../test/test-utils'
 import Header from './HeaderNext'
 
 test('Logged in user should see My Home link', async () => {
-  render(<Header />, { route: '/' })
-  await waitFor(async () => {
-    const element = await screen.findByTestId('main-header')
-    expect(element).toBeInTheDocument()
-  })
+  const screen = render(<Header />, { route: '/' })
+  await expect.element(screen.getByTestId('main-header')).toBeInTheDocument()
 })

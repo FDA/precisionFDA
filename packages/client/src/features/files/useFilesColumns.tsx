@@ -56,6 +56,7 @@ export const useFilesColumns = ({
             {node.type === 'UserFile' || node.type === 'File' || node.type === 'Asset' ? (
               <>
                 <StyledNameCell
+                  data-testid="file-row-name"
                   data-tooltip-id={`fileNameTooltip${node.uid}`}
                   data-tooltip-content={`File is in ${node.state} state.`}
                   color={
@@ -72,7 +73,7 @@ export const useFilesColumns = ({
                 {isIncompleteFile(node.state) && <Tooltip id={`fileNameTooltip${node.uid}`} style={{ zIndex: 2 }} />}
               </>
             ) : (
-              <StyledNameCell onClick={() => onFolderClick(node.id.toString())}>
+              <StyledNameCell data-testid="folder-row-name" onClick={() => onFolderClick(node.id.toString())}>
                 <FolderIcon height={14} />
                 {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
                 {node.name}

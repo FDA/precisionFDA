@@ -1,7 +1,7 @@
 volumes:
   bundler-deps-cache-ruby:
   db-pfda-mysql-volume:
-  webpack-cache-client:
+  vite-cache-client:
 
 services:
   web:
@@ -24,8 +24,8 @@ services:
       service: frontend
     volumes:
       - type: volume
-        source: webpack-cache-client
-        target: /precision-fda/.build_cache/
+        source: vite-cache-client
+        target: /precision-fda/node_modules/.vite/
   nodejs-api:
     depends_on:
       - db

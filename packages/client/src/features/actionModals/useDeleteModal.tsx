@@ -66,7 +66,7 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
   }
 
   const modalComp = (
-    <ModalNext id="modal-resource-delete" data-test-id="modal-resource-delete" isShown={isShown} hide={() => setShowModal(false)}>
+    <ModalNext id="modal-resource-delete" data-testid="modal-resource-delete" isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop
         disableClose={false}
         headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}

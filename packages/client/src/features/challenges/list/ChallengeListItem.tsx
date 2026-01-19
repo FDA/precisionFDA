@@ -32,7 +32,7 @@ export const ChallengeListItem = ({ challenge }: { challenge: Challenge }) => {
         <img width="100%" src={challenge.cardImageUrl} alt="sf" />
       </ItemImage>
       <ItemBody>
-        <Title to={`/challenges/${challenge.id}`}>{challenge.name}</Title>
+        <Title to={`/challenges/${challenge.id}`} data-testid="challenge-title">{challenge.name}</Title>
         <DateArea>
           <span className="challenge-date-label">Starts</span>
         <span className="challenge-date">

@@ -23,16 +23,18 @@ export const StatusSelect = ({
     value: option,
   }))
   return (
-    <Select
-      options={options}
-      placeholder="Choose..."
-      onChange={onChange}
-      isClearable
-      isSearchable
-      onBlur={onBlur}
-      value={value}
-      isDisabled={isSubmitting}
-      inputId="challenge_status"
-    />
+    <div data-testid="challenge-status-select">
+      <Select
+        options={options}
+        placeholder="Choose..."
+        onChange={onChange}
+        isClearable
+        isSearchable
+        onBlur={onBlur}
+        value={value}
+        isDisabled={isSubmitting}
+        inputId="challenge_status"
+      />
+    </div>
   )
 }

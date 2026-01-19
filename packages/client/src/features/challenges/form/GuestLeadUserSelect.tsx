@@ -28,17 +28,19 @@ export const GuestLeadUserSelect = ({
 }) => {
   const { data: guestLeadUserOptions, isLoading } = useFetchGuestLeadUsersQuery()
   return (
-    <Select
-      options={guestLeadUserOptions}
-      placeholder="Choose..."
-      onChange={onChange}
-      isClearable
-      isSearchable
-      onBlur={onBlur}
-      value={value}
-      isDisabled={isDisabled}
-      isLoading={isLoading}
-      inputId="challenge_guest-lead-user"
-    />
+    <div data-testid="challenge-guest-lead-select">
+      <Select
+        options={guestLeadUserOptions}
+        placeholder="Choose..."
+        onChange={onChange}
+        isClearable
+        isSearchable
+        onBlur={onBlur}
+        value={value}
+        isDisabled={isDisabled}
+        isLoading={isLoading}
+        inputId="challenge_guest-lead-user"
+      />
+    </div>
   )
 }

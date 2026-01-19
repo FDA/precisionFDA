@@ -32,7 +32,6 @@ const commonValidationSchema = {
     .nullable()
     .required('Scoring App User is required'),
   startAt: Yup.date()
-    .min(new Date(), 'Start date has to be in the future')
     .nullable()
     .typeError('Invalid Date')
     .required('Start Date is required'),

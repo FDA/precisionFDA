@@ -10,4 +10,4 @@ if [[ ! $SKIP_FRONTEND_DEPS_SETUP || $SKIP_FRONTEND_DEPS_SETUP = 0 ]]; then
     pnpm i --frozen-lockfile
 fi
 
-docker-entrypoint.sh "$@"
+exec docker-entrypoint.sh "$@"

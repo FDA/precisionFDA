@@ -140,12 +140,13 @@ export const ChallengeForm = ({
   return (
     <>
       <div>
-        <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+        <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off" data-testid="challenge-form">
           <FieldGroup label='Name' required>
             <InputText
               placeholder="Name of the challenge"
               {...register('name')}
               disabled={isSubmitting}
+              data-testid="challenge-name-input"
             />
             <ErrorMessage
               errors={errors}
@@ -160,6 +161,7 @@ export const ChallengeForm = ({
               placeholder="What is this challenge about?"
               {...register('description')}
               disabled={isSubmitting}
+              data-testid="challenge-description-input"
             />
             <ErrorMessage
               errors={errors}
@@ -248,6 +250,7 @@ export const ChallengeForm = ({
               type="datetime-local"
               {...register('startAt', { valueAsDate: true })}
               disabled={isSubmitting || ended}
+              data-testid="challenge-start-at-input"
             />
             <ErrorMessage
               errors={errors}
@@ -261,6 +264,7 @@ export const ChallengeForm = ({
               type="datetime-local"
               {...register('endAt', { valueAsDate: true })}
               disabled={isSubmitting || ended}
+              data-testid="challenge-end-at-input"
             />
             <ErrorMessage
               errors={errors}
@@ -350,6 +354,7 @@ export const ChallengeForm = ({
               data-variant='primary'
               disabled={Object.keys(errors).length > 0 || isSubmitting || isSaving}
               type="submit"
+              data-testid="challenge-submit-button"
             >
               Submit
             </Button>

@@ -74,7 +74,7 @@ export const useDnDMoveFileModal = ({
   }
 
   const modalComp = (
-    <ModalNext id="modal-files-move" data-test-id="modal-files-move" isShown={isShown} hide={() => setShowModal(false)}>
+    <ModalNext id="modal-files-move" data-testid="modal-files-move" isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop
         disableClose={false}
         headerText={`Moving ${memoSelected ? itemsCountString('item', memoSelected.length) : '...'} to ${targetNode.name}`}

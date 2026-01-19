@@ -1,15 +1,21 @@
 import { ToastOptions } from 'react-toastify'
+import { IS_DEV, ENABLE_DEV_MSW } from './env'
 
 /**
- * Returns localhost:3001 for development on local machine and
- * corresponding hostname for everything else (no need for port).
+ * Returns the WebSocket URL for the notification service.
+ * When running in development mode, connects directly to nginx on port 3000.
+ * For all other environments, uses the current host.
  *
  * @returns WebSocket url or null if location is not available
  */
 export const getNodeWsUrl = (): string | null => {
   if (window?.location) {
-    const { host } = window.location
-    return `wss://${host}/ws`
+    const { hostname } = window.location
+    // In development mode, connect directly to nginx (port 3000)
+    if (IS_DEV) {
+      return `wss://${hostname}:3000/ws`
+    }
+    return `wss://${window.location.host}/ws`
   }
   return null
 }
@@ -21,4 +27,4 @@ export const notificationsConfig: ToastOptions = {}
 
 export const DEFAULT_RECONNECT_INTERVAL = 1000 // ms
 export const DEFAULT_RECONNECT_ATTEMPTS = 1000 // ms
-export const SHOULD_RECONNECT = !process.env.ENABLE_DEV_MSW
+export const SHOULD_RECONNECT = !ENABLE_DEV_MSW

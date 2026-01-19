@@ -23,7 +23,7 @@ export function selectColumnDef<T extends { id: string | number }>(): ColumnDef<
     enableSorting: false,
     enableHiding: false,
     cell: ({ row }) => (
-      <label style={{ cursor: 'pointer' }}>
+      <label style={{ cursor: 'pointer' }} data-testid="row-checkbox">
         <Checkbox
           style={{ boxSizing: 'content-box' }}
           checked={row.getIsSelected()}

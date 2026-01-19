@@ -51,7 +51,7 @@ const ExternalLink: FunctionComponent<IExternalLinkProps> = ({
 
       <ModalNext
         id="external-link"
-        data-test-id="external-link"
+        data-testid="external-link"
         isShown={isOpen}
         hide={closeModal}
       >

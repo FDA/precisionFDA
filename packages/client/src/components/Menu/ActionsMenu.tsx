@@ -136,8 +136,8 @@ export function ActionsMenu({
         data-testid={dataTestId}
       />
       <BaseMenu.Portal>
-        <BaseMenu.Positioner sideOffset={3}  className={`${baseStyles.positioner} ${styles.positioner}`} side="bottom" align="end">
-          <BaseMenu.Popup className={baseStyles.popup}>
+        <BaseMenu.Positioner sideOffset={3} className={`${baseStyles.positioner} ${styles.positioner}`} side="bottom" align="end">
+          <BaseMenu.Popup className={baseStyles.popup} role="menu" aria-label={`${label} menu`}>
             {children}
           </BaseMenu.Popup>
         </BaseMenu.Positioner>
