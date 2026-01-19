@@ -165,6 +165,7 @@ jobs:
           bower install --allow-root
           cp config/database.ci.yml config/database.yml
           bundle exec rake db:setup
+          mkdir -p app/assets/packs
           touch app/assets/packs/bundle.js
           touch app/assets/packs/bundle.css
 
@@ -273,9 +274,13 @@ jobs:
         working-directory: ./packages/client
         run: pnpm install --frozen-lockfile --prod=false
 
+      - name: Install Playwright browsers
+        working-directory: ./packages/client
+        run: pnpm exec playwright install chromium --with-deps
+
       - name: Test
         working-directory: ./packages/client
-        run: pnpm test
+        run: pnpm test:run
 
   test-react-app-production:
     name: Test React app production build

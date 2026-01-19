@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--config",
+        "${workspaceFolder}/packages/client/e2e/playwright.config.ts"
+      ]
+    }
+  }
+}

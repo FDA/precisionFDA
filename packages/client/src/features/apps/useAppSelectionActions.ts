@@ -232,12 +232,9 @@ export const useAppSelectionActions = ({
     },
     {
       name: 'Make public',
-      type: 'link',
-      link: {
-        method: 'GET' as const,
-        url: `/publish?identifier=${selected[0]?.uid}&type=app`,
-      },
-      isDisabled: selected.length !== 1 || !selected[0].links.publish || !user?.allowed_to_publish,
+      type: 'route',
+      to: `/publish?identifier=${selected[0]?.uid}&type=app`,
+      isDisabled: selected.length !== 1 || !user?.allowed_to_publish,
       shouldHide: selected[0]?.location !== 'Private',
     },
     {

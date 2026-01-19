@@ -98,9 +98,9 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
             <PFDALogoDark 
               className="brand-logo brand-logo-dark" 
             />
-            </div>
-
-            <nav className="desktop-nav" role="navigation" aria-label="Primary navigation">
+          </div>
+          
+          <nav className="desktop-nav" role="navigation" aria-label="Primary navigation" data-testid="public-navbar">
             <Link 
               to="/" 
               className={getNavLinkClassName('/')}
@@ -139,11 +139,11 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
               rel="noopener noreferrer"
               className="nav-link"
             >
-                GSRS
-              </a>
-            </nav>
-
-            <div className="desktop-actions">
+              GSRS
+            </a>
+          </nav>
+          
+          <div className="desktop-actions" data-testid="public-navbar-actions">
             <Button 
               className="action-btn action-btn-secondary" 
               onClick={onRequestAccess}

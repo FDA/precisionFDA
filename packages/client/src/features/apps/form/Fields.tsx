@@ -488,9 +488,11 @@ const StyledButton = styled(Button)`
 export const SelectIOClass = ({
   addRow,
   children,
+  testId,
 }: {
   addRow: (s: IOSpec['class']) => void
   children: React.ReactNode
+  testId?: string
 }) => {
   return (
     <Menu
@@ -499,6 +501,7 @@ export const SelectIOClass = ({
         <StyledButton
           as={Menu.Trigger}
           type="button"
+          data-testid={testId}
         >
           <PlusIcon height={12} />
           {children}

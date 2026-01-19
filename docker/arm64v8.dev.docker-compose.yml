@@ -2,14 +2,14 @@
 volumes:
   bundler-deps-cache-ruby:
   db-pfda-mysql-volume:
-  webpack-cache-client:
-  yarn-network-cache-client:
-  yarn-network-cache-nodejs-api:
-  yarn-network-cache-nodejs-worker:
-  yarn-deps-cache-client:
-  yarn-deps-cache-nodejs-api:
-  yarn-deps-cache-nodejs-worker:
-  yarn-deps-cache-docs:
+  vite-cache-client:
+  pnpm-store-cache-client:
+  pnpm-store-cache-nodejs-api:
+  pnpm-store-cache-nodejs-worker:
+  pnpm-deps-cache-client:
+  pnpm-deps-cache-nodejs-api:
+  pnpm-deps-cache-nodejs-worker:
+  pnpm-deps-cache-docs:
 
 services:
   web:
@@ -43,13 +43,13 @@ services:
       - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
     volumes:
       - type: volume
-        source: webpack-cache-client
-        target: /precision-fda/.build_cache/
+        source: vite-cache-client
+        target: /precision-fda/node_modules/.vite/
       - type: bind
         source: ../packages/client/src
         target: /precision-fda/src
-      - yarn-network-cache-client:${YARNV1_CACHE_DIR}
-      - yarn-deps-cache-client:/precision-fda/node_modules
+      - pnpm-store-cache-client:/root/.local/share/pnpm/store
+      - pnpm-deps-cache-client:/precision-fda/node_modules
   docs:
     extends:
       file: ./base.services.yml
@@ -61,7 +61,7 @@ services:
       - type: bind
         source: ../packages/docs
         target: /app
-      - yarn-deps-cache-docs:/app/node_modules
+      - pnpm-deps-cache-docs:/app/node_modules
   nodejs-api:
     extends:
       file: ./base.services.yml
@@ -69,7 +69,7 @@ services:
     build:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-dev.Dockerfile
-    command: ["make", "watch"]
+    command: ["pnpm", "run", "start:dev:api"]
     depends_on:
       - db
       - redis
@@ -83,8 +83,8 @@ services:
       - type: bind
         source: ../packages/server
         target: /app
-      - yarn-network-cache-nodejs-api:${YARNV1_CACHE_DIR}
-      - yarn-deps-cache-nodejs-api:/app/node_modules
+      - pnpm-store-cache-nodejs-api:/root/.local/share/pnpm/store
+      - pnpm-deps-cache-nodejs-api:/app/node_modules
 
   nodejs-worker:
     depends_on:
@@ -96,7 +96,7 @@ services:
     build:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-dev.Dockerfile
-    command: ["make", "watch-worker"]
+    command: ["pnpm", "run", "start:dev:worker"]
     environment:
       - NODE_ENV=development
       - NODE_DATABASE_NAME=precision-fda
@@ -107,8 +107,8 @@ services:
       - type: bind
         source: ../packages/server
         target: /app
-      - yarn-network-cache-nodejs-worker:${YARNV1_CACHE_DIR}
-      - yarn-deps-cache-nodejs-worker:/app/node_modules
+      - pnpm-store-cache-nodejs-worker:/root/.local/share/pnpm/store
+      - pnpm-deps-cache-nodejs-worker:/app/node_modules
   nodejs-admin-platform-client:
     extends:
       file: ./base.services.yml
@@ -116,7 +116,7 @@ services:
     build:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-dev.Dockerfile
-    command: ["make", "watch-admin-platform-client"]
+    command: ["pnpm", "run", "start:dev:admin-platform-client"]
     environment:
       - NODE_ENV=development
       - SKIP_NODEJS_DB_WAITING=1

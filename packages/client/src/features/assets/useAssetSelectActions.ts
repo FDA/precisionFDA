@@ -173,12 +173,9 @@ export const useAssetActions = ({
     },
     {
       name: 'Make Public',
-      type: 'link',
       isDisabled: selected.length !== 1 || selectedButNotClosed || !user?.allowed_to_publish,
-      link: {
-        method: 'GET' as const,
-        url: `/publish?identifier=${selected[0]?.uid}&type=asset`,
-      },
+      type: 'route',
+      to: `/publish?identifier=${selected[0]?.uid}&type=asset`,
     },
     {
       name: 'Delete',

@@ -8,7 +8,7 @@ const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
         refetchOnWindowFocus: false,
         onSuccess: (res: any) => {
           // Catch if cookie expired
-          // if(NODE_ENV !== 'development') {
+          // if(!IS_DEV) {
           if (res?.failure === 'Authentication failure') {
             onAuthFailure()
           }

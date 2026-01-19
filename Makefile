@@ -57,6 +57,7 @@ DOCKER_COMPOSE_PREFIX := precision-fda$(subst -dev,,-$(PFDA_ROLE))
 
 SERVICES := web frontend nodejs-api nodejs-worker db redis
 PREPARE_DB_SERVICES := web db
+PREPARE_DB_TEST_SERVICES := web db nodejs-api nodejs-worker nodejs-admin-platform-client nginx redis
 # NOTE - web container needs to be stopped as well as db volume is mounted in web container for some reason
 # TODO - investigate if it can be removed
 DB_WIPE_SERVICES := web db
@@ -82,16 +83,16 @@ endif
 # NOTE(samuel) run, run-qa (or build, build-qa) are basically same, as I haven't done any of optimizations for Intel workstations
 # NOTE(samuel) prepare-db is a temporary command mostly useful for QAs, until db waiting for nodejs-api containers is implemented
 prepare-db:
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build $(PREPARE_DB_SERVICES)
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build $(PREPARE_DB_SERVICES)
 prepare-db-test:
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) run -e RAILS_ENV=test --name web_prepare-db-test --rm $(PREPARE_DB_SERVICES)
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build $(PREPARE_DB_TEST_SERVICES)
 run:
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build
 stop:
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
 	echo Stopped
 run-spec:
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) -f docker/spec.docker-compose.yml up
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) -f docker/spec.docker-compose.yml up
 
 # ┌───────────────────────────────────┐
 # │                                   │
@@ -101,21 +102,21 @@ run-spec:
 
 define DYNAMIC__SERVICE_RESTART
 restart-$(1):
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) restart $(1)
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) restart $(1)
 endef
 define DYNAMIC__SERVICE_HOOK_INTO
 hook-into-$(1):
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) exec -it $(1) bash
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) exec -it $(1) bash
 endef
 
 debug-config:
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) config
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) config
 
 $(foreach service,$(SERVICES),$(eval $(call DYNAMIC__SERVICE_RESTART,$(service))))
 $(foreach service,$(SERVICES),$(eval $(call DYNAMIC__SERVICE_HOOK_INTO,$(service))))
 
 restart-full:
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) restart
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) restart
 
 # ┌─────────────────────────────────────────┐
 # │                                         │
@@ -127,11 +128,11 @@ restart-full:
 
 define DYNAMIC__IMAGE_CLEANUP
 image-cleanup-$(1):
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) stop $(1)
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) rm -f $(1)
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) stop $(1)
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) rm -f $(1)
 	docker image prune
 	docker builder prune
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
 	echo Image cleanup complete
 endef
 
@@ -141,7 +142,7 @@ endef
 $(foreach service,$(SERVICES),$(eval $(call DYNAMIC__IMAGE_CLEANUP,$(service))))
 
 image-cleanup-full:
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
 	docker container prune
 	docker image prune
 	docker builder prune
@@ -188,15 +189,15 @@ define FRAGMENT__VOLUME_CLEANUP
 endef
 
 define FRAGMENT__CACHE_CLEANUP
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) stop $($($1)__SERVICES)
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) rm -f $($($1)__SERVICES)
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) stop $($($1)__SERVICES)
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) rm -f $($($1)__SERVICES)
 	$(foreach volume_cleanup,$($(1)__VOLUME_CLEANUPS),$(call FRAGMENT__VOLUME_CLEANUP,$(1)__$(volume_cleanup)))
 endef
 
 define DYNAMIC__CACHE_CLEANUP
 cache-cleanup-$($(1)__TARGET_SUFFIX):
 	$(call FRAGMENT__CACHE_CLEANUP,$(1))
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
 	echo Cache cleanup complete
 endef
 
@@ -212,14 +213,14 @@ $(foreach cache_cleanup,$(POSSIBLE_CACHE_CLEANUPS),$(eval $(call DYNAMIC__CACHE_
 
 # Fragment with DB wipe snippet
 define FRAGMENT__DB_WIPE
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) stop $(DB_WIPE_SERVICES)
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) rm -f $(DB_WIPE_SERVICES)
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) stop $(DB_WIPE_SERVICES)
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) rm -f $(DB_WIPE_SERVICES)
 	docker volume rm -f $(foreach db_wipe_volume,$(DB_WIPE_VOLUMES),$(DOCKER_COMPOSE_PREFIX)_$(db_wipe_volume))
 endef
 
 db-wipe:
 	$(call FRAGMENT__DB_WIPE)
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
 	echo Db wipe complete
 
 
@@ -227,7 +228,7 @@ define DYNAMIC__CACHE_CLEANUP_WITH_DB_WIPE
 cache-cleanup-$($(1)__TARGET_SUFFIX)-with-db-wipe:
 	$(call FRAGMENT__CACHE_CLEANUP,$(1))
 	$(call FRAGMENT__DB_WIPE)
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
 	echo Cache cleanup with db wipe complete
 endef
 
@@ -236,7 +237,7 @@ define DYNAMIC__CACHE_CLEANUP_WITH_DB_WIPE
 cache-cleanup-$($(1)__TARGET_SUFFIX)-with-db-wipe:
 	$(call FRAGMENT__CACHE_CLEANUP,$(1))
 	$(call FRAGMENT__DB_WIPE)
-	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
+	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
 	echo Cache cleanup with db wipe complete
 endef
 

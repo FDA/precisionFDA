@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
 import { theme } from '../../../styles/theme'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer as ModalFooter } from '../../modal/styles'
 
@@ -111,9 +112,10 @@ const ExpertAskQuestionModalComponent = ({
   )
 
   const renderModalWithCaptcha = () => {
-    if (CAPTCHA_ENABLED) {
+    const recaptchaSiteKey = getRuntimeEnv().RECAPTCHA_SITE_KEY
+    if (recaptchaSiteKey) {
       return (
-        <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY} useEnterprise>
+        <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey} useEnterprise>
           {renderModal()}
         </GoogleReCaptchaProvider>
       )

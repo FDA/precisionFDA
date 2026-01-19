@@ -28,17 +28,19 @@ export const ScopeFieldSelect = ({
 }) => {
   const { data: scopesOptions, isLoading } = useFetchChallengeScopesQuery()
   return (
-    <Select
-      options={scopesOptions}
-      placeholder="Choose..."
-      onChange={onChange}
-      isClearable
-      isSearchable
-      onBlur={onBlur}
-      value={value}
-      isDisabled={isSubmitting}
-      isLoading={isLoading}
-      inputId="challenge_scope"
-    />
+    <div data-testid="challenge-scope-select">
+      <Select
+        options={scopesOptions}
+        placeholder="Choose..."
+        onChange={onChange}
+        isClearable
+        isSearchable
+        onBlur={onBlur}
+        value={value}
+        isDisabled={isSubmitting}
+        isLoading={isLoading}
+        inputId="challenge_scope"
+      />
+    </div>
   )
 }

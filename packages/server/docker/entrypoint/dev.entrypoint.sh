@@ -21,5 +21,5 @@ fi
 
 echo "Database connection established"
 
-# TODO(samuel) wrap the original docker entrypoint
-docker-entrypoint.sh "$@"
+# Use exec to replace shell process and forward signals properly
+exec docker-entrypoint.sh "$@"

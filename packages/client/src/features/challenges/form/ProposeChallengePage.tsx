@@ -7,6 +7,7 @@ import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
 import { formatMutationErrors } from '../../../hooks/useMutationErrorEffect'
 import PublicLayout from '../../../layouts/PublicLayout'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ProposeChallengePayload, proposeChallengeRequest } from './api'
 import { ProposeChallengeForm, ProposeChallengeFormValues } from './ProposeChallengeForm'
@@ -54,6 +55,7 @@ const ProposeChallengePage = () => {
   const [triggerCaptcha, setTriggerCaptcha] = useState(false)
   const [submissionSuccess, setSubmissionSuccess] = useState(false)
   const [values, setValues] = useState<ProposeChallengeFormValues>()
+  const recaptchaSiteKey = getRuntimeEnv().RECAPTCHA_SITE_KEY
 
   const queryClient = useQueryClient()
   const mutation = useMutation({
@@ -74,7 +76,7 @@ const ProposeChallengePage = () => {
   const mutationErrors = formatMutationErrors(mutation.error instanceof AxiosError ? mutation.error.response?.data : undefined)
 
   const handleSubmit = async (v: ProposeChallengeFormValues) => {
-    if (!isLoggedIn && CAPTCHA_ENABLED) {
+    if (!isLoggedIn && recaptchaSiteKey) {
       setValues(v)
       setTriggerCaptcha(true)
     } else {
@@ -123,7 +125,7 @@ const ProposeChallengePage = () => {
 
   const renderContentWithCaptcha = () => {
     return (
-      <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY} useEnterprise>
+      <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey!} useEnterprise>
         {renderContent()}
       </GoogleReCaptchaProvider>
     )
@@ -132,7 +134,7 @@ const ProposeChallengePage = () => {
   return (
     <PublicLayout mainScroll={!!user}>
       <NavigationBar user={user} />
-      {!isLoggedIn && CAPTCHA_ENABLED ? renderContentWithCaptcha() : renderContent()}
+      {!isLoggedIn && recaptchaSiteKey ? renderContentWithCaptcha() : renderContent()}
     </PublicLayout>
   )
 }

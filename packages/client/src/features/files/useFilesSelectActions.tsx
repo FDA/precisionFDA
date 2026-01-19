@@ -326,14 +326,11 @@ export const useFilesSelectActions = ({
     },
     {
       name: 'Make public',
-      type: 'link',
-      link: {
-        method: 'GET' as const,
-        url:
-          selected[0]?.type === 'UserFile'
-            ? `/publish?identifier=${selected[0]?.uid}&type=file`
+      type: 'route',
+      to:
+        selected[0]?.type === 'UserFile'
+          ? `/publish?identifier=${selected[0]?.uid}&type=file`
             : `/publish?identifier=folder-${selected[0]?.id}&type=folder`,
-      },
       isDisabled: !user?.allowed_to_publish,
       shouldHide: selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
     },

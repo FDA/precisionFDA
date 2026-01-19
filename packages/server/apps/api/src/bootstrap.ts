@@ -9,7 +9,7 @@ import fs from 'fs'
 import { ApiModule } from './api.module'
 import { log } from './logger'
 
-export async function bootstrap() {
+export async function bootstrap(): Promise<NestExpressApplication> {
   const enableSsl = config.api.enableSsl
   const options: NestApplicationOptions = {
     snapshot: config.nestjsDevtoolsEnabled,
@@ -34,6 +34,7 @@ export async function bootstrap() {
   }
 
   app.useGlobalPipes(new CustomValidationPipe({ transform: true }))
+
   await app.listen(config.api.port, '0.0.0.0')
 
   log.log(`${enableSsl ? 'HTTPS' : 'HTTP'} Server: started (port: ${config.api.port.toString()})`)

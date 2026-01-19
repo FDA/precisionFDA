@@ -1,7 +1,8 @@
 import Editor, { loader, EditorProps, Monaco } from '@monaco-editor/react'
 import * as monacoEditor from 'monaco-editor'
 import React from 'react'
-import { useTheme } from '../../utils/ThemeContext'
+import { useTheme } from '@/utils/ThemeContext'
+import { ENABLE_DEV_MSW } from '@/utils/env'
 
 if(!ENABLE_DEV_MSW) {
   loader.config({

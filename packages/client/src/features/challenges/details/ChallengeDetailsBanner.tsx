@@ -109,10 +109,10 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
 
     return (
       <div>
-        {hasJoined && <div>You have joined this challenge</div>}
+        {hasJoined && <div data-testid="challenge-joined-message">You have joined this challenge</div>}
         {userCanJoin && !hasJoined && (
           <div>
-            <Button data-variant="primary" disabled={!userCanJoin} onClick={handleJoinChallenge}>
+            <Button data-variant="primary" disabled={!userCanJoin} onClick={handleJoinChallenge} data-testid="challenge-join-button">
               Join This Challenge
             </Button>
           </div>
@@ -123,7 +123,7 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
 
   return (
     <NavigationBar user={user}>
-      <StyledChallengeDetailsBanner>
+      <StyledChallengeDetailsBanner data-testid="challenge-details-banner">
         <LeftColumn>
           <div>
             <Link to={{ pathname: '/challenges' }} className="backToChallenges">
@@ -167,6 +167,7 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
               as="a"
               style={{ marginTop: '12px' }}
               href={`/challenges/${challenge.id}/submissions/new?app_dxid=${challenge.appUid}`}
+              data-testid="challenge-submit-entry-button"
             >
               Submit Challenge Entry
             </Button>
@@ -184,7 +185,7 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
                   <PencilIcon /> Challenge Content
                 </StyledOutlineButton>
               )}
-              <StyledOutlineButton as={Link} to={`/challenges/${challenge.id}/settings`}>
+              <StyledOutlineButton as={Link} to={`/challenges/${challenge.id}/settings`} data-testid="challenge-settings-button">
                 <CogsIcon /> Settings
               </StyledOutlineButton>
               <StyledOutlineButton as={Link} to={`/spaces/${challenge.spaceId}`}>

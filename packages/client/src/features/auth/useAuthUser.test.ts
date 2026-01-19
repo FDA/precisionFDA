@@ -1,10 +1,11 @@
+import { vi, describe, it, expect } from 'vitest'
 import { useAuthUser } from './useAuthUser'
 import { IUser } from '../../types/user'
 import { IMeta } from '../home/types'
 
 let email = 'test'
-jest.mock('./api', () => {
-    const originalModule = jest.requireActual('./api')
+vi.mock('./api', async () => {
+    const originalModule = await vi.importActual('./api')
     return {
         ...originalModule,
         useAuthUserQuery: () => (

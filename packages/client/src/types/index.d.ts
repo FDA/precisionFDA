@@ -1,11 +1,16 @@
-declare const NODE_ENV: 'development' | 'staging' | 'production'
-declare const ENABLE_DEV_MSW: boolean = false
-declare const ALERT_HEIGHT: number = 0
-declare const RECAPTCHA_SITE_KEY: string
-declare const CAPTCHA_ENABLED: boolean
-declare const process: {
-  env: {
-    ENABLE_DEV_MSW: boolean
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_ENABLE_DEV_MSW: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
+interface Window {
+  __PFDA_RUNTIME_ENV__?: {
+    RECAPTCHA_SITE_KEY?: string
   }
 }
 

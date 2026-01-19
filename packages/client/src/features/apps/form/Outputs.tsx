@@ -116,7 +116,7 @@ export const Outputs = (props: OutputProps) => {
     <StyledInputOutputBox>
       <SectionTitleRow>
         <SectionTitle>Outputs</SectionTitle>
-        <SelectIOClass addRow={addOutput}>Add Output</SelectIOClass>
+        <SelectIOClass addRow={addOutput} testId="add-output-button">Add Output</SelectIOClass>
       </SectionTitleRow>
       <TableStyles>
         {outputs.fields.length === 0 && <div>No outputs defined</div>}

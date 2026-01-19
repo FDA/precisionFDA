@@ -39,6 +39,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     entrypoint: ./docker/entrypoint/isolation.docker-entrypoint.sh
+    stop_grace_period: 30s
 
   frontend:
     build:
@@ -46,12 +47,16 @@ services:
       dockerfile: ./docker/images/isolation.Dockerfile
       args:
         - FRONTEND_IMAGE_TAG=22.15.0-slim
+    environment:
+      - VITE_OUT_DIR=dist
+      - VITE_BASE_PATH=/assets/
+      - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
     volumes:
       - type: bind
         source: ../packages/rails/app/assets/packs
         target: /precision-fda/dist
     working_dir: /precision-fda
-    command: pnpm run watch:docker
+    command: pnpm run build
   docs:
     container_name: docs
     build:
@@ -64,6 +69,7 @@ services:
     volumes:
       - ../cert.pem:/keys/cert.pem
       - ../key.pem:/keys/key.pem
+    stop_grace_period: 10s
   nodejs-api:
     environment:
       - NODE_PATH_CERT=/keys/cert.pem
@@ -76,10 +82,12 @@ services:
       - ../key.pem:/keys/key.pem
     ports:
       - 3001:3001
+    stop_grace_period: 15s
   nodejs-worker:
     extends:
       service: base_nodejs
     command: ["make", "run-worker-dist"]
+    stop_grace_period: 15s
   nodejs-admin-platform-client:
     extends:
       service: base_nodejs

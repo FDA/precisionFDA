@@ -128,7 +128,7 @@ export const Inputs = (props: InputProps) => {
     <StyledInputOutputBox>
       <SectionTitleRow>
         <SectionTitle>Inputs</SectionTitle>
-        <SelectIOClass addRow={addInput}>
+        <SelectIOClass addRow={addInput} testId="add-input-button">
           Add Input
         </SelectIOClass>
       </SectionTitleRow>

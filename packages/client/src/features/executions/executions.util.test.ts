@@ -1,6 +1,4 @@
-/**
- * @jest-environment node
- */
+// @vitest-environment node
 
 import { createMockExecution, createMockWorkflowExecution } from '../../test/mocks'
 import { IExecution } from './executions.types'

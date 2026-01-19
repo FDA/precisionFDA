@@ -694,13 +694,9 @@ class EcsDeployer:
     def get_image_uri(self, image_key, tag):
         """
         Returns the ECR image URI, adding 'production/' for production branches.
-        Web uses the env as prefix as we are building separate images for each env.
         Matches branch against regex patterns in self.prod_branches_patterns.
         """
-
-        if image_key.lower() == "web":
-            prefix = f"{self.environment}/"
-        elif any(re.match(pattern, self.branch) for pattern in self.prod_branches_patterns):
+        if any(re.match(pattern, self.branch) for pattern in self.prod_branches_patterns):
             prefix = "production/"
         else:
             prefix = ""

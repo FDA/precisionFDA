@@ -28,17 +28,19 @@ export const ScoringAppUserSelect = ({
 }) => {
   const { data: scoringAppUserOptions, isLoading } = useFetchScoringAppUsersQuery()
   return (
-    <Select
-      options={scoringAppUserOptions}
-      placeholder="Choose..."
-      onChange={onChange}
-      isClearable
-      isSearchable
-      onBlur={onBlur}
-      value={value}
-      isDisabled={isSubmitting}
-      isLoading={isLoading}
-      inputId="challenge_scoring-app-user"
-    />
+    <div data-testid="challenge-scoring-app-select">
+      <Select
+        options={scoringAppUserOptions}
+        placeholder="Choose..."
+        onChange={onChange}
+        isClearable
+        isSearchable
+        onBlur={onBlur}
+        value={value}
+        isDisabled={isSubmitting}
+        isLoading={isLoading}
+        inputId="challenge_scoring-app-user"
+      />
+    </div>
   )
 }

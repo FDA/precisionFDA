@@ -28,6 +28,6 @@ export default [
     },
   },
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: ['eslint.config.mjs', './e2e/**/*', './test/**/*'],
   },
 ]

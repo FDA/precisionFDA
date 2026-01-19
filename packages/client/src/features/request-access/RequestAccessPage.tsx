@@ -15,6 +15,7 @@ import { InputText } from '../../components/InputText'
 import { Loader } from '../../components/Loader'
 import { PFDALogoDark, PFDALogoLight } from '../../components/NavigationBar/PFDALogo'
 import PublicLayout from '../../layouts/PublicLayout'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { createRequestAccess } from './api'
 import { RequestAccessSuccessMessage } from './RequestAccessSuccessMessage'
 import {
@@ -122,11 +123,6 @@ const RequestAccessForm = () => {
   )
 
   const onSubmitRequestAccess = (data: RequestAccess) => {
-    if (!CAPTCHA_ENABLED) {
-      mutation.mutateAsync(data)
-      return
-    }
-
     submitWithCaptcha(data)
   }
 
@@ -203,6 +199,8 @@ const RequestAccessForm = () => {
 }
 
 const RequestAccessFormWrapper = () => {
+  const recaptchaSiteKey = getRuntimeEnv().RECAPTCHA_SITE_KEY
+
   return (
     <FormWrapper>
       <FormHeader>
@@ -215,12 +213,13 @@ const RequestAccessFormWrapper = () => {
           </Link>
         </p>
       </FormHeader>
-      {CAPTCHA_ENABLED && (
-        <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY} useEnterprise>
+      {recaptchaSiteKey ? (
+        <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey} useEnterprise>
           <RequestAccessForm />
         </GoogleReCaptchaProvider>
+      ) : (
+        <RequestAccessForm />
       )}
-      {!CAPTCHA_ENABLED && <RequestAccessForm />}
     </FormWrapper>
   )
 }

@@ -1,20 +1,12 @@
-import React from 'react'
-import {
-  render,
-  screen,
-  waitFor,
-} from '../../../test/test-utils'
+import { render } from '../../../test/test-utils'
 import { FileList } from '../../files/FileList'
 
 describe('My Home / Files', () => {
   test('User should be allowed to view files list', async () => {
-    render(<FileList homeScope="me" showFolderActions />, { route: '/home/files' })
+    const screen = render(<FileList homeScope="me" showFolderActions />, { route: '/home/files' })
 
-    await waitFor(async () => {
-      const tableEl = screen.getByTestId('pfda-table')
-      expect(tableEl).toBeInTheDocument()
-      const rowEls = screen.getAllByTestId('data-row')
-      expect(rowEls.length).toBe(6)
-    })
+    await expect.element(screen.getByTestId('pfda-table')).toBeInTheDocument()
+    // Poll until all data rows are loaded
+    await expect.poll(() => screen.getByTestId('data-row').elements().length).toBe(6)
   })
 })

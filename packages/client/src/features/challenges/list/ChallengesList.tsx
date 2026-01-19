@@ -125,7 +125,7 @@ const ChallengesList = () => {
               {!user ? <ChallengesLanding /> : null}
               {timeStatus && <PageFilterTitle>{getTimeStatusName(timeStatus)}</PageFilterTitle>}
               {year && <PageFilterTitle>{year}</PageFilterTitle>}
-              <PageList>
+              <PageList data-testid="challenges-list">
                 {data?.data?.length === 0 && renderEmpty(timeStatus)}
                 {data?.data?.map(n => (
                   <ChallengeListItem key={n.id} challenge={n} />
@@ -147,7 +147,7 @@ const ChallengesList = () => {
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <Button data-variant="primary" as={Link} to="/challenges/create" data-turbolinks="false">
+                  <Button data-variant="primary" as={Link} to="/challenges/create" data-turbolinks="false" data-testid="create-challenge-button">
                     <TrophyIcon height={14} /> Create Challenge
                   </Button>
                 </ButtonRow>
