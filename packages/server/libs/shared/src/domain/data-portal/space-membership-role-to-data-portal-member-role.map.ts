@@ -1,0 +1,12 @@
+import { DATA_PORTAL_MEMBER_ROLE } from '@shared/domain/data-portal/data-portal.enum'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+
+export const spaceMembershipRoleToDataPortalMemberRoleSMap: Record<
+  SPACE_MEMBERSHIP_ROLE,
+  DATA_PORTAL_MEMBER_ROLE
+> = {
+  [SPACE_MEMBERSHIP_ROLE.ADMIN]: DATA_PORTAL_MEMBER_ROLE.ADMIN,
+  [SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]: DATA_PORTAL_MEMBER_ROLE.CONTRIBUTOR,
+  [SPACE_MEMBERSHIP_ROLE.LEAD]: DATA_PORTAL_MEMBER_ROLE.LEAD,
+  [SPACE_MEMBERSHIP_ROLE.VIEWER]: DATA_PORTAL_MEMBER_ROLE.VIEWER,
+}

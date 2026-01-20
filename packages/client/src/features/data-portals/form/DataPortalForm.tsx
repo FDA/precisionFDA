@@ -1,8 +1,10 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { AxiosError } from 'axios'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { unstable_usePrompt } from 'react-router'
+import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { InputFile, InputNumber, InputText } from '../../../components/InputText'
@@ -10,24 +12,24 @@ import { Loader } from '../../../components/Loader'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { FieldInfo } from '../../../components/form/FieldInfo'
 import { InputError } from '../../../components/form/styles'
+import { useAuthUser } from '../../auth/useAuthUser'
+import { ApiErrorResponse } from '../../home/types'
 import { SavingModal } from '../../modal/SavingModal'
 import { UsersSelect } from './UsersSelect'
-import { createValidationSchema, editValidationSchema } from './common'
-import { AxiosError } from 'axios'
-import { ApiErrorResponse } from '../../home/types'
+import { dataPortalValidationSchema } from './common'
 
 type SelectItem = { label: string; value: string }
 
 export interface CreateDataPortalForm {
   name: string
   description: string
-  url_slug: string
-  host_lead_dxuser: SelectItem | null
-  guest_lead_dxuser: SelectItem | null
-  sort_order: number
-  card_image_uid: string | null
-  card_image_url: string
-  card_image_file: File[] | null
+  urlSlug: string
+  hostLeadDxuser: SelectItem
+  guestLeadDxuser: SelectItem
+  sortOrder: number
+  cardImageUid: string | null
+  cardImageUrl: string | null
+  cardImageFile: FileList | null
 }
 
 const StyledForm = styled.form`
@@ -58,10 +60,7 @@ const ImageUploadPreview = styled.img`
 function getBase64(file?: File, callback?: (a: string | null) => void) {
   if (file) {
     const reader = new FileReader()
-    reader.addEventListener(
-      'load',
-      () => callback && callback(reader.result as string),
-    )
+    reader.addEventListener('load', () => callback && callback(reader.result as string))
     reader.readAsDataURL(file)
   }
 }
@@ -80,12 +79,14 @@ export const DataPortalForm = ({
   isSaving?: boolean
   isEditMode?: boolean
   canEditMainDataPortal?: boolean
-  isSubmitting: boolean,
+  isSubmitting: boolean
   mutationErrors?: AxiosError<ApiErrorResponse> | null
 }) => {
+  const user = useAuthUser()
   const [base64Image, setBase64Image] = React.useState<string | null>(null)
 
   const [slugEdited, setSlugEdited] = React.useState<boolean>(false)
+  const [canUploadImage, setCanUploadImage] = React.useState<boolean>(true)
 
   const {
     control,
@@ -95,20 +96,26 @@ export const DataPortalForm = ({
     watch,
     getValues,
     setValue,
+    resetField,
     formState: { errors, dirtyFields },
   } = useForm<CreateDataPortalForm>({
-    resolver: yupResolver(
-      isEditMode ? editValidationSchema : createValidationSchema,
-    ),
+    resolver: yupResolver(dataPortalValidationSchema),
     defaultValues: defaultValues || {
       name: '',
       description: '',
-      url_slug: '',
-      host_lead_dxuser: null,
-      guest_lead_dxuser: null,
-      sort_order: 0,
-      card_image_file: null,
-      card_image_uid: null,
+      urlSlug: '',
+      hostLeadDxuser: {
+        label: '',
+        value: '',
+      },
+      guestLeadDxuser: {
+        label: '',
+        value: '',
+      },
+      sortOrder: 0,
+      cardImageFile: null,
+      cardImageUid: null,
+      cardImageUrl: null,
     },
   })
 
@@ -125,23 +132,36 @@ export const DataPortalForm = ({
   }
 
   useEffect(() => {
-    const img = watch().card_image_file
+    const img = watch().cardImageFile
     if (img?.[0] != null) {
       getBase64(img?.[0], setBase64Image)
     }
-  }, [watch().card_image_file])
+  }, [watch().cardImageFile])
 
   useEffect(() => {
     // Do not automatically update the slug field in case the user changed the value manually or in edit mode
     if (!slugEdited && !isEditMode) {
-      setValue('url_slug', slugify(getValues('name')))
-      delete errors.url_slug
+      setValue('urlSlug', slugify(getValues('name')))
+      delete errors.urlSlug
     }
   }, [watch().name])
 
   useEffect(() => {
-    setValue('url_slug', slugify(getValues('url_slug')))
-  }, [watch().url_slug])
+    setValue('urlSlug', slugify(getValues('urlSlug')))
+  }, [watch().urlSlug])
+
+  useEffect(() => {
+    const hostLead = watch().hostLeadDxuser?.value
+    const guestLead = watch().guestLeadDxuser?.value
+    const noLeadsSelected = !hostLead || !guestLead
+    const currentUserIsLead = [hostLead, guestLead].includes(user?.dxuser ?? '')
+    const canUpload = noLeadsSelected || currentUserIsLead || isEditMode
+    setCanUploadImage(canUpload)
+    if (!canUpload) {
+      resetField('cardImageFile')
+      setBase64Image(null)
+    }
+  }, [watch().hostLeadDxuser, watch().guestLeadDxuser])
 
   useEffect(() => {
     if (mutationErrors?.response?.data?.error) {
@@ -155,8 +175,7 @@ export const DataPortalForm = ({
   unstable_usePrompt({
     message: 'There are unsaved changes, are you sure you want to leave?',
     when: ({ currentLocation, nextLocation }) =>
-      (!isSubmitting && Object.keys(dirtyFields).length > 0) &&
-      currentLocation.pathname !== nextLocation.pathname,
+      !isSubmitting && Object.keys(dirtyFields).length > 0 && currentLocation.pathname !== nextLocation.pathname,
   })
 
   const submitErrors = { ...errors }
@@ -172,15 +191,15 @@ export const DataPortalForm = ({
         <FieldGroup label="URL slug" required>
           <InputText
             placeholder="URL slug"
-            {...register('url_slug')}
+            {...register('urlSlug')}
             disabled={isSubmitting || isEditMode}
-            onChange={(e) => {
-              setSlugEdited(true)  // The URL slug field was manually edited
-              register('url_slug').onChange(e) // Trigger default onChange event
+            onChange={e => {
+              setSlugEdited(true) // The URL slug field was manually edited
+              register('urlSlug').onChange(e) // Trigger default onChange event
             }}
           />
           <FieldInfo text="Once Data portal is created, the URL slug cannot be edited" />
-          <ErrorMessage errors={errors} name="url_slug" render={({ message }) => <InputError>{message}</InputError>} />
+          <ErrorMessage errors={errors} name="urlSlug" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
         <FieldGroup label="Description">
           <InputText
@@ -191,27 +210,11 @@ export const DataPortalForm = ({
           />
           <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
-        <FieldGroup label="Portal image" required>
-          {base64Image ? (
-            <ImageUploadPreview width={300} src={base64Image || undefined} alt="portal img" />
-          ) : (
-            defaultValues?.card_image_url && (
-              <ImageUploadPreview width={300} src={defaultValues?.card_image_url} alt="portal img" />
-            )
-          )}
-
-          <>
-            <InputFile type="file" accept="image/*" {...register('card_image_file')} disabled={isSubmitting} />
-            <ErrorMessage errors={errors} name="card_image_file" render={({ message }) => <InputError>{message}</InputError>} />
-          </>
-
-          {/* disabled changing image for edit mode */}
-        </FieldGroup>
         <FieldGroup label="First Lead User" required>
           <Controller
-            name="host_lead_dxuser"
+            name="hostLeadDxuser"
             control={control}
-            render={({ field: { value, onChange, onBlur }}) => (
+            render={({ field: { value, onChange, onBlur } }) => (
               <UsersSelect
                 isDisabled={isEditMode || isSubmitting}
                 onChange={onChange}
@@ -221,13 +224,17 @@ export const DataPortalForm = ({
               />
             )}
           />
-          <ErrorMessage errors={errors} name="host_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
+          <ErrorMessage
+            errors={errors}
+            name="hostLeadDxuser.value"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
         </FieldGroup>
         <FieldGroup label="Second Lead User" required>
           <Controller
-            name="guest_lead_dxuser"
+            name="guestLeadDxuser"
             control={control}
-            render={({ field: { value, onChange, onBlur }}) => (
+            render={({ field: { value, onChange, onBlur } }) => (
               <UsersSelect
                 onChange={onChange}
                 onBlur={onBlur}
@@ -237,7 +244,35 @@ export const DataPortalForm = ({
               />
             )}
           />
-          <ErrorMessage errors={errors} name="guest_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
+          <ErrorMessage
+            errors={errors}
+            name="guestLeadDxuser.value"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
+        </FieldGroup>
+        <FieldGroup label="Portal image">
+          {base64Image ? (
+            <ImageUploadPreview width={300} src={base64Image || undefined} alt="portal img" />
+          ) : (
+            defaultValues?.cardImageUrl && <ImageUploadPreview width={300} src={defaultValues?.cardImageUrl} alt="portal img" />
+          )}
+
+          <>
+            <InputFile
+              type="file"
+              accept="image/*"
+              {...register('cardImageFile')}
+              disabled={!canUploadImage || isSubmitting}
+              data-tooltip-id={'card_image_file_disabled'}
+              data-tooltip-content={
+                'Image upload is only available to portal leads. You must be selected as First Lead or Second Lead to upload.'
+              }
+            />
+            <ErrorMessage errors={errors} name="cardImageFile" render={({ message }) => <InputError>{message}</InputError>} />
+            {!canUploadImage && <Tooltip id="card_image_file_disabled" />}
+          </>
+
+          {/* disabled changing image for edit mode */}
         </FieldGroup>
         {canEditMainDataPortal && (
           <Row>
@@ -246,11 +281,11 @@ export const DataPortalForm = ({
                 step="1"
                 min="0"
                 placeholder="What is the portal's sort order?"
-                {...register('sort_order')}
+                {...register('sortOrder')}
                 disabled={isSubmitting}
               />
               <FieldInfo text="Portals are presented in ascending order" />
-              <ErrorMessage errors={errors} name="sort_order" render={({ message }) => <InputError>{message}</InputError>} />
+              <ErrorMessage errors={errors} name="sortOrder" render={({ message }) => <InputError>{message}</InputError>} />
             </FieldGroup>
           </Row>
         )}

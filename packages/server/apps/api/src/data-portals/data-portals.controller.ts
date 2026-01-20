@@ -10,16 +10,14 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
-import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/create-data-portal.dto'
 import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFileParamDTO'
-import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
+import { DataPortalDTO } from '@shared/domain/data-portal/dto/data-portal.dto'
 import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
+import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
+import { CreateResourceResponse } from '@shared/domain/data-portal/service/data-portal.types'
 import { CreateDataPortalFacade } from '@shared/facade/data-portal-create/create-data-portal.facade'
-import {
-  CreateResourceResponse,
-  DataPortalParam,
-} from '@shared/domain/data-portal/service/data-portal.types'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @UseGuards(UserContextGuard)
 @Controller('/data-portals')
@@ -54,7 +52,7 @@ export class DataPortalsController {
    */
   @HttpCode(201)
   @Post()
-  async createDataPortal(@Body() body: CreateDataPortalDTO): Promise<DataPortalParam> {
+  async createDataPortal(@Body() body: CreateDataPortalDTO): Promise<DataPortalDTO> {
     return await this.createDataPortalFacade.create(body)
   }
 
@@ -62,7 +60,7 @@ export class DataPortalsController {
    * Updates data portal.
    */
   @Patch('/:identifier')
-  async updateDataPortal(@Body() body: UpdateDataPortalDTO): Promise<DataPortalParam> {
+  async updateDataPortal(@Body() body: UpdateDataPortalDTO): Promise<DataPortalDTO> {
     return await this.dataPortalService.update(body)
   }
 
@@ -70,7 +68,7 @@ export class DataPortalsController {
    * List is not returning content of the portal.
    */
   @Get()
-  async listDataPortals(): Promise<DataPortalParam[]> {
+  async listDataPortals(): Promise<DataPortalDTO[]> {
     return await this.dataPortalService.list()
   }
 
@@ -78,7 +76,7 @@ export class DataPortalsController {
    * Returns details of the portal (including content) by its url slug or id
    */
   @Get('/:identifier')
-  async getDataPortal(@Param('identifier') identifier: string): Promise<DataPortalParam> {
+  async getDataPortal(@Param('identifier') identifier: string): Promise<DataPortalDTO> {
     return await this.dataPortalService.getByUrlSlugOrId(identifier)
   }
 
