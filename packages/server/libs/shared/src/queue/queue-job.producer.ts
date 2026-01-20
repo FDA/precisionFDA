@@ -3,6 +3,7 @@ import { InvalidStateError } from '@shared/errors'
 import { getJobStatusMessageWithElapsedTime } from '@shared/queue/queue.utils'
 import { Task } from '@shared/queue/task.input'
 import { Job, JobOptions, Queue } from 'bull'
+import { context, propagation } from '@opentelemetry/api'
 
 export abstract class QueueJobProducer {
   protected readonly logger = new Logger('QueueJobProducer')
@@ -21,7 +22,8 @@ export abstract class QueueJobProducer {
       'adding a task to queue',
     )
 
-    return await this.queue.add(task.type, task, options)
+    const taskWithTrace = this.injectTrace(task)
+    return await this.queue.add(task.type, taskWithTrace, options)
   }
 
   protected async addBulkToQueue<T extends Task>(tasks: Parameters<Queue<T>['addBulk']>[0]) {
@@ -77,5 +79,11 @@ export abstract class QueueJobProducer {
     if (!this.queue) {
       throw new Error('Queue not defined. Define queue to produce jobs.')
     }
+  }
+
+  private injectTrace<T>(task: T): T & { __trace: Record<string, string> } {
+    const carrier: Record<string, string> = {}
+    propagation.inject(context.active(), carrier)
+    return { ...task, __trace: carrier }
   }
 }

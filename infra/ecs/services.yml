@@ -17,6 +17,7 @@ services:
         timeout: 5
         retries: 3
         startPeriod: 60
+      xray_enabled: true
 
     pfda-nodejs-api-internal:
       imageName: server
@@ -35,6 +36,7 @@ services:
         timeout: 5
         retries: 3
         startPeriod: 60
+      xray_enabled: true
 
     pfda-nodejs-worker:
       imageName: server
@@ -47,6 +49,7 @@ services:
         securityGroups:
           - name: common-sg
       command: ["pnpm", "run", "start:prod:worker"]
+      xray_enabled: true
 
     pfda-nodejs-admin-platform-client:
       imageName: server
@@ -59,6 +62,7 @@ services:
         securityGroups:
           - name: common-sg
       command: ["pnpm", "run", "start:prod:admin-platform-client"]
+      xray_enabled: true
 
 
     pfda-db-migrate:
@@ -83,6 +87,7 @@ services:
       serviceConnect:
         securityGroups:
           - name: web-sg
+      xray_enabled: true
 
     pfda-docs:
       imageName: docs
