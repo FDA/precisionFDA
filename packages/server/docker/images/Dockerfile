@@ -42,6 +42,6 @@ COPY packages/server/ ./
 RUN chmod +x ./docker/entrypoint/entrypoint.sh
 # Expose port
 EXPOSE 3001
-
+ENV OTEL_LOG_LEVEL=none
 # Set entrypoint
 ENTRYPOINT ["./docker/entrypoint/entrypoint.sh"]

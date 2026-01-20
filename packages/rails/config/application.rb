@@ -117,7 +117,21 @@ module PrecisionFda
     # The log level can be set differently for every environment in respective environment file (eg. development.rb),
     # variable config.log_level
     main_logger = ActiveSupport::Logger.new(log_output)
-    main_logger.formatter = ::Logger::Formatter.new
+    main_logger.formatter = proc do |severity, time, _progname, msg|
+      span = OpenTelemetry::Trace.current_span
+      ctx  = span.context
+
+      # Set default values for when no trace is active
+      trace_id = ctx.valid? ? ctx.hex_trace_id : ""
+      span_id  = ctx.valid? ? ctx.hex_span_id : ""
+
+      # Access the tags stored by ActiveSupport::TaggedLogging
+      tags = Thread.current[:activesupport_tagged_logging_tags]
+      tag_prefix = tags&.map { |t| "[#{t}]" }&.join(" ")
+
+      # Assemble the final log line
+      "#{time.utc.iso8601} #{severity} #{tag_prefix} [trace_id=#{trace_id} span_id=#{span_id}] #{msg}\n"
+    end
     config.log_level = :debug
 
     # Error logger logs only messages having ERROR, FATAL and UNKNOWN severity
@@ -145,6 +159,8 @@ module PrecisionFda
       httplog_config.enabled = false unless LOG_OUTGOING_HTTP_REQUESTS
       httplog_config.logger = config.logger
       httplog_config.log_headers = true
+      collector_endpoint_regex = %r{127\.0\.0\.1:4318(/.*)?}
+      httplog_config.url_blacklist_pattern = collector_endpoint_regex
     end
   end
 end

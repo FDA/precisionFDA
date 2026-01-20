@@ -28,6 +28,8 @@ class EcsDeployer:
         self.ecr_account = "991033550868"
         self.branch = os.environ.get("GIT_BRANCH")
         self.services_file = services_file
+        self.otel_cpu = 50
+        self.otel_memory = 128
         # Track previously deployed services for rollback
         self.deployed_services = {}
 
@@ -65,9 +67,8 @@ class EcsDeployer:
         # Define deployment stages
         self.stages = [
             ["pfda-db-migrate"],
-            ["pfda-nodejs-api", "pfda-nodejs-api-internal", "pfda-nodejs-worker", "pfda-nodejs-admin-platform-client"],
-            ["pfda-web", "pfda-docs"],
-            ["pfda-nginx"],
+            ["pfda-nodejs-api", "pfda-nodejs-api-internal", "pfda-nodejs-worker",
+             "pfda-nodejs-admin-platform-client", "pfda-web", "pfda-docs", "pfda-nginx"]
         ]
 
         self.prod_branches_patterns = [r"^master$",r"^production$",r"^release.*",r"^staging.*"]
@@ -88,8 +89,8 @@ class EcsDeployer:
                 self._execute_in_capacity_aware_batches(
                     stage_services,
                     get_resource_requirements=lambda svc, conf: {
-                        "CPU": conf["container"]["cpu"],
-                        "MEMORY": conf["container"]["memoryReservation"],
+                        "CPU": conf["container"]["cpu"] + (self.otel_cpu if conf.get("xray_enabled") else 0),
+                        "MEMORY": conf["container"]["memoryReservation"] + (self.otel_memory if conf.get("xray_enabled") else 0),
                         "DESIRED_COUNT": conf.get("desiredCount", 1),
                     },
                     action=lambda svc, conf: self._deploy_single_service(svc, conf, svc in self.force_services),
@@ -134,8 +135,8 @@ class EcsDeployer:
             self._execute_in_capacity_aware_batches(
                 stage_services,
                 get_resource_requirements=lambda svc, ctx: {
-                    "CPU": ctx["config"]["container"]["cpu"] if ctx.get("config") else 0,
-                    "MEMORY": ctx["config"]["container"]["memoryReservation"] if ctx.get("config") else 0,
+                    "CPU": ctx["config"]["container"]["cpu"] if ctx.get("config") else 0 + (self.otel_cpu if ctx["config"].get("xray_enabled") else 0),
+                    "MEMORY": ctx["config"]["container"]["memoryReservation"] if ctx.get("config") else 0 + (self.otel_memory if ctx["config"].get("xray_enabled") else 0),
                     "DESIRED_COUNT": ctx["config"].get("desiredCount", 1),
                 },
                 action=lambda svc, ctx: (
@@ -197,8 +198,37 @@ class EcsDeployer:
 
         ecs_secrets = self._get_ssm_secrets(service_name)
         execution_role_arn = f"arn:aws:iam::{self.account_id}:role/ecs-task-execution-role-pfda-{self.environment}"
+        task_role_arn = f"arn:aws:iam::{self.account_id}:role/ecs-task-role-pfda-{self.environment}"
         container_def = self._build_container_definition(service_name, service_config, image_uri, ecs_secrets)
         desired_count = service_config["desiredCount"]
+
+
+        # Build the containerDefinitions list
+        container_definitions = [container_def]
+
+        # Conditionally add X-Ray daemon container
+        if service_config.get("xray_enabled"):
+            adot_collector_def = {
+                "name": "aws-otel-collector",
+                "image": "public.ecr.aws/aws-observability/aws-otel-collector:latest",
+                "essential": True,
+                "cpu": self.otel_cpu,
+                "memory": self.otel_memory,
+                "command": [
+                    "--config=/etc/ecs/ecs-cloudwatch-xray.yaml"
+                ],
+                "portMappings": [
+                    {"containerPort": 4317, "protocol": "tcp"},
+                    {"containerPort": 4318, "protocol": "tcp"},
+                ],
+                "secrets": [
+                    {
+                        "name": "AOT_CONFIG_CONTENT",
+                        "valueFrom": f"/pfda/{self.environment}/app/environment/AOT_CONFIG_CONTENT"
+                    }
+                ]
+            }
+            container_definitions.append(adot_collector_def)
 
         # Check if task definition changed (image or config)
         if not force and not self._task_definition_changed(service_name, container_def, desired_count):
@@ -209,8 +239,9 @@ class EcsDeployer:
         response = self.ecs_client.register_task_definition(
             family=f"{service_name}-task-{self.environment}",
             executionRoleArn=execution_role_arn,
+            taskRoleArn=task_role_arn,
             networkMode="awsvpc",
-            containerDefinitions=[container_def],
+            containerDefinitions=container_definitions,
             requiresCompatibilities=["EC2"],
         )
         return response["taskDefinition"]["taskDefinitionArn"]
@@ -503,6 +534,14 @@ class EcsDeployer:
                 if key not in hc:
                     raise ValueError(f"Missing required healthCheck key '{key}' for service {service_name}")
             container_def["healthCheck"] = hc
+
+        if service_config.get("xray_enabled"):
+            container_def["environment"] = [
+                {"name": "OTEL_SERVICE_NAME", "value": service_name},
+                {"name": "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "value": "http://127.0.0.1:4318/v1/traces"},
+                {"name": "OTEL_EXPORTER_OTLP_PROTOCOL", "value": "http/protobuf"},
+                {"name": "TRACING_ENABLED", "value": "1"}
+            ]
 
         return container_def
 

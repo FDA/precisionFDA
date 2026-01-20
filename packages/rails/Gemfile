@@ -119,6 +119,26 @@ gem "soapforce"
 
 gem "dotenv-rails", "~> 2.7"
 
+# Core OpenTelemetry SDK
+gem "opentelemetry-sdk"
+
+# Exporter to send traces via OTLP (to the ADOT Collector sidecar)
+gem "opentelemetry-exporter-otlp"
+
+# Traces incoming web requests and spans controller/view processing
+gem "opentelemetry-instrumentation-rack"
+gem "opentelemetry-instrumentation-action_pack"
+# Traces database calls (SQL queries)
+gem "opentelemetry-instrumentation-active_record"
+gem "opentelemetry-instrumentation-active_support"
+# Traces background job processing and propagates trace context
+gem "opentelemetry-instrumentation-sidekiq"
+
+
+# Enables the AWS X-Ray trace header format (X-Amzn-Trace-Id)
+# and provides the X-Ray ID Generator.
+gem "opentelemetry-propagator-xray"
+
 group :development do
   # Annotate models
   gem "annotate"

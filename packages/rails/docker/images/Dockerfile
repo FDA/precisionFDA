@@ -97,6 +97,7 @@ ENV GIT_BRANCH=${GIT_BRANCH}
 ENV GIT_REVISION=${GIT_REVISION}
 ENV APP_DIR=/precision-fda
 ENV DOCKER_BUILD=true
+ENV OTEL_LOG_LEVEL=unknown
 WORKDIR $APP_DIR
 
 # Install runtime dependencies only
