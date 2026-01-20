@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { createFile } from '../files/files.api'
 import { processFile } from '../resources/uploadImage'
-import { DataPortal, CreateDataPortalData, UpdateDataPortalData } from './types'
+import { CreateDataPortalData, DataPortal, UpdateDataPortalData } from './types'
 
 export async function fetchGovUsers(): Promise<[]> {
   return axios.get('/api/v2/users/government').then(r => r.data)
@@ -57,7 +57,7 @@ export async function createDataPortalRequest(dataPortalData: CreateDataPortalDa
   const createPortalResponse = await axios
     .post('/api/v2/data-portals', dataPortalData.dataPortal)
     .then(res => res.data as DataPortal)
-  if (!createPortalResponse.error) {
+  if (!createPortalResponse.error && createPortalResponse.cardImageUid) {
     await processFile(dataPortalData.image, createPortalResponse.cardImageUid)
   }
   return createPortalResponse

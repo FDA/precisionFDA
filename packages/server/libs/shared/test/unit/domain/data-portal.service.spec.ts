@@ -1,15 +1,26 @@
+import { UniqueConstraintViolationException } from '@mikro-orm/core'
 import type { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
-import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
+import { DATA_PORTAL_MEMBER_ROLE } from '@shared/domain/data-portal/data-portal.enum'
+import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
+import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/create-data-portal.dto'
+import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { FileParam } from '@shared/domain/data-portal/service/data-portal.types'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { expect } from 'chai'
-import { create, db } from '../../../src/test'
+import { DataPortalUrlSlugFormatError, NotFoundError, PermissionError } from '@shared/errors'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import type { PlatformClient } from '@shared/platform-client'
 import type {
   FileCreateParams,
@@ -19,21 +30,10 @@ import type {
   ClassIdResponse,
   FileDownloadLinkResponse,
 } from '@shared/platform-client/platform-client.responses'
-import { DATA_PORTAL_MEMBER_ROLE } from '@shared/domain/data-portal/data-portal.enum'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import * as generate from '../../../src/test/generate'
-import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
+import { expect } from 'chai'
 import { stub } from 'sinon'
-import { DataPortalUrlSlugFormatError, NotFoundError, PermissionError } from '@shared/errors'
-import { UniqueConstraintViolationException } from '@mikro-orm/core'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
-import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { EntityService } from '@shared/domain/entity/entity.service'
+import { create, db } from '../../../src/test'
+import * as generate from '../../../src/test/generate'
 
 describe('DataPortalService', () => {
   const FILE_DXID = 'file-dxid'

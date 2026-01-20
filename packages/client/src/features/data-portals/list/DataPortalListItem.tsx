@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
+import precisionFDADataPortal from '../../../assets/precisionFDA-dp.png'
 import { DataPortal } from '../types'
 
 const StyledDataPortalListItem = styled.div`
@@ -60,18 +61,10 @@ const Content = styled.p`
   -webkit-box-orient: vertical;
 `
 
-export const DataPortalListItem = ({
-  dataPortal,
-}: {
-  dataPortal: DataPortal
-}) => (
+export const DataPortalListItem = ({ dataPortal }: { dataPortal: DataPortal }) => (
   <StyledDataPortalListItem as={Link} to={`/data-portals/${dataPortal.urlSlug}`}>
     <PortalImage>
-      <img
-        width="100%"
-        src={dataPortal.cardImageUrl}
-        alt="data portal thumbnail"
-      />
+      <img width="100%" src={dataPortal.cardImageUrl ?? precisionFDADataPortal} alt="data portal thumbnail" />
     </PortalImage>
     <PortalItemBody>
       <Title>{dataPortal.name}</Title>

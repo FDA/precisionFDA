@@ -1,21 +1,21 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
+import { ApiErrorResponse } from '../../home/types'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
 import { editDataPortalRequest, UpdateDataPortalRequest } from '../api'
 import { useDataPortalByIdQuery } from '../queries'
 import { UpdateDataPortalData } from '../types'
 import { canEditSettings, isUserInMemberRole } from '../utils'
 import { CreateDataPortalForm, DataPortalForm } from './DataPortalForm'
-import { AxiosError } from 'axios'
-import { ApiErrorResponse } from '../../home/types'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const EditDataPortalPage = () => {
   const { portalId } = useParams<{ portalId: string }>()
@@ -32,10 +32,10 @@ const EditDataPortalPage = () => {
         id: portal?.id,
         name: v.name,
         description: v.description,
-        sortOrder: v.sort_order,
+        sortOrder: v.sortOrder,
       } as UpdateDataPortalRequest,
-      spaceId: v.card_image_file ? portal?.spaceId : undefined,
-      image: v.card_image_file ? v.card_image_file[0] : undefined,
+      spaceId: v.cardImageFile ? portal?.spaceId : undefined,
+      image: v.cardImageFile ? v.cardImageFile[0] : undefined,
     }
 
     try {
@@ -77,21 +77,16 @@ const EditDataPortalPage = () => {
               onSubmit={onSubmit}
               isSubmitting={dataPortalMutation.isPending}
               defaultValues={{
-                name: portal.name,
-                url_slug: portal.urlSlug,
-                description: portal.description,
-                card_image_uid: portal.cardImageUid,
-                card_image_url: portal.cardImageUrl,
-                card_image_file: null,
-                host_lead_dxuser: {
+                ...portal,
+                cardImageFile: null,
+                hostLeadDxuser: {
                   label: portal.hostLeadDxuser,
                   value: portal.hostLeadDxuser,
                 },
-                guest_lead_dxuser: {
+                guestLeadDxuser: {
                   label: portal.guestLeadDxuser,
                   value: portal.guestLeadDxuser,
                 },
-                sort_order: portal.sortOrder,
               }}
             />
           </StyledPageContent>

@@ -15,7 +15,8 @@ export class CreateDataPortalDTO {
   content?: string
 
   @IsString()
-  cardImageFileName: string
+  @IsOptional()
+  cardImageFileName?: string
 
   @IsString()
   hostLeadDxUser: string
