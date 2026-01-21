@@ -1,7 +1,7 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getBottomSpacer, getViewSpaceButton, getMiddleSpacer } from './common'
+import { footer, getBottomSpacer, getMiddleSpacer, getViewSpaceButton, header } from './common'
 
-export type SpaceChangeTemplateInput = EmailTemplateInput & {
+export type SpaceChangeTemplateInput = {
+  firstName: string
   content: {
     initiator: { fullName: string }
     action: string
@@ -25,7 +25,7 @@ export const spaceChangedTemplate = (data: SpaceChangeTemplateInput): string => 
     <mj-section css-class="body-section">
       <mj-column>
         <mj-text>
-          Hello ${data.receiver.firstName}!
+          Hello ${data.firstName}!
         </mj-text>
         <mj-text>
           The space ${data.content.space.name} was ${data.content.action}

@@ -58,7 +58,7 @@ export class JobFailedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFailed> {
     return [owner]
   }
 
-  protected getSubject(_receiver: User, context: JobFailedContext): string {
+  protected getSubject(context: JobFailedContext): string {
     return `Execution "${context.job.name}" failed`
   }
 
@@ -67,11 +67,11 @@ export class JobFailedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFailed> {
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: JobFailedContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.jobFailed] {
     return {
-      receiver,
+      firstName: receiver?.firstName,
       content: {
         job: {
           id: context.job.id,

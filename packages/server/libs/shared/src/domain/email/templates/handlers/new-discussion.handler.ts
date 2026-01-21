@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
-import { newDiscussionTemplate } from '@shared/domain/email/templates/mjml/new-discussion.template'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import { User } from '@shared/domain/user/user.entity'
 import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
 import {
-  EmailTypeToContextMap,
   DiscussionContext,
+  EmailTypeToContextMap,
 } from '@shared/domain/email/dto/email-type-to-context.map'
-import { EmailClient } from '@shared/services/email-client'
-import { EntityService } from '@shared/domain/entity/entity.service'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
-import { UserRepository } from '@shared/domain/user/user.repository'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { newDiscussionTemplate } from '@shared/domain/email/templates/mjml/new-discussion.template'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
 export class NewDiscussionHandler extends EmailHandler<EMAIL_TYPES.newDiscussion> {
@@ -60,12 +60,11 @@ export class NewDiscussionHandler extends EmailHandler<EMAIL_TYPES.newDiscussion
     return { discussionLink, input, discussion, space }
   }
 
-  protected getSubject(_receiver: User, context: DiscussionContext): string {
+  protected getSubject(context: DiscussionContext): string {
     return `[precisionFDA] New Discussion notification: ${context.space.name}`
   }
 
   protected getTemplateInput(
-    _receiver: User,
     contextObject: EmailTypeToContextMap[EMAIL_TYPES.newDiscussion],
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.newDiscussion] {
     return {

@@ -3,6 +3,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ORG_EVERYONE } from '@shared/config/consts'
 import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
 import { EmailService } from '@shared/domain/email/email.service'
+import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
@@ -298,7 +299,7 @@ export class UserProvisionFacade {
 
   private async sendProvisionedEmail(
     firstName: string,
-    email: string,
+    email: EmailAddress,
     username: string,
   ): Promise<void> {
     const emailInput: TypedEmailBodyDto<EMAIL_TYPES.userProvisioned> = {

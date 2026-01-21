@@ -52,20 +52,19 @@ export class LicenseRevokedHandler extends EmailHandler<EMAIL_TYPES.licenseRevok
     return [receiver]
   }
 
-  protected getSubject(_receiver: User, context: LicenseRevokedContext): string {
+  protected getSubject(context: LicenseRevokedContext): string {
     return `Your license for ${context.license.title} has been revoked`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: LicenseRevokedContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.licenseRevoked] {
     return {
-      firstName: receiver.firstName,
-      lastName: receiver.lastName,
+      firstName: receiver?.firstName,
+      lastName: receiver?.lastName,
       licenseTitle: context.license.title,
       licenseUrl: `${config.api.railsHost}/licenses/${context.acceptedLicense.license.id}`,
-      receiver,
     }
   }
 }

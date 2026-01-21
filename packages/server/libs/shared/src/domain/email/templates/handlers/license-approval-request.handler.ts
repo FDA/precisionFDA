@@ -1,19 +1,19 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { User } from '@shared/domain/user/user.entity'
-import { licenseApprovalRequestTemplate } from '@shared/domain/email/templates/mjml/license-approval-request.template'
-import { LicenseApprovalRequestDTO } from '@shared/domain/email/dto/license-approval-request.dto'
-import { config } from '@shared/config'
-import { lowercaseAndDash } from '@shared/utils/format'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EmailClient } from '@shared/services/email-client'
 import { Injectable } from '@nestjs/common'
-import { LicenseRepository } from '@shared/domain/license/license.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
+import { config } from '@shared/config'
 import {
   EmailTypeToContextMap,
   LicenseApprovalContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { LicenseApprovalRequestDTO } from '@shared/domain/email/dto/license-approval-request.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { licenseApprovalRequestTemplate } from '@shared/domain/email/templates/mjml/license-approval-request.template'
+import { LicenseRepository } from '@shared/domain/license/license.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { lowercaseAndDash } from '@shared/utils/format'
 
 @Injectable()
 export class LicenseApprovalRequestHandler extends EmailHandler<EMAIL_TYPES.licenseApprovalRequest> {
@@ -57,13 +57,13 @@ export class LicenseApprovalRequestHandler extends EmailHandler<EMAIL_TYPES.lice
     return [context.license.user.getEntity()]
   }
 
-  protected getSubject(_receiver: User, context: LicenseApprovalContext): string {
+  protected getSubject(context: LicenseApprovalContext): string {
     return `${context.requesterName} requested approval for license: ${context.license.title}`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: LicenseApprovalContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.licenseApprovalRequest] {
     return {
       userFullName: context.requesterName,
@@ -73,8 +73,7 @@ export class LicenseApprovalRequestHandler extends EmailHandler<EMAIL_TYPES.lice
       licenseUrl: `${config.api.railsHost}/licenses/${context.license.id}`,
       requestUrl: `${config.api.railsHost}/licenses/${context.license.id}-${lowercaseAndDash(context.license.title)}/users`,
       message: context.input.message,
-      userId: receiver.id,
-      receiver,
+      userId: receiver?.id,
     }
   }
 }

@@ -1,11 +1,11 @@
 import { FilterQuery } from '@mikro-orm/mysql'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { PaginationParams } from '../../types/common'
 import { buildEntityQueryAndFilter } from '../permissions/permissions.filters'
 import { Job } from './job.entity'
-import { JOB_STATE } from './job.enum'
-import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
-import { User } from '@shared/domain/user/user.entity'
-import { STATIC_SCOPE } from '@shared/enums'
 
 // Either find by spaceId or userId
 interface JobsFindPaginatedParams extends PaginationParams {

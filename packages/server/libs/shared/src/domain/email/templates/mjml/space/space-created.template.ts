@@ -1,7 +1,7 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getBottomSpacer, getViewSpaceButton, generateSpaceLink } from './../common'
+import { footer, generateSpaceLink, getBottomSpacer, getViewSpaceButton, header } from './../common'
 
-export type SpaceCreatedTemplateInput = EmailTemplateInput & {
+export type SpaceCreatedTemplateInput = {
+  firstName: string
   space: { name: string; id: number }
 }
 
@@ -17,7 +17,7 @@ export const spaceCreatedTemplate = (data: SpaceCreatedTemplateInput): string =>
     <mj-section css-class="body-section">
       <mj-column width="100%">
         <mj-text>
-          Hello ${data.receiver.firstName}!
+          Hello ${data.firstName}!
         </mj-text>
         <mj-text>
           The space <a href="${generateSpaceLink(data.space.id)}"> ${data.space.name}</a> has been created.

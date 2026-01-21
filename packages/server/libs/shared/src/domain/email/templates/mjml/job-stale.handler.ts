@@ -1,7 +1,7 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getBottomSpacer, getExecutionDetailButton } from './common'
+import { footer, getBottomSpacer, getExecutionDetailButton, header } from './common'
 
-export type JobStaleInputTemplate = EmailTemplateInput & {
+export type JobStaleInputTemplate = {
+  firstName: string
   content: {
     job: {
       id: number
@@ -24,7 +24,7 @@ export const jobStaleTemplate = (data: JobStaleInputTemplate): string => `
     <mj-section css-class="body-section">
       <mj-column>
         <mj-text>
-          Hello ${data.receiver.firstName},
+          Hello ${data.firstName},
         </mj-text>
         <mj-text>
           The precisionFDA Workstation, ${

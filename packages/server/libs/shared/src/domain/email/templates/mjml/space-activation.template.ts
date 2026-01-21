@@ -1,7 +1,6 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getBottomSpacer, getMiddleSpacer } from './common'
+import { footer, getBottomSpacer, getMiddleSpacer, header } from './common'
 
-export type SpaceActivationTemplateInput = EmailTemplateInput & {
+export type SpaceActivationTemplateInput = {
   spaceTitle: string
   activationRequestLead: string
   spaceUrl: string

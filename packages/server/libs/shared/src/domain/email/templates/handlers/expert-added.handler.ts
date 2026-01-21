@@ -1,17 +1,17 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
-import { User } from '@shared/domain/user/user.entity'
-import { expertAddedTemplate } from '@shared/domain/email/templates/mjml/expert-added.template'
-import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
 import { Injectable } from '@nestjs/common'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EmailClient } from '@shared/services/email-client'
 import {
   EmailTypeToContextMap,
   ExpertAddedContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
+import { expertAddedTemplate } from '@shared/domain/email/templates/mjml/expert-added.template'
+import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { EmailClient } from '@shared/services/email-client'
 
 @Injectable()
 export class ExpertAddedHandler extends EmailHandler<EMAIL_TYPES.expertAdded> {
@@ -42,13 +42,12 @@ export class ExpertAddedHandler extends EmailHandler<EMAIL_TYPES.expertAdded> {
     return [context.expert.user.getEntity()]
   }
 
-  protected getSubject(_receiver: User, context: ExpertAddedContext): string {
+  protected getSubject(context: ExpertAddedContext): string {
     const name = getUserTitle(context.expert.user.getEntity())
     return `A new Expert Q&A Session was created for ${name}`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: ExpertAddedContext,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.expertAdded] {
     const name = getUserTitle(context.expert.user.getEntity())
@@ -57,7 +56,6 @@ export class ExpertAddedHandler extends EmailHandler<EMAIL_TYPES.expertAdded> {
         expertName: name,
         expertId: context.expert.id,
       },
-      receiver,
     }
   }
 }

@@ -1,37 +1,27 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer } from './common'
+import { JobStaleCheckDTO } from '@shared/domain/job/dto/job-stale-check.dto'
+import { SimpleJobDTO } from '@shared/domain/job/dto/simple-job.dto'
+import { footer, header } from './common'
 
-interface ReportJobInfo {
-  uid: string
-  name: string
-  dxuser: string
-  state: string
-  duration: string
-}
-
-export type ReportStaleJobsTemplateInput = EmailTemplateInput & {
+export type ReportStaleJobsTemplateInput = {
   content: {
-    staleJobsInfo: ReportJobInfo[]
-    nonStaleJobsInfo: ReportJobInfo[]
+    jobsInfo: JobStaleCheckDTO[]
     maxDuration: string
   }
 }
 
-const createJobsTable = (jobsInfo: ReportJobInfo[]) => {
+const renderJobsTable = (jobsInfo: SimpleJobDTO[]): string => {
   return `
   <mj-table>
     <tr style="border-bottom:1px solid #ecedee; text-align: left;">
       <th>Uid</th>
       <th>Name</th>
-      <th>User</th>
       <th>State</th>
       <th>Duration</th>
     </tr>
     ${jobsInfo.map(
       (job) => `<tr>
       <td>${job.uid}</td>
-      <td>${job.name}</td>
-      <td>${job.dxuser}</td>
+      <td><a href="${job.link}" target="_blank" style="color: #1f70b7; text-decoration: none;">${job.name}</a></td>
       <td>${job.state}</td>
       <td>${job.duration}</td>
     </tr>`,
@@ -54,20 +44,29 @@ export const reportStaleJobsTemplate = (data: ReportStaleJobsTemplateInput): str
     </mj-section>
     <mj-section css-class="body-section">
       <mj-column>
-        <mj-text font-weight="bold">Stale Jobs</mj-text>
-        ${
-          data.content.staleJobsInfo.length === 0
-            ? '<mj-text color="#666" align="center">No stale jobs found</mj-text>'
-            : createJobsTable(data.content.staleJobsInfo)
-        }
-        <mj-divider border-width="1px" border-color="lightgrey" padding-top="24px" padding-bottom="24px" />
-        <mj-text font-weight="bold">Other Jobs</mj-text>
-        ${
-          data.content.nonStaleJobsInfo.length === 0
-            ? '<mj-text color="#666" align="center">No running jobs found</mj-text>'
-            : createJobsTable(data.content.nonStaleJobsInfo)
-        }
-        <mj-divider border-width="1px" border-color="lightgrey" padding-top="24px" padding-bottom="24px" />
+        ${data.content.jobsInfo.map(
+          (userJobs) => `
+          <mj-text font-size="16px" font-weight="bold" padding-bottom="8px">
+            User: ${userJobs.user.fullName} (${userJobs.user.dxuser})
+          </mj-text>
+          <mj-text font-weight="bold" font-size="14px">Stale Jobs</mj-text>
+          ${
+            userJobs.staleJobs.length === 0
+              ? '<mj-text color="#666" align="center">No stale jobs found</mj-text>'
+              : renderJobsTable(userJobs.staleJobs)
+          }
+          ${
+            userJobs.nonStaleJobs.length === 0
+              ? ''
+              : `
+            <mj-divider border-width="1px" border-color="lightgrey" padding-top="24px" padding-bottom="24px" />
+            <mj-text font-weight="bold" font-size="14px">Non-stale Jobs</mj-text>
+            ${renderJobsTable(userJobs.nonStaleJobs)}
+          `
+          }
+          <mj-divider border-width="1px" border-color="lightgrey" padding-top="24px" padding-bottom="24px" />
+          `,
+        )}
         <mj-text>Jobs are stale after ${parseInt(data.content.maxDuration) / (60 * 60 * 24)} days</mj-text>
       </mj-column>
     </mj-section>

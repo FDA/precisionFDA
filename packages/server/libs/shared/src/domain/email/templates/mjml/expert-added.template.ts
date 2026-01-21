@@ -1,7 +1,6 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getBottomSpacer, getMiddleSpacer, getExpertCtoButton } from './common'
+import { footer, getBottomSpacer, getExpertCtoButton, getMiddleSpacer, header } from './common'
 
-export type ExpertAddedTemplateInput = EmailTemplateInput & {
+export type ExpertAddedTemplateInput = {
   content: {
     expertName: string
     expertId: number

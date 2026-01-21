@@ -6,6 +6,8 @@ import { NotificationService } from '@shared/domain/notification/services/notifi
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserService } from '@shared/domain/user/service/user.service'
+import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
+import { JobSyncTaskCheckFacade } from '@shared/facade/job/job-sync-task-check.facade'
 import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
@@ -44,9 +46,14 @@ const userCheckupFacade = {
   },
 } as UserCheckupFacade
 
-const jobServiceUserClient = {
-  checkStaleJobs: () => {},
-} as JobService
+const jobServiceUserClient = {} as JobService
+const jobSyncTaskCheckFacade = {
+  recreateJobSyncIfMissing: () => {},
+} as unknown as JobSyncTaskCheckFacade
+
+const jobStaleCheckFacade = {
+  checkAndNotifyStaleJobs: () => {},
+} as unknown as JobStaleCheckFacade
 
 const jobSyncService = {
   checkChallengeJobs: () => {},
@@ -66,7 +73,8 @@ const processor = {
       userService,
       spaceMembershipService,
       userCheckupFacade,
-      jobServiceUserClient,
+      jobStaleCheckFacade,
+      jobSyncTaskCheckFacade,
       jobSyncService,
     ),
   FILE: (): FileSyncQueueProcessor =>

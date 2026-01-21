@@ -1,13 +1,7 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getBottomSpacer, getMiddleSpacer } from './common'
+import { UserProvisionedDTO } from '@shared/domain/email/dto/user-provisioned.dto'
+import { footer, getBottomSpacer, getMiddleSpacer, header } from './common'
 
-export type UserProvisionedInput = EmailTemplateInput & {
-  firstName: string
-  username: string
-  email: string
-}
-
-export const userProvisionedTemplate = (data: UserProvisionedInput): string => `
+export const userProvisionedTemplate = (data: UserProvisionedDTO): string => `
   ${header}
     <mj-section css-class="hidden-email-preview">
       <mj-column>

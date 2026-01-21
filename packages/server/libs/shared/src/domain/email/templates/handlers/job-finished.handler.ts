@@ -1,18 +1,18 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { User } from '@shared/domain/user/user.entity'
-import { jobFinishedTemplate } from '../mjml/job-finished.template'
-import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
-import { Injectable } from '@nestjs/common'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EmailClient } from '@shared/services/email-client'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
+import { Injectable } from '@nestjs/common'
 import {
   EmailTypeToContextMap,
   JobFinishedContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { jobFinishedTemplate } from '../mjml/job-finished.template'
 
 @Injectable()
 export class JobFinishedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFinished> {
@@ -39,10 +39,7 @@ export class JobFinishedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFinishe
     }
   }
 
-  protected async getNotificationSettingKeys(
-    context: JobFinishedContext,
-    _user: User,
-  ): Promise<string[]> {
+  protected async getNotificationSettingKeys(context: JobFinishedContext): Promise<string[]> {
     return context.job.isPrivate() ? ['private_job_finished'] : []
   }
 
@@ -65,16 +62,16 @@ export class JobFinishedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFinishe
     return [owner]
   }
 
-  protected getSubject(_receiver: User, context: JobFinishedContext): string {
+  protected getSubject(context: JobFinishedContext): string {
     return `Execution ${context.job.name} finished`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: JobFinishedContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.jobFinished] {
     return {
-      receiver,
+      firstName: receiver?.firstName,
       content: { job: { id: context.job.id, uid: context.job.uid, name: context.job.name } },
     }
   }

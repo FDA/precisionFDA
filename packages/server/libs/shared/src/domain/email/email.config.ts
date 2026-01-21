@@ -1,5 +1,4 @@
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { User } from '@shared/domain/user/user.entity'
 import { mergeAll } from 'ramda'
 
 /**
@@ -61,6 +60,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES = {
   private_job_finished: false,
   private_challenge_opened: true,
   private_challenge_preregister: true,
+  private_job_stale: false,
 }
 
 /**
@@ -143,6 +143,7 @@ const NOTIFICATION_PRIVATE = {
   private_job_failed: true,
   private_challenge_opened: true,
   private_challenge_preregister: true,
+  private_job_stale: true,
 }
 
 // we use as any here to overwrite mergeAll type declaration
@@ -173,5 +174,3 @@ export type EmailSendInput = {
   returnAddress?: string // where it should go if not delivered
   body?: string
 }
-
-export type EmailTemplateInput = { receiver: User }

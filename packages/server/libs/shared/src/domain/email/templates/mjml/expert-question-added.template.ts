@@ -1,13 +1,12 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import {
-  header,
   footer,
+  generateExpertQuestionLink,
   getBottomSpacer,
   getMiddleSpacer,
-  generateExpertQuestionLink,
+  header,
 } from './common'
 
-export type ExpertQuestionTemplateInput = EmailTemplateInput & {
+export type ExpertQuestionTemplateInput = {
   content: {
     senderName: string
     questionBody: string

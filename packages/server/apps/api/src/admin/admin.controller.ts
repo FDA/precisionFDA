@@ -1,4 +1,4 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager'
 import {
   Body,
   Controller,
@@ -12,30 +12,28 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
+import { config } from '@shared/config'
+import { CountStats } from '@shared/database/statistics.type'
+import { AdminRequestDTO } from '@shared/domain/admin/dto/admin-request.dto'
+import { LimitAdminRequestDTO } from '@shared/domain/admin/dto/limit-admin-request.dto'
+import { ResourceAdminRequestDTO } from '@shared/domain/admin/dto/resource-admin-request.dto'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { EditInvitationDTO } from '@shared/domain/invitation/dto/edit-invitation.dto'
 import { InvitationPaginationDTO } from '@shared/domain/invitation/dto/invitation-pagination.dto'
 import { ProvisionUsersDTO } from '@shared/domain/invitation/dto/provision-users.dto'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { InvitationService } from '@shared/domain/invitation/services/invitation.service'
+import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
+import { SpaceService } from '@shared/domain/space/service/space.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
-import { User } from '@shared/domain/user/user.entity'
+import { UserManagementService } from '@shared/domain/user/service/user-management.service'
 import { UserService } from '@shared/domain/user/service/user.service'
-import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
-import { Job } from 'bull'
+import { User } from '@shared/domain/user/user.entity'
+import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
+import { StatisticsFacade } from '../facade/statistics/statistics.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { SiteAdminGuard } from './guards/site-admin.guard'
-import { config } from '@shared/config'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
-import { AdminRequestDTO } from '@shared/domain/admin/dto/admin-request.dto'
-import { LimitAdminRequestDTO } from '@shared/domain/admin/dto/limit-admin-request.dto'
-import { ResourceAdminRequestDTO } from '@shared/domain/admin/dto/resource-admin-request.dto'
-import { UserManagementService } from '@shared/domain/user/service/user-management.service'
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager'
-import { CountStats } from '@shared/database/statistics.type'
-import { StatisticsFacade } from '../facade/statistics/statistics.facade'
 
 @UseGuards(UserContextGuard, SiteAdminGuard)
 @Controller('/admin')
@@ -43,11 +41,11 @@ export class AdminController {
   constructor(
     private readonly user: UserContext,
     private readonly userService: UserService,
-    private readonly maintenanceJobProducer: MaintenanceQueueJobProducer,
     private readonly invitationService: InvitationService,
     private readonly userManagementService: UserManagementService,
     private readonly spaceService: SpaceService,
     private readonly statisticsFacade: StatisticsFacade,
+    private readonly jobStaleCheckFacade: JobStaleCheckFacade,
   ) {}
 
   @UseInterceptors(CacheInterceptor)
@@ -62,12 +60,10 @@ export class AdminController {
     return await this.statisticsFacade.getStatistics()
   }
 
-  /**
-   * Currently unused in app. Needs to be invoked by outside HTTP request.
-   */
-  @Get('/checkStaleJobs')
-  async checkStaleJobs(): Promise<Job> {
-    return await this.maintenanceJobProducer.createCheckStaleJobsTask(this.user)
+  @HttpCode(204)
+  @Get('/check-stale-jobs')
+  async checkStaleJobs(): Promise<void> {
+    await this.jobStaleCheckFacade.checkAndNotifyStaleJobs()
   }
 
   @Get('/users')

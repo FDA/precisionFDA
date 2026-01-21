@@ -31,21 +31,19 @@ export class NodeCopyHandler extends EmailHandler<EMAIL_TYPES.nodeCopy> {
     })
   }
 
-  protected getSubject(_receiver: User, input: NodeCopyInputDTO): string {
+  protected getSubject(input: NodeCopyInputDTO): string {
     return `Some items haven't been copied to ${input.destination}`
   }
 
   protected getTemplateInput(
-    receiver: User,
     input: NodeCopyInputDTO,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.nodeCopy] {
-    const subject = this.getSubject(receiver, input)
+    const subject = this.getSubject(input)
     return {
       subject,
       destination: input.destination,
       notCopiedFolderNames: input.notCopiedFolderNames,
       notCopiedFileNames: input.notCopiedFileNames,
-      receiver,
     }
   }
 

@@ -47,16 +47,15 @@ export class SpaceActivatedHandler extends EmailHandler<EMAIL_TYPES.spaceActivat
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: SpaceActivatedContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.spaceActivated] {
     const space = context.spaceMembership.spaces[0]
     return {
-      firstName: receiver.firstName,
-      lastName: receiver.lastName,
+      firstName: receiver?.firstName,
+      lastName: receiver?.lastName,
       spaceTitle: space.name,
       spaceUrl: `${config.api.railsHost}/spaces/${space.id}`,
-      receiver,
     }
   }
 }

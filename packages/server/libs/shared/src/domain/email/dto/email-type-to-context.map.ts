@@ -140,6 +140,14 @@ export type DiscussionContext = {
     | EmailTypeToInputMap[EMAIL_TYPES.newDiscussionReply]
 }
 
+export type StaleJobsReportContext = {
+  input: EmailTypeToInputMap[EMAIL_TYPES.staleJobsReport]
+}
+
+export type UserRunningJobsReportContext = {
+  input: EmailTypeToInputMap[EMAIL_TYPES.userRunningJobsReport]
+}
+
 type EmailTypeToContextMapOverride = {
   [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO
   [EMAIL_TYPES.jobFinished]: JobFinishedContext
@@ -150,7 +158,7 @@ type EmailTypeToContextMapOverride = {
   [EMAIL_TYPES.challengeOpened]: ChallengeOpenedContext
   [EMAIL_TYPES.challengePrereg]: ChallengePreregContext
   [EMAIL_TYPES.jobTerminationWarning]: EmptyEmailInputDTO
-  [EMAIL_TYPES.staleJobsReport]: EmptyEmailInputDTO
+  [EMAIL_TYPES.staleJobsReport]: StaleJobsReportContext
   [EMAIL_TYPES.nonTerminatedDbClusters]: EmptyEmailInputDTO
   [EMAIL_TYPES.jobFailed]: JobFailedContext
   [EMAIL_TYPES.adminDataConsistencyReport]: EmptyEmailInputDTO
@@ -172,6 +180,7 @@ type EmailTypeToContextMapOverride = {
   [EMAIL_TYPES.nodeCopy]: NodeCopyInputDTO
   [EMAIL_TYPES.newDiscussion]: DiscussionContext
   [EMAIL_TYPES.newDiscussionReply]: DiscussionContext
+  [EMAIL_TYPES.userRunningJobsReport]: UserRunningJobsReportContext
 }
 
 export type EmailTypeToContextMap = {

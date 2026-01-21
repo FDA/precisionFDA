@@ -1,8 +1,8 @@
 import { FindOptions, raw } from '@mikro-orm/core'
 import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
+import { CountStats } from '@shared/database/statistics.type'
 import { config } from '../../config'
 import { RESOURCE_TYPES, User } from './user.entity'
-import { CountStats } from '@shared/database/statistics.type'
 
 type Resource = (typeof RESOURCE_TYPES)[number]
 
@@ -13,7 +13,7 @@ export class UserRepository extends PaginatedRepository<User> {
     })
   }
 
-  findActive(findOptions?: FindOptions<User>): Promise<User[]> {
+  findActive<Hint extends string = never>(findOptions?: FindOptions<User, Hint>): Promise<User[]> {
     return this.find({ lastLogin: { $ne: null }, privateFilesProject: { $ne: null } }, findOptions)
   }
 
@@ -135,15 +135,14 @@ export class UserRepository extends PaginatedRepository<User> {
 
     const result = await this.em.getConnection().execute(
       `
-    SELECT
-      COUNT(*) as total,
-      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_month,
-      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_six_months,
-      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as year_to_date,
-      SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_year
-    FROM users
-    WHERE user_state = 0 -- Only active users
-  `,
+        SELECT COUNT(*)                                         as total,
+               SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_month,
+               SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_six_months,
+               SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as year_to_date,
+               SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as last_year
+        FROM users
+        WHERE user_state = 0 -- Only active users
+      `,
       [oneMonthAgo, sixMonthsAgo, yearToDateStart, oneYearAgo],
     )
 

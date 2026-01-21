@@ -14,6 +14,8 @@ import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { IdWithReceiversInputDTO } from '@shared/domain/email/dto/id-with-receivers-input.dto'
 import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
+import { AdminStaleJobsReportDTO } from '@shared/domain/job/dto/admin-stale-job-report-input.dto'
+import { UserRunningJobsReportDTO } from '@shared/domain/job/dto/user-running-job-report-input.dto'
 
 export const emailTypeToInputDtoMap = {
   [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO,
@@ -25,7 +27,7 @@ export const emailTypeToInputDtoMap = {
   [EMAIL_TYPES.challengeOpened]: ChallengeOpenedDTO,
   [EMAIL_TYPES.challengePrereg]: ChallengeCreatedDTO,
   [EMAIL_TYPES.jobTerminationWarning]: EmptyEmailInputDTO,
-  [EMAIL_TYPES.staleJobsReport]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.staleJobsReport]: AdminStaleJobsReportDTO,
   [EMAIL_TYPES.nonTerminatedDbClusters]: EmptyEmailInputDTO,
   [EMAIL_TYPES.jobFailed]: JobEventDTO,
   [EMAIL_TYPES.adminDataConsistencyReport]: EmptyEmailInputDTO,
@@ -48,6 +50,7 @@ export const emailTypeToInputDtoMap = {
   [EMAIL_TYPES.userProvisioned]: UserProvisionedDTO,
   [EMAIL_TYPES.newDiscussion]: DiscussionNotificationDTO,
   [EMAIL_TYPES.newDiscussionReply]: DiscussionNotificationDTO,
+  [EMAIL_TYPES.userRunningJobsReport]: UserRunningJobsReportDTO,
 } satisfies Record<EMAIL_TYPES, new () => object>
 
 export type EmailTypeToInputMap = {

@@ -9,14 +9,18 @@ import {
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { NodeTagging } from '@shared/domain/tagging/node-tagging.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { CHALLENGE_BOT_USER_CONTEXT } from '@shared/domain/user-context/provider/challenge-bot-user-context.provider'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import * as errors from '@shared/errors'
 import { ClientRequestError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
+import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
 import {
   createSendEmailTask,
   createSyncOutputsTask,
@@ -44,10 +48,6 @@ import {
   sendJobFailedEmails,
   shouldSyncStatus,
 } from '../job.helper'
-import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
-import { CHALLENGE_BOT_USER_CONTEXT } from '@shared/domain/user-context/provider/challenge-bot-user-context.provider'
-import * as errors from '@shared/errors'
-import { NodeTagging } from '@shared/domain/tagging/node-tagging.entity'
 
 /**
  * JobSynchronizationService is responsible for synchronizing the job status with the platform.
@@ -195,7 +195,7 @@ export class JobSynchronizationService {
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
           this.logger.log({ error: err.props }, 'Received 401 from platform, removing sync task')
-          await removeRepeatable(bullJob)
+          await removeRepeatable(bullJob, getMainQueue())
         }
       } else {
         this.logger.log({ error: err }, 'Unhandled error from job/describe, will retry later')
@@ -340,9 +340,6 @@ export class JobSynchronizationService {
 
   async requestTerminateJob(jobDxid: DxId<'job'>): Promise<Job> {
     const job = await this.jobRepo.findEditableOne({ dxid: jobDxid })
-    if (!job) {
-      throw new errors.JobNotFoundError()
-    }
     return this.terminateJob(job, this.platformClient)
   }
 
@@ -381,7 +378,7 @@ export class JobSynchronizationService {
   ): Promise<void> {
     // send email to job owner
     const body = buildEmailTemplate<JobStaleInputTemplate>(jobStaleTemplate, {
-      receiver: user,
+      firstName: user?.firstName,
       content: {
         // TODO LUDVIK - NONE OF THESE PROPERTIES EXIST IN CheckStatusJob['payload'] and TypeScript doesn't care here ???.
         job: { id: checkStatusJob.id, name: checkStatusJob.name, uid: checkStatusJob.uid },
@@ -412,7 +409,7 @@ export class JobSynchronizationService {
 
   private async sendJobFinishedEmail(user: User, job: Job): Promise<void> {
     const body = buildEmailTemplate<JobFinishedInputTemplate>(jobFinishedTemplate, {
-      receiver: user,
+      firstName: user?.firstName,
       content: {
         job: { id: job.id, name: job.name, uid: job.uid },
       },

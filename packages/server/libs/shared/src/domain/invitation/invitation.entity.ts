@@ -1,5 +1,6 @@
 import { Entity, ManyToOne, Property, Ref } from '@mikro-orm/core'
 import { BaseEntity } from '@shared/database/base.entity'
+import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { PROVISIONING_STATE } from './invitation.enum'
@@ -26,7 +27,7 @@ export class Invitation extends BaseEntity {
   lastName: string
 
   @Property()
-  email: string
+  email: EmailAddress
 
   @Property()
   org: string

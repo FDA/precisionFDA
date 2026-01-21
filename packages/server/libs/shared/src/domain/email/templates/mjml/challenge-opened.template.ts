@@ -1,7 +1,7 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getBottomSpacer, getChallengeCtoButton, getMiddleSpacer } from './common'
+import { footer, getBottomSpacer, getChallengeCtoButton, getMiddleSpacer, header } from './common'
 
-export type ChallengeOpenedTemplateInput = EmailTemplateInput & {
+export type ChallengeOpenedTemplateInput = {
+  firstName: string
   content: {
     challenge: { name: string; id: number }
   }
@@ -19,7 +19,7 @@ export const challengeOpenedTemplate = (data: ChallengeOpenedTemplateInput): str
     <mj-section css-class="body-section">
       <mj-column>
         <mj-text>
-          Hello ${data.receiver.firstName}!
+          Hello ${data.firstName}!
         </mj-text>
         <mj-text>
           A new challenge has opened on precisionFDA:

@@ -46,7 +46,6 @@ export class SpaceInvitationHandler extends EmailHandler<EMAIL_TYPES.spaceInvita
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: SpaceInvitationContext,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.spaceInvitation] {
     const space = context.membership.spaces[0]
@@ -57,16 +56,15 @@ export class SpaceInvitationHandler extends EmailHandler<EMAIL_TYPES.spaceInvita
       membershipSideAlias: context.membership.getSpaceMembershipSideAlias(),
       spaceUrl: `${config.api.railsHost}/spaces/${space.id}`,
       adminUserUrl: `${config.api.railsHost}/users/${context.admin.dxuser}`,
-      receiver,
     }
   }
 
-  protected getSubject(_receiver: User, context: SpaceInvitationContext): string {
+  protected getSubject(context: SpaceInvitationContext): string {
     const space = context.membership.spaces[0]
     return `${context.admin.fullName} added you to the space "${space.name}"`
   }
 
-  protected getReplyTo(_receiver: User, context: SpaceInvitationContext): string {
+  protected getReplyTo(context: SpaceInvitationContext): string {
     return context.admin.email
   }
 }

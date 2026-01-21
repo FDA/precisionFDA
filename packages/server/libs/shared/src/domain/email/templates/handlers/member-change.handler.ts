@@ -204,16 +204,16 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     }
   }
 
-  protected getSubject(_receiver: User, context: MemberChangedContext): string {
+  protected getSubject(context: MemberChangedContext): string {
     return `${context.content.initiator.fullName} ${context.content.action}`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: MemberChangedContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.memberChangedAddedRemoved] {
     return {
-      receiver,
+      firstName: receiver?.firstName,
       content: context.content,
     }
   }

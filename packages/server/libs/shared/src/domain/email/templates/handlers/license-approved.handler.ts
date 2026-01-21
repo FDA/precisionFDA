@@ -48,22 +48,21 @@ export class LicenseApprovedHandler extends EmailHandler<EMAIL_TYPES.licenseAppr
     return [receiver]
   }
 
-  protected getSubject(_receiver: User, context: LicenseApprovedContext): string {
+  protected getSubject(context: LicenseApprovedContext): string {
     return `You were approved for ${context.acceptedLicense.license.getEntity().title}`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: LicenseApprovedContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.licenseApproved] {
     const license = context.acceptedLicense.license.getEntity()
     return {
-      firstName: receiver.firstName,
-      lastName: receiver.lastName,
+      firstName: receiver?.firstName,
+      lastName: receiver?.lastName,
       licenseTitle: license.title,
       licenseUrl: `${config.api.railsHost}/licenses/${license.id}`,
       itemsLicenseUrl: `${config.api.railsHost}/licenses/${license.id}-${lowercaseAndDash(license.title)}/items`,
-      receiver,
     }
   }
 }

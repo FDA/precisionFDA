@@ -10,7 +10,6 @@ import {
   SyncSpacesPermissionsJob,
   TASK_TYPE,
 } from '@shared/queue/task.input'
-import { UserCtx } from '@shared/types'
 import { Job, JobOptions, Queue } from 'bull'
 
 @Injectable()
@@ -26,7 +25,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
   async createCheckAdminDataConsistencyReportTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT as const,
-      payload: undefined as any,
+      payload: undefined,
     }
 
     const options: JobOptions = {
@@ -41,7 +40,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
   async createCheckChallengeJobsTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.CHECK_CHALLENGE_JOBS as const,
-      payload: undefined as any,
+      payload: undefined,
     }
 
     const options: JobOptions = {
@@ -56,7 +55,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
   async createCheckNonTerminatedDbClustersTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const,
-      payload: undefined as any,
+      payload: undefined,
     }
 
     const options: JobOptions = {
@@ -71,7 +70,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
   async createUserInactivityAlertTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.USER_INACTIVITY_ALERT as const,
-      payload: undefined as any,
+      payload: undefined,
     }
 
     const options: JobOptions = {
@@ -83,21 +82,25 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createCheckStaleJobsTask(user: UserCtx): Promise<Job> {
+  async createCheckStaleJobsTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.CHECK_STALE_JOBS as const,
-      payload: undefined as any,
-      user,
+      payload: undefined,
     }
 
-    const options: JobOptions = { jobId: TASK_TYPE.CHECK_STALE_JOBS }
+    const options: JobOptions = {
+      jobId: TASK_TYPE.CHECK_STALE_JOBS,
+      repeat: {
+        cron: config.workerJobs.jobStaleCheck.repeatPattern,
+      },
+    }
     return await this.addToQueue(wrapped, options)
   }
 
   async createSyncSpacesPermissionsTask(): Promise<Job<SyncSpacesPermissionsJob>> {
     const wrapped = {
       type: TASK_TYPE.SYNC_SPACES_PERMISSIONS as const,
-      payload: undefined as any,
+      payload: undefined,
       user: this.user,
     }
 
@@ -143,13 +146,13 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createCheckUserJobsTask(data: BasicUserJob): Promise<Job<BasicUserJob>> {
+  async createCheckUserJobsTask(): Promise<Job<BasicUserJob>> {
     const wrapped = {
       type: TASK_TYPE.CHECK_USER_JOBS as const,
-      user: data.user,
+      user: this.user,
     }
     const options: JobOptions = {
-      jobId: `${wrapped.type}.${data.user.dxuser}`,
+      jobId: `${wrapped.type}.${this.user.dxuser}`,
     }
     return await this.addToQueue(wrapped, options)
   }

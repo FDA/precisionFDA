@@ -1,13 +1,13 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { challengeProposalTemplate } from '@shared/domain/email/templates/mjml/challenge-proposed.template'
-import { User } from '@shared/domain/user/user.entity'
+import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
 import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal.dto'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EmailClient } from '@shared/services/email-client'
-import { Injectable } from '@nestjs/common'
-import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { EmailAddress } from '@shared/domain/email/model/email-address'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { challengeProposalTemplate } from '@shared/domain/email/templates/mjml/challenge-proposed.template'
+import { EmailClient } from '@shared/services/email-client'
 
 @Injectable()
 export class ChallengeProposalReceivedHandler extends EmailHandler<EMAIL_TYPES.challengeProposalReceived> {
@@ -19,14 +19,11 @@ export class ChallengeProposalReceivedHandler extends EmailHandler<EMAIL_TYPES.c
     super(emailClient)
   }
 
-  protected async determineReceivers(): Promise<User[]> {
-    return config.challengeProposalRecipients.map(
-      (receiverEmail) => ({ email: receiverEmail }) as User,
-    )
+  protected async determineReceivers(): Promise<EmailAddress[]> {
+    return config.challengeProposalRecipients
   }
 
   protected getTemplateInput(
-    _receiver: User,
     input: ChallengeProposalInputDTO,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.challengeProposalReceived] {
     return {
@@ -45,7 +42,7 @@ export class ChallengeProposalReceivedHandler extends EmailHandler<EMAIL_TYPES.c
     }
   }
 
-  protected getSubject(_receiver: User, input: ChallengeProposalInputDTO): string {
+  protected getSubject(input: ChallengeProposalInputDTO): string {
     return `${config.env} New challenge proposal received from ${input.name} (${input.email})`
   }
 

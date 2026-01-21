@@ -98,6 +98,7 @@ const initMaintenanceQueue = async (): Promise<void> => {
   }
 
   await maintenanceJobProducer.createCheckChallengeJobsTask()
+  await maintenanceJobProducer.createCheckStaleJobsTask()
 }
 
 // removeRepeatable and removeRepeatableJob explanation:
@@ -132,8 +133,10 @@ const findRepeatable = async (bullJobId: string): Promise<Bull.JobInformation> =
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createSyncJobStatusTask = async (data: CheckStatusJob['payload'], user: UserCtx) =>
-  mainJobProducer.createSyncJobStatusTask(data, user)
+const createSyncJobStatusTask = async (
+  data: CheckStatusJob['payload'],
+  user: UserCtx,
+): Promise<Job> => mainJobProducer.createSyncJobStatusTask(data, user)
 
 /**
  * @deprecated Use the job producer directly within the DI
@@ -152,7 +155,7 @@ const createSendEmailTask = async (
   data: SendEmailJob['payload'],
   user: UserCtx | undefined,
   taskId?: string,
-) => emailsJobProducer.createSendEmailTask(data, user, taskId)
+): Promise<Job> => emailsJobProducer.createSendEmailTask(data, user, taskId)
 
 /**
  * @deprecated Use the job producer directly within the DI
@@ -162,7 +165,7 @@ const removeFromEmailQueue = (jobId: string): Promise<void> => emailsJobProducer
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createRemoveNodesJobTask = async (ids: number[], user: UserCtx) =>
+const createRemoveNodesJobTask = async (ids: number[], user: UserCtx): Promise<Job> =>
   fileSyncJobProducer.createRemoveNodesJobTask(ids, user)
 
 /**
@@ -191,25 +194,27 @@ const createCloseFileJobTask = async (payload: FileUidInput, user?: UserCtx): Pr
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createLockNodesJobTask = async (ids: number[], user: UserCtx) =>
+const createLockNodesJobTask = async (ids: number[], user: UserCtx): Promise<Job> =>
   fileSyncJobProducer.createLockNodesJobTask(ids, user)
 
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createUnlockNodesJobTask = async (ids: number[], user: UserCtx) =>
+const createUnlockNodesJobTask = async (ids: number[], user: UserCtx): Promise<Job> =>
   fileSyncJobProducer.createUnlockNodesJobTask(ids, user)
 
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createDbClusterSyncTask = async (data: SyncDbClusterJob['payload'], user: UserCtx) =>
-  mainJobProducer.createDbClusterSyncTask(data, user)
+const createDbClusterSyncTask = async (
+  data: SyncDbClusterJob['payload'],
+  user: UserCtx,
+): Promise<Job> => mainJobProducer.createDbClusterSyncTask(data, user)
 
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createTestMaxMemoryTask = async (): Promise<any> =>
+const createTestMaxMemoryTask = async (): Promise<Job> =>
   maintenanceJobProducer.createTestMaxMemoryTask()
 
 // Queue adding helpers

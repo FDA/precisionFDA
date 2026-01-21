@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { Controller, useForm, Path, PathValue } from 'react-hook-form'
+import { Controller, Path, PathValue, useForm } from 'react-hook-form'
+import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/CheckboxNext'
 import { Loader } from '../../../components/Loader'
+import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { PageActions, PageHeader, PageTitle } from '../../../components/Page/styles'
 import { FieldLabelRow } from '../../../components/form/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
@@ -10,16 +12,14 @@ import { UserLayout } from '../../../layouts/UserLayout'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
 import {
   FieldGroup,
+  NotificationSectionColumn,
+  NotificationSectionRow,
   SectionTitle,
   SectionTitleSmall,
   StyledNotifications,
   StyledPageContainer,
-  NotificationSectionRow,
-  NotificationSectionColumn,
 } from './styles'
 import { AllNotification, NotificationPreferences, NotificationPreferencesPayload } from './types'
-import { Button } from '../../../components/Button'
-import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 type NotificationLabelType = Record<string, string>
 
@@ -136,6 +136,24 @@ const NotificationForm = ({
                   onChange={e => handleSetValue('private.private_job_finished', e.target.checked)}
                 />
                 Notify me when an execution has finished.
+              </FieldLabelRow>
+            )}
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <Controller
+            name="private.private_job_stale"
+            control={control}
+            defaultValue={false}
+            render={({ field }) => (
+              <FieldLabelRow id="staleExecution">
+                <Checkbox
+                  {...field}
+                  disabled={isSubmitting}
+                  checked={field.value}
+                  onChange={e => handleSetValue('private.private_job_stale', e.target.checked)}
+                />
+                Notify me when executions may be stuck or stale.
               </FieldLabelRow>
             )}
           />

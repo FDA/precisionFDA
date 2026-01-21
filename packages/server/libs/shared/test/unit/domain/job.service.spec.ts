@@ -1,13 +1,23 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { EventHelper } from '@shared/domain/event/event.helper'
+import { JobRepository } from '@shared/domain/job/job.repository'
 import { JobService } from '@shared/domain/job/job.service'
 import { JobRunData } from '@shared/domain/job/job.types'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { Notification } from '@shared/domain/notification/notification.entity'
-import { expect } from 'chai'
-import { create, db } from '@shared/test'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { User } from '@shared/domain/user/user.entity'
+import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
 import { PlatformClient } from '@shared/platform-client'
 import { FileStatesParams, JobFindParams } from '@shared/platform-client/platform-client.params'
 import {
@@ -16,24 +26,11 @@ import {
   JobDescribeResponse,
   JobOutput,
 } from '@shared/platform-client/platform-client.responses'
-import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { EventHelper } from '@shared/domain/event/event.helper'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import { Queue } from 'bull'
 import * as queueDomain from '@shared/queue'
+import { create, db } from '@shared/test'
+import { Queue } from 'bull'
+import { expect } from 'chai'
 import { stub } from 'sinon'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EmailService } from '@shared/domain/email/email.service'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -42,9 +39,7 @@ describe('Job service tests', () => {
   let userCtx: UserContext
   let notificationService: NotificationService
   let nodeService: NodeService
-  let emailQueueJobProducer: EmailQueueJobProducer
   let jobSynchronizationService: JobSynchronizationService
-  let userRepo: UserRepository
   let jobRepo: JobRepository
   let spaceRepo: SpaceRepository
   let spaceMembershipRepo: SpaceMembershipRepository
@@ -92,12 +87,7 @@ describe('Job service tests', () => {
     eventHelper = {
       createFileEvent: eventHelperCreateFileEventStub,
     } as unknown as EventHelper
-    emailQueueJobProducer = new EmailQueueJobProducer(queue)
     jobSynchronizationService = {} as unknown as JobSynchronizationService
-    userRepo = {
-      findOneOrFail: userRepoFindOneOrFailStub,
-      findAdminUser: userRepoFindAdminUserStub,
-    } as unknown as UserRepository
     jobRepo = {
       findOneOrFail: jobRepoFindOneOrFailStub,
       find: jobRepoFindStub,
@@ -463,133 +453,6 @@ describe('Job service tests', () => {
     }
   })
 
-  context('#checkStaleJobs', async () => {
-    it('Stale job found', async () => {
-      const app = create.appHelper.createRegular(em, { user }, { title: 'app1' })
-      await em.flush()
-      const staleJob = await create.jobHelper.create(
-        em,
-        { user, app },
-        { createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
-      )
-      await em.flush()
-      queueAdd.reset()
-      const adminUser = await create.userHelper.createAdmin(em)
-      userRepoFindAdminUserStub.returns(adminUser)
-      const platformClient = {
-        async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
-          expect(params.project).contains('project-')
-          return {
-            results: [
-              {
-                id: 'job-1',
-                name: 'job-1-name',
-                describe: {
-                  state: 'done',
-                  created: 1,
-                  modified: 1,
-                },
-              } as unknown as JobDescribeResponse,
-            ],
-          } as FindJobsResponse
-        },
-      } as PlatformClient
-
-      jobService = getJobServiceInstance(platformClient)
-
-      jobRepoFindStub
-        .withArgs(
-          {},
-          {
-            filters: ['isNonTerminal'],
-            orderBy: { createdAt: 'DESC' },
-            populate: ['app', 'user'],
-          },
-        )
-        .returns([staleJob])
-
-      await em.flush()
-
-      await jobService.checkStaleJobs()
-
-      expect(queueAdd.calledTwice).to.be.true()
-      expect(queueAdd.firstCall.firstArg).to.equal('send_email')
-      expect(queueAdd.firstCall.args[1].payload.emailType).to.equal(EMAIL_TYPES.staleJobsReport)
-      expect(queueAdd.firstCall.args[1].payload.body).not.to.contain('No stale jobs found')
-      expect(queueAdd.firstCall.args[1].payload.body).to.contain(staleJob.dxid)
-      expect(queueAdd.firstCall.args[1].payload.to).to.equal(adminUser.email)
-      expect(queueAdd.firstCall.args[1].payload.subject).to.equal('Stale jobs report')
-
-      expect(queueAdd.secondCall.firstArg).to.equal('send_email')
-      expect(queueAdd.secondCall.args[1].payload.emailType).to.equal(EMAIL_TYPES.staleJobsReport)
-      expect(queueAdd.secondCall.args[1].payload.body).not.to.contain('No stale jobs found')
-      expect(queueAdd.secondCall.args[1].payload.body).to.contain(staleJob.dxid)
-      expect(queueAdd.secondCall.args[1].payload.to).to.equal('precisionfda-no-reply@dnanexus.com')
-      expect(queueAdd.secondCall.args[1].payload.subject).to.equal('Stale jobs report')
-    })
-
-    it('Stale job not found', async () => {
-      const app = create.appHelper.createRegular(em, { user }, { title: 'app1' })
-      await em.flush()
-      const normalJob = await create.jobHelper.create(em, { user, app })
-      await em.flush()
-
-      queueAdd.reset()
-      const adminUser = await create.userHelper.createAdmin(em)
-      userRepoFindAdminUserStub.returns(adminUser)
-      const platformClient = {
-        async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
-          expect(params.project).contains('project-')
-          return {
-            results: [
-              {
-                id: 'job-1',
-                name: 'job-1-name',
-                describe: {
-                  state: 'done',
-                  created: 1,
-                  modified: 1,
-                },
-              } as unknown as JobDescribeResponse,
-            ],
-          } as FindJobsResponse
-        },
-      } as PlatformClient
-
-      jobService = getJobServiceInstance(platformClient)
-
-      jobRepoFindStub
-        .withArgs(
-          {},
-          {
-            filters: ['isNonTerminal'],
-            orderBy: { createdAt: 'DESC' },
-            populate: ['app', 'user'],
-          },
-        )
-        .returns([normalJob])
-
-      await em.flush()
-
-      await jobService.checkStaleJobs()
-
-      expect(queueAdd.calledTwice).to.be.true()
-      expect(queueAdd.firstCall.firstArg).to.equal('send_email')
-      expect(queueAdd.firstCall.args[1].payload.emailType).to.equal(EMAIL_TYPES.staleJobsReport)
-      expect(queueAdd.firstCall.args[1].payload.body).to.contain('No stale jobs found')
-      expect(queueAdd.firstCall.args[1].payload.body).to.contain(normalJob.dxid)
-      expect(queueAdd.firstCall.args[1].payload.to).to.equal(adminUser.email)
-      expect(queueAdd.firstCall.args[1].payload.subject).to.equal('Stale jobs report')
-
-      expect(queueAdd.secondCall.firstArg).to.equal('send_email')
-      expect(queueAdd.secondCall.args[1].payload.emailType).to.equal(EMAIL_TYPES.staleJobsReport)
-      expect(queueAdd.secondCall.args[1].payload.body).to.contain('No stale jobs found')
-      expect(queueAdd.secondCall.args[1].payload.body).to.contain(normalJob.dxid)
-      expect(queueAdd.secondCall.args[1].payload.to).to.equal('precisionfda-no-reply@dnanexus.com')
-      expect(queueAdd.secondCall.args[1].payload.subject).to.equal('Stale jobs report')
-    })
-  })
-
   const getJobServiceInstance = (platformClient: PlatformClient): JobService => {
     return new JobService(
       em,
@@ -597,10 +460,8 @@ describe('Job service tests', () => {
       platformClient,
       notificationService,
       nodeService,
-      emailQueueJobProducer,
       jobSynchronizationService,
       emailService,
-      userRepo,
       jobRepo,
       spaceRepo,
       spaceMembershipRepo,
