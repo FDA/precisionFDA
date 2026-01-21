@@ -69,6 +69,7 @@ const fakes = {
     processFake: sinon.fake(),
     isReadyFake: sinon.stub(),
     addFake: sinon.stub(),
+    addBulkFake: sinon.stub(),
     getJobFake: sinon.stub(),
   },
   notificationService: mockServiceFactory.notificationService,
@@ -222,6 +223,7 @@ const mocksSetup = () => {
   sandbox.replace(Bull.prototype, 'process', fakes.bull.processFake)
   sandbox.replace(Bull.prototype, 'isReady', fakes.bull.isReadyFake)
   sandbox.replace(Bull.prototype, 'add', fakes.bull.addFake)
+  sandbox.replace(Bull.prototype, 'addBulk', fakes.bull.addBulkFake)
   sandbox.replace(Bull.prototype, 'getJob', fakes.bull.getJobFake)
 
   // stub queue helpers

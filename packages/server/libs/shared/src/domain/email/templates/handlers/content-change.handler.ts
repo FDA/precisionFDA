@@ -81,8 +81,8 @@ export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newCont
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: ContentChangedContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.newContentAdded] {
     const action = SPACE_EVENT_ACTIVITY_TYPE[context.spaceEvent.activityType].split('_')[1]
     if (isNil(action)) {
@@ -105,7 +105,7 @@ export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newCont
       },
     }
     return {
-      receiver,
+      firstName: receiver?.firstName,
       content,
     }
   }

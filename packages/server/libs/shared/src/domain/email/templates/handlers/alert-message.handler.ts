@@ -28,12 +28,11 @@ export class AlertMessageHandler extends EmailHandler<EMAIL_TYPES.alertMessage> 
     })
   }
 
-  protected getSubject(_receiver: User, input: AlertMessageInputDTO): string {
+  protected getSubject(input: AlertMessageInputDTO): string {
     return input.subject
   }
 
   protected getTemplateInput(
-    _receiver: User,
     input: AlertMessageInputDTO,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.alertMessage] {
     return input

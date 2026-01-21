@@ -31,4 +31,5 @@ export enum EMAIL_TYPES {
   userProvisioned = 30,
   newDiscussion = 31,
   newDiscussionReply = 32,
+  userRunningJobsReport = 33,
 }

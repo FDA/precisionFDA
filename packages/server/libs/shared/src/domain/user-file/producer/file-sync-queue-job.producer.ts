@@ -58,7 +58,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createLockNodesJobTask(ids: number[], user: UserCtx) {
+  async createLockNodesJobTask(ids: number[], user: UserCtx): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.LOCK_NODES as const,
       payload: ids,
@@ -70,7 +70,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createUnlockNodesJobTask(ids: number[], user: UserCtx) {
+  async createUnlockNodesJobTask(ids: number[], user: UserCtx): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.UNLOCK_NODES as const,
       payload: ids,
@@ -82,7 +82,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createUserDataConsistencyReportJobTask() {
+  async createUserDataConsistencyReportJobTask(): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.USER_DATA_CONSISTENCY_REPORT as const,
       user: this.user,
@@ -93,7 +93,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  private async createSyncTask<T extends Task>(task: T, dxid: string) {
+  private async createSyncTask<T extends Task>(task: T, dxid: string): Promise<Job> {
     const jobId = `${task.type}.${dxid}`
     const existingJob = await this.queue.getJob(jobId)
     if (existingJob !== null) {

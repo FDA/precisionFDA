@@ -41,6 +41,7 @@ import { JobTagging } from '@shared/domain/tagging/job-tagging.entity'
   cond: {
     $or: [
       { state: JOB_STATE.IDLE },
+      { state: JOB_STATE.RUNNABLE },
       { state: JOB_STATE.RUNNING },
       { state: JOB_STATE.TERMINATING },
     ],

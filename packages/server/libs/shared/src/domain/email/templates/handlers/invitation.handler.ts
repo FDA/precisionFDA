@@ -1,17 +1,17 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { invitationTemplate } from '@shared/domain/email/templates/mjml/invitation.template'
-import { User } from '@shared/domain/user/user.entity'
-import { config } from '@shared/config'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { Injectable } from '@nestjs/common'
-import { EmailClient } from '@shared/services/email-client'
-import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
+import { config } from '@shared/config'
 import {
   EmailTypeToContextMap,
   InvitationContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EmailAddress } from '@shared/domain/email/model/email-address'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { invitationTemplate } from '@shared/domain/email/templates/mjml/invitation.template'
+import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
+import { EmailClient } from '@shared/services/email-client'
 
 @Injectable()
 export class InvitationHandler extends EmailHandler<EMAIL_TYPES.invitation> {
@@ -38,20 +38,15 @@ export class InvitationHandler extends EmailHandler<EMAIL_TYPES.invitation> {
     }
   }
 
-  protected async determineReceivers(): Promise<User[]> {
-    const recipients = [{ email: config.pfdaEmail } as User]
-    if (config.env === 'production') {
-      recipients.push({ email: config.pfdaEmail } as User)
-    }
-    return recipients
+  protected async determineReceivers(): Promise<EmailAddress[]> {
+    return [config.pfdaEmail]
   }
 
-  protected getSubject(_receiver: User, context: InvitationContext): string {
+  protected getSubject(context: InvitationContext): string {
     return `New access request from ${context.invitation.firstName} ${context.invitation.lastName}`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: InvitationContext,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.invitation] {
     return {
@@ -70,7 +65,6 @@ export class InvitationHandler extends EmailHandler<EMAIL_TYPES.invitation> {
       participateIntent: context.invitation.extras.participate_intent,
       organizeIntent: context.invitation.extras.organize_intent,
       ip: context.invitation.ip,
-      receiver,
     }
   }
 }

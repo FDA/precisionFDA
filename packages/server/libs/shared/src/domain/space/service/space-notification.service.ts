@@ -18,9 +18,9 @@ export class SpaceNotificationService {
     private readonly userContext: UserContext,
   ) {}
 
-  async notifySpaceCreated(space: Space, user: User) {
+  async notifySpaceCreated(space: Space, user: User): Promise<void> {
     const emailInput: SpaceCreatedTemplateInput = {
-      receiver: user,
+      firstName: user?.firstName,
       space: {
         name: space.name,
         id: space.id,

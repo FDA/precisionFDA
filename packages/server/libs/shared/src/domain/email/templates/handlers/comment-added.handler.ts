@@ -125,16 +125,16 @@ export class CommentAddedEmailHandler extends EmailHandler<EMAIL_TYPES.commentAd
       .filter((user) => user.id !== spaceEventCreatorId)
   }
 
-  protected getSubject(_receiver: User, context: CommentAddedContext): string {
+  protected getSubject(context: CommentAddedContext): string {
     return `${context.comment.user.unwrap().fullName} added a comment`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: CommentAddedContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.commentAdded] {
     return {
-      receiver,
+      firstName: receiver?.firstName,
       content: {
         initiator: { fullName: context.comment.user.unwrap().fullName },
         comment: {

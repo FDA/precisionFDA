@@ -1,12 +1,12 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { User } from '@shared/domain/user/user.entity'
-import { userProvisionedTemplate } from '@shared/domain/email/templates/mjml/user-provisioned.template'
-import { UserProvisionedDTO } from '@shared/domain/email/dto/user-provisioned.dto'
 import { Injectable } from '@nestjs/common'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EmailClient } from '@shared/services/email-client'
-import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { UserProvisionedDTO } from '@shared/domain/email/dto/user-provisioned.dto'
+import { EmailAddress } from '@shared/domain/email/model/email-address'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { userProvisionedTemplate } from '@shared/domain/email/templates/mjml/user-provisioned.template'
+import { EmailClient } from '@shared/services/email-client'
 
 /**
  * Handles the email notification for user provisioning (currently
@@ -23,22 +23,21 @@ export class UserProvisionedHandler extends EmailHandler<EMAIL_TYPES.userProvisi
     super(emailClient)
   }
 
-  protected async determineReceivers(input: UserProvisionedDTO): Promise<User[]> {
-    return [{ email: input.email } as User]
+  protected async determineReceivers(input: UserProvisionedDTO): Promise<EmailAddress[]> {
+    return [input.email]
   }
 
-  protected getSubject(_receiver: User, input: UserProvisionedDTO): string {
+  protected getSubject(input: UserProvisionedDTO): string {
     return `Welcome to precisionFDA, ${input.firstName}!`
   }
 
   protected getTemplateInput(
-    _receiver: User,
     input: UserProvisionedDTO,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.userProvisioned] {
     return {
       firstName: input.firstName,
       username: input.username,
-      email: _receiver.email,
+      email: input.email,
     }
   }
 

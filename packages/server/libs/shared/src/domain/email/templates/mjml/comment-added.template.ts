@@ -1,10 +1,10 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getViewSpaceButton, getBottomSpacer } from './common'
+import { footer, getBottomSpacer, getViewSpaceButton, header } from './common'
 
-export type CommentAddedTemplateInput = EmailTemplateInput & {
+export type CommentAddedTemplateInput = {
+  firstName: string
   content: {
     initiator: { fullName: string }
-    comment: { body: string; id: number, contentObjectId: number, contentObjectType: string }
+    comment: { body: string; id: number; contentObjectId: number; contentObjectType: string }
     space: { id: number }
     objectCommentsLink: string
   }
@@ -22,7 +22,7 @@ export const commentAddedTemplate = (data: CommentAddedTemplateInput): string =>
     <mj-section css-class="body-section">
       <mj-column>
         <mj-text>
-          Hello ${data.receiver.firstName}!
+          Hello ${data.firstName}!
         </mj-text>
         <mj-text>
           User ${data.content.initiator.fullName} added a new <a href=${data.content.objectCommentsLink}>comment</a>:

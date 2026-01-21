@@ -1,22 +1,11 @@
 import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { config } from '@shared/config'
-import { EmailSendInput } from '@shared/domain/email/email.config'
-import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 import { EmailService } from '@shared/domain/email/email.service'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import {
-  reportStaleJobsTemplate,
-  ReportStaleJobsTemplateInput,
-} from '@shared/domain/email/templates/mjml/report-stale-jobs.template'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { Job } from '@shared/domain/job/job.entity'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
@@ -28,9 +17,7 @@ import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
 import { Job as BullJob } from 'bull'
-import { difference } from 'ramda'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 import * as errors from '../../errors'
 import { PlatformClient } from '../../platform-client'
@@ -40,12 +27,11 @@ import {
   FindJobsResponse,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
-import { Maybe, UserCtx } from '../../types'
+import { Maybe } from '../../types'
 import { DxId } from '../entity/domain/dxid'
 import { EventHelper } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
-import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
 
 @Injectable()
@@ -59,10 +45,8 @@ export class JobService implements SearchableByUid<'job'> {
     private readonly platformClient: PlatformClient,
     private readonly notificationService: NotificationService,
     private readonly nodeService: NodeService,
-    private readonly emailsJobProducer: EmailQueueJobProducer,
     private readonly jobSyncService: JobSynchronizationService,
     private readonly emailService: EmailService,
-    private readonly userRepo: UserRepository,
     private readonly jobRepo: JobRepository,
     private readonly spaceRepo: SpaceRepository,
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
@@ -97,109 +81,12 @@ export class JobService implements SearchableByUid<'job'> {
     return job
   }
 
-  /**
-   * Asynchronously checks for stale jobs and performs necessary actions.
-   *
-   * The method performs the following steps:
-   * 1. Retrieves all running jobs that are close to their "deadline" (30 days in production).
-   * 2. Checks if there are any missing SyncJobOperations for the retrieved jobs and recreates them if necessary.
-   * 3. Logs and returns an empty array if no running jobs are found.
-   * 4. Filters out the stale jobs based on a maximum duration threshold and logs the result.
-   * 5. Calculates the non-stale jobs by finding the difference between running jobs and stale jobs.
-   * 6. Logs information about both stale and non-stale jobs for administrative purposes.
-   * 7. Generates and sends an email report to the admin user and a predefined email address, containing details of stale and non-stale jobs.
-   *
-   * @returns {Promise<Job[]>} A promise that resolves to an array of stale jobs.
-   */
-  async checkStaleJobs(): Promise<Job[]> {
-    // TODO cut into smaller methods
-    // find running jobs that are close to "deadline" -> 30days in production
-    const runningJobs = await this.jobRepo.find(
-      {},
-      {
-        filters: ['isNonTerminal'],
-        orderBy: { createdAt: 'DESC' },
-        populate: ['app', 'user'],
-      },
-    )
+  async findAllRunningJobs(): Promise<Job[]> {
+    return this.jobRepo.findAllRunningJobs()
+  }
 
-    runningJobs.map(async (job) => {
-      const runningJob = await getMainQueue().getJob(
-        JobSynchronizationService.getBullJobId(job.dxid),
-      )
-      if (!runningJob) {
-        await createSyncJobStatusTask(job, this.user)
-        this.logger.log({}, `Recreated missing SyncJobOperation for ${job.dxid}`)
-      }
-    })
-    if (runningJobs.length === 0) {
-      this.logger.log({}, 'No running jobs found')
-      return []
-    }
-
-    const isOverMaxDuration = buildIsOverMaxDuration('notify')
-    const staleJobs: Job[] = runningJobs.filter((job) => isOverMaxDuration(job))
-    if (staleJobs.length === 0) {
-      this.logger.log({}, 'No stale jobs found')
-    }
-
-    // TODO(samuel) use Set instead - reduce bundle size
-    // TODO(samuel) refactor into repository method instead
-    const nonStaleJobs = difference(runningJobs, staleJobs)
-
-    const createJobInfo = (
-      job: Job,
-    ): {
-      duration: string
-      uid: `job-${string}-${number}`
-      name: string
-      dxuser: string
-      state: JOB_STATE
-    } => ({
-      uid: job.uid,
-      name: job.name,
-      state: job.state,
-      dxuser: job.user.getEntity().dxuser,
-      duration: job.elapsedTimeSinceCreationString(),
-    })
-    const nonStaleJobsInfo = nonStaleJobs.map(createJobInfo)
-    const staleJobsInfo = staleJobs.map(createJobInfo)
-
-    this.logger.log(
-      { nonStaleJobsInfo: nonStaleJobsInfo },
-      'Non stale jobs - for admin to note the times',
-    )
-    this.logger.log({ staleJobs: staleJobsInfo }, 'Stale jobs - should be terminated')
-
-    // generate email for admin with list of jobs
-    const adminUser = await this.userRepo.findAdminUser()
-    const body = buildEmailTemplate<ReportStaleJobsTemplateInput>(reportStaleJobsTemplate, {
-      receiver: adminUser,
-      content: {
-        staleJobsInfo: staleJobsInfo,
-        nonStaleJobsInfo: nonStaleJobsInfo,
-        maxDuration: config.workerJobs.syncJob.staleJobsEmailAfter.toString() ?? '-1',
-      },
-    })
-    const email: EmailSendInput = {
-      emailType: EMAIL_TYPES.staleJobsReport,
-      to: adminUser.email,
-      body,
-      subject: 'Stale jobs report',
-    }
-    const emailToPfda: EmailSendInput = {
-      emailType: EMAIL_TYPES.staleJobsReport,
-      to: 'precisionfda-no-reply@dnanexus.com',
-      body,
-      subject: 'Stale jobs report',
-    }
-
-    await this.emailsJobProducer.createSendEmailTask(email, { dxuser: adminUser.dxuser } as UserCtx)
-    await this.emailsJobProducer.createSendEmailTask(emailToPfda, {
-      dxuser: adminUser.dxuser,
-    } as UserCtx)
-
-    return staleJobs
+  async findRunningJobsByUser(): Promise<Job[]> {
+    return this.jobRepo.findRunningJobsByUser({ userId: this.user.id })
   }
 
   /**

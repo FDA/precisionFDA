@@ -1,7 +1,6 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getBottomSpacer, getMiddleSpacer } from './common'
+import { footer, getBottomSpacer, getMiddleSpacer, header } from './common'
 
-export type LicenseApprovalTemplateInput = EmailTemplateInput & {
+export type LicenseApprovalTemplateInput = {
   userFullName: string
   userUsername: string
   userOrgName: string

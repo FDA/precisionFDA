@@ -1,3 +1,4 @@
+import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { parseEnumValueFromString } from '@shared/validation/parsers'
 import { default as dotenv } from 'dotenv'
 import path from 'path'
@@ -116,7 +117,7 @@ const defaultConfig = {
       fromAddress: process.env.SMTP_FROM_ADDRESS ?? 'precisionfda-no-reply@dnanexus.com',
       returnAddress: process.env.SMTP_RETURN_ADDRESS ?? 'precisionfda-no-reply@dnax-dev.net',
     },
-    report: 'pfda-reports-dev@dnanexus.com',
+    report: 'pfda-reports-dev@dnanexus.com' as EmailAddress,
   },
   redis: {
     url: process.env.NODE_REDIS_URL ?? 'redis://localhost:6379',
@@ -185,6 +186,9 @@ const defaultConfig = {
     spaceReport: {
       partBatchSize: parseIntFromProcess(process.env.NODE_SPACE_REPORT_PART_BATCH_SIZE) ?? 20,
     },
+    jobStaleCheck: {
+      repeatPattern: process.env.NODE_JOB_STALE_CHECK_REPEAT ?? '0 2 * * 0',
+    },
   },
   // TODO(samuel) apply "satisfies" operator
   // https://devblogs.microsoft.com/typescript/announcing-typescript-4-9-beta/#the-satisfies-operator
@@ -242,8 +246,8 @@ const defaultConfig = {
   secretKeyBase: process.env.SECRET_KEY_BASE,
   maxInactivityMinutes: parseIntFromProcess(process.env.MAX_TIME_INACTIVITY) ?? 30,
   minusExpirationMinutes: 4,
-  pfdaEmail: 'precisionfda@fda.hhs.gov',
-  challengeProposalRecipients: [] as String[],
+  pfdaEmail: 'pfda-reports-dev@dnanexus.com' as EmailAddress,
+  challengeProposalRecipients: [] as EmailAddress[],
   setupSwagger: true,
   defaultFDASpaceGroupId: parseIntFromProcess(process.env.DEFAULT_FDA_SPACE_GROUP_ID) ?? 1,
 }

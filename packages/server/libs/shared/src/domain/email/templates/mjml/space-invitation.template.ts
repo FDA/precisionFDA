@@ -1,7 +1,6 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import { header, footer, getBottomSpacer, getMiddleSpacer } from './common'
 
-export type SpaceInvitationTemplateInput = EmailTemplateInput & {
+export type SpaceInvitationTemplateInput = {
   spaceTitle: string
   adminFullName: string
   membershipRoleAlias: string

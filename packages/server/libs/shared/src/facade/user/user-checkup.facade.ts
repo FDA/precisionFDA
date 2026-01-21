@@ -2,19 +2,18 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { CheckUserDbClustersOperation } from '@shared/domain/db-cluster/ops/check-user-dbs'
-import { CheckUserJobsOperation } from '@shared/domain/job/ops/check-user-jobs'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { findUnclosedFilesOrAssets } from '@shared/domain/user-file/user-file.helper'
 import { User } from '@shared/domain/user/user.entity'
+import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { findRepeatable, getMainQueue, removeRepeatableJob } from '@shared/queue'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
+import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 import { isJobOrphaned } from '@shared/queue/queue.utils'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
 import { Job } from 'bull'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 
 // Check jobs for a given user, to be run when user logs in to clean up
 // old states that are stuck because sync jobs are missing.
@@ -28,11 +27,11 @@ export class UserCheckupFacade {
     private readonly user: UserContext,
     private readonly fileSyncQueueJobProducer: FileSyncQueueJobProducer,
     private readonly mainQueueJobProducer: MainQueueJobProducer,
+    private readonly maintenanceQueueJobProducer: MaintenanceQueueJobProducer,
   ) {}
 
   async runCheckup(job: Job): Promise<void> {
-    const userRepo = this.em.getRepository(User) as UserRepository
-    const user = await userRepo.findDxuser(this.user.dxuser)
+    const user = await this.user.loadEntity()
     if (!user) {
       this.logger.error(
         {
@@ -80,7 +79,7 @@ export class UserCheckupFacade {
     }
 
     const ctx = { em: this.em, user: this.user, log: this.logger, job } as WorkerOpsCtx<UserOpsCtx>
-    await new CheckUserJobsOperation(ctx).execute()
+    await this.maintenanceQueueJobProducer.createCheckUserJobsTask()
     await new CheckUserDbClustersOperation(ctx).execute()
 
     this.logger.log(

@@ -65,7 +65,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
    * Only currently active users are returned.
    * @param discussion
    */
-  async getFollowers(discussion: Discussion): Promise<User[]> {
+  private async getFollowers(discussion: Discussion): Promise<User[]> {
     const userIDs = discussion.follows
       .getItems()
       .filter((follow) => follow.followerType === 'User')
@@ -80,7 +80,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
   protected async determineReceivers(
     context: EmailTypeToContextMap[EMAIL_TYPES.newDiscussionReply],
   ): Promise<User[]> {
-    let users = await this.getFollowers(context.discussion)
+    const users: User[] = await this.getFollowers(context.discussion)
 
     if (EntityScopeUtils.isSpaceScope(context.discussion.note.getEntity().scope)) {
       this.logger.log('Discussion is in space....')
@@ -105,13 +105,13 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
         users.push(...specificUsers)
       }
     }
+
     return Array.from(new Set(users.map((user) => user.id))).map(
       (id) => users.find((user) => user.id === id)!,
     )
   }
 
   protected getTemplateInput(
-    _receiver: User,
     contextObject: EmailTypeToContextMap[EMAIL_TYPES.newDiscussionReply],
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.newDiscussionReply] {
     return {
@@ -122,7 +122,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
     }
   }
 
-  protected getSubject(_receiver: User, context: DiscussionContext): string {
+  protected getSubject(context: DiscussionContext): string {
     if (EntityScopeUtils.isSpaceScope(context.discussion.note.getEntity().scope)) {
       return `[precisionFDA] New Discussion reply notification: ${context.space.name}`
     } else {

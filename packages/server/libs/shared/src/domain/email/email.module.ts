@@ -46,6 +46,8 @@ import { NewDiscussionHandler } from '@shared/domain/email/templates/handlers/ne
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityModule } from '@shared/domain/entity/entity.module'
 import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handlers/new-discussion-reply.handler'
+import { StaleJobsReportHandler } from './templates/handlers/stale-jobs-report.handler'
+import { UserRunningJobsReportHandler } from './templates/handlers/user-running-jobs-report.handler'
 
 @Module({
   imports: [
@@ -107,6 +109,8 @@ import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handle
     NewDiscussionHandler,
     NewDiscussionReplyHandler,
     TypeToHandlerMapProvider,
+    StaleJobsReportHandler,
+    UserRunningJobsReportHandler,
   ],
   exports: [
     BullQueueModule,

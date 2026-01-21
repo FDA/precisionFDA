@@ -10,6 +10,7 @@ import { SpaceMembershipModule } from '@shared/domain/space-membership/space-mem
 import { SpaceReportModule } from '@shared/domain/space-report/space-report.module'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { UserModule } from '@shared/domain/user/user.module'
+import { JobFacadeModule } from '@shared/facade/job/job-facade.module'
 import { SpaceMemberNotificationFacadeModule } from '@shared/facade/space-member-notification/space-member-notification-facade.module'
 import { SyncFilesStateFacadeModule } from '@shared/facade/sync-file-state/sync-files-state-facade.module'
 import { UserFacadeModule } from '@shared/facade/user/user-facade.module'
@@ -40,6 +41,7 @@ import { MaintenanceQueueProcessor } from './processor/maintenance-queue.process
     DbClusterCheckNonTerminatedFacadeModule,
     DbClusterSynchronizeFacadeModule,
     SpaceMemberNotificationFacadeModule,
+    JobFacadeModule,
   ],
   providers: [MainQueueProcessor, MaintenanceQueueProcessor],
 })

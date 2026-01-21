@@ -1,26 +1,25 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { LoadedReference } from '@mikro-orm/core'
-import { STATIC_SCOPE } from '@shared/enums'
-import { pfdaNoReplyUser } from '../../email.helper'
-import { challengePreregTemplate } from '../mjml/challenge-preregister.template'
-import { InternalError } from '@shared/errors'
-import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper'
-import { Injectable } from '@nestjs/common'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { ChallengeCreatedDTO } from '@shared/domain/email/dto/challenge-created.dto'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EmailClient } from '@shared/services/email-client'
+import { Injectable } from '@nestjs/common'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { ChallengeCreatedDTO } from '@shared/domain/email/dto/challenge-created.dto'
 import {
-  ChallengeOpenedContext,
   ChallengePreregContext,
   EmailTypeToContextMap,
 } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { STATIC_SCOPE } from '@shared/enums'
+import { InternalError } from '@shared/errors'
+import { EmailClient } from '@shared/services/email-client'
+import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper'
+import { pfdaNoReplyUser } from '../../email.helper'
+import { challengePreregTemplate } from '../mjml/challenge-preregister.template'
 
 @Injectable()
 export class ChallengePreregEmailHandler extends EmailHandler<EMAIL_TYPES.challengePrereg> {
@@ -54,7 +53,7 @@ export class ChallengePreregEmailHandler extends EmailHandler<EMAIL_TYPES.challe
     let users: User[]
     if (context.input.scope === STATIC_SCOPE.PUBLIC) {
       // all active users
-      users = await this.userRepo.findActive({ populate: ['notificationPreference'] as never[] })
+      users = await this.userRepo.findActive({ populate: ['notificationPreference'] })
     } else if (scopeContainsId(context.input.scope)) {
       // find space, memberships, inform only those users
       const spaceId = getIdFromScopeName(context.input.scope)
@@ -72,23 +71,20 @@ export class ChallengePreregEmailHandler extends EmailHandler<EMAIL_TYPES.challe
     return users.concat(pfdaNoReplyUser)
   }
 
-  protected async getNotificationSettingKeys(
-    _context: ChallengeOpenedContext,
-    _user: User,
-  ): Promise<string[]> {
+  protected async getNotificationSettingKeys(): Promise<string[]> {
     return ['private_challenge_preregister']
   }
 
-  protected getSubject(_receiver: User, context: ChallengePreregContext): string {
+  protected getSubject(context: ChallengePreregContext): string {
     return `Challenge ${context.input.name} preregistration opened`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: ChallengePreregContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.challengePrereg] {
     return {
-      receiver,
+      firstName: receiver?.firstName,
       content: {
         challenge: { name: context.input.name, id: context.input.challengeId },
       },

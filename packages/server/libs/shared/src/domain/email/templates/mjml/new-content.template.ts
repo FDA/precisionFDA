@@ -1,7 +1,7 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, getBottomSpacer, getViewSpaceButton } from './common'
+import { footer, getBottomSpacer, getViewSpaceButton, header } from './common'
 
-export type NewContentTemplateInput = EmailTemplateInput & {
+export type NewContentTemplateInput = {
+  firstName: string
   content: {
     entityType: string
     objectType: string
@@ -32,7 +32,7 @@ export const newContentTemplate = (data: NewContentTemplateInput): string => `
     <mj-section css-class="body-section">
       <mj-column>
         <mj-text>
-          Hello ${data.receiver.firstName}!
+          Hello ${data.firstName}!
         </mj-text>
         <mj-text>
           ${data.content.objectType} ${data.content.action} by ${data.content.user.fullName}

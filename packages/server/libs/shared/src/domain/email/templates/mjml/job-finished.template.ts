@@ -1,7 +1,7 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, generateJobDetailLink, getMiddleSpacer } from './common'
+import { footer, generateJobDetailLink, getMiddleSpacer, header } from './common'
 
-export type JobFinishedInputTemplate = EmailTemplateInput & {
+export type JobFinishedInputTemplate = {
+  firstName: string
   content: {
     job: {
       id: number
@@ -23,7 +23,7 @@ export const jobFinishedTemplate = (data: JobFinishedInputTemplate): string => `
     <mj-section css-class="body-section">
       <mj-column>
         <mj-text>
-          Hello ${data.receiver.firstName}!
+          Hello ${data.firstName}!
         </mj-text>
         <mj-text>
           An execution on precisionFDA has finished successfully.

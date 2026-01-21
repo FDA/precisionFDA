@@ -62,6 +62,7 @@ class NotificationPreference < ApplicationRecord
     private_job_finished
     private_challenge_opened
     private_challenge_preregister
+    private_job_stale
   ).freeze
 
   # email types currently handled by nodejs app
@@ -104,9 +105,17 @@ class NotificationPreference < ApplicationRecord
     end
 
     define_method("#{key}") do
-      return true if super().nil?
+      stored_value = super()
+      if stored_value.nil?
+        default = self.class.default_preferences[key]
 
-      super()
+        # Preserve legacy behavior (default to true) when no explicit default is defined
+        return true if default.nil?
+
+        return default == 1
+      end
+
+      stored_value
     end
   end
 
@@ -118,38 +127,38 @@ class NotificationPreference < ApplicationRecord
   class << self
     def default_preferences
       {
-        # flags - enabled only for comment_activity
-        # https://jira.internal.dnanexus.com/browse/PFDA-3094
+        # based on DEFAULT_NOTIFICATION_PREFERENCES in NodeJS
         group_contributor_membership_changed: 0,
-        group_contributor_comment_activity: 0,
+        group_contributor_comment_activity: 1,
         group_contributor_content_added_or_deleted: 0,
         shared_contributor_membership_changed: 0,
-        shared_contributor_comment_activity: 0,
+        shared_contributor_comment_activity: 1,
         shared_contributor_content_added_or_deleted: 0,
         group_viewer_membership_changed: 0,
-        group_viewer_comment_activity: 0,
+        group_viewer_comment_activity: 1,
         group_viewer_content_added_or_deleted: 0,
         shared_viewer_membership_changed: 0,
-        shared_viewer_comment_activity: 0,
+        shared_viewer_comment_activity: 1,
         shared_viewer_content_added_or_deleted: 0,
-        group_lead_membership_changed: 0,
-        group_lead_comment_activity: 0,
-        group_lead_content_added_or_deleted: 0,
-        group_lead_member_added_to_space: 0,
-        group_lead_space_locked_unlocked_deleted: 0,
-        shared_lead_membership_changed: 0,
-        shared_lead_comment_activity: 0,
-        shared_lead_content_added_or_deleted: 0,
-        shared_lead_member_added_to_space: 0,
-        shared_lead_space_locked_unlocked_deleted: 0,
-        admin_membership_changed: 0,
-        admin_comment_activity: 0,
-        admin_content_added_or_deleted: 0,
-        admin_member_added_to_space: 0,
+        group_lead_membership_changed: 1,
+        group_lead_comment_activity: 1,
+        group_lead_content_added_or_deleted: 1,
+        group_lead_member_added_to_space: 1,
+        group_lead_space_locked_unlocked_deleted: 1,
+        shared_lead_membership_changed: 1,
+        shared_lead_comment_activity: 1,
+        shared_lead_content_added_or_deleted: 1,
+        shared_lead_member_added_to_space: 1,
+        shared_lead_space_locked_unlocked_deleted: 1,
+        admin_membership_changed: 1,
+        admin_comment_activity: 1,
+        admin_content_added_or_deleted: 1,
+        admin_member_added_to_space: 1,
         admin_space_locked_unlocked_deleted: 1,
         private_job_finished: 0,
         private_challenge_opened: 1,
         private_challenge_preregister: 1,
+        private_job_stale: 0,
       }
     end
 

@@ -1,7 +1,7 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { header, footer, generateJobDetailLink } from './common'
+import { footer, generateJobDetailLink, header } from './common'
 
-export type JobFailedInputTemplate = EmailTemplateInput & {
+export type JobFailedInputTemplate = {
+  firstName: string
   content: {
     job: {
       id: number
@@ -26,7 +26,7 @@ export const jobFailedTemplate = (data: JobFailedInputTemplate): string => `
     <mj-section css-class="body-section">
       <mj-column>
         <mj-text>
-          Hello ${data.receiver.firstName}!
+          Hello ${data.firstName}!
         </mj-text>
         <mj-text>
           An execution on precisionFDA has failed due to the following reason:
@@ -54,7 +54,7 @@ export const jobCostLimitExceededTemplate = (data: JobFailedInputTemplate): stri
     <mj-section css-class="body-section">
       <mj-column>
         <mj-text>
-          Hello ${data.receiver.firstName}!
+          Hello ${data.firstName}!
         </mj-text>
         <mj-text>
           There was an error running execution ${data.content.job.uid}. The execution failed after

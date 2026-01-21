@@ -23,6 +23,8 @@ import { SpaceActivationEmailHandler } from '@shared/domain/email/templates/hand
 import { SpaceChangedEmailHandler } from '@shared/domain/email/templates/handlers/space-change.handler'
 import { NewDiscussionHandler } from '@shared/domain/email/templates/handlers/new-discussion.handler'
 import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handlers/new-discussion-reply.handler'
+import { StaleJobsReportHandler } from './templates/handlers/stale-jobs-report.handler'
+import { UserRunningJobsReportHandler } from './templates/handlers/user-running-jobs-report.handler'
 
 const TYPE_TO_HANDLER_PROVIDER_MAP = 'TYPE_TO_HANDLER_PROVIDER_MAP'
 
@@ -50,6 +52,8 @@ type TypeToHandlerMap = {
   [EMAIL_TYPES.spaceChanged]: SpaceChangedEmailHandler
   [EMAIL_TYPES.newDiscussion]: NewDiscussionHandler
   [EMAIL_TYPES.newDiscussionReply]: NewDiscussionReplyHandler
+  [EMAIL_TYPES.staleJobsReport]: StaleJobsReportHandler
+  [EMAIL_TYPES.userRunningJobsReport]: UserRunningJobsReportHandler
 }
 
 const TypeToHandlerMapProvider: Provider = {
@@ -78,6 +82,8 @@ const TypeToHandlerMapProvider: Provider = {
     SpaceChangedEmailHandler,
     NewDiscussionHandler,
     NewDiscussionReplyHandler,
+    StaleJobsReportHandler,
+    UserRunningJobsReportHandler,
   ],
   useFactory: (
     alertMessageHandler: AlertMessageHandler,
@@ -103,6 +109,8 @@ const TypeToHandlerMapProvider: Provider = {
     spaceChangedEmailHandler: SpaceChangedEmailHandler,
     newDicussionHandler: NewDiscussionHandler,
     newDicussionReplyHandler: NewDiscussionReplyHandler,
+    staleJobsReportHandler: StaleJobsReportHandler,
+    userRunningJobsReportHandler: UserRunningJobsReportHandler,
   ): TypeToHandlerMap => {
     return {
       [EMAIL_TYPES.alertMessage]: alertMessageHandler,
@@ -128,8 +136,10 @@ const TypeToHandlerMapProvider: Provider = {
       [EMAIL_TYPES.spaceChanged]: spaceChangedEmailHandler,
       [EMAIL_TYPES.newDiscussion]: newDicussionHandler,
       [EMAIL_TYPES.newDiscussionReply]: newDicussionReplyHandler,
+      [EMAIL_TYPES.staleJobsReport]: staleJobsReportHandler,
+      [EMAIL_TYPES.userRunningJobsReport]: userRunningJobsReportHandler,
     }
   },
 }
 
-export { TypeToHandlerMapProvider, TYPE_TO_HANDLER_PROVIDER_MAP }
+export { TYPE_TO_HANDLER_PROVIDER_MAP, TypeToHandlerMapProvider }

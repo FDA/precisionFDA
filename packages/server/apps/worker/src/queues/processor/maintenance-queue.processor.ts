@@ -2,15 +2,15 @@ import { Processor } from '@nestjs/bull'
 import { config } from '@shared/config'
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
-import { JobService } from '@shared/domain/job/job.service'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { UserService } from '@shared/domain/user/service/user.service'
+import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
+import { JobSyncTaskCheckFacade } from '@shared/facade/job/job-sync-task-check.facade'
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
 import { SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
 import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
 import { Job } from 'bull'
-import { checkUserJobsHandler } from '../../jobs/check-user-jobs.handler'
 import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
@@ -23,7 +23,8 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     private readonly userService: UserService,
     private readonly spaceMembershipService: SpaceMembershipService,
     private readonly userCheckupFacade: UserCheckupFacade,
-    private readonly jobServiceWithPlatformClient: JobService,
+    private readonly jobStaleCheckFacade: JobStaleCheckFacade,
+    private readonly jobSyncTaskCheckFacade: JobSyncTaskCheckFacade,
     private readonly jobSyncService: JobSynchronizationService,
   ) {
     super()
@@ -36,7 +37,7 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.CHECK_STALE_JOBS)
   async checkStaleJobs(): Promise<void> {
-    await this.jobServiceWithPlatformClient.checkStaleJobs()
+    await this.jobStaleCheckFacade.checkAndNotifyStaleJobs()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS)
@@ -70,8 +71,8 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_USER_JOBS)
-  async checkUserJobs(job: Job): Promise<void> {
-    await checkUserJobsHandler(job)
+  async checkUserJobs(): Promise<void> {
+    await this.jobSyncTaskCheckFacade.recreateJobSyncIfMissing()
   }
 
   @ProcessWithContext(TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT)

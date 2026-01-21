@@ -1,22 +1,22 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { User } from '@shared/domain/user/user.entity'
-import { ErrorCodes, NotFoundError } from '@shared/errors'
-import { spaceChangedTemplate } from '../mjml/space-change.template'
-import { getKeyForUserSpaceRole } from '../../email.helper'
-import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EmailClient } from '@shared/services/email-client'
-import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
-import { Injectable } from '@nestjs/common'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable } from '@nestjs/common'
 import {
   EmailTypeToContextMap,
   SpaceChangedContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { ErrorCodes, NotFoundError } from '@shared/errors'
+import { EmailClient } from '@shared/services/email-client'
+import { getKeyForUserSpaceRole } from '../../email.helper'
+import { spaceChangedTemplate } from '../mjml/space-change.template'
 
 @Injectable()
 export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChanged> {
@@ -77,10 +77,7 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
     }
   }
 
-  protected async getNotificationSettingKeys(
-    context: SpaceChangedContext,
-    _user: User,
-  ): Promise<string[]> {
+  protected async getNotificationSettingKeys(context: SpaceChangedContext): Promise<string[]> {
     const space = context.space
     await space.spaceMemberships.loadItems()
     const spaceMembership = space.spaceMemberships
@@ -108,8 +105,8 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: SpaceChangedContext,
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.spaceChanged] {
     const action = this.getAction(context.input.activityType)
     return {
@@ -124,11 +121,11 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
         receiverMembershipSide: context.receiverMembershipSide.toString(),
         receiversSides: context.receiversSides,
       },
-      receiver,
+      firstName: receiver?.firstName,
     }
   }
 
-  protected getSubject(_receiver: User, context: SpaceChangedContext): string {
+  protected getSubject(context: SpaceChangedContext): string {
     return `${context.user.fullName} ${this.getAction(context.input.activityType)} the space ${context.space.name}`
   }
 }

@@ -1,13 +1,13 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import {
-  header,
   footer,
   getBottomSpacer,
   getMiddleSpacer,
+  header,
   viewChallengePreregPageCtoButton,
 } from './common'
 
-export type ChallengePreregTemplateInput = EmailTemplateInput & {
+export type ChallengePreregTemplateInput = {
+  firstName: string
   content: {
     challenge: { name: string; id: number }
   }
@@ -25,7 +25,7 @@ export const challengePreregTemplate = (data: ChallengePreregTemplateInput): str
     <mj-section css-class="body-section">
       <mj-column>
         <mj-text>
-          Hello ${data.receiver.firstName}!
+          Hello ${data.firstName}!
         </mj-text>
         <mj-text>
           You may now pre-register for a new upcoming challenge on precisionFDA:

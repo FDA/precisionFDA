@@ -1,4 +1,5 @@
 import { Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common'
+import { ApiOperation } from '@nestjs/swagger'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
@@ -10,12 +11,14 @@ export class AccountController {
 
   @HttpCode(204)
   @Post('/checkSpacesPermissions')
-  async checkSpacesPermissions() {
-    return await this.maintenanceQueueJobProducer.createSyncSpacesPermissionsTask()
+  async checkSpacesPermissions(): Promise<void> {
+    await this.maintenanceQueueJobProducer.createSyncSpacesPermissionsTask()
   }
 
+  @ApiOperation({ summary: 'Trigger user checkup tasks' })
+  @HttpCode(204)
   @Get('/checkup')
-  async userCheckup() {
-    return await this.maintenanceQueueJobProducer.createUserCheckupTask()
+  async userCheckup(): Promise<void> {
+    await this.maintenanceQueueJobProducer.createUserCheckupTask()
   }
 }

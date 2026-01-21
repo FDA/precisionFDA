@@ -1,3 +1,4 @@
+import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export class RequestAccessDTO {
@@ -15,7 +16,7 @@ export class RequestAccessDTO {
   lastName: string
 
   @IsEmail()
-  email: string
+  email: EmailAddress
 
   @IsString()
   duns: string

@@ -74,4 +74,5 @@ export const config: ConfigOverride = () => ({
   },
   setupSwagger: false,
   challengeProposalRecipients: [defaultConfig.pfdaEmail],
+  pfdaEmail: 'precisionfda@fda.hhs.gov',
 })

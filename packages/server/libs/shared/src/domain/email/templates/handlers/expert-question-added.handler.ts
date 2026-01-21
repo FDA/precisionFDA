@@ -39,17 +39,16 @@ export class ExpertQuestionAddedHandler extends EmailHandler<EMAIL_TYPES.expertQ
   }
 
   protected async determineReceivers(context: ExpertQuestionAddedContext): Promise<User[]> {
-    const expertUser = await context.expertQuestion.expert.getEntity().user.getEntity()
+    const expertUser = context.expertQuestion.expert.getEntity().user.getEntity()
     return [expertUser]
   }
 
-  protected getSubject(_receiver: User, context: ExpertQuestionAddedContext): string {
+  protected getSubject(context: ExpertQuestionAddedContext): string {
     const name = getUserTitle(context.questionAuthor)
     return `A new question was submitted by ${name}`
   }
 
   protected getTemplateInput(
-    receiver: User,
     context: ExpertQuestionAddedContext,
   ): EmailTypeToTemplateInputMap[EMAIL_TYPES.expertQuestionAdded] {
     const name = getUserTitle(context.questionAuthor)
@@ -60,7 +59,6 @@ export class ExpertQuestionAddedHandler extends EmailHandler<EMAIL_TYPES.expertQ
         expertId: context.expertQuestion.expert.id,
         questionId: context.expertQuestion.id,
       },
-      receiver,
     }
   }
 }

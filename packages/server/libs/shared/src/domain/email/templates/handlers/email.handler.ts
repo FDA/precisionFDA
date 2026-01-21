@@ -5,6 +5,7 @@ import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type
 import { IsEmailInputValidConstraint } from '@shared/domain/email/dto/is-email-input-valid.constraint'
 import { EmailSendInput } from '@shared/domain/email/email.config'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
@@ -40,9 +41,7 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     input: EmailTypeToInputMap[T],
   ): Promise<EmailTypeToContextMap[T]>
 
-  protected abstract determineReceivers(contextObject: EmailTypeToContextMap[T]): Promise<User[]>
-
-  protected abstract getSubject(receiver: User, contextObject: EmailTypeToContextMap[T]): string
+  protected abstract getSubject(contextObject: EmailTypeToContextMap[T], receiver?: User): string
 
   protected abstract getBody(
     input: EmailTypeToTemplateInputMap[T],
@@ -50,15 +49,19 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
   ): string
 
   protected abstract getTemplateInput(
-    receiver: User,
     contextObject: EmailTypeToContextMap[T],
+    receiver?: User,
   ): EmailTypeToTemplateInputMap[T]
 
-  protected getBcc(_receiver: User, _contextObject: EmailTypeToContextMap[T]): string {
+  protected abstract determineReceivers(
+    _contextObject: EmailTypeToContextMap[T],
+  ): Promise<(User | EmailAddress)[]>
+
+  protected getBcc(_contextObject: EmailTypeToContextMap[T], _receiver: User): string {
     return null
   }
 
-  protected getReplyTo(_receiver: User, _contextObject: EmailTypeToContextMap[T]): string {
+  protected getReplyTo(_contextObject: EmailTypeToContextMap[T], _receiver: User): string {
     return null
   }
 
@@ -74,32 +77,69 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     const contextObject = await this.getContextualData(inputDto)
     await this.validateInput(inputDto)
     const receivers = await this.determineReceivers(contextObject)
-    const filteredReceivers = await this.filterReceiversByPreference(receivers, contextObject)
 
-    for (const receiver of filteredReceivers) {
-      const emailSendInput = await this.createEmailSendInput(receiver, contextObject)
-      await this.emailClient.sendEmail(emailSendInput)
+    const { users, emailAddresses } = this.splitReceivers(receivers)
+    const filteredUsers = await this.filterReceiversByPreference(users, contextObject)
+
+    const emailInputs: EmailSendInput[] = []
+
+    for (const receiver of filteredUsers) {
+      const emailSendInput = await this.createEmailSendInput(
+        contextObject,
+        receiver.email,
+        receiver,
+      )
+
+      emailInputs.push(emailSendInput)
+    }
+
+    for (const address of emailAddresses) {
+      const emailSendInput = await this.createEmailSendInput(contextObject, address)
+      emailInputs.push(emailSendInput)
+    }
+
+    for (const input of emailInputs) {
+      await this.emailClient.sendEmail(input)
     }
   }
 
-  protected buildBody(receiver: User, contextObject: EmailTypeToContextMap[T]): string {
-    const templateInput = this.getTemplateInput(receiver, contextObject)
+  protected buildBody(contextObject: EmailTypeToContextMap[T], receiver?: User): string {
+    const templateInput = this.getTemplateInput(contextObject, receiver)
     const template = this.getBody(templateInput, contextObject)
     const processed = mjml2html(template)
     return processed.html
   }
 
+  private splitReceivers(receivers: (User | EmailAddress)[]): {
+    users: User[]
+    emailAddresses: EmailAddress[]
+  } {
+    const users: User[] = []
+    const emailAddresses: EmailAddress[] = []
+
+    receivers.forEach((r) => {
+      if (typeof r === 'string') {
+        emailAddresses.push(r)
+      } else {
+        users.push(r)
+      }
+    })
+
+    return { users, emailAddresses }
+  }
+
   private async createEmailSendInput(
-    receiver: User,
     contextObject: EmailTypeToContextMap[T],
+    email: string,
+    receiver?: User,
   ): Promise<EmailSendInput> {
     return {
       emailType: this.emailType,
-      to: receiver.email,
-      body: this.buildBody(receiver, contextObject),
-      subject: this.getSubject(receiver, contextObject),
-      bcc: this.getBcc(receiver, contextObject),
-      replyTo: this.getReplyTo(receiver, contextObject),
+      to: email,
+      body: this.buildBody(contextObject, receiver),
+      subject: this.getSubject(contextObject, receiver),
+      bcc: this.getBcc(contextObject, receiver),
+      replyTo: this.getReplyTo(contextObject, receiver),
     }
   }
 
