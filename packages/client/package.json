@@ -68,7 +68,7 @@
     "highlight.js": "^11.11.1",
     "immer": "^10.1.3",
     "lexical": "0.31.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "lucide-react": "^0.553.0",
     "monaco-editor": "^0.52.2",
     "query-string": "^9.2.2",
