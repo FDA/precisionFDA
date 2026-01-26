@@ -118,6 +118,9 @@ Rails.application.configure do
   Rails.application.config.middleware.use(
     ExceptionNotification::Rack,
     ignore_if: lambda do |env, _exception|
+      # Global switch via environment variable
+      return true if ENV["DISABLE_ERROR_EMAILS"] == "true"
+
       ip = env["HTTP_X_FORWARDED_FOR"]
 
       begin
