@@ -13,6 +13,7 @@ volumes:
 
 services:
   web:
+    platform: linux/arm64
     depends_on:
       - db
       - redis
@@ -28,10 +29,14 @@ services:
       - SKIP_RUBY_DEPS_SETUP=${SKIP_RUBY_DEPS_SETUP}
       - SKIP_DB_SETUP=${SKIP_DB_SETUP}
     volumes:
+      - type: bind
+        source: ../packages/rails
+        target: /precision-fda
       - type: volume
         source: bundler-deps-cache-ruby
         target: /usr/local/bundle
-      - db-pfda-mysql-volume:/var/lib/mysql
+      - ../cert.pem:/cert.pem
+      - ../key.pem:/key.pem
   frontend:
     extends:
       file: ./base.services.yml
