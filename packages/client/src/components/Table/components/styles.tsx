@@ -75,6 +75,14 @@ export const TableStyles = styled.div`
     }
   }
 
+  tbody tr.row-click-select {
+    cursor: pointer;
+  }
+
+  tbody tr.row-click-select:hover td {
+    background-color: var(--background-shaded);
+  }
+
 
   .col-select-btn {
     background: none;

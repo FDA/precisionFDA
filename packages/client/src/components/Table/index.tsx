@@ -28,6 +28,8 @@ import { useDebounce } from './useDebounce'
 
 function Table<T extends { id: number | string }>({
   enableColumnFilters = true,
+  enableColumnSelect = true,
+  enableRowClickSelection = false,
   emptyText,
   isLoading,
   data,
@@ -52,6 +54,8 @@ function Table<T extends { id: number | string }>({
   manualSorting = true,
 }: {
   enableColumnFilters?: boolean
+  enableColumnSelect?: boolean
+  enableRowClickSelection?: boolean
   emptyText?: string
   isLoading: boolean
   data: T[]
@@ -183,7 +187,17 @@ function Table<T extends { id: number | string }>({
 
   return (
     <TableStyles ref={containerRef}>
-      <CustomTable isLoading={isLoading} emptyText={emptyText} table={table} enableDnd={enableDnd} enableHtmlDnd={enableHtmlDnd} onDragStart={onDragStart} spacerWidth={spacerWidth} />
+      <CustomTable
+        isLoading={isLoading}
+        emptyText={emptyText}
+        table={table}
+        enableDnd={enableDnd}
+        enableHtmlDnd={enableHtmlDnd}
+        onDragStart={onDragStart}
+        spacerWidth={spacerWidth}
+        enableColumnSelect={enableColumnSelect}
+        enableRowClickSelection={enableRowClickSelection}
+      />
     </TableStyles>
   )
 }

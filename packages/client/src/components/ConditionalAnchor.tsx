@@ -9,14 +9,16 @@ type Props = {
   children?: React.ReactNode
   href: string
   dataMethod?: 'GET' | 'POST'
+  style?: React.CSSProperties
+  className?: string
 }
 
-export const ConditionalAnchor = ({ isAllowed, onViolation, children, href, dataMethod }: Props) => (isAllowed ? (
-    <a href={href} data-method={dataMethod}>
+export const ConditionalAnchor = ({ isAllowed, onViolation, children, href, dataMethod, style, className }: Props) => (isAllowed ? (
+    <a href={href} data-method={dataMethod} style={style} className={className}>
       { children }
     </a>
   ) : (
-    <div onClick={onViolation}>
+    <div onClick={onViolation} style={style} className={className}>
       { children }
     </div>
   ))
@@ -26,15 +28,19 @@ type CloudResourcesConditionalAnchorProps = {
   children?: React.ReactNode
   href: string
   conditionType: CloudResourcesConditionType
+  style?: React.CSSProperties
+  className?: string
 }
 
-export const CloudResourcesConditionalAnchor = ({ children, href, conditionType }: CloudResourcesConditionalAnchorProps) => {
+export const CloudResourcesConditionalAnchor = ({ children, href, conditionType, style, className }: CloudResourcesConditionalAnchorProps) => {
   const { isAllowed, onViolation } = useCloudResourcesCondition(conditionType)
   return (
     <ConditionalAnchor
       href={href}
+      style={style}
       isAllowed={isAllowed}
       onViolation={onViolation}
+      className={className}
     >
       {children}
     </ConditionalAnchor>
