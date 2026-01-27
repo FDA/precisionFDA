@@ -80,6 +80,8 @@ function ResourceTable<T extends { id: number; uid: string; name: string; revisi
   return (
     <Table<T>
       enableColumnFilters={false}
+      enableColumnSelect={false}
+      enableRowClickSelection={true}
       isLoading={isLoading}
       columns={col}
       data={data}

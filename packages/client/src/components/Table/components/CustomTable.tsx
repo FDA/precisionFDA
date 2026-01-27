@@ -27,9 +27,23 @@ type Props<T extends RowData> = {
   onDragStart?: DragEventHandler
   displayColSpacer?: boolean
   spacerWidth?: number
+  enableColumnSelect?: boolean
+  enableRowClickSelection?: boolean
 }
 
-const DnDRow = ({ row, numSelected, children }: {row: Row<IFile>, numSelected: number, children: React.ReactNode }) => {
+const DnDRow = ({
+  row,
+  numSelected,
+  children,
+  onClick,
+  className,
+}: {
+  row: Row<IFile>
+  numSelected: number
+  children: React.ReactNode
+  onClick?: React.MouseEventHandler<HTMLTableRowElement>
+  className?: string
+}) => {
   const isSelected = row.getIsSelected()
 
   let DnDComp = isSelected ? Draggable : 'tr'
@@ -41,13 +55,32 @@ const DnDRow = ({ row, numSelected, children }: {row: Row<IFile>, numSelected: n
   }
   const dndProps = DnDComp !== 'tr' ? { numSelected } : {}
   return (
-    <DnDComp data-testid="data-row" as="tr" {...dndProps} id={row.original.id} name={row.original.name}>
+    <DnDComp data-testid="data-row" as="tr" {...dndProps} id={row.original.id} name={row.original.name} onClick={onClick} className={className}>
       {children}
     </DnDComp>
   )
 }
 
 const Filler = styled.td``
+
+function shouldIgnoreRowClick(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false
+  return Boolean(
+    target.closest(
+      [
+        'a',
+        'button',
+        'input',
+        'select',
+        'textarea',
+        'label',
+        '[role="button"]',
+        '[role="checkbox"]',
+        '[data-row-click-ignore="true"]',
+      ].join(','),
+    ),
+  )
+}
 
 export function CustomTable<T extends RowData>({
   emptyText = 'There are no items here.',
@@ -59,6 +92,8 @@ export function CustomTable<T extends RowData>({
   onDragStart = undefined,
   spacerWidth = 0,
   displayColSpacer = true,
+  enableColumnSelect = true,
+  enableRowClickSelection = false,
 }: Props<T>) {
   const [headerGroups] = getTableHeaderGroups(table, tableGroup)
   const numSelected = table.getSelectedRowModel().rows.length
@@ -115,7 +150,7 @@ export function CustomTable<T extends RowData>({
                   </th>
                 ))}
                 {colFiller('th')}
-                <ColumnSelect<T> table={table} />
+                {enableColumnSelect && <ColumnSelect<T> table={table} />}
               </tr>
               {table.options.enableColumnFilters && (
                 <tr className="filter-row">
@@ -144,6 +179,12 @@ export function CustomTable<T extends RowData>({
           {isLoading &&
             range(0, 3).map(i => <LoadingRows visibleColumns={headerGroups[0].headers.map(h => h.column)} delay={i} key={i} />)}
           {table.getRowModel().rows.map(row => {
+            const handleRowClick: React.MouseEventHandler<HTMLTableRowElement> = e => {
+              if (!enableRowClickSelection) return
+              if (shouldIgnoreRowClick(e.target)) return
+              row.toggleSelected()
+            }
+
             const cells = getRowGroup(row, tableGroup).map(cell => (
               <td
                 className={classNames({ 'cell-select sticky-left': cell.column.id === 'select', relative: true })}
@@ -157,7 +198,13 @@ export function CustomTable<T extends RowData>({
 
             if (enableDnd) {
               return (
-                <DnDRow key={row.id} row={row as Row<IFile>} numSelected={numSelected}>
+                <DnDRow
+                  key={row.id}
+                  row={row as Row<IFile>}
+                  numSelected={numSelected}
+                  onClick={handleRowClick}
+                  className={classNames({ 'row-click-select': enableRowClickSelection })}
+                >
                   {cells}
                   {colFiller('td')}
                 </DnDRow>
@@ -168,7 +215,15 @@ export function CustomTable<T extends RowData>({
 
             if (enableHtmlDnd) {
               return (
-                <tr data-testid="data-row" key={row.id} className={classNames({ 'sub-row': isSubRow })} draggable={true} onDragStart={onDragStart} id={`html-dnd-${row.id}`}>
+                <tr
+                  data-testid="data-row"
+                  key={row.id}
+                  className={classNames({ 'sub-row': isSubRow, 'row-click-select': enableRowClickSelection })}
+                  draggable={true}
+                  onDragStart={onDragStart}
+                  id={`html-dnd-${row.id}`}
+                  onClick={handleRowClick}
+                >
                   {cells}
                   {colFiller('td')}
                 </tr>
@@ -176,7 +231,12 @@ export function CustomTable<T extends RowData>({
             }
 
             return (
-              <tr data-testid="data-row" key={row.id} className={classNames({ 'sub-row': isSubRow })}>
+              <tr
+                data-testid="data-row"
+                key={row.id}
+                className={classNames({ 'sub-row': isSubRow, 'row-click-select': enableRowClickSelection })}
+                onClick={handleRowClick}
+              >
                 {cells}
                 {colFiller('td')}
               </tr>
