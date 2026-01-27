@@ -12,6 +12,8 @@ import { getSpaceIdFromScope } from '../../utils'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
+import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
+import { getHomeScopeFromServerScope } from '../home/getHomeScopeFromServerScope'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   HeaderLeft,
@@ -28,13 +30,11 @@ import {
   Topbox,
 } from '../home/show.styles'
 import { HomeScope } from '../home/types'
+import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
 import { getBasePath } from '../home/utils'
 import { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
-import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
-import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
-import { getHomeScopeFromServerScope } from '../home/getHomeScopeFromServerScope'
 
 export type AppShowOutletContext = {
   spaceId?: string
@@ -178,7 +178,7 @@ export const AppsShow = ({
   spaceId?: string
   isContributorOrHigher?: boolean
   homeContext?: HomeScopeContextValue
-}) => {
+}): React.JSX.Element => {
   const { homeScope } = homeContext
   const location = useLocation()
   const { data, isLoading } = useFetchAppQuery(appUid!)
@@ -188,7 +188,13 @@ export const AppsShow = ({
   const app = data?.app
   const meta = data?.meta
 
-  if (isLoading) return <HomeLoader />
+  if (isLoading)
+    return (
+      <>
+        <HomeLoader />
+        <Outlet context={{ spaceId, spec: null, readme: null, appUid }} />
+      </>
+    )
 
   if (!app || !meta)
     return (
