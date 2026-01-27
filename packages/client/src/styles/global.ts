@@ -130,23 +130,24 @@ const GlobalStyle = createGlobalStyle<{ railsAlertHeight: number }>`
     border: 2px solid ${colors.primaryYellow} !important;
     border-radius: 5px !important;
   }
-`
 
-export const ScrollableMainGlobalStyles = createGlobalStyle`
-  html, body, #app-root {
+  /* Scroll modes - classes toggled by useScrollMode hook */
+  html.scroll-main, html.scroll-main body, html.scroll-main #app-root {
     overflow: hidden;
   }
-  main {
+  html.scroll-main main {
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
   }
-`
 
-export const ScrollableInnerGlobalStyles = createGlobalStyle`
-  html, body, #app-root, main {
+  html.scroll-inner, html.scroll-inner body, html.scroll-inner #app-root, html.scroll-inner main {
     height: 100%;
     overflow: hidden;
   }
-  ${compactScrollBarV2}
+  html.scroll-inner {
+    ${compactScrollBarV2}
+  }
 `
 
 export default GlobalStyle

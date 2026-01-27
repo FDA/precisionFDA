@@ -5,7 +5,7 @@ import { NotAllowedPage } from '../../components/NotAllowed'
 import { useAuthUserQuery } from '../../features/auth/api'
 import Logo from '../../components/Logo'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
-import { ScrollableInnerGlobalStyles, ScrollableMainGlobalStyles } from '../../styles/global'
+import { useScrollMode } from '../../hooks/useScrollMode'
 
 const StyledLayoutLoader = styled.div`
   display: flex;
@@ -25,6 +25,7 @@ export const LayoutLoader = () => (
 
 export const UserLayout = ({ children, mainScroll = false, innerScroll = false, scrollPaddingTop }: { children: ReactNode, mainScroll?: boolean, innerScroll?: boolean, scrollPaddingTop?: string|number }) => {
   const user = useAuthUserQuery()
+  useScrollMode(mainScroll ? 'main' : innerScroll ? 'inner' : null)
 
   const content = () => {
     if (user.isLoading) return <LayoutLoader />
@@ -40,14 +41,10 @@ export const UserLayout = ({ children, mainScroll = false, innerScroll = false, 
     return children
   }
   return (
-    <>
-    {mainScroll && <ScrollableMainGlobalStyles />}
-    {innerScroll && <ScrollableInnerGlobalStyles />}
     <main style={{ scrollPaddingTop }}>
       <ErrorBoundary>
         {content()}
       </ErrorBoundary>
     </main>
-    </>
   )
 }
