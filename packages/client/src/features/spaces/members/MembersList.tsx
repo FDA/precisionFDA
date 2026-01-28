@@ -63,11 +63,11 @@ export const MembersList = ({ space }: { space: ISpace }) => {
   const [sideRole, setSideRole] = useState<SideRole | undefined>()
   const { settings, updateSettings } = useLocalSpaceSettings(space.id)
   const viewMode = settings.membershipView || 'table'
-  
+
   const setViewMode = (mode: 'table' | 'cards') => {
     updateSettings({ membershipView: mode })
   }
-  
+
   const { modalComp, setShowModal } = useAddMembersModal({ spaceId: String(space.id) })
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
@@ -124,8 +124,24 @@ export const MembersList = ({ space }: { space: ISpace }) => {
 
             <RadioButtonGroup
               options={[
-                { value: 'table', label: <div className='flex align-center gap-1'><ListIcon height={16} />Table</div> },
-                { value: 'cards', label: <div className='flex align-center gap-1'><Grid2x2Icon height={16} />Cards</div> },
+                {
+                  value: 'table',
+                  label: (
+                    <div className="flex items-center gap-1">
+                      <ListIcon height={16} />
+                      Table
+                    </div>
+                  ),
+                },
+                {
+                  value: 'cards',
+                  label: (
+                    <div className="flex items-center gap-1">
+                      <Grid2x2Icon height={16} />
+                      Cards
+                    </div>
+                  ),
+                },
               ]}
               value={viewMode}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,11 +160,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
               <div />
               <Menu
                 trigger={
-                  <ActionsButton
-                    as={Menu.Trigger}
-                    data-testid="members-actions-button"
-                    disabled={selectedMembers.length === 0}
-                  />
+                  <ActionsButton as={Menu.Trigger} data-testid="members-actions-button" disabled={selectedMembers.length === 0} />
                 }
               >
                 <ActionsMenuContent actions={actions} />
@@ -177,7 +189,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
           <div style={{ padding: '16px' }}>Loading...</div>
         ) : (
           <CardsGrid>
-            {members.map((m) => (
+            {members.map(m => (
               <MemberCard key={`${m.user_name}-${m.side}`} member={m} space={space} />
             ))}
           </CardsGrid>

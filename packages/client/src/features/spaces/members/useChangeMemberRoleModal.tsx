@@ -131,7 +131,7 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
             </Button>
           )}
         </div>
-        <div className="flex align-center gap-2">
+        <div className="flex items-center gap-2">
           <Button type="button" onClick={onCancel} disabled={isSubmitting} aria-label="Close modal">
             Cancel
           </Button>

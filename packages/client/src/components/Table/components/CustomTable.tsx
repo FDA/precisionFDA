@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import { flexRender, Row, RowData, Table, Column } from '@tanstack/react-table'
+import { Column, flexRender, Row, RowData, Table } from '@tanstack/react-table'
 import classNames from 'classnames'
 import { range } from 'ramda'
 import React, { DragEventHandler } from 'react'
@@ -55,7 +55,15 @@ const DnDRow = ({
   }
   const dndProps = DnDComp !== 'tr' ? { numSelected } : {}
   return (
-    <DnDComp data-testid="data-row" as="tr" {...dndProps} id={row.original.id} name={row.original.name} onClick={onClick} className={className}>
+    <DnDComp
+      data-testid="data-row"
+      as="tr"
+      {...dndProps}
+      id={row.original.id}
+      name={row.original.name}
+      onClick={onClick}
+      className={className}
+    >
       {children}
     </DnDComp>
   )

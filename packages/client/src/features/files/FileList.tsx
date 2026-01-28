@@ -18,11 +18,10 @@ import Table from '../../components/Table'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
-import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
-import { ActionsButton, FilesListBreadcrumbHeader, FilesListResourceHeader } from '../home/show.styles'
+import { FilesListResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta, NOTIFICATION_ACTION, MetaPath } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -141,7 +140,6 @@ export const FileList = ({
     ).toString()
     navigate({ search })
   }
-
 
   // @ts-expect-error sometimes shows as entries instead of files
   const files: IFile[] = data?.files || data?.entries

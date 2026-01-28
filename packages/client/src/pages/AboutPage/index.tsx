@@ -1,58 +1,14 @@
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
-import { colors } from '../../styles/theme'
 import { PfTab, PfTabContent, PfTabRow, PfTabTitle } from '../../components/Tabs/PfTab'
 import { Button } from '../../components/Button'
 import { RichText } from '../styles'
 
 //TODO JIRI: TO BE DELETED COMPLETELY
-
-const Row = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-
-  @media (min-width: 1000px) {
-    flex-direction: row;
-    * > {
-      flex: 50%;
-    }
-  }
-`
-
-const AboutGuestInfo = styled.div`
-  margin-bottom: 64px;
-
-  .panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid var(--c-layout-border);
-    background-color: var(--tertiary-70);
-    padding: 32px;
-    text-align: center;
-  }
-  p {
-    margin-bottom: 16px;
-  }
-
-  .lead-bold {
-    font-weight: bold;
-    font-size: 20px;
-  }
-`
-
-const MainLine = styled.div`
-  font-size: 20px;
-  font-weight: bold;
-  line-height: 30px;
-  color: ${colors.primaryBlue};
-`
 
 type AboutSectionType = 'why' | 'what' | 'who' | 'how'
 
@@ -89,12 +45,12 @@ const AboutPage = () => {
         </PfTabRow>
 
         <PfTabContent $isShown={selectedSection === 'why'}>
-          <MainLine>
+          <div className="text-xl font-bold leading-[30px] text-primary-blue">
             The Food and Drug Administration (FDA) plays an integral role in precision medicine, which foresees the day when an
-            individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up.
-          </MainLine>
+            individual's medical care will be tailored in part based on their unique characteristics and genetic make-up.
+          </div>
           <hr />
-          <Row>
+          <div className="flex flex-col gap-4 lg:flex-row lg:*:flex-1">
             <RichText>
               <p>
                 To accelerate progress towards this vision, in July 2014, FDA’s Chief Health Informatics Officer (CHIO), Taha
@@ -120,15 +76,15 @@ const AboutPage = () => {
                 <img src="/assets/beta-release.png" alt="Beta release Timeline: Beta launch on Dec 2015" />
               </p>
             </div>
-          </Row>
+          </div>
         </PfTabContent>
 
         <PfTabContent $isShown={selectedSection === 'what'}>
-          <MainLine>
+          <div className="text-xl font-bold leading-[30px] text-primary-blue">
             PrecisionFDA provides the genomics community with a secure, cloud-based platform where participants can access and
             share datasets, analysis pipelines, and bioinformatics tools, in order to benchmark their approaches and advance
             regulatory science.
-          </MainLine>
+          </div>
           <hr />
           <RichText>
             <p>
@@ -155,10 +111,10 @@ const AboutPage = () => {
         </PfTabContent>
 
         <PfTabContent $isShown={selectedSection === 'who'}>
-          <MainLine>
+          <div className="text-xl font-bold leading-[30px] text-primary-blue">
             PrecisionFDA is an initiative in the Office of Health Informatics (OHI) at the Food and Drug Administration led by the
             Chief Health Informatics Officer (CHIO), Dr. Taha Kass-Hout, MD, MS.
-          </MainLine>
+          </div>
           <hr />
           <RichText>
             <p>The core project team consists of the following individuals, in alphabetical order:</p>
@@ -214,23 +170,23 @@ const AboutPage = () => {
           </RichText>
         </PfTabContent>
         {!isLoggedIn && (
-          <AboutGuestInfo>
+          <div className="mb-16">
             <div className="container">
-              <div className="panel panel-info text-center">
-                <div className="panel-body">
-                  <p className="lead lead-bold">This program is in production at this time.</p>
-                  <p className="lead">
+              <div className="flex flex-col items-center border border-(--c-layout-border) bg-(--tertiary-70) p-8 text-center [&_p]:mb-4">
+                <div>
+                  <p className="text-xl font-bold">This program is in production at this time.</p>
+                  <p>
                     For further information and to express interest in participating please submit our request access form.
                   </p>
                 </div>
-                <div className="panel-body">
+                <div>
                   <Button data-variant="primary" as="a" href="/request_access">
                     <span className="fa fa-user-plus" aria-hidden="true" /> Request Access
                   </Button>
                 </div>
               </div>
             </div>
-          </AboutGuestInfo>
+          </div>
         )}
       </PageContainerMargin>
     </PublicLayout>

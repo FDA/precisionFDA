@@ -56,6 +56,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@tanstack/react-query": "^5.90.16",
     "@tanstack/react-query-devtools": "^5.91.2",
+    "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.14",
     "axios": "^1.12.2",
@@ -96,6 +97,7 @@
     "spark-md5": "^3.0.2",
     "styled-components": "^6.1.19",
     "stylis": "^4.3.6",
+    "tailwindcss": "^4.1.18",
     "uniqid": "^5.4.0",
     "use-immer": "^0.11.0",
     "yup": "^1.7.0"
