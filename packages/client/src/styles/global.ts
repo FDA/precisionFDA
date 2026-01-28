@@ -1,19 +1,13 @@
 import { createGlobalStyle } from 'styled-components'
+import { compactScrollBarV2 } from '../components/Page/styles'
 import { colors, theme } from './theme'
 import { colorvars, themes } from './variables'
-import { compactScrollBarV2 } from '../components/Page/styles'
 
-import './cssHelpers.css'
+import './tailwind.css'
 
 const GlobalStyle = createGlobalStyle<{ railsAlertHeight: number }>`
   ${colorvars}
   ${themes}
-
-  * {
-    margin: 0;
-    padding: 0;
-    font: inherit;
-  }
 
   body {
     margin: 0;
@@ -81,7 +75,6 @@ const GlobalStyle = createGlobalStyle<{ railsAlertHeight: number }>`
     /* max-width: 72ch; */
     /* text-wrap: pretty; */
   }
-
 
   body:has(.rails-alert) {
     --rails-alert-height: ${({ railsAlertHeight }) => railsAlertHeight}px;

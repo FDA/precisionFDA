@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+
+@layer base {
+  * {
+    font: inherit;
+    margin: 0;
+    padding: 0;
+  }
+}

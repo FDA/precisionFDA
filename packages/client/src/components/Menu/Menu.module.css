@@ -11,10 +11,8 @@
   text-align: center;
   touch-action: manipulation;
   gap: 6px;
-  padding: none;
   font-size: inherit;
   font-weight: inherit;
-  border-radius: none;
   background-color: transparent;
   border: none;
   color: var(--c-text-700);
@@ -58,7 +56,9 @@
   border: 1px solid var(--c-dropdown-menu-border, #e5e7eb);
   background-color: var(--c-dropdown-bg, #ffffff);
   padding: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
   outline: none;
   animation: scaleIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: var(--transform-origin);

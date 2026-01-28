@@ -1,8 +1,9 @@
-import { defineConfig, loadEnv } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
+import { defineConfig, loadEnv } from 'vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -30,10 +31,13 @@ export default defineConfig(({ mode }) => {
       react({
         babel: {
           plugins: [
-            ['babel-plugin-styled-components', {
-              displayName: true,
-              ssr: false,
-            }],
+            [
+              'babel-plugin-styled-components',
+              {
+                displayName: true,
+                ssr: false,
+              },
+            ],
           ],
         },
       }),
@@ -45,6 +49,7 @@ export default defineConfig(({ mode }) => {
           },
         ],
       }),
+      tailwindcss(),
     ],
 
     css: {
@@ -64,7 +69,7 @@ export default defineConfig(({ mode }) => {
           format: 'es',
           entryFileNames: 'bundle.js',
           chunkFileNames: '[name]-[hash].js',
-          assetFileNames: (assetInfo) => {
+          assetFileNames: assetInfo => {
             if (assetInfo.name?.endsWith('.css')) {
               return 'bundle.css'
             }
@@ -77,10 +82,12 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
       port: 4000,
-      https: hasHttpsCerts ? {
-        key: fs.readFileSync(keyPath),
-        cert: fs.readFileSync(certPath),
-      } : undefined,
+      https: hasHttpsCerts
+        ? {
+            key: fs.readFileSync(keyPath),
+            cert: fs.readFileSync(certPath),
+          }
+        : undefined,
       proxy: {
         '/docs': {
           target: 'https://0.0.0.0:3000',
