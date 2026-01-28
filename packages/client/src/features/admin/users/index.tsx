@@ -2,6 +2,7 @@ import { Column, ColumnDef } from '@tanstack/react-table'
 import React from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
+import { DEFAULT_PAGINATED_DATA } from '../../../api/types'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { UsersIcon } from '../../../components/icons/UserIcon'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
@@ -16,10 +17,9 @@ import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils
 import { useList } from '../../home/useList'
 import { formatNumberUS } from '../../home/utils'
 import { AdminSectionBreadcrumbDivider, AdminSectionBreadcrumbs, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
+import { fetchUsers } from './api'
 import { UsersListActionRow } from './ListPageActionRow'
 import { AdminUserListType, User } from './types'
-import { fetchUsers } from './api'
-import { DEFAULT_PAGINATED_DATA } from '../../../api/types'
 
 const StyledLinkCell = styled.a`
   display: flex;
@@ -96,7 +96,11 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
     size: 250,
     enableColumnFilter: false,
     cell: ({ row }) => (
-      <UserLinkCell dxuser={row.original.dxuser}>${formatNumberUS(row.original.cloudResourceSettings.total_limit)}</UserLinkCell>
+      <UserLinkCell dxuser={row.original.dxuser}>
+        {row.original.cloudResourceSettings?.total_limit
+          ? `$${formatNumberUS(row.original.cloudResourceSettings?.total_limit)}`
+          : 'N/A'}
+      </UserLinkCell>
     ),
   },
   {
@@ -106,7 +110,11 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
     enableColumnFilter: false,
     size: 250,
     cell: ({ row }) => (
-      <UserLinkCell dxuser={row.original.dxuser}>${formatNumberUS(row.original.cloudResourceSettings.job_limit)}</UserLinkCell>
+      <UserLinkCell dxuser={row.original.dxuser}>
+        {row.original.cloudResourceSettings?.job_limit
+          ? `$${formatNumberUS(row.original.cloudResourceSettings?.job_limit)}`
+          : 'N/A'}
+      </UserLinkCell>
     ),
   },
 ]
