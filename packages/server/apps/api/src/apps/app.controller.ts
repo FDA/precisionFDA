@@ -16,11 +16,11 @@ import { AppService } from '@shared/domain/app/services/app.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { RunAppInput, runAppSchema } from '@shared/domain/job/job.input'
 import { CreateJobOperation } from '@shared/domain/job/ops/create'
-import { LicensesForAppOperation } from '@shared/domain/license/ops/licenses-for-app'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserOpsCtx } from '@shared/types'
 import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { LicensesForAppFacade } from '../facade/license/licenses-for-app.facade'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import { AppUidParamDto } from './model/app-uid-param.dto'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -35,6 +35,7 @@ export class AppController {
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly logger: Logger,
     private readonly appService: AppService,
+    private readonly licensesForAppFacade: LicensesForAppFacade,
   ) {}
 
   @HttpCode(200)
@@ -46,15 +47,7 @@ export class AppController {
 
   @Get('/:appUid/licenses-to-accept')
   async getLicences(@Param() params: AppUidParamDto): Promise<License[]> {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
-    return await new LicensesForAppOperation(opsCtx).execute({
-      uid: params.appUid,
-    })
+    return await this.licensesForAppFacade.findLicensesForApp(params.appUid)
   }
 
   @Post('/:appDxId/run')

@@ -20,11 +20,6 @@ Please read the Jira ticket for more details.
 - [ ] Feature change (modifies existing functionality, may affect user experience or output)
 - [ ] Breaking change (fix or feature that may cause existing functionality to not work as expected)
 
-## 🔮 Risk & Impact
-
-<!--- Add a quick note of the risk & impact analysis conducted for this change. -->
-<!--- Any database schema mutations or API changes should be noted in more detail here. -->
-
 Risk analysis was not conducted yet.
 
 <!--- If you're not ready to merge your pull request, you can open it as a "draft". This is better than just labeling it "Work in progress" or "Do not merge" because it prevents the pull request from being merged until it's marked as ready. -->

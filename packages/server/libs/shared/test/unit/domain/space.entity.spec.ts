@@ -2,9 +2,12 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { database } from '../../../src/database'
+import { database } from '@shared/database'
 import { create, db } from '@shared/test'
-import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
 
 describe('space entity tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -20,8 +23,16 @@ describe('space entity tests', () => {
     guestLead = create.userHelper.create(em)
     await em.flush()
 
-    create.spacesHelper.addMember(em, { user: hostLead, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST })
-    create.spacesHelper.addMember(em, { user: guestLead, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST })
+    create.spacesHelper.addMember(
+      em,
+      { user: hostLead, space },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { user: guestLead, space },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+    )
 
     await em.flush()
   })
@@ -39,7 +50,11 @@ describe('space entity tests', () => {
   it('data portals are present', async () => {
     expect(space.dataPortal).to.undefined()
 
-    const portal = create.dataPortalsHelper.create(em, { space }, { name: 'portal1', urlSlug: 'portal1' })
+    const portal = create.dataPortalsHelper.create(
+      em,
+      { space },
+      { name: 'portal1', urlSlug: 'portal1' },
+    )
     await em.flush()
 
     const loadedSpace = await em.findOneOrFail(

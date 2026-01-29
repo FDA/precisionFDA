@@ -1,40 +1,19 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import {
-  Body,
-  Controller,
-  Get,
-  Inject,
-  Logger,
-  Param,
-  Patch,
-  Query,
-  UseGuards,
-} from '@nestjs/common'
+import { Body, Controller, Inject, Logger, Param, Patch, UseGuards } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { ListJobsInput, PageJobs } from '@shared/domain/job/job.input'
-import { DescribeJobOperation } from '@shared/domain/job/ops/describe'
-import { ListJobsOperation } from '@shared/domain/job/ops/list'
 import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
 import { WorkstationService } from '@shared/domain/job/workstation.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { createSyncJobStatusTask } from '@shared/queue'
 import { UserOpsCtx } from '@shared/types'
-import { schemas } from '@shared/utils/base-schemas'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
-import {
-  JobSetAPIKeyParams,
-  JobSnapshotParams,
-  WorkstationAliveParams,
-  jobListQuerySchema,
-  jobSetAPIKeyBodySchema,
-  jobSnapshotBodySchema,
-  workstationAliveBodySchema,
-} from './job.schemas'
+import { DxidValidationPipe } from '../validation/pipes/dxid.pipe'
+import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body.dto'
+import { JobSnapshotBodyDTO } from '@shared/domain/job/dto/job-snapshot-body.dto'
+import { WorkstationAliveBodyDTO } from '@shared/domain/job/dto/workstation-alive-body.dto'
 import { Job } from '@shared/domain/job/job.entity'
-import { JobActionDTO } from '@shared/domain/job/dto/job-action.dto'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 @UseGuards(UserContextGuard)
@@ -47,57 +26,30 @@ export class JobController {
     private readonly logger: Logger,
   ) {}
 
-  // not used at the moment
-  @Get()
-  async listJobs(
-    @Query(new JsonSchemaPipe(jobListQuerySchema)) query: ListJobsInput,
-  ): Promise<PageJobs> {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
-    return await new ListJobsOperation(opsCtx).execute({
-      page: query.page ?? 1,
-      limit: query.limit ?? 10,
-      scope: query.scope ?? undefined,
-      spaceId: query.spaceId ?? undefined,
-    })
-  }
-
-  // not used at the moment
-  @Get('/:dxid')
-  async describeJob(@Param() param: JobActionDTO): Promise<Job> {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
-    return await new DescribeJobOperation(opsCtx).execute({ dxid: param.dxid })
-  }
-
   // ------------------------
   //    HTTPS Workstations
   // ------------------------
   @Patch('/:dxid/terminate')
-  async terminateJob(@Param() param: JobActionDTO): Promise<Job> {
-    return await this.jobSynchronizationService.requestTerminateJob(param.dxid)
+  async terminateJob(
+    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>,
+  ): Promise<Job> {
+    return await this.jobSynchronizationService.requestTerminateJob(dxid)
   }
 
   @Patch('/:dxid/syncJob')
-  async syncJobStatus(@Param() param: JobActionDTO): Promise<{
+  async syncJobStatus(
+    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>,
+  ): Promise<{
     message: string
   }> {
-    await createSyncJobStatusTask({ dxid: param.dxid }, this.user)
+    await createSyncJobStatusTask({ dxid }, this.user)
     return { message: 'Job sync task created' }
   }
 
-  @Patch('/:jobDxId/checkAlive')
+  @Patch('/:dxid/checkAlive')
   async checkAlive(
-    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
-    @Body(new JsonSchemaPipe(workstationAliveBodySchema)) body: WorkstationAliveParams,
+    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>,
+    @Body() body: WorkstationAliveBodyDTO,
   ): Promise<boolean> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
@@ -111,10 +63,10 @@ export class JobController {
   }
 
   @UseGuards(InternalRouteGuard)
-  @Patch('/:jobDxId/setAPIKey')
+  @Patch('/:dxid/setAPIKey')
   async setApiKey(
-    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
-    @Body(new JsonSchemaPipe(jobSetAPIKeyBodySchema)) body: JobSetAPIKeyParams,
+    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>,
+    @Body() body: JobSetAPIKeyBodyDTO,
   ): Promise<void> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
@@ -127,10 +79,10 @@ export class JobController {
     return await workstationService.setAPIKey(body.key)
   }
 
-  @Patch('/:jobDxId/snapshot')
+  @Patch('/:dxid/snapshot')
   async createSnapshot(
-    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) jobDxid: DxId<'job'>,
-    @Body(new JsonSchemaPipe(jobSnapshotBodySchema)) body: JobSnapshotParams,
+    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) jobDxid: DxId<'job'>,
+    @Body() body: JobSnapshotBodyDTO,
   ): Promise<{ message: string }> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
@@ -138,11 +90,9 @@ export class JobController {
       em: this.em,
     }
 
-    const terminate = body.terminate ?? false
     const input = {
       ...body,
       jobDxid,
-      terminate,
     }
 
     await new WorkstationSnapshotOperation(opsCtx).enqueue(input)

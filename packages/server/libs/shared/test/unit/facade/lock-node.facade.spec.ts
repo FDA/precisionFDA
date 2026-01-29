@@ -4,6 +4,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { stub } from 'sinon'
 import { expect } from 'chai'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -38,6 +39,7 @@ describe('LockNodeFacade', () => {
   let notificationServiceCreateNotificationStub = stub()
   let nodeHelperFilterNodesByUserStub = stub()
   let emFlushStub = stub()
+  let createLockNodesJobTaskStub = stub()
 
   const em = {
     flush: emFlushStub,
@@ -55,6 +57,9 @@ describe('LockNodeFacade', () => {
   const notificationService = {
     createNotification: notificationServiceCreateNotificationStub,
   } as unknown as NotificationService
+  const fileSyncQueueJobProducer = {
+    createLockNodesJobTask: createLockNodesJobTaskStub,
+  } as unknown as FileSyncQueueJobProducer
 
   beforeEach(() => {
     nodeServiceLoadNodesStub.reset()
@@ -71,6 +76,9 @@ describe('LockNodeFacade', () => {
 
     emFlushStub.reset()
     emFlushStub.throws()
+
+    createLockNodesJobTaskStub.reset()
+    createLockNodesJobTaskStub.throws()
   })
 
   describe('#lockNodes', async () => {
@@ -134,6 +142,6 @@ describe('LockNodeFacade', () => {
   })
 
   function getInstance(): LockNodeFacade {
-    return new LockNodeFacade(em, userCtx, nodeHelper, nodeService, notificationService)
+    return new LockNodeFacade(em, userCtx, nodeHelper, nodeService, notificationService, fileSyncQueueJobProducer)
   }
 })

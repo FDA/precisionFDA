@@ -9,14 +9,12 @@ import {
   findFileOrAssetsWithDxid,
   findFileOrAssetWithUid,
 } from '@shared/domain/user-file/user-file.helper'
-import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
-import { ChallengeUpdateCardImageUrlOperation } from '@shared/domain/challenge/ops/update-challenge-card-image-url'
+import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { ClientRequestError } from '@shared/errors'
 import { Job } from 'bull'
 import { removeRepeatable } from '@shared/queue'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { UserOpsCtx } from '@shared/types'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
@@ -31,7 +29,7 @@ export class SyncFilesStateFacade {
     private readonly em: SqlEntityManager,
     private readonly userCtx: UserContext,
     private readonly platformClient: PlatformClient,
-    private readonly challengeRepo: ChallengeRepository,
+    private readonly challengeService: ChallengeService,
     private readonly nodeHelper: NodeHelper,
     private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
@@ -224,25 +222,13 @@ export class SyncFilesStateFacade {
         if (fileOrAsset.isCreatedByChallengeBot() && fileOrAsset.state === FILE_STATE_DX.CLOSED) {
           // Special case: If this closed file is used as a challenge card image
           // once they are uploaded and closed we need to update the cardImageUrl
-          const challenge = await this.challengeRepo.findOneWithCardImageUid(fileOrAsset.uid)
-          if (challenge) {
-            this.logger.log(
-              { fileUid: fileOrAsset.uid },
-              `File associated with challenge ${fileInfo.describe.state} for file with uid ${fileOrAsset.uid}`,
+          try {
+            await this.challengeService.updateCardImageUrl(fileOrAsset.uid)
+          } catch (error) {
+            this.logger.error(
+              { fileUid: fileOrAsset.uid, error },
+              'Error updating challenge card image URL',
             )
-            try {
-              const opsCtx: UserOpsCtx = {
-                log: this.logger,
-                user: this.userCtx,
-                em: this.em,
-              }
-              await new ChallengeUpdateCardImageUrlOperation(opsCtx).execute(challenge.id)
-            } catch (error) {
-              this.logger.error(
-                { fileUid: fileOrAsset.uid, error },
-                'Error invoking ChallengeUpdateCardImageUrlOperation',
-              )
-            }
           }
         }
       } else {

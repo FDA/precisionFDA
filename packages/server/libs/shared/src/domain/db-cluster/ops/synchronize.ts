@@ -1,4 +1,4 @@
-import { TASK_TYPE } from '../../../queue/task.input'
+import { TASK_TYPE } from '@shared/queue/task.input'
 
 export class SyncDbClusterOperation {
   static getBullJobId(dbClusterDxId: string): string {
