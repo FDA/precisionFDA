@@ -1,4 +1,5 @@
-export const validUbuntuPackages = ['0ad',
+export const validUbuntuPackages = [
+  '0ad',
   '0ad-data',
   '0ad-data-common',
   '0ad-dbg',

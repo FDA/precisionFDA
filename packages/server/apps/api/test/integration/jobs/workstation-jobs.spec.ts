@@ -149,9 +149,19 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
     expect(response.body.error.message).to.equal('Job is not in running state')
   })
 
-  it('throws 404 when the job does not exist', async () => {
+  it('throws 400 when the job dxid has invalid format', async () => {
     const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${generate.random.dxstr()}/setAPIKey`)
+      .set(getDefaultHeaderData(user))
+      .send({ key: 'hello world', code: 'code from auth server' })
+
+    expect(response.statusCode).to.equal(400)
+    expect(response.body.error).to.have.property('code', ErrorCodes.VALIDATION)
+  })
+
+  it('throws 404 when the job does not exist', async () => {
+    const response = await supertest(testedApp.getHttpServer())
+      .patch(`/jobs/job-${generate.random.dxstr()}/setAPIKey`)
       .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
 
@@ -307,9 +317,24 @@ describe('PATCH /jobs/:id/snapshot', () => {
     }
   })
 
-  it('throws 404 when the job does not exist', async () => {
+  it('throws 400 when the job dxid has invalid format', async () => {
     const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${generate.random.dxstr()}/snapshot`)
+      .set(getDefaultHeaderData(user))
+      .send({
+        key: 'hello world',
+        code: 'code from auth server',
+        name: 'MySnapshot',
+      })
+
+    expect(response.statusCode).to.equal(400)
+    expect(response.body.error).to.have.property('code', ErrorCodes.VALIDATION)
+    expect(fakes.bull.addFake.notCalled).to.be.true()
+  })
+
+  it('throws 404 when the job does not exist', async () => {
+    const response = await supertest(testedApp.getHttpServer())
+      .patch(`/jobs/job-${generate.random.dxstr()}/snapshot`)
       .set(getDefaultHeaderData(user))
       .send({
         key: 'hello world',

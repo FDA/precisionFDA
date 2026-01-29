@@ -1,14 +1,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useEffectEvent, useState } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router'
-import { HomeLabel } from '../../../components/HomeLabel'
-import { StyledTab, StyledTabList, StyledTabPanel } from '../../../components/Tabs'
-import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../../components/Tags'
-import { CogsIcon } from '../../../components/icons/Cogs'
-import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
-import { RESOURCE_LABELS } from '../../../types/user'
-import { pluralize } from '../../../utils/formatting'
-import { getBackPathNext } from '../../../utils/getBackPath'
+import { HomeLabel } from '@/components/HomeLabel'
+import { StyledTab, StyledTabList, StyledTabPanel } from '@/components/Tabs'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
+import { CogsIcon } from '@/components/icons/Cogs'
+import { useLastWSNotification } from '@/hooks/useLastWSNotification'
+import { RESOURCE_LABELS } from '@/types/user'
+import { pluralize } from '@/utils/formatting'
+import { getBackPathNext } from '@/utils/getBackPath'
 import { PricingMap } from '../../apps/apps.types'
 import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
 import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
@@ -35,6 +35,12 @@ import { StateCell } from '../StateCell'
 import { fetchExecution } from '../executions.api'
 import { IExecution } from '../executions.types'
 import { FailureMessage, TitleLeft } from './styles'
+
+const calculateCost = (durationInSeconds: number, instanceType: string): string => {
+  const runtimeHours = durationInSeconds / 3600
+  const perHourCost: number = PricingMap[instanceType as keyof typeof PricingMap]
+  return `$${parseFloat((runtimeHours * perHourCost).toFixed(2))}`
+}
 
 export const ExecutionDetails = ({
   executionUid,
@@ -75,17 +81,17 @@ export const ExecutionDetails = ({
       return
     }
     queryCache.invalidateQueries({
-      queryKey: ['execution'],
+      queryKey: ['execution', executionUid],
     })
-  }, [lastJsonMessage])
+  }, [lastJsonMessage, queryCache, executionUid])
 
   const execution = data?.job
 
-  const [currentCost, setCurrentCost] = useState('$0')
-  const [currentDuration, setCurrentDuration] = useState('0s')
+  const [liveMetrics, setLiveMetrics] = useState({ cost: '$0', duration: '0s' })
 
-  const updateCostAndDuration = (e: IExecution) => {
-    if (!e.startedRunning) {
+  const updateCostAndDuration = useEffectEvent(() => {
+    const e = data?.job
+    if (!e?.startedRunning) {
       return
     }
     const now = Date.now()
@@ -98,50 +104,43 @@ export const ExecutionDetails = ({
     const seconds = durationInSeconds % 60
 
     // Create a human-readable string
-    const durationString = `${days > 0 ? `${days}  ${pluralize('day', days)}` : ''}${
+    const duration = `${days > 0 ? `${days} ${pluralize('day', days)}` : ''}${
       hours > 0 ? `${hours} ${pluralize('hour', hours)} ` : ''
     }${minutes > 0 ? `${minutes} ${pluralize('minute', minutes)} ` : ''}${seconds} ${pluralize('second', seconds)}`
 
-    setCurrentDuration(durationString)
-    const runtimeHours = durationInSeconds / (60 * 60)
-    const perHourCost: number = PricingMap[e.instance_type as keyof typeof PricingMap]
-    setCurrentCost(`$${parseFloat((runtimeHours * perHourCost).toFixed(2))}`)
-  }
+    const cost = calculateCost(durationInSeconds, e.instance_type)
+
+    setLiveMetrics({ cost, duration })
+  })
 
   useEffect(() => {
-    if (data?.job && (data.job.state === 'running' || data.job.state === 'terminating')) {
-      updateCostAndDuration(data.job)
-
-      const interval = setInterval(() => {
-        updateCostAndDuration(data.job)
-      }, 1000)
-
+    if (execution && (execution.state === 'running' || execution.state === 'terminating')) {
+      updateCostAndDuration()
+      const interval = setInterval(updateCostAndDuration, 1000)
       return () => clearInterval(interval)
     }
     return undefined
-  }, [data?.job])
+  }, [execution?.state, execution?.startedRunning])
 
   const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
   const basePath = getBasePath(spaceId)
 
   const getDuration = (e: IExecution) => {
     if (e.state === 'running' || e.state === 'terminating') {
-      return currentDuration
+      return liveMetrics.duration
     }
     return e.duration
   }
 
   const getCostMetadataItem = (e: IExecution) => {
     const isActiveState = e.state === 'running' || e.state === 'terminating'
-    const calculatedCost = `$${((e.duration_in_seconds / 3600) * PricingMap[e.instance_type as keyof typeof PricingMap]).toFixed(
-      2,
-    )}`
+    const calculatedCost = calculateCost(e.duration_in_seconds, e.instance_type)
 
     let finalCost: string
     if (!isActiveState) {
       finalCost = e.energy_consumption === 'N/A' ? calculatedCost : e.energy_consumption
     } else {
-      finalCost = currentCost
+      finalCost = liveMetrics.cost
     }
 
     return (

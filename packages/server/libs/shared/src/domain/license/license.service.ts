@@ -22,4 +22,19 @@ export class LicenseService {
 
     return licensedItems.map((item) => item.license.getEntity())
   }
+
+  async findLicensesForNodeIds(nodeIds: number[]): Promise<License[]> {
+    if (nodeIds.length === 0) {
+      return []
+    }
+
+    const licensedItems = await this.em.find(
+      LicensedItem,
+      { licenseableId: { $in: nodeIds }, licenseableType: 'Node' },
+      { populate: ['license'] },
+    )
+
+    const licenses = licensedItems.map((item) => item.license.getEntity())
+    return [...new Map(licenses.map((item) => [item.id, item])).values()]
+  }
 }

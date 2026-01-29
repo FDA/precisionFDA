@@ -12,8 +12,7 @@ import { Reference } from '@mikro-orm/core'
 import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
 import { FILE_STATE_DX, FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { FileStateResult } from '@shared/platform-client/platform-client.responses'
-import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
-import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 describe('SyncFilesStateFacade', () => {
@@ -23,9 +22,8 @@ describe('SyncFilesStateFacade', () => {
   } as unknown as User
 
   const platformClientFileStatesStub = stub()
-  const challengeRepoFindOneWithCardImageUidStub = stub()
+  const challengeServiceUpdateCardImageUrlStub = stub()
   const emFlushStub = stub()
-  const emGetRepositoryStub = stub()
   const removeNodesFacadeRemoveFileStub = stub()
   const nodeHelperFindRecentClosingFilesAndAssetsStub = stub()
   const nodeHelperFindOldClosingFilesAndAssetsStub = stub()
@@ -37,7 +35,6 @@ describe('SyncFilesStateFacade', () => {
 
   const em = {
     flush: emFlushStub,
-    getRepository: emGetRepositoryStub,
   } as unknown as SqlEntityManager
   const nodeHelper = {
     findRecentClosingFilesAndAssets: nodeHelperFindRecentClosingFilesAndAssetsStub,
@@ -53,9 +50,9 @@ describe('SyncFilesStateFacade', () => {
   const platformClient = {
     fileStates: platformClientFileStatesStub,
   } as unknown as PlatformClient
-  const challengeRepo = {
-    findOneWithCardImageUid: challengeRepoFindOneWithCardImageUidStub,
-  } as unknown as ChallengeRepository
+  const challengeService = {
+    updateCardImageUrl: challengeServiceUpdateCardImageUrlStub,
+  } as unknown as ChallengeService
   const removeNodesFacade = {
     removeFile: removeNodesFacadeRemoveFileStub,
   } as unknown as RemoveNodesFacade
@@ -88,17 +85,14 @@ describe('SyncFilesStateFacade', () => {
     findFileOrAssetsWithDxidStub.reset()
     findFileOrAssetsWithDxidStub.throws()
 
-    challengeRepoFindOneWithCardImageUidStub.reset()
-    challengeRepoFindOneWithCardImageUidStub.throws()
+    challengeServiceUpdateCardImageUrlStub.reset()
+    challengeServiceUpdateCardImageUrlStub.throws()
 
     removeNodesFacadeRemoveFileStub.reset()
     removeNodesFacadeRemoveFileStub.throws()
 
     emFlushStub.reset()
     emFlushStub.throws()
-
-    emGetRepositoryStub.reset()
-    emGetRepositoryStub.throws()
 
     platformClientFileStatesStub.reset()
     platformClientFileStatesStub.throws()
@@ -116,7 +110,7 @@ describe('SyncFilesStateFacade', () => {
       em,
       userCtx,
       platformClient,
-      challengeRepo,
+      challengeService,
       nodeHelper,
       removeNodesFacade,
     )
@@ -375,22 +369,16 @@ describe('SyncFilesStateFacade', () => {
           } as FileStateResult,
         ])
 
-      const challenge = {} as unknown as Challenge
-
       findFileOrAssetWithUidStub.withArgs(em, file1.uid).resolves(file1)
-      findFileOrAssetsWithDxidStub.withArgs(em, file1.dxid).resolves([file1])
-      challengeRepoFindOneWithCardImageUidStub.withArgs(file1.uid).resolves(challenge)
-      emGetRepositoryStub.reset()
+      challengeServiceUpdateCardImageUrlStub.withArgs(file1.uid).resolves()
 
       const job = {} as unknown as Job
 
       const facade = getInstance()
       await facade.syncFiles(job)
 
-      // here I only want to know if the ChallengeUpdateCardImageUrlOperation was called
-      // it needs to be moved into it's separate service and therefore it doesn't make much
-      // sense to test calling the inside of the operation
-      expect(emGetRepositoryStub.calledOnce).to.be.true()
+      expect(challengeServiceUpdateCardImageUrlStub.calledOnce).to.be.true()
+      expect(challengeServiceUpdateCardImageUrlStub.firstCall.firstArg).to.equal(file1.uid)
     })
 
     it('remove abandoned files (open, closing)', async () => {

@@ -10,14 +10,14 @@ import {
 } from '@tanstack/react-table'
 import React, { useEffect, useRef } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
-import { Button } from '../../components/Button'
-import { ActionsMenu } from '../../components/Menu'
-import { ContentFooter } from '../../components/Page/ContentFooter'
-import { Pagination } from '../../components/Pagination'
+import { Button } from '@/components/Button'
+import { ActionsMenu } from '@/components/Menu'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { Pagination } from '@/components/Pagination'
 import Table from '../../components/Table'
-import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
+import { HoverDNAnexusLogo } from '@/components/icons/DNAnexusLogo'
+import { StyledPageTable } from '@/components/Table/components/styles'
+import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
@@ -35,13 +35,13 @@ import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { useLastWSNotification } from '../../hooks/useLastWSNotification'
-import { FolderIcon } from '../../components/icons/FolderIcon'
-import { FileIcon } from '../../components/icons/FileIcon'
+import { useLastWSNotification } from '@/hooks/useLastWSNotification'
+import { FolderIcon } from '@/components/icons/FolderIcon'
+import { FileIcon } from '@/components/icons/FileIcon'
 import styles from './FileList.module.css'
-import { CopyText } from '../../components/CopyText/CopyText'
+import { CopyText } from '@/components/CopyText/CopyText'
 import { clsx } from 'clsx'
-import { toastInfo } from '../../components/NotificationCenter/ToastHelper'
+import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
 
 type ListType = { files: (IFile | IFolder)[]; meta: IMeta }
 
@@ -288,7 +288,6 @@ export const FilesListTable = ({
   homeScope,
   columnSizing,
   setColumnSizing,
-  filesMeta,
   metaPath,
   folderId,
   columnVisibility,

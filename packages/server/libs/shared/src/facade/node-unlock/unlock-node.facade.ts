@@ -5,6 +5,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
 import { PermissionError } from '@shared/errors'
@@ -22,6 +23,7 @@ export class UnlockNodeFacade {
     private readonly nodeHelper: NodeHelper,
     private readonly nodeService: NodeService,
     private readonly notificationService: NotificationService,
+    private readonly fileSyncQueueJobProducer: FileSyncQueueJobProducer,
   ) {}
 
   async unlockNodes(ids: number[], async?: boolean): Promise<void> {
@@ -63,6 +65,11 @@ export class UnlockNodeFacade {
         throw err
       }
     }
+  }
+
+  async unlockNodesAsync(ids: number[]): Promise<void> {
+    this.logger.log(`Asynchronously unlocking nodes ${ids}`)
+    await this.fileSyncQueueJobProducer.createUnlockNodesJobTask(ids, this.userCtx)
   }
 
   private async rollbackUnlockingState(nodes: Node[]): Promise<void> {

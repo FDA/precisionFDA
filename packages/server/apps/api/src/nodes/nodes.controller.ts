@@ -1,10 +1,5 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Body, Controller, Delete, HttpCode, Inject, Logger, Post, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { Body, Controller, Delete, HttpCode, Post, UseGuards } from '@nestjs/common'
 import { NodesInputDTO } from '@shared/domain/user-file/dto/nodes-input.dto'
-import { RequestNodesLockOperation } from '@shared/domain/user-file/ops/start-lock-nodes-job'
-import { RequestNodesUnlockOperation } from '@shared/domain/user-file/ops/start-unlock-nodes-job'
-import { UserOpsCtx } from '@shared/types'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
@@ -18,8 +13,6 @@ import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file
 export class NodesController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly logger: Logger,
     private readonly removeNodesFacade: RemoveNodesFacade,
     private readonly lockNodeFacade: LockNodeFacade,
     private readonly unlockNodeFacade: UnlockNodeFacade,
@@ -35,16 +28,10 @@ export class NodesController {
   @HttpCode(204)
   @Post('/lock')
   async lockNodes(@Body() input: NodesInputDTO): Promise<void> {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
     const { ids, async } = input
 
     if (async) {
-      await new RequestNodesLockOperation(opsCtx).execute({ ids })
+      await this.lockNodeFacade.lockNodesAsync(ids)
     } else {
       await this.lockNodeFacade.lockNodes(ids, async)
     }
@@ -53,16 +40,10 @@ export class NodesController {
   @HttpCode(204)
   @Post('/unlock')
   async unlockNodes(@Body() input: NodesInputDTO): Promise<void> {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
     const { ids, async } = input
 
     if (async) {
-      await new RequestNodesUnlockOperation(opsCtx).execute({ ids })
+      await this.unlockNodeFacade.unlockNodesAsync(ids)
     } else {
       await this.unlockNodeFacade.unlockNodes(ids, async)
     }

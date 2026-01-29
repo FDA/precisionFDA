@@ -5,6 +5,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
@@ -22,6 +23,7 @@ export class LockNodeFacade {
     private readonly nodeHelper: NodeHelper,
     private readonly nodeService: NodeService,
     private readonly notificationService: NotificationService,
+    private readonly fileSyncQueueJobProducer: FileSyncQueueJobProducer,
   ) {}
 
   async lockNodes(ids: number[], async?: boolean): Promise<void> {
@@ -49,6 +51,11 @@ export class LockNodeFacade {
 
       throw err
     }
+  }
+
+  async lockNodesAsync(ids: number[]): Promise<void> {
+    this.logger.log(`Asynchronously locking nodes ${ids}`)
+    await this.fileSyncQueueJobProducer.createLockNodesJobTask(ids, this.userCtx)
   }
 
   private notifyUserError(): Promise<void> {
