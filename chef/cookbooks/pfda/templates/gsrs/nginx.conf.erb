@@ -16,12 +16,17 @@ http {
   keepalive_timeout 120;
   send_timeout 120;
 
+  real_ip_header X-Forwarded-For;
+  set_real_ip_from 10.0.0.0/8;
+  real_ip_recursive on;
+
   include /etc/nginx/conf.d/json_analytics_log_format_for_prometheus.conf;
 
   log_format custom_format '$remote_addr - $remote_user [$time_local] '
     '"$request" $status $body_bytes_sent '
     'AUTH_EMAIL="$http_authentication_email" '
     'AUTH_NAME="$http_authentication_username" '
+    'XFF_HEADER="$http_x_forwarded_for" '
     'USER_AGENT="$http_user_agent"';
   access_log /var/log/nginx/access.log custom_format;
 
