@@ -6,13 +6,23 @@ import { ArrayUtils } from '@shared/utils/array.utils'
 import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
+import { WorkflowCountService } from '@shared/domain/workflow/service/workflow-count.service'
 
 @Injectable()
 export class WorkflowService implements SearchableByUid<'workflow'> {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly workflowRepository: WorkflowRepository,
+    private readonly workflowCountService: WorkflowCountService,
   ) {}
+
+  /**
+   * Count workflows based on the given scope filter context
+   */
+  async countByScope(context: ScopeFilterContext): Promise<number> {
+    return this.workflowCountService.count(context)
+  }
 
   getAccessibleEntityByUid(uid: Uid<'workflow'>): Promise<Workflow | null> {
     return this.workflowRepository.findAccessibleOne({ uid })

@@ -76,6 +76,9 @@ export class Job extends ScopedEntity {
   @Property()
   entityType: number
 
+  @Property({ default: false })
+  featured: boolean
+
   @Property()
   terminationEmailSent: boolean
 

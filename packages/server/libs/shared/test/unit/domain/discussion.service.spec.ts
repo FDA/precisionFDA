@@ -66,12 +66,16 @@ describe('DiscussionService tests', () => {
       findAccessibleOne: findAccessibleOneStub,
     } as unknown as DiscussionRepository
 
+    const discussionCountService = {
+      count: stub().resolves(0),
+    } as any
     discussionService = new DiscussionService(
       em,
       userContext,
       discussionRepository,
       discussionReplyRepository,
       entityLinkService,
+      discussionCountService,
     )
 
     findOneStub.reset()
@@ -341,12 +345,16 @@ describe('DiscussionService tests', () => {
       loadEntity: (): null => null,
     }
 
+    const discussionCountService = {
+      count: stub().resolves(0),
+    } as any
     discussionService = new DiscussionService(
       em,
       adminUserCtx,
       discussionRepository,
       discussionReplyRepository,
       entityLinkService,
+      discussionCountService,
     )
 
     await discussionService.deleteDiscussion(discussion.id)

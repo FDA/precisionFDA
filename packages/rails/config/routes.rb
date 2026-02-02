@@ -415,13 +415,6 @@ Rails.application.routes.draw do
         resources :comments
       end
 
-      resource :counters do
-        get :index
-        get :featured
-        get :everybody
-        get :spaces
-      end
-
       resources :notification_preferences do
         get :index
         post "change", on: :collection

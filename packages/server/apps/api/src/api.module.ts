@@ -12,6 +12,7 @@ import { AdminApiModule } from './admin/admin.api.module'
 import { AlertsApiModule } from './alerts/alerts.api.module'
 import { AppApiModule } from './apps/app.api.module'
 import { ChallengeApiModule } from './challenges/challenge.api.module'
+import { CountersApiModule } from './counters/counters.api.module'
 import { CliApiModule } from './cli/cli.api.module'
 import { DataPortalsApiModule } from './data-portals/data-portals.api.module'
 import { DbClusterApiModule } from './dbclusters/dbcluster.api.module'
@@ -65,6 +66,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     AppApiModule,
     ChallengeApiModule,
     CliApiModule,
+    CountersApiModule,
     DataPortalsApiModule,
     DbClusterApiModule,
     DebugApiModule,

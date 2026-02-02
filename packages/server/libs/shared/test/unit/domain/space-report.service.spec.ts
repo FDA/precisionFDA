@@ -346,6 +346,7 @@ describe('SpaceReportService', () => {
       } as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
       const notificationService = {} as unknown as NotificationService
+      const spaceReportCountService = { count: stub().resolves(0) } as any
 
       return new SpaceReportService(
         em,
@@ -353,6 +354,7 @@ describe('SpaceReportService', () => {
         spaceReportResultService,
         USER,
         notificationService,
+        spaceReportCountService,
       )
     }
   })
@@ -395,6 +397,7 @@ describe('SpaceReportService', () => {
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
       const notificationService = {} as unknown as NotificationService
+      const spaceReportCountService = { count: stub().resolves(0) } as any
 
       return new SpaceReportService(
         em,
@@ -402,6 +405,7 @@ describe('SpaceReportService', () => {
         spaceReportResultService,
         null,
         notificationService,
+        spaceReportCountService,
       )
     }
   })
@@ -627,6 +631,7 @@ describe('SpaceReportService', () => {
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
       const notificationService = {} as unknown as NotificationService
+      const spaceReportCountService = { count: stub().resolves(0) } as any
 
       return new SpaceReportService(
         em,
@@ -634,6 +639,7 @@ describe('SpaceReportService', () => {
         spaceReportResultService,
         USER,
         notificationService,
+        spaceReportCountService,
       )
     }
   })
@@ -712,6 +718,7 @@ describe('SpaceReportService', () => {
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
       const notificationService = {} as unknown as NotificationService
+      const spaceReportCountService = { count: stub().resolves(0) } as any
 
       return new SpaceReportService(
         em,
@@ -719,6 +726,7 @@ describe('SpaceReportService', () => {
         spaceReportResultService,
         null,
         notificationService,
+        spaceReportCountService,
       )
     }
   })
@@ -762,6 +770,7 @@ describe('SpaceReportService', () => {
       } as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
       const notificationService = {} as unknown as NotificationService
+      const spaceReportCountService = { count: stub().resolves(0) } as any
 
       return new SpaceReportService(
         em,
@@ -769,6 +778,7 @@ describe('SpaceReportService', () => {
         spaceReportResultService,
         null,
         notificationService,
+        spaceReportCountService,
       )
     }
   })
@@ -818,6 +828,7 @@ describe('SpaceReportService', () => {
         generateResult: generateResultStub,
       } as unknown as SpaceReportResultService
       const notificationService = {} as unknown as NotificationService
+      const spaceReportCountService = { count: stub().resolves(0) } as any
 
       return new SpaceReportService(
         em,
@@ -825,6 +836,7 @@ describe('SpaceReportService', () => {
         spaceReportResultService,
         null,
         notificationService,
+        spaceReportCountService,
       )
     }
   })
@@ -876,6 +888,7 @@ describe('SpaceReportService', () => {
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
       const notificationService = {} as unknown as NotificationService
+      const spaceReportCountService = { count: stub().resolves(0) } as any
 
       return new SpaceReportService(
         em,
@@ -883,6 +896,7 @@ describe('SpaceReportService', () => {
         spaceReportResultService,
         null,
         notificationService,
+        spaceReportCountService,
       )
     }
   })
@@ -988,6 +1002,7 @@ describe('SpaceReportService', () => {
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
       const notificationService = {} as unknown as NotificationService
+      const spaceReportCountService = { count: stub().resolves(0) } as any
 
       return new SpaceReportService(
         em,
@@ -995,6 +1010,7 @@ describe('SpaceReportService', () => {
         spaceReportResultService,
         USER,
         notificationService,
+        spaceReportCountService,
       )
     }
   })
@@ -1084,6 +1100,7 @@ describe('SpaceReportService', () => {
       const notificationService = {
         createNotification: createNotificationStub,
       } as unknown as NotificationService
+      const spaceReportCountService = { count: stub().resolves(0) } as any
 
       return new SpaceReportService(
         em,
@@ -1091,6 +1108,7 @@ describe('SpaceReportService', () => {
         spaceReportResultService,
         null,
         notificationService,
+        spaceReportCountService,
       )
     }
   })

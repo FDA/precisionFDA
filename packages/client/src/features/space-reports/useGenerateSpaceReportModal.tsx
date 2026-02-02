@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { FormEvent, useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -24,6 +24,7 @@ const StyledRadio = styled(Radio)`
 
 export function useGenerateSpaceReportModal({ scope, onClose }: { scope: string; onClose?: () => void }) {
   const { isShown, setShowModal } = useModal()
+  const queryClient = useQueryClient()
 
   const [reportFormat, setReportFormat] = useState<SpaceReportFormat>('HTML')
   const [options, setOptions] = useState<SpaceReportFormatToOptionsMap[SpaceReportFormat]>()
@@ -37,6 +38,8 @@ export function useGenerateSpaceReportModal({ scope, onClose }: { scope: string;
     mutationKey: ['generate-space-report'],
     mutationFn: () => createReport(scope, reportFormat, options),
     onSuccess: async () => {
+      // Invalidate counters to refresh report count in sidebar
+      await queryClient.invalidateQueries({ queryKey: ['counters'] })
       close()
     },
     onError: (e: AxiosError<{ error: { message: string } }>) => {

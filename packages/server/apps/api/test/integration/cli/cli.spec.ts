@@ -704,6 +704,7 @@ describe('/cli', async () => {
     it('POST /properties sets properties on all node types', async () => {
       const file = create.filesHelper.createUploaded(em, { user })
       const asset = create.filesHelper.createAsset(em, { user })
+      await em.flush()
       const folder = create.filesHelper.createFolder(em, { user })
       await em.flush()
 

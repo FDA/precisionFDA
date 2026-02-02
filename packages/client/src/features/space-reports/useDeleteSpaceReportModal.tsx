@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
@@ -19,6 +19,7 @@ const StyledReportTable = styled(StyledTable)`
 
 export function useDeleteSpaceReportModal({ selected, onClose }: { selected: ISpaceReport[]; onClose?: () => void }) {
   const { isShown, setShowModal } = useModal()
+  const queryClient = useQueryClient()
 
   const close = () => {
     if (onClose) onClose()
@@ -33,7 +34,9 @@ export function useDeleteSpaceReportModal({ selected, onClose }: { selected: ISp
     onError: () => {
       toastError('Error: Deleting space reports')
     },
-    onSuccess: res => {
+    onSuccess: async res => {
+      // Invalidate counters to refresh report count in sidebar
+      await queryClient.invalidateQueries({ queryKey: ['counters'] })
       close()
       toastSuccess(`${itemsCountString('report', res?.length ?? 0)} deleted`)
     },

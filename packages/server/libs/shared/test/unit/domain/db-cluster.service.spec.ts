@@ -230,7 +230,10 @@ describe('DbClusterService', () => {
     const notificationService = {
       createNotification: createNotificationStub,
     } as unknown as NotificationService
+    const dbClusterCountService = {
+      count: stub().resolves(0),
+    } as any
 
-    return new DbClusterService(em, dbClusterRepo, userContext, notificationService)
+    return new DbClusterService(em, dbClusterRepo, userContext, notificationService, dbClusterCountService)
   }
 })

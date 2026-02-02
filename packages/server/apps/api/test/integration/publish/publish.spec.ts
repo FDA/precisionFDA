@@ -21,8 +21,11 @@ describe('Publish Controller', () => {
     const user = create.userHelper.createSiteAdmin(em)
     create.sessionHelper.create(em, { user })
     const folder = create.filesHelper.createLocalOnlyFolder(em, { user }, {})
+    await em.flush()
     const childFile = create.filesHelper.create(em, { user, parentFolder: folder })
+    await em.flush()
     const childFolder = create.filesHelper.createLocalOnlyFolder(em, { user, parentFolder: folder })
+    await em.flush()
     const childFolderFile = create.filesHelper.create(em, {
       user,
       parentFolder: childFolder,

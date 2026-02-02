@@ -67,6 +67,9 @@ export class Node extends ScopedEntity {
   @Property()
   parentId: number
 
+  @Property({ default: false })
+  featured: boolean
+
   @Enum({ items: () => PARENT_TYPE, fieldName: 'parent_type' })
   parentType: PARENT_TYPE
 

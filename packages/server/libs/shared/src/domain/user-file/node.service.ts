@@ -31,6 +31,9 @@ import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { CountStats } from '@shared/database/statistics.type'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
+import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
+import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
 
 @Injectable()
 export class NodeService {
@@ -46,7 +49,23 @@ export class NodeService {
     private readonly nodeRepository: NodeRepository,
     private readonly userRepository: UserRepository,
     private readonly nodeHelper: NodeHelper,
+    private readonly fileCountService: FileCountService,
+    private readonly assetCountService: AssetCountService,
   ) {}
+
+  /**
+   * Count files based on the given scope filter context
+   */
+  async countFiles(context: ScopeFilterContext): Promise<number> {
+    return this.fileCountService.count(context)
+  }
+
+  /**
+   * Count assets based on the given scope filter context
+   */
+  async countAssets(context: ScopeFilterContext): Promise<number> {
+    return this.assetCountService.count(context)
+  }
 
   getAccessibleEntityByUid(uid: Uid<'file'>): Promise<FileOrAsset> {
     return this.nodeRepository.findAccessibleOne({

@@ -150,8 +150,14 @@ export const useAppSelectionActions = ({
         queryKey: ['apps'],
       })
       if (spaceId) {
+        queryClient.invalidateQueries({
+          queryKey: ['space', spaceId],
+        })
         navigate(`/spaces/${spaceId}/apps`)
       } else {
+        queryClient.invalidateQueries({
+          queryKey: ['counters'],
+        })
         navigate(`/home/apps?scope=${homeScope}`)
       }
       if (resetSelected) resetSelected()

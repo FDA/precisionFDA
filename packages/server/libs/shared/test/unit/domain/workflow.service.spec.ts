@@ -101,7 +101,11 @@ describe('WorkflowService', () => {
     const em = {
       find: findStub,
     } as unknown as SqlEntityManager
+    const workflowRepository = {} as any
+    const workflowCountService = {
+      count: stub().resolves(0),
+    } as any
 
-    return new WorkflowService(em)
+    return new WorkflowService(em, workflowRepository, workflowCountService)
   }
 })

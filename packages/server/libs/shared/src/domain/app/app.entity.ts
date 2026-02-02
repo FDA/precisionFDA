@@ -74,6 +74,9 @@ export class App extends ScopedEntity {
   @Property()
   verified: boolean
 
+  @Property({ default: false })
+  featured: boolean
+
   @Property({ unique: true })
   uid: Uid<'app'>
 
