@@ -339,6 +339,7 @@ describe('/nodes', async () => {
 
     it('removes a folder with files inside', async () => {
       const folder = create.filesHelper.createFolder(em, { user })
+      await em.flush()
       const file1 = create.filesHelper.createUploaded(em, { user, parentFolder: folder })
       const file2 = create.filesHelper.createUploaded(em, { user, parentFolder: folder })
       await em.flush()

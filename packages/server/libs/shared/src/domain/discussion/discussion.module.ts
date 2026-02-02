@@ -15,6 +15,8 @@ import { SpaceModule } from '@shared/domain/space/space.module'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { DiscussionReplyModule } from '../discussion-reply/discussion-reply.module'
+import { DiscussionCountService } from '@shared/domain/discussion/services/discussion-count.service'
+import { DiscussionScopeFilterProvider } from '@shared/domain/discussion/discussion-scope-filter.provider'
 
 @Module({
   imports: [
@@ -32,7 +34,12 @@ import { DiscussionReplyModule } from '../discussion-reply/discussion-reply.modu
     ComparisonModule,
     MikroOrmModule.forFeature([Discussion]),
   ],
-  providers: [PublisherService, DiscussionService],
-  exports: [DiscussionService, PublisherService, MikroOrmModule],
+  providers: [
+    PublisherService,
+    DiscussionService,
+    DiscussionCountService,
+    DiscussionScopeFilterProvider,
+  ],
+  exports: [DiscussionService, PublisherService],
 })
 export class DiscussionModule {}

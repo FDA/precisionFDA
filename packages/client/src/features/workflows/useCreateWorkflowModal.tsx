@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import styled from 'styled-components'
 import { InputText } from '../../components/InputText'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
@@ -17,6 +17,7 @@ const StyledForm = styled.div`
 `
 
 export const useCreateWorkflowModal = () => {
+  const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const [workflowName, setWorkflowName] = useState('')
   const mutation = useMutation({ 
@@ -25,6 +26,12 @@ export const useCreateWorkflowModal = () => {
     onSuccess: () => {
       setShowModal(false)
       setWorkflowName('')
+      queryClient.invalidateQueries({
+        queryKey: ['workflows'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['counters'],
+      })
     },
   })
 

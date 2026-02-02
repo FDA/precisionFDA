@@ -9,6 +9,8 @@ import { SpaceReportResultModule } from '@shared/domain/space-report/service/res
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
 import { TimeUtils } from '@shared/utils/time.utils'
+import { SpaceReportCountService } from '@shared/domain/space-report/service/space-report-count.service'
+import { SpaceReportScopeFilterProvider } from '@shared/domain/space-report/space-report-scope-filter.provider'
 
 @Module({
   imports: [
@@ -26,7 +28,13 @@ import { TimeUtils } from '@shared/utils/time.utils'
     MikroOrmModule.forFeature([SpaceReport]),
     NotificationModule,
   ],
-  providers: [SpaceReportService, SpaceReportPartService, SpaceReportQueueJobProducer],
+  providers: [
+    SpaceReportService,
+    SpaceReportPartService,
+    SpaceReportQueueJobProducer,
+    SpaceReportCountService,
+    SpaceReportScopeFilterProvider,
+  ],
   exports: [SpaceReportService, BullQueueModule, MikroOrmModule, SpaceReportQueueJobProducer],
 })
 export class SpaceReportModule {}

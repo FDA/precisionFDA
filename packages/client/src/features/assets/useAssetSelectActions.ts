@@ -68,6 +68,9 @@ export const useAssetActions = ({
       queryClient.invalidateQueries({
         queryKey: ['assets'],
       })
+      queryClient.invalidateQueries({
+        queryKey: ['counters'],
+      })
       navigate('/home/assets')
       if (resetSelected) resetSelected()
     },

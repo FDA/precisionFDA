@@ -71,6 +71,7 @@ describe('UserFileResolverFacade', () => {
       { user: user1 },
       { name: 'invalid_folder' },
     )
+    await em.flush()
     const file = await create.filesHelper.create(
       em,
       { user: user1, parentFolder: folder },
@@ -102,6 +103,7 @@ describe('UserFileResolverFacade', () => {
         { user: user1, parentFolder: folder1 },
         { name: 'folder2' },
       )
+      await em.flush()
       const rootFile = create.filesHelper.create(em, { user: user1 }, { name: 'rootFile' })
       const file1 = create.filesHelper.create(
         em,
@@ -113,12 +115,14 @@ describe('UserFileResolverFacade', () => {
         { user: user1, parentFolder: folder2 },
         { name: 'file2' },
       )
+      await em.flush()
       const folder1User2 = create.filesHelper.createFolder(em, { user: user2 }, { name: 'folder1' })
       const folder2User2 = create.filesHelper.createFolder(
         em,
         { user: user2, parentFolder: folder1User2 },
         { name: 'folder2' },
       )
+      await em.flush()
       const file1User2 = create.filesHelper.create(
         em,
         { user: user2, parentFolder: folder1User2 },
@@ -197,6 +201,7 @@ describe('UserFileResolverFacade', () => {
         { user: user1 },
         { name: 'test_conflicting_path' },
       )
+      await em.flush()
       const file = create.filesHelper.create(em, { user: user1 }, { name: 'test_conflicting_path' })
       await em.flush()
 
@@ -279,16 +284,19 @@ describe('UserFileResolverFacade', () => {
         { user: user1 },
         { name: 'space_folder1', scope: `space-${spaceUser1.id}` },
       )
+      await em.flush()
       const spaceFileUser1 = create.filesHelper.create(
         em,
         { user: user1, parentFolder: spaceFolderUser1 },
         { name: 'space_file1', scope: `space-${spaceUser1.id}` },
       )
+      await em.flush()
       const spaceFolderUser2 = create.filesHelper.createFolder(
         em,
         { user: user2 },
         { name: 'space_folder1', scope: `space-${spaceUser2.id}` },
       )
+      await em.flush()
       const spaceFileUser2 = create.filesHelper.create(
         em,
         { user: user2, parentFolder: spaceFolderUser2 },
@@ -395,6 +403,7 @@ describe('UserFileResolverFacade', () => {
         { user: publicUser, parentFolder: publicFolder },
         { name: 'public_child_folder', scope: STATIC_SCOPE.PUBLIC },
       )
+      await em.flush()
       const publicFile = create.filesHelper.create(
         em,
         { user: publicUser },

@@ -152,6 +152,7 @@ describe('PublisherService tests', () => {
 
   it('publish folder to public', async () => {
     const folder = create.filesHelper.createFolder(em, { user }, {})
+    await em.flush()
     const node = create.filesHelper.create(em, { user }, {})
     await em.flush()
     await publisherService.publishNodes([node, folder])

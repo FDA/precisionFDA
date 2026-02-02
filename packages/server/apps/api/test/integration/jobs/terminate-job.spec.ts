@@ -51,6 +51,7 @@ describe('PATCH /jobs/:id/terminate', () => {
       project: job.project,
       state: JOB_STATE.TERMINATING,
       name: job.name,
+      featured: false,
       scope: job.scope,
       provenance: null,
       entityType: ENTITY_TYPE.HTTPS,

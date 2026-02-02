@@ -1,7 +1,6 @@
 import { stub } from 'sinon'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { expect } from 'chai'
-import { EntityService } from '@shared/domain/entity/entity.service'
 import { NoteRepository } from '@shared/domain/note/note.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { AppRepository } from '@shared/domain/app/app.repository'
@@ -60,7 +59,6 @@ describe('AttachmentManagementFacade', () => {
   const findAttachmentStub = stub()
   const findOneAttachmentStub = stub()
 
-  const entityService = {} as unknown as EntityService
   const noteRepository = {
     findEditableOne: findEditableOneNoteStub,
     findAccessibleOne: findAccessibleOneNoteStub,
@@ -102,7 +100,6 @@ describe('AttachmentManagementFacade', () => {
       jobRepository,
       comparisonRepository,
       attachmentsRepository,
-      entityService,
     )
 
     findEditableOneNoteStub.reset()
@@ -141,6 +138,7 @@ describe('AttachmentManagementFacade', () => {
     app = create.appHelper.createRegular(em, { user }, { scope: SPACE_SCOPE })
     job = create.jobHelper.create(em, { user }, { scope: SPACE_SCOPE })
     asset = create.assetHelper.create(em, { user }, { scope: SPACE_SCOPE })
+    await em.flush()
     folder = create.filesHelper.createFolder(em, { user }, { scope: SPACE_SCOPE })
     comparison = create.comparisonHelper.create(em, { app, user }, { scope: SPACE_SCOPE })
     await em.flush()

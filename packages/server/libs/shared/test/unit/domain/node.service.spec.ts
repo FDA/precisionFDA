@@ -60,6 +60,12 @@ describe('NodeService', () => {
       findOne: stub().resolves(user),
     } as unknown as UserRepository
     const userCtx = { id: user.id } as unknown as UserContext
+    const fileCountService = {
+      count: stub().resolves(0),
+    } as any
+    const assetCountService = {
+      count: stub().resolves(0),
+    } as any
     return new NodeService(
       em,
       userCtx,
@@ -69,6 +75,8 @@ describe('NodeService', () => {
       nodeRepository,
       userRepository,
       nodeHelper,
+      fileCountService,
+      assetCountService,
     )
   }
 

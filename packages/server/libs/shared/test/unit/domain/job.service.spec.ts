@@ -454,6 +454,9 @@ describe('Job service tests', () => {
   })
 
   const getJobServiceInstance = (platformClient: PlatformClient): JobService => {
+    const jobCountService = {
+      count: stub().resolves(0),
+    } as any
     return new JobService(
       em,
       userCtx,
@@ -466,6 +469,7 @@ describe('Job service tests', () => {
       spaceRepo,
       spaceMembershipRepo,
       eventHelper,
+      jobCountService,
     )
   }
 })

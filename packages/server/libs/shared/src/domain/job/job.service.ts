@@ -7,6 +7,7 @@ import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-u
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { JobCountService } from '@shared/domain/job/services/job-count.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
@@ -33,6 +34,7 @@ import { EventHelper } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { JobRepository } from './job.repository'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 
 @Injectable()
 export class JobService implements SearchableByUid<'job'> {
@@ -51,7 +53,15 @@ export class JobService implements SearchableByUid<'job'> {
     private readonly spaceRepo: SpaceRepository,
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
     private readonly eventHelper: EventHelper,
+    private readonly jobCountService: JobCountService,
   ) {}
+
+  /**
+   * Count jobs based on the given scope filter context
+   */
+  async countByScope(context: ScopeFilterContext): Promise<number> {
+    return this.jobCountService.count(context)
+  }
 
   getAccessibleEntityByUid(uid: Uid<'job'>): Promise<Job | null> {
     return this.jobRepo.findAccessibleOne({ uid })

@@ -11,6 +11,8 @@ import { JobLogService } from './services/job-log.service'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { JobCountService } from '@shared/domain/job/services/job-count.service'
+import { JobScopeFilterProvider } from '@shared/domain/job/job-scope-filter.provider'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { EventModule } from '@shared/domain/event/event.module'
@@ -27,7 +29,7 @@ const imports = [
 
 @Module({
   imports,
-  providers: [JobService, JobLogService, JobSynchronizationService],
+  providers: [JobService, JobLogService, JobSynchronizationService, JobCountService, JobScopeFilterProvider],
   exports: [JobService, JobLogService, JobSynchronizationService],
 })
 export class JobServiceModule {

@@ -80,8 +80,14 @@ export const useWorkflowSelectActions = ({
         queryKey: ['workflows'],
       })
       if (spaceId) {
+        queryClient.invalidateQueries({
+          queryKey: ['space', spaceId],
+        })
         navigate(`/spaces/${spaceId}/workflows`)
       } else {
+        queryClient.invalidateQueries({
+          queryKey: ['counters'],
+        })
         navigate('/home/workflows')
       }
       if (resetSelected) resetSelected()

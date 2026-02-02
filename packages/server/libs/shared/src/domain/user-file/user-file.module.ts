@@ -25,6 +25,10 @@ import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
 import { FolderService } from '@shared/domain/user-file/folder.service'
 import { EventModule } from '@shared/domain/event/event.module'
 import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
+import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
+import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
+import { FileScopeFilterProvider } from '@shared/domain/user-file/service/file-scope-filter.provider'
+import { AssetScopeFilterProvider } from '@shared/domain/user-file/service/asset-scope-filter.provider'
 
 @Module({
   imports: [
@@ -64,6 +68,10 @@ import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.serv
     UrlFetchService,
     NodeHelper,
     FileSyncQueueJobProducer,
+    FileCountService,
+    AssetCountService,
+    FileScopeFilterProvider,
+    AssetScopeFilterProvider,
   ],
   exports: [
     NodeService,

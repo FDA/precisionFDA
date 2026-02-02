@@ -27,6 +27,8 @@ import { CreateReplyDTO } from '../dto/create-reply.dto'
 import { DiscussionReplyDTO } from '../dto/discussion-reply.dto'
 import { SimpleDiscussionDTO } from '../dto/simple-discussion.dto'
 import { UpdateReplyDTO } from '../dto/update-reply.dto'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
+import { DiscussionCountService } from '@shared/domain/discussion/services/discussion-count.service'
 
 @Injectable()
 export class DiscussionService {
@@ -39,7 +41,15 @@ export class DiscussionService {
     private readonly discussionRepository: DiscussionRepository,
     private readonly discussionReplyRepository: DiscussionReplyRepository,
     private readonly entityLinkService: EntityLinkService,
+    private readonly discussionCountService: DiscussionCountService,
   ) {}
+
+  /**
+   * Count discussions based on the given scope filter context
+   */
+  async countByScope(context: ScopeFilterContext): Promise<number> {
+    return this.discussionCountService.count(context)
+  }
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
     const discussion = await this.discussionRepository.findAccessibleOne({ id: discussionId })

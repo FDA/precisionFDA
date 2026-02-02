@@ -27,6 +27,8 @@ import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-u
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
+import { DbClusterCountService } from '@shared/domain/db-cluster/service/db-cluster-count.service'
 
 @Injectable()
 export class DbClusterService implements SearchableByUid<'dbcluster'> {
@@ -38,7 +40,15 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
     private readonly dbClusterRepo: DbClusterRepository,
     private readonly userContext: UserContext,
     private readonly notificationService: NotificationService,
+    private readonly dbClusterCountService: DbClusterCountService,
   ) {}
+
+  /**
+   * Count db clusters based on the given scope filter context
+   */
+  async countByScope(context: ScopeFilterContext): Promise<number> {
+    return this.dbClusterCountService.count(context)
+  }
   getAccessibleEntityByUid(uid: Uid<'dbcluster'>): Promise<DbCluster | null> {
     return this.dbClusterRepo.findAccessibleOne({ uid: uid })
   }

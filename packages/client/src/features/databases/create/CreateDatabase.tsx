@@ -111,6 +111,15 @@ export const CreateDatabase = ({ spaceId, homeScope }: { spaceId?: number; homeS
         queryClient.invalidateQueries({
           queryKey: ['dbclusters'],
         })
+        if (spaceId) {
+          queryClient.invalidateQueries({
+            queryKey: ['space', spaceId.toString()],
+          })
+        } else {
+          queryClient.invalidateQueries({
+            queryKey: ['counters'],
+          })
+        }
         toastSuccess('Database created')
       }
     },

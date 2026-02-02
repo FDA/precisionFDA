@@ -29,6 +29,8 @@ import { SpaceReport } from '../entity/space-report.entity'
 import { BatchComplete } from '../model/batch-complete'
 import { SpaceReportPartSource } from '../model/space-report-part-source'
 import { SpaceReportPartService } from './part/space-report-part.service'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
+import { SpaceReportCountService } from '@shared/domain/space-report/service/space-report-count.service'
 
 @Injectable()
 export class SpaceReportService {
@@ -41,7 +43,15 @@ export class SpaceReportService {
     private readonly spaceReportResultService: SpaceReportResultService,
     private readonly user: UserContext,
     private readonly notificationService: NotificationService,
+    private readonly spaceReportCountService: SpaceReportCountService,
   ) {}
+
+  /**
+   * Count space reports based on the given scope filter context
+   */
+  async countByScope(context: ScopeFilterContext): Promise<number> {
+    return this.spaceReportCountService.count(context)
+  }
 
   async createReport({ format, options, scope }: SpaceReportCreateDto) {
     if (scope == null) {

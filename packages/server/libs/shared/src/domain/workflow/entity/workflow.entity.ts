@@ -27,6 +27,9 @@ export class Workflow extends BaseEntity {
   @Property()
   scope: string
 
+  @Property({ default: false })
+  featured: boolean
+
   @Property()
   uid: Uid<'workflow'>
 
