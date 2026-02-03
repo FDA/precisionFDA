@@ -1,23 +1,23 @@
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { WorkflowScopeFilterProvider } from '@shared/domain/workflow/workflow-scope-filter.provider'
+import { WorkflowSeriesScopeFilterProvider } from '@shared/domain/workflow-series/workflow-series-scope-filter.provider'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
 
-describe('WorkflowScopeFilterProvider', () => {
+describe('WorkflowSeriesScopeFilterProvider', () => {
   const USER_ID = 1
   const USER = { id: USER_ID } as unknown as User
   const SPACE_SCOPES: SpaceScope[] = ['space-1', 'space-2']
 
-  let provider: WorkflowScopeFilterProvider
+  let provider: WorkflowSeriesScopeFilterProvider
 
   beforeEach(() => {
-    provider = new WorkflowScopeFilterProvider()
+    provider = new WorkflowSeriesScopeFilterProvider()
   })
 
   describe('#buildWhereCondition', () => {
     describe('HOME_SCOPE.ME', () => {
-      it('should return condition for private workflows owned by user', () => {
+      it('should return condition for private workflow series owned by user (excluding deleted)', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.ME,
@@ -27,6 +27,7 @@ describe('WorkflowScopeFilterProvider', () => {
         const result = provider.buildWhereCondition(context)
 
         expect(result).to.deep.equal({
+          deleted: false,
           user: USER_ID,
           scope: STATIC_SCOPE.PRIVATE,
         })
@@ -34,7 +35,7 @@ describe('WorkflowScopeFilterProvider', () => {
     })
 
     describe('HOME_SCOPE.FEATURED', () => {
-      it('should return condition for featured public workflows', () => {
+      it('should return condition for featured public workflow series (excluding deleted)', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.FEATURED,
@@ -44,6 +45,7 @@ describe('WorkflowScopeFilterProvider', () => {
         const result = provider.buildWhereCondition(context)
 
         expect(result).to.deep.equal({
+          deleted: false,
           featured: true,
           scope: STATIC_SCOPE.PUBLIC,
         })
@@ -51,7 +53,7 @@ describe('WorkflowScopeFilterProvider', () => {
     })
 
     describe('HOME_SCOPE.EVERYBODY', () => {
-      it('should return condition for all public workflows', () => {
+      it('should return condition for all public workflow series (excluding deleted)', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.EVERYBODY,
@@ -61,13 +63,14 @@ describe('WorkflowScopeFilterProvider', () => {
         const result = provider.buildWhereCondition(context)
 
         expect(result).to.deep.equal({
+          deleted: false,
           scope: STATIC_SCOPE.PUBLIC,
         })
       })
     })
 
     describe('HOME_SCOPE.SPACES', () => {
-      it('should return condition for workflows in accessible spaces', () => {
+      it('should return condition for workflow series in accessible spaces (excluding deleted)', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.SPACES,
@@ -77,6 +80,7 @@ describe('WorkflowScopeFilterProvider', () => {
         const result = provider.buildWhereCondition(context)
 
         expect(result).to.deep.equal({
+          deleted: false,
           scope: { $in: SPACE_SCOPES },
         })
       })

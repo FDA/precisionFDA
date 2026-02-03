@@ -11,7 +11,7 @@ import { NodeService } from '@shared/domain/user-file/node.service'
 import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
 import { JobService } from '@shared/domain/job/job.service'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
+import { WorkflowSeriesService } from '@shared/domain/workflow-series/service/workflow-series.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 
@@ -26,7 +26,7 @@ export class CountersFacade {
     private readonly appSeriesService: AppSeriesService,
     private readonly jobService: JobService,
     private readonly dbClusterService: DbClusterService,
-    private readonly workflowService: WorkflowService,
+    private readonly workflowSeriesService: WorkflowSeriesService,
     private readonly spaceReportService: SpaceReportService,
     private readonly discussionService: DiscussionService,
   ) {}
@@ -50,7 +50,7 @@ export class CountersFacade {
         this.nodeService.countAssets(context),
         this.jobService.countByScope(context),
         this.dbClusterService.countByScope(context),
-        this.workflowService.countByScope(context),
+        this.workflowSeriesService.countByScope(context),
         this.spaceReportService.countByScope(context),
         this.discussionService.countByScope(context),
       ])
