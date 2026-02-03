@@ -37,7 +37,7 @@ describe('AppSeriesCountService', () => {
 
   describe('#count', () => {
     describe('ME scope', () => {
-      it('should query app series with correct filters for ME scope', async () => {
+      it('should query app series with correct filters for ME scope (excluding deleted)', async () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.ME,
@@ -50,6 +50,7 @@ describe('AppSeriesCountService', () => {
         expect(countCalls).to.have.lengthOf(1)
         const appCall = countCalls[0]
         expect(appCall.where).to.deep.include({
+          deleted: false,
           user: USER_ID,
           scope: STATIC_SCOPE.PRIVATE,
         })
@@ -57,7 +58,7 @@ describe('AppSeriesCountService', () => {
     })
 
     describe('FEATURED scope', () => {
-      it('should query app series with featured filter', async () => {
+      it('should query app series with featured filter (excluding deleted)', async () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.FEATURED,
@@ -69,6 +70,7 @@ describe('AppSeriesCountService', () => {
         expect(result).to.eq(2)
         const appCall = countCalls[0]
         expect(appCall.where).to.deep.include({
+          deleted: false,
           featured: true,
           scope: STATIC_SCOPE.PUBLIC,
         })
@@ -76,7 +78,7 @@ describe('AppSeriesCountService', () => {
     })
 
     describe('EVERYBODY scope', () => {
-      it('should query app series with public scope', async () => {
+      it('should query app series with public scope (excluding deleted)', async () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.EVERYBODY,
@@ -88,13 +90,14 @@ describe('AppSeriesCountService', () => {
         expect(result).to.eq(2)
         const appCall = countCalls[0]
         expect(appCall.where).to.deep.include({
+          deleted: false,
           scope: STATIC_SCOPE.PUBLIC,
         })
       })
     })
 
     describe('SPACES scope', () => {
-      it('should query app series with space scopes', async () => {
+      it('should query app series with space scopes (excluding deleted)', async () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.SPACES,
@@ -106,6 +109,7 @@ describe('AppSeriesCountService', () => {
         expect(result).to.eq(2)
         const appCall = countCalls[0]
         expect(appCall.where).to.deep.include({
+          deleted: false,
           scope: { $in: SPACE_SCOPES },
         })
       })

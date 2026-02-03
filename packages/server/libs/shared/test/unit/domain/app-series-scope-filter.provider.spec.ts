@@ -17,7 +17,7 @@ describe('AppSeriesScopeFilterProvider', () => {
 
   describe('#buildWhereCondition', () => {
     describe('HOME_SCOPE.ME', () => {
-      it('should return condition for private app series owned by user', () => {
+      it('should return condition for private app series owned by user (excluding deleted)', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.ME,
@@ -27,6 +27,7 @@ describe('AppSeriesScopeFilterProvider', () => {
         const result = provider.buildWhereCondition(context)
 
         expect(result).to.deep.equal({
+          deleted: false,
           user: USER_ID,
           scope: STATIC_SCOPE.PRIVATE,
         })
@@ -34,7 +35,7 @@ describe('AppSeriesScopeFilterProvider', () => {
     })
 
     describe('HOME_SCOPE.FEATURED', () => {
-      it('should return condition for featured public app series', () => {
+      it('should return condition for featured public app series (excluding deleted)', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.FEATURED,
@@ -44,6 +45,7 @@ describe('AppSeriesScopeFilterProvider', () => {
         const result = provider.buildWhereCondition(context)
 
         expect(result).to.deep.equal({
+          deleted: false,
           featured: true,
           scope: STATIC_SCOPE.PUBLIC,
         })
@@ -51,7 +53,7 @@ describe('AppSeriesScopeFilterProvider', () => {
     })
 
     describe('HOME_SCOPE.EVERYBODY', () => {
-      it('should return condition for all public app series', () => {
+      it('should return condition for all public app series (excluding deleted)', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.EVERYBODY,
@@ -61,13 +63,14 @@ describe('AppSeriesScopeFilterProvider', () => {
         const result = provider.buildWhereCondition(context)
 
         expect(result).to.deep.equal({
+          deleted: false,
           scope: STATIC_SCOPE.PUBLIC,
         })
       })
     })
 
     describe('HOME_SCOPE.SPACES', () => {
-      it('should return condition for app series in accessible spaces', () => {
+      it('should return condition for app series in accessible spaces (excluding deleted)', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.SPACES,
@@ -77,6 +80,7 @@ describe('AppSeriesScopeFilterProvider', () => {
         const result = provider.buildWhereCondition(context)
 
         expect(result).to.deep.equal({
+          deleted: false,
           scope: { $in: SPACE_SCOPES },
         })
       })

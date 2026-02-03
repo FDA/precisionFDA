@@ -4,10 +4,10 @@ import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { stub, SinonStub } from 'sinon'
-import { WorkflowCountService } from '@shared/domain/workflow/service/workflow-count.service'
-import { WorkflowScopeFilterProvider } from '@shared/domain/workflow/workflow-scope-filter.provider'
+import { WorkflowSeriesCountService } from '@shared/domain/workflow-series/workflow-series-count.service'
+import { WorkflowSeriesScopeFilterProvider } from '@shared/domain/workflow-series/workflow-series-scope-filter.provider'
 
-describe('WorkflowCountService', () => {
+describe('WorkflowSeriesCountService', () => {
   const USER_ID = 1
 
   let emCountStub: SinonStub
@@ -20,7 +20,7 @@ describe('WorkflowCountService', () => {
   const SPACE_SCOPES: SpaceScope[] = ['space-1', 'space-2']
 
   let em: { count: SinonStub }
-  let workflowScopeFilterProvider: WorkflowScopeFilterProvider
+  let workflowSeriesScopeFilterProvider: WorkflowSeriesScopeFilterProvider
 
   beforeEach(() => {
     countCalls = []
@@ -32,12 +32,12 @@ describe('WorkflowCountService', () => {
     })
 
     em = { count: emCountStub } as unknown as { count: SinonStub }
-    workflowScopeFilterProvider = new WorkflowScopeFilterProvider()
+    workflowSeriesScopeFilterProvider = new WorkflowSeriesScopeFilterProvider()
   })
 
   describe('#count', () => {
     describe('ME scope', () => {
-      it('should query workflows with correct filters for ME scope', async () => {
+      it('should query workflow series with correct filters for ME scope (excluding deleted)', async () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.ME,
@@ -50,6 +50,7 @@ describe('WorkflowCountService', () => {
         expect(countCalls).to.have.lengthOf(1)
         const workflowCall = countCalls[0]
         expect(workflowCall.where).to.deep.include({
+          deleted: false,
           user: USER_ID,
           scope: STATIC_SCOPE.PRIVATE,
         })
@@ -57,7 +58,7 @@ describe('WorkflowCountService', () => {
     })
 
     describe('FEATURED scope', () => {
-      it('should query workflows with featured filter', async () => {
+      it('should query workflow series with featured filter (excluding deleted)', async () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.FEATURED,
@@ -69,6 +70,7 @@ describe('WorkflowCountService', () => {
         expect(result).to.eq(4)
         const workflowCall = countCalls[0]
         expect(workflowCall.where).to.deep.include({
+          deleted: false,
           featured: true,
           scope: STATIC_SCOPE.PUBLIC,
         })
@@ -76,7 +78,7 @@ describe('WorkflowCountService', () => {
     })
 
     describe('EVERYBODY scope', () => {
-      it('should query workflows with public scope', async () => {
+      it('should query workflow series with public scope (excluding deleted)', async () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.EVERYBODY,
@@ -88,13 +90,14 @@ describe('WorkflowCountService', () => {
         expect(result).to.eq(4)
         const workflowCall = countCalls[0]
         expect(workflowCall.where).to.deep.include({
+          deleted: false,
           scope: STATIC_SCOPE.PUBLIC,
         })
       })
     })
 
     describe('SPACES scope', () => {
-      it('should query workflows with space scopes', async () => {
+      it('should query workflow series with space scopes (excluding deleted)', async () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.SPACES,
@@ -106,6 +109,7 @@ describe('WorkflowCountService', () => {
         expect(result).to.eq(4)
         const workflowCall = countCalls[0]
         expect(workflowCall.where).to.deep.include({
+          deleted: false,
           scope: { $in: SPACE_SCOPES },
         })
       })
@@ -125,7 +129,10 @@ describe('WorkflowCountService', () => {
     })
   })
 
-  function getInstance(): WorkflowCountService {
-    return new WorkflowCountService(em as unknown as SqlEntityManager, workflowScopeFilterProvider)
+  function getInstance(): WorkflowSeriesCountService {
+    return new WorkflowSeriesCountService(
+      em as unknown as SqlEntityManager,
+      workflowSeriesScopeFilterProvider,
+    )
   }
 })
