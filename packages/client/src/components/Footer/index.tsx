@@ -1,9 +1,10 @@
 import React from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
+import { useAuthUser } from '@/features/auth/useAuthUser'
 import fdaLogo from '../../assets/logo-fda.svg'
-import { EnvelopeIcon } from '../icons/EnvelopeIcon'
 import { HoverDNAnexusLogo } from '../icons/DNAnexusLogo'
+import { EnvelopeIcon } from '../icons/EnvelopeIcon'
 import { ThemeToggle } from '../ThemeToggle'
 
 const StyledFooterContainer = styled.div`
@@ -74,6 +75,9 @@ const StyledFDALogo = styled.a`
 `
 
 const PFDAFooter = () => {
+  const user = useAuthUser()
+  // LOGIC UPDATE BECAUSE OF - https://jira.internal.dnanexus.com/browse/PFDA-6741
+  const showDNAnexusLogo = !!user
 
   return (
     <StyledFooterContainer>
@@ -232,7 +236,7 @@ const PFDAFooter = () => {
               <ThemeToggle />
             </div>
           </Center>
-          <HoverDNAnexusLogo />
+          {showDNAnexusLogo && <HoverDNAnexusLogo />}
         </StyledFooter>
       </StyledFooterWrapper>
     </StyledFooterContainer>
