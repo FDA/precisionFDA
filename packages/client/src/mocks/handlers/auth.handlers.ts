@@ -17,7 +17,6 @@ export const authHandlers = [
           full_name: 'PrecisionFDA Admin - Dev',
           email: 'pkryshenyk-cf+precisionfda.admin_dev@dnanexus.com',
           admin: true,
-          counters: { files: 0, folders: 0, apps: 2, workflows: 2, jobs: 1, assets: 0, notes: 0 },
           links: {},
           job_limit: 100,
           pricing_map: {
@@ -230,7 +229,6 @@ export const authHandlers = [
           full_name: 'Dr. Leon Voss',
           email: 'lvoss@gmail.com',
           admin: true,
-          counters: { files: 0, folders: 0, apps: 2, workflows: 2, jobs: 1, assets: 0, notes: 0 },
           links: {},
           job_limit: 100,
           pricing_map: {

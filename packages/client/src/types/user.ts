@@ -52,15 +52,6 @@ export interface IUser {
   allowed_to_publish: boolean
   can_create_data_portals: boolean
   can_see_spaces: boolean
-  counters: {
-    files: number
-    folders: number
-    apps: number
-    workflows: number
-    jobs: number
-    assets: number
-    notes: number
-  }
   resources: typeof RESOURCES
   email: string
   first_name: string

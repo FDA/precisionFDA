@@ -90,48 +90,6 @@ class ApplicationSerializer < ActiveModel::Serializer
     "/spaces/#{object.space_object.id}"
   end
 
-  # Returns apps count of user 'private' scope.
-  # @return [Integer] Apps count.
-  def apps_private_count
-    AppSeries.private_count(object)
-  end
-
-  # Returns files count of user 'private' scope in all folders.
-  # @return [Integer] Files count.
-  def files_private_count
-    object.user_files.private_count(object)
-  end
-
-  # Returns all folders count of user 'private' scope.
-  # @return [Integer] Folder count.
-  def folders_private_count
-    Folder.private_count(object)
-  end
-
-  # Returns jobs count of 'private' scope.
-  # @return [Integer] Jobs count.
-  def jobs_count
-    object.jobs.accessible_by_private.count
-  end
-
-  # Returns workflows count of user 'private' scope.
-  # @return [Integer] Workflows count.
-  def workflows_count
-    WorkflowSeries.private_count(object)
-  end
-
-  # Returns assets count of 'private' scope.
-  # @return [Integer] Assets count.
-  def assets_count
-    object.assets.accessible_by_private.count
-  end
-
-  # Returns notes count of 'private' scope.
-  # @return [Integer] notes count.
-  def notes_count
-    object.notes.accessible_by_private.count
-  end
-
   protected
 
   # Returns formatted time.
