@@ -7,7 +7,7 @@ import { getBaseUrlFromHeaders } from '@/lib/getBaseUrlFromHeaders'
 export default async function Layout({ children }: { children: ReactNode }) {
   const baseUrl = await getBaseUrlFromHeaders()
   return (
-    <DocsLayout tree={source.pageTree} {...baseOptions} nav={{ ...baseOptions.nav, url: baseUrl }} >
+    <DocsLayout tree={source.getPageTree()} {...baseOptions} nav={{ ...baseOptions.nav, url: baseUrl }} >
       {children}
     </DocsLayout>
   );
