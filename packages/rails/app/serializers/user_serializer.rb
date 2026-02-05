@@ -8,7 +8,6 @@ class UserSerializer < ApplicationSerializer
     :full_name,
     :email,
     :admin,
-    :counters,
     :job_limit,
     :pricing_map,
     :resources,
@@ -29,20 +28,6 @@ class UserSerializer < ApplicationSerializer
   # @return [Boolean] Returns true if a user is site admin, false otherwise.
   def admin
     object.site_admin?
-  end
-
-  # Returns user counters for related objects.
-  # @return [Hash] User counters for files, apps, workflows, etc.
-  def counters
-    {
-      files: files_private_count,
-      folders: folders_private_count,
-      apps: apps_private_count,
-      workflows: workflows_count,
-      jobs: jobs_count,
-      assets: assets_count,
-      notes: notes_count,
-    }
   end
 
   delegate :can_administer_site?, to: :object
