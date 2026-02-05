@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query'
 import axios from 'axios'
-import { IUser } from '../../types/user'
+import { IUser } from '@/types/user'
 import { SiteSettingsResponse } from './useSiteSettingsQuery'
 
 export function useAuthUserQuery(): UseQueryResult<{ user: IUser; meta: any }, Error> {
@@ -19,6 +19,7 @@ export function useAuthUserQuery(): UseQueryResult<{ user: IUser; meta: any }, E
       }
       return failureCount < 1
     },
+    retryOnMount: false,
   })
 }
 
@@ -29,7 +30,7 @@ export function logout() {
 export type CDMHKey = 'cdmhPortal' | 'cdrBrowser' | 'cdrAdmin' | 'connectPortal'
 
 export async function siteSettingsRequest() {
-  return axios.get<SiteSettingsResponse>('/api/v2/site-settings').then(r => r.data)
+  return axios.get<SiteSettingsResponse>('/api/v2/site-settings').then((r) => r.data)
 }
 
 interface GenerateKeyResponse {
@@ -37,5 +38,5 @@ interface GenerateKeyResponse {
 }
 
 export async function generateKeyRequest() {
-  return axios.get('/api/auth_key').then(r => r.data as GenerateKeyResponse)
+  return axios.get('/api/auth_key').then((r) => r.data as GenerateKeyResponse)
 }
