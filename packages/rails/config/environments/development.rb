@@ -87,4 +87,10 @@ Rails.application.configure do
   # Allow access from any ip
   config.web_console.whiny_requests = false
   config.hosts << "web"
+
+  # Log unexpected errors instead of emailing
+  Rails.application.config.middleware.use(
+    ExceptionNotification::Rack,
+    logger: {},
+  )
 end

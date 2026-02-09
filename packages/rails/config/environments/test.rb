@@ -62,24 +62,9 @@ Rails.application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
-  # Email us when an exception occurs
+  # Log unexpected errors instead of emailing
   Rails.application.config.middleware.use(
     ExceptionNotification::Rack,
-    ignore_if: lambda do |env, _exception|
-      ip = env["HTTP_X_FORWARDED_FOR"]
-
-      begin
-        ip.in?(%w(73.158.44.186 76.191.184.242)) ||
-          IPAddr.new("64.39.96.0/20").include?(IPAddr.new(ip))
-      rescue IPAddr::Error
-        false
-      end
-    end,
-    email: {
-      email_prefix: "[PrecisionFDA-Dev] ",
-      sender_address: "\"pFDA Dev\" <#{ENV.fetch('SMTP_FROM_ADDRESS')}>",
-      exception_recipients: %w(precisionfda-dev@dnanexus.com),
-      email_format: :html,
-    },
+    logger: {},
   )
 end
