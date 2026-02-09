@@ -23,12 +23,12 @@ import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { moveFilesRequest } from './files.api'
 
 import { AxiosError } from 'axios'
-import { pluralize, sanitizeFileName } from '../../utils/formatting'
+import { pluralize, sanitizeFileName } from '@/utils/formatting'
 import { IFile, TreeOnSelectInfo } from './files.types'
-import { displayPayloadMessage, Payload } from '../../utils/api'
+import { displayPayloadMessage, Payload } from '@/utils/api'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { useLicensesListQuery } from '../licenses/queries'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
   if (scope) {
@@ -54,7 +54,7 @@ export const useFilesSelectActions = ({
   resourceKeys,
   resetSelected,
 }: {
-  homeScope?: HomeScope
+  homeScope: HomeScope
   space?: ISpace
   folderId?: string
   selectedItems: IFile[]
@@ -169,12 +169,12 @@ export const useFilesSelectActions = ({
         }
       } else {
         if (folderId) {
-          navigate(`/home/files?folder_id=${folderId}`)
+          navigate(`/home/files?folder_id=${folderId}&scope=${homeScope}`)
           queryClient.invalidateQueries({
             queryKey: ['files', folderId],
           })
         } else {
-          navigate('/home/files')
+          navigate(`/home/files?scope=${homeScope}`)
           queryClient.invalidateQueries({
             queryKey: ['files'],
           })
