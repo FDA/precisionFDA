@@ -114,27 +114,9 @@ Rails.application.configure do
   # prints values of SQL queries if given env property is set to true
   config.active_record.verbose_query_logs = ENV["PRINT_DB_QUERY_VALUES_IN_LOG"] == "true"
 
-  # Email us when an exception occurs
+  # Log unexpected errors instead of emailing
   Rails.application.config.middleware.use(
     ExceptionNotification::Rack,
-    ignore_if: lambda do |env, _exception|
-      # Global switch via environment variable
-      return true if ENV["DISABLE_ERROR_EMAILS"] == "true"
-
-      ip = env["HTTP_X_FORWARDED_FOR"]
-
-      begin
-        ip.in?(%w(73.158.44.186 76.191.184.242)) ||
-          IPAddr.new("64.39.96.0/20").include?(IPAddr.new(ip))
-      rescue IPAddr::Error
-        false
-      end
-    end,
-    email: {
-      email_prefix: "[PrecisionFDA] ",
-      sender_address: "\"pFDA Production\" <#{ENV.fetch('SMTP_FROM_ADDRESS')}>",
-      exception_recipients: %w(precisionfda-production@dnanexus.com),
-      email_format: :html,
-    },
+    logger: {},
   )
 end

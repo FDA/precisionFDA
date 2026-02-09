@@ -42,4 +42,10 @@ Rails.application.configure do
 
   # SSL
   config.force_ssl = true
+
+  # Log unexpected errors instead of emailing
+  Rails.application.config.middleware.use(
+    ExceptionNotification::Rack,
+    logger: {},
+  )
 end

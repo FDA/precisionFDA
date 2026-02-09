@@ -10,6 +10,7 @@ require "rails/all"
 Bundler.require(*Rails.groups)
 
 require_relative "../app/extras/error_logger"
+require_relative "../lib/exception_notifier/logger_notifier"
 
 module PrecisionFda
   class Application < Rails::Application
