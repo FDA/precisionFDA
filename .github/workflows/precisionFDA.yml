@@ -141,7 +141,10 @@ jobs:
 
       - name: Check prettier formatting (server)
         if: steps.changed-server.outputs.any_changed == 'true'
-        run: npx prettier --check --config packages/server/.prettierrc ${{ steps.changed-server.outputs.all_changed_files }}
+        working-directory: packages/server
+        run: pnpm exec prettier --check ${FILES//packages\/server\//}
+        env:
+          FILES: ${{ steps.changed-server.outputs.all_changed_files }}
 
       - name: Get changed files (client)
         id: changed-client
@@ -153,7 +156,10 @@ jobs:
 
       - name: Check prettier formatting (client)
         if: steps.changed-client.outputs.any_changed == 'true'
-        run: npx prettier --check --config packages/client/.prettierrc ${{ steps.changed-client.outputs.all_changed_files }}
+        working-directory: packages/client
+        run: pnpm exec prettier --check ${FILES//packages\/client\//}
+        env:
+          FILES: ${{ steps.changed-client.outputs.all_changed_files }}
 
   test-ruby:
     name: Test Ruby

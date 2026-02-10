@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   ColumnDefResolved,
   ColumnFiltersState,
@@ -6,23 +7,20 @@ import {
   RowSelectionState,
   VisibilityState,
 } from '@tanstack/react-table'
-import React from 'react'
 import { Link } from 'react-router'
-import { Button } from '../../components/Button'
-import { ActionsMenu } from '../../components/Menu'
-import { ContentFooter } from '../../components/Page/ContentFooter'
-import { Pagination } from '../../components/Pagination'
+import { Button } from '@/components/Button'
+import { CubeIcon } from '@/components/icons/CubeIcon'
+import { PlusIcon } from '@/components/icons/PlusIcon'
+import { ActionsMenu } from '@/components/Menu'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { Pagination } from '@/components/Pagination'
+import { StyledPageTable } from '@/components/Table/components/styles'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { CubeIcon } from '../../components/icons/CubeIcon'
-import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../components/icons/PlusIcon'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
-import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsRow, QuickActions } from '../home/home.styles'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
@@ -30,8 +28,8 @@ import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { fetchApps } from './apps.api'
 import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
-import { useAppSelectionActions } from './useAppSelectionActions'
 import { useAppsColumns } from './useAppsColumns'
+import { useAppSelectionActions } from './useAppSelectionActions'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -127,7 +125,9 @@ export const AppList = ({
           <ActionsMenu data-testid="home-apps-actions-button">
             <ActionsMenuContent
               actions={actions}
-              message={homeScope === 'spaces' ? 'To perform other actions on this app, access it from the Space' : undefined}
+              message={
+                homeScope === 'spaces' ? 'To perform other actions on this app, access it from the Space' : undefined
+              }
             />
           </ActionsMenu>
         </ActionsRow>
@@ -160,7 +160,6 @@ export const AppList = ({
           setPage={p => setPageParam(p, true)}
           onPerPageSelect={p => setPerPageParam(p, true)}
         />
-        <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
       <ActionModalsRenderer modals={modals} />

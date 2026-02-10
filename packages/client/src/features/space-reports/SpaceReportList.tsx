@@ -1,19 +1,19 @@
+import React, { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnSizingState } from '@tanstack/react-table'
-import React, { useEffect } from 'react'
-import { Button } from '../../components/Button'
-import Menu from '../../components/Menu/Menu'
-import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { ContentFooter } from '../../components/Page/ContentFooter'
+import { Button } from '@/components/Button'
+import { SpaceReportIcon } from '@/components/icons/SpaceReportIcon'
+import { ActionsMenu } from '@/components/Menu'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { StyledPageTable } from '@/components/Table/components/styles'
+import { useLastWSNotification } from '@/hooks/useLastWSNotification'
+import { getSelectedObjectsFromIndexes } from '@/utils/object'
 import Table from '../../components/Table'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { useLastWSNotification } from '../../hooks/useLastWSNotification'
-import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { ActionsButton, ResourceHeader } from '../home/show.styles'
+import { ResourceHeader } from '../home/show.styles'
 import { HomeScope, MetaV2, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
 import { Params } from '../home/utils'
@@ -22,8 +22,6 @@ import { fetchReports } from './space-reports.api'
 import { useGenerateSpaceReportModal } from './useGenerateSpaceReportModal'
 import { useSpaceReportColumns } from './useSpaceReportColumns'
 import { userReportSelectActions } from './useSpaceReportSelectActions'
-import { SpaceReportIcon } from '../../components/icons/SpaceReportIcon'
-import { ActionsMenu } from '../../components/Menu'
 
 type ListType = { reports: ISpaceReport[]; meta: MetaV2 }
 
@@ -61,16 +59,27 @@ const SpaceReportListTable = ({
   )
 }
 
-export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: string; isContributorOrHigher?: boolean }) => {
-  const { query, selectedIndexes, setSelectedIndexes, saveColumnResizeWidth, colWidths, resetSelected } = useList<ListType>({
-    fetchList: (_, params: Params) => fetchReports(params.scope as HomeScope).then(reports => ({ reports, meta: {} as MetaV2 })),
-    resource: 'space-reports',
-    params: { scope },
-  })
+export const SpaceReportList = ({
+  scope,
+  isContributorOrHigher,
+}: {
+  scope: string
+  isContributorOrHigher?: boolean
+}) => {
+  const { query, selectedIndexes, setSelectedIndexes, saveColumnResizeWidth, colWidths, resetSelected } =
+    useList<ListType>({
+      fetchList: (_, params: Params) =>
+        fetchReports(params.scope as HomeScope).then(reports => ({ reports, meta: {} as MetaV2 })),
+      resource: 'space-reports',
+      params: { scope },
+    })
 
   const client = useQueryClient()
 
-  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.SPACE_REPORT_DONE, NOTIFICATION_ACTION.SPACE_REPORT_ERROR])
+  const lastJsonMessage = useLastWSNotification([
+    NOTIFICATION_ACTION.SPACE_REPORT_DONE,
+    NOTIFICATION_ACTION.SPACE_REPORT_ERROR,
+  ])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
@@ -123,9 +132,7 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
         columnSizing={colWidths}
       />
 
-      <ContentFooter>
-        <HoverDNAnexusLogo opacity height={14} />
-      </ContentFooter>
+      <ContentFooter />
 
       {generateModal}
       <ActionModalsRenderer modals={modals} />

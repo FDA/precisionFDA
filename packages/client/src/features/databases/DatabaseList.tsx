@@ -1,18 +1,24 @@
-import { ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
 import React, { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
 import { Link } from 'react-router'
 import styled from 'styled-components'
-import { Button } from '../../components/Button'
-import { ContentFooter } from '../../components/Page/ContentFooter'
-import { BackLink } from '../../components/Page/PageBackLink'
-import { Pagination } from '../../components/Pagination'
+import { Button } from '@/components/Button'
+import { DatabaseIcon } from '@/components/icons/DatabaseIcon'
+import { SyncIcon } from '@/components/icons/SyncIcon'
+import { ActionsMenu } from '@/components/Menu'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { BackLink } from '@/components/Page/PageBackLink'
+import { Refresh } from '@/components/Page/styles'
+import { Pagination } from '@/components/Pagination'
+import { StyledPageTable } from '@/components/Table/components/styles'
+import { useLastWSNotification } from '@/hooks/useLastWSNotification'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions, StyledRight } from '../home/home.styles'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
 import { HomeScope, MetaV2, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
@@ -22,13 +28,6 @@ import { fetchDatabaseList } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
-import { useQueryClient } from '@tanstack/react-query'
-import { useLastWSNotification } from '../../hooks/useLastWSNotification'
-import { ActionsMenu } from '../../components/Menu'
-import { Refresh } from '../../components/Page/styles'
-import { SyncIcon } from '../../components/icons/SyncIcon'
 
 const DBStyledRight = styled(StyledRight)`
   gap: 20px;
@@ -104,7 +103,12 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
       <ResourceHeader>
         <ActionsRow>
           <QuickActions>
-            <Button data-variant="primary" data-testid="databases-create-link" as={Link} to={`${basePath}/databases/create`}>
+            <Button
+              data-variant="primary"
+              data-testid="databases-create-link"
+              as={Link}
+              to={`${basePath}/databases/create`}
+            >
               <DatabaseIcon height={14} /> Create Database
             </Button>
           </QuickActions>
@@ -148,7 +152,6 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
           setPage={p => setPageParam(p, true)}
           onPerPageSelect={p => setPerPageParam(p, true)}
         />
-        <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
       <ActionModalsRenderer modals={modals} />
