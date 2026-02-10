@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { SpaceService } from '@shared/domain/space/service/space.service'
 import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/cli-space-member.dto'
+import { SpaceService } from '@shared/domain/space/service/space.service'
 
 @Injectable()
 export class CliListMembersFacade {

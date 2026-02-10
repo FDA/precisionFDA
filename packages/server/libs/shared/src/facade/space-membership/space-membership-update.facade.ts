@@ -1,7 +1,9 @@
 import { EntityManager } from '@mikro-orm/mysql'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
+import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import {
   ENTITY_TYPE,
@@ -16,16 +18,24 @@ import { SpaceMembershipPermission } from '@shared/domain/space-membership/space
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserService } from '@shared/domain/user/service/user.service'
 import { ClientRequestError, InternalError, InvalidStateError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { PlatformClient } from '@shared/platform-client'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 
 @Injectable()
 export class SpaceMembershipUpdateFacade {
+  @ServiceLogger()
+  private readonly logger: Logger
+
   constructor(
     private readonly em: EntityManager,
+    private readonly platformClient: PlatformClient,
     private readonly userContext: UserContext,
     private readonly spaceService: SpaceService,
     private readonly spaceMembershipService: SpaceMembershipService,
+    private readonly userService: UserService,
     private readonly maintenanceQueueJobProducer: MaintenanceQueueJobProducer,
     private readonly emailService: EmailService,
   ) {}
@@ -138,6 +148,111 @@ export class SpaceMembershipUpdateFacade {
         throw error
       }
     }
+  }
+
+  async recoverSpaceLead(
+    sharedSpaceId: number,
+    currentLeadMembershipId: number,
+    newLeadDxuser: string,
+  ): Promise<void> {
+    const newLeadUser = await this.userService.getUserByDxuser(newLeadDxuser)
+    if (!newLeadUser) {
+      throw new InvalidStateError(`User ${newLeadDxuser} not found`)
+    }
+
+    const sharedSpace = await this.spaceService.findEditableById(sharedSpaceId)
+    if (!sharedSpace) {
+      throw new InvalidStateError(`Shared space with id ${sharedSpaceId} not found`)
+    }
+
+    const currentLeadMember = await this.spaceMembershipService.getMembershipInSpace(
+      sharedSpaceId,
+      currentLeadMembershipId,
+    )
+
+    if (!currentLeadMember) {
+      throw new InvalidStateError('Current lead not found')
+    }
+    if (currentLeadMember.role !== SPACE_MEMBERSHIP_ROLE.LEAD) {
+      throw new InvalidStateError('Current member is not a lead in the space')
+    }
+    if (!currentLeadMember.active) {
+      throw new InvalidStateError('Current lead is not active')
+    }
+
+    await this.em.populate(currentLeadMember, ['user', 'user.organization'])
+    const spaceOrgs = sharedSpace.getMembershipOrg(currentLeadMember)
+    const currentLeadBillTo = currentLeadMember.user.getEntity().billTo()
+    await this.em.populate(newLeadUser, ['organization'])
+    const newLeadBillTo = newLeadUser.billTo()
+
+    const errors = await this.preValidateAdminInUserOrg([
+      ...spaceOrgs,
+      currentLeadBillTo,
+      newLeadBillTo,
+    ])
+    if (errors.length > 0) {
+      throw new InvalidStateError(`Pre-validation failed: ${errors.join('; ')}`)
+    }
+
+    try {
+      const newLeads = await this.em.transactional(async () => {
+        const newLeadMembers = await this.spaceMembershipService.changeLeadRole(
+          sharedSpace,
+          currentLeadMember,
+          newLeadUser,
+        )
+        await this.createSpaceEvents(
+          newLeadMembers,
+          SPACE_MEMBERSHIP_ROLE.LEAD,
+          SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
+        )
+        return newLeadMembers
+      })
+      if (newLeads.length > 0) {
+        await this.sendUpdateEmail(
+          [newLeads[0]], // all memberships point to the same user, so just send email to the first one
+          sharedSpace.id,
+          SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_changed],
+          SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.LEAD],
+        )
+      }
+    } catch (error: unknown) {
+      await this.maintenanceQueueJobProducer.createSyncSpaceLeadBillToTask(currentLeadMember.id)
+      if (error instanceof ClientRequestError) {
+        this.logger.error(`Failed to recover space lead membership ${error.message}`)
+        throw new InternalError('Failed to recover space lead membership')
+      } else {
+        throw error
+      }
+    }
+  }
+
+  private async preValidateAdminInUserOrg(orgs: DxId<'org'>[]): Promise<string[]> {
+    const validationPromises = orgs.map((org) => this.checkAdminMembership(org))
+    const results = await Promise.all(validationPromises)
+    const errors: string[] = []
+    results.forEach((hasAdmin, index) => {
+      if (!hasAdmin) {
+        errors.push(`Admin user not found in org ${orgs[index]}`)
+      }
+    })
+    return errors
+  }
+
+  private async checkAdminMembership(org: DxId<'org'>): Promise<boolean> {
+    const orgDescribe = await this.platformClient.orgDescribe({
+      dxid: org,
+      defaultFields: false,
+      fields: {
+        admins: true,
+      },
+    })
+    const adminList = orgDescribe.admins ?? []
+    if (!adminList.includes(`user-${config.platform.adminUser}`)) {
+      return false
+    }
+    return true
   }
 
   private async createSpaceEvents(

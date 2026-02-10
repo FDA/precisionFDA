@@ -1,18 +1,13 @@
 import { PopulateHint } from '@mikro-orm/mysql'
 import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { NotFoundError } from '@shared/errors'
 import { Space } from '../space/space.entity'
 import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from './space-membership.enum'
 
 export class SpaceMembershipRepository extends PaginatedRepository<SpaceMembership> {
   async getMembership(spaceId: number, userId: number): Promise<SpaceMembership> {
-    const memberships = await this.find({ spaces: spaceId, user: userId, active: true })
-    if (memberships.length > 0) {
-      return memberships[0]
-    }
-    throw new NotFoundError(`Couldn't find membership for user ${userId}`)
+    return this.findOne({ spaces: spaceId, user: userId, active: true })
   }
 
   async findActiveMembershipAndSpace(

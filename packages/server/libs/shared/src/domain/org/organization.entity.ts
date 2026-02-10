@@ -2,6 +2,7 @@ import { Collection, Entity, ManyToOne, OneToMany, Property, Ref } from '@mikro-
 import { User } from '@shared/domain/user/user.entity'
 
 import { BaseEntity } from '../../database/base.entity'
+import { DxId } from '../entity/domain/dxid'
 import { OrganizationRepository } from './organization.repository'
 
 @Entity({ tableName: 'orgs', repository: () => OrganizationRepository })
@@ -35,11 +36,11 @@ export class Organization extends BaseEntity {
   @OneToMany({ entity: () => User, mappedBy: 'organization' })
   users = new Collection<User>(this)
 
-  static createDxOrg(handle: string): string {
+  static createDxOrg(handle: string): DxId<'org'> {
     return `org-pfda..${handle}`
   }
 
-  getDxOrg(): string {
+  getDxOrg(): DxId<'org'> {
     return Organization.createDxOrg(this.handle)
   }
 

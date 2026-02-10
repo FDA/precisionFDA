@@ -31,10 +31,10 @@ export abstract class SpaceMembershipUpdatePermissionProvider {
     space: Space,
     currentMembership: SpaceMembership,
     changeableMemberships: SpaceMembership[],
-  ): Promise<number[]> {
+  ): Promise<SpaceMembership[]> {
     await this.updateMemberships(changeableMemberships)
     await this.updateOrgsAccess(space, currentMembership, changeableMemberships)
-    return changeableMemberships.map((m) => m.id)
+    return changeableMemberships
   }
 
   protected async updateOrgsAccess(
@@ -58,7 +58,7 @@ export abstract class SpaceMembershipUpdatePermissionProvider {
       for (const membership of memberships) {
         this.updateMembership(membership)
       }
-      this.em.persist(memberships)
+      await this.em.persist(memberships).flush()
     })
   }
 }

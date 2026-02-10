@@ -3,20 +3,17 @@ import { Link } from 'react-router'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
-import Menu from '../../components/Menu/Menu'
+import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
+import { ActionsMenu } from '../../components/Menu'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { Action } from '../home/action-types'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { QuickActions } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
 import { ISpaceGroup } from '../space-groups/types'
 import { getDefaultSpaceUrl, isAllowedSpaceGroupType } from './helpers'
 import { useAddSpacesToSpaceGroupModal } from './modals/useAddSpacesToSpaceGroupModal'
 import { useRemoveSpacesFromSpaceGroupModal } from './modals/useRemoveSpacesFromSpaceGroupModal'
 import { ISpaceV2 } from './spaces.types'
-import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
-import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
-import { ActionsMenu } from '../../components/Menu'
 
 const SpacesQuickActions = styled(QuickActions)`
   display: flex;
@@ -94,11 +91,6 @@ export const SpaceQuickActions = ({
   selectedItems: ISpaceV2[]
 }) => {
   const isSelectionValidForAddingToGroup = selectedItems.length > 0 && selectedItems.every(s => isAllowedSpaceGroupType(s.type))
-  const spaceHiddenMutation = useSpaceHiddenMutation()
-  const hideSpaces = () => {
-    const ids = selectedItems.map(s => s.id)
-    spaceHiddenMutation.mutateAsync({ ids, hidden: true })
-  }
 
   const addSpacesToSpaceGroup = useAddSpacesToSpaceGroupModal({
     spaces: selectedItems.filter(s => isAllowedSpaceGroupType(s.type)),
@@ -119,11 +111,6 @@ export const SpaceQuickActions = ({
     <SpacesQuickActions>
       <div>{spaceGroupId && <BackLink linkTo={getDefaultSpaceUrl(userCanAdministerSite)}>Back to Spaces</BackLink>}</div>
       <QuickActions>
-        {userCanAdministerSite && (
-          <Button data-variant="primary" disabled={selectedItems.length === 0} onClick={hideSpaces}>
-            Hide Spaces
-          </Button>
-        )}
         {userCanAdministerSpaceGroups && !spaceGroupId && (
           <>
             <ActionsMenu

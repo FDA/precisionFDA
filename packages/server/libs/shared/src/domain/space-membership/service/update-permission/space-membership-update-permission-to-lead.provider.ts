@@ -1,4 +1,4 @@
-import { EntityData, SqlEntityManager, TransactionPropagation } from '@mikro-orm/mysql'
+import { SqlEntityManager, TransactionPropagation } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { SpaceMembershipPlatformAccessToAdminProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-admin.provider'
@@ -8,7 +8,7 @@ import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-mem
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { InternalError } from '@shared/errors'
+import { getProjectDxid } from '@shared/domain/space/space.helper'
 import { PlatformClient } from '@shared/platform-client'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
@@ -39,9 +39,9 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
 
   override async update(
     space: Space,
-    currentMembership: SpaceMembership,
+    currentLeadMembership: SpaceMembership,
     changeableMemberships: SpaceMembership[],
-  ): Promise<number[]> {
+  ): Promise<SpaceMembership[]> {
     if (
       changeableMemberships.length !== 1 &&
       new Set(changeableMemberships.map((m) => m.user.id)).size !== 1
@@ -53,63 +53,78 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
     await this.em.populate(newLead, ['user', 'user.organization'])
     const billTo = newLead.user.getEntity().billTo()
 
-    await super.updateOrgsAccess(space, currentMembership, changeableMemberships)
+    await this.updateOrgsAccess(space, currentLeadMembership, changeableMemberships)
 
-    await this.em.populate(changeableMemberships, ['spaces'])
-    // in review spaces, a membership is pointed to review space and confidential space,
-    // but in some cases, different memberships are created for review space and confidential space
-    for (const membership of changeableMemberships) {
-      const spaces = membership.spaces.getItems()
-      for (const space of spaces) {
-        const project = currentMembership.isHost() ? space.hostProject : space.guestProject
-        await this.updateSpaceBillTo(project as DxId<'project'>, billTo as DxId<'org'>)
-      }
+    // Update the project's billTo to the new lead's organization
+    const project = getProjectDxid(space, currentLeadMembership)
+    // project should not be null here
+    await this.updateSpaceBillTo(project as DxId<'project'>, billTo as DxId<'org'>)
+    if (space.type === SPACE_TYPE.REVIEW) {
+      await this.em.populate(space, ['confidentialSpaces'])
+      const confidentialSpace = currentLeadMembership.isHost()
+        ? space.confidentialReviewerSpace
+        : space.confidentialSponsorSpace
+      const cfProject = getProjectDxid(confidentialSpace, currentLeadMembership)
+      await this.updateSpaceBillTo(cfProject as DxId<'project'>, billTo as DxId<'org'>)
     }
 
-    await this.em.transactional(
+    return await this.em.transactional(
       async () => {
-        currentMembership.role = SPACE_MEMBERSHIP_ROLE.ADMIN
-        const membershipIds = changeableMemberships.map((m) => m.id)
-        const updateData: EntityData<SpaceMembership> = {
-          role: SPACE_MEMBERSHIP_ROLE.LEAD,
-          updatedAt: new Date(),
-        }
-        if (space.type === SPACE_TYPE.GROUPS && currentMembership.side !== newLead.side) {
-          updateData.side = currentMembership.side
-        }
-        const updatedCount = await this.spaceMembershipRepository.nativeUpdate(
-          { id: { $in: membershipIds } },
-          updateData,
-        )
-        if (updatedCount !== membershipIds.length) {
-          throw new InternalError('Not all records were updated')
-        }
-
+        currentLeadMembership.role = SPACE_MEMBERSHIP_ROLE.ADMIN
+        changeableMemberships.forEach((m) => {
+          m.role = SPACE_MEMBERSHIP_ROLE.LEAD
+          if (m.side !== currentLeadMembership.side) {
+            m.side = currentLeadMembership.side
+          }
+        })
         if (space.type === SPACE_TYPE.REVIEW) {
           const cfDemotedLead =
             await this.spaceMembershipRepository.findConfidentialMembershipByUser(
               space.id,
-              currentMembership.user.id,
-              currentMembership.side,
+              currentLeadMembership.user.id,
+              currentLeadMembership.side,
             )
-          if (cfDemotedLead) {
+          if (cfDemotedLead && cfDemotedLead.id !== currentLeadMembership.id) {
             cfDemotedLead.role = SPACE_MEMBERSHIP_ROLE.ADMIN
           }
         }
         await this.em.flush()
+        return changeableMemberships
       },
       {
         propagation: TransactionPropagation.REQUIRED,
       },
     )
+  }
 
-    return [newLead.id]
+  override async updateOrgsAccess(
+    space: Space,
+    membership: SpaceMembership,
+    changeableMemberships: SpaceMembership[],
+  ): Promise<void> {
+    const orgs = space.getMembershipOrg(membership)
+    const promises = orgs.map((org) => {
+      return this.adminClient.orgSetMemberAccess({
+        orgDxId: org,
+        data: {
+          [changeableMemberships[0].user.getEntity().dxid]:
+            this.spaceMembershipPlatformAccessToAdminProvider.memberAccess,
+        },
+      })
+    })
+    await Promise.all(promises)
   }
 
   private async updateSpaceBillTo(
     projectDxid: DxId<'project'>,
     billTo: DxId<'org'>,
   ): Promise<ClassIdResponse> {
+    const projectDescribe = await this.adminClient.projectDescribe(projectDxid)
+    if (projectDescribe.billTo === billTo) {
+      return {
+        id: projectDxid,
+      }
+    }
     return this.adminClient.projectUpdate(projectDxid, { billTo })
   }
 }

@@ -7,3 +7,10 @@ export const bulkDelete = async (ids: ISpaceV2['id'][]) => {
   })
   return res.data
 }
+
+export async function recoverSpaceLeadRequest(spaceId: number, currentLeadMembershipId: number, newLeadDxuser: string) {
+  await axios.post(`/api/v2/spaces/${spaceId}/memberships/recover-lead`, {
+    currentLeadMembershipId,
+    newLeadDxuser,
+  })
+}

@@ -3,6 +3,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { ORG_DUMMY } from '@shared/config/consts'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
+import { CountStats } from '@shared/database/statistics.type'
 import { EmailSendInput } from '@shared/domain/email/email.config'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
@@ -24,7 +25,6 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { StringUtils } from '@shared/utils/string.utils'
-import { CountStats } from '@shared/database/statistics.type'
 
 @Injectable()
 export class UserService {
@@ -199,6 +199,10 @@ export class UserService {
 
   async getUserById(id: number): Promise<User> {
     return await this.userRepo.findOne({ id: id })
+  }
+
+  async getUserByDxuser(dxuser: string): Promise<User> {
+    return await this.userRepo.findOne({ dxuser: dxuser })
   }
 
   async getCloudResources(): Promise<UserCloudResourcesDTO> {

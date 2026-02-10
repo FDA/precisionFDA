@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_01_07_090807) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_20_174015) do
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
     t.integer "user_id"
@@ -45,8 +45,8 @@ ActiveRecord::Schema.define(version: 2026_01_07_090807) do
     t.string "type", null: false
     t.datetime "start_time", null: false
     t.datetime "end_time", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "analyses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -276,8 +276,8 @@ ActiveRecord::Schema.define(version: 2026_01_07_090807) do
     t.integer "card_image_id"
     t.integer "sort_order"
     t.integer "space_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "url_slug", null: false
     t.index ["card_image_id"], name: "fk_rails_807efcbd20"
     t.index ["space_id"], name: "fk_rails_59bf9507a5"
@@ -299,8 +299,8 @@ ActiveRecord::Schema.define(version: 2026_01_07_090807) do
     t.string "description"
     t.datetime "status_as_of"
     t.string "uid", collation: "utf8mb3_bin"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "salt"
     t.integer "sync_status", default: 0, null: false
     t.string "failure_reason"
@@ -646,8 +646,8 @@ ActiveRecord::Schema.define(version: 2026_01_07_090807) do
     t.integer "parent_id"
     t.string "parent_type"
     t.text "meta"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["user_file_id"], name: "fk_rails_32ef3811c9"
     t.index ["user_id"], name: "fk_rails_250ed64e61"
   end
@@ -706,8 +706,8 @@ ActiveRecord::Schema.define(version: 2026_01_07_090807) do
   create_table "space_groups", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.text "description"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "space_invitations", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -735,6 +735,7 @@ ActiveRecord::Schema.define(version: 2026_01_07_090807) do
   create_table "space_memberships_spaces", id: false, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "space_id"
     t.integer "space_membership_id"
+    t.index ["space_id", "space_membership_id"], name: "unique_space_membership", unique: true
     t.index ["space_id"], name: "index_space_memberships_spaces_on_space_id"
     t.index ["space_membership_id"], name: "index_space_memberships_spaces_on_space_membership_id"
   end
@@ -745,8 +746,8 @@ ActiveRecord::Schema.define(version: 2026_01_07_090807) do
     t.string "source_type"
     t.json "result"
     t.string "state", default: "CREATED"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["space_report_id"], name: "fk_rails_015b1a9336"
   end
 
@@ -754,8 +755,8 @@ ActiveRecord::Schema.define(version: 2026_01_07_090807) do
     t.integer "result_file_id"
     t.string "state", default: "CREATED"
     t.integer "created_by"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "format", default: "HTML"
     t.json "options"
     t.string "scope", null: false
@@ -950,8 +951,8 @@ ActiveRecord::Schema.define(version: 2026_01_07_090807) do
     t.integer "user_id", null: false
     t.bigint "dbcluster_id", null: false
     t.string "salt", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["dbcluster_id"], name: "fk_rails_077f7b5516"
     t.index ["user_id"], name: "fk_rails_e5847a8e1f"
   end

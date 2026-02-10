@@ -1,5 +1,6 @@
 import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
+import { CountStats } from '@shared/database/statistics.type'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
@@ -37,7 +38,6 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { StringUtils } from '@shared/utils/string.utils'
 import { Logger } from 'nestjs-pino'
 import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
-import { CountStats } from '@shared/database/statistics.type'
 
 type SpaceFilter = FilterQuery<Space> & {
   spaceMemberships?: {
@@ -68,6 +68,10 @@ export class SpaceService {
     private readonly spaceGroupService: SpaceGroupService,
     private readonly eventHelper: EventHelper,
   ) {}
+
+  async findEditableById(id: number): Promise<Space> {
+    return this.spaceRepository.findEditableOne({ id })
+  }
 
   async deleteSpaces(spaceIds: number[]): Promise<void> {
     this.logger.log(`Deleting spaces with ids ${spaceIds}`)
@@ -309,9 +313,18 @@ export class SpaceService {
   }
 
   async getSpaceMembers(spaceId: number): Promise<SpaceMembership[]> {
-    const space = await this.spaceRepository.findAccessibleOne({
-      id: spaceId,
-    })
+    const user = await this.userContext.loadEntity()
+    let space: Space | null = null
+    if (await user.isSiteAdmin()) {
+      space = await this.spaceRepository.findOne({
+        id: spaceId,
+        type: { $ne: SPACE_TYPE.PRIVATE_TYPE },
+      })
+    } else {
+      space = await this.spaceRepository.findAccessibleOne({
+        id: spaceId,
+      })
+    }
 
     if (!space) {
       throw new SpaceNotFoundError('Space does not exist or is not accessible')
@@ -330,7 +343,7 @@ export class SpaceService {
 
   // Any of the returned spaces cannot have state == DELETED
   // Regular user: All unhidden spaces they are active member
-  // Site admin:   All the spaces they are active member of + all the group spaces
+  // Site admin:   All the spaces they are active member of + all the review spaces + all the group spaces
   // RSA:          All the spaces they are active member of + all the review spaces
   // RSA + SA:     All the spaces they are active member of + all the review spaces + all the group spaces
   async paginateSpaces(query: SpacePaginationDTO): Promise<PaginatedResult<SpaceListItemDTO>> {
@@ -422,7 +435,7 @@ export class SpaceService {
       filters.push(this.rsaFilter())
     }
 
-    return { $and: [hiddenFilter, { $or: [filters] }] }
+    return { $and: [hiddenFilter, { $or: filters }] }
   }
 
   private buildSpaceGroupAccessWhere(spaceGroupId: number, isAdmin: boolean): FilterQuery<Space> {
@@ -450,7 +463,8 @@ export class SpaceService {
   private siteAdminFilter(): FilterQuery<Space> {
     return {
       state: { $ne: SPACE_STATE.DELETED },
-      type: SPACE_TYPE.GROUPS,
+      type: { $in: [SPACE_TYPE.GROUPS, SPACE_TYPE.REVIEW] },
+      spaceId: null,
     }
   }
 

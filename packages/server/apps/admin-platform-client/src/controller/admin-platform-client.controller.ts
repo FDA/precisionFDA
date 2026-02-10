@@ -11,7 +11,7 @@ export class AdminPlatformClientController {
 
   @HttpCode(200)
   @Post('execute')
-  async execute(@Body() body: ExecuteBodyDto, @Res() res: Response) {
+  async execute(@Body() body: ExecuteBodyDto, @Res() res: Response): Promise<void> {
     try {
       const result = await this.adminPlatformClientService.execute(body.method, body.params)
       res.send(result)

@@ -32,9 +32,8 @@ import { Resource } from '@shared/domain/resource/resource.entity'
 import { Session } from '@shared/domain/session/session.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
-import { Tag } from '@shared/domain/tag/tag.entity'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -46,6 +45,7 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { HashUtils } from '@shared/utils/hash.utils'
+import { Chance } from 'chance'
 import { config } from '../config'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import * as generate from './generate'
@@ -766,6 +766,34 @@ const spacesHelper = {
     })
     em.persist(space)
     return space
+  },
+  createConfidentialReview: (
+    em: EntityManager,
+    space: Space,
+    side: SPACE_MEMBERSHIP_SIDE,
+  ): Space => {
+    const confidentialReviewSpace = em.create(Space, {
+      name: space.name,
+      description: space.description,
+      type: space.type,
+      state: space.state,
+      protected: space.protected,
+      hostProject: side === SPACE_MEMBERSHIP_SIDE.HOST ? `project-${new Chance().word()}` : null,
+      guestProject: side === SPACE_MEMBERSHIP_SIDE.GUEST ? `project-${new Chance().word()}` : null,
+      hostDxOrg: side === SPACE_MEMBERSHIP_SIDE.HOST ? space.hostDxOrg : null,
+      guestDxOrg: side === SPACE_MEMBERSHIP_SIDE.GUEST ? space.guestDxOrg : null,
+      spaceId: space.id,
+      space: space,
+      sponsorOrgId: null,
+      spaceMemberships: [],
+      spaceGroups: [],
+      meta: {
+        ...space.meta,
+        restricted_discussions: false,
+      },
+    })
+    em.persist(confidentialReviewSpace)
+    return confidentialReviewSpace
   },
 
   addMember: (

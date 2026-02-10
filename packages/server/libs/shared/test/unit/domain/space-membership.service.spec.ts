@@ -1,461 +1,645 @@
-import { Reference } from '@mikro-orm/mysql'
-import { DxId } from '@shared/domain/entity/domain/dxid'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { config } from '@shared/config'
+import { database } from '@shared/database'
 import { SpaceMembershipPlatformAccessToAdminProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-admin.provider'
+import { SpaceMembershipPlatformAccessToContributorProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-contributor.provider'
 import { SpaceMembershipPlatformAccessToInactiveProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-inactive.provider'
+import { SpaceMembershipPlatformAccessToViewerProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-viewer.provider'
+import { SpaceMembershipPlatformAccessProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access.provider'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
+import { SpaceMembershipUpdatePermissionToActiveProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-active.provider'
 import { SpaceMembershipUpdatePermissionToAdminProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-admin.provider'
+import { SpaceMembershipUpdatePermissionToContributorProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-contributor.provider'
+import { SpaceMembershipUpdatePermissionToInactiveProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-inactive.provider'
+import { SpaceMembershipUpdatePermissionToLeadProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-lead.provider'
+import { SpaceMembershipUpdatePermissionToViewerProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-viewer.provider'
 import { SpaceMembershipUpdatePermissionHelper } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.helper'
 import { SpaceMembershipUpdatePermissionProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.provider'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { SpaceMembershipPermission } from '@shared/domain/space-membership/space-membership.type'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
-import { InternalError, InvalidStateError, PermissionError } from '@shared/errors'
+import { InvalidStateError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
-import { OrgMemberAccess } from '@shared/platform-client/platform-client.params'
+import { create, db } from '@shared/test'
 import { expect } from 'chai'
-import { match, stub } from 'sinon'
+import { stub } from 'sinon'
 
 describe('SpaceMembershipService', () => {
-  const findChangeableMembershipsStub = stub()
-  const bulkUpdateStub = stub()
-  const validateUpdaterRoleStub = stub()
-  const spaceMembershipUpdateRoleUpdateStub = stub()
-  const nativeUpdateStub = stub()
+  let em: SqlEntityManager
+  let spaceMembershipRepository: SpaceMembershipRepository
+  let userContext: UserContext
+  let spaceMembershipUpdatePermissionProviderMap: {
+    [T in SpaceMembershipPermission]: SpaceMembershipUpdatePermissionProvider
+  }
+  let spaceMembershipToPlatformAccessProviderMap: {
+    [T in SpaceMembershipPermission]: SpaceMembershipPlatformAccessProvider
+  }
+  let spaceMembershipUpdatePermissionHelper: SpaceMembershipUpdatePermissionHelper
+  let groupSpace: Space
+  let hostLead: User
+  let guestLead: User
+  let hostLeadMembership: SpaceMembership
+  let groupGuestLeadMembership: SpaceMembership
+  let groupViewerMembership: SpaceMembership
+  let groupContributorMembership: SpaceMembership
+
   const orgSetMemberAccessStub = stub()
   const adminProjectDescribeStub = stub()
   const adminProjectUpdateStub = stub()
-  const spaceMembershipFindStub = stub()
-  const spaceMembershipFindOneStub = stub()
-  const buildMembershipAccessPayloadStub = stub()
+  const orgDescribeStub = stub()
+  const orgFindMembersStub = stub()
+  const inviteUserToOrganizationStub = stub()
+  const removeUserFromOrganizationStub = stub()
 
-  const MEMBERSHIP_IDS = [1, 2, 3]
-  const ORG_1 = 'org-1'
-  const ORG_2 = 'org-2'
-  const SPACE = {
-    id: 4,
-    type: SPACE_TYPE.GROUPS,
-    getMembershipOrg: (_: SpaceMembership) => {
-      return [ORG_1, ORG_2] as DxId<'org'>[]
-    },
-    hostProject: 'project-host' as DxId<'project'>,
-    guestProject: 'project-guest' as DxId<'project'>,
-  } as unknown as Space
-  const CURRENT_MEMBERSHIP = {
-    role: SPACE_MEMBERSHIP_ROLE.ADMIN,
-  } as unknown as SpaceMembership
-  const CURRENT_CONTRIBUTOR_MEMBERSHIP = {
-    role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-  } as unknown as SpaceMembership
-  const MEMBERSHIP_CONTRIBUTOR = {
-    id: 4,
-    user: {
-      getEntity: (): User => ({ dxid: 'user-contributor' }) as unknown as User,
-    } as unknown as Reference<User>,
-    role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-    active: true,
-  }
-  const MEMBERSHIP_ADMIN = {
-    id: 5,
-    user: {
-      getEntity: (): User => ({ dxid: 'user-admin' }) as unknown as User,
-    } as unknown as Reference<User>,
-    role: SPACE_MEMBERSHIP_ROLE.ADMIN,
-    active: true,
-    spaces: {
-      getItems: (): Space[] => [SPACE],
-    },
-  }
-  const MEMBERSHIP_INACTIVE_ADMIN = {
-    id: 6,
-    user: {
-      getEntity: (): User => ({ dxid: 'user-inactive.admin' }) as unknown as User,
-    } as unknown as Reference<User>,
-    role: SPACE_MEMBERSHIP_ROLE.ADMIN,
-    active: false,
-    spaces: {
-      getItems: (): Space[] => [SPACE],
-    },
-  }
-  const MEMBERSHIP_INACTIVE_ADMIN_2 = {
-    id: 7,
-    user: {
-      getEntity: (): User => ({ dxid: 'user-inactive.admin2' }) as unknown as User,
-    } as unknown as Reference<User>,
-    role: SPACE_MEMBERSHIP_ROLE.ADMIN,
-    active: false,
-  }
-
-  const userContext = {} as unknown as UserContext
   const platformClient = {
+    orgDescribe: orgDescribeStub,
     orgSetMemberAccess: orgSetMemberAccessStub,
   } as unknown as PlatformClient
   const adminClient = {
+    orgSetMemberAccess: orgSetMemberAccessStub,
+    orgFindMembers: orgFindMembersStub,
+    inviteUserToOrganization: inviteUserToOrganizationStub,
     projectDescribe: adminProjectDescribeStub,
     projectUpdate: adminProjectUpdateStub,
+    removeUserFromOrganization: removeUserFromOrganizationStub,
   } as unknown as PlatformClient
-  const spaceMembershipRepository = {
-    findChangeableMemberships: findChangeableMembershipsStub,
-    nativeUpdate: nativeUpdateStub,
-    find: spaceMembershipFindStub,
-    findOne: spaceMembershipFindOneStub,
-  } as unknown as SpaceMembershipRepository
-  const spaceMembershipPlatformAccessToInactiveProvider = {
-    memberAccess: {
-      level: 'MEMBER',
-      allowBillableActivities: false,
-      appAccess: false,
-      projectAccess: 'NONE',
-    } as OrgMemberAccess,
-    bulkUpdate: bulkUpdateStub,
-  } as unknown as SpaceMembershipPlatformAccessToInactiveProvider
-  const spaceMembershipPlatformAccessToAdminProvider = {
-    memberAccess: {
-      level: 'ADMIN',
-    },
-  } as unknown as SpaceMembershipPlatformAccessToAdminProvider
 
-  const spaceMembershipUpdateToAdminProvider = {
-    validateUpdaterRole: validateUpdaterRoleStub,
-    update: spaceMembershipUpdateRoleUpdateStub,
-    updateMembership: (membership: SpaceMembership): void => {
-      membership.role = SPACE_MEMBERSHIP_ROLE.ADMIN
-    },
-    permittedUpdaterRoles: [SPACE_MEMBERSHIP_ROLE.ADMIN],
-  } as unknown as SpaceMembershipUpdatePermissionToAdminProvider
-  const spaceMembershipUpdatePermisisonProviderMap = {
-    [SPACE_MEMBERSHIP_ROLE.ADMIN]: spaceMembershipUpdateToAdminProvider,
-  } as unknown as {
-    [T in SpaceMembershipPermission]: SpaceMembershipUpdatePermissionProvider
-  }
+  beforeEach(async () => {
+    await db.dropData(database.connection())
+    em = database.orm().em.fork() as SqlEntityManager
+    em.clear()
 
-  const spaceMembershipUpdatePermissionHelper = {
-    buildMembershipAccessPayload: buildMembershipAccessPayloadStub,
-  } as unknown as SpaceMembershipUpdatePermissionHelper
-
-  beforeEach(() => {
-    findChangeableMembershipsStub.reset()
-    findChangeableMembershipsStub.throws()
-    findChangeableMembershipsStub
-      .withArgs(SPACE, MEMBERSHIP_IDS, match.bool, CURRENT_MEMBERSHIP)
-      .resolves([])
-      .withArgs(SPACE, [MEMBERSHIP_CONTRIBUTOR.id], true, CURRENT_MEMBERSHIP)
-      .resolves([MEMBERSHIP_CONTRIBUTOR])
-      .withArgs(SPACE, [MEMBERSHIP_ADMIN.id], true, CURRENT_MEMBERSHIP)
-      .resolves([MEMBERSHIP_ADMIN])
-      .withArgs(SPACE, [MEMBERSHIP_INACTIVE_ADMIN.id], false, CURRENT_MEMBERSHIP)
-      .resolves([MEMBERSHIP_INACTIVE_ADMIN])
-      .withArgs(
-        SPACE,
-        [MEMBERSHIP_INACTIVE_ADMIN.id, MEMBERSHIP_INACTIVE_ADMIN_2.id],
-        false,
-        CURRENT_MEMBERSHIP,
+    spaceMembershipRepository = new SpaceMembershipRepository(em, SpaceMembership)
+    hostLead = create.userHelper.create(em)
+    await em.flush()
+    userContext = {
+      id: hostLead.id,
+      dxuser: hostLead.dxuser,
+      accessToken: 'token',
+      sessionId: 'sessionId',
+      loadEntity: (): Promise<User> => Promise.resolve(hostLead),
+    }
+    const adminAccesProvider = new SpaceMembershipPlatformAccessToAdminProvider(em, platformClient)
+    const contributorAccessProvider = new SpaceMembershipPlatformAccessToContributorProvider(
+      em,
+      platformClient,
+    )
+    const viewerAccessProvider = new SpaceMembershipPlatformAccessToViewerProvider(
+      em,
+      platformClient,
+    )
+    const inactiveAccessProvider = new SpaceMembershipPlatformAccessToInactiveProvider(
+      em,
+      platformClient,
+    )
+    spaceMembershipToPlatformAccessProviderMap = {
+      [SPACE_MEMBERSHIP_ROLE.LEAD]: adminAccesProvider,
+      [SPACE_MEMBERSHIP_ROLE.ADMIN]: adminAccesProvider,
+      [SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]: contributorAccessProvider,
+      [SPACE_MEMBERSHIP_ROLE.VIEWER]: viewerAccessProvider,
+      ['disable']: inactiveAccessProvider,
+      ['enable']: null,
+    }
+    spaceMembershipUpdatePermissionHelper = new SpaceMembershipUpdatePermissionHelper(
+      spaceMembershipToPlatformAccessProviderMap,
+    )
+    const spaceMembershipUpdatePermissionToActiveProvider =
+      new SpaceMembershipUpdatePermissionToActiveProvider(
+        em,
+        platformClient,
+        spaceMembershipRepository,
+        spaceMembershipUpdatePermissionHelper,
       )
-      .returns([MEMBERSHIP_INACTIVE_ADMIN, MEMBERSHIP_INACTIVE_ADMIN_2])
-
-    validateUpdaterRoleStub.reset()
-    validateUpdaterRoleStub.throws()
-    validateUpdaterRoleStub
-      .withArgs(CURRENT_MEMBERSHIP)
-      .resolves()
-      .withArgs(CURRENT_CONTRIBUTOR_MEMBERSHIP)
-      .throws(
-        new PermissionError(
-          'Current user does not have permission to update memberships to target role',
-        ),
+    const spaceMembershipUpdatePermissionToInactiveProvider =
+      new SpaceMembershipUpdatePermissionToInactiveProvider(
+        em,
+        platformClient,
+        spaceMembershipRepository,
+        inactiveAccessProvider,
       )
+    const spaceMembershipUpdatePermissionToViewerProvider =
+      new SpaceMembershipUpdatePermissionToViewerProvider(
+        em,
+        platformClient,
+        spaceMembershipRepository,
+        viewerAccessProvider,
+      )
+    const spaceMembershipUpdatePermissionToContributorProvider =
+      new SpaceMembershipUpdatePermissionToContributorProvider(
+        em,
+        platformClient,
+        spaceMembershipRepository,
+        contributorAccessProvider,
+      )
+    const spaceMembershipUpdatePermissionToAdminProvider =
+      new SpaceMembershipUpdatePermissionToAdminProvider(
+        em,
+        platformClient,
+        spaceMembershipRepository,
+        adminAccesProvider,
+      )
+    const spaceMembershipUpdatePermissionToLeadProvider =
+      new SpaceMembershipUpdatePermissionToLeadProvider(
+        em,
+        platformClient,
+        spaceMembershipRepository,
+        adminAccesProvider,
+        adminClient,
+      )
+    spaceMembershipUpdatePermissionProviderMap = {
+      ['enable']: spaceMembershipUpdatePermissionToActiveProvider,
+      ['disable']: spaceMembershipUpdatePermissionToInactiveProvider,
+      [SPACE_MEMBERSHIP_ROLE.VIEWER]: spaceMembershipUpdatePermissionToViewerProvider,
+      [SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]: spaceMembershipUpdatePermissionToContributorProvider,
+      [SPACE_MEMBERSHIP_ROLE.ADMIN]: spaceMembershipUpdatePermissionToAdminProvider,
+      [SPACE_MEMBERSHIP_ROLE.LEAD]: spaceMembershipUpdatePermissionToLeadProvider,
+    }
 
-    spaceMembershipUpdateRoleUpdateStub.reset()
-    spaceMembershipUpdateRoleUpdateStub.throws()
-
-    bulkUpdateStub.reset()
-    bulkUpdateStub.throws()
-    bulkUpdateStub.resolves()
-
-    nativeUpdateStub.reset()
-    nativeUpdateStub.throws()
+    groupSpace = create.spacesHelper.create(em, {
+      type: SPACE_TYPE.GROUPS,
+      state: SPACE_STATE.ACTIVE,
+      hostProject: 'project-grouphost',
+      guestProject: 'project-groupguest',
+    })
+    guestLead = create.userHelper.create(em)
+    hostLeadMembership = create.spacesHelper.addMember(
+      em,
+      { user: hostLead, space: groupSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    groupGuestLeadMembership = create.spacesHelper.addMember(
+      em,
+      { user: guestLead, space: groupSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+    )
+    groupViewerMembership = create.spacesHelper.addMember(
+      em,
+      { user: create.userHelper.create(em), space: groupSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.VIEWER, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+    )
+    groupContributorMembership = create.spacesHelper.addMember(
+      em,
+      { user: create.userHelper.create(em), space: groupSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    await em.flush()
 
     orgSetMemberAccessStub.reset()
     orgSetMemberAccessStub.throws()
     orgSetMemberAccessStub.resolves()
+    orgDescribeStub.reset()
+    orgDescribeStub.throws()
+    orgDescribeStub.resolves({ admins: [`user-${config.platform.adminUser}`] })
+    orgFindMembersStub.reset()
+    orgFindMembersStub.throws()
+    orgFindMembersStub.resolves({
+      results: [],
+    })
+    inviteUserToOrganizationStub.reset()
+    inviteUserToOrganizationStub.throws()
+    inviteUserToOrganizationStub.resolves()
 
     adminProjectDescribeStub.reset()
     adminProjectDescribeStub.throws()
+    adminProjectDescribeStub.withArgs(groupSpace.hostProject).resolves({
+      billTo: hostLeadMembership.user.getEntity().billTo(),
+    })
+    adminProjectDescribeStub.withArgs(groupSpace.guestProject).resolves({
+      billTo: groupGuestLeadMembership.user.getEntity().billTo(),
+    })
 
     adminProjectUpdateStub.reset()
     adminProjectUpdateStub.throws()
+    adminProjectUpdateStub.resolves()
 
-    spaceMembershipFindStub.reset()
-    spaceMembershipFindStub.throws()
-
-    spaceMembershipFindOneStub.reset()
-    spaceMembershipFindOneStub.throws()
-
-    buildMembershipAccessPayloadStub.reset()
-    buildMembershipAccessPayloadStub.throws()
-    buildMembershipAccessPayloadStub
-      .withArgs([MEMBERSHIP_ADMIN, MEMBERSHIP_INACTIVE_ADMIN])
-      .returns({
-        'user-admin': spaceMembershipPlatformAccessToAdminProvider.memberAccess,
-        'user-inactive.admin': spaceMembershipPlatformAccessToInactiveProvider.memberAccess,
-      })
+    removeUserFromOrganizationStub.reset()
+    removeUserFromOrganizationStub.throws()
+    removeUserFromOrganizationStub.resolves()
   })
 
-  context('updateRole', () => {
+  context('updatePermission', () => {
     it('should throw error if validateUpdaterRole throws', async () => {
-      const membershipIds = [MEMBERSHIP_CONTRIBUTOR.id]
-      const targetRole = SPACE_MEMBERSHIP_ROLE.ADMIN
-
-      const service = getInstance()
       await expect(
-        service.updatePermission(SPACE, CURRENT_CONTRIBUTOR_MEMBERSHIP, membershipIds, targetRole),
+        getInstance().updatePermission(
+          groupSpace,
+          groupViewerMembership,
+          [hostLeadMembership.id, groupContributorMembership.id],
+          SPACE_MEMBERSHIP_ROLE.ADMIN,
+        ),
       ).to.be.rejectedWith(
         PermissionError,
         'Current user does not have permission to update memberships to target role',
       )
-      expect(validateUpdaterRoleStub.calledOnce).to.be.true()
-      expect(validateUpdaterRoleStub.firstCall.args).to.deep.equal([CURRENT_CONTRIBUTOR_MEMBERSHIP])
     })
 
     it('should throw InvalidStateError if no memberships can be changed', async () => {
-      const membershipIds = MEMBERSHIP_IDS
-      const targetRole = SPACE_MEMBERSHIP_ROLE.ADMIN
-
-      const service = getInstance()
       await expect(
-        service.updatePermission(SPACE, CURRENT_MEMBERSHIP, membershipIds, targetRole),
+        getInstance().updatePermission(
+          groupSpace,
+          hostLeadMembership,
+          [-1, -2],
+          SPACE_MEMBERSHIP_ROLE.ADMIN,
+        ),
       ).to.be.rejectedWith(InvalidStateError, 'No memberships can be changed')
-      expect(validateUpdaterRoleStub.calledOnce).to.be.true()
-      expect(validateUpdaterRoleStub.firstCall.args).to.deep.equal([CURRENT_MEMBERSHIP])
-      expect(findChangeableMembershipsStub.calledOnce).to.be.true()
-      expect(findChangeableMembershipsStub.firstCall.args).to.deep.equal([
-        SPACE,
-        membershipIds,
-        true,
-        CURRENT_MEMBERSHIP,
-      ])
-    })
-
-    it('should throw error if update throws', async () => {
-      const error = new InternalError('Not all records were updated')
-      const membershipIds = [MEMBERSHIP_CONTRIBUTOR.id]
-      const targetRole = SPACE_MEMBERSHIP_ROLE.ADMIN
-
-      const changeableMemberships = [MEMBERSHIP_CONTRIBUTOR]
-      spaceMembershipUpdateRoleUpdateStub.throws(error)
-
-      const service = getInstance()
-      await expect(
-        service.updatePermission(SPACE, CURRENT_MEMBERSHIP, membershipIds, targetRole),
-      ).to.be.rejectedWith(error)
-      expect(validateUpdaterRoleStub.calledOnce).to.be.true()
-      expect(validateUpdaterRoleStub.firstCall.args).to.deep.equal([CURRENT_MEMBERSHIP])
-      expect(findChangeableMembershipsStub.calledOnce).to.be.true()
-      expect(findChangeableMembershipsStub.firstCall.args).to.deep.equal([
-        SPACE,
-        membershipIds,
-        true,
-        CURRENT_MEMBERSHIP,
-      ])
-      expect(spaceMembershipUpdateRoleUpdateStub.calledOnce).to.be.true()
-      expect(spaceMembershipUpdateRoleUpdateStub.firstCall.args).to.deep.equal([
-        SPACE,
-        CURRENT_MEMBERSHIP,
-        changeableMemberships,
-      ])
     })
 
     it('should return the changeable memberships', async () => {
-      const changeableMemberships = [MEMBERSHIP_CONTRIBUTOR]
-      spaceMembershipUpdateRoleUpdateStub.resolves()
-      const membershipIds = [MEMBERSHIP_CONTRIBUTOR.id]
-      const targetRole = SPACE_MEMBERSHIP_ROLE.ADMIN
-
-      const service = getInstance()
-      const result = await service.updatePermission(
-        SPACE,
-        CURRENT_MEMBERSHIP,
-        membershipIds,
-        targetRole,
+      const result = await getInstance().updatePermission(
+        groupSpace,
+        hostLeadMembership,
+        [groupViewerMembership.id, groupContributorMembership.id],
+        SPACE_MEMBERSHIP_ROLE.ADMIN,
       )
-      expect(result).to.deep.equal(changeableMemberships)
-      expect(validateUpdaterRoleStub.calledOnce).to.be.true()
-      expect(validateUpdaterRoleStub.firstCall.args).to.deep.equal([CURRENT_MEMBERSHIP])
-      expect(findChangeableMembershipsStub.calledOnce).to.be.true()
-      expect(findChangeableMembershipsStub.firstCall.args).to.deep.equal([
-        SPACE,
-        membershipIds,
-        true,
-        CURRENT_MEMBERSHIP,
+      expect(result).to.deep.equal([groupViewerMembership, groupContributorMembership])
+    })
+  })
+
+  context('changeLeadRole', () => {
+    it('should throw InvalidStateError if the new lead is already the current lead', async () => {
+      await expect(
+        getInstance().changeLeadRole(groupSpace, hostLeadMembership, hostLead),
+      ).to.be.rejectedWith(InvalidStateError, 'The new lead is already the current lead')
+    })
+
+    it('should throw InvalidStateError if the new lead is already a lead in the space', async () => {
+      await expect(
+        getInstance().changeLeadRole(groupSpace, hostLeadMembership, guestLead),
+      ).to.be.rejectedWith(InvalidStateError, 'The new lead is already a lead in the space')
+    })
+
+    it('should update lead role if user is already a member', async () => {
+      const newLeadMembership = create.spacesHelper.addMember(
+        em,
+        { user: create.userHelper.create(em), space: groupSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      await em.flush()
+      orgFindMembersStub.resolves({
+        results: [
+          {
+            id: newLeadMembership.user.getEntity().dxid,
+          },
+        ],
+      })
+
+      const result = await getInstance().changeLeadRole(
+        groupSpace,
+        hostLeadMembership,
+        newLeadMembership.user.getEntity(),
+      )
+      expect(hostLeadMembership.role).to.equal(SPACE_MEMBERSHIP_ROLE.ADMIN)
+      expect(result[0].id).to.equal(newLeadMembership.id)
+      expect(result[0].role).to.equal(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(result[0].side).to.equal(SPACE_MEMBERSHIP_SIDE.HOST)
+      expect(orgFindMembersStub.calledTwice).to.be.true()
+      expect(orgFindMembersStub.firstCall.args).to.deep.equal([
+        {
+          orgDxid: groupSpace.hostDxOrg,
+          id: [newLeadMembership.user.getEntity().dxid],
+        },
       ])
-      expect(spaceMembershipUpdateRoleUpdateStub.calledOnce).to.be.true()
-      expect(spaceMembershipUpdateRoleUpdateStub.firstCall.args).to.deep.equal([
-        SPACE,
-        CURRENT_MEMBERSHIP,
-        changeableMemberships,
+      expect(orgFindMembersStub.secondCall.args).to.deep.equal([
+        {
+          orgDxid: groupSpace.guestDxOrg,
+          id: [newLeadMembership.user.getEntity().dxid],
+        },
+      ])
+      expect(inviteUserToOrganizationStub.notCalled).to.be.true()
+      expect(adminProjectDescribeStub.calledOnce).to.be.true()
+      expect(adminProjectDescribeStub.firstCall.args).to.deep.equal([groupSpace.hostProject])
+      expect(adminProjectUpdateStub.calledOnce).to.be.true()
+      expect(adminProjectUpdateStub.firstCall.args).to.deep.equal([
+        groupSpace.hostProject,
+        { billTo: newLeadMembership.user.getEntity().billTo() },
+      ])
+    })
+
+    it('should invite user to orgs if user is not a member and update lead role', async () => {
+      const newLeadMembership = create.spacesHelper.addMember(
+        em,
+        { user: create.userHelper.create(em), space: groupSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      await em.flush()
+
+      const newUser = newLeadMembership.user.getEntity()
+      const result = await getInstance().changeLeadRole(groupSpace, hostLeadMembership, newUser)
+      expect(hostLeadMembership.role).to.equal(SPACE_MEMBERSHIP_ROLE.ADMIN)
+      expect(result[0].role).to.equal(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(result[0].side).to.equal(SPACE_MEMBERSHIP_SIDE.HOST)
+      expect(orgFindMembersStub.calledTwice).to.be.true()
+      expect(orgFindMembersStub.firstCall.args).to.deep.equal([
+        {
+          orgDxid: groupSpace.hostDxOrg,
+          id: [newUser.dxid],
+        },
+      ])
+      expect(orgFindMembersStub.secondCall.args).to.deep.equal([
+        {
+          orgDxid: groupSpace.guestDxOrg,
+          id: [newUser.dxid],
+        },
+      ])
+      expect(inviteUserToOrganizationStub.calledTwice).to.be.true()
+      expect(inviteUserToOrganizationStub.firstCall.args).to.deep.equal([
+        {
+          orgDxId: groupSpace.hostDxOrg,
+          data: {
+            invitee: newUser.dxid,
+            suppressEmailNotification: true,
+            ...spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+          },
+        },
+      ])
+      expect(inviteUserToOrganizationStub.secondCall.args).to.deep.equal([
+        {
+          orgDxId: groupSpace.guestDxOrg,
+          data: {
+            invitee: newUser.dxid,
+            suppressEmailNotification: true,
+            ...spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+          },
+        },
+      ])
+      expect(adminProjectDescribeStub.calledOnce).to.be.true()
+      expect(adminProjectDescribeStub.firstCall.args).to.deep.equal([groupSpace.hostProject])
+      expect(adminProjectUpdateStub.calledOnce).to.be.true()
+      expect(adminProjectUpdateStub.firstCall.args).to.deep.equal([
+        groupSpace.hostProject,
+        { billTo: newUser.billTo() },
+      ])
+    })
+
+    it('should remove user from opposite if user is not longer a member on that side', async () => {
+      const newUser = create.userHelper.create(em)
+      const reviewSpace = create.spacesHelper.create(em, {
+        type: SPACE_TYPE.REVIEW,
+        state: SPACE_STATE.ACTIVE,
+        hostProject: 'project-reviewhost',
+        guestProject: 'project-reviewguest',
+      })
+      const cfHostSpace = create.spacesHelper.createConfidentialReview(
+        em,
+        reviewSpace,
+        SPACE_MEMBERSHIP_SIDE.HOST,
+      )
+      const cfGuestSpace = create.spacesHelper.createConfidentialReview(
+        em,
+        reviewSpace,
+        SPACE_MEMBERSHIP_SIDE.GUEST,
+      )
+
+      create.spacesHelper.addMember(
+        em,
+        { user: hostLead, space: reviewSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      create.spacesHelper.addMember(
+        em,
+        { user: hostLead, space: cfHostSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      const reviewSpaceGuestLead = create.spacesHelper.addMember(
+        em,
+        { user: guestLead, space: reviewSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+      )
+      create.spacesHelper.addMember(
+        em,
+        { user: guestLead, space: cfGuestSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+      )
+      create.spacesHelper.addMember(
+        em,
+        { user: newUser, space: reviewSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.ADMIN, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      create.spacesHelper.addMember(
+        em,
+        { user: newUser, space: cfHostSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.ADMIN, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      await em.flush()
+
+      orgFindMembersStub
+        .withArgs({
+          orgDxid: reviewSpace.hostDxOrg,
+          id: [newUser.dxid],
+        })
+        .resolves({
+          results: [
+            {
+              id: newUser.dxid,
+              level: 'ADMIN',
+            },
+          ],
+        })
+      orgFindMembersStub
+        .withArgs({
+          orgDxid: reviewSpace.guestDxOrg,
+          id: [newUser.dxid],
+        })
+        .resolves({
+          results: [],
+        })
+      removeUserFromOrganizationStub
+        .withArgs({
+          orgDxId: reviewSpace.hostDxOrg,
+          data: {
+            user: newUser.dxid,
+          },
+        })
+        .resolves({
+          id: reviewSpace.hostDxOrg,
+        })
+      adminProjectDescribeStub
+        .withArgs(reviewSpace.guestProject)
+        .resolves({ billTo: reviewSpaceGuestLead.user.getEntity().billTo() })
+        .withArgs(cfGuestSpace.guestProject)
+        .resolves({ billTo: reviewSpaceGuestLead.user.getEntity().billTo() })
+
+      const result = await getInstance().changeLeadRole(reviewSpace, reviewSpaceGuestLead, newUser)
+      expect(reviewSpaceGuestLead.role).to.equal(SPACE_MEMBERSHIP_ROLE.ADMIN)
+      expect(result[0].role).to.equal(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(result[0].side).to.equal(SPACE_MEMBERSHIP_SIDE.GUEST)
+      expect(orgFindMembersStub.calledTwice).to.be.true()
+      expect(orgFindMembersStub.firstCall.args).to.deep.equal([
+        {
+          orgDxid: reviewSpace.guestDxOrg,
+          id: [newUser.dxid],
+        },
+      ])
+      expect(orgFindMembersStub.secondCall.args).to.deep.equal([
+        {
+          orgDxid: reviewSpace.hostDxOrg,
+          id: [newUser.dxid],
+        },
+      ])
+      expect(inviteUserToOrganizationStub.calledOnce).to.be.true()
+      expect(inviteUserToOrganizationStub.firstCall.args).to.deep.equal([
+        {
+          orgDxId: reviewSpace.guestDxOrg,
+          data: {
+            invitee: newUser.dxid,
+            suppressEmailNotification: true,
+            ...spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+          },
+        },
+      ])
+      expect(removeUserFromOrganizationStub.calledOnce).to.be.true()
+      expect(removeUserFromOrganizationStub.firstCall.args).to.deep.equal([
+        {
+          orgDxId: reviewSpace.hostDxOrg,
+          data: {
+            user: newUser.dxid,
+          },
+        },
+      ])
+    })
+
+    it('should create new membership if user is not a member and update lead role', async () => {
+      const newUser = create.userHelper.create(em)
+      await em.flush()
+
+      const result = await getInstance().changeLeadRole(groupSpace, hostLeadMembership, newUser)
+      expect(hostLeadMembership.role).to.equal(SPACE_MEMBERSHIP_ROLE.ADMIN)
+      expect(result[0].role).to.equal(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(result[0].side).to.equal(SPACE_MEMBERSHIP_SIDE.HOST)
+      expect(orgFindMembersStub.calledTwice).to.be.true()
+      expect(orgFindMembersStub.firstCall.args).to.deep.equal([
+        {
+          orgDxid: groupSpace.hostDxOrg,
+          id: [newUser.dxid],
+        },
+      ])
+      expect(orgFindMembersStub.secondCall.args).to.deep.equal([
+        {
+          orgDxid: groupSpace.guestDxOrg,
+          id: [newUser.dxid],
+        },
+      ])
+      expect(inviteUserToOrganizationStub.calledTwice).to.be.true()
+      expect(inviteUserToOrganizationStub.firstCall.args).to.deep.equal([
+        {
+          orgDxId: groupSpace.hostDxOrg,
+          data: {
+            invitee: newUser.dxid,
+            suppressEmailNotification: true,
+            ...spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+          },
+        },
+      ])
+      expect(inviteUserToOrganizationStub.secondCall.args).to.deep.equal([
+        {
+          orgDxId: groupSpace.guestDxOrg,
+          data: {
+            invitee: newUser.dxid,
+            suppressEmailNotification: true,
+            ...spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+          },
+        },
+      ])
+      expect(adminProjectDescribeStub.calledOnce).to.be.true()
+      expect(adminProjectDescribeStub.firstCall.args).to.deep.equal([groupSpace.hostProject])
+      expect(adminProjectUpdateStub.calledOnce).to.be.true()
+      expect(adminProjectUpdateStub.firstCall.args).to.deep.equal([
+        groupSpace.hostProject,
+        { billTo: newUser.billTo() },
       ])
     })
   })
 
   context('syncPlatformAccess', () => {
     it('should return early if no memberships found', async () => {
-      const memberIds = MEMBERSHIP_IDS
-      const spaceId = SPACE.id
-      spaceMembershipFindStub.resolves([])
-
-      const service = getInstance()
-      await service.syncPlatformAccess(spaceId, memberIds)
-      expect(spaceMembershipFindStub.calledOnce).to.be.true()
-      expect(spaceMembershipFindStub.firstCall.args).to.deep.equal([
-        {
-          spaces: { id: spaceId, state: SPACE_STATE.ACTIVE },
-          id: { $in: memberIds },
-        },
-        { populate: ['user', 'spaces'] },
-      ])
+      const result = await getInstance().syncPlatformAccess(groupSpace.id, [-1, -2])
+      expect(orgSetMemberAccessStub.callCount).to.be.equal(0)
+      expect(result).to.deep.equal(undefined)
     })
 
     it('should call orgSetMemberAccess and update memberships', async () => {
-      const changeableMemberships = [MEMBERSHIP_ADMIN, MEMBERSHIP_INACTIVE_ADMIN]
-      const memberIds = [MEMBERSHIP_ADMIN.id, MEMBERSHIP_INACTIVE_ADMIN.id]
-      const spaceId = SPACE.id
-      spaceMembershipFindStub.resolves(changeableMemberships)
-      const userDxId1 = MEMBERSHIP_ADMIN.user.getEntity().dxid
-      const userDxId2 = MEMBERSHIP_INACTIVE_ADMIN.user.getEntity().dxid
-      const adminAccess = spaceMembershipPlatformAccessToAdminProvider.memberAccess
-      const inactiveAccess = spaceMembershipPlatformAccessToInactiveProvider.memberAccess
       const memberAccessPayload = {
-        [userDxId1]: adminAccess,
-        [userDxId2]: inactiveAccess,
+        [groupViewerMembership.user.getEntity().dxid]:
+          spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.VIEWER].memberAccess,
+        [groupContributorMembership.user.getEntity().dxid]:
+          spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]
+            .memberAccess,
       }
-      orgSetMemberAccessStub
-        .withArgs({
-          orgDxId: ORG_1,
-          data: memberAccessPayload,
-        })
-        .resolves({ id: ORG_1 })
-      orgSetMemberAccessStub
-        .withArgs({
-          orgDxId: ORG_2,
-          data: memberAccessPayload,
-        })
-        .resolves({ id: ORG_2 })
 
-      const service = getInstance()
-      const result = await service.syncPlatformAccess(spaceId, memberIds)
-      expect(result).to.deep.equal(undefined)
-      expect(spaceMembershipFindStub.calledOnce).to.be.true()
-      expect(spaceMembershipFindStub.firstCall.args).to.deep.equal([
-        {
-          id: { $in: memberIds },
-          spaces: {
-            state: SPACE_STATE.ACTIVE,
-            id: spaceId,
-          },
-        },
-        { populate: ['user', 'spaces'] },
+      const result = await getInstance().syncPlatformAccess(groupSpace.id, [
+        groupViewerMembership.id,
+        groupContributorMembership.id,
       ])
+      expect(result).to.deep.equal(undefined)
       expect(orgSetMemberAccessStub.calledTwice).to.be.true()
       expect(orgSetMemberAccessStub.firstCall.args).to.deep.equal([
         {
-          orgDxId: ORG_1,
+          orgDxId: groupSpace.hostDxOrg,
           data: memberAccessPayload,
         },
       ])
       expect(orgSetMemberAccessStub.secondCall.args).to.deep.equal([
         {
-          orgDxId: ORG_2,
+          orgDxId: groupSpace.guestDxOrg,
           data: memberAccessPayload,
         },
       ])
-      expect(buildMembershipAccessPayloadStub.calledOnce).to.be.true()
-      expect(buildMembershipAccessPayloadStub.firstCall.args).to.deep.equal([changeableMemberships])
     })
   })
 
   context('syncSpaceLeadBillTo', () => {
-    const MEMBERSHIP_LEAD = {
-      id: 8,
-      user: {
-        getEntity: (): User =>
-          ({ dxid: 'user-lead', billTo: () => 'org-pfda..lead' }) as unknown as User,
-      } as unknown as Reference<User>,
-      spaces: {
-        getItems: (): Space[] => [SPACE],
-      },
-      role: SPACE_MEMBERSHIP_ROLE.LEAD,
-      active: true,
-      isHost: (): boolean => true,
-    }
-
     it('should throw InvalidStateError if membership not found', async () => {
       const membershipId = -1
-      spaceMembershipFindOneStub.resolves(null)
 
       const service = getInstance()
       await expect(service.syncSpaceLeadBillTo(membershipId)).to.be.rejectedWith(
         InvalidStateError,
         'Lead membership not found',
       )
-      expect(spaceMembershipFindOneStub.calledOnce).to.be.true()
-      expect(spaceMembershipFindOneStub.firstCall.args).to.deep.equal([
-        { id: membershipId, role: SPACE_MEMBERSHIP_ROLE.LEAD, active: true },
-        { populate: ['spaces', 'spaces.confidentialSpaces', 'user', 'user.organization'] },
-      ])
     })
 
     it('should not update billTo if project billTo matches user organization', async () => {
-      const membershipId = MEMBERSHIP_LEAD.id
-      spaceMembershipFindOneStub.resolves(MEMBERSHIP_LEAD)
-      adminProjectDescribeStub.withArgs(SPACE.hostProject).resolves({ billTo: 'org-pfda..lead' })
+      adminProjectDescribeStub
+        .withArgs(groupSpace.hostProject)
+        .resolves({ billTo: hostLead.billTo() })
 
-      const service = getInstance()
-      await service.syncSpaceLeadBillTo(membershipId)
-      expect(spaceMembershipFindOneStub.calledOnce).to.be.true()
-      expect(spaceMembershipFindOneStub.firstCall.args).to.deep.equal([
-        { id: membershipId, role: SPACE_MEMBERSHIP_ROLE.LEAD, active: true },
-        { populate: ['spaces', 'spaces.confidentialSpaces', 'user', 'user.organization'] },
-      ])
+      await getInstance().syncSpaceLeadBillTo(hostLeadMembership.id)
       expect(adminProjectDescribeStub.calledOnce).to.be.true()
-      expect(adminProjectDescribeStub.firstCall.args).to.deep.equal([SPACE.hostProject])
+      expect(adminProjectDescribeStub.firstCall.args).to.deep.equal([groupSpace.hostProject])
       expect(adminProjectUpdateStub.notCalled).to.be.true()
     })
 
     it('should update project billTo if it does not match user organization', async () => {
-      const membershipId = MEMBERSHIP_LEAD.id
-      spaceMembershipFindOneStub.resolves(MEMBERSHIP_LEAD)
-      adminProjectDescribeStub.withArgs(SPACE.hostProject).resolves({ billTo: 'org-pfda..x' })
-      adminProjectUpdateStub.withArgs(SPACE.hostProject, { billTo: 'org-pfda..lead' }).resolves()
+      adminProjectDescribeStub.withArgs(groupSpace.hostProject).resolves({ billTo: 'org-pfda..x' })
 
-      const service = getInstance()
-      await service.syncSpaceLeadBillTo(membershipId)
-      expect(spaceMembershipFindOneStub.calledOnce).to.be.true()
-      expect(spaceMembershipFindOneStub.firstCall.args).to.deep.equal([
-        { id: membershipId, role: SPACE_MEMBERSHIP_ROLE.LEAD, active: true },
-        { populate: ['spaces', 'spaces.confidentialSpaces', 'user', 'user.organization'] },
-      ])
+      await getInstance().syncSpaceLeadBillTo(hostLeadMembership.id)
       expect(adminProjectDescribeStub.calledOnce).to.be.true()
-      expect(adminProjectDescribeStub.firstCall.args).to.deep.equal([SPACE.hostProject])
+      expect(adminProjectDescribeStub.firstCall.args).to.deep.equal([groupSpace.hostProject])
       expect(adminProjectUpdateStub.calledOnce).to.be.true()
       expect(adminProjectUpdateStub.firstCall.args).to.deep.equal([
-        SPACE.hostProject,
-        { billTo: 'org-pfda..lead' },
+        groupSpace.hostProject,
+        { billTo: hostLead.billTo() },
       ])
     })
   })
 
   function getInstance(): SpaceMembershipService {
     return new SpaceMembershipService(
+      em,
       userContext,
       platformClient,
       adminClient,
       spaceMembershipRepository,
-      spaceMembershipUpdatePermisisonProviderMap,
+      spaceMembershipUpdatePermissionProviderMap,
       spaceMembershipUpdatePermissionHelper,
+      spaceMembershipToPlatformAccessProviderMap,
     )
   }
 })

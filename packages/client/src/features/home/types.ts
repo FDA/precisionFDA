@@ -54,7 +54,6 @@ export type HomeResourceType = Exclude<ResourceTypeUrlNames, 'members'>
 
 export type APIResource =
   | 'admin-users'
-  | 'admin-spaces'
   | 'admin-invitations'
   | 'files'
   | 'folders'
