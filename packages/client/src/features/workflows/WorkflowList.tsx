@@ -1,18 +1,26 @@
-import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
 import React from 'react'
-import { Button } from '../../components/Button'
-import { ActionsMenu } from '../../components/Menu'
-import { ContentFooter } from '../../components/Page/ContentFooter'
-import { Pagination } from '../../components/Pagination'
+import {
+  ColumnDefResolved,
+  ColumnFiltersState,
+  ColumnSizingState,
+  ColumnSort,
+  VisibilityState,
+} from '@tanstack/react-table'
+import { Button } from '@/components/Button'
+import { NetworkIcon } from '@/components/icons/NetworkIcon'
+import { PlusIcon } from '@/components/icons/PlusIcon'
+import { ActionsMenu } from '@/components/Menu'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { Pagination } from '@/components/Pagination'
+import { StyledPageTable } from '@/components/Table/components/styles'
+import { ErrorBoundary } from '@/utils/ErrorBoundry'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
-import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../components/icons/PlusIcon'
-import { ErrorBoundary } from '../../utils/ErrorBoundry'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
-import { ActionsButton, ResourceHeader } from '../home/show.styles'
+import { ResourceHeader } from '../home/show.styles'
 import { HomeScope } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -21,9 +29,6 @@ import { useWorkflowListActions } from './useWorkflowListActions'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { fetchWorkflowList } from './workflows.api'
 import { IWorkflow, WorkflowMeta } from './workflows.types'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
-import { NetworkIcon } from '../../components/icons/NetworkIcon'
 
 type ListType = { workflows: IWorkflow[]; meta: WorkflowMeta }
 
@@ -145,7 +150,6 @@ export const WorkflowList = ({
           setPage={p => setPageParam(p, true)}
           onPerPageSelect={p => setPerPageParam(p, true)}
         />
-        <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
       <ActionModalsRenderer modals={listModals} />

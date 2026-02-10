@@ -1,3 +1,4 @@
+import React, { useEffect, useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   ColumnDefResolved,
@@ -8,19 +9,18 @@ import {
   RowSelectionState,
   VisibilityState,
 } from '@tanstack/react-table'
-import React, { useEffect, useMemo, useState } from 'react'
 import { ActionsMenu } from '@/components/Menu'
 import { ContentFooter } from '@/components/Page/ContentFooter'
 import { Pagination } from '@/components/Pagination'
-import Table from '../../components/Table'
 import { StyledPageTable } from '@/components/Table/components/styles'
-import { HoverDNAnexusLogo } from '@/components/icons/DNAnexusLogo'
+import { useLastWSNotification } from '@/hooks/useLastWSNotification'
 import { ErrorBoundary } from '@/utils/ErrorBoundry'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
+import Table from '../../components/Table'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsRow } from '../home/home.styles'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
@@ -29,7 +29,6 @@ import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionSelectActions } from './useExecutionSelectActions'
-import { useLastWSNotification } from '@/hooks/useLastWSNotification'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -87,7 +86,11 @@ export const ExecutionList = ({
   }, [lastJsonMessage])
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.jobs)
-  const { actions, modals } = useExecutionSelectActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs'] })
+  const { actions, modals } = useExecutionSelectActions({
+    homeScope,
+    selectedItems: selectedFileObjects,
+    resourceKeys: ['jobs'],
+  })
 
   if (error) return <ResouceQueryErrorMessage />
 
@@ -129,7 +132,6 @@ export const ExecutionList = ({
           setPage={p => setPageParam(p, true)}
           onPerPageSelect={p => setPerPageParam(p, true)}
         />
-        <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
       <ActionModalsRenderer modals={modals} />

@@ -1,3 +1,4 @@
+import React, { useEffect, useRef } from 'react'
 import { DndContext } from '@dnd-kit/core'
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -8,40 +9,38 @@ import {
   RowSelectionState,
   VisibilityState,
 } from '@tanstack/react-table'
-import React, { useEffect, useRef } from 'react'
+import { clsx } from 'clsx'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '@/components/Button'
+import { CopyText } from '@/components/CopyText/CopyText'
+import { FileIcon } from '@/components/icons/FileIcon'
+import { FolderIcon } from '@/components/icons/FolderIcon'
 import { ActionsMenu } from '@/components/Menu'
+import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
 import { ContentFooter } from '@/components/Page/ContentFooter'
 import { Pagination } from '@/components/Pagination'
-import Table from '../../components/Table'
-import { HoverDNAnexusLogo } from '@/components/icons/DNAnexusLogo'
 import { StyledPageTable } from '@/components/Table/components/styles'
+import { useLastWSNotification } from '@/hooks/useLastWSNotification'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
+import Table from '../../components/Table'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { FilesListResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta, NOTIFICATION_ACTION, MetaPath } from '../home/types'
+import { HomeScope, IMeta, MetaPath, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
-import { FileBreadcrumb } from './FileBreadcrumb'
 import { centerToCursorCollisionDetection } from './centerToCursorCollisionDetection'
+import { FileBreadcrumb } from './FileBreadcrumb'
+import styles from './FileList.module.css'
 import { fetchFiles } from './files.api'
 import { IFile, IFolder } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
 import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { useLastWSNotification } from '@/hooks/useLastWSNotification'
-import { FolderIcon } from '@/components/icons/FolderIcon'
-import { FileIcon } from '@/components/icons/FileIcon'
-import styles from './FileList.module.css'
-import { CopyText } from '@/components/CopyText/CopyText'
-import { clsx } from 'clsx'
-import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
 
 type ListType = { files: (IFile | IFolder)[]; meta: IMeta }
 
@@ -219,7 +218,9 @@ export const FileList = ({
             <ActionsMenu data-testid="home-files-actions-button">
               <ActionsMenuContent
                 actions={actions}
-                message={homeScope === 'spaces' ? 'To perform other actions on this file, access it from the Space' : undefined}
+                message={
+                  homeScope === 'spaces' ? 'To perform other actions on this file, access it from the Space' : undefined
+                }
               />
             </ActionsMenu>
           </QuickActions>
@@ -261,7 +262,6 @@ export const FileList = ({
           setPage={p => setPageParam(p, true)}
           onPerPageSelect={p => setPerPageParam(p, true)}
         />
-        <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
       <ActionModalsRenderer modals={folderModals} />

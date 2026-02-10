@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   ColumnDefResolved,
   ColumnFiltersState,
@@ -6,24 +7,22 @@ import {
   RowSelectionState,
   VisibilityState,
 } from '@tanstack/react-table'
-import React from 'react'
 import { Link, useLocation } from 'react-router'
-import { Button } from '../../components/Button'
-import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { ContentFooter } from '../../components/Page/ContentFooter'
-import { Pagination } from '../../components/Pagination'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { Button } from '@/components/Button'
+import { DiscussionIcon } from '@/components/icons/DiscussionIcon'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { Pagination } from '@/components/Pagination'
+import { StyledPageTable } from '@/components/Table/components/styles'
+import { toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { toArrayFromObject } from '../../utils/object'
 import { ActionsRow, QuickActions } from '../home/home.styles'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
 import { HomeScope, MetaV2 } from '../home/types'
 import { useList } from '../home/useList'
 import { fetchDiscussionsRequest } from './api'
 import { Discussion } from './discussions.types'
 import { useDiscussionColumns } from './useDiscussionColumns'
-import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
 
 type ListType = { data: Discussion[]; meta: MetaV2 }
 
@@ -165,7 +164,6 @@ export const DiscussionList = ({
           setPage={p => setPageParam(p, true)}
           onPerPageSelect={p => setPerPageParam(p, true)}
         />
-        <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
     </>
   )

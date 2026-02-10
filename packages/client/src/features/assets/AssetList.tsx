@@ -1,20 +1,27 @@
-import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
 import React from 'react'
+import {
+  ColumnDefResolved,
+  ColumnFiltersState,
+  ColumnSizingState,
+  ColumnSort,
+  VisibilityState,
+} from '@tanstack/react-table'
 import { useNavigate } from 'react-router'
-import { Button } from '../../components/Button'
-import { ActionsMenu } from '../../components/Menu'
-import { ContentFooter } from '../../components/Page/ContentFooter'
-import { Pagination } from '../../components/Pagination'
+import { Button } from '@/components/Button'
+import { KeyIcon } from '@/components/icons/KeyIcon'
+import { QuestionIcon } from '@/components/icons/QuestionIcon'
+import { ActionsMenu } from '@/components/Menu'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { Pagination } from '@/components/Pagination'
+import { StyledPageTable } from '@/components/Table/components/styles'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
-import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { KeyIcon } from '../../components/icons/KeyIcon'
-import { QuestionIcon } from '../../components/icons/QuestionIcon'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useGenerateKeyModal } from '../auth/useGenerateKeyModal'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
-import { ActionsButton, ResourceHeader } from '../home/show.styles'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { ResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -22,12 +29,18 @@ import { fetchAssets } from './assets.api'
 import { IAsset } from './assets.types'
 import { useAssetColumns } from './useAssetColumns'
 import { useAssetActions } from './useAssetSelectActions'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { assets: IAsset[]; meta: IMeta }
 
-export const AssetList = ({ homeScope, spaceId, isAdmin }: { homeScope?: HomeScope; spaceId?: string, isAdmin?: boolean }) => {
+export const AssetList = ({
+  homeScope,
+  spaceId,
+  isAdmin,
+}: {
+  homeScope?: HomeScope
+  spaceId?: string
+  isAdmin?: boolean
+}) => {
   const navigate = useNavigate()
 
   const onRowClick = (uid: string) => navigate(`/home/assets/${uid}`)
@@ -59,7 +72,12 @@ export const AssetList = ({ homeScope, spaceId, isAdmin }: { homeScope?: HomeSco
   const { data: propertiesData } = usePropertiesQuery('asset', homeScope, spaceId)
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.assets)
-  const { actions, modals } = useAssetActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['assets'], resetSelected })
+  const { actions, modals } = useAssetActions({
+    homeScope,
+    selectedItems: selectedFileObjects,
+    resourceKeys: ['assets'],
+    resetSelected,
+  })
   const generateCLIKeyAction = useGenerateKeyModal()
 
   if (error) return <ResouceQueryErrorMessage />
@@ -87,7 +105,9 @@ export const AssetList = ({ homeScope, spaceId, isAdmin }: { homeScope?: HomeSco
           <ActionsMenu data-testid="home-assets-actions-button">
             <ActionsMenuContent
               actions={actions}
-              message={homeScope === 'spaces' ? 'To perform other actions on this asset, access it from the Space' : undefined}
+              message={
+                homeScope === 'spaces' ? 'To perform other actions on this asset, access it from the Space' : undefined
+              }
             />
           </ActionsMenu>
         </ActionsRow>
@@ -122,7 +142,6 @@ export const AssetList = ({ homeScope, spaceId, isAdmin }: { homeScope?: HomeSco
           setPage={p => setPageParam(p, true)}
           onPerPageSelect={p => setPerPageParam(p, true)}
         />
-        <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
       <ActionModalsRenderer modals={modals} />

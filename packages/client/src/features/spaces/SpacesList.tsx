@@ -1,11 +1,10 @@
+import React, { useEffect, useMemo, useState } from 'react'
 import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { useQuery } from '@tanstack/react-query'
 import { ColumnDefResolved } from '@tanstack/react-table'
-import React, { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import styled from 'styled-components'
 import { BannerTitle, MainBanner } from '../../components/Banner'
-import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { compactScrollBarV2 } from '../../components/Page/styles'
 import { Pagination } from '../../components/Pagination'
@@ -222,7 +221,6 @@ const SpacesList = () => {
                 setPage={p => pagination.setPageParam(p, true)}
                 onPerPageSelect={p => pagination.setPerPageParam(p, true)}
               />
-              <HoverDNAnexusLogo opacity height={14} />
             </ContentFooter>
           </MainContent>
         </DndContext>
