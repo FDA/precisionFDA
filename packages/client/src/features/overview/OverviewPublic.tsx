@@ -1,13 +1,16 @@
 import React from 'react'
-import { PageContainerMargin } from '../../components/Page/styles'
-import { OverviewCenterSection, PageRow } from '../../components/Public/styles'
-import { usePageMeta } from '../../hooks/usePageMeta'
-import NavigationBar, { NavigationBarBanner, NavigationBarPublicLandingTitle } from '../../components/NavigationBar/NavigationBar'
+import styled from 'styled-components'
+import { Button } from '@/components/Button'
+import { PageContainerMargin } from '@/components/Page/styles'
+import { OverviewCenterSection, PageRow } from '@/components/Public/styles'
+import { usePageMeta } from '@/hooks/usePageMeta'
+import NavigationBar, {
+  NavigationBarBanner,
+  NavigationBarPublicLandingTitle,
+} from '../../components/NavigationBar/NavigationBar'
 import MailButton from '../../components/NavigationBar/SocialMediaButtons'
 import PublicLayout from '../../layouts/PublicLayout'
 import { PageOverviewMainBody } from './styles'
-import { Button } from '../../components/Button'
-import styled from 'styled-components'
 
 const HeroContent = styled.div`
   text-align: center;
@@ -294,8 +297,8 @@ const PrecisionFDALanding = () => {
       <HeroContent>
         <HeroTitle>precisionFDA</HeroTitle>
         <HeroSubtitle>
-          A secure, collaborative, cloud-based high-performance computing environment advancing regulatory science and AI
-          innovation for the FDA
+          A secure, collaborative, cloud-based high-performance computing environment advancing regulatory science and
+          AI innovation for the FDA
         </HeroSubtitle>
       </HeroContent>
 
@@ -309,52 +312,53 @@ const PrecisionFDALanding = () => {
           <FeatureCard>
             <FeatureTitle>What is precisionFDA?</FeatureTitle>
             <FeatureDescription>
-              precisionFDA is a secure, collaborative, cloud-based high-performance computing environment that was launched by the
-              U.S. Food and Drug Administration (FDA) to facilitate the collection, analysis, and application of data and new
-              tools to support its mission.
+              precisionFDA is a secure, collaborative, cloud-based high-performance computing environment that was
+              launched by the U.S. Food and Drug Administration (FDA) to facilitate the collection, analysis, and
+              application of data and new tools to support its mission.
             </FeatureDescription>
             <FeatureDescription>
-              The platform offers collaborative opportunities, capabilities, and initiatives to help inform regulatory science,
-              speed the Agency's understanding of evolving science, and advance the ethical and responsible use of artificial
-              intelligence (AI) to support the work of FDA regulators and scientists.
+              The platform offers collaborative opportunities, capabilities, and initiatives to help inform regulatory
+              science, speed the Agency's understanding of evolving science, and advance the ethical and responsible use
+              of artificial intelligence (AI) to support the work of FDA regulators and scientists.
             </FeatureDescription>
           </FeatureCard>
 
           <FeatureCard>
             <FeatureTitle>Who can become a user?</FeatureTitle>
             <FeatureDescription>
-              FDA researchers and people who interface with FDA; for example, scientists in industry, academia, and government who
-              may collaborate with the Agency through Research Collaboration Agreements (RCAs), Memoranda Of Understanding (MOUs),
-              pilot programs, or partnerships.
+              FDA researchers and people who interface with FDA; for example, scientists in industry, academia, and
+              government who may collaborate with the Agency through Research Collaboration Agreements (RCAs), Memoranda
+              Of Understanding (MOUs), pilot programs, or partnerships.
             </FeatureDescription>
             <FeatureDescription>
-              Join our community of scientists participating in exciting <FeatureLink href="/challenges">Challenges</FeatureLink>{' '}
-              and collaborative research initiatives.
+              Join our community of scientists participating in exciting{' '}
+              <FeatureLink href="/challenges">Challenges</FeatureLink> and collaborative research initiatives.
             </FeatureDescription>
           </FeatureCard>
 
           <FeatureCard>
             <FeatureTitle>Why become a user?</FeatureTitle>
             <FeatureDescription>
-              precisionFDA offers a number of capabilities that facilitate collaborations between FDA researchers and those in the
-              external scientific community. They include collaborative spaces in the cloud where participants can safely exchange
-              large data sets, including sensitive or confidential data allowed under FEDRamp and FISMA moderate certification.
+              precisionFDA offers a number of capabilities that facilitate collaborations between FDA researchers and
+              those in the external scientific community. They include collaborative spaces in the cloud where
+              participants can safely exchange large data sets, including sensitive or confidential data allowed under
+              FEDRamp and FISMA moderate certification.
             </FeatureDescription>
             <FeatureDescription>
-              Access secure computational resources specifically configured to meet the most demanding technical computing
-              requirements, software tools, and computational pipelines.
+              Access secure computational resources specifically configured to meet the most demanding technical
+              computing requirements, software tools, and computational pipelines.
             </FeatureDescription>
           </FeatureCard>
 
           <FullWidthCard>
             <FeatureTitle>How do I become a user?</FeatureTitle>
             <FeatureDescription>
-              The best place to start is to <FeatureLink href="/request_access">request access</FeatureLink> in the upper
-              right-hand corner of this page. Fill in the form and follow the instructions.
+              The best place to start is to <FeatureLink href="/request_access">request access</FeatureLink> in the
+              upper right-hand corner of this page. Fill in the form and follow the instructions.
             </FeatureDescription>
             <FeatureDescription>
-              Your request will be reviewed and you will receive an email with further instructions to get you started on your
-              precisionFDA journey.
+              Your request will be reviewed and you will receive an email with further instructions to get you started
+              on your precisionFDA journey.
             </FeatureDescription>
 
             <GetStartedSection>

@@ -131,6 +131,30 @@ jobs:
           level: "info"
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get changed files (server)
+        id: changed-server
+        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32 #v46.0.1
+        with:
+          files: |
+            packages/server/apps/**/*.ts
+            packages/server/libs/**/*.ts
+
+      - name: Check prettier formatting (server)
+        if: steps.changed-server.outputs.any_changed == 'true'
+        run: npx prettier --check --config packages/server/.prettierrc ${{ steps.changed-server.outputs.all_changed_files }}
+
+      - name: Get changed files (client)
+        id: changed-client
+        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32 #v46.0.1
+        with:
+          files: |
+            packages/client/src/**/*.ts
+            packages/client/src/**/*.tsx
+
+      - name: Check prettier formatting (client)
+        if: steps.changed-client.outputs.any_changed == 'true'
+        run: npx prettier --check --config packages/client/.prettierrc ${{ steps.changed-client.outputs.all_changed_files }}
+
   test-ruby:
     name: Test Ruby
     runs-on: ubuntu-latest

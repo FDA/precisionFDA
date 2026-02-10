@@ -4,12 +4,15 @@
   "singleQuote": true,
   "trailingComma": "all",
   "semi": false,
-  "plugins": ["@ianvs/prettier-plugin-sort-imports"],
-  "importOrderParserPlugins": ["typescript", "decorators-legacy", "jsx"],
+  "plugins": [
+    "@ianvs/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ],
   "importOrder": [
     "<BUILTIN_MODULES>",
+    "^react$",
     "<THIRD_PARTY_MODULES>",
-    "^@shared/(.*)$",
+    "^@/(.*)$",
     "^[.]"
   ]
 }
