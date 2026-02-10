@@ -7,6 +7,9 @@ export interface Links {
 export type MemberRole = 'lead' | 'contributor' | 'viewer' | 'admin' | 'disable' | 'enable'
 export type MemberSide = 'host' | 'guest'
 
+export type MemberRoleV2 = 'LEAD' | 'CONTRIBUTOR' | 'VIEWER' | 'ADMIN'
+export type MemberSideV2 = 'HOST' | 'GUEST'
+
 export enum MEMBER_ROLE {
   ADMIN = 0,
   CONTRIBUTOR = 1,
@@ -36,6 +39,17 @@ export interface SpaceMembership {
   links: Links
   to_roles: MemberRole[]
   shared_membership_id: number
+}
+
+export interface SpaceMembershipV2 {
+  active: boolean
+  createdAt: string
+  id: number
+  name: string
+  role: MemberRoleV2
+  side: MemberSideV2
+  userActive: boolean
+  username: string
 }
 
 export interface ListMembersResponse {

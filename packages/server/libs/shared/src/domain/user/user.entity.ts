@@ -393,7 +393,7 @@ export class User extends BaseEntity {
     return (await this.isSiteAdmin()) || (await this.isChallengeAdmin())
   }
 
-  billTo(): string {
+  billTo(): DxId<'org'> {
     return this.organization.getEntity().getDxOrg()
   }
 }

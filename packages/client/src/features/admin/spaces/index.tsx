@@ -1,27 +1,20 @@
+import axios from 'axios'
 import React from 'react'
-import { usePageMeta } from '../../../hooks/usePageMeta'
-import { UserLayout } from '../../../layouts/UserLayout'
-import {
-  AdminSectionBreadcrumbDivider,
-  AdminSectionBreadcrumbs,
-  AdminStyledPageTable,
-  Title,
-  Topbox,
-  TopLeft,
-} from '../styles'
 import { Link } from 'react-router'
-import Table from '../../../components/Table'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { hidePagination, Pagination } from '../../../components/Pagination'
+import Table from '../../../components/Table'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
-import { useList } from '../../home/useList'
+import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
+import { usePageMeta } from '../../../hooks/usePageMeta'
+import { UserLayout } from '../../../layouts/UserLayout'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { IFilter, MetaV2 } from '../../home/types'
+import { useList } from '../../home/useList'
 import { Params, prepareListFetchV2 } from '../../home/utils'
-import axios from 'axios'
-import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import { ISpaceV2 } from '../../spaces/spaces.types'
 import { useSpacesColumns } from '../../spaces/useSpacesColumns'
+import { AdminSectionBreadcrumbDivider, AdminSectionBreadcrumbs, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
 import { SpacesListActionRow } from './SpacesListActionRow'
 
 type AdminSpaceListType = { data: ISpaceV2[]; meta: MetaV2 }
@@ -49,7 +42,7 @@ export const SpacesList = () => {
     colWidths,
   } = useList<AdminSpaceListType>({
     fetchList: fetchSpaces,
-    resource: 'admin-spaces',
+    resource: 'spaces',
     params: {},
   })
 

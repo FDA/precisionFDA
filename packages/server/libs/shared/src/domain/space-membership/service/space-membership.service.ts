@@ -1,14 +1,20 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
+import { SpaceMembershipPlatformAccessProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access.provider'
+import { SPACE_MEMBERSHIP_TO_PLATFORM_ACCESS_PROVIDER_MAP } from '@shared/domain/space-membership/providers/platform-access/space-membership-to-platform-access-provider.provider'
 import { SPACE_MEMBERSHIP_PERMISSION_TO_UPDATE_PROVIDER_MAP } from '@shared/domain/space-membership/service/update-permission/space-membership-to-update-permission-provider.provider'
 import { SpaceMembershipUpdatePermissionHelper } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.helper'
 import { SpaceMembershipUpdatePermissionProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.provider'
 import { SpaceMembershipPermission } from '@shared/domain/space-membership/space-membership.type'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { getOppositeOrgDxid } from '@shared/domain/space/space.helper'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { InvalidStateError } from '@shared/errors'
+import { User } from '@shared/domain/user/user.entity'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
+import { UserInviteToOrgResponse } from '@shared/platform-client/platform-client.responses'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { SpaceMembership } from '../space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership.enum'
@@ -20,6 +26,7 @@ export class SpaceMembershipService {
   private readonly logger: Logger
 
   constructor(
+    private readonly em: SqlEntityManager,
     private readonly userContext: UserContext,
     private readonly platformClient: PlatformClient,
     @Inject(ADMIN_PLATFORM_CLIENT)
@@ -30,10 +37,25 @@ export class SpaceMembershipService {
       [T in SpaceMembershipPermission]: SpaceMembershipUpdatePermissionProvider
     },
     private readonly spaceMembershipUpdatePermissionHelper: SpaceMembershipUpdatePermissionHelper,
+    @Inject(SPACE_MEMBERSHIP_TO_PLATFORM_ACCESS_PROVIDER_MAP)
+    private readonly spaceMembershipToPlatformAccessProviderMap: {
+      [T in SpaceMembershipPermission]: SpaceMembershipPlatformAccessProvider
+    },
   ) {}
 
-  getCurrentMembership(spaceId: number, userId: number): Promise<SpaceMembership> {
-    return this.spaceMembershipRepository.getMembership(spaceId, userId)
+  async getCurrentMembership(spaceId: number, userId: number): Promise<SpaceMembership> {
+    const membership = await this.spaceMembershipRepository.getMembership(spaceId, userId)
+    if (!membership) {
+      throw new NotFoundError(`Couldn't find membership for user ${userId}`)
+    }
+    return membership
+  }
+
+  async getMembershipInSpace(spaceId: number, membershipId: number): Promise<SpaceMembership> {
+    return this.spaceMembershipRepository.findOne({
+      id: membershipId,
+      spaces: spaceId,
+    })
   }
 
   async getCurrentUserMembershipInSharedSpace(spaceId: number): Promise<SpaceMembership | null> {
@@ -46,6 +68,25 @@ export class SpaceMembershipService {
         space: null,
       },
     })
+  }
+
+  async createMembership(
+    currentMembership: SpaceMembership,
+    space: Space,
+    user: User,
+    role: SPACE_MEMBERSHIP_ROLE,
+  ): Promise<SpaceMembership> {
+    const newMembership = new SpaceMembership(user, space, currentMembership.side, role)
+    if (space.type === SPACE_TYPE.REVIEW) {
+      await this.em.populate(space, ['confidentialSpaces'])
+      newMembership.spaces.add(
+        currentMembership.isHost()
+          ? space.confidentialReviewerSpace
+          : space.confidentialSponsorSpace,
+      )
+    }
+    await this.em.persist(newMembership).flush()
+    return newMembership
   }
 
   async updatePermission(
@@ -69,6 +110,108 @@ export class SpaceMembershipService {
 
     await provider.update(space, currentMembership, changeableMemberships)
     return changeableMemberships
+  }
+
+  async changeLeadRole(
+    sharedSpace: Space,
+    currentLeadMember: SpaceMembership,
+    newLeadUser: User,
+  ): Promise<SpaceMembership[]> {
+    const newLeadMember = await this.spaceMembershipRepository.getMembership(
+      sharedSpace.id,
+      newLeadUser.id,
+    )
+
+    if (newLeadMember) {
+      if (newLeadMember.id === currentLeadMember.id) {
+        throw new InvalidStateError('The new lead is already the current lead')
+      }
+      if (newLeadMember.role === SPACE_MEMBERSHIP_ROLE.LEAD) {
+        throw new InvalidStateError('The new lead is already a lead in the space')
+      }
+    }
+
+    const allLeadMemberships: SpaceMembership[] = []
+    if (!newLeadMember) {
+      this.logger.log(
+        `Created new lead membership for user ${newLeadUser.dxuser} in space ${sharedSpace.id}`,
+      )
+      const leadMembership = await this.createMembership(
+        currentLeadMember,
+        sharedSpace,
+        newLeadUser,
+        SPACE_MEMBERSHIP_ROLE.ADMIN,
+      )
+      allLeadMemberships.push(leadMembership)
+    } else {
+      allLeadMemberships.push(newLeadMember)
+      // TODO (PFDA-6418): handle multiple members linked to shared space and confidential space, remove this after fixing the database
+      if (sharedSpace.type === SPACE_TYPE.REVIEW) {
+        const cfNewLeadMembership =
+          await this.spaceMembershipRepository.findConfidentialMembershipByUser(
+            sharedSpace.id,
+            newLeadMember.user.id,
+            newLeadMember.side,
+          )
+        if (cfNewLeadMembership && cfNewLeadMembership.id !== newLeadMember.id) {
+          allLeadMemberships.push(cfNewLeadMembership)
+        }
+      }
+    }
+
+    // Ensure the new lead has admin access in all orgs related to the space
+    const spaceOrgs = sharedSpace.getMembershipOrg(currentLeadMember)
+    const promises = spaceOrgs.map((org) =>
+      this.adminClient
+        .orgFindMembers({
+          orgDxid: org,
+          id: [newLeadUser.dxid],
+        })
+        .then((findResult): Promise<UserInviteToOrgResponse | void> => {
+          const results = findResult.results
+          return results.length === 0
+            ? this.adminClient.inviteUserToOrganization({
+                orgDxId: org,
+                data: {
+                  invitee: newLeadUser.dxid,
+                  suppressEmailNotification: true,
+                  ...this.spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN]
+                    .memberAccess,
+                },
+              })
+            : Promise.resolve()
+        }),
+    )
+    await Promise.all(promises)
+    if (sharedSpace.type !== SPACE_TYPE.GROUPS) {
+      const oppositeOrgDxid = getOppositeOrgDxid(sharedSpace, currentLeadMember)
+      if (oppositeOrgDxid) {
+        await this.adminClient
+          .orgFindMembers({
+            orgDxid: oppositeOrgDxid,
+            id: [newLeadUser.dxid],
+          })
+          .then((findResult) => {
+            const results = findResult.results
+            if (results.length === 0) {
+              return
+            }
+            return this.adminClient.removeUserFromOrganization({
+              orgDxId: oppositeOrgDxid,
+              data: {
+                user: newLeadUser.dxid,
+              },
+            })
+          })
+      }
+    }
+    const leadProvider = this.spaceMembershipUpdatePermissionProviderMap[SPACE_MEMBERSHIP_ROLE.LEAD]
+    const updatedMemberships = await leadProvider.update(
+      sharedSpace,
+      currentLeadMember,
+      allLeadMemberships,
+    )
+    return updatedMemberships
   }
 
   async syncPlatformAccess(spaceId: number, memberIds: number[]): Promise<void> {

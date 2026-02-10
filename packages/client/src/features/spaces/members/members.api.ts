@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { SideRole } from '../spaces.types'
-import { ListMembersResponse, MEMBER_ROLE, MemberRole } from './members.types'
+import { ListMembersResponse, MemberRole, SpaceMembershipV2 } from './members.types'
 
 export type MembershipRolesChangePayload = {
   membershipIds: number[]
@@ -18,6 +18,10 @@ export async function spacesMembersListRequest({
   const params = sideRole ? { side: sideRole } : {}
 
   return axios.get(`/api/spaces/${spaceId}/members`, { params }).then(r => r.data)
+}
+
+export async function fetchSpaceMemberships(spaceId: number): Promise<SpaceMembershipV2[]> {
+  return axios.get(`/api/v2/spaces/${spaceId}/memberships`).then(r => r.data)
 }
 
 export async function addMembersToSpaceRequest({

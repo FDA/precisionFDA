@@ -1,4 +1,5 @@
 import { Reference, SqlEntityManager } from '@mikro-orm/mysql'
+import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import {
@@ -14,9 +15,11 @@ import {
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserService } from '@shared/domain/user/service/user.service'
 import { User } from '@shared/domain/user/user.entity'
 import { InvalidStateError } from '@shared/errors'
 import { SpaceMembershipUpdateFacade } from '@shared/facade/space-membership/space-membership-update.facade'
+import { PlatformClient } from '@shared/platform-client'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 import { expect } from 'chai'
 import { stub } from 'sinon'
@@ -30,11 +33,18 @@ describe('SpaceMembershipUpdateFacade', () => {
   const flushStub = stub()
   const sendEmailStub = stub()
   const getSharedSpaceStub = stub()
+  const getMembershipInSpaceStub = stub()
+  const findEditableByIdStub = stub()
+  const changeLeadRoleStub = stub()
 
   const updatePermissionStub = stub()
 
   const createSyncSpaceMemberAccessTaskStub = stub()
   const createSyncSpaceLeadBillToTaskStub = stub()
+
+  const getUserByDxuserStub = stub()
+
+  const orgDescribeStub = stub()
 
   const GROUP_SPACE_ID = 4
   const MEMBER_IDS = [2, 3]
@@ -44,13 +54,23 @@ describe('SpaceMembershipUpdateFacade', () => {
   const userContext = {
     loadEntity: () => Promise.resolve(currentUser),
   } as UserContext
-  const space = { id: GROUP_SPACE_ID } as Space
+  const space = {
+    id: GROUP_SPACE_ID,
+    hostDxOrg: 'org-pfda..host',
+    guestDxOrg: 'org-pfda..guest',
+    getMembershipOrg: (_: SpaceMembership) => ['org-pfda..host', 'org-pfda..guest'],
+  } as unknown as Space
   const membership = {
     id: CURRENT_MEMBERSHIP_ID,
-    role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+    role: SPACE_MEMBERSHIP_ROLE.LEAD,
     side: SPACE_MEMBERSHIP_SIDE.HOST,
+    active: true,
     spaces: {
       getItems: () => [space],
+    },
+    user: {
+      getEntity: (): User =>
+        ({ id: 9, fullName: 'Lead User', billTo: () => 'org-pfda..lead.user' }) as unknown as User,
     },
   } as unknown as SpaceMembership
 
@@ -78,6 +98,13 @@ describe('SpaceMembershipUpdateFacade', () => {
       },
     },
   ] as unknown as SpaceMembership[]
+  const spaceAdmin = {
+    id: 5,
+    role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+    side: SPACE_MEMBERSHIP_SIDE.HOST,
+    spaces: { getItems: () => [space] },
+    user: { getEntity: () => ({ id: 12, fullName: 'Lead User' }) as User },
+  } as unknown as SpaceMembership
 
   const em = {
     populate: populateStub,
@@ -85,13 +112,22 @@ describe('SpaceMembershipUpdateFacade', () => {
     persist: persistStub,
     flush: flushStub,
   } as unknown as SqlEntityManager
+  const platformClient = {
+    orgDescribe: orgDescribeStub,
+  } as unknown as PlatformClient
   const spaceService = {
     getSharedSpace: getSharedSpaceStub,
+    findEditableById: findEditableByIdStub,
   } as unknown as SpaceService
   const spaceMembershipService = {
     getCurrentUserMembershipInSharedSpace: getCurrentUserMembershipInSharedSpaceStub,
     updatePermission: updatePermissionStub,
+    getMembershipInSpace: getMembershipInSpaceStub,
+    changeLeadRole: changeLeadRoleStub,
   } as unknown as SpaceMembershipService
+  const userService = {
+    getUserByDxuser: getUserByDxuserStub,
+  } as unknown as UserService
   const maintenanceQueueJobProducer = {
     createSyncSpaceMemberAccessTask: createSyncSpaceMemberAccessTaskStub,
     createSyncSpaceLeadBillToTask: createSyncSpaceLeadBillToTaskStub,
@@ -104,6 +140,9 @@ describe('SpaceMembershipUpdateFacade', () => {
     getSharedSpaceStub.reset()
     getSharedSpaceStub.throws()
     getSharedSpaceStub.withArgs(GROUP_SPACE_ID).resolves(space)
+    findEditableByIdStub.reset()
+    findEditableByIdStub.throws()
+    findEditableByIdStub.resolves(null).withArgs(GROUP_SPACE_ID).resolves(space)
 
     getCurrentUserMembershipInSharedSpaceStub.reset()
     getCurrentUserMembershipInSharedSpaceStub.throws()
@@ -124,10 +163,31 @@ describe('SpaceMembershipUpdateFacade', () => {
 
     updatePermissionStub.reset()
     updatePermissionStub.throws()
+    getMembershipInSpaceStub.reset()
+    getMembershipInSpaceStub.throws()
+    getMembershipInSpaceStub
+      .resolves(null)
+      .withArgs(GROUP_SPACE_ID, membership.id)
+      .resolves(membership)
+      .withArgs(GROUP_SPACE_ID, spaceAdmin.id)
+      .resolves(spaceAdmin)
+
+    changeLeadRoleStub.reset()
+    changeLeadRoleStub.throws()
 
     createSyncSpaceMemberAccessTaskStub.reset()
     createSyncSpaceMemberAccessTaskStub.throws()
     createSyncSpaceMemberAccessTaskStub.resolves()
+
+    getUserByDxuserStub.reset()
+    getUserByDxuserStub.throws()
+    getUserByDxuserStub.resolves(null)
+
+    orgDescribeStub.reset()
+    orgDescribeStub.throws()
+    orgDescribeStub.resolves({
+      admins: [`user-${config.platform.adminUser}`],
+    })
 
     sendEmailStub.reset()
     sendEmailStub.throws()
@@ -135,6 +195,10 @@ describe('SpaceMembershipUpdateFacade', () => {
     referenceStub = stub(Reference, 'create')
     referenceStub.withArgs(space).returns(space as unknown as Reference<Space>)
     referenceStub.withArgs(currentUser).returns(currentUser as unknown as Reference<User>)
+
+    createSyncSpaceLeadBillToTaskStub.reset()
+    createSyncSpaceLeadBillToTaskStub.throws()
+    createSyncSpaceLeadBillToTaskStub.resolves()
   })
 
   afterEach(() => {
@@ -461,16 +525,183 @@ describe('SpaceMembershipUpdateFacade', () => {
         [MEMBER_IDS[0]],
       ])
       expect(createSyncSpaceLeadBillToTaskStub.calledOnce).to.be.true()
-      expect(createSyncSpaceLeadBillToTaskStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID])
+      expect(createSyncSpaceLeadBillToTaskStub.firstCall.args).to.deep.equal([membership.id])
+    })
+  })
+
+  context('recoverSpaceLead', () => {
+    const NEW_LEAD_DXUSER = 'new.user'
+    const NEW_LEAD_USER = {
+      id: 10,
+      fullName: 'New Lead User',
+      dxuser: NEW_LEAD_DXUSER,
+      dxid: `user-${NEW_LEAD_DXUSER}`,
+      billTo: () => 'org-pfda..new.user',
+    } as unknown as User
+    const newLeadMembership = {
+      id: 20,
+      role: SPACE_MEMBERSHIP_ROLE.LEAD,
+      side: SPACE_MEMBERSHIP_SIDE.HOST,
+      spaces: {
+        getItems: (): Space[] => [space],
+      },
+      user: {
+        getEntity: (): User => NEW_LEAD_USER,
+      },
+    } as unknown as SpaceMembership
+
+    beforeEach(() => {
+      getUserByDxuserStub.withArgs(NEW_LEAD_DXUSER).resolves(NEW_LEAD_USER)
+    })
+
+    it('should throw if new lead user not found', async () => {
+      const newLeadDxuser = 'new_lead_user'
+      const facade = getInstance()
+      await expect(
+        facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, newLeadDxuser),
+      ).to.be.rejectedWith(InvalidStateError, `User ${newLeadDxuser} not found`)
+    })
+
+    it('should throw if space not found', async () => {
+      const invalidSpaceId = 9999
+      const facade = getInstance()
+      await expect(
+        facade.recoverSpaceLead(invalidSpaceId, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER),
+      ).to.be.rejectedWith(InvalidStateError, `Shared space with id ${invalidSpaceId} not found`)
+    })
+
+    it('should throw if current lead membership not found', async () => {
+      const invalidMembershipId = 9999
+      const facade = getInstance()
+      await expect(
+        facade.recoverSpaceLead(GROUP_SPACE_ID, invalidMembershipId, NEW_LEAD_DXUSER),
+      ).to.be.rejectedWith(InvalidStateError, 'Current lead not found')
+    })
+
+    it('should throw if current member is not a lead in the space', async () => {
+      const facade = getInstance()
+      await expect(
+        facade.recoverSpaceLead(GROUP_SPACE_ID, spaceAdmin.id, NEW_LEAD_DXUSER),
+      ).to.be.rejectedWith(InvalidStateError, 'Current member is not a lead in the space')
+    })
+
+    it('should throw if current lead is not active', async () => {
+      const inactiveLeadMembership = {
+        id: 123,
+        role: SPACE_MEMBERSHIP_ROLE.LEAD,
+        active: false,
+        spaces: {
+          getItems: (): Space[] => [space],
+        },
+      } as unknown as SpaceMembership
+      getMembershipInSpaceStub
+        .withArgs(GROUP_SPACE_ID, inactiveLeadMembership.id)
+        .resolves(inactiveLeadMembership)
+
+      const facade = getInstance()
+      await expect(
+        facade.recoverSpaceLead(GROUP_SPACE_ID, inactiveLeadMembership.id, NEW_LEAD_DXUSER),
+      ).to.be.rejectedWith(InvalidStateError, 'Current lead is not active')
+    })
+
+    it('should throw if admin user does not exist in the orgs', async () => {
+      orgDescribeStub
+        .withArgs({
+          dxid: space.guestDxOrg,
+          defaultFields: false,
+          fields: {
+            admins: true,
+          },
+        })
+        .resolves({
+          admins: [],
+        })
+      orgDescribeStub
+        .withArgs({
+          dxid: membership.user.getEntity().billTo(),
+          defaultFields: false,
+          fields: {
+            admins: true,
+          },
+        })
+        .resolves({})
+
+      const facade = getInstance()
+      await expect(
+        facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER),
+      ).to.be.rejectedWith(
+        InvalidStateError,
+        `Pre-validation failed: Admin user not found in org ${space.guestDxOrg}; Admin user not found in org ${membership.user.getEntity().billTo()}`,
+      )
+    })
+
+    it('should recover space lead successfully', async () => {
+      changeLeadRoleStub.withArgs(space, membership, NEW_LEAD_USER).resolves([newLeadMembership])
+
+      const facade = getInstance()
+      await facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER)
+      expect(getUserByDxuserStub.calledOnce).to.be.true()
+      expect(getUserByDxuserStub.firstCall.args).to.deep.equal([NEW_LEAD_DXUSER])
+      expect(transactionalStub.calledOnce).to.be.true()
+      expect(populateStub.callCount).to.equal(3)
+      expect(populateStub.firstCall.args).to.deep.equal([membership, ['user', 'user.organization']])
+      expect(populateStub.secondCall.args).to.deep.equal([NEW_LEAD_USER, ['organization']])
+      expect(populateStub.thirdCall.args).to.deep.equal([[newLeadMembership], ['spaces']])
+      expect(orgDescribeStub.callCount).to.equal(4)
+      expect(orgDescribeStub.getCall(0).args[0].dxid).to.equal(space.hostDxOrg)
+      expect(orgDescribeStub.getCall(1).args[0].dxid).to.equal(space.guestDxOrg)
+      expect(orgDescribeStub.getCall(2).args[0].dxid).to.equal(membership.user.getEntity().billTo())
+      expect(orgDescribeStub.getCall(3).args[0].dxid).to.equal(NEW_LEAD_USER.billTo())
+      expect(changeLeadRoleStub.calledOnce).to.be.true()
+      expect(changeLeadRoleStub.firstCall.args).to.deep.equal([space, membership, NEW_LEAD_USER])
+      expect(persistStub.calledOnce).to.be.true()
+      expect(persistStub.firstCall.args[0].entityId).to.equal(newLeadMembership.id)
+      expect(persistStub.firstCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP)
+      expect(persistStub.firstCall.args[0].activityType).to.equal(
+        SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
+      )
+      expect(persistStub.firstCall.args[0].role).to.equal(membership.role)
+      expect(persistStub.firstCall.args[0].side).to.equal(membership.side)
+      expect(persistStub.firstCall.args[0].data).to.equal(
+        JSON.stringify({
+          role: 'lead',
+          full_name: NEW_LEAD_USER.fullName,
+        }),
+      )
+      expect(flushStub.calledOnce).to.be.true()
+      expect(sendEmailStub.callCount).to.equal(1)
+      expect(sendEmailStub.firstCall.args[0]).to.deep.include({
+        type: EMAIL_TYPES.memberChangedAddedRemoved,
+        input: {
+          initUserId: userContext.id,
+          spaceId: GROUP_SPACE_ID,
+          updatedMembershipId: newLeadMembership.id,
+          activityType: 'membership_changed',
+          newMembershipRole: 'LEAD',
+        },
+      })
+    })
+
+    it('should rollback platform changes if recover failed', async () => {
+      transactionalStub.throws(new Error('Test error'))
+
+      const facade = getInstance()
+      await expect(
+        facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER),
+      ).to.be.rejectedWith(Error, 'Test error')
+      expect(createSyncSpaceLeadBillToTaskStub.calledOnce).to.be.true()
+      expect(createSyncSpaceLeadBillToTaskStub.firstCall.args).to.deep.equal([membership.id])
     })
   })
 
   function getInstance(): SpaceMembershipUpdateFacade {
     return new SpaceMembershipUpdateFacade(
       em,
+      platformClient,
       userContext,
       spaceService,
       spaceMembershipService,
+      userService,
       maintenanceQueueJobProducer,
       emailService,
     )
