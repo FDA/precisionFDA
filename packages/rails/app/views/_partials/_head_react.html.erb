@@ -2,5 +2,7 @@
 
 <%= javascript_include_tag 'next_application' %>
 
-<link rel="stylesheet" href="/assets/bundle.css">
-<script type="module" src="/assets/bundle.js"></script>
+<% vite_css_paths("src/index.tsx").each do |css_path| %>
+  <link rel="stylesheet" href="<%= css_path %>">
+<% end %>
+<script type="module" src="<%= vite_asset_path("src/index.tsx") %>"></script>

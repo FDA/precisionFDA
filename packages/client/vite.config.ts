@@ -14,12 +14,9 @@ export default defineConfig(({ mode }) => {
   const certPath = path.resolve(__dirname, '../../cert.pem')
   const hasHttpsCerts = fs.existsSync(keyPath) && fs.existsSync(certPath)
 
-  // Use /assets/ base for production or when VITE_BASE_PATH is set (e.g. Docker builds)
-  const basePath = env.VITE_BASE_PATH || (isProduction ? '/assets/' : '/')
-
   return {
-    // Base path for rails production - chunks will be loaded from /assets/
-    base: basePath,
+    // Base path for rails production - chunks will be loaded from /packs/
+    base: isProduction ? '/packs/' : '/',
 
     resolve: {
       alias: {
@@ -60,20 +57,24 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
-      outDir: env.VITE_OUT_DIR || (isProduction ? '../rails/app/assets/packs' : 'dist'),
+      outDir: env.VITE_OUT_DIR || (isProduction ? '../rails/public/packs' : 'dist'),
       emptyOutDir: true,
+      manifest: true,
       sourcemap: !isProduction,
       rollupOptions: {
         input: path.resolve(__dirname, 'src/index.tsx'),
         output: {
           format: 'es',
-          entryFileNames: 'bundle.js',
+          entryFileNames: 'bundle-[hash].js',
           chunkFileNames: '[name]-[hash].js',
           assetFileNames: assetInfo => {
             if (assetInfo.name?.endsWith('.css')) {
-              return 'bundle.css'
+              return 'bundle-[hash].css'
             }
             return '[name][extname]'
+          },
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router'],
           },
         },
       },

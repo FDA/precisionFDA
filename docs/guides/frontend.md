@@ -150,7 +150,7 @@ ENABLE_DEV_MSW=true pnpm run dev
 pnpm run build
 ```
 
-The build outputs to `../rails/app/assets/packs` for integration with the Rails application.
+The build outputs to `../rails/public/packs` for integration with the Rails application.
 
 ---
 

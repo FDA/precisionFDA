@@ -49,11 +49,10 @@ services:
         - FRONTEND_IMAGE_TAG=22.15.0-slim
     environment:
       - VITE_OUT_DIR=dist
-      - VITE_BASE_PATH=/assets/
       - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
     volumes:
       - type: bind
-        source: ../packages/rails/app/assets/packs
+        source: ../packages/rails/public/packs
         target: /precision-fda/dist
     working_dir: /precision-fda
     command: pnpm run build

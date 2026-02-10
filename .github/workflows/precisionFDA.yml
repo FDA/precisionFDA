@@ -189,9 +189,9 @@ jobs:
           bower install --allow-root
           cp config/database.ci.yml config/database.yml
           bundle exec rake db:setup
-          mkdir -p app/assets/packs
-          touch app/assets/packs/bundle.js
-          touch app/assets/packs/bundle.css
+          mkdir -p public/packs
+          touch public/packs/bundle.js
+          touch public/packs/bundle.css
 
       - name: Test
         working-directory: ./packages/rails

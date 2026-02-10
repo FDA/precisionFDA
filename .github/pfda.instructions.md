@@ -6,9 +6,9 @@ applyTo: '**'
 
 - **Traffic flow**: `packages/nginx/default.conf.template` routes most paths to Rails, `/api/v2` and `/ws` to the Nest API on 3001, and `/docs` to the docs service; preserve this split when adding endpoints.
 
-- **Rails role**: `packages/rails` still renders HTML, serves packs via `app/assets/packs`, and exposes classic REST in `packages/rails/config/routes.rb`; avoid touching the asset pipeline when React already owns a flow.
+- **Rails role**: `packages/rails` still renders HTML, serves packs via `public/packs`, and exposes classic REST in `packages/rails/config/routes.rb`; avoid touching the asset pipeline when React already owns a flow.
 
-- **React build**: `packages/client/vite.config.ts` outputs to `../rails/app/assets/packs`; run `pnpm run build` before Rails-only features that need fresh bundles.
+- **React build**: `packages/client/vite.config.ts` outputs to `../rails/public/packs`; run `pnpm run build` before Rails-only features that need fresh bundles.
 
 - **React dev**: from `packages/client` run `pnpm install && pnpm run dev` for `https://localhost:4000`; axios calls stay relative (`/api/v2/...`) so nginx can proxy to Rails/Nest in Docker.
 
@@ -56,7 +56,7 @@ applyTo: '**'
 
 - **WebSockets**: `/ws` upgrades hit adapters in `@shared/websocket`; register new gateways under `apps/api/src/websocket`.
 
-- **Static assets**: the Docker frontend container binds `packages/rails/app/assets/packs`; keep build outputs relative so bind mounts continue to work.
+- **Static assets**: the Docker frontend container binds `packages/rails/public/packs`; keep build outputs relative so bind mounts continue to work.
 
 - **CI signals**: `.github/workflows/precisionFDA.yml` builds client + Rails; add placeholder touches for new artifacts to avoid pipeline cache misses.
 
@@ -66,7 +66,7 @@ applyTo: '**'
 
 - **Strategic bias**: Rails is being phased out—prefer implementing new features in Nest + React and leave comments when touching legacy code.
 
-- **Pre-PR checks**: verify `make run` still boots, rerun targeted tests, and regenerate client packs so `packages/rails/app/assets/packs` stays current.
+- **Pre-PR checks**: verify `make run` still boots, rerun targeted tests, and regenerate client packs so `packages/rails/public/packs` stays current.
 
   
 

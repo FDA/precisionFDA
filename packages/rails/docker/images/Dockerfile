@@ -73,16 +73,16 @@ RUN pnpm install --frozen-lockfile
 
 # Copy the rest of the frontend code and build
 COPY packages/client/ $APP_DIR/frontend
+# Override VITE_OUT_DIR since the default '../rails/public/packs' is relative to packages/client
+# but in Docker, frontend is at /precision-fda/frontend and Rails is at /precision-fda
+ENV VITE_OUT_DIR=$APP_DIR/public/packs
 RUN pnpm run build
 
 WORKDIR $APP_DIR
 RUN mv .env.do_not_delete .env
 RUN mv config/database.do_not_delete.yml config/database.yml
 
-RUN rm -rf public/packs app/assets/packs && \
-    mkdir -p public/assets && \
-    cp -r rails/app/assets/packs/* public/assets/ && \
-    bower install --allow-root --force && \
+RUN bower install --allow-root --force && \
     bundle exec rake assets:precompile
 
 

@@ -68,9 +68,8 @@ yarn-error.log
 # Ignore client node_modules
 /client/node_modules
 /client/coverage
-/app/assets/packs/*
-!/app/assets/packs/.keep
-
+/public/packs
+/app/assets/packs
 # Ignore local scripts
 run-ui-test.sh
 

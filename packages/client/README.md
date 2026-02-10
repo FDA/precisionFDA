@@ -56,7 +56,7 @@ The client can be built and run using Docker Compose. From the repository root:
 # Start the full development stack
 docker compose -f docker/dev.docker-compose.yml up
 
-# Build only the frontend (outputs to rails/app/assets/packs)
+# Build only the frontend (outputs to rails/public/packs)
 docker compose -f docker/dev.docker-compose.yml up frontend
 ```
 
@@ -78,7 +78,7 @@ docker compose -f docker/dev.docker-compose.yml up frontend
 |---------|-------------|
 | `pnpm dev` | Start Vite development server on port 4000 |
 | `pnpm dev:msw` | Start dev server with MSW mocks enabled |
-| `pnpm build` | Production build (outputs to `rails/app/assets/packs`) |
+| `pnpm build` | Production build (outputs to `rails/public/packs`) |
 | `pnpm build:dev` | Development build |
 | `pnpm start` | Preview production build |
 | `pnpm test` | Run Vitest in watch mode |
@@ -236,8 +236,7 @@ The dev server will automatically use HTTPS if these files exist.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_OUT_DIR` | Build output directory | `../rails/app/assets/packs` (prod) |
-| `VITE_BASE_PATH` | Base path for assets | `/assets/` (prod), `/` (dev) |
+| `VITE_OUT_DIR` | Build output directory | `../rails/public/packs` (prod) |
 
 ### Runtime Variables
 
