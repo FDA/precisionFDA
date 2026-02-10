@@ -155,6 +155,10 @@
                pattern="%h %l %u %t &quot;%r&quot; %s %b" />
                
         <Valve className="org.apache.catalina.valves.rewrite.RewriteValve"/>
+
+        <Valve className="org.apache.catalina.valves.ErrorReportValve"
+           showReport="false"
+           showServerInfo="false" />
       </Host>
     </Engine>
   </Service>
