@@ -1,31 +1,31 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { EntityScope } from '@shared/types/common'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User } from '@shared/domain/user/user.entity'
-import { DxId } from '@shared/domain/entity/domain/dxid'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { FILE_STI_TYPE, FileOrAsset, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { PlatformClient } from '@shared/platform-client'
-import { Node } from '@shared/domain/user-file/node.entity'
 import { Reference } from '@mikro-orm/core'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Event, EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
-import { InvalidStateError, NotFoundError } from '@shared/errors'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { NodeTagging } from '@shared/domain/tagging/node-tagging.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
+import { FILE_STI_TYPE, FileOrAsset, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { User } from '@shared/domain/user/user.entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { PlatformClient } from '@shared/platform-client'
+import { EntityScope } from '@shared/types/common'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 /**
  * Facade for copying nodes (files and folders) between different scopes. If user specifies
@@ -48,11 +48,7 @@ export class CopyNodesFacade {
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
   ) {}
 
-  async copyNodes(
-    requestedIds: number[],
-    targetScope: EntityScope,
-    targetFolderId?: number,
-  ): Promise<void> {
+  async copyNodes(requestedIds: number[], targetScope: EntityScope, targetFolderId?: number): Promise<void> {
     this.logger.log(
       `Copying nodes with ids: [${requestedIds.join(', ')}] to folderId: ${targetFolderId} within scope: ${targetScope}`,
     )
@@ -63,16 +59,14 @@ export class CopyNodesFacade {
 
     // Validate that all nodes are from the same project
     const sourceProject = nodes[0]?.project
-    const fileNodes = nodes.filter((node) => node.isFile)
-    const allSameProject = fileNodes.every((node) => node.project === sourceProject)
+    const fileNodes = nodes.filter(node => node.isFile)
+    const allSameProject = fileNodes.every(node => node.project === sourceProject)
     if (!allSameProject) {
       throw new InvalidStateError('All nodes to be copied must belong to the same source project.')
     }
 
     const destinationProject = await this.getDestinationProjectId(targetScope, user)
-    const fileDxIds = nodes
-      .filter((node) => node.isFile || node.isAsset)
-      .map((n: FileOrAsset) => n.dxid)
+    const fileDxIds = nodes.filter(node => node.isFile || node.isAsset).map((n: FileOrAsset) => n.dxid)
 
     try {
       await this.platformClient.projectClone(sourceProject, destinationProject, fileDxIds)
@@ -85,7 +79,7 @@ export class CopyNodesFacade {
 
     let newlyCreatedFilesCount = 0
     let newlyCreatedFoldersCount = 0
-    let nodesExistingInTarget = []
+    const nodesExistingInTarget: Node[] = []
 
     const nodesToProcess = [...nodes].reverse()
     const sourceFoldersMap = new Map<number, Node>()
@@ -94,14 +88,9 @@ export class CopyNodesFacade {
     }
 
     try {
-      await this.em.transactional(async (tem) => {
+      await this.em.transactional(async tem => {
         for (const sourceNode of nodesToProcess) {
-          const existingNode = await this.getExistingNode(
-            sourceNode,
-            targetScope,
-            user,
-            targetFolderId,
-          )
+          const existingNode = await this.getExistingNode(sourceNode, targetScope, user, targetFolderId)
           if (existingNode) {
             this.logger.log(`Node with uid: ${sourceNode.uid} already exists in target. Skipping.`)
 
@@ -137,17 +126,13 @@ export class CopyNodesFacade {
           }
         }
       })
-      await this.processInfoNotification(
-        nodesExistingInTarget.length,
-        newlyCreatedFilesCount,
-        newlyCreatedFoldersCount,
-      )
+      await this.processInfoNotification(nodesExistingInTarget.length, newlyCreatedFilesCount, newlyCreatedFoldersCount)
     } catch (error: unknown) {
       // collect all dxids of cloned files and rollback
-      const dxids = nodes.filter((node) => node.isFile).map((n: FileOrAsset) => n.dxid)
+      const dxids = nodes.filter(node => node.isFile).map((n: FileOrAsset) => n.dxid)
       // filter out nodes that existed in target to avoid deleting user's existing files
       const dxidsToRollback = dxids.filter(
-        (dxid) => !nodesExistingInTarget.find((node) => (node as FileOrAsset).dxid === dxid),
+        dxid => !nodesExistingInTarget.find((node: FileOrAsset) => node.dxid === dxid),
       )
 
       const chunkSize = 100
@@ -214,10 +199,7 @@ export class CopyNodesFacade {
     }
   }
 
-  private async copyProperties(
-    sourceNode: Node,
-    newlyCreatedNode: UserFile | Asset | Folder,
-  ): Promise<void> {
+  private async copyProperties(sourceNode: Node, newlyCreatedNode: UserFile | Asset | Folder): Promise<void> {
     await this.em.populate(sourceNode, ['properties'])
     for (const property of sourceNode.properties) {
       const newProperty = new NodeProperty()
@@ -260,11 +242,7 @@ export class CopyNodesFacade {
     newlyCreatedFoldersCount: number,
   ): Promise<void> {
     await this.notificationService.createNotification({
-      message: this.getNotificationMessage(
-        existingNodesCount,
-        newlyCreatedFilesCount,
-        newlyCreatedFoldersCount,
-      ),
+      message: this.getNotificationMessage(existingNodesCount, newlyCreatedFilesCount, newlyCreatedFoldersCount),
       severity: SEVERITY.INFO,
       action: NOTIFICATION_ACTION.NODES_COPIED,
       userId: this.user.id,
@@ -295,13 +273,7 @@ export class CopyNodesFacade {
       newlyCreatedNodeAsFile.uid = await this.nodeHelper.generateUid(newlyCreatedNodeAsFile.dxid)
       newlyCreatedNode.state = sourceNode.state
     }
-    this.possiblySetParentFolder(
-      sourceNode,
-      newlyCreatedNode,
-      targetScope,
-      sourceFoldersMap,
-      targetFolderId,
-    )
+    this.possiblySetParentFolder(sourceNode, newlyCreatedNode, targetScope, sourceFoldersMap, targetFolderId)
     return newlyCreatedNode
   }
 
@@ -360,9 +332,7 @@ export class CopyNodesFacade {
   ): string {
     const parts: string[] = []
     if (newlyCreatedFilesCount > 0) {
-      parts.push(
-        getSuccessMessage(newlyCreatedFilesCount, newlyCreatedFoldersCount, 'Successfully copied'),
-      )
+      parts.push(getSuccessMessage(newlyCreatedFilesCount, newlyCreatedFoldersCount, 'Successfully copied'))
     }
     if (existingNodesCount > 0) {
       parts.push(
@@ -388,11 +358,7 @@ export class CopyNodesFacade {
       }
     }
     // if no parent folder is set on target and targetFolderId is provided use it
-    if (
-      !this.hasParentFolder(targetNode) &&
-      targetFolderId !== null &&
-      targetFolderId !== undefined
-    ) {
+    if (!this.hasParentFolder(targetNode) && targetFolderId !== null && targetFolderId !== undefined) {
       this.possiblySetTargetParentFolderId(targetScope, targetNode, targetFolderId)
     }
   }
@@ -465,9 +431,7 @@ export class CopyNodesFacade {
       const spaceId = EntityScopeUtils.getSpaceIdFromScope(scope)
       const membership = await this.spaceMembershipRepo.getMembership(spaceId, user.id)
       await membership.spaces.load()
-      return membership.isHost
-        ? membership.spaces[0].hostProject
-        : membership.spaces[0].guestProject
+      return membership.isHost ? membership.spaces[0].hostProject : membership.spaces[0].guestProject
     }
   }
 }

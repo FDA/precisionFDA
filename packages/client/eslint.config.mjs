@@ -1,18 +1,17 @@
 // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from 'eslint-plugin-storybook'
-
-// @ts-check
 import eslint from '@eslint/js'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import eslintPluginImport from 'eslint-plugin-import'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 import eslintPluginReact from 'eslint-plugin-react'
 import * as reactHooks from 'eslint-plugin-react-hooks'
+import storybook from 'eslint-plugin-storybook'
+import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 
-export default tseslint.config(
+export default defineConfig(
   eslint.configs.recommended,
-  ...tseslint.configs.recommended,
+  tseslint.configs.recommended,
   eslintPluginReact.configs.flat['jsx-runtime'],
   eslintPluginReact.configs.flat['recommended'],
   jsxA11y.flatConfigs.recommended,
@@ -31,7 +30,6 @@ export default tseslint.config(
       'react/require-default-props': 'off',
       'react/jsx-props-no-spreading': 'off',
       'jsx-a11y/label-has-associated-control': 'off',
-      'comma-dangle': ['error', 'always-multiline'],
       'no-redeclare': 'off',
       'no-plusplus': 'off',
       'import/no-unresolved': 'error',
@@ -42,17 +40,17 @@ export default tseslint.config(
       'no-prototype-builtins': 'off',
       'arrow-body-style': 'off',
       'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.jsx'] }],
-      'object-curly-spacing': ['error', 'always', { objectsInObjects: true, arraysInObjects: true }],
       'no-param-reassign': [
         2,
         {
           props: false,
         },
       ],
-      quotes: ['error', 'single', { avoidEscape: true }],
-      semi: ['error', 'never'],
     },
     settings: {
+      react: {
+        version: 'detect',
+      },
       'import/resolver': {
         typescript: {},
       },
