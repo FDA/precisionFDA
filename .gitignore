@@ -52,6 +52,7 @@ yarn-error.log
 
 # Ignore local environment
 .env
+.env.prod
 
 # Ignore IDE files
 .idea/
@@ -63,8 +64,6 @@ yarn-error.log
 # Ignore client node_modules
 /client/node_modules
 /client/coverage
-/app/assets/packs/*
-!/app/assets/packs/.keep
 
 # Ignore local scripts
 run-ui-test.sh
