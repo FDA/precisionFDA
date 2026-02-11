@@ -1,6 +1,6 @@
-import classNames from 'classnames'
-import React, { useEffect, useState } from 'react'
-import { TransparentButton, Button } from '../../components/Button'
+import clsx from 'clsx'
+import { useEffect, useState } from 'react'
+import { Button, TransparentButton } from '../../components/Button'
 import { InputText } from '../../components/InputText'
 import { Loader } from '../../components/Loader'
 import { CrossIcon } from '../../components/icons/PlusIcon'
@@ -55,7 +55,7 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: Asse
   const filteredItems = search ? items.filter(e => reg.test(e.title)) : items
 
   const itemsList = filteredItems.map(item => {
-    const classes = classNames('__menu-item', {
+    const classes = clsx('__menu-item', {
       '__menu-item--selected': item.uid === selectedItem?.uid,
     })
 

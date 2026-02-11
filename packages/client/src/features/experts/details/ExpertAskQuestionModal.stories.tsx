@@ -1,5 +1,5 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useState } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useState } from 'react'
 import { StorybookProviders } from '../../../stories/StorybookProviders'
 import { ExpertAskQuestionModal } from './ExpertAskQuestionModal'
 

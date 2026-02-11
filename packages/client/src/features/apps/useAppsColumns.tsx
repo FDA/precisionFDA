@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnDef } from '@tanstack/react-table'
-import React from 'react'
 import { Link, useLocation } from 'react-router'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
@@ -68,7 +67,7 @@ export const useAppsColumns = ({
             disabled={!isAdmin}
             featured={props.cell.row.original.featured}
             uids={[props.cell.row.original.uid]}
-            onSuccess={() => queryClient.invalidateQueries({ queryKey: ['apps']})}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ['apps'] })}
           />
         </div>
       ),

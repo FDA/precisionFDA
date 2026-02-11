@@ -214,7 +214,9 @@ const HomeShowContent = () => {
         </StyledMenu>
         <Main>
           <ErrorBoundary>
-            <Outlet />
+            <React.Suspense fallback={null}>
+              <Outlet />
+            </React.Suspense>
           </ErrorBoundary>
         </Main>
       </Row>

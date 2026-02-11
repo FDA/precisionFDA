@@ -72,9 +72,11 @@ applyTo: '**'
 
 ## Other Notes
 
-- The year is 2025, November.
+- The year is 2026, February
 
-- We use React 19.2, and the useEffectEvent feature is stable. - Use web search or context7 for useEffectEvent documentation: https://react.dev/reference/react/useEffectEvent
+We use React 19.2
+- the useEffectEvent feature is stable. - Use the useEffectEvent documentation: https://react.dev/reference/react/useEffectEvent
+- `forwardRef` is not longer used and ref is passed in through props.
 
 - Use CSS modules for styling React components.
 - Our project css variables are defined in packages/client/src/styles/variables.ts

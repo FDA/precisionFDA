@@ -1,11 +1,11 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
+import { mockCopyApps } from '../../mocks/handlers/apps.handlers'
+import { mockCopyFiles } from '../../mocks/handlers/files.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { copyAppsToPrivate } from '../apps/apps.api'
 import { APIResource } from '../home/types'
 import { useCopyToPrivateModal } from './useCopyToPrivateModal'
-import { mockCopyApps } from '../../mocks/handlers/apps.handlers'
-import { mockCopyFiles } from '../../mocks/handlers/files.handlers'
 
 const meta: Meta = {
   title: 'Modals/Common',

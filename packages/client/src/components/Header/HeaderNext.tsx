@@ -1,4 +1,4 @@
-import classNames from 'classnames'
+import clsx from 'clsx'
 import React, { useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { PlacesType, Tooltip } from 'react-tooltip'
@@ -12,16 +12,20 @@ import { IUser } from '../../types/user'
 import { AlertBanner } from '../AlertBanner'
 import { TransparentButton } from '../Button'
 import { CloudResourceModal } from '../CloudResourcesModal'
+import { useSearchModal } from '../GlobalSearch/useSearchModal'
 import Menu from '../Menu/Menu'
+import { NotificationCenter } from '../NotificationCenter/NotificationCenter'
+import { ThemeToggle } from '../ThemeToggle'
 import { ArrowLeftIcon } from '../icons/ArrowLeftIcon'
 import { CDMHIcon } from '../icons/CDMHIcon'
 import { CaretIcon } from '../icons/CaretIcon'
 import { CrossIcon } from '../icons/PlusIcon'
 import { ProfileIcon } from '../icons/ProfileIcon'
+import { SearchIcon } from '../icons/SearchIcon'
 import { SiteMenuIcon } from '../icons/SiteMenuIcon'
 import { StarIcon } from '../icons/StarIcon'
-import { ThemeToggle } from '../ThemeToggle'
 import { getNavigationPath, getNavigationRel, getNavigationTarget, SiteNavItemType } from './NavItems'
+import { UserMenu } from './UserMenu'
 import { getOrderedFavoritesOnly } from './getOrderedFavoritesOnly'
 import { getObjectsByIds } from './orderObjectById'
 import {
@@ -51,10 +55,6 @@ import {
 import { useEditFavoritesModal } from './useEditFavoritesModal'
 import { useNavFavorites } from './useNavFavorites'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
-import { useSearchModal } from '../GlobalSearch/useSearchModal'
-import { SearchIcon } from '../icons/SearchIcon'
-import { UserMenu } from './UserMenu'
-import { NotificationCenter } from '../NotificationCenter/NotificationCenter'
 
 const isActiveLink = (linkPath: string, pathname: string) => {
   if (linkPath === '/') {
@@ -319,7 +319,7 @@ const Header: React.FC = () => {
         />
       )}
       <SiteNav
-        className={classNames({ enter: showSiteNav, exit: !showSiteNav })}
+        className={clsx({ enter: showSiteNav, exit: !showSiteNav })}
         ignoredOutsideClickRef={buttonElement}
         setShowSiteNav={setSidebar}
         isSiteAdmin={userCanAdministerSite}

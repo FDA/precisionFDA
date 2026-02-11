@@ -1,13 +1,13 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { fetchApps } from '../apps/apps.api'
+import { IApp } from '../apps/apps.types'
 import { fetchFiles } from '../files/files.api'
+import { IFile } from '../files/files.types'
 import { APIResource } from '../home/types'
 import { useEditTagsModal } from './useEditTagsModal'
-import { IFile } from '../files/files.types'
-import { IApp } from '../apps/apps.types'
 
 const meta: Meta = {
   title: 'Modals/Common',

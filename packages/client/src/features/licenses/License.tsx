@@ -1,8 +1,7 @@
-import React from 'react'
+import clsx from 'clsx'
 import styled from 'styled-components'
-import classnames from 'classnames'
-import { License as ILicense } from './types'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
+import { License as ILicense } from './types'
 
 
 const StyledTitle = styled.div`
@@ -16,7 +15,7 @@ const StyledTitle = styled.div`
 const StyledLicense = styled.div``
 
 export const License = ({ license, className, link }: { license?: ILicense, className?: string, link?: string}) => {
-  const classes = classnames({
+  const classes = clsx({
     'home-license': true,
   }, className)
 

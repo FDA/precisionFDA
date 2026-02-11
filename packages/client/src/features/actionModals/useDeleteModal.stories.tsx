@@ -1,9 +1,9 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
-import { StorybookProviders } from '../../stories/StorybookProviders'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { mockDeleteApps } from '../../mocks/handlers/apps.handlers'
 import { mockDeleteAssets } from '../../mocks/handlers/assets.handlers'
 import { mockDeleteWorkflows } from '../../mocks/handlers/workflows.handlers'
+import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useDeleteModal } from './useDeleteModal'
 
 const meta: Meta = {

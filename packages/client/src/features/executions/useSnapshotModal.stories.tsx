@@ -1,7 +1,7 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
-import { StorybookProviders } from '../../stories/StorybookProviders'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { mockWorkstationExecution } from '../../mocks/handlers/executions.handlers'
+import { StorybookProviders } from '../../stories/StorybookProviders'
 import { IExecution } from './executions.types'
 import { useSnapshotModal } from './useSnapshotModal'
 

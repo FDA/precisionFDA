@@ -1,7 +1,6 @@
-import React from 'react'
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import Header from './HeaderNext'
+import { Meta, StoryObj } from '@storybook/react-vite'
 import { StorybookProviders } from '../../stories/StorybookProviders'
+import Header from './HeaderNext'
 
 const meta: Meta = {
   title: 'Components/Header',

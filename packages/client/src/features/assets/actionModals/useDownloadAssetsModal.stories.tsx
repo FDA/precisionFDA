@@ -1,9 +1,9 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { WithListData } from '../../../stories/helpers'
 import { StorybookProviders } from '../../../stories/StorybookProviders'
-import { IAsset } from '../assets.types'
 import { fetchAssets } from '../assets.api'
+import { IAsset } from '../assets.types'
 import { useDownloadAssetsModal } from './useDownloadAssetsModal'
 
 const meta: Meta = {

@@ -1,15 +1,15 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
+import { licensesMocks, mockAcceptedLicenses, mockLicenses } from '../../mocks/handlers/licenses.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { WithListData } from '../../stories/helpers'
-import { useAcceptLicensesModal } from './useAcceptLicensesModal'
-import { useAcceptLicenseModal } from './useAcceptLicenseModal'
-import { useAttachLicensesModal } from './useAttachLicensesModal'
-import { useDetachLicenseModal } from './useDetachLicenseModal'
+import { FileLicense } from '../assets/assets.types'
 import { fetchFiles } from '../files/files.api'
 import { IFile } from '../files/files.types'
-import { FileLicense } from '../assets/assets.types'
-import { mockLicenses, mockAcceptedLicenses, licensesMocks } from '../../mocks/handlers/licenses.handlers'
+import { useAcceptLicenseModal } from './useAcceptLicenseModal'
+import { useAcceptLicensesModal } from './useAcceptLicensesModal'
+import { useAttachLicensesModal } from './useAttachLicensesModal'
+import { useDetachLicenseModal } from './useDetachLicenseModal'
 
 const meta: Meta = {
   title: 'Modals/Licenses',
