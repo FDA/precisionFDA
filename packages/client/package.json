@@ -58,7 +58,7 @@
     "@tanstack/react-query-devtools": "^5.91.2",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.14",
-    "axios": "^1.12.2",
+    "axios": "^1.13.5",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
