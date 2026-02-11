@@ -1,10 +1,10 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { fetchApps } from './apps.api'
-import { useExportToModal } from './useExportToModal'
 import { IApp } from './apps.types'
+import { useExportToModal } from './useExportToModal'
 
 const meta: Meta = {
   title: 'Modals/Common',

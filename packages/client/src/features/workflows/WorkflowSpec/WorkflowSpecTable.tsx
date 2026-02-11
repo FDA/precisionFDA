@@ -1,5 +1,4 @@
-import React from 'react'
-import classNames from 'classnames'
+import clsx from 'clsx'
 import { InputOutput } from '../workflows.types'
 
 
@@ -16,7 +15,7 @@ export const WorkflowSpecTable = ({ title, config, dataTestId }: { title: string
   }
 
   const data = config.map((spec, i) => {
-    const classes = classNames({
+    const classes = clsx({
       '__table_row': true,
       '__table_row_even': !(i % 2),
     })

@@ -1,10 +1,9 @@
-import React from 'react'
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import { StorybookProviders } from '../../../stories/StorybookProviders'
-import { ChallengeMyEntriesTable, ChallengeMyEntriesTableProps } from './ChallengeMyEntriesTable'
-import { challengeHandlers } from '../../../mocks/handlers/challenges.handlers'
+import { Meta, StoryObj } from '@storybook/react-vite'
 import { authHandlers } from '../../../mocks/handlers/auth.handlers'
+import { challengeHandlers } from '../../../mocks/handlers/challenges.handlers'
+import { StorybookProviders } from '../../../stories/StorybookProviders'
 import { IUser } from '../../../types/user'
+import { ChallengeMyEntriesTable, ChallengeMyEntriesTableProps } from './ChallengeMyEntriesTable'
 
 
 // Mock user for the stories

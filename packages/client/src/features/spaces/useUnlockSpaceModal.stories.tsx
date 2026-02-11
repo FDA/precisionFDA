@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
+import { Meta, StoryObj } from '@storybook/react-vite'
 import React, { useEffect } from 'react'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useUnlockSpaceModal } from './useUnlockSpaceModal'

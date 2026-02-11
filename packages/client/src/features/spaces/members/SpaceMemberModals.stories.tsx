@@ -1,5 +1,5 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { mockMembers } from '../../../mocks/handlers/spaces.handlers'
 import { StorybookProviders } from '../../../stories/StorybookProviders'
 import { MemberRole, SpaceMembership } from './members.types'

@@ -1,5 +1,5 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect, useState } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect, useState } from 'react'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { Asset } from './AttachToModal/useListAssetsQuery'
 import { useAssetAttachModal } from './useAssetAttachModal'
@@ -21,7 +21,7 @@ type Props = {
 
 type Story = StoryObj<Props>
 
-const AssetAttachModalWrapper = ({ initialAssets = []}: Props) => {
+const AssetAttachModalWrapper = ({ initialAssets = [] }: Props) => {
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>(initialAssets)
   const { modalComp, setShowModal } = useAssetAttachModal(selectedAssets, setSelectedAssets)
 

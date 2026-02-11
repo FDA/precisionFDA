@@ -1,5 +1,5 @@
-import classNames from 'classnames'
-import React, { useEffect, useState } from 'react'
+import clsx from 'clsx'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { onLogInWithSSO, useSiteSettingsQuery } from '../../../features/auth/useSiteSettingsQuery'
 import { Button } from '../../Button'
@@ -25,22 +25,22 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
 
   const getNavLinkClassName = (linkPath: string) => {
     if (linkPath === '/') {
-      return classNames('nav-link', {
+      return clsx('nav-link', {
         'active': pathname === linkPath,
       })
     }
-    return classNames('nav-link', {
+    return clsx('nav-link', {
       'active': pathname.startsWith(linkPath),
     })
   }
 
   const getMobileNavLinkClassName = (linkPath: string) => {
     if (linkPath === '/') {
-      return classNames('menu-nav-item', {
+      return clsx('menu-nav-item', {
         'menu-nav-active': pathname === linkPath,
       })
     }
-    return classNames('menu-nav-item', {
+    return clsx('menu-nav-item', {
       'menu-nav-active': pathname.startsWith(linkPath),
     })
   }
@@ -91,7 +91,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
           <div className="navbar-content">
             <div className="brand-section">
               <PFDALogoLight
-                className={classNames('brand-logo', 'brand-logo-light', {
+                className={clsx('brand-logo', 'brand-logo-light', {
                   hidden: !shouldShowLogo,
                 })}
               />
@@ -176,9 +176,9 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
               type="button"
             >
               <div className="hamburger-icon">
-                <div className={classNames('hamburger-line', 'line-1', { 'menu-open': isMobileMenuOpen })}></div>
-                <div className={classNames('hamburger-line', 'line-2', { 'menu-open': isMobileMenuOpen })}></div>
-                <div className={classNames('hamburger-line', 'line-3', { 'menu-open': isMobileMenuOpen })}></div>
+                <div className={clsx('hamburger-line', 'line-1', { 'menu-open': isMobileMenuOpen })}></div>
+                <div className={clsx('hamburger-line', 'line-2', { 'menu-open': isMobileMenuOpen })}></div>
+                <div className={clsx('hamburger-line', 'line-3', { 'menu-open': isMobileMenuOpen })}></div>
               </div>
             </button>
           </div>
@@ -186,11 +186,11 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
       </StyledPublicNavbar>
 
       <MobileMenuOverlay
-        className={classNames({ 'menu-visible': isMobileMenuOpen })}
+        className={clsx({ 'menu-visible': isMobileMenuOpen })}
         onClick={closeMobileMenu}
       >
         <section
-          className={classNames('menu-container', { 'menu-visible': isMobileMenuOpen })}
+          className={clsx('menu-container', { 'menu-visible': isMobileMenuOpen })}
           role="dialog"
           aria-modal="true"
           aria-labelledby="mobile-menu-title"

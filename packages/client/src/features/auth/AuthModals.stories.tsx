@@ -1,8 +1,8 @@
-import { Meta } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
-import { SessionExpiredModal as AuthModalComp } from './SessionExpiredModal'
-import { useModal } from '../modal/useModal'
+import { Meta } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { StorybookProviders } from '../../stories/StorybookProviders'
+import { useModal } from '../modal/useModal'
+import { SessionExpiredModal as AuthModalComp } from './SessionExpiredModal'
 import { useGenerateKeyModal } from './useGenerateKeyModal'
 
 const meta: Meta = {

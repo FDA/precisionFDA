@@ -1,5 +1,4 @@
-import classNames from 'classnames'
-import React from 'react'
+import clsx from 'clsx'
 import { Link } from 'react-router'
 import styled from 'styled-components'
 import { IAccessibleFile } from '../../databases/databases.api'
@@ -95,7 +94,7 @@ export const SpecTable = ({
   }
 
   const data = config.map((spec, i) => {
-    const classes = classNames({
+    const classes = clsx({
       __table_row: true,
       __table_row_even: !(i % 2),
     })

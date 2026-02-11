@@ -87,7 +87,7 @@ export async function copyFilesRequest(scope: string, ids: number[], folderId?: 
 }
 
 export async function editFileRequest({ name, description, fileId }: { name: string; description: string; fileId: string }) {
-  return axios.put(`/api/files/${fileId}`, { file: { name, description }}).then(r => r.data)
+  return axios.put(`/api/files/${fileId}`, { file: { name, description } }).then(r => r.data)
 }
 
 export async function editFolderRequest({ name, folderId }: { name: string; folderId?: number }) {
@@ -122,7 +122,7 @@ export async function createFile(name: string, scope: string, folder_id: string 
 }
 
 export async function fetchSelectedFiles(ids: number[]): Promise<SelectedNode[]> {
-  return axios.get('/api/files/selected', { params: { ids: ids.join(',') }}).then(r => r.data)
+  return axios.get('/api/files/selected', { params: { ids: ids.join(',') } }).then(r => r.data)
 }
 
 export async function validateCopyingFiles(uids: string[], scope: ServerScope): Promise<IExistingFileSet> {

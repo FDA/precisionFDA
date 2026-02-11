@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
+import { Button } from '../../components/Button'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import { PageContainerMargin } from '../../components/Page/styles'
+import { PfTab, PfTabContent, PfTabRow, PfTabTitle } from '../../components/Tabs/PfTab'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { usePageMeta } from '../../hooks/usePageMeta'
-import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
-import { PfTab, PfTabContent, PfTabRow, PfTabTitle } from '../../components/Tabs/PfTab'
-import { Button } from '../../components/Button'
 import { RichText } from '../styles'
 
 //TODO JIRI: TO BE DELETED COMPLETELY
@@ -47,7 +47,7 @@ const AboutPage = () => {
         <PfTabContent $isShown={selectedSection === 'why'}>
           <div className="text-xl font-bold leading-[30px] text-primary-blue">
             The Food and Drug Administration (FDA) plays an integral role in precision medicine, which foresees the day when an
-            individual's medical care will be tailored in part based on their unique characteristics and genetic make-up.
+            individual&apos;s medical care will be tailored in part based on their unique characteristics and genetic make-up.
           </div>
           <hr />
           <div className="flex flex-col gap-4 lg:flex-row lg:*:flex-1">

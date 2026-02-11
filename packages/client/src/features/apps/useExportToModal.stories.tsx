@@ -1,9 +1,9 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
-import { StorybookProviders } from '../../stories/StorybookProviders'
-import { useExportToModal, ExportToResource } from './useExportToModal'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { mockExportApp } from '../../mocks/handlers/apps.handlers'
 import { mockExportWorkflow } from '../../mocks/handlers/workflows.handlers'
+import { StorybookProviders } from '../../stories/StorybookProviders'
+import { ExportToResource, useExportToModal } from './useExportToModal'
 
 const meta: Meta = {
   title: 'Modals/Apps',

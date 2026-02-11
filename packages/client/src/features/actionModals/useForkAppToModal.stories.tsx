@@ -1,7 +1,7 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
-import { StorybookProviders } from '../../stories/StorybookProviders'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { mockForkApp } from '../../mocks/handlers/apps.handlers'
+import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useForkAppToModal } from './useForkAppToModal'
 
 const meta: Meta = {

@@ -1,13 +1,12 @@
-import React from 'react'
-import classNames from 'classnames'
+import clsx from 'clsx'
 import { Link } from 'react-router'
 import Xarrow from 'react-xarrows'
 import uniqid from 'uniqid'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { Loader } from '../../../components/Loader'
+import type { InputOutput, Stage as WorkflowStage } from '../workflows.types'
 import { StyledWorkflowDiagram } from './styles'
 import { useWorkflowDiagramQuery } from './useWorkflowDiagramQuery'
-import type { InputOutput, Stage as WorkflowStage } from '../workflows.types'
 
 const NoData = () => {
   return <div className="text-center">No data found</div>
@@ -29,7 +28,7 @@ const AppOutputs = ({
         const outputRef = refs && `from-${slotId}${output.name}`
         const title = output.name
 
-        const outputClass = classNames({
+        const outputClass = clsx({
           'fa fa-arrow-down': true,
           'text-muted': !refs,
           'workflow-digaram-gly': refs,
@@ -60,7 +59,7 @@ const AppInputs = ({ inputs, slotId }: { inputs: InputOutput[]; slotId: string }
         const outputRef = refs && `from-${input.values.id}${input.values.name}`
         const title = input.name
 
-        const inputClass = classNames({
+        const inputClass = clsx({
           'glyphicon glyphicon-filter': true,
           'text-muted': !refs,
           'workflow-digaram-gly': refs,

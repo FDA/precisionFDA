@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import { Column, flexRender, Row, RowData, Table } from '@tanstack/react-table'
-import classNames from 'classnames'
+import clsx from 'clsx'
 import { range } from 'ramda'
 import React, { DragEventHandler } from 'react'
 import styled from 'styled-components'
@@ -124,7 +124,7 @@ export function CustomTable<T extends RowData>({
               <tr className="name-row" style={{ position: 'relative' }}>
                 {headerGroup.headers.map(header => (
                   <th
-                    className={classNames({
+                    className={clsx({
                       'cell-select cell-select-header sticky-left': header.column.id === 'select',
                       relative: true,
                     })}
@@ -136,7 +136,7 @@ export function CustomTable<T extends RowData>({
                       type="button"
                       tabIndex={header.column.getCanSort() ? 0 : -1}
                       onClick={header.column.getToggleSortingHandler()}
-                      className={classNames('col-select-btn', {
+                      className={clsx('col-select-btn', {
                         'col-sort-btn': header.column.getCanSort(),
                         'name-btn': header.column.id !== 'select',
                       })}
@@ -164,7 +164,7 @@ export function CustomTable<T extends RowData>({
                 <tr className="filter-row">
                   {headerGroup.headers.map(header => (
                     <th
-                      className={classNames({ 'cell-select': header.column.id === 'select' })}
+                      className={clsx({ 'cell-select': header.column.id === 'select' })}
                       key={header.id}
                       style={{ width: header.getSize() }}
                       colSpan={header.colSpan}
@@ -195,7 +195,7 @@ export function CustomTable<T extends RowData>({
 
             const cells = getRowGroup(row, tableGroup).map(cell => (
               <td
-                className={classNames({ 'cell-select sticky-left': cell.column.id === 'select', relative: true })}
+                className={clsx({ 'cell-select sticky-left': cell.column.id === 'select', relative: true })}
                 key={cell.id}
                 style={{ width: cell.column.getSize() }}
                 data-testid={`table-col-${cell.column.id}`}
@@ -211,7 +211,7 @@ export function CustomTable<T extends RowData>({
                   row={row as Row<IFile>}
                   numSelected={numSelected}
                   onClick={handleRowClick}
-                  className={classNames({ 'row-click-select': enableRowClickSelection })}
+                  className={clsx({ 'row-click-select': enableRowClickSelection })}
                 >
                   {cells}
                   {colFiller('td')}
@@ -226,7 +226,7 @@ export function CustomTable<T extends RowData>({
                 <tr
                   data-testid="data-row"
                   key={row.id}
-                  className={classNames({ 'sub-row': isSubRow, 'row-click-select': enableRowClickSelection })}
+                  className={clsx({ 'sub-row': isSubRow, 'row-click-select': enableRowClickSelection })}
                   draggable={true}
                   onDragStart={onDragStart}
                   id={`html-dnd-${row.id}`}
@@ -242,7 +242,7 @@ export function CustomTable<T extends RowData>({
               <tr
                 data-testid="data-row"
                 key={row.id}
-                className={classNames({ 'sub-row': isSubRow, 'row-click-select': enableRowClickSelection })}
+                className={clsx({ 'sub-row': isSubRow, 'row-click-select': enableRowClickSelection })}
                 onClick={handleRowClick}
               >
                 {cells}

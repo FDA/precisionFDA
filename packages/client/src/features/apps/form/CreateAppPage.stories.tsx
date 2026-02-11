@@ -1,7 +1,6 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React from 'react'
-import { CreateAppPage as CreateAppPageImport } from './CreateAppPage'
+import { Meta, StoryObj } from '@storybook/react-vite'
 import { StorybookProviders } from '../../../stories/StorybookProviders'
+import { CreateAppPage as CreateAppPageImport } from './CreateAppPage'
 
 const meta: Meta = {
   title: 'Apps/Create',

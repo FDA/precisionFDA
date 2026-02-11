@@ -81,7 +81,7 @@ export default defineConfig(({ mode }) => {
     },
 
     server: {
-      host: '0.0.0.0',
+      host: 'localhost',
       port: 4000,
       https: hasHttpsCerts
         ? {
@@ -91,100 +91,100 @@ export default defineConfig(({ mode }) => {
         : undefined,
       proxy: {
         '/docs': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/logout': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/return_from_login': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/login': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/api': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/pdfs': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/assets': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/discussions': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/apps': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/workflows/new': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/notes': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/comparisons': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/licenses': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/users': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/profile': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         '/guidelines': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         // /workflows/*/edit
         '^/workflows/.+/edit$': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         // /experts/*/edit
         '^/experts/.+/edit$': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
         // /experts/new
         '/experts/new': {
-          target: 'https://0.0.0.0:3000',
+          target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },

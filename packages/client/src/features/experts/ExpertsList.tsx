@@ -1,10 +1,13 @@
+import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import queryString from 'query-string'
-import React from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router'
 import styled from 'styled-components'
+import { Button } from '../../components/Button'
+import { LightBulbIcon } from '../../components/icons/LightBulbIcon'
 import { Loader } from '../../components/Loader'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
+import { PageContainerMargin } from '../../components/Page/styles'
 import { Pagination } from '../../components/Pagination'
 import {
   ButtonRow,
@@ -21,17 +24,13 @@ import {
   SectionTitle,
   Title,
 } from '../../components/Public/styles'
+import { usePageMeta } from '../../hooks/usePageMeta'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { expertsYearsListRequest } from './api'
 import { ExpertsCondensedList } from './ExpertsCondensedList/ExpertsCondensedList'
 import { useExpertsListQuery } from './useExpertsListQuery'
-import { PageContainerMargin } from '../../components/Page/styles'
-import { usePageMeta } from '../../hooks/usePageMeta'
-import { Button } from '../../components/Button'
-import { LightBulbIcon } from '../../components/icons/LightBulbIcon'
 
 export const ExpertListItem = styled.div`
   display: flex;

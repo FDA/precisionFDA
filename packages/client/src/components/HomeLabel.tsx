@@ -1,4 +1,4 @@
-import classnames from 'classnames'
+import clsx from 'clsx'
 import React from 'react'
 import styled from 'styled-components'
 import { colors } from '../styles/theme'
@@ -60,7 +60,7 @@ export const HomeLabel = ({
   value: React.ReactNode
   state?: string
 }) => {
-  const classes = classnames(
+  const classes = clsx(
     {
       [`home-label--${type}`]: type,
       [`home-label__state-${state}`]: state,

@@ -1,14 +1,14 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useEffectEvent, useState } from 'react'
-import { Link, Route, Routes, useLocation } from 'react-router'
 import { HomeLabel } from '@/components/HomeLabel'
 import { StyledTab, StyledTabList, StyledTabPanel } from '@/components/Tabs'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
-import { CogsIcon } from '@/components/icons/Cogs'
+import { BoltIcon } from '@/components/icons/BoltIcon'
 import { useLastWSNotification } from '@/hooks/useLastWSNotification'
 import { RESOURCE_LABELS } from '@/types/user'
 import { pluralize } from '@/utils/formatting'
 import { getBackPathNext } from '@/utils/getBackPath'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useEffectEvent, useState } from 'react'
+import { Link, Route, Routes, useLocation } from 'react-router'
 import { PricingMap } from '../../apps/apps.types'
 import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
 import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
@@ -176,7 +176,7 @@ export const ExecutionDetails = ({
           <HeaderLeft>
             <TitleLeft>
               <Title>
-                <CogsIcon height={20} />
+                <BoltIcon />
                 <span data-testid="execution-name">{execution.name}</span>
               </Title>
               {execution?.failure_message && (

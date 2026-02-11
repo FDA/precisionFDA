@@ -1,13 +1,13 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
+import { toast } from 'react-toastify'
+import { mockCopyToSpaceApps } from '../../mocks/handlers/apps.handlers'
+import { mockCopyToSpaceFiles } from '../../mocks/handlers/files.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { copyAppsRequest } from '../apps/apps.api'
 import { copyFilesRequest } from '../files/files.api'
 import { APIResource } from '../home/types'
-import { mockCopyToSpaceFiles } from '../../mocks/handlers/files.handlers'
-import { mockCopyToSpaceApps } from '../../mocks/handlers/apps.handlers'
 import { useCopyToSpaceModal } from './useCopyToSpace'
-import { toast } from 'react-toastify'
 
 const meta: Meta = {
   title: 'Modals/Common',

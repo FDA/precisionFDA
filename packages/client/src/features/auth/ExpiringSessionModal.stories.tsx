@@ -1,8 +1,8 @@
-import { Meta } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
-import { ExpiringSessionModal } from './ExpiringSessionModal'
-import { useModal } from '../modal/useModal'
+import { Meta } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { StorybookProviders } from '../../stories/StorybookProviders'
+import { useModal } from '../modal/useModal'
+import { ExpiringSessionModal } from './ExpiringSessionModal'
 
 const meta: Meta = {
   title: 'Modals/Auth',

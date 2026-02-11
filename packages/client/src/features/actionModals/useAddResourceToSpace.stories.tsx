@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
+import { Meta, StoryObj } from '@storybook/react-vite'
 import { useMutation } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
 import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'

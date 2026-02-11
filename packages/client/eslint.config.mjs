@@ -35,6 +35,7 @@ export default defineConfig(
       'import/no-unresolved': 'error',
       'import/no-cycle': 'warn',
       'import/no-self-import': 'error',
+      'react/react-in-jsx-scope': 'off',
       'react/function-component-definition': 'off',
       'react/destructuring-assignment': 'off',
       'no-prototype-builtins': 'off',

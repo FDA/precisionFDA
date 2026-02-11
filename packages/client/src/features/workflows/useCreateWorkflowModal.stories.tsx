@@ -1,8 +1,8 @@
-import { Meta, StoryObj } from '@storybook/react-webpack5'
-import React, { useEffect } from 'react'
+import { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
+import { workflowMocks } from '../../mocks/handlers/workflows.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useCreateWorkflowModal } from './useCreateWorkflowModal'
-import { workflowMocks } from '../../mocks/handlers/workflows.handlers'
 
 const meta: Meta = {
   title: 'Modals/Workflows',
