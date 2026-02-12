@@ -26,7 +26,7 @@ export class SpaceReport<T extends SpaceReportFormat = SpaceReportFormat> extend
   scope: EntityScope
 
   @OneToOne({ entity: () => UserFile, fieldName: 'result_file_id' })
-  resultFile: Ref<UserFile>
+  resultFile?: Ref<UserFile>
 
   @Property()
   state: SpaceReportState = 'CREATED'
