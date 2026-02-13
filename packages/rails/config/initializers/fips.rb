@@ -1,5 +1,6 @@
-OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ssl_version] ="TLSv1_2"
-OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ciphers] = "TLSv1.2+FIPS:kRSA+FIPS:!eNULL:!aNULL"
+OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:min_version] = OpenSSL::SSL::TLS1_2_VERSION
+OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ciphers] = "TLS_AES_128_GCM_SHA256:ECDHE-RSA-AES128-GCM-SHA256:TLSv1.2+FIPS:kRSA+FIPS:!eNULL:!aNULL"
+
 
 module SHA256_OpenSSL
   def self.prepended(base)
