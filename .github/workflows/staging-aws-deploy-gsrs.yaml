@@ -1,0 +1,120 @@
+name: STAGING - Deploy GSRS ECS
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      GSRS_MAIN_BRANCH:
+        description: "Branch/Tag for ncats/gsrs3-main-deployment"
+        required: true
+        default: "GSRSv3.1.2PUB"
+      FRONTEND_TAG:
+        description: "Tag/Branch for ncats/GSRSFrontend"
+        required: true
+        default: "pfda"
+      FORCE_DEPLOY_SERVICES:
+        description: "Comma-separated list of services to force redeploy (e.g., gsrs-web, gsrs-nginx)"
+        required: false
+        default: ""
+
+concurrency:
+  group: dev-deploy-gsrs-ecs
+  cancel-in-progress: false
+
+jobs:
+  build-and-push-gsrs-images:
+    runs-on: ubuntu-latest
+    environment:
+      name: staging_4711
+    outputs:
+      gsrs_web_image_tag: ${{ steps.set_output.outputs.gsrs_web_image_tag }}
+      gsrs_nginx_image_tag: ${{ steps.set_output.outputs.gsrs_nginx_image_tag }}
+    strategy:
+      matrix:
+        include:
+          - package: gsrs_web
+            context: "packages/gsrs/web"
+          - package: gsrs_nginx
+            context: "packages/gsrs/nginx"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+
+      - uses: ./.github/actions/build-gsrs-docker-images
+        id: build_image
+        with:
+          environment: ${{ vars.ENVIRONMENT }}
+          region: ${{ vars.REGION }}
+          role-arn: ${{ vars.ROLE_ECS_GITHUB_ARN }}
+          orchestration-account-id: ${{ vars.ORCHESTRATION_ACCOUNT_ID }}
+          package: ${{ matrix.package }}
+          context: ${{ matrix.context }}
+          gsrs-main-branch: ${{ inputs.GSRS_MAIN_BRANCH }}
+          frontend-tag: ${{ inputs.FRONTEND_TAG }}
+
+      - name: Set matrix job output
+        id: set_output
+        run: |
+          echo "${{ matrix.package }}_image_tag=${{ steps.build_image.outputs.image-tag }}" >> $GITHUB_OUTPUT
+
+      - name: Write build summary
+        run: |
+          {
+            echo "### 📦 Built Image"
+            echo "- **Component:** ${{ matrix.package }}"
+            echo "- **Final Tag:** ${{ steps.build_image.outputs.image-tag }}"
+          } >> $GITHUB_STEP_SUMMARY
+
+  deploy:
+    needs: build-and-push-gsrs-images
+    runs-on: ubuntu-latest
+    environment:
+      name: staging_4711
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3 pyaml
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722
+        with:
+          aws-region: ${{ vars.REGION }}
+          role-to-assume: ${{ vars.ROLE_ECS_GITHUB_ARN }}
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+          echo "AWS Account ID: $ACCOUNT_ID"
+          echo "ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
+
+      - name: Deploy GSRS ECS Service
+        working-directory: infra/ecs
+        env:
+          AWS_REGION: ${{ vars.REGION }}
+          ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+          GSRS_WEB_TAG: ${{ needs.build-and-push-gsrs-images.outputs.gsrs_web_image_tag }}
+          GSRS_NGINX_TAG: ${{ needs.build-and-push-gsrs-images.outputs.gsrs_nginx_image_tag }}
+          FORCE_DEPLOY_SERVICES: ${{ inputs.FORCE_DEPLOY_SERVICES }}
+          GIT_BRANCH: ${{ github.ref_name }}
+          DEPLOYMENT_TYPE: "gsrs"
+          PYTHONUNBUFFERED: "1"
+        run: |
+          echo "Deploying GSRS to $ENVIRONMENT..."
+          echo "GSRS_WEB_TAG=$GSRS_WEB_TAG"
+          echo "GSRS_NGINX_TAG=$GSRS_NGINX_TAG"
+
+          python deploy-ecs-service.py
+        shell: bash

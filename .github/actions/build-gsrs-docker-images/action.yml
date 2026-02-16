@@ -1,0 +1,167 @@
+name: "Deploy GSRS Services"
+description: "Builds, pushes or retrieves images for GSRS Web and GSRS Nginx"
+
+inputs:
+  environment:
+    required: true
+    description: "Environment name (e.g., dev, test, staging)"
+  region:
+    required: true
+    description: "AWS region"
+  role-arn:
+    required: true
+    description: "AWS role ARN for ECS deployment"
+  orchestration-account-id:
+    required: true
+    description: "AWS Account ID for ECR repo"
+  package:
+    required: true
+    description: "Package name (must be 'gsrs_web' or 'gsrs_nginx')"
+  gsrs-main-branch:
+    required: false
+    default: "GSRSv3.1.2PUB"
+    description: "External branch/tag for GSRS build"
+  frontend-tag:
+    required: false
+    default: "pfda"
+    description: "External frontend tag for GSRS build"
+  dockerfile:
+    required: false
+    description: "Optional path to Dockerfile (overrides default)"
+  context:
+    required: false
+    default: .
+    description: "Optional Docker build context (defaults to '.')"
+
+outputs:
+  image-tag:
+    description: "The Docker image tag that was built or retrieved from ECR."
+    value: ${{ steps.set_output.outputs.image-tag }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ inputs.region }}
+        role-to-assume: ${{ inputs.role-arn }}
+
+    - name: Get AWS Account ID
+      id: get_account_id
+      run: |
+        ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+        echo "ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Calculate image tag components
+      id: calc_tag
+      run: |
+        RAW_BRANCH=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
+        BRANCH_NAME=$(echo "$RAW_BRANCH" | sed 's/\//-/g')
+
+        if [ "${{ inputs.package }}" = "gsrs_web" ]; then
+          # --- GSRS Web: triple-source fingerprint ---
+
+          MAIN_SHA=$(git ls-remote https://github.com/ncats/gsrs3-main-deployment.git refs/heads/${{ inputs.gsrs-main-branch }} | awk '{print $1}')
+          [ -z "$MAIN_SHA" ] && MAIN_SHA=$(git ls-remote https://github.com/ncats/gsrs3-main-deployment.git refs/tags/${{ inputs.gsrs-main-branch }} | awk '{print $1}')
+
+          FE_SHA=$(git ls-remote https://github.com/ncats/GSRSFrontend.git refs/tags/${{ inputs.frontend-tag }} | awk '{print $1}')
+          [ -z "$FE_SHA" ] && FE_SHA=$(git ls-remote https://github.com/ncats/GSRSFrontend.git refs/heads/${{ inputs.frontend-tag }} | awk '{print $1}')
+
+          if [ -z "$MAIN_SHA" ] || [ -z "$FE_SHA" ]; then
+            echo "Failed to resolve external SHAs"
+            exit 1
+          fi
+
+          LOCAL_SHA=$(git rev-parse --short HEAD:packages/gsrs/web)
+
+          SHORT_SHA=$(echo "${LOCAL_SHA}-${MAIN_SHA}-${FE_SHA}" | sha1sum | cut -c1-7)
+
+        elif [ "${{ inputs.package }}" = "gsrs_nginx" ]; then
+          # --- GSRS Nginx: config tree fingerprint ---
+          SHORT_SHA=$(git rev-parse --short HEAD:packages/gsrs/nginx)
+
+        else
+          echo "Error: package must be 'gsrs_web' or 'gsrs_nginx'"
+          exit 1
+        fi
+
+        if [[ "$BRANCH_NAME" =~ ^(master|production|staging-release|release-) ]]; then
+          REPO_NAME="pfda/production/${{ inputs.package }}"
+        else
+          REPO_NAME="pfda/${{ inputs.package }}"
+        fi
+
+        echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+        echo "BRANCH_NAME=$BRANCH_NAME" >> "$GITHUB_ENV"
+        echo "REPO_NAME=$REPO_NAME" >> "$GITHUB_ENV"
+      shell: bash
+
+    - name: Log in to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076
+      with:
+        registries: ${{ inputs.orchestration-account-id }}
+
+    - name: Check if image exists in ECR
+      id: check_ecr
+      run: |
+        EXISTING_IMAGE=$(aws ecr list-images \
+          --registry-id "${{ inputs.orchestration-account-id }}" \
+          --repository-name "${{ env.REPO_NAME }}" \
+          --filter "tagStatus=TAGGED" \
+          --query "sort_by(imageIds[?contains(imageTag, \`-${{ steps.calc_tag.outputs.short_sha }}-\`)], &imageTag)[-1].imageTag" \
+          --output text 2>/dev/null || echo "")
+
+        if [ -z "$EXISTING_IMAGE" ] || [ "$EXISTING_IMAGE" = "None" ] || [ "$EXISTING_IMAGE" = "null" ]; then
+          TIMESTAMP=$(date +%Y%m%dT%H%M)
+          IMAGE_TAG="${{ env.BRANCH_NAME }}-${{ steps.calc_tag.outputs.short_sha }}-${TIMESTAMP}"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "build_needed=true" >> $GITHUB_OUTPUT
+        else
+          echo "IMAGE_TAG=$EXISTING_IMAGE" >> $GITHUB_ENV
+          echo "build_needed=false" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+
+    - name: Set Docker build paths
+      if: steps.check_ecr.outputs.build_needed == 'true'
+      run: |
+        if [ -n "${{ inputs.dockerfile }}" ]; then
+          echo "DOCKERFILE=${{ inputs.dockerfile }}" >> $GITHUB_ENV
+        elif [ "${{ inputs.package }}" = "gsrs_nginx" ]; then
+          echo "DOCKERFILE=packages/gsrs/nginx/Dockerfile" >> $GITHUB_ENV
+        else
+          echo "DOCKERFILE=packages/gsrs/web/Dockerfile" >> $GITHUB_ENV
+        fi
+      shell: bash
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349
+
+    - name: Build and push Docker image
+      if: steps.check_ecr.outputs.build_needed == 'true'
+      uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75
+      with:
+        push: true
+        provenance: false
+        tags: ${{ inputs.orchestration-account-id }}.dkr.ecr.${{ inputs.region }}.amazonaws.com/${{ env.REPO_NAME }}:${{ env.IMAGE_TAG }}
+        file: ${{ env.DOCKERFILE }}
+        context: ${{ inputs.context }}
+        build-args: |
+          GSRS3_MAIN_BRANCH=${{ inputs.gsrs-main-branch }}
+          FRONTEND_TAG=${{ inputs.frontend-tag }}
+          GIT_BRANCH=${{ github.ref_name }}
+          GIT_REVISION=${{ github.sha }}
+        cache-from: type=gha,scope=gsrs-build-${{ inputs.package }}
+        cache-to: type=gha,mode=max,scope=gsrs-build-${{ inputs.package }}
+
+    - name: Set action output
+      id: set_output
+      run: echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+      shell: bash

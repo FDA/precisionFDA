@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.18</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>gov.nih.ncats</groupId>
+    <artifactId>frontend</artifactId>
+    <version>3.1.2-SNAPSHOT</version>
+    <name>frontend</name>
+    <description>GSRS 3 frontend</description>
+    <properties>
+        <java.version>1.8</java.version>
+        <with.packaging>war</with.packaging>
+        <with.fork>true</with.fork>
+        <spring-cloud.version>2021.0.8</spring-cloud.version>
+        <gsrs.starter.version>3.1.2</gsrs.starter.version>
+        <ncats-common.version>0.3.6</ncats-common.version>
+        <gsrs-services-common.version>1.0-SNAPSHOT</gsrs-services-common.version>
+        <gateway.host>http://localhost:8080</gateway.host>
+        <npm.script.name>build:fda:prod</npm.script.name>
+        <log4j2.version>2.17.2</log4j2.version>
+        <frontend.repo>https://github.com/ncats/GSRSFrontend</frontend.repo>
+        <frontend.tag>GSRSv${project.version}PUB</frontend.tag>
+        <without.visualizer>false</without.visualizer>
+        <without.static>false</without.static>
+        <node.disable>false</node.disable>
+    </properties>
+
+    <packaging>${with.packaging}</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+           <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.zeldigas</groupId>
+            <artifactId>spring-hocon-property-source</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nih.ncats</groupId>
+            <artifactId>ncats-common</artifactId>
+            <version>${ncats-common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nih.ncats</groupId>
+            <artifactId>gsrs-basic-service-utilities</artifactId>
+            <version>${gsrs-services-common.version}</version>
+        </dependency>
+
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>central-repo1-maven2</id>
+            <url>https://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>central</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>central</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>central</id>
+            <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <fork>${with.fork}</fork>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.15.0</version>
+                <configuration>
+                    <nodeVersion>v16.20.2</nodeVersion>
+                    <installDirectory>target</installDirectory>
+                    <workingDirectory>target/GSRSFrontend</workingDirectory>
+                    <environmentVariables>
+                        <PATH>${env.PATH}:${project.build.directory}/node:${project.build.directory}/GSRSFrontend/node_modules/.bin</PATH>
+                        <NODE_OPTIONS>--max-old-space-size=8192</NODE_OPTIONS>
+                    </environmentVariables>
+                    <skip>${node.disable}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install node and npm</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>npm install</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${node.disable}</skip>
+                            <arguments>install --legacy-peer-deps</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm install --legacy-peer-deps</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${node.disable}</skip>
+                            <arguments>install --legacy-peer-deps</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm run ${npm.script.name}</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${node.disable}</skip>
+                            <arguments>run ${npm.script.name}</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>get frontend sources</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <skip>${without.static}</skip>
+                            <target>
+                                <macrodef name="getfrontend">
+                                    <attribute name="src"/>
+                                    <sequential>
+                                        <local name="action"/>
+                                        <condition property="action" value="Skipping" else="Getting">
+                                            <available file="${project.build.directory}/frontend.zip" type="file"/>
+                                        </condition>
+                                        <echo level="info">${action}: @{src}</echo>
+                                        <get src="@{src}" dest="${project.build.directory}/frontend.zip" skipexisting="true" ignoreerrors="true" quiet="true"/>
+                                    </sequential>
+                                </macrodef>
+                                <getfrontend src="${frontend.repo}/releases/download/${frontend.tag}/${frontend.tag}.zip"/>
+                                <getfrontend src="${frontend.repo}/releases/download/${frontend.tag}/deployable_binaries.zip"/>
+                                <getfrontend src="${frontend.repo}/archive/refs/tags/${frontend.tag}.zip"/>
+                                <getfrontend src="${frontend.repo}/archive/${frontend.tag}.zip"/>
+                                <getfrontend src="${frontend.repo}/archive/refs/heads/development_3.0.zip"/>
+                                <unzip src="${project.build.directory}/frontend.zip" dest="${project.build.directory}"/>
+                                <delete file="${project.build.directory}/frontend.zip"/>
+                                <move file="${project.build.directory}/dist" tofile="${project.build.directory}/GSRSFrontend" failonerror="false" quiet="true"/>
+                                <move file="${project.build.directory}/GSRSFrontend/browser" tofile="${project.build.directory}/GSRSFrontend/dist/browser" failonerror="false" quiet="true"/>
+                                <move file="${project.build.directory}/GSRSFrontend-${frontend.tag}" tofile="${project.build.directory}/GSRSFrontend" failonerror="false" quiet="true"/>
+                                <move file="${project.build.directory}/GSRSFrontend-development_3.0" tofile="${project.build.directory}/GSRSFrontend" failonerror="false" quiet="true"/>
+                                <delete file="${project.build.directory}/GSRSFrontend/package-lock.json"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>copy dist/browser to classes/static</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <skip>${without.static}</skip>
+                            <target>
+                                <copy todir="${project.build.directory}/classes/static"><fileset dir="${project.build.directory}/GSRSFrontend/dist/browser"/></copy>
+                                <replaceregexp file="${project.build.directory}/classes/static/assets/data/config.json" match="version&quot;: &quot;[^&quot;]*" replace="apiBaseUrl&quot;: &quot;/&quot;,&#xA;  &quot;version&quot;: &quot;${project.version}"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>copy visualizer</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <skip>${without.visualizer}</skip>
+                            <target>
+                                <get src="https://github.com/ncats/gsrs3-main-deployment/archive/refs/tags/GSRSv3.1PUB.zip" dest="${project.build.directory}/visualizer.zip"/>
+                                <unzip src="${project.build.directory}/visualizer.zip" dest="${project.build.directory}"/>
+                                <delete dir="${project.build.directory}/classes/static/substanceRelationshipVisualizer" quiet="true"/>
+                                <move file="${project.build.directory}/gsrs3-main-deployment-GSRSv3.1PUB/frontend/src/main/resources/static/substanceRelationshipVisualizer" tofile="${project.build.directory}/classes/static/substanceRelationshipVisualizer"/>
+                                <delete file="${project.build.directory}/visualizer.zip"/>
+                                <delete dir="${project.build.directory}/gsrs3-main-deployment-GSRSv3.1PUB"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>clean frontend sources</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="${project.build.directory}/GSRSFrontend"/>
+                                <delete dir="${project.build.directory}/node" quiet="true"/>
+                                <delete dir="${project.build.directory}/antrun" quiet="true"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
