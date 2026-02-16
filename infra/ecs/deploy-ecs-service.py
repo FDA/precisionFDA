@@ -27,6 +27,7 @@ class EcsDeployer:
         self.environment = os.getenv("ENVIRONMENT")
         self.ecr_account = "991033550868"
         self.branch = os.environ.get("GIT_BRANCH")
+        self.deployment_type = os.environ.get("DEPLOYMENT_TYPE", "pfda").lower()
         self.services_file = services_file
         self.otel_cpu = 50
         self.otel_memory = 128
@@ -42,6 +43,8 @@ class EcsDeployer:
             "SERVER": os.getenv("SERVER_TAG"),
             "NGINX": os.getenv("NGINX_TAG"),
             "DOCS": os.getenv("DOCS_TAG"),
+            "GSRS_WEB": os.getenv("GSRS_WEB_TAG"),
+            "GSRS_NGINX": os.getenv("GSRS_NGINX_TAG")
         }
 
         force_services_str = os.getenv("FORCE_DEPLOY_SERVICES", "")
@@ -71,6 +74,12 @@ class EcsDeployer:
              "pfda-nodejs-admin-platform-client", "pfda-web", "pfda-docs", "pfda-nginx"]
         ]
 
+        if self.deployment_type == "gsrs":
+            self.stages = [
+                ["gsrs-web", "gsrs-nginx"],
+            ]
+
+
         self.prod_branches_patterns = [r"^master$",r"^production$",r"^release.*",r"^staging.*"]
 
     # ---------------------- Deployment Orchestration ----------------------
@@ -86,8 +95,23 @@ class EcsDeployer:
                 for svc_name, svc_conf in stage_services.items():
                     self._apply_resource_overrides(svc_name, svc_conf)
 
+                # First, check which services actually need deployment (changed or forced)
+                services_to_deploy = {}
+                for svc_name, svc_conf in stage_services.items():
+                    force = svc_name in self.force_services
+                    container_def, desired_count = self._get_container_and_desired_count(svc_name, svc_conf)
+                    if force or self._task_definition_changed(svc_name, container_def, desired_count):
+                        services_to_deploy[svc_name] = svc_conf
+                    else:
+                        print(f"Skipping {svc_name} — no changes detected and not forced")
+
+                if not services_to_deploy:
+                    print("No services to deploy in this stage.")
+                    continue
+
+                # Then execute in capacity-aware batches
                 self._execute_in_capacity_aware_batches(
-                    stage_services,
+                    services_to_deploy,
                     get_resource_requirements=lambda svc, conf: {
                         "CPU": conf["container"]["cpu"] + (self.otel_cpu if conf.get("xray_enabled") else 0),
                         "MEMORY": conf["container"]["memoryReservation"] + (self.otel_memory if conf.get("xray_enabled") else 0),
@@ -172,7 +196,12 @@ class EcsDeployer:
     def _get_cluster_available_resources(self):
         """Return total remaining CPU and memory across ECS container instances."""
         res = {"CPU": 0, "MEMORY": 0}
-        instance_arns = self.ecs_client.list_container_instances(cluster=self.cluster_name)["containerInstanceArns"]
+
+        list_args = {"cluster": self.cluster_name,
+                     "filter": f"attribute:deployment_type == {self.deployment_type}"}
+
+        instance_arns = self.ecs_client.list_container_instances(**list_args)["containerInstanceArns"]
+
         if not instance_arns:
             return res
 
@@ -190,18 +219,15 @@ class EcsDeployer:
 
     def register_task_definition(self, service_name, service_config, force):
         """Register or update ECS task definition for a service."""
+        # Use shared helper to build container definition and get desired count
+        container_def, desired_count = self._get_container_and_desired_count(service_name, service_config)
+
+        # Extract image tag for logging
         image_key = service_config["imageName"].upper()
         tag = self.image_tags.get(image_key)
-        if not tag:
-            raise ValueError(f"Image tag not found for key: {image_key}")
-        image_uri = self.get_image_uri(image_key, tag)
 
-        ecs_secrets = self._get_ssm_secrets(service_name)
         execution_role_arn = f"arn:aws:iam::{self.account_id}:role/ecs-task-execution-role-pfda-{self.environment}"
         task_role_arn = f"arn:aws:iam::{self.account_id}:role/ecs-task-role-pfda-{self.environment}"
-        container_def = self._build_container_definition(service_name, service_config, image_uri, ecs_secrets)
-        desired_count = service_config["desiredCount"]
-
 
         # Build the containerDefinitions list
         container_definitions = [container_def]
@@ -236,14 +262,20 @@ class EcsDeployer:
             return
 
         print(f"Registering task definition for {service_name} with image tag: {tag}")
-        response = self.ecs_client.register_task_definition(
-            family=f"{service_name}-task-{self.environment}",
-            executionRoleArn=execution_role_arn,
-            taskRoleArn=task_role_arn,
-            networkMode="awsvpc",
-            containerDefinitions=container_definitions,
-            requiresCompatibilities=["EC2"],
-        )
+        task_def_args = {
+            "family": f"{service_name}-task-{self.environment}",
+            "executionRoleArn": execution_role_arn,
+            "taskRoleArn": task_role_arn,
+            "networkMode": "awsvpc",
+            "containerDefinitions": container_definitions,
+            "requiresCompatibilities": ["EC2"],
+        }
+
+        if "volumes" in service_config:
+            task_def_args["volumes"] = service_config["volumes"]
+
+        response = self.ecs_client.register_task_definition(**task_def_args)
+
         return response["taskDefinition"]["taskDefinitionArn"]
 
     def _execute_in_capacity_aware_batches(self, services, get_resource_requirements, action, attempt=1, max_retries=5, wait_interval=30):
@@ -316,6 +348,13 @@ class EcsDeployer:
     def create_or_update_service(self, service_name, service_config, task_definition_arn):
         """Creates a new ECS service or updates an existing one if the task definition changed."""
 
+        placement_constraints = [
+            {
+                "type": "memberOf",
+                "expression": f"attribute:deployment_type == {self.deployment_type}"
+            }
+        ]
+
         service_args = {
             "cluster": self.cluster_name,
             "serviceName": service_name,
@@ -328,6 +367,7 @@ class EcsDeployer:
                 "minimumHealthyPercent": 50,
                 "deploymentCircuitBreaker": {"enable": True, "rollback": True},
             },
+            "placementConstraints": placement_constraints
         }
 
         lb_conf = self._get_load_balancers_conf(service_name, service_config)
@@ -349,6 +389,7 @@ class EcsDeployer:
                 taskDefinition=task_definition_arn,
                 desiredCount=service_config.get("desiredCount", 1),
                 forceNewDeployment=True,
+                placementConstraints=placement_constraints,
             )
 
         print(f"Waiting for ECS service {service_name} to become stable...")
@@ -478,7 +519,7 @@ class EcsDeployer:
             "secrets",
             "command",
             "entryPoint",
-            "healthCheck",
+            "healthCheck"
         ]
         current_subset = {k: current_container_def.get(k) for k in keys_to_compare}
         new_subset = {k: new_container_def.get(k) for k in keys_to_compare}
@@ -509,6 +550,7 @@ class EcsDeployer:
             "name": service_name,
             "image": image_uri,
             "essential": True,
+            "privileged": service_config.get("privileged", False),
             "cpu": service_config["container"].get("cpu"),
             "memoryReservation": service_config["container"].get("memoryReservation"),
             "portMappings": [{"containerPort": service_config.get("containerPort"), "protocol": "tcp", "name": "https"}],
@@ -543,7 +585,26 @@ class EcsDeployer:
                 {"name": "TRACING_ENABLED", "value": "1"}
             ]
 
+        # Handle Mount Points (Required for GSRS Index)
+        if "mountPoints" in service_config:
+            container_def["mountPoints"] = service_config["mountPoints"]
+
         return container_def
+
+    def _get_container_and_desired_count(self, service_name, service_config):
+        """
+        Build and return (container_def, desired_count) for a service.
+        Used by deploy_all_services to check for changes before capacity planning.
+        """
+        image_key = service_config["imageName"].upper()
+        tag = self.image_tags.get(image_key)
+        if not tag:
+            raise ValueError(f"Image tag not found for key: {image_key}")
+        image_uri = self.get_image_uri(image_key, tag)
+        ecs_secrets = self._get_ssm_secrets(service_name)
+        container_def = self._build_container_definition(service_name, service_config, image_uri, ecs_secrets)
+        desired_count = service_config.get("desiredCount", 1)
+        return container_def, desired_count
 
     def _get_network_config(self, service_config):
         sg_names = [sg["name"] for sg in service_config.get("serviceConnect", {}).get("securityGroups", [])]
@@ -574,7 +635,7 @@ class EcsDeployer:
     def _get_load_balancers_conf(self, service_name, service_config):
         if "targetGroupName" not in service_config:
             return None
-        tg_arn = self._get_target_group_arn(f'pfda-{self.environment}-{service_config["targetGroupName"]}')
+        tg_arn = self._get_target_group_arn(f'{self.deployment_type}-{self.environment}-{service_config["targetGroupName"]}')
         return [{"targetGroupArn": tg_arn, "containerName": service_name, "containerPort": service_config["containerPort"]}]
 
     def _is_new_service(self, service_name):
@@ -624,7 +685,10 @@ class EcsDeployer:
         ecs_secrets = []
         exclusions = ["nginx", "docs"]
         for param in self._ssm_parameters:
-            if param["Name"].endswith("/ssl_configuration/private_key"):
+            if self.deployment_type == "gsrs" and not (
+                    "gsrs" in param["Name"].lower() or "HOST" in param["Name"]):
+                continue
+            elif param["Name"].endswith("/ssl_configuration/private_key"):
                 ecs_secrets.append({"name": "SSL_KEY", "valueFrom": param["Name"]})
             elif param["Name"].endswith("/ssl_configuration/certificate"):
                 ecs_secrets.append({"name": "SSL_CERT", "valueFrom": param["Name"]})
@@ -633,6 +697,7 @@ class EcsDeployer:
             elif not any(excl in service_name.lower() for excl in exclusions):
                 # Include other parameters only if service is not Nginx
                 ecs_secrets.append({"name": param["Name"].split("/")[-1], "valueFrom": param["Name"]})
+
         return ecs_secrets
 
     def _get_services_resource_overrides(self):

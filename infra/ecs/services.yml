@@ -112,6 +112,49 @@ services:
           - name: nginx-sg
       targetGroupName: ecs-default-tg
 
+
+    gsrs-web:
+      imageName: gsrs_web
+      desiredCount: 1
+      container:
+        cpu: 1664
+        memoryReservation: 6144
+      containerPort: 8080
+      privileged: true
+      serviceConnect:
+        securityGroups:
+          - name: gsrs-web-sg
+
+      volumes:
+        - name: read-only-base-index
+          host:
+            sourcePath: /opt/gsrs/base_index
+        - name: overlay-data-index
+          host:
+            sourcePath: /opt/gsrs/overlay-data
+
+      mountPoints:
+        - sourceVolume: read-only-base-index
+          containerPath: /tmp/read-only-base
+          readOnly: true
+        - sourceVolume: overlay-data-index
+          containerPath: /tmp/overlay-data
+          readOnly: false
+
+    gsrs-nginx:
+      imageName: gsrs_nginx
+      desiredCount: 1
+      container:
+        cpu: 256
+        memoryReservation: 512
+      containerPort: 80
+      serviceConnect:
+        securityGroups:
+          - name: gsrs-nginx-sg
+      targetGroupName: assets-ecs-tg
+
+############ ENV OVERRIDE ############
+
   dev:
     pfda-nodejs-worker:
       desiredCount: 1
