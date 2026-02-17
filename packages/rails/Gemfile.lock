@@ -431,7 +431,7 @@ GEM
     puma (6.4.3)
       nio4r (~> 2.0)
     racc (1.8.1)
-    rack (2.2.20)
+    rack (2.2.22)
     rack-session (1.0.2)
       rack (< 3)
     rack-test (2.2.0)
@@ -495,8 +495,6 @@ GEM
     recaptcha (5.8.1)
       json
     redis (4.8.1)
-    redis-client (0.25.2)
-      connection_pool
     regexp_parser (2.8.0)
     reline (0.6.2)
       io-console (~> 0.5)
