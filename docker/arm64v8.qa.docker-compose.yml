@@ -7,6 +7,7 @@ volumes:
 
 services:
   web:
+    platform: linux/arm64
     depends_on:
       - db
       - redis
