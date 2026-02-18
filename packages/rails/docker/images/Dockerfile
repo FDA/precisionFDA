@@ -41,7 +41,7 @@ RUN set -eux && \
       tzdata \
       shared-mime-info
 
-RUN npm i -g pnpm@10.10.0 bower
+RUN npm i -g pnpm@10.29.3 bower
 
 # Copy only dependency files for caching Ruby gems
 COPY packages/rails/Gemfile $APP_DIR/Gemfile

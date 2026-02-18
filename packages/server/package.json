@@ -5,7 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "pnpm@10.29.3",
   "scripts": {
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "format:check": "prettier --check \"apps/**/*.ts\" \"libs/**/*.ts\"",

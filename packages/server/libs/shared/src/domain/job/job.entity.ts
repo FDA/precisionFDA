@@ -196,7 +196,7 @@ export class Job extends ScopedEntity {
     }
 
     const port: string = this.describe.runInput?.port || '443'
-    let url = <string>this.describe.httpsApp?.dns?.url
+    let url = this.describe.httpsApp?.dns?.url as string
     if (!url) {
       return null
     }

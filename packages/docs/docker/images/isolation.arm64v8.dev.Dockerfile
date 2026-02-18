@@ -3,7 +3,7 @@ ARG FRONTEND_IMAGE_TAG
 FROM node:${FRONTEND_IMAGE_TAG}
 
 WORKDIR /app
-RUN npm i -g pnpm@10.10.0
+RUN npm i -g pnpm@10.29.3
 COPY package.json \
     pnpm-lock.yaml \
     source.config.ts \

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "type": "module",
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "pnpm@10.29.3",
   "scripts": {
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
@@ -108,7 +108,7 @@
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
     "@storybook/react-vite": "^10.2.7",
     "@types/lodash": "^4.17.23",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "@types/ramda": "^0.31.1",
     "@types/react-dom": "^19.2.3",
     "@types/react-modal": "^3.16.3",

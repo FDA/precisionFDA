@@ -6,7 +6,7 @@ import { useTheme } from '@/utils/ThemeContext'
 if (!ENABLE_DEV_MSW) {
   loader.config({
     paths: {
-      vs: '/packs/monaco-editor/min/vs',
+      vs: `${import.meta.env.BASE_URL}monaco-editor/min/vs`,
     },
   })
 }

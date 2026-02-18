@@ -5,7 +5,7 @@ The main React frontend for the precisionFDA project.
 ## Tech Stack
 
 - **Build Tool**: [Vite](https://vitejs.dev/) (v7+)
-- **Package Manager**: [pnpm](https://pnpm.io/) (v10.10.0)
+- **Package Manager**: [pnpm](https://pnpm.io/) (v10.29.3)
 - **Framework**: React 19 with TypeScript
 - **Routing**: React Router v7
 - **Styling**: styled-components, CSS Modules
@@ -19,8 +19,8 @@ The main React frontend for the precisionFDA project.
 
 ## Prerequisites
 
-- Node.js 22+
-- pnpm 10.10.0 (`npm i -g pnpm@10.10.0`)
+- Node.js 24+
+- pnpm 10.29.3 (`npm i -g pnpm@10.29.3`)
 - SSL certificates for HTTPS development (see below)
 
 ## Getting Started
@@ -62,36 +62,36 @@ docker compose -f docker/dev.docker-compose.yml up frontend
 
 ### Docker Services
 
-| Service | Description | Port |
-|---------|-------------|------|
-| `frontend` | Vite build for client | - |
-| `web` | Rails API server | 5012 (internal 3000) |
-| `nodejs-api` | Node.js API server | 3001 |
-| `nodejs-worker` | Background worker | - |
-| `nginx` | Reverse proxy | 3000 (HTTPS) |
-| `db` | MySQL 8.0 | 32800 |
-| `redis` | Redis cache | 6379 |
+| Service         | Description           | Port                 |
+|-----------------|-----------------------|----------------------|
+| `frontend`      | Vite build for client | -                    |
+| `web`           | Rails API server      | 5012 (internal 3000) |
+| `nodejs-api`    | Node.js API server    | 3001                 |
+| `nodejs-worker` | Background worker     | -                    |
+| `nginx`         | Reverse proxy         | 3000 (HTTPS)         |
+| `db`            | MySQL 8.0             | 32800                |
+| `redis`         | Redis cache           | 6379                 |
 
 ## Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start Vite development server on port 4000 |
-| `pnpm dev:msw` | Start dev server with MSW mocks enabled |
-| `pnpm build` | Production build (outputs to `rails/public/packs`) |
-| `pnpm build:dev` | Development build |
-| `pnpm start` | Preview production build |
-| `pnpm test` | Run Vitest in watch mode |
-| `pnpm test:run` | Run Vitest once |
-| `pnpm test:ui` | Run Vitest with UI |
-| `pnpm test:e2e` | Run Playwright E2E tests |
-| `pnpm test:e2e:ui` | Run E2E tests with Playwright UI |
-| `pnpm test:e2e:headed` | Run E2E tests in headed browser |
-| `pnpm test:e2e:debug` | Debug E2E tests |
-| `pnpm storybook` | Start Storybook on port 6006 |
-| `pnpm build-storybook` | Build static Storybook |
-| `pnpm lint` | Run ESLint |
-| `pnpm tsc` | Type-check with TypeScript |
+| Command                | Description                                        |
+|------------------------|----------------------------------------------------|
+| `pnpm dev`             | Start Vite development server on port 4000         |
+| `pnpm dev:msw`         | Start dev server with MSW mocks enabled            |
+| `pnpm build`           | Production build (outputs to `rails/public/packs`) |
+| `pnpm build:dev`       | Development build                                  |
+| `pnpm start`           | Preview production build                           |
+| `pnpm test`            | Run Vitest in watch mode                           |
+| `pnpm test:run`        | Run Vitest once                                    |
+| `pnpm test:ui`         | Run Vitest with UI                                 |
+| `pnpm test:e2e`        | Run Playwright E2E tests                           |
+| `pnpm test:e2e:ui`     | Run E2E tests with Playwright UI                   |
+| `pnpm test:e2e:headed` | Run E2E tests in headed browser                    |
+| `pnpm test:e2e:debug`  | Debug E2E tests                                    |
+| `pnpm storybook`       | Start Storybook on port 6006                       |
+| `pnpm build-storybook` | Build static Storybook                             |
+| `pnpm lint`            | Run ESLint                                         |
+| `pnpm tsc`             | Type-check with TypeScript                         |
 
 ## Testing
 
@@ -234,8 +234,8 @@ The dev server will automatically use HTTPS if these files exist.
 
 ### Build-time Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable       | Description            | Default                        |
+|----------------|------------------------|--------------------------------|
 | `VITE_OUT_DIR` | Build output directory | `../rails/public/packs` (prod) |
 
 ### Runtime Variables

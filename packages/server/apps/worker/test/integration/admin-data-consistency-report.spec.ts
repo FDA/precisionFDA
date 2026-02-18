@@ -27,7 +27,7 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = <EntityManager>database.orm().em.fork()
+    em = database.orm().em.fork() as EntityManager
     em.clear()
     create.userHelper.createAdmin(em)
     user = create.userHelper.create(em)

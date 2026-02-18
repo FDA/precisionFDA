@@ -455,7 +455,7 @@ export class JobSynchronizationService {
       )
 
       files.forEach((file) => {
-        const tagging = <NodeTagging>file.taggings.getItems().find((t) => t.tag.name === lockedKey)
+        const tagging = file.taggings.getItems().find((t) => t.tag.name === lockedKey) as NodeTagging
         file.taggings.remove(tagging)
       })
 
