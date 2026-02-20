@@ -58,7 +58,7 @@
     "@types/ramda": "^0.27.66",
     "@types/tough-cookie": "^4.0.5",
     "@types/ws": "8.18.1",
-    "ajv": "^6.12.6",
+    "ajv": "^8.18.0",
     "archiver": "^6.0.1",
     "axios": "^1.13.2",
     "axios-cookiejar-support": "^6.0.5",
