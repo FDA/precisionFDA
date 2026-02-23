@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   ColumnDefResolved,
@@ -8,16 +9,15 @@ import {
   RowSelectionState,
   VisibilityState,
 } from '@tanstack/react-table'
-import React, { useEffect, useState } from 'react'
 import { ContentFooter } from '../../components/Page/ContentFooter'
-import { Pagination, hidePagination } from '../../components/Pagination'
+import { hidePagination, Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { createLocationKey } from '../../utils'
 import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
@@ -34,8 +34,10 @@ type ListType = { jobs: IExecution[]; meta: IMeta }
 export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid: string }) => {
   const resource = 'workflow-executions'
   const locationKey = createLocationKey(resource, spaceId)
-  const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' } })
+  const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams(resource)
+  const { sortBy, sort, setSortBy } = useOrderByState({
+    defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' },
+  })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
 

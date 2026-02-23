@@ -1,5 +1,5 @@
-import { UseQueryOptions } from '@tanstack/react-query'
 import { useEffect, useEffectEvent } from 'react'
+import { UseQueryOptions } from '@tanstack/react-query'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByParams } from '../../hooks/useOrderByState'
@@ -24,10 +24,9 @@ interface IUseList<T> {
   queryOptions?: UseQueryOptions<T>
 }
 
-
 export function useList<T extends ListType>({ fetchList, resource, params = {}, scope }: IUseList<T>) {
   const locationKey = createLocationKey(resource, params?.spaceId)
-  const pagination = usePaginationParams()
+  const pagination = usePaginationParams(resource)
   const { selectedIndexes, setSelectedIndexes } = useListSelect()
   const { sortBy, sort, setSortBy } = useOrderByParams({ onSetSortBy: () => setSelectedIndexes({}) })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
@@ -35,7 +34,7 @@ export function useList<T extends ListType>({ fetchList, resource, params = {}, 
 
   const resetSelected = useEffectEvent(() => setSelectedIndexes({}))
 
-  const { filterQuery, setSearchFilter, setFilterParam } = useFilterParams({
+  const { filterQuery, setSearchFilter } = useFilterParams({
     filters: columnFilters,
   })
 

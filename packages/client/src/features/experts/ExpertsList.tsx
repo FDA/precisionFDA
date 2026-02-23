@@ -25,7 +25,7 @@ import {
   Title,
 } from '../../components/Public/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
-import { usePaginationParams } from '../../hooks/usePaginationState'
+import { usePaginationParamsV2 } from '../../hooks/usePaginationState'
 import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { expertsYearsListRequest } from './api'
@@ -79,7 +79,7 @@ const ExpertsList = () => {
   const location = useLocation()
   const { year } = queryString.parse(location.search)
 
-  const pagination = usePaginationParams()
+  const pagination = usePaginationParamsV2()
 
   const { data: response, isLoading } = useExpertsListQuery({
     year: parseInt(year as string, 10) || undefined,
@@ -130,10 +130,14 @@ const ExpertsList = () => {
                             Expert Q&amp;A
                           </Button>
                           <Link to={`/experts/${n.id}`} data-turbolinks="false">
-                            <span aria-label={`Click to view more information about ${n.meta.title}`}>☆ About This Expert</span>
+                            <span aria-label={`Click to view more information about ${n.meta.title}`}>
+                              ☆ About This Expert
+                            </span>
                           </Link>
                           <Link to={`/experts/${n.id}/blog`} data-turbolinks="false">
-                            <span aria-label={`Click to read ${n.meta.title}'s blog post`}>Read Expert Blog Post &#x2197;</span>
+                            <span aria-label={`Click to read ${n.meta.title}'s blog post`}>
+                              Read Expert Blog Post &#x2197;
+                            </span>
                           </Link>
                         </ExpertButtonRow>
                         {user?.admin && (
@@ -169,7 +173,7 @@ const ExpertsList = () => {
                   totalPages={response?.meta?.totalPages}
                   isHidden={false}
                   setPage={n => pagination.setPageParam(n, true)}
-                  onPerPageSelect={n => pagination.setPerPageParam(n, true)}
+                  onPerPageSelect={n => pagination.setPageSizeParam(n)}
                 />
               </PageList>
             </div>
@@ -194,7 +198,13 @@ const ExpertsList = () => {
                   yearsListData
                     ?.map(y => y?.toString() || null)
                     .map((y, i) => (
-                      <ItemButton as={Link} to={`/experts?year=${y}`} data-turbolinks="false" key={i} selected={y === year}>
+                      <ItemButton
+                        as={Link}
+                        to={`/experts?year=${y}`}
+                        data-turbolinks="false"
+                        key={i}
+                        selected={y === year}
+                      >
                         {y}
                       </ItemButton>
                     ))}
