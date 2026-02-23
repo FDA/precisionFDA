@@ -19,18 +19,10 @@
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "paths": {
-      "@shared": [
-        "libs/shared/src"
-      ],
-      "@shared/*": [
-        "libs/shared/src/*"
-      ],
-      "@worker-test": [
-        "apps/worker/test"
-      ],
-      "@worker-test/*": [
-        "apps/worker/test/*"
-      ]
+      "@shared": ["libs/shared/src"],
+      "@shared/*": ["libs/shared/src/*"],
+      "@worker-test": ["apps/worker/test"],
+      "@worker-test/*": ["apps/worker/test/*"]
     }
   }
 }
