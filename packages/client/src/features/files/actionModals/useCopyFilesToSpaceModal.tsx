@@ -1,36 +1,34 @@
-import { useMutation } from '@tanstack/react-query'
-import { DataNode } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
+import { DataNode } from 'rc-tree/lib/interface'
 import { useSearchParams } from 'react-router'
 import { useImmer } from 'use-immer'
-import { Button } from '../../../components/Button'
+import { BackendError } from '@/api/types'
+import { Button } from '@/components/Button'
+import { toastError } from '@/components/NotificationCenter/ToastHelper'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, StyledModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { addData } from '../../spaces/spaces.api'
-import { fetchFolderChildren } from '../files.api'
-import { FileTree } from '../FileTree'
 import { findById } from '../file.utils'
+import { copyFilesRequest, fetchFolderChildren } from '../files.api'
 import { CustomDataNode, IFile } from '../files.types'
-import { toastError } from '../../../components/NotificationCenter/ToastHelper'
-import { AxiosError } from 'axios'
-import { BackendError } from '../../../api/types'
+import { FileTree } from '../FileTree'
 
 export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   const [searchParams] = useSearchParams()
-  const folderId = searchParams.get('folder_id') ?? undefined
+  const folderIdParam = searchParams.get('folder_id')
+  const folderId = folderIdParam ? parseInt(folderIdParam, 10) : undefined
 
   const { isShown, setShowModal } = useModal()
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([])
-  const [treeData, setTreeData] = useImmer<CustomDataNode[]>([{ key: 'ROOT', title: '/', checkable: false, children: [] }])
+  const [selectedFileIds, setSelectedFileIds] = useState<number[]>([])
+  const [treeData, setTreeData] = useImmer<CustomDataNode[]>([
+    { key: 'ROOT', title: '/', checkable: false, children: [] },
+  ])
+  const scope = spaceId ? `space-${spaceId}` : ''
   const { mutateAsync, isPending } = useMutation({
     mutationKey: ['copy-files-to-space-add'],
-    mutationFn: () =>
-      addData({
-        spaceId: spaceId || '',
-        folderId: folderId || '',
-        uids: selectedFiles,
-      }),
+    mutationFn: () => copyFilesRequest(scope, selectedFileIds, folderId),
     onSuccess: () => {
       setShowModal(false)
     },
@@ -44,13 +42,8 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   })
 
   const onFileCheck = (checkedKeys: string[]) => {
-    const uids = checkedKeys
-      .map(c => {
-        const node: CustomDataNode | null = findById(treeData, c)
-        return node?.uid
-      })
-      .filter(i => typeof i === 'string') as string[]
-    setSelectedFiles(uids)
+    const ids = checkedKeys.map(k => parseInt(k, 10)).filter(id => !isNaN(id))
+    setSelectedFileIds(ids)
   }
 
   const loadData = async (node: DataNode) => {

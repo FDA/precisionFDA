@@ -44,23 +44,6 @@ export async function unlockSpaceRequest({
   return axios.post(link).then(res => res.data)
 }
 
-export async function addData({
-  spaceId,
-  folderId,
-  uids,
-}: {
-  spaceId: string
-  folderId: string
-  uids: string[]
-}): Promise<unknown> {
-  return axios
-    .post(`/api/spaces/${spaceId}/add_data/`, {
-      uids,
-      folder_id: folderId,
-    })
-    .then(res => res.data)
-}
-
 export async function acceptSpaceRequest({ id }: { id: string | number }): Promise<unknown> {
   return axios.post(`/api/spaces/${id}/accept`).then(res => res.data)
 }
