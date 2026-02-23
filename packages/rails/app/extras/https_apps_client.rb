@@ -4,18 +4,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # initializes the instance
   def initialize; end
 
-  def copy_nodes(ids, scope, folder_id)
-    request(
-      "/nodes/copy",
-      {
-        ids: ids,
-        scope: scope,
-        folderId: folder_id,
-      },
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
   def get_upload_url(fileUid, index, md5, size)
     request(
       "/files/#{fileUid}/upload-url",

@@ -115,35 +115,18 @@ module Api
       render json: jobs, adapter: :json
     end
 
-    # TODO: split this route to separately handle different objects?
-    # Copies files, apps or workflows from any accessible user scope to the current space.
+    # Copies apps or workflows from any accessible user scope to the current space.
+    # File copying is handled directly by the Node API via /api/v2/nodes/copy.
     def add_data
       head(:forbidden) && return unless @space.editable_by?(current_user)
 
       grouped = @items.group_by(&:klass)
-      user_files, assets, apps, workflows = grouped.values_at("file", "asset", "app", "workflow")
-      files = Array(user_files) + Array(assets)
-
-      if files.any?(&:created_by_challenge_bot?)
-        render status: :forbidden,
-               json: { error: { message: "Cannot copy challenge-bot files." } }
-        return
-      end
-
-      if files.any?
-        https_apps_client.copy_nodes(
-          files.map(&:id),
-          @space.scope,
-          params[:folder_id]
-        )
-      end
+      _, _, apps, workflows = grouped.values_at("file", "asset", "app", "workflow")
 
       workflows&.each { |workflow| workflow_copy_service.copy(workflow, @space.scope, params[:properties]) }
       apps&.each { |app| app_copy_service.copy(app, @space.scope, params[:properties]) }
 
       head :ok
-    rescue HttpsAppsClient::Error => e
-      render status: e.status_code, json: { error: { message: e.message, statusCode: e.status_code, code: e.code } }
     end
 
     def fix_guest_permissions
