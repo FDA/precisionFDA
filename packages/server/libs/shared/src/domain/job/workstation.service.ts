@@ -1,10 +1,10 @@
-import { config } from '@shared/config'
-import { Job } from '@shared/domain/job/job.entity'
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import { wrapper } from 'axios-cookiejar-support'
 import { compareVersions } from 'compare-versions'
 import { omit } from 'ramda'
-import { wrapper } from 'axios-cookiejar-support'
 import { CookieJar } from 'tough-cookie'
+import { config } from '@shared/config'
+import { Job } from '@shared/domain/job/job.entity'
 import * as errors from '../../errors'
 import { getServiceFactory } from '../../services/service-factory'
 import { UserOpsCtx } from '../../types'
@@ -34,7 +34,8 @@ class WorkstationService {
       jar,
       withCredentials: true, // required when using cookies
     }
-    this.axiosInstance = wrapper(axios.create(config))
+    // temporary fix mismatch between axios and axios-cookiejar-support types
+    this.axiosInstance = wrapper(axios.create(config) as any)
     this.authToken = authToken
   }
 
@@ -44,7 +45,8 @@ class WorkstationService {
       jar,
       withCredentials: true, // required when using cookies
     }
-    this.axiosInstance = wrapper(axios.create(config))
+    // temporary fix mismatch between axios and axios-cookiejar-support types
+    this.axiosInstance = wrapper(axios.create(config) as any)
 
     if (this.job) {
       throw new errors.InternalError('WorkstationService already initialized with a job')
@@ -103,10 +105,7 @@ class WorkstationService {
 
   checkRunningWorkstation() {
     if (this.job.state !== JOB_STATE.RUNNING) {
-      this.ctx.log.log(
-        { jobId: this.job.id, jobDxid: this.job.dxid },
-        'Job is not in running state',
-      )
+      this.ctx.log.log({ jobId: this.job.id, jobDxid: this.job.dxid }, 'Job is not in running state')
       throw new errors.InvalidStateError('Job is not in running state')
     }
   }
