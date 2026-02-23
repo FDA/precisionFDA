@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 
 export interface PaginationParams {
   page: number
@@ -19,11 +20,14 @@ export function usePaginationState() {
 }
 
 /** @deprecated use usePaginationParamsV2 instead when endpoints using this are written in Node */
-export function usePaginationParams(initialPerPageCount?: number) {
+export function usePaginationParams(resourceName?: string) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [userPerPage, setUserPerPage] = useLocalStorage<Record<string, number>>('userPerPage', {
+    [resourceName || 'default']: defaultPerPageCount,
+  })
 
   const pageParam = Number(searchParams.get('page')) || defaultPage
-  const perPageParam = Number(searchParams.get('per_page')) || initialPerPageCount || defaultPerPageCount
+  const perPageParam = userPerPage[resourceName || 'default'] || defaultPerPageCount
 
   const handleSetPageParam = (v: number | undefined, replace: boolean = false) => {
     setSearchParams(
@@ -41,6 +45,9 @@ export function usePaginationParams(initialPerPageCount?: number) {
   }
 
   const handleSetPerPageParam = (v: number, replace: boolean = false) => {
+    if (resourceName) {
+      setUserPerPage({ ...userPerPage, [resourceName]: v })
+    }
     setSearchParams(
       prev => {
         const newParams = new URLSearchParams(prev)

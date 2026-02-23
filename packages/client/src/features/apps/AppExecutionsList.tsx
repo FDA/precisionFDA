@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   ColumnDefResolved,
@@ -7,16 +8,15 @@ import {
   RowSelectionState,
   VisibilityState,
 } from '@tanstack/react-table'
-import React, { useEffect, useMemo } from 'react'
 import { ContentFooter } from '../../components/Page/ContentFooter'
-import { Pagination, hidePagination } from '../../components/Pagination'
+import { hidePagination, Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
+import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { createLocationKey } from '../../utils'
 import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
@@ -26,13 +26,15 @@ import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { HomeScope, NOTIFICATION_ACTION } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
-import { FetchAppsExecutionsResponse, fetchAppExecutions } from './apps.api'
+import { fetchAppExecutions, FetchAppsExecutionsResponse } from './apps.api'
 
 export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string; appUid: string }) => {
   const resource = 'app-executions'
   const locationKey = createLocationKey(resource, spaceId)
-  const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' } })
+  const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams(resource)
+  const { sort, sortBy, setSortBy } = useOrderByState({
+    defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' },
+  })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const queryCache = useQueryClient()
@@ -132,7 +134,12 @@ export const ExecutionsListTable = ({
 }) => {
   function filterColsByScope(c: ColumnDefResolved<IExecution>): boolean {
     // Check if any of the conditions is true, then hide the column
-    return !(c.accessorKey === 'featured' || c.accessorKey === 'app_title' || c.accessorKey === 'location' || c.id === 'select')
+    return !(
+      c.accessorKey === 'featured' ||
+      c.accessorKey === 'app_title' ||
+      c.accessorKey === 'location' ||
+      c.id === 'select'
+    )
   }
   // @ts-expect-error: type is broken from react-table library
   const col = useExecutionColumns({}).filter(filterColsByScope)

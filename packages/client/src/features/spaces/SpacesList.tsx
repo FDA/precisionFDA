@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { useQuery } from '@tanstack/react-query'
 import { ColumnDefResolved } from '@tanstack/react-table'
@@ -93,7 +93,7 @@ const SpacesList = () => {
   const resource = 'spaces'
   const locationKey = createLocationKey(resource)
   const user = useAuthUser()
-  const pagination = usePaginationParams()
+  const pagination = usePaginationParams(resource)
   const { selectedIndexes, setSelectedIndexes } = useListSelect()
   const { sortBy, sort, setSortBy } = useOrderByParams({
     onSetSortBy: () => setSelectedIndexes({}),
