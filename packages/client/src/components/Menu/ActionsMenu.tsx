@@ -1,5 +1,5 @@
 import React from 'react'
-import { Menu as BaseMenu } from '@base-ui-components/react/menu'
+import { Menu as BaseMenu } from '@base-ui/react/menu'
 import styles from './ActionsMenu.module.css'
 import baseStyles from './Menu.module.css'
 import { ArrowIcon } from '../icons/ArrowIcon'
@@ -21,7 +21,7 @@ export interface ActionsMenuItemProps {
   disabled?: boolean
   className?: string
   closeOnClick?: boolean
-  render?: React.ReactElement<Record<string, unknown>> | ((props: any, state: any) => React.ReactElement)
+  render?: React.ReactElement<Record<string, unknown>> | ((props: unknown, state: unknown) => React.ReactElement)
 }
 
 export interface ActionsMenuCheckboxItemProps {
@@ -36,12 +36,12 @@ export interface ActionsMenuMessageProps {
   children: React.ReactNode
 }
 
-function ActionsMenuTrigger({ 
-  label = 'Actions', 
-  disabled, 
+function ActionsMenuTrigger({
+  label = 'Actions',
+  disabled,
   className,
-  ...props 
-}: { 
+  ...props
+}: {
   label?: string
   disabled?: boolean
   className?: string
@@ -58,13 +58,13 @@ function ActionsMenuTrigger({
   )
 }
 
-function ActionsMenuItem({ 
-  children, 
-  onClick, 
-  disabled, 
+function ActionsMenuItem({
+  children,
+  onClick,
+  disabled,
   className,
   closeOnClick = true,
-  render
+  render,
 }: ActionsMenuItemProps) {
   return (
     <BaseMenu.Item
@@ -80,12 +80,12 @@ function ActionsMenuItem({
   )
 }
 
-function ActionsMenuCheckboxItem({ 
-  children, 
-  checked, 
-  onCheckedChange, 
+function ActionsMenuCheckboxItem({
+  children,
+  checked,
+  onCheckedChange,
   disabled,
-  className 
+  className,
 }: ActionsMenuCheckboxItemProps) {
   return (
     <BaseMenu.CheckboxItem

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Svg } from './Svg'
 
-export const ChevronRightIcon = ({ width, height = 16 }: { width?: number, height?: number }) => (
+export const ChevronRightIcon = ({ width, height = 16, className }: { width?: number, height?: number, className?: string }) => (
   <Svg
     aria-hidden="true"
     focusable="false"
@@ -10,6 +10,7 @@ export const ChevronRightIcon = ({ width, height = 16 }: { width?: number, heigh
     viewBox="0 0 576 512"
     height={height}
     width={width}
+    className={className}
   >
     <path
       fill="currentColor"

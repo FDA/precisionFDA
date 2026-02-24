@@ -15,7 +15,6 @@ import { ActionsMenuContent } from '../../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
 import { StyledBackLink } from '../../home/home.styles'
 import {
-  ActionsButton,
   HeaderLeft,
   HomeLoader,
   LockedRow,
@@ -36,9 +35,11 @@ import { ISpace } from '../../spaces/spaces.types'
 import { fetchFile } from '../files.api'
 import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
-import { FileDescription } from './styles'
+import { FileDescription, HeaderActions } from './styles'
 import { FileBreadcrumb } from '../FileBreadcrumb'
 import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
+import { Button } from '../../../components/Button'
+import { sanitizeFileName } from '../../../utils/formatting'
 
 const FileActionsDropdown = ({
   homeScope,
@@ -73,7 +74,7 @@ const FileActionsDropdown = ({
 export const FileShow = ({
   fileId,
   space,
-  homeContext = defaultHomeContext
+  homeContext = defaultHomeContext,
 }: {
   fileId: string,
   space?: ISpace,
@@ -135,9 +136,25 @@ export const FileShow = ({
               )}
             </Title>
           </HeaderLeft>
-          <div>
-            <FileActionsDropdown homeScope={homeScope} space={space} file={file} folderId={folderId} />
-          </div>
+          <HeaderActions>
+            <Button
+              type="button"
+              onClick={() => {
+                const win = window.open(`/api/files/${file.uid}/${sanitizeFileName(file.name)}?inline=true`, '_blank')
+                win?.focus()
+              }}
+              disabled={file.locked || !file.links.download || file.show_license_pending || file.state !== 'closed'}
+              data-testid="file-open-button"
+            >
+              Open
+            </Button>
+            <FileActionsDropdown
+              homeScope={homeScope}
+              space={space}
+              file={file}
+              folderId={folderId}
+            />
+          </HeaderActions>
         </ResourceHeader>
 
         <PathSection>

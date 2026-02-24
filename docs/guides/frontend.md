@@ -1652,7 +1652,7 @@ Standard icon sizes:
 Use Base UI for accessible primitives. These are unstyled components that handle accessibility concerns:
 
 ```tsx
-import { Select } from '@base-ui-components/react/select'
+import { Select } from '@base-ui/react/select'
 
 export const MySelect = ({ options, value, onChange }) => (
   <Select.Root value={value} onValueChange={onChange}>

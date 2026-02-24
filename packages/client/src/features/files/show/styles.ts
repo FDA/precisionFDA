@@ -46,3 +46,11 @@ export const FileHeaderRight = styled.div`
 export const Middle = styled.div`
   width: 100%;
 `
+
+export const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+`

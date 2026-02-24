@@ -11,7 +11,6 @@ export const SpaceMainInfo = styled.div`
 export const SpaceHeaderDescrip = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
   max-width: 650px;
 `
 
@@ -96,7 +95,7 @@ export const DescriptionText = styled.div`
 `
 
 export const SpaceHeaderTitle = styled.div`
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--c-text-700);
   margin: auto 0;
@@ -246,7 +245,7 @@ export const SpaceHeader = styled.div`
   display: flex;
   flex-direction: column;
   background-color: var(--background-shaded);
-  padding: 20px 32px;
+  padding: 16px 32px;
   border-bottom: 1px solid var(--c-layout-border);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;

@@ -20,6 +20,7 @@ import { useEditFolderModal } from './actionModals/useEditFolderModal'
 import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
+import { isOpenable } from './file.utils'
 import { moveFilesRequest } from './files.api'
 
 import { AxiosError } from 'axios'
@@ -54,7 +55,7 @@ export const useFilesSelectActions = ({
   resourceKeys,
   resetSelected,
 }: {
-  homeScope: HomeScope
+  homeScope?: HomeScope
   space?: ISpace
   folderId?: string
   selectedItems: IFile[]
@@ -279,7 +280,15 @@ export const useFilesSelectActions = ({
     {
       name: 'Open',
       type: 'modal',
-      func: () => setOpenFileModal(true),
+      func: () => {
+        if (selected.length === 1) {
+          const file = selected[0]
+          const win = window.open(`/api/files/${file.uid}/${sanitizeFileName(file.name)}?inline=true`, '_blank')
+          win?.focus()
+        } else {
+          setOpenFileModal(true)
+        }
+      },
       isDisabled:
         selected.length === 0 ||
         selected.some(e => e.locked) ||
@@ -288,6 +297,7 @@ export const useFilesSelectActions = ({
         selectedButNotClosed,
       modal: openFileModal,
       showModal: isShownOpenFileModal,
+      shouldHide: selected.some(e => e.type !== 'UserFile' || !isOpenable(e.name)),
     },
     {
       name: 'Download',

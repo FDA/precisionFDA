@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components'
 
 export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': disabled ? true : undefined }))<{
-  'data-variant'?: 'primary' | 'success' | 'warning' | 'link'
+  'data-variant'?: 'primary' | 'success' | 'warning' | 'link' | 'outline'
   disabled?: boolean
   active?: BooleanString
 }>`
@@ -41,7 +41,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   }
 
   &[data-variant='primary'] {
-    border: none;
+    border: 1px solid transparent;
     background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-500) 100%);
     color: white;
 
@@ -56,7 +56,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   }
 
   &[data-variant='success'] {
-    border: none;
+    border: 1px solid transparent;
     background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
     color: white;
 
@@ -72,7 +72,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   }
 
   &[data-variant='warning'] {
-    border: none;
+    border: 1px solid transparent;
     background: linear-gradient(135deg, var(--warning-500) 0%, var(--warning-600) 100%);
     color: white;
 
@@ -106,6 +106,23 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
       color: var(--c-link-hover);
       background: var(--primary-100);
       transform: none;
+    }
+  }
+
+  &[data-variant='outline'] {
+    background: transparent;
+    border: 1px solid var(--c-layout-border);
+    color: var(--c-text);
+
+    &:hover:not([aria-disabled='true']) {
+      background: var(--tertiary-50);
+      border-color: var(--tertiary-400);
+      box-shadow: 0 2px 4px var(--base-opacity-06);
+    }
+
+    &:active {
+      background: var(--tertiary-100);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
     }
   }
 

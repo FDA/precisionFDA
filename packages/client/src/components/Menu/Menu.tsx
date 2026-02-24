@@ -1,5 +1,5 @@
 import React from 'react'
-import { Menu as BaseMenu } from '@base-ui-components/react/menu'
+import { Menu as BaseMenu } from '@base-ui/react/menu'
 import styles from './Menu.module.css'
 import { cn } from '../../utils/cn'
 
@@ -60,6 +60,7 @@ export interface MenuProps {
   positioner?: React.ComponentProps<typeof BaseMenu.Positioner>
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function MenuTrigger({ children, className, onClick, ...props }: MenuTriggerProps) {
   return (
     <BaseMenu.Trigger className={cn(styles.trigger, className)} {...props}>
@@ -74,12 +75,12 @@ function MenuItem({
   disabled, 
   className,
   closeOnClick = true,
-  render
+  render,
 }: MenuItemProps) {
   return (
     <BaseMenu.Item
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || undefined}
       closeOnClick={closeOnClick}
       className={`${styles.item} ${className || ''}`}
       render={render}
@@ -94,7 +95,7 @@ function MenuCheckboxItem({
   checked, 
   onCheckedChange, 
   disabled,
-  className 
+  className,
 }: MenuCheckboxItemProps) {
   return (
     <BaseMenu.CheckboxItem
@@ -193,7 +194,7 @@ function MenuSubmenu({ trigger, children }: MenuSubmenuProps) {
   )
 }
 
-function Menu({ children, trigger, open, onOpenChange, positioner = { side: "bottom", align: "end" } }: MenuProps) {
+function Menu({ children, trigger, open, onOpenChange, positioner = { side: 'bottom', align: 'end' } }: MenuProps) {
   return (
     <BaseMenu.Root open={open} onOpenChange={onOpenChange}>
       {trigger}
