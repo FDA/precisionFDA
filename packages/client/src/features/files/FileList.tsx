@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { DndContext } from '@dnd-kit/core'
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -10,6 +10,7 @@ import {
   VisibilityState,
 } from '@tanstack/react-table'
 import { clsx } from 'clsx'
+import { ArrowUpRightFromSquareIcon } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '@/components/Button'
 import { CopyText } from '@/components/CopyText/CopyText'
@@ -19,10 +20,10 @@ import { ActionsMenu } from '@/components/Menu'
 import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
 import { ContentFooter } from '@/components/Page/ContentFooter'
 import { Pagination } from '@/components/Pagination'
+import Table from '@/components/Table'
 import { StyledPageTable } from '@/components/Table/components/styles'
 import { useLastWSNotification } from '@/hooks/useLastWSNotification'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
-import Table from '../../components/Table'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
@@ -161,6 +162,8 @@ export const FileList = ({
     resetSelected,
   )
 
+  const openAction = actions.find(action => action.name === 'Open')
+
   const findAction = (actionName: string) => {
     return folderActions.find(action => action.name === actionName)
   }
@@ -205,14 +208,26 @@ export const FileList = ({
           <QuickActions>
             {selectedFileIds.length > 0 && (
               <Button
-                data-variant="primary"
+                data-variant="outline"
                 as={CopyText}
                 value={selectedFileIds.join(', ')}
-                iconColor="white"
+                iconColor="currentColor"
                 iconSuccessColor="white"
-                style={{ color: 'white' }}
               >
                 Copy IDs
+              </Button>
+            )}
+            {openAction && selectedFileIds.length > 0 && (
+              <Button
+                data-variant="outline"
+                onClick={() => {
+                  if ('func' in openAction && openAction.func) {
+                    openAction.func(false)
+                  }
+                }}
+                disabled={openAction.isDisabled}
+              >
+                <ArrowUpRightFromSquareIcon height={14} /> Open
               </Button>
             )}
             <ActionsMenu data-testid="home-files-actions-button">

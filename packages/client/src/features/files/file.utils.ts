@@ -21,3 +21,45 @@ export const noAccessText = {
   multi: 'One or more files are not accessible',
   single: 'This file is not accessible',
 }
+
+const openableExtensions = new Set([
+  'pdf',
+  'txt',
+  'json',
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'svg',
+  'dot',
+  'rtf',
+  'html',
+  'htm',
+  'xml',
+  'md',
+  'log',
+  'err',
+  'out',
+  'csv',
+  'tsv',
+  'webp',
+  'bmp',
+  'ico',
+  'mp3',
+  'wav',
+  'ogg',
+  'mp4',
+  'webm',
+  'js',
+  'css',
+  'py',
+  'rb',
+  'sh',
+  'yaml',
+  'yml',
+])
+
+export const isOpenable = (fileName: string): boolean => {
+  const ext = fileName.split('.').pop()?.toLowerCase()
+  return ext ? openableExtensions.has(ext) : false
+}

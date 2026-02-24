@@ -144,6 +144,7 @@ export interface ModalNextProps {
   blur?: boolean
   id: string
   nodeRef: React.RefObject<HTMLDivElement | null>
+  zIndex?: number
 }
 
 export interface SuperModalProps extends ModalNextProps {
@@ -153,10 +154,16 @@ export interface SuperModalProps extends ModalNextProps {
 const SuperModalPortal = (props: PropsWithChildren<Omit<SuperModalProps, 'isShown'>>) => {
   // @ts-expect-error disableClose needs to be extracted from props
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { nodeRef, variant, headerText, hide, children, blur = false, disableClose, ...rest } = props
+  const { nodeRef, variant, headerText, hide, children, blur = false, disableClose, zIndex, ...rest } = props
   useKeyPress('Escape', () => hide())
   return ReactDOM.createPortal(
-    <StyledSuperModal onClick={hide} ref={nodeRef} data-blur={blur.toString() as BooleanString} {...rest}>
+    <StyledSuperModal
+      onClick={hide}
+      ref={nodeRef}
+      data-blur={blur.toString() as BooleanString}
+      style={{ zIndex }}
+      {...rest}
+    >
       <ModalContent
         aria-modal
         aria-label={headerText}

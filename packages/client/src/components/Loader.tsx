@@ -11,7 +11,7 @@ export const LoaderMargin = styled.div`
   margin: 24px;
 `
 
-const LoaderWrapper = styled.div`
+const LoaderWrapper = styled.span`
   display: flex;
   justify-content: center;
 
