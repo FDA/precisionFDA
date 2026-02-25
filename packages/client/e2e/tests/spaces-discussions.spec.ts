@@ -61,25 +61,24 @@ test.describe('Spaces - Discussions in Spaces', () => {
     // Click Upload Files option (use button role to avoid matching description text)
     await page.getByRole('button', { name: 'Upload Files' }).click()
 
-    // Select file to upload
-    const fileInput = page.locator('input[type="file"]')
-    await fileInput.setInputFiles(filePath)
+    // Wait for modal to be visible
+    await expect(page.getByTestId('modal-files-upload')).toBeVisible()
 
-    // Set up wait for close_file API response before clicking Upload
-    const closeFilePromise = page.waitForResponse(
-      response => response.url().includes('/api/close_file') && response.request().method() === 'POST'
-    )
+    // Select file to upload using the file input
+    await page.getByTestId('upload-modal-file-input').setInputFiles(filePath)
 
-    // Click Upload button inside the modal
-    await page.getByTestId('modal-files-upload').getByRole('button', { name: 'Upload' }).click()
+    // Verify file appears in the list
+    await expect(page.getByTestId('upload-modal-file-row')).toBeVisible()
 
-    // Wait for file close API to complete
-    await closeFilePromise
+    // Click Upload button
+    await page.getByTestId('upload-modal-upload').click()
 
-    // Close the upload modal (be specific since there may be multiple modals)
-    await page.getByTestId('modal-files-upload').getByTestId('modal-close-button').click()
+    // Wait for upload to complete - the Close button appears when finished
+    await expect(page.getByTestId('upload-modal-close')).toBeVisible({ timeout: 120000 })
 
-    await expect(page.getByText('Successfully uploaded 1 file')).toBeVisible()
+    // Close the upload modal
+    await page.getByTestId('upload-modal-close').click()
+    await expect(page.getByTestId('modal-files-upload')).not.toBeVisible()
 
     // Wait for the toast to disappear and page to settle
     await page.waitForTimeout(1500)
@@ -247,10 +246,11 @@ test.describe('Spaces - Discussions in Spaces', () => {
       if (fs.existsSync(benchmarkPath)) {
         // In home files (not space), clicking Add Files button directly opens the upload modal
         await page.getByTestId('home-files-add-files-button').click()
-        await page.locator('input[type="file"]').setInputFiles(benchmarkPath)
-        await page.getByTestId('modal-files-upload').getByRole('button', { name: 'Upload' }).click()
-        await page.waitForLoadState('networkidle')
-        await page.getByTestId('modal-close-button').click()
+        await expect(page.getByTestId('modal-files-upload')).toBeVisible()
+        await page.getByTestId('upload-modal-file-input').setInputFiles(benchmarkPath)
+        await page.getByTestId('upload-modal-upload').click()
+        await expect(page.getByTestId('upload-modal-close')).toBeVisible({ timeout: 120000 })
+        await page.getByTestId('upload-modal-close').click()
       }
     }
 
@@ -264,10 +264,11 @@ test.describe('Spaces - Discussions in Spaces', () => {
       if (fs.existsSync(testSetPath)) {
         // In home files (not space), clicking Add Files button directly opens the upload modal
         await page.getByTestId('home-files-add-files-button').click()
-        await page.locator('input[type="file"]').setInputFiles(testSetPath)
-        await page.getByTestId('modal-files-upload').getByRole('button', { name: 'Upload' }).click()
-        await page.waitForLoadState('networkidle')
-        await page.getByTestId('modal-close-button').click()
+        await expect(page.getByTestId('modal-files-upload')).toBeVisible()
+        await page.getByTestId('upload-modal-file-input').setInputFiles(testSetPath)
+        await page.getByTestId('upload-modal-upload').click()
+        await expect(page.getByTestId('upload-modal-close')).toBeVisible({ timeout: 120000 })
+        await page.getByTestId('upload-modal-close').click()
       }
     }
   })

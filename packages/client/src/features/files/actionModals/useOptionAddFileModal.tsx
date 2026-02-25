@@ -5,6 +5,7 @@ import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { Button } from '../../../components/Button'
 import { CopyIcon } from '../../../components/icons/CopyIcon'
 import { UploadIcon } from '../../../components/icons/UploadIcon'
+import type { FileUploadModalOpenOptions } from './useFileUploadModal/FileUploadModalProvider'
 
 const ModalBody = styled.div`
   padding: 32px;
@@ -92,11 +93,11 @@ const IconWrapper = styled.div`
 `
 
 interface UseOptionAddFileModalProps {
-  setShowFileUploadModal: (show: boolean) => void
+  openFileUploadModal: (options?: FileUploadModalOpenOptions) => void
   setShowCopyFilesModal: (show: boolean) => void
 }
 
-export const useOptionAddFileModal = ({ setShowFileUploadModal, setShowCopyFilesModal }: UseOptionAddFileModalProps) => {
+export const useOptionAddFileModal = ({ openFileUploadModal, setShowCopyFilesModal }: UseOptionAddFileModalProps) => {
   const { isShown, setShowModal } = useModal()
 
   const handleCopyFiles = () => {
@@ -106,7 +107,7 @@ export const useOptionAddFileModal = ({ setShowFileUploadModal, setShowCopyFiles
 
   const handleUploadFiles = () => {
     setShowModal(false)
-    setShowFileUploadModal(true)
+    openFileUploadModal()
   }
 
   const modalComp = (

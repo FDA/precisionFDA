@@ -26,6 +26,7 @@ export default defineConfig(
       '@typescript-eslint/no-shadow': ['error'],
       '@typescript-eslint/no-empty-function': 'off',
       camelcase: 'off',
+      'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react/require-default-props': 'off',
       'react/jsx-props-no-spreading': 'off',

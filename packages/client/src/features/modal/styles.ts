@@ -24,6 +24,8 @@ export const HeaderText = styled.div`
   align-self: center;
   font-size: 18px;
   font-weight: 600;
+  flex: 1;
+  min-width: 0;
 `
 export const HeaderTextDetails = styled.div`
   font-size: 13px;
@@ -72,6 +74,11 @@ export const ModalScroll = styled.div`
   flex: 1;
   overflow-y: scroll;
   max-height: var(--modal-max-height, 50vh);
+  ${compactScrollBarV2}
+`
+export const ModalScrollAutoHeight = styled.div`
+  flex: 1;
+  overflow-y: scroll;
   ${compactScrollBarV2}
 `
 

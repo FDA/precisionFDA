@@ -2,8 +2,8 @@ import styled from 'styled-components'
 
 export const StyledBreadcrumbs = styled.div`
   display: flex;
+  flex-wrap: wrap;
   font-size: 14px;
-  height: 20px;
   line-height: 20px;
 `
 

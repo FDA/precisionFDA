@@ -7,8 +7,9 @@ export interface MenuTriggerProps {
   children: React.ReactNode
   className?: string
   onClick?: (e: React.MouseEvent) => void
-  tabIndex?: number
+  'aria-label'?: string
   'data-testid'?: string
+  tabIndex?: number
 }
 
 export interface MenuItemProps {

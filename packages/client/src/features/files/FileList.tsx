@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { DndContext } from '@dnd-kit/core'
-import { useQueryClient } from '@tanstack/react-query'
 import {
   ColumnDefResolved,
   ColumnFiltersState,
@@ -22,14 +21,13 @@ import { ContentFooter } from '@/components/Page/ContentFooter'
 import { Pagination } from '@/components/Pagination'
 import Table from '@/components/Table'
 import { StyledPageTable } from '@/components/Table/components/styles'
-import { useLastWSNotification } from '@/hooks/useLastWSNotification'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { FilesListResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta, MetaPath, NOTIFICATION_ACTION } from '../home/types'
+import { HomeScope, IMeta, MetaPath } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
@@ -41,6 +39,7 @@ import { IFile, IFolder } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
 import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
+import { useFilesWebSocketUpdates } from './useFilesWebSocketUpdates'
 import { useFolderActions } from './useFolderActions'
 
 type ListType = { files: (IFile | IFolder)[]; meta: IMeta }
@@ -57,7 +56,6 @@ export const FileList = ({
   isAdmin?: boolean
 }) => {
   const location = useLocation()
-  const queryCache = useQueryClient()
 
   const [searchParams] = useSearchParams()
   const folderIdParam = searchParams.get('folder_id') ?? undefined
@@ -94,26 +92,9 @@ export const FileList = ({
     navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search } })
   }
 
-  const lastJsonMessage = useLastWSNotification([
-    NOTIFICATION_ACTION.NODES_REMOVED,
-    NOTIFICATION_ACTION.NODES_COPIED,
-    NOTIFICATION_ACTION.FILE_CLOSED,
-  ])
+  // Handle WebSocket notifications for optimistic updates during file upload
+  useFilesWebSocketUpdates({ spaceId: space?.id })
 
-  useEffect(() => {
-    if (lastJsonMessage == null) {
-      return
-    }
-    queryCache.invalidateQueries({
-      queryKey: ['files'],
-    })
-    queryCache.invalidateQueries({
-      queryKey: ['space', String(space?.id)],
-    })
-    queryCache.invalidateQueries({
-      queryKey: ['counters'],
-    })
-  }, [lastJsonMessage])
   const { data: propertiesData } = usePropertiesQuery('node', homeScope, space?.id.toString())
   const { isLoading, data, error } = query
 
@@ -160,6 +141,7 @@ export const FileList = ({
     folderIdParam!,
     space?.id.toString(),
     resetSelected,
+    data?.meta?.path,
   )
 
   const openAction = actions.find(action => action.name === 'Open')
@@ -200,7 +182,7 @@ export const FileList = ({
                     }
                   }}
                 >
-                  <FileIcon height={14} /> Create Files
+                  <FileIcon height={14} /> Upload Files
                 </Button>
               </>
             )}

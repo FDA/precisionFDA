@@ -1600,6 +1600,9 @@ class ApiController < ApplicationController
         raise_api_error "The folder doesn't exist."
       end
 
+    # If folder is present, its scope rules everything
+    params[:scope] = @folder.scope if @folder
+
     if @folder && !@folder.editable_by?(@context)
       raise_api_error "You don't have permissions to add files to the folder."
     end

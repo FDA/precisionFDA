@@ -73,11 +73,21 @@ export const useFilesColumns = ({
                 {isIncompleteFile(node.state) && <Tooltip id={`fileNameTooltip${node.uid}`} style={{ zIndex: 2 }} />}
               </>
             ) : (
-              <StyledNameCell data-testid="folder-row-name" onClick={() => onFolderClick(node.id.toString())}>
-                <FolderIcon height={14} />
-                {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
-                {node.name}
-              </StyledNameCell>
+              <>
+                <StyledNameCell
+                  data-testid="folder-row-name"
+                  data-tooltip-id={`folderNameTooltip${node.id}`}
+                  data-tooltip-content="Folder is being removed."
+                  color={node.state === 'removing' ? 'var(--tertiary-600)' : undefined}
+                  style={node.state === 'removing' ? { pointerEvents: 'none' } : undefined}
+                  onClick={node.state === 'removing' ? undefined : () => onFolderClick(node.id.toString())}
+                >
+                  <FolderIcon height={14} />
+                  {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
+                  {node.name}
+                </StyledNameCell>
+                {node.state === 'removing' && <Tooltip id={`folderNameTooltip${node.id}`} style={{ zIndex: 2 }} />}
+              </>
             )}
           </StyledLocked>
         )

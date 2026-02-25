@@ -21,7 +21,17 @@ export function useLocalStorage<T>(key: string, initialValue: T, storageType: 'l
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = window[storageType].getItem(key)
-      return item ? JSON.parse(item) : initialValue
+      if (item === null) {
+        return initialValue
+      }
+      // Try to parse as JSON first
+      try {
+        return JSON.parse(item)
+      } catch {
+        // If JSON parsing fails, the value might be a plain string
+        // Return it as-is if T is expected to be a string type
+        return item as T
+      }
     } catch (error: unknown) {
       console.error(`Error reading ${storageType} for key "${key}":`, error)
       return initialValue

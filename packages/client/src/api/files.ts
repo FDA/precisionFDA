@@ -1,6 +1,7 @@
 import axios from 'axios'
+import { ServerScope } from '../features/home/types'
 
-export const createFile = (name: string, scope: string, folderId?: string | number) =>
+export const createFile = (name: string, scope?: ServerScope, folderId?: string | number) =>
   axios.post('/api/create_file', { name, scope, folder_id: folderId }).then(response => ({ status: response.status, payload: response.data }))
 
 export const getUploadURL = (uid: string | number, index: number, size: number, md5: string) =>
