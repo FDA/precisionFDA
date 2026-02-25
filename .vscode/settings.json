@@ -1,7 +1,6 @@
 {
   "eslint.workingDirectories": ["./packages/server", "./packages/client"],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-
   "editor.formatOnPaste": true,
   "markdown.preview.scrollPreviewWithEditor": false,
   // Debug settings

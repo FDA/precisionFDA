@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router'
 import GlobalStyle from '../styles/global'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
 import { ColorModeProvider } from '../utils/ThemeContext'
+import { FileUploadModalProvider } from '../features/files/actionModals/useFileUploadModal/FileUploadModalProvider'
+import { OnlineStatusProvider } from '../utils/OnlineStatusContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,7 +23,9 @@ export function StorybookProviders({ children }: React.PropsWithChildren) {
         <GlobalStyle railsAlertHeight={0} />
         <QueryClientProvider client={queryClient}>
           <AlertDismissedProvider>
-            {children}
+            <OnlineStatusProvider>
+              <FileUploadModalProvider>{children}</FileUploadModalProvider>
+            </OnlineStatusProvider>
           </AlertDismissedProvider>
         </QueryClientProvider>
       </BrowserRouter>

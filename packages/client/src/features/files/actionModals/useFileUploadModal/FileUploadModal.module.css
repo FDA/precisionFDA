@@ -1,0 +1,562 @@
+.title {
+  font-size: 18px;
+}
+
+.remove {
+  padding: 4px 16px;
+}
+
+.remove button {
+  min-height: 23px;
+}
+
+.status {
+  padding: 4px 16px;
+  width: 90px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.name {
+  padding: 4px 16px;
+  text-align: left;
+  vertical-align: top;
+  min-width: 260px;
+}
+
+.uploadFilesContainer {
+  flex: 1;
+  background: var(--background);
+  border: none;
+  border-radius: 0;
+  padding-bottom: 8px;
+}
+
+.autoScrollFooter {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 0px;
+  z-index: 2;
+}
+
+.autoScrollButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: var(--c-layout-border-200);
+  color: var(--c-text-600);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.autoScrollButton:hover {
+  background: var(--c-layout-border);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.autoScrollButton:active {
+  transform: translateY(0);
+}
+
+.autoScrollButton.isActive {
+  background: var(--primary-500);
+  color: #fff;
+}
+
+.autoScrollButton.isActive:hover {
+  background: var(--primary-600);
+}
+
+.autoScrollButton svg {
+  flex-shrink: 0;
+}
+
+.uploadFilesHeader {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(90px, 90px) minmax(180px, 220px) minmax(80px, 100px) 120px;
+  gap: 12px;
+  position: sticky;
+  background: var(--background);
+  top: 0;
+  z-index: 3;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--c-text-500);
+  padding: 8px 16px;
+  padding-right: 4px;
+  border-bottom: 1px solid var(--c-layout-border);
+}
+
+.uploadFilesHeader > div:last-child {
+  position: sticky;
+  right: 0;
+  background: var(--background);
+  padding-left: 8px;
+  border-left: 1px solid var(--c-layout-border-200);
+}
+
+/* Lower z-index of entire table when dragging files so the drop zone outline is visible */
+.uploadFilesContainer.dragActive {
+  position: relative;
+  z-index: -1;
+}
+
+.fileItem {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(90px, 90px) minmax(180px, 220px) minmax(80px, 100px) 120px;
+  gap: 12px;
+  padding: 4px 16px;
+  padding-right: 4px;
+  border-bottom: 1px solid var(--c-layout-border-200);
+  align-items: center;
+  transition: background 0.15s ease;
+  min-height: 60px;
+}
+
+.fileItem:hover {
+  background: var(--c-dropdown-hover-bg);
+}
+
+.uploadFilesContainer.hasActiveMenu .fileItem:not(.menuOpen):hover {
+  background: transparent;
+}
+
+.fileItem.menuOpen {
+  background: var(--c-dropdown-hover-bg);
+}
+
+.fileItem:last-child {
+  border-bottom: none;
+}
+
+.fileItem > div:last-child {
+  position: sticky;
+  right: 0;
+  padding-left: 8px;
+  border-left: 1px solid var(--c-layout-border-200);
+}
+
+.fileName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fileName .fileIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  background: var(--primary-100);
+  border: 1.5px solid var(--primary-200);
+  border-radius: 4px;
+}
+
+.fileName .fileNameText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.fileName .fileNamePath {
+  font-size: 12px;
+  color: var(--c-text-500);
+  font-weight: 500;
+  max-width: 100%;
+}
+
+.fileName .fileNameBase {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-text-700);
+  max-width: 100%;
+}
+
+.statusWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 32px;
+}
+
+.fileStat {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 13px;
+  color: var(--c-text-600);
+  white-space: nowrap;
+}
+
+.removeButton {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--c-text-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.removeButton:hover:not(:disabled) {
+  background: var(--c-dropdown-hover-bg);
+  color: var(--c-text-700);
+  transform: scale(1.08);
+}
+
+.removeButton:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.removeButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.removeButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Special styling for destructive actions */
+.removeButton[title*="Cancel"]:hover:not(:disabled),
+.removeButton[title*="Remove"]:hover:not(:disabled) {
+  background: var(--warning-100);
+  color: var(--warning-600);
+}
+
+/* Special styling for play/resume actions */
+.removeButton[title*="Resume"]:hover:not(:disabled) {
+  background: var(--primary-100);
+  color: var(--primary-600);
+}
+
+/* Special styling for retry actions */
+.removeButton[title*="Retry"]:hover:not(:disabled) {
+  background: var(--primary-100);
+  color: var(--primary-600);
+}
+
+.actionsWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--c-text-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: var(--c-dropdown-hover-bg);
+  color: var(--c-text-700);
+  transform: scale(1.02);
+}
+
+.actionButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.actionButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.actionItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  color: var(--c-text-700);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.actionItem:hover:not(:disabled) {
+  background: var(--c-dropdown-hover-bg);
+}
+
+.actionItem:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.statusContainer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-text-600);
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusContainer svg {
+  flex-shrink: 0;
+}
+
+.dropZoneWrapper {
+  display: flex;
+  transition: all 0.4s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropZoneWrapper.exit {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  overflow: hidden;
+}
+
+.dropZoneCard {
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 24px;
+  border: 2px var(--c-layout-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  user-select: none;
+}
+
+.dropZoneCard.uploadInProgress {
+  cursor: not-allowed;
+}
+
+.dropZoneCard input {
+  display: none;
+}
+
+.dropZoneContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.dropZoneDescription {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--c-text-600);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dropZoneButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dropZoneLimit {
+  font-size: 13px;
+  color: var(--c-text-400);
+  margin: 0;
+}
+
+/* Applied to the entire modal scroll area when files are being dragged over */
+.dropZoneActive {
+  position: relative;
+  z-index: 0;
+  background: var(--success-50);
+  outline: 3px solid var(--success-500);
+  outline-offset: -3px;
+}
+
+.iconWrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--primary-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconWrapper svg {
+  width: 24px;
+  height: 24px;
+  color: var(--primary-600);
+}
+
+.floatingBubbleContainer {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .floatingBubbleContainer {
+    right: 16px;
+    left: 16px;
+  }
+}
+
+.floatingBubbleCard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--background, #fff);
+  border: 1px solid var(--c-layout-border-200);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(15, 15, 15, 0.12);
+  padding: 8px;
+  color: var(--c-text-700);
+}
+
+.floatingBubbleButton {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.floatingBubbleButton:hover,
+.floatingBubbleButton:focus-visible {
+  background: var(--c-dropdown-hover-bg);
+}
+
+.floatingBubbleButton:focus-visible {
+  outline: 2px solid var(--primary-400);
+  outline-offset: 2px;
+}
+
+.floatingBubbleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--primary-100);
+  color: var(--primary-600);
+}
+
+.floatingBubbleIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.floatingBubbleContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.floatingBubbleTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-text-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floatingBubbleSubtitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--c-text-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floatingBubbleClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--c-text-400);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.floatingBubbleClose:hover:not(:disabled) {
+  background: var(--c-dropdown-hover-bg);
+  color: var(--c-text-600);
+}
+
+.floatingBubbleClose:focus-visible {
+  outline: 2px solid var(--primary-400);
+  outline-offset: 2px;
+}
+
+.floatingBubbleClose:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.floatingBubbleClose svg {
+  width: 14px;
+  height: 14px;
+}

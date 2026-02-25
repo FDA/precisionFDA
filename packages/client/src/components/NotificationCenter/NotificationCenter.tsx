@@ -27,17 +27,19 @@ const NO_TOAST_NOTIFICATIONS = [
   NOTIFICATION_ACTION.USER_PROVISIONING_ERROR,
 ]
 
-// Helper function to create toast content
+// Helper function to create toast content as JSX elements
 const createToastContent = (message: string, meta?: Notification['meta']) => {
   if (meta?.linkTitle && meta?.linkUrl) {
-    return ToastWithLink({
-      message,
-      linkTitle: meta.linkTitle,
-      linkUrl: meta.linkUrl,
-      linkTarget: meta.linkTarget,
-    })
+    return (
+      <ToastWithLink
+        message={message}
+        linkTitle={meta.linkTitle}
+        linkUrl={meta.linkUrl}
+        linkTarget={meta.linkTarget}
+      />
+    )
   }
-  return BasicToast(message)
+  return <BasicToast message={message} />
 }
 
 export const NotificationCenter = () => {

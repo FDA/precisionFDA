@@ -2,11 +2,21 @@ import { render as browserRender } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 import { FC } from 'react'
 import { BrowserRouter } from 'react-router'
-import { QueryClientProvider, QueryClient, QueryCache } from '@tanstack/react-query'
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
 import { ColorModeProvider } from '../utils/ThemeContext'
+import { OnlineStatusProvider } from '../utils/OnlineStatusContext'
+import { FileUploadModalProvider } from '../features/files/actionModals/useFileUploadModal/FileUploadModalProvider'
 
-const queryCache = new QueryCache()
+// Ensure modal-root element exists for portal-based modals
+const ensureModalRoot = () => {
+  if (!document.getElementById('modal-root')) {
+    const modalRoot = document.createElement('div')
+    modalRoot.setAttribute('id', 'modal-root')
+    document.body.appendChild(modalRoot)
+  }
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -20,18 +30,23 @@ export const AllTheProviders: FC<{ children: React.ReactNode }> = ({ children })
   <ColorModeProvider>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <AlertDismissedProvider>{children}</AlertDismissedProvider>
+        <AlertDismissedProvider>
+          <OnlineStatusProvider>
+            <FileUploadModalProvider>{children}</FileUploadModalProvider>
+          </OnlineStatusProvider>
+        </AlertDismissedProvider>
       </QueryClientProvider>
     </BrowserRouter>
   </ColorModeProvider>
 )
 
 const customRender = (ui: React.ReactElement, { route = '/' } = {}) => {
+  ensureModalRoot()
   window.history.pushState({}, 'Test page', route)
   browserRender(
     <AllTheProviders>
       {ui}
-    </AllTheProviders>
+    </AllTheProviders>,
   )
   // Return the page object for querying elements
   return page

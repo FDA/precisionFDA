@@ -167,29 +167,67 @@ test.describe('My Home - Folders & Files', () => {
     const file1Path = await createTestFile(fileName)
     const file2Path = await createTestFile(everyoneFile)
 
-    // Click Add Files
+    // Click Add Files to open the multi-file upload modal
     await page.getByTestId('home-files-add-files-button').click()
+    
+    // Wait for modal to be visible
+    await expect(page.getByTestId('modal-files-upload')).toBeVisible()
+    
+    // Verify dropzone is visible
+    await expect(page.getByTestId('upload-modal-dropzone')).toBeVisible()
+    
+    // Verify initial status shows 0 files
+    await expect(page.getByTestId('upload-modal-status')).toContainText('0 Files Ready to Upload')
 
-    // Close modal first
+    // Close modal first to test close functionality
     await page.getByTestId('modal-close-button').click()
+    await expect(page.getByTestId('modal-files-upload')).not.toBeVisible()
 
-    // Reopen
+    // Reopen the upload modal
     await page.getByTestId('home-files-add-files-button').click()
+    await expect(page.getByTestId('modal-files-upload')).toBeVisible()
 
-    // Select first file
-    await page.locator('input[type="file"]').setInputFiles(file1Path)
+    // Select first file using the file input
+    await page.getByTestId('upload-modal-file-input').setInputFiles(file1Path)
+    
+    // Verify file appears in the file list with pending status
+    await expect(page.getByTestId('upload-modal-file-list')).toBeVisible()
+    await expect(page.getByTestId('upload-modal-file-row')).toBeVisible()
+    await expect(page.getByTestId('file-status-pending')).toBeVisible()
+    
+    // Verify status shows 1 file
+    await expect(page.getByTestId('upload-modal-status')).toContainText('1 File Ready to Upload')
 
-    // Remove all
-    await page.getByRole('button', { name: 'Remove all' }).click()
+    // Remove all files
+    await page.getByTestId('upload-modal-remove-all').click()
+    
+    // Verify file list is empty (no rows visible)
+    await expect(page.getByTestId('upload-modal-file-row')).not.toBeVisible()
+    
+    // Verify status shows 0 files
+    await expect(page.getByTestId('upload-modal-status')).toContainText('0 Files Ready to Upload')
 
     // Select both files
-    await page.locator('input[type="file"]').setInputFiles([file1Path, file2Path])
+    await page.getByTestId('upload-modal-file-input').setInputFiles([file1Path, file2Path])
+    
+    // Verify both files appear in the list
+    await expect(page.getByTestId('upload-modal-file-row')).toHaveCount(2)
+    
+    // Verify status shows 2 files
+    await expect(page.getByTestId('upload-modal-status')).toContainText('2 Files Ready to Upload')
 
-    // Upload
-    await page.getByRole('button', { name: 'Upload' }).click()
+    // Click Upload button
+    await page.getByTestId('upload-modal-upload').click()
 
+    // Wait for uploads to complete - the Close button appears when finished
+    await expect(page.getByTestId('upload-modal-close')).toBeVisible({ timeout: 120000 })
+    
+    // Verify completed status shows in footer
+    await expect(page.getByTestId('upload-modal-status')).toContainText('2/2 Completed')
+    
     // Close the upload modal
-    await page.getByTestId('modal-close-button').click()
+    await page.getByTestId('upload-modal-close').click()
+    await expect(page.getByTestId('modal-files-upload')).not.toBeVisible()
 
     // Verify first file
     await FilesList.searchFileAndOpenDetailWhenClosed(page, fileName)
@@ -326,7 +364,7 @@ test.describe('My Home - Folders & Files', () => {
     await SpacesList.createPrivateSpaceIfNotExists(
       page,
       'Cypress Private Space for "copy to space" action',
-      'Cypress Private'
+      'Cypress Private',
     )
 
     await app.ensureRoute('/home/files')
@@ -340,11 +378,14 @@ test.describe('My Home - Folders & Files', () => {
     await page.waitForTimeout(1000)
     await page.getByText('Cypress Private Space for "copy to space" action').click()
 
+    // Wait for copy API to succeed
+    const copyPromise = page.waitForResponse(
+      response => response.url().includes('/api/') && response.url().includes('copy') && response.status() === 200,
+    )
+
     await page.getByRole('button', { name: 'Copy', exact: true }).click()
 
-    await expect(
-      page.getByText('Files are being copied, it may take several minutes. The files will appear when copying is complete.')
-    ).toBeVisible()
+    await copyPromise
 
     // Open the space and verify the copied file
     await app.ensureRoute('/spaces')
@@ -368,21 +409,21 @@ test.describe('My Home - Folders & Files', () => {
   })
 
   // TODO: remove skip when PFDA-6609 is merged
-  test.skip('Add Properties', async ({ page, app }) => {
+  test.skip('Add Properties', async ({ page }) => {
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
     await FileDetail.addPropertiesTest(page)
   })
 
   // TODO: remove skip when PFDA-6609 is merged
-  test.skip('Edit Properties', async ({ page, app }) => {
+  test.skip('Edit Properties', async ({ page }) => {
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
     await FileDetail.editPropertiesTest(page)
   })
 
   // TODO: remove skip when PFDA-6609 is merged
-  test.skip('Delete Properties', async ({ page, app }) => {
+  test.skip('Delete Properties', async ({ page }) => {
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
     await FileDetail.deletePropertiesTest(page)
@@ -418,7 +459,7 @@ test.describe('My Home - Folders & Files', () => {
     await expect(page.getByText('Cypress Comment - Edited')).toBeVisible()
   })
 
-  test.skip('Delete Comment', async ({ page, app }) => {
+  test.skip('Delete Comment', async ({ page }) => {
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
     await FileDetail.clickActionsMenuItem(page, 'Comments')
@@ -435,7 +476,7 @@ test.describe('My Home - Folders & Files', () => {
     await SpacesList.createPrivateSpaceIfNotExists(
       page,
       'Cypress Private Space for "copy to space" action',
-      'Cypress Private'
+      'Cypress Private',
     )
 
     await app.ensureRoute('/home/files')
@@ -453,11 +494,14 @@ test.describe('My Home - Folders & Files', () => {
     await page.waitForTimeout(1000)
     await page.getByText('Cypress Private Space for "copy to space" action').click()
 
+    // Wait for copy API to succeed
+    const copyPromise = page.waitForResponse(
+      response => response.url().includes('/api/') && response.url().includes('copy') && response.status() === 200,
+    )
+
     await page.getByRole('button', { name: 'Copy', exact: true }).click()
 
-    await expect(
-      page.getByText('Files are being copied, it may take several minutes. The files will appear when copying is complete.')
-    ).toBeVisible()
+    await copyPromise
 
     // Open the space and verify the copied file
     await app.ensureRoute('/spaces')

@@ -99,7 +99,8 @@ export const FilesListPage = () => {
     return <Navigate to="?scope=me" replace />
   }
 
-  return <FileList homeScope={context.homeContext?.homeScope} space={context.space} isAdmin={user?.isAdmin} showFolderActions />
+  const showFolderActions = context.homeContext?.homeScope !== 'featured'
+  return <FileList homeScope={context.homeContext?.homeScope} space={context.space} isAdmin={user?.isAdmin} showFolderActions={showFolderActions} />
 }
 
 export const FileShowPage = () => {

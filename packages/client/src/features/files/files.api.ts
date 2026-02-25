@@ -75,7 +75,16 @@ export async function addFolderRequest(
     public: homeScope === 'everybody' ? 'true' : null,
     space_id: spaceId ?? null,
   })
-  return axios.post('/api/files/create_folder', data).then(r => r.data)
+  return axios.post('/api/files/create_folder', data).then(r => {
+    // Handle error responses that come with 200 status code
+    if (r.data.message?.type === 'error') {
+      const errorText = Array.isArray(r.data.message.text) 
+        ? r.data.message.text.join(', ') 
+        : r.data.message.text
+      throw new Error(errorText)
+    }
+    return r.data
+  })
 }
 
 export async function featureFileRequest({ ids, uids, featured }: { ids: string[]; uids: string[]; featured: boolean }) {

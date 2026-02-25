@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useConditionalState } from '../../hooks/useConditionalState'
 
 export interface UseModal {
@@ -9,8 +9,8 @@ export interface UseModal {
 
 export const useModal = (def = false): UseModal => {
   const [isShown, setIsShown] = useState<boolean>(def)
-  const toggle = () => setIsShown((prevIsShown) => !prevIsShown)
-  const setShowModal = (val: boolean) => setIsShown(val)
+  const toggle = useCallback(() => setIsShown((prevIsShown) => !prevIsShown), [])
+  const setShowModal = useCallback((val: boolean) => setIsShown(val), [])
 
   return {
     isShown,
@@ -21,8 +21,8 @@ export const useModal = (def = false): UseModal => {
 
 export const useConditionalModal = (isAllowed: boolean, onViolation: () => void, defaultValue = false) => {
   const [isShown, setIsShown] = useConditionalState<boolean>(isAllowed, onViolation, defaultValue)
-  const toggle = () => setIsShown((prevIsShown) => !prevIsShown)
-  const setShowModal = (val: boolean) => setIsShown(val)
+  const toggle = useCallback(() => setIsShown((prevIsShown) => !prevIsShown), [setIsShown])
+  const setShowModal = useCallback((val: boolean) => setIsShown(val), [setIsShown])
 
   return {
     isShown,

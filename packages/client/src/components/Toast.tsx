@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
+import type { ToastContentProps } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import styled from 'styled-components'
 
@@ -9,6 +10,10 @@ export interface ToastWithLinkProps {
   linkTitle: string
   linkTarget?: '_blank' | '_self'
 }
+
+// Combined props type that includes react-toastify's injected props
+type ToastWithLinkContentProps = ToastWithLinkProps & Partial<ToastContentProps>
+type BasicToastContentProps = { message: string } & Partial<ToastContentProps>
 
 // Styled components for custom toasts
 const ToastContentWrapper = styled.div`
@@ -41,14 +46,19 @@ const MessageContent = styled.div`
   }
 `
 
-export interface ToastWithLinkProps {
-  message: string
-  linkUrl: string
-  linkTitle: string
-  linkTarget?: '_blank' | '_self'
-}
-
-export const ToastWithLink = ({ message, linkUrl, linkTitle, linkTarget }: ToastWithLinkProps) => {
+// Destructure and ignore closeToast/toastProps to prevent them from being passed to DOM elements
+export const ToastWithLink = ({
+  message,
+  linkUrl,
+  linkTitle,
+  linkTarget,
+  closeToast: _closeToast,
+  toastProps: _toastProps,
+  ...rest
+}: ToastWithLinkContentProps) => {
+  void _closeToast
+  void _toastProps
+  void rest
   return (
     <ToastContentWrapper>
       <MessageContent>
@@ -61,7 +71,16 @@ export const ToastWithLink = ({ message, linkUrl, linkTitle, linkTarget }: Toast
   )
 }
 
-export const BasicToast = (message: string) => {
+// Destructure and ignore closeToast/toastProps to prevent them from being passed to DOM elements
+export const BasicToast = ({
+  message,
+  closeToast: _closeToast,
+  toastProps: _toastProps,
+  ...rest
+}: BasicToastContentProps) => {
+  void _closeToast
+  void _toastProps
+  void rest
   return (
     <ToastContentWrapper>
       <MessageContent>

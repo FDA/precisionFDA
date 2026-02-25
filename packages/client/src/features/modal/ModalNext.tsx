@@ -26,10 +26,12 @@ export const ModalContent = styled.div`
   overflow: hidden;
 
   &[data-variant='large'] {
-    width: min(80%, 900px);
+    width: min(80%, 1000px);
+    height: min(80vh, 800px);
+    max-height: 700px;
   }
   &[data-variant='medium'] {
-    width: min(80%, 600px);
+    width: min(80%, 800px);
   }
   &[data-variant='small'] {
     width: min(80%, 400px);

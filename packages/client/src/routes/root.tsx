@@ -20,6 +20,8 @@ import RequestAccessPage from '../features/request-access/RequestAccessPage'
 import { ColorModeProvider } from '../utils/ThemeContext'
 import { homeRoutes } from './home'
 import spacesRoutes from './spaces'
+import { FileUploadModalProvider } from '@/features/files/actionModals/useFileUploadModal'
+import { OnlineStatusProvider } from '@/utils/OnlineStatusContext'
 
 const DataPortalRoutes = React.lazy(() => import('../features/data-portals/routes'))
 const ExpertsSinglePage = React.lazy(() => import('../features/experts/details/index'))
@@ -67,15 +69,19 @@ const RootComponent = () => {
             onAuthFailure: () => sessionExpiredModal.setShowModal(true),
           })}
         >
-          <AlertDismissedProvider>
-            <Header />
-            <React.Suspense fallback={<LayoutLoader />}>
-              <Outlet />
-            </React.Suspense>
-            <PFDAToastContainer />
-            <SessionExpiredModal {...sessionExpiredModal} />
-            <ExpiringSessionModal modal={expiringSessionModal} />
-          </AlertDismissedProvider>
+          <OnlineStatusProvider>
+            <FileUploadModalProvider>
+              <AlertDismissedProvider>
+                <Header />
+                <React.Suspense fallback={<LayoutLoader />}>
+                  <Outlet />
+                </React.Suspense>
+                <PFDAToastContainer />
+                <SessionExpiredModal {...sessionExpiredModal} />
+                <ExpiringSessionModal modal={expiringSessionModal} />
+              </AlertDismissedProvider>
+            </FileUploadModalProvider>
+          </OnlineStatusProvider>
         </QueryClientProvider>
       </React.Fragment>
     </ColorModeProvider>

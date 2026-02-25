@@ -1,11 +1,11 @@
-import { ReactNode } from 'react'
+import { ReactNode, useCallback } from 'react'
 import { useCloudResourcesCondition } from '../../hooks/useCloudResourcesCondition'
 import { Action } from '../home/action-types'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
-import { HomeScope } from '../home/types'
+import { HomeScope, MetaPath } from '../home/types'
 import { useAddFolderModal } from './actionModals/useAddFolderModal'
 import { useCopyFilesToSpaceModal } from './actionModals/useCopyFilesToSpaceModal'
-import { useFileUploadModal } from './actionModals/useFileUploadModal'
+import { useFileUploadModalContext } from './actionModals/useFileUploadModal/FileUploadModalProvider'
 import { useOptionAddFileModal } from './actionModals/useOptionAddFileModal'
 
 export interface UseFolderActionsResult {
@@ -18,6 +18,7 @@ export const useFolderActions = (
   folderId?: string,
   spaceId?: string,
   resetSelected?: () => void,
+  metaPath?: MetaPath[],
 ): UseFolderActionsResult => {
   const { isAllowed, onViolation } = useCloudResourcesCondition('totalLimitCheck')
   
@@ -28,22 +29,29 @@ export const useFolderActions = (
     isAllowed,
     onViolation,
   })
-  
-  const { modalComp: FileUploadModal, setShowModal: setShowFileUploadModal } = useFileUploadModal({
-    homeScope,
-    folderId,
-    spaceId,
-    isAllowed,
-    onViolation,
-    onUpload: () => {
-      if (resetSelected) resetSelected()
-    },
-  })
+
+  const { openModal: openRootFileUploadModal } = useFileUploadModalContext()
+
+  const handleUploadStart = useCallback(() => {
+    if (resetSelected) {
+      resetSelected()
+    }
+  }, [resetSelected])
+
+  const triggerFileUploadModal = useCallback(() => {
+    openRootFileUploadModal({
+      homeScope,
+      folderId,
+      folderPath: metaPath,
+      spaceId,
+      onUpload: handleUploadStart,
+    })
+  }, [folderId, metaPath, handleUploadStart, homeScope, openRootFileUploadModal, spaceId])
   
   const { modalComp: CopyFilesModal, setShowModal: setShowCopyFilesModal } = useCopyFilesToSpaceModal({ spaceId })
   
   const { modalComp: OptionAddFileModal, setShowModal: setShowOptionAddFileModal } = useOptionAddFileModal({
-    setShowFileUploadModal,
+    openFileUploadModal: triggerFileUploadModal,
     setShowCopyFilesModal,
   })
 
@@ -58,9 +66,9 @@ export const useFolderActions = (
     {
       name: 'Add Files',
       type: 'modal',
-      func: () => setShowFileUploadModal(true),
+      func: () => triggerFileUploadModal(),
       isDisabled: false,
-      modal: FileUploadModal,
+      modal: null,
     },
     {
       name: 'Copy Files',

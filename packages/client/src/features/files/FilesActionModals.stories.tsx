@@ -1,7 +1,7 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
 import React, { useEffect } from 'react'
-import { StorybookProviders } from '../../stories/StorybookProviders'
+import { Meta, StoryObj } from '@storybook/react-vite'
 import { WithListData } from '../../stories/helpers'
+import { StorybookProviders } from '../../stories/StorybookProviders'
 import { ServerScope } from '../home/types'
 import { useAddFolderModal } from './actionModals/useAddFolderModal'
 import { useConfirmModal } from './actionModals/useConfirmModal'
@@ -12,7 +12,7 @@ import { useDnDMoveFileModal } from './actionModals/useDnDMoveFileModal'
 import { useDownloadFileModal } from './actionModals/useDownloadFileModal'
 import { useEditFileModal } from './actionModals/useEditFileModal'
 import { useEditFolderModal } from './actionModals/useEditFolderModal'
-import { useFileUploadModal } from './actionModals/useFileUploadModal'
+import { useFileUploadModalContext } from './actionModals/useFileUploadModal'
 import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOptionAddFileModal } from './actionModals/useOptionAddFileModal'
@@ -54,16 +54,14 @@ export const AddFolderModal: Story = {
 }
 
 const FileUploadModalWrapper = () => {
-  const { modalComp, setShowModal } = useFileUploadModal({
-    folderId: '1',
-    spaceId: '1',
-    isAllowed: true,
-    onViolation: () => {},
-  })
+  const { openModal } = useFileUploadModalContext()
   useEffect(() => {
-    setShowModal(true)
+    openModal({
+      folderId: '1',
+      spaceId: '1',
+    })
   }, [])
-  return modalComp
+  return <div style={{ padding: 20 }}>The File Upload Modal should be open.</div>
 }
 export const FileUploadModal: Story = {
   render: () => <FileUploadModalWrapper />,
@@ -113,7 +111,11 @@ export const EditFileModal: Story = {
 
 const OpenFilesModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
   const result = useOpenFileModal(data?.files || [])
-  const { modalComp, setShowModal } = result as { modalComp: React.ReactElement; setShowModal: (val: boolean) => void; isShown: boolean }
+  const { modalComp, setShowModal } = result as {
+    modalComp: React.ReactElement
+    setShowModal: (val: boolean) => void
+    isShown: boolean
+  }
   useEffect(() => {
     setShowModal(true)
   }, [])
@@ -243,7 +245,7 @@ const SelectFileModalWrapper = () => {
   const { modalComp, setShowModal } = useSelectFileModal(
     'Select Files',
     'checkbox',
-    (files) => {
+    files => {
       console.log('Selected files:', files)
     },
     'Choose files from the list below',
@@ -298,8 +300,8 @@ export const ConfirmModal: Story = {
 
 const OptionAddFileModalWrapper = () => {
   const { modalComp, setShowModal } = useOptionAddFileModal({
-    setShowFileUploadModal: (show) => console.log('Upload modal:', show),
-    setShowCopyFilesModal: (show) => console.log('Copy modal:', show),
+    openFileUploadModal: () => console.log('Upload modal opened'),
+    setShowCopyFilesModal: show => console.log('Copy modal:', show),
   })
   useEffect(() => {
     setShowModal(true)

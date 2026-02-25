@@ -1,16 +1,26 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import { useNavigate } from 'react-router'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { displayPayloadMessage, Payload } from '@/utils/api'
+import { pluralize, sanitizeFileName } from '@/utils/formatting'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { getBaseLink } from '../apps/run/utils'
 import { useAuthUser } from '../auth/useAuthUser'
 import { Action } from '../home/action-types'
+import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { BaseAPIResponse, HomeScope, ServerScope } from '../home/types'
+import { useLicensesListQuery } from '../licenses/queries'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
-import { isActionDisabledBasedOnLocked, isActionDisabledBasedOnProtected, isActionDisabledBasedOnRole } from '../spaces/common'
+import {
+  isActionDisabledBasedOnLocked,
+  isActionDisabledBasedOnProtected,
+  isActionDisabledBasedOnRole,
+} from '../spaces/common'
 import { ISpace } from '../spaces/spaces.types'
 import { useCopyFilesModal } from './actionModals/useCopyFilesModal'
 import { useDeleteFileModal } from './actionModals/useDeleteFileModal'
@@ -22,14 +32,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { isOpenable } from './file.utils'
 import { moveFilesRequest } from './files.api'
-
-import { AxiosError } from 'axios'
-import { pluralize, sanitizeFileName } from '@/utils/formatting'
 import { IFile, TreeOnSelectInfo } from './files.types'
-import { displayPayloadMessage, Payload } from '@/utils/api'
-import { extractModalsFromActions } from '../home/extractModalsFromActions'
-import { useLicensesListQuery } from '../licenses/queries'
-import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
   if (scope) {
@@ -99,7 +102,11 @@ export const useFilesSelectActions = ({
     },
   })
 
-  const { modalComp: openFileModal, setShowModal: setOpenFileModal, isShown: isShownOpenFileModal } = useOpenFileModal(selected)
+  const {
+    modalComp: openFileModal,
+    setShowModal: setOpenFileModal,
+    isShown: isShownOpenFileModal,
+  } = useOpenFileModal(selected)
   const {
     modalComp: downloadModal,
     setShowModal: setDownloadModal,
@@ -221,7 +228,9 @@ export const useFilesSelectActions = ({
     scope: getFileScope(homeScope, space),
     onHandleSubmit: (selectedFolderId: number, info: TreeOnSelectInfo) => {
       moveFilesMutation.mutateAsync(selectedFolderId).then(() => {
-        toastSuccess(`Successfully moved ${selected.length} ${pluralize('item', selected.length)} to ${info.node.title}`)
+        toastSuccess(
+          `Successfully moved ${selected.length} ${pluralize('item', selected.length)} to ${info.node.title}`,
+        )
         setMoveFileModal(false)
       })
     },
@@ -340,7 +349,7 @@ export const useFilesSelectActions = ({
       to:
         selected[0]?.type === 'UserFile'
           ? `/publish?identifier=${selected[0]?.uid}&type=file`
-            : `/publish?identifier=folder-${selected[0]?.id}&type=folder`,
+          : `/publish?identifier=folder-${selected[0]?.id}&type=folder`,
       isDisabled: !user?.allowed_to_publish,
       shouldHide: selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
     },
@@ -353,7 +362,8 @@ export const useFilesSelectActions = ({
           uids: selected.map(f => (f.type === 'Folder' ? f.id : f.uid)),
         })
       },
-      isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature) || selectedButNotClosed,
+      isDisabled:
+        selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature) || selectedButNotClosed,
       shouldHide: homeScope !== 'everybody' || selected.some(e => e.featured) || !isAdmin,
     },
     {
@@ -366,7 +376,8 @@ export const useFilesSelectActions = ({
         })
       },
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature) || selectedButNotClosed,
-      shouldHide: selected.some(e => !e.featured) || (homeScope !== 'everybody' && homeScope !== 'featured') || !isAdmin,
+      shouldHide:
+        selected.some(e => !e.featured) || (homeScope !== 'everybody' && homeScope !== 'featured') || !isAdmin,
     },
     {
       name: 'Delete',
@@ -404,7 +415,10 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setMoveFileModal(true),
       isDisabled:
-        selected.length === 0 || selected.some(e => e.locked) || selected.some(e => !e.links.organize) || selectedButNotClosed,
+        selected.length === 0 ||
+        selected.some(e => e.locked) ||
+        selected.some(e => !e.links.organize) ||
+        selectedButNotClosed,
       modal: moveFileModal,
       showModal: isShownMoveFileModal,
       shouldHide: !isAdmin && homeScope !== 'me' && isViewer,
@@ -413,7 +427,8 @@ export const useFilesSelectActions = ({
       name: 'Copy to...',
       type: 'modal',
       func: () => setCopyToModal(true),
-      isDisabled: selected.length === 0 || selectedButNotClosed || isActionDisabledBasedOnLocked(selected, user?.id, space),
+      isDisabled:
+        selected.length === 0 || selectedButNotClosed || isActionDisabledBasedOnLocked(selected, user?.id, space),
       modal: copyToModal,
       showModal: isShownCopyToModal,
     },
@@ -451,7 +466,8 @@ export const useFilesSelectActions = ({
       isDisabled: selectedButNotClosed || isFolder || selected.some(e => e.locked),
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || homeScope === 'spaces',
+      shouldHide:
+        (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || homeScope === 'spaces',
     },
     {
       name: 'Edit properties',
