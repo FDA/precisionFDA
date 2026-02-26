@@ -43,7 +43,7 @@ export async function fetchApps(filters: IFilter[], params: Params): Promise<Fet
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query as Record<string, string>).toString()}`
   const scopeQ = formatScopeQ(params.scope as HomeScope)
-  return axios.get<FetchAppsQuery>(`/api/apps/${scopeQ}${paramQ}`).then(r => r.data)
+  return axios.get<FetchAppsQuery>(`/api/apps${scopeQ}${paramQ}`).then(r => r.data)
 }
 
 export async function fetchSelectableSpaces(id: string): Promise<ISpace[]> {

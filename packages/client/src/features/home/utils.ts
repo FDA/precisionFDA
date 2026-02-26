@@ -97,12 +97,8 @@ export type Params = {
 export type QueryType = Record<string, any>
 
 export function formatScopeQ(scope?: HomeScope) {
-  let scopeQ = ''
-  if (scope) {
-    scopeQ = scope === 'me' ? '' : scope
-    scopeQ = `/${scopeQ}`
-  }
-  return scopeQ
+  if (!scope || scope === 'me') return ''
+  return `/${scope}`
 }
 
 export function formatScopeQuery(scope?: HomeScope, spaceId?: string|number) {
