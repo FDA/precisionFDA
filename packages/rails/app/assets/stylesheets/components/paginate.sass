@@ -1,4 +1,88 @@
 
-
 .paginate-container
   text-align: center
+  padding: 20px 16px
+
+  .pagination
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    margin: 0
+    padding: 0
+    list-style: none
+
+    > li
+      display: inline-block
+
+      > a,
+      > span
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        min-width: 36px
+        height: 36px
+        padding: 0 10px
+        font-size: 14px
+        font-weight: 500
+        line-height: 1
+        color: $brand-blue-primary
+        background-color: #fff
+        border: 1px solid $color-border-default
+        border-radius: 6px
+        text-decoration: none
+        transition: all 0.15s ease-in-out
+        cursor: pointer
+
+        &:hover,
+        &:focus
+          color: darken($brand-blue-primary, 10%)
+          background-color: $brand-blue-subtler
+          border-color: $brand-blue-primary
+          text-decoration: none
+
+      &.active > a,
+      &.active > span
+        color: #fff
+        background-color: $brand-blue-primary
+        border-color: $brand-blue-primary
+        cursor: default
+        pointer-events: none
+
+        &:hover,
+        &:focus
+          color: #fff
+          background-color: $brand-blue-primary
+          border-color: $brand-blue-primary
+
+      &.disabled > a,
+      &.disabled > span
+        color: $pagination-disabled-color
+        background-color: $pagination-disabled-bg
+        border-color: $pagination-disabled-border
+        cursor: not-allowed
+        pointer-events: none
+        opacity: 0.5
+
+      &.prev,
+      &.next
+        > a,
+        > span
+          font-weight: 600
+
+      &.first,
+      &.last
+        > a,
+        > span
+          font-weight: 600
+
+    > li.prev
+      margin-right: 4px
+
+    > li.next
+      margin-left: 4px
+
+    > li.first
+      margin-right: 2px
+
+    > li.last
+      margin-left: 2px
