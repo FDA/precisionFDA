@@ -1,11 +1,11 @@
 import React, { ReactNode } from 'react'
 import styled from 'styled-components'
-import { Loader } from '../../components/Loader'
-import { NotAllowedPage } from '../../components/NotAllowed'
-import { useAuthUserQuery } from '../../features/auth/api'
+import { Loader } from '@/components/Loader'
+import { NotAllowedPage } from '@/components/NotAllowed'
+import { useAuthUser } from '@/features/auth/useAuthUser'
 import Logo from '../../components/Logo'
-import { ErrorBoundary } from '../../utils/ErrorBoundry'
-import { useScrollMode } from '../../hooks/useScrollMode'
+import { ErrorBoundary } from '@/utils/ErrorBoundry'
+import { useScrollMode } from '@/hooks/useScrollMode'
 
 const StyledLayoutLoader = styled.div`
   display: flex;
@@ -23,28 +23,28 @@ export const LayoutLoader = () => (
   </StyledLayoutLoader>
 )
 
-export const UserLayout = ({ children, mainScroll = false, innerScroll = false, scrollPaddingTop }: { children: ReactNode, mainScroll?: boolean, innerScroll?: boolean, scrollPaddingTop?: string|number }) => {
-  const user = useAuthUserQuery()
+export const UserLayout = ({
+  children,
+  mainScroll = false,
+  innerScroll = false,
+  scrollPaddingTop,
+}: {
+  children: ReactNode
+  mainScroll?: boolean
+  innerScroll?: boolean
+  scrollPaddingTop?: string | number
+}) => {
+  const { user, loading } = useAuthUser(true)
   useScrollMode(mainScroll ? 'main' : innerScroll ? 'inner' : null)
 
   const content = () => {
-    if (user.isLoading) return <LayoutLoader />
-    if (user.isSuccess) return children
-    if (user.error) {
-      if (user.error?.response?.status === 401)
-        return <NotAllowedPage info="401 Unauthorized" />
-        // @ts-expect-error unknonwn type
-        if (user.error?.response?.data?.failure)
-          // @ts-expect-error unknonwn type
-        return user.error.response.data.failure
-    }
-    return children
+    if (loading) return <LayoutLoader />
+    if (user) return children
+    return <NotAllowedPage info="401 Unauthorized" />
   }
   return (
     <main style={{ scrollPaddingTop }}>
-      <ErrorBoundary>
-        {content()}
-      </ErrorBoundary>
+      <ErrorBoundary>{content()}</ErrorBoundary>
     </main>
   )
 }

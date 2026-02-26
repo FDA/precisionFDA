@@ -1,15 +1,13 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { HeaderItem } from '@shared/domain/user/header-item'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { UserService } from '@shared/domain/user/service/user.service'
-import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
-import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
 import sinon, { match, stub } from 'sinon'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
+import { UserService } from '@shared/domain/user/service/user.service'
+import { User, USER_STATE } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { PlatformClient } from '@shared/platform-client'
 
 describe('user service tests', () => {
   const emFlushStub = sinon.stub()
@@ -37,11 +35,12 @@ describe('user service tests', () => {
       findOne: userRepoFindOneStub,
     } as unknown as UserRepository
 
-    emTransactionalStub.callsFake(async (callback) => {
+    emTransactionalStub.callsFake(async callback => {
       return callback(em)
     })
 
     const platformClient = {} as unknown as PlatformClient
+    const adminPlatformClient = {} as unknown as PlatformClient
 
     return new UserService(
       em,
@@ -54,15 +53,8 @@ describe('user service tests', () => {
       userRepo,
       emailsJobProducer,
       platformClient,
+      adminPlatformClient,
     )
-  }
-
-  const checkHeaderItems = (expected: HeaderItem[], tested: HeaderItem[]) => {
-    expect(tested.length).eq(expected.length)
-    for (let i = 0; i < expected.length; i++) {
-      expect(tested[i].name).eq(expected[i].name)
-      expect(tested[i].favorite).eq(expected[i].favorite)
-    }
   }
 
   beforeEach(async () => {
@@ -81,11 +73,7 @@ describe('user service tests', () => {
 
   describe('#listActiveUserNames', () => {
     it('basic', async () => {
-      userRepoFindActiveStub.resolves([
-        { dxuser: 'user1' },
-        { dxuser: 'user2' },
-        { dxuser: 'user3' },
-      ])
+      userRepoFindActiveStub.resolves([{ dxuser: 'user1' }, { dxuser: 'user2' }, { dxuser: 'user3' }])
 
       const userService = createUserService()
       const result = await userService.listActiveUserNames()
@@ -100,10 +88,7 @@ describe('user service tests', () => {
     it('list government user names', async () => {
       userRepoFindStub
         .withArgs({
-          $and: [
-            { userState: 0 },
-            { $or: [{ email: { $like: '%fda.hhs.gov' } }, { email: { $like: '%fda.gov' } }] },
-          ],
+          $and: [{ userState: 0 }, { $or: [{ email: { $like: '%fda.hhs.gov' } }, { email: { $like: '%fda.gov' } }] }],
         })
         .resolves([
           { dxuser: 'gov-user1', email: 'user1@fda.hhs.gov' },
@@ -146,9 +131,7 @@ describe('user service tests', () => {
       await userService.sendUserInactivityAlerts()
 
       expect(createSendEmailTaskStub.callCount).to.equal(1)
-      expect(createSendEmailTaskStub.getCall(0).args[0].emailType).to.equal(
-        EMAIL_TYPES.userInactivityAlert,
-      )
+      expect(createSendEmailTaskStub.getCall(0).args[0].emailType).to.equal(EMAIL_TYPES.userInactivityAlert)
       expect(soonToBeLockedUser.extras.inactivity_email_sent).to.equal(true)
     })
   })
@@ -212,9 +195,7 @@ describe('user service tests', () => {
       const userService = createUserService()
       await userService.paginateUsers(query)
 
-      const [startDate, endDate] = query.filter.lastLogin
-        .split(',')
-        .map((dateStr) => new Date(dateStr))
+      const [startDate, endDate] = query.filter.lastLogin.split(',').map(dateStr => new Date(dateStr))
       const expectedFilter = {
         $gte: new Date(startDate.toISOString()),
         $lte: new Date(endDate.toISOString()),
@@ -258,9 +239,7 @@ describe('user service tests', () => {
 
       expect(userRepoPaginateStub.callCount).to.equal(1)
       expect(userRepoPaginateStub.getCall(0).args[0]).to.deep.equal(query)
-      expect(
-        userRepoPaginateStub.getCall(0).args[1].cloudResourceSettings.total_limit,
-      ).to.deep.equal({
+      expect(userRepoPaginateStub.getCall(0).args[1].cloudResourceSettings.total_limit).to.deep.equal({
         $gte: 10,
         $lte: 20,
       })
@@ -281,12 +260,10 @@ describe('user service tests', () => {
 
       expect(userRepoPaginateStub.callCount).to.equal(1)
       expect(userRepoPaginateStub.getCall(0).args[0]).to.deep.equal(query)
-      expect(userRepoPaginateStub.getCall(0).args[1].cloudResourceSettings.job_limit).to.deep.equal(
-        {
-          $gte: 5,
-          $lte: 10,
-        },
-      )
+      expect(userRepoPaginateStub.getCall(0).args[1].cloudResourceSettings.job_limit).to.deep.equal({
+        $gte: 5,
+        $lte: 10,
+      })
     })
 
     it('should order users by total limit in ascending order', async () => {
@@ -344,75 +321,6 @@ describe('user service tests', () => {
       expect(userRepoPaginateStub.getCall(0).args[2].orderBy).to.deep.equal({
         dxuser: 'ASC',
       })
-    })
-  })
-
-  describe('#listFavoriteItems', () => {
-    it('basic', async () => {
-      const headerItems = [
-        { name: 'overview', favorite: false },
-        { name: 'docs', favorite: true },
-      ]
-      userRepoFindOneStub.resolves({ dxuser: 'user1', extras: { header_items: headerItems } })
-
-      const userService = createUserService()
-      const result = await userService.listHeaderItems()
-      checkHeaderItems(headerItems, result)
-    })
-
-    it('header items not set yet', async () => {
-      userRepoFindOneStub.resolves({ dxuser: 'user1', extras: {} })
-
-      const userService = createUserService()
-      await expect(userService.listHeaderItems()).be.rejectedWith(
-        NoHeaderItemsSetError,
-        'Header items have not been set yet for user user1',
-      )
-    })
-
-    it('non-existing user', async () => {
-      userRepoFindOneStub.resolves()
-
-      const userService = createUserService()
-      await expect(userService.listHeaderItems()).be.rejectedWith(NotFoundError, 'User not found')
-    })
-  })
-
-  describe('#updateFavoriteItems', () => {
-    it('basic', async () => {
-      const headerItemsOrig = [
-        { name: 'overview', favorite: false },
-        { name: 'docs', favorite: true },
-      ]
-      const headerItemsUpdate = [
-        { name: 'gsrs', favorite: true },
-        { name: 'overview', favorite: true },
-        { name: 'docs', favorite: false },
-      ]
-      userRepoFindOneStub.resolves({ dxuser: 'user1', extras: { header_items: headerItemsOrig } })
-
-      const userService = createUserService()
-      const beforeUpdate = await userService.listHeaderItems()
-      checkHeaderItems(headerItemsOrig, beforeUpdate)
-
-      await userService.updateHeaderItems(headerItemsUpdate)
-      const newHeaderItems = await userService.listHeaderItems()
-      checkHeaderItems(headerItemsUpdate, newHeaderItems)
-    })
-
-    it('empty array', async () => {
-      const headerItemsOrig = [
-        { name: 'overview', favorite: false },
-        { name: 'docs', favorite: true },
-      ]
-      const headerItemsUpdate = []
-      userRepoFindOneStub.resolves({ dxuser: 'user1', extras: { header_items: headerItemsOrig } })
-
-      const userService = createUserService()
-
-      await userService.updateHeaderItems(headerItemsUpdate)
-      const newHeaderItems = await userService.listHeaderItems()
-      checkHeaderItems(headerItemsUpdate, newHeaderItems)
     })
   })
 })

@@ -1,21 +1,29 @@
-import { DndContext, DragEndEvent, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core'
+import React from 'react'
 import {
-  SortableContext,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
   arrayMove,
+  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import React from 'react'
 import styled from 'styled-components'
-
+import { useAuthUser } from '@/features/auth/useAuthUser'
 import { TransparentButton } from '../Button'
 import { StarIcon } from '../icons/StarIcon'
-import { HeaderItemText, IconWrap } from './styles'
-import { useNavFavorites } from './useNavFavorites'
-import { useUserSiteNavItems } from './useUserSiteNavItems'
 import { SiteNavItemType } from './NavItems'
+import { HeaderItemText, IconWrap } from './styles'
+import { useUpdateFavoritesMutation } from './useNavFavorites'
+import { useUserSiteNavItems } from './useUserSiteNavItems'
 
 export const Name = styled.div`
   display: flex;
@@ -64,7 +72,6 @@ const SiteNavItem = (props: { item: SiteNavItemType; onClick: () => void; childr
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: props.item.id })
 
   return (
-
     <Item
       ref={setNodeRef}
       {...attributes}
@@ -73,10 +80,8 @@ const SiteNavItem = (props: { item: SiteNavItemType; onClick: () => void; childr
         transform: CSS.Transform.toString(transform),
         transition: transition,
       }}
-      >
-      <ItemButton onClick={props.onClick}>
-        {props.children}
-      </ItemButton>
+    >
+      <ItemButton onClick={props.onClick}>{props.children}</ItemButton>
     </Item>
   )
 }
@@ -93,10 +98,16 @@ function getAllObjectsByIds(ids: string[], items: SiteNavItemType[]) {
 }
 
 export const FavoriteMenuItemsScreen = () => {
-  const { selFavorites, updateFavorites } = useNavFavorites()
   const { userSiteNavItems } = useUserSiteNavItems()
+  const user = useAuthUser()
+  const { mutate: updateFavorites } = useUpdateFavoritesMutation()
 
-  const displayList = getAllObjectsByIds(selFavorites.map(item => item.name), userSiteNavItems)
+  const selFavorites = user?.header_items || []
+
+  const displayList = getAllObjectsByIds(
+    selFavorites.map(item => item.name),
+    userSiteNavItems,
+  )
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -132,7 +143,14 @@ export const FavoriteMenuItemsScreen = () => {
       const oldIdx = displayList.findIndex(item => item.id === e.active.id)
       const newIndex = displayList.findIndex(item => item.id === e.over!.id)
       const newLi = arrayMove(displayList, oldIdx, newIndex)
-      updateFavorites(newLi.map(item => {return { name: item.id, favorite: selFavorites.find(selFavItem => selFavItem.name === item.id && selFavItem.favorite) !== undefined }}))
+      updateFavorites(
+        newLi.map(item => {
+          return {
+            name: item.id,
+            favorite: selFavorites.find(selFavItem => selFavItem.name === item.id && selFavItem.favorite) !== undefined,
+          }
+        }),
+      )
     }
   }
 
@@ -140,7 +158,7 @@ export const FavoriteMenuItemsScreen = () => {
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorder}>
       <SortableContext items={displayList} strategy={verticalListSortingStrategy}>
         <StyledFavorites>
-          {displayList.map((i) => {
+          {displayList.map(i => {
             const { id, iconHeight, text, icon: Icon } = i
             return (
               <SiteNavItem key={id} item={i} onClick={() => handleItemClick(i.id)}>
@@ -150,7 +168,10 @@ export const FavoriteMenuItemsScreen = () => {
                   </IconWrap>
                   <HeaderItemText>{text}</HeaderItemText>
                 </Name>
-                <FavIconWrap $selected={selFavorites.find(item => item.name === i.id && item.favorite) !== undefined} data-testid={`favorite-menu-star-${id}`}>
+                <FavIconWrap
+                  $selected={selFavorites.find(item => item.name === i.id && item.favorite) !== undefined}
+                  data-testid={`favorite-menu-star-${id}`}
+                >
                   <StarIcon height={15} />
                 </FavIconWrap>
               </SiteNavItem>

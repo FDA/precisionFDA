@@ -1,32 +1,31 @@
-import clsx from 'clsx'
 import React, { useRef, useState } from 'react'
+import clsx from 'clsx'
 import { Link, useLocation } from 'react-router'
 import { PlacesType, Tooltip } from 'react-tooltip'
-import { useAlertDismissed } from '../../features/admin/alerts/useAlertDismissedLocalStorage'
-import { CDMHKey, logout } from '../../features/auth/api'
-import { useAuthUser } from '../../features/auth/useAuthUser'
-import { useGenerateKeyModal } from '../../features/auth/useGenerateKeyModal'
-import { CDMHNames, SiteSettingsDataPortal, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
-import { useOnOutsideClickRef } from '../../hooks/useOnOutsideClick'
-import { IUser } from '../../types/user'
+import { useAlertDismissed } from '@/features/admin/alerts/useAlertDismissedLocalStorage'
+import { CDMHKey, logout } from '@/features/auth/api'
+import { useAuthUser } from '@/features/auth/useAuthUser'
+import { useGenerateKeyModal } from '@/features/auth/useGenerateKeyModal'
+import { CDMHNames, SiteSettingsDataPortal, useSiteSettingsQuery } from '@/features/auth/useSiteSettingsQuery'
+import { useOnOutsideClickRef } from '@/hooks/useOnOutsideClick'
+import { IUser } from '@/types/user'
 import { AlertBanner } from '../AlertBanner'
 import { TransparentButton } from '../Button'
 import { CloudResourceModal } from '../CloudResourcesModal'
 import { useSearchModal } from '../GlobalSearch/useSearchModal'
-import Menu from '../Menu/Menu'
-import { NotificationCenter } from '../NotificationCenter/NotificationCenter'
-import { ThemeToggle } from '../ThemeToggle'
 import { ArrowLeftIcon } from '../icons/ArrowLeftIcon'
-import { CDMHIcon } from '../icons/CDMHIcon'
 import { CaretIcon } from '../icons/CaretIcon'
+import { CDMHIcon } from '../icons/CDMHIcon'
 import { CrossIcon } from '../icons/PlusIcon'
 import { ProfileIcon } from '../icons/ProfileIcon'
 import { SearchIcon } from '../icons/SearchIcon'
 import { SiteMenuIcon } from '../icons/SiteMenuIcon'
 import { StarIcon } from '../icons/StarIcon'
-import { getNavigationPath, getNavigationRel, getNavigationTarget, SiteNavItemType } from './NavItems'
-import { UserMenu } from './UserMenu'
+import Menu from '../Menu/Menu'
+import { NotificationCenter } from '../NotificationCenter/NotificationCenter'
+import { ThemeToggle } from '../ThemeToggle'
 import { getOrderedFavoritesOnly } from './getOrderedFavoritesOnly'
+import { getNavigationPath, getNavigationRel, getNavigationTarget, SiteNavItemType } from './NavItems'
 import { getObjectsByIds } from './orderObjectById'
 import {
   DisabledSiteMenuItem,
@@ -53,7 +52,7 @@ import {
   SubLink,
 } from './styles'
 import { useEditFavoritesModal } from './useEditFavoritesModal'
-import { useNavFavorites } from './useNavFavorites'
+import { UserMenu } from './UserMenu'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
 
 const isActiveLink = (linkPath: string, pathname: string) => {
@@ -97,7 +96,15 @@ const MenuLink = ({
   )
 }
 
-const MenuItem = ({ navItem, pathname, onClick }: { navItem: SiteNavItemType; pathname: string; onClick: () => void }) => {
+const MenuItem = ({
+  navItem,
+  pathname,
+  onClick,
+}: {
+  navItem: SiteNavItemType
+  pathname: string
+  onClick: () => void
+}) => {
   return (
     <MenuLink navItem={navItem} onClick={onClick} data-testid={`sitenav-${navItem.id}`}>
       <SiteMenuItem $active={isActiveLink(getNavigationPath(navItem), pathname)}>
@@ -146,7 +153,12 @@ const DisabledTopMenuItem = ({
   siteSettingsDataPortal: SiteSettingsDataPortal
 }) => {
   return (
-    <DisabledMenuItem key={navItem.id} navItem={navItem} siteSettingsDataPortal={siteSettingsDataPortal} tooltipPos="bottom" />
+    <DisabledMenuItem
+      key={navItem.id}
+      navItem={navItem}
+      siteSettingsDataPortal={siteSettingsDataPortal}
+      tooltipPos="bottom"
+    />
   )
 }
 
@@ -207,7 +219,10 @@ const SiteNav = ({
       <SiteNavBody>
         <Row>
           <div>
-            {getObjectsByIds(['overview', 'data-portals', 'discussions', 'challenges', 'experts'], userSiteNavItems).map(i => (
+            {getObjectsByIds(
+              ['overview', 'data-portals', 'discussions', 'challenges', 'experts'],
+              userSiteNavItems,
+            ).map(i => (
               <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
             ))}
             <HeaderSpacer />
@@ -279,7 +294,6 @@ const Header: React.FC = () => {
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
-  const { selFavorites } = useNavFavorites()
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
   const buttonElement = useRef<HTMLButtonElement>(null)
   const generateCLIKeyAction = useGenerateKeyModal()
@@ -305,7 +319,7 @@ const Header: React.FC = () => {
     }, ms ?? 225)
   }
 
-  const orderedFavorites = getOrderedFavoritesOnly(selFavorites)
+  const orderedFavorites = getOrderedFavoritesOnly(user.header_items ?? [])
 
   return (
     <>
@@ -340,7 +354,13 @@ const Header: React.FC = () => {
           <HeaderLeft>
             {getObjectsByIds(orderedFavorites, userSiteNavItems).map(i => {
               if (siteSettings?.data?.dataPortals[i.id]?.accessible === false) {
-                return <DisabledTopMenuItem key={i.id} navItem={i} siteSettingsDataPortal={siteSettings.data.dataPortals[i.id]} />
+                return (
+                  <DisabledTopMenuItem
+                    key={i.id}
+                    navItem={i}
+                    siteSettingsDataPortal={siteSettings.data.dataPortals[i.id]}
+                  />
+                )
               }
 
               const dynamicNavItem = { ...i }

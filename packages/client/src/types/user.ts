@@ -36,13 +36,9 @@ export const RESOURCE_LABELS = {
 export const RESOURCES = Object.keys(RESOURCE_LABELS) as (keyof typeof RESOURCE_LABELS)[]
 export interface IUser {
   id: number
-  name: string
-  fullName: string
-  org: string
-  url: string
-  isAccepted: boolean
-  isGovUser?: boolean
-  isAdmin?: boolean
+  org: { id: number; name: string; handle: string }
+  isGovUser?: boolean // derived from email domain, not returned by API
+  isAdmin?: boolean // derived from can_administer_site, not returned by API
   dxuser: string
   admin: boolean
   can_access_notification_preference: boolean
@@ -50,8 +46,8 @@ export interface IUser {
   review_space_admin: boolean
   can_create_challenges: boolean
   allowed_to_publish: boolean
-  can_create_data_portals: boolean
   can_see_spaces: boolean
+  header_items: { name: string; favorite: boolean }[]
   resources: typeof RESOURCES
   email: string
   first_name: string
@@ -60,8 +56,11 @@ export interface IUser {
   last_name: string
   handle: string
   session_id: string
+  total_limit: number
+  pricing_map: Record<string, number>
 }
 
+// Node Backend User Type
 export type SimpleUser = {
   id: number
   dxuser: string

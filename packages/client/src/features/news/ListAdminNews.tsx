@@ -3,20 +3,20 @@ import React from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { Tooltip } from 'react-tooltip'
 import styled, { css } from 'styled-components'
-import { Button, TransparentButton } from '../../components/Button'
+import { Button, TransparentButton } from '@/components/Button'
 import ExternalLink from '../../components/Controls/ExternalLink'
-import { ArrowLeftIcon } from '../../components/icons/ArrowLeftIcon'
-import { GlobeIcon } from '../../components/icons/GlobeIcon'
-import { NewspaperIcon } from '../../components/icons/NewspaperIcon'
-import { Svg } from '../../components/icons/Svg'
-import { Loader } from '../../components/Loader'
-import { BackLink } from '../../components/Page/PageBackLink'
-import { PageContainerMargin, PageTitle } from '../../components/Page/styles'
-import { UserLayout } from '../../layouts/UserLayout'
-import { useAuthUserQuery } from '../auth/api'
+import { ArrowLeftIcon } from '@/components/icons/ArrowLeftIcon'
+import { GlobeIcon } from '@/components/icons/GlobeIcon'
+import { NewspaperIcon } from '@/components/icons/NewspaperIcon'
+import { Svg } from '@/components/icons/Svg'
+import { Loader } from '@/components/Loader'
+import { BackLink } from '@/components/Page/PageBackLink'
+import { PageContainerMargin, PageTitle } from '@/components/Page/styles'
+import { UserLayout } from '@/layouts/UserLayout'
 import { ButtonRow } from '../modal/styles'
 import { NewsItem } from './types'
 import { useNewsAdminAllRequest } from './useNewsListQuery'
+import { useAuthUser } from '@/features/auth/useAuthUser'
 
 const StyledCard = styled.div`
   display: flex;
@@ -175,9 +175,9 @@ function ListAdminNews() {
 }
 
 const IsAdminWrapper = () => {
-  const { data } = useAuthUserQuery()
-  if (!data?.user) return <div />
-  if (!data?.user.admin) {
+  const user = useAuthUser()
+  if (!user) return <div />
+  if (!user?.admin) {
     return <Navigate to="/news" replace />
   }
   return <ListAdminNews />

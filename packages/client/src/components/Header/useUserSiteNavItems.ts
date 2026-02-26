@@ -1,4 +1,4 @@
-import { useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
+import { useSiteSettingsQuery } from '@/features/auth/useSiteSettingsQuery'
 import { cdmhNavItems, gsrsNavItems, siteNavItems } from './NavItems'
 
 export const useUserSiteNavItems = () => {

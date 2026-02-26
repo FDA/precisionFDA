@@ -1,8 +1,9 @@
-import { render } from '../../../test/test-utils'
+import { render, setAuthenticatedSession } from '../../../test/test-utils'
 import HomeShowLayout from '../HomeShowLayout'
 
 describe('My Home', () => {
   test('User should be allowed to view My Home and default to files list', async () => {
+    setAuthenticatedSession()
     const screen = render(<HomeShowLayout />, { route: '/home/files' })
 
     await expect.element(screen.getByTestId('home-files-link')).toHaveClass('active')
