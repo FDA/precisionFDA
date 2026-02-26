@@ -20,11 +20,12 @@ import { HeaderItem } from '@shared/domain/user/header-item'
 import { UserExtras } from '@shared/domain/user/user-extras'
 import { CloudResourceSettings, User, USER_STATE } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import { ClientRequestError, NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
+import { ClientRequestError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { StringUtils } from '@shared/utils/string.utils'
+
 
 @Injectable()
 export class UserService {
@@ -88,7 +89,7 @@ export class UserService {
       }
     }
 
-    let orderByClause = this.extractOrderByClause(query)
+    const orderByClause = this.extractOrderByClause(query)
 
     return await this.userRepo.paginate(query, where, { orderBy: orderByClause })
   }
@@ -96,35 +97,15 @@ export class UserService {
   async listActiveUserNames(): Promise<string[]> {
     this.logger.log('getting list of active user names')
     const result = await this.userRepo.findActive()
-    return result.map((user) => user.dxuser)
+    return result.map(user => user.dxuser)
   }
 
   async listGovernmentUserNames(): Promise<string[]> {
     this.logger.log('getting list of government user names')
     const result = await this.userRepo.find({
-      $and: [
-        { userState: 0 },
-        { $or: [{ email: { $like: '%fda.hhs.gov' } }, { email: { $like: '%fda.gov' } }] },
-      ],
+      $and: [{ userState: 0 }, { $or: [{ email: { $like: '%fda.hhs.gov' } }, { email: { $like: '%fda.gov' } }] }],
     })
-    return result.map((user) => user.dxuser)
-  }
-
-  async listHeaderItems(): Promise<HeaderItem[]> {
-    this.logger.log(`Getting header items settings for user: ${this.user.dxuser}`)
-    const user = await this.userRepo.findOne({ id: this.user.id })
-    if (!user) {
-      throw new NotFoundError('User not found')
-    }
-
-    if (user.extras.header_items === undefined) {
-      // TODO: PFDA-6176 Return default header items settings
-      throw new NoHeaderItemsSetError(
-        `Header items have not been set yet for user ${this.user.dxuser}`,
-      )
-    }
-
-    return user.extras.header_items
+    return result.map(user => user.dxuser)
   }
 
   async updateHeaderItems(headerItems: HeaderItem[]): Promise<void> {
@@ -161,9 +142,7 @@ export class UserService {
       userState: USER_STATE.ENABLED,
     })
     // filter users who haven't been notified yet
-    const usersToBeNotify = soonToBeLockedUsers.filter(
-      (user) => user.extras?.inactivity_email_sent === false,
-    )
+    const usersToBeNotify = soonToBeLockedUsers.filter(user => user.extras?.inactivity_email_sent === false)
 
     for (let i = 0; i < usersToBeNotify.length; i++) {
       const user = usersToBeNotify[i]
@@ -171,17 +150,13 @@ export class UserService {
         this.logger.log(`found soon to be locked user, sending alert to: ${user.dxuser}`)
         const today = new Date()
         const daysUntilLockout = Math.floor(
-          PLATFORM_LOCKOUT_DAYS -
-            (today.getTime() - user.lastLogin.getTime()) / (1000 * 60 * 60 * 24),
+          PLATFORM_LOCKOUT_DAYS - (today.getTime() - user.lastLogin.getTime()) / (1000 * 60 * 60 * 24),
         )
         const emailInput: UserInactivityAlertEmailInput = {
           receiver: user,
           daysLeft: daysUntilLockout,
         }
-        const body = buildEmailTemplate<UserInactivityAlertEmailInput>(
-          userInactivityAlertTemplate,
-          emailInput,
-        )
+        const body = buildEmailTemplate<UserInactivityAlertEmailInput>(userInactivityAlertTemplate, emailInput)
         const emailTask: EmailSendInput = {
           emailType: EMAIL_TYPES.userInactivityAlert,
           to: user.email,
@@ -242,8 +217,8 @@ export class UserService {
     // needs to be done by this way because we don't know the user ID
     const members = await this.adminClient.orgFindMembers({ orgDxid: ORG_DUMMY })
     const userIds = members.results
-      .filter((member) => member.level === 'MEMBER' && member.id !== config.platform.adminUser)
-      .map((member) => member.id)
+      .filter(member => member.level === 'MEMBER' && member.id !== config.platform.adminUser)
+      .map(member => member.id)
 
     for (const userId of userIds) {
       await this.adminClient.removeUserFromOrganization({
@@ -260,7 +235,7 @@ export class UserService {
     | {
         cloudResourceSettings: { total_limit: 'DESC' | 'ASC' }
       }
-    | {}
+    | object
     | { [p: string]: 'DESC' | 'ASC' } {
     if (['totalLimit', 'jobLimit'].includes(query.orderBy)) {
       if (query.orderBy === 'totalLimit') {

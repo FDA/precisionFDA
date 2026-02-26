@@ -52,4 +52,8 @@ const customRender = (ui: React.ReactElement, { route = '/' } = {}) => {
   return page
 }
 
+export const setAuthenticatedSession = () => {
+  document.cookie = 'sessionExpiredAt=9999999999999; path=/'
+}
+
 export { customRender as render }

@@ -1,8 +1,10 @@
-import { render } from '../../../test/test-utils'
-import { FileList } from '../../files/FileList'
+import { render, setAuthenticatedSession } from '../../../test/test-utils';
+import { FileList } from '../../files/FileList';
+
 
 describe('My Home / Files', () => {
   test('User should be allowed to view files list', async () => {
+    setAuthenticatedSession()
     const screen = render(<FileList homeScope="me" showFolderActions />, { route: '/home/files' })
 
     await expect.element(screen.getByTestId('pfda-table')).toBeInTheDocument()

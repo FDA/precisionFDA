@@ -1,7 +1,6 @@
 import { http, HttpResponse } from 'msw'
-import { SiteSettingsResponse } from '../../features/auth/useSiteSettingsQuery'
-import { CloudResourcesResponse } from '../../hooks/useCloudResourcesCondition'
-import { NavFavorite } from '../../components/Header/useNavFavorites'
+import { SiteSettingsResponse } from '@/features/auth/useSiteSettingsQuery'
+import { CloudResourcesResponse } from '@/hooks/useCloudResourcesCondition'
 
 export const authHandlers = [
   http.get('https://localhost:3001/', () => HttpResponse.json({}, { status: 200 })),
@@ -46,6 +45,7 @@ export const authHandlers = [
             db_mem1_x64: 30.933,
           },
           resources: ['baseline-2', 'baseline-4', 'hidisk-2', 'hidisk-4', 'himem-2', 'himem-4'],
+          header_items: [],
           total_limit: 200,
           can_administer_site: true,
           can_create_challenges: true,
@@ -100,27 +100,7 @@ export const authHandlers = [
     ),
   ),
 
-  http.get('/api/v2/users/header-items', () =>
-    HttpResponse.json<NavFavorite[]>(
-      [
-        { name: 'home', favorite: true },
-        { name: 'spaces', favorite: true },
-        { name: 'docs', favorite: true },
-        { name: 'apps', favorite: false },
-        { name: 'workflows', favorite: false },
-        { name: 'databases', favorite: false },
-        { name: 'executions', favorite: false },
-        { name: 'files', favorite: false },
-        { name: 'assets', favorite: false },
-        { name: 'challenges', favorite: false },
-      ],
-      { status: 200 },
-    ),
-  ),
-
-  http.put('/api/v2/users/header-items', () =>
-    HttpResponse.json({}, { status: 200 }),
-  ),
+  http.put('/api/v2/users/header-items', () => HttpResponse.json({}, { status: 200 })),
 
   http.get('/api/v2/site-settings', () =>
     HttpResponse.json<SiteSettingsResponse>(
