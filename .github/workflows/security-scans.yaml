@@ -1,0 +1,44 @@
+name: 'Security Scans'
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - internal-release
+      - production
+
+jobs:
+  kodem-scans:
+    name: 'Kodem ${{ matrix.name }} Scan'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scan-type: code
+            name: SAST
+          - scan-type: open-source
+            name: SCA
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          path: cloned-repo
+
+      - name: Run the Kodem ${{ matrix.name }} Scan
+        run: |
+          docker run --rm --tty \
+            --volume "$(pwd)/cloned-repo:/tmp/cloned-repo" \
+            --env KODEM_SERVICE_KEY="${{ secrets.KODEM_TEST_SERVICE_KEY }}" \
+            --env KODEM_INTEGRATIONS_ENDPOINT=https://integrations.kodem.internal.dnanexus.com \
+            --env KODEM_DISABLE_RESOURCE_UPDATES=true \
+            us-docker.pkg.dev/kodem-public/kodem-ci/kodemci:latest \
+            scan code-repository ${{ matrix.scan-type }} /tmp/cloned-repo \
+              --output-severity=Critical,High \
+              --upload \
+              --code-repository-name ${{ github.event.repository.name }} \
+              --is-default-branch \
+              --branch-name ${{ github.ref_name }}
