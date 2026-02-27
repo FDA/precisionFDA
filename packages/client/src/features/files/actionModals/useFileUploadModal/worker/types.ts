@@ -115,6 +115,8 @@ export interface WorkerSession {
   throttle: ThrottleState
   /** Timer ID for periodic progress updates */
   progressTimerId: number | null
+  /** CSRF token for mutating API requests */
+  csrfToken?: string
 }
 
 /**

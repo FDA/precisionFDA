@@ -6,6 +6,18 @@ import { ChunkUploadError, CreateFileError } from './errors'
 import type { UploadUrlResponse, WorkerSession } from './types'
 import { cleanObject, toError } from './utils'
 
+function buildRequestHeaders(csrfToken?: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+
+  if (csrfToken) {
+    headers['X-CSRF-Token'] = csrfToken
+  }
+
+  return headers
+}
+
 /**
  * Create a new file on the server
  */
@@ -18,16 +30,13 @@ export async function createFileRequest(session: WorkerSession): Promise<void> {
     home_scope: session.homeScope,
   })
 
-  // Create an AbortController for this request so it can be cancelled
   const controller = new AbortController()
   session.currentControllers.add(controller)
 
   try {
     const response = await fetch('/api/create_file', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: buildRequestHeaders(session.csrfToken),
       body: JSON.stringify(data),
       signal: controller.signal,
     })
@@ -125,12 +134,10 @@ export async function requestUploadUrl(
 /**
  * Close a file after all chunks are uploaded
  */
-export async function closeFileRequest(uid: string): Promise<void> {
+export async function closeFileRequest(uid: string, csrfToken?: string): Promise<void> {
   const response = await fetch(`/api/v2/files/${uid}/close`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: buildRequestHeaders(csrfToken),
   })
 
   if (!response.ok) {

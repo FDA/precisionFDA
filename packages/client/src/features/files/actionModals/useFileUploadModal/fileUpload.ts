@@ -6,6 +6,7 @@
  *
  */
 
+import { getAuthenticityToken } from '@/utils/api'
 import type { HomeScope } from '../../../home/types'
 import {
   DEFAULT_CHUNK_CONCURRENCY,
@@ -106,6 +107,7 @@ export class FileUploadController {
           baseDelayMs: this.config.retryBackoffMs ?? DEFAULT_RETRY_BACKOFF_MS,
         },
         concurrency: this.config.concurrency ?? DEFAULT_CHUNK_CONCURRENCY,
+        csrfToken: getAuthenticityToken() ?? undefined,
       }
 
       this.worker.postMessage({
