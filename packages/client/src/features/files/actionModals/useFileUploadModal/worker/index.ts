@@ -156,7 +156,7 @@ async function processFile(activeSession: WorkerSession): Promise<void> {
 
   await ensureActive(activeSession)
   postState(activeSession, 'finalizing', { force: true })
-  await closeFileRequest(activeSession.fileUid)
+  await closeFileRequest(activeSession.fileUid, activeSession.csrfToken)
 
   activeSession.completedAt = Date.now()
   postState(activeSession, 'completed', {

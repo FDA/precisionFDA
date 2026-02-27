@@ -78,6 +78,7 @@ export function initializeSession(payload: UploadWorkerStartPayload): WorkerSess
       lastEmittedBytes: initialUploadedBytes,
     },
     progressTimerId: null,
+    csrfToken: payload.csrfToken,
   }
 }
 

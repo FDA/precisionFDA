@@ -4,18 +4,18 @@ import type { HomeScope } from '@/features/home/types'
  * Unified upload status used everywhere (worker, store, UI)
  */
 export type UploadStatus =
-  | 'pending'     // File added, not yet started
-  | 'queued'      // Waiting to start (when other files are uploading)
-  | 'preparing'   // Initial preparation
-  | 'creating'    // Creating file on server
-  | 'hashing'     // Computing file hash
-  | 'uploading'   // Actively uploading chunks
-  | 'paused'      // Paused by user or system
-  | 'retrying'    // Retrying after error
-  | 'finalizing'  // Closing file on server
-  | 'completed'   // Successfully uploaded
-  | 'failed'      // Upload failed
-  | 'cancelled'   // Cancelled by user
+  | 'pending' // File added, not yet started
+  | 'queued' // Waiting to start (when other files are uploading)
+  | 'preparing' // Initial preparation
+  | 'creating' // Creating file on server
+  | 'hashing' // Computing file hash
+  | 'uploading' // Actively uploading chunks
+  | 'paused' // Paused by user or system
+  | 'retrying' // Retrying after error
+  | 'finalizing' // Closing file on server
+  | 'completed' // Successfully uploaded
+  | 'failed' // Upload failed
+  | 'cancelled' // Cancelled by user
 
 /**
  * Simplified progress snapshot - just bytes, speed calculated on main thread
@@ -65,6 +65,7 @@ export interface UploadWorkerStartPayload {
   }
   readonly concurrency?: number
   readonly resumeFrom?: UploadResumeSnapshot
+  readonly csrfToken?: string
 }
 
 export type UploadWorkerCommand =
