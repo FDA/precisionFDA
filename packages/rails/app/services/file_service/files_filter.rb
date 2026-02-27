@@ -18,7 +18,11 @@ module FileService
         condition(NODE_TABLE[:scope], scopes)
       end,
       "username" => lambda do |value|
-        condition(USER_TABLE[:first_name], value).or(condition(USER_TABLE[:last_name], value))
+        pattern = Arel::Nodes.build_quoted(sanitize(value))
+        fn, ln = USER_TABLE[:first_name], USER_TABLE[:last_name]
+        first_last = Arel::Nodes::NamedFunction.new("CONCAT", [fn, Arel::Nodes.build_quoted(" "), ln])
+        last_first = Arel::Nodes::NamedFunction.new("CONCAT", [ln, Arel::Nodes.build_quoted(" "), fn])
+        Arel::Nodes::Matches.new(first_last, pattern).or(Arel::Nodes::Matches.new(last_first, pattern))
       end,
     }.freeze
   end
