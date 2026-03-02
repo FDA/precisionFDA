@@ -16,7 +16,7 @@ if (typeof window !== 'undefined' && !window.ResizeObserver) {
 
 // Setup MSW worker
 beforeAll(async () => {
-  await worker.start({ onUnhandledRequest: 'warn' })
+  await worker.start({ onUnhandledRequest: 'warn', quiet: true })
 })
 
 afterEach(() => worker.resetHandlers())

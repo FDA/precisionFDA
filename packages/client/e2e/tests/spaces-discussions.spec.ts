@@ -31,6 +31,7 @@ const spaceName = `Cypress Group Space for Discussions`
 
 // Discussion title for file attachment test (used across multiple tests)
 let discussionWithFilesTitle = `Cypress Space Discussion with Files attachement ${testId}`
+let spaceId: string
 
 // Tests must run in serial order since they depend on each other
 test.describe.configure({ mode: 'serial' })
@@ -55,11 +56,15 @@ test.describe('Spaces - Discussions in Spaces', () => {
 
     await SpacesList.searchSpaceOpenDetail(page, spaceName)
 
+    // Capture space ID for direct navigation in subsequent tests
+    const match = page.url().match(/\/spaces\/(\d+)/)
+    if (match) spaceId = match[1]
+
     // Click Add Files button
     await page.getByTestId('home-files-add-files-button').click()
 
-    // Click Upload Files option (use button role to avoid matching description text)
-    await page.getByRole('button', { name: 'Upload Files' }).click()
+    // Click Upload Files option inside the Add Files modal (toolbar also has "Upload Files")
+    await page.getByTestId('choose-add-file-option-modal').getByRole('button', { name: 'Upload Files' }).click()
 
     // Wait for modal to be visible
     await expect(page.getByTestId('modal-files-upload')).toBeVisible()
@@ -96,11 +101,8 @@ test.describe('Spaces - Discussions in Spaces', () => {
   })
 
   test('Create Discussion with Files attachment', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.startDiscussion(page)
 
     await DiscussionForm.fill(page, discussionWithFilesTitle, `Cypress Content${testId}`)
@@ -139,9 +141,7 @@ test.describe('Spaces - Discussions in Spaces', () => {
     await expect(page.getByRole('button', { name: 'Run App' })).toBeVisible()
 
     // Navigate to space and add the app
-    await app.ensureRoute('/spaces')
-
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
+    await app.ensureRoute(`/spaces/${spaceId}`)
 
     await page.getByTestId('apps-link').click()
     await page.waitForTimeout(1500)
@@ -186,7 +186,7 @@ test.describe('Spaces - Discussions in Spaces', () => {
     await expect(page.getByRole('button', { name: 'Re-Run Execution' })).toBeVisible()
 
     // Now create a discussion with App attachment
-    await DiscussionsList.goToDiscussions(page)
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
     await DiscussionsList.startDiscussion(page)
 
     await DiscussionForm.fill(
@@ -209,11 +209,8 @@ test.describe('Spaces - Discussions in Spaces', () => {
   test.skip('Create Discussion with Job attachment', async ({ page, app }) => {
     const appName = `cypress_discussion_app_${testId}`
 
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.startDiscussion(page)
 
     await DiscussionForm.fill(
@@ -399,11 +396,8 @@ test.describe('Spaces - Discussions in Spaces', () => {
     await expect(page.locator('div.metadata-header p').filter({ hasText: 'Public' })).toBeVisible()
 
     // Now create a discussion with Comparison attachment
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.startDiscussion(page)
 
     await DiscussionForm.fill(
@@ -424,33 +418,24 @@ test.describe('Spaces - Discussions in Spaces', () => {
   })
 
   test.skip('Add Comment', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.openDiscussion(page, discussionWithFilesTitle)
 
     await DiscussionDetail.addComment(page, 'Cypress Comment')
   })
 
   test.skip('Edit Comment', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.openDiscussion(page, discussionWithFilesTitle)
 
     await DiscussionDetail.editComment(page, 'Cypress Comment - Edited')
   })
 
   test.skip('Delete Comment', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.openDiscussion(page, discussionWithFilesTitle)
 
     await DiscussionDetail.deleteComment(page, 'last')
@@ -459,44 +444,32 @@ test.describe('Spaces - Discussions in Spaces', () => {
   })
 
   test('Add Answer', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.openDiscussion(page, discussionWithFilesTitle)
 
     await DiscussionDetail.addAnswer(page, 'Cypress Answer')
   })
 
   test('Edit Answer', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.openDiscussion(page, discussionWithFilesTitle)
 
     await DiscussionDetail.editAnswer(page, 'Cypress Answer - Edited', 'last')
   })
 
   test('Add Reply to Answer', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.openDiscussion(page, discussionWithFilesTitle)
 
     await DiscussionDetail.addReplyToAnswer(page, 'Cypress Reply to Answer')
   })
 
   test('Delete Reply', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.openDiscussion(page, discussionWithFilesTitle)
 
     await DiscussionDetail.deleteComment(page, 'first')
@@ -505,11 +478,8 @@ test.describe('Spaces - Discussions in Spaces', () => {
   })
 
   test('Delete Answer', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.openDiscussion(page, discussionWithFilesTitle)
 
     await DiscussionDetail.deleteAnswer(page, 'first')
@@ -518,20 +488,15 @@ test.describe('Spaces - Discussions in Spaces', () => {
   })
 
   test('Delete Discussion', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
+    await app.ensureRoute(`/spaces/${spaceId}/discussions`)
 
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
-
-    await DiscussionsList.goToDiscussions(page)
     await DiscussionsList.openDiscussion(page, discussionWithFilesTitle)
 
     await DiscussionDetail.deleteDiscussion(page)
   })
 
   test('Delete uploaded file', async ({ page, app }) => {
-    await app.ensureRoute('/spaces')
-
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
+    await app.ensureRoute(`/spaces/${spaceId}`)
 
     await FilesList.searchFileAndOpenDetail(page, cypressFile)
 
@@ -547,9 +512,7 @@ test.describe('Spaces - Discussions in Spaces', () => {
     const appName = `cypress_discussion_app_${testId}`
     const appTitle = `Cypress Discussion App ${testId}`
 
-    await app.ensureRoute('/spaces')
-
-    await SpacesList.searchSpaceOpenDetail(page, spaceName)
+    await app.ensureRoute(`/spaces/${spaceId}`)
 
     await page.getByTestId('apps-link').click()
     await page.waitForTimeout(1500)

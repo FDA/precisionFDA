@@ -284,18 +284,10 @@ test.describe('My Home - Folders & Files', () => {
     await app.ensureRoute('/home/files')
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
-    await FileDetail.clickActionsMenuItem(page, 'Open')
-
-    // Cancel first
-    await page.getByRole('button', { name: 'Cancel' }).click()
-
-    // Open again
-    await FileDetail.clickActionsMenuItem(page, 'Open')
-
-    // Handle the new tab - we'll intercept it and navigate in the same tab
+    // With a single file selected, Open opens in a new tab directly (no modal)
     const [newPage] = await Promise.all([
       page.context().waitForEvent('page'),
-      page.locator('table button', { hasText: 'Open' }).click(),
+      FileDetail.clickActionsMenuItem(page, 'Open'),
     ])
 
     // Wait for the new page to load and verify content
