@@ -10,9 +10,9 @@
 #  note_id       :integer
 #  reply_type    :string(255)      not null
 #  parent_id     :integer
-#  old_comment_id :integer
 
 class Answer < ApplicationRecord
+  self.table_name = 'discussion_replies'
   include Auditor
   # This includes permissions but many methods must be redefined
   # given that the real permissions are mandated by the note

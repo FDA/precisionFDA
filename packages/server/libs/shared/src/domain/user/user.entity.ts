@@ -1,14 +1,4 @@
-import {
-  Collection,
-  Entity,
-  Enum,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  Property,
-  Ref,
-  Reference,
-} from '@mikro-orm/core'
+import { Collection, Entity, Enum, ManyToOne, OneToMany, OneToOne, Property, Ref, Reference } from '@mikro-orm/core'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
 import { DxId } from '@shared/domain/entity/domain/dxid'
@@ -19,10 +9,7 @@ import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { Organization } from '@shared/domain/org/organization.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  ADMIN_LEAD_ROLES,
-  CAN_EDIT_ROLES,
-} from '@shared/domain/space-membership/space-membership.helper'
+import { ADMIN_LEAD_ROLES, CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
 import { UserExtras } from '@shared/domain/user/user-extras'
@@ -103,14 +90,9 @@ export const PRICING_MAP = {
 
 export const JOB_LIMIT = 100
 export const TOTAL_LIMIT = 200
-export const RESOURCES = [
-  'baseline-2',
-  'baseline-4',
-  'hidisk-2',
-  'hidisk-4',
-  'himem-2',
-  'himem-4',
-] as Array<(typeof RESOURCE_TYPES)[number]>
+export const RESOURCES = ['baseline-2', 'baseline-4', 'hidisk-2', 'hidisk-4', 'himem-2', 'himem-4'] as Array<
+  (typeof RESOURCE_TYPES)[number]
+>
 
 export type CloudResourceSettings = {
   pricing_map: Record<(typeof RESOURCE_TYPES)[number], number>
@@ -294,17 +276,20 @@ export class User extends BaseEntity {
   async accessibleSpaces(): Promise<Space[]> {
     await this.spaceMemberships.load({
       populate: ['spaces'],
-      where: { spaces: { state: { $ne: SPACE_STATE.DELETED } }, active: true },
+      where: {
+        active: true,
+        spaces: {
+          state: { $ne: SPACE_STATE.DELETED },
+        },
+      },
     })
 
-    return Array.from(this.spaceMemberships).flatMap((spaceMembership) =>
-      Array.from(spaceMembership.spaces),
-    )
+    return Array.from(this.spaceMemberships).flatMap(spaceMembership => Array.from(spaceMembership.spaces))
   }
 
   async accessibleSpaceIds(): Promise<number[]> {
     const accessibleSpaces = await this.accessibleSpaces()
-    return accessibleSpaces.map((space) => space.id)
+    return accessibleSpaces.map(space => space.id)
   }
 
   async editableSpaces(): Promise<Space[]> {
@@ -319,7 +304,7 @@ export class User extends BaseEntity {
       },
     })
 
-    return Array.from(this.spaceMemberships).flatMap((membership) => Array.from(membership.spaces))
+    return Array.from(this.spaceMemberships).flatMap(membership => Array.from(membership.spaces))
   }
 
   /**
@@ -337,7 +322,7 @@ export class User extends BaseEntity {
       },
     })
 
-    return Array.from(this.spaceMemberships).flatMap((membership) => Array.from(membership.spaces))
+    return Array.from(this.spaceMemberships).flatMap(membership => Array.from(membership.spaces))
   }
 
   async leadableSpaces(): Promise<Space[]> {
@@ -351,8 +336,7 @@ export class User extends BaseEntity {
         },
       },
     })
-
-    return Array.from(this.spaceMemberships).flatMap((membership) => Array.from(membership.spaces))
+    return Array.from(this.spaceMemberships).flatMap(membership => Array.from(membership.spaces))
   }
 
   isChallengeBot(): boolean {

@@ -1,4 +1,10 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { config } from '@shared/config'
+import { Answer } from '@shared/domain/answer/answer.entity'
 import { App } from '@shared/domain/app/app.entity'
+import { DiscussionReplyComment } from '@shared/domain/discussion-reply/discussion-reply-comment.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { UiLinkableEntityType } from '@shared/domain/entity/entity-link/domain/ui-linkable-entity.type'
 import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
 import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
@@ -6,13 +12,6 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { PlatformClient } from '@shared/platform-client'
 import { EntityUtils } from '@shared/utils/entity.utils'
-import { expect } from 'chai'
-import { stub } from 'sinon'
-import { Answer } from '@shared/domain/answer/answer.entity'
-import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
-import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
-import { config } from '@shared/config'
 
 describe('EntityLinkService', () => {
   const appGetLinkStub = stub()
@@ -56,11 +55,11 @@ describe('EntityLinkService', () => {
     const ANSWER_LINK = 'ANSWER_LINK'
 
     const ANSWER_COMMENT_ID = 30
-    const ANSWER_COMMENT = { id: ANSWER_COMMENT_ID } as unknown as AnswerComment
+    const ANSWER_COMMENT = { id: ANSWER_COMMENT_ID } as unknown as DiscussionReplyComment
     const ANSWER_COMMENT_LINK = 'ANSWER_COMMENT_LINK'
 
     const DISCUSSION_COMMENT_ID = 40
-    const DISCUSSION_COMMENT = { id: DISCUSSION_COMMENT_ID } as unknown as DiscussionComment
+    const DISCUSSION_COMMENT = { id: DISCUSSION_COMMENT_ID } as unknown as DiscussionReplyComment
     const DISCUSSION_COMMENT_LINK = 'DISCUSSION_COMMENT_LINK'
 
     const DISCUSSION_ID = 50
@@ -149,9 +148,7 @@ describe('EntityLinkService', () => {
     it('should correctly encode the file name into the url', async () => {
       const res = await getInstance().getDownloadLink(FILE, "Crazy&File *Name #123?='Yes'.jpg")
 
-      expect(res).to.equal(
-        `${config.api.railsHost}/api/files/FILE_UID/Crazy%26File%20_Name%20%23123_%3D'Yes'.jpg`,
-      )
+      expect(res).to.equal(`${config.api.railsHost}/api/files/FILE_UID/Crazy%26File%20_Name%20%23123_%3D'Yes'.jpg`)
     })
 
     it('should include the inline parameter when inline is set to true', async () => {
@@ -205,7 +202,7 @@ describe('EntityLinkService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): EntityLinkService {
     const linkProviderMap = {
       app: { getLink: appGetLinkStub },
       user: { getLink: userGetLinkStub },
