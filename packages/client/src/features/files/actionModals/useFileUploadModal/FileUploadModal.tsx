@@ -280,7 +280,9 @@ export const FileUploadModal = ({
             <div style={{ fontSize: '0.8rem', flexGrow: 1 }} data-testid="upload-modal-status">
               {uploadInProgress
                 ? `${completedUploadsCount}/${filesCount} Completed${pausedUploadsCount > 0 ? ` • ${pausedUploadsCount} Paused` : ''}${stoppedUploadsCount > 0 ? ` • ${stoppedUploadsCount} Stopped` : ''}${failedUploadsCount > 0 ? ` • ${failedUploadsCount} Failed` : ''}`
-                : `${itemsCountString('File', filesCount)} Ready to Upload`}
+                : uploadFinished
+                  ? `${completedUploadsCount}/${filesCount} Completed${pausedUploadsCount > 0 ? ` • ${pausedUploadsCount} Paused` : ''}${stoppedUploadsCount > 0 ? ` • ${stoppedUploadsCount} Stopped` : ''}${failedUploadsCount > 0 ? ` • ${failedUploadsCount} Failed` : ''}`
+                  : `${itemsCountString('File', filesCount)} Ready to Upload`}
             </div>
             {exceedsMax && <InputError>You can only upload up to {MAX_UPLOADABLE_FILES} files at a time</InputError>}
             {uploadInProgress && (

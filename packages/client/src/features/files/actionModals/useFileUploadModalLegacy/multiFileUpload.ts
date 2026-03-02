@@ -1,6 +1,5 @@
 import { closeFile, createFile, getUploadURL, uploadChunk } from '@/api/files'
 import { HTTP_STATUS } from '@/constants'
-import 'regenerator-runtime/runtime'
 import sparkMD5 from 'spark-md5'
 import { CHUNK_SIZE, FILE_STATUS, FilesMeta, IUploadFile, IUploadInfo } from './constants'
 

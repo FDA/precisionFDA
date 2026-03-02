@@ -1,15 +1,11 @@
-import 'core-js/stable'
-import 'regenerator-runtime/runtime'
-import React from 'react'
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import Axios from 'axios'
 import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
-import Root from './routes/root'
-import { getAuthenticityToken } from './utils/api'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ENABLE_DEV_MSW } from '@/utils/env'
 import { loadRuntimeEnv } from '@/utils/runtimeEnv'
+import Root from './routes/root'
+import { getAuthenticityToken } from './utils/api'
 
 async function enableMocking() {
   if (!ENABLE_DEV_MSW) {
@@ -68,4 +64,3 @@ const renderApp = () => {
 }
 document.addEventListener('DOMContentLoaded', renderApp)
 document.addEventListener('page:load', renderApp)
-

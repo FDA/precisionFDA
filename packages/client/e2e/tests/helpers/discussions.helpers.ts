@@ -203,7 +203,7 @@ export const DiscussionDetail = {
     await page.locator('textarea[name="content"]').first().clear()
     await page.locator('textarea[name="content"]').first().fill(newContent)
     await page.locator('button[form="commentForm"]').filter({ hasText: 'Save' }).click()
-    await expect(page.getByText('Answer has been updated')).toBeVisible()
+    await expect(page.getByText('Reply has been published')).toBeVisible()
   },
 
   /**
