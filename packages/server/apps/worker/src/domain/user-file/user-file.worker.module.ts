@@ -7,13 +7,14 @@ import { ResourceModule } from '@shared/domain/resource/resource.module'
 import { SpaceReportModule } from '@shared/domain/space-report/space-report.module'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { UserModule } from '@shared/domain/user/user.module'
+import { JobFacadeModule } from '@shared/facade/job/job-facade.module'
+import { CopyNodesFacadeModule } from '@shared/facade/node-copy/copy-nodes-facade.module'
+import { NodeLockFacadeModule } from '@shared/facade/node-lock/node-lock-facade.module'
 import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes-facade.module'
+import { NodeUnlockFacadeModule } from '@shared/facade/node-unlock/node-unlock-facade.module'
 import { UserFacadeModule } from '@shared/facade/user/user-facade.module'
 import { FollowUpDecider } from './follow-up-decider'
 import { FileSyncQueueProcessor } from './processor/file-sync-queue.processor'
-import { NodeUnlockFacadeModule } from '@shared/facade/node-unlock/node-unlock-facade.module'
-import { NodeLockFacadeModule } from '@shared/facade/node-lock/node-lock-facade.module'
-import { CopyNodesFacadeModule } from '@shared/facade/node-copy/copy-nodes-facade.module'
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CopyNodesFacadeModule } from '@shared/facade/node-copy/copy-nodes-facad
     CopyNodesFacadeModule,
     NodeLockFacadeModule,
     UserFacadeModule,
+    JobFacadeModule,
   ],
   providers: [FileSyncQueueProcessor, FollowUpDecider],
   exports: [FollowUpDecider],

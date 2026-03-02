@@ -1,12 +1,17 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { Queue } from 'bull'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { database } from '@shared/database'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
+import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body.dto'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { JobService } from '@shared/domain/job/job.service'
 import { JobRunData } from '@shared/domain/job/job.types'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { JobWorkstationService } from '@shared/domain/job/services/job-workstation.service'
 import { Notification } from '@shared/domain/notification/notification.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
@@ -18,6 +23,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
+import { InvalidStateError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { FileStatesParams, JobFindParams } from '@shared/platform-client/platform-client.params'
 import {
@@ -28,9 +34,6 @@ import {
 } from '@shared/platform-client/platform-client.responses'
 import * as queueDomain from '@shared/queue'
 import { create, db } from '@shared/test'
-import { Queue } from 'bull'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -45,17 +48,21 @@ describe('Job service tests', () => {
   let spaceMembershipRepo: SpaceMembershipRepository
   let emailService: EmailService
   let eventHelper: EventHelper
+  let jobWorkstationService: JobWorkstationService
 
   let getMainQueueStub
-  let userContextLoadEntityStub = stub()
-  let userRepoFindOneOrFailStub = stub()
-  let userRepoFindAdminUserStub = stub()
-  let jobRepoFindOneOrFailStub = stub()
-  let jobRepoFindStub = stub()
-  let spaceMembershipRepoGetMembershipStub = stub()
-  let spaceRepoFindOneStub = stub()
-  let eventHelperCreateFileEventStub = stub()
-  let nodeServiceCreateFoldersOnPathStub = stub()
+  const userContextLoadEntityStub = stub()
+  const userRepoFindOneOrFailStub = stub()
+  const userRepoFindAdminUserStub = stub()
+  const jobRepoFindOneOrFailStub = stub()
+  const jobRepoFindStub = stub()
+  const spaceMembershipRepoGetMembershipStub = stub()
+  const spaceRepoFindOneStub = stub()
+  const eventHelperCreateFileEventStub = stub()
+  const nodeServiceCreateFoldersOnPathStub = stub()
+  const aliveStub = stub()
+  const setAPIKeyStub = stub()
+  const snapshotStub = stub()
 
   const file1Dxid = 'file-GY5q9B00Q6xpbXG503kKgF68'
   const file2Dxid = 'file-GXPKG480q0jQPgXxFxKyyJ7q'
@@ -100,6 +107,11 @@ describe('Job service tests', () => {
     } as unknown as SpaceMembershipRepository
 
     emailService = {} as unknown as EmailService
+    jobWorkstationService = {
+      alive: aliveStub,
+      setAPIKey: setAPIKeyStub,
+      snapshot: snapshotStub,
+    } as unknown as JobWorkstationService
 
     queueAdd.reset()
     queueAdd.throws()
@@ -127,6 +139,20 @@ describe('Job service tests', () => {
 
     eventHelperCreateFileEventStub.reset()
     eventHelperCreateFileEventStub.throws()
+
+    aliveStub.reset()
+    aliveStub.throws()
+    aliveStub.resolves(true)
+
+    setAPIKeyStub.reset()
+    setAPIKeyStub.throws()
+    setAPIKeyStub.resolves()
+
+    snapshotStub.reset()
+    snapshotStub.throws()
+    snapshotStub.resolves({
+      result: 'success',
+    })
 
     getMainQueueStub = stub(queueDomain, 'getMainQueue').throws()
     getMainQueueStub.returns(queue)
@@ -235,9 +261,7 @@ describe('Job service tests', () => {
     jobRepoFindOneOrFailStub.withArgs({ dxid: job.dxid }).returns(job)
     await em.flush()
 
-    await expect(jobService.syncOutputs(job.dxid)).to.be.rejectedWith(
-      `Incorrect number of results for job ${job.dxid}`,
-    )
+    await expect(jobService.syncOutputs(job.dxid)).to.be.rejectedWith(`Incorrect number of results for job ${job.dxid}`)
   })
 
   it('Test Job Outputs sync - sync job with all types of outputs', async () => {
@@ -254,7 +278,7 @@ describe('Job service tests', () => {
     const filesCreated = await em.find(UserFile, {})
     expect(filesCreated.length).to.equal(3)
 
-    const file1 = filesCreated.find((f) => f.dxid === file1Dxid)
+    const file1 = filesCreated.find(f => f.dxid === file1Dxid)
     expect(file1?.project).to.equal(job.project)
     expect(file1?.name).to.equal('file1')
     expect(file1?.fileSize).to.equal(100)
@@ -264,7 +288,7 @@ describe('Job service tests', () => {
     expect(file1?.scope).to.equal(STATIC_SCOPE.PRIVATE.toString())
     expect(file1?.uid).to.equal(`${file1?.dxid}-1`)
 
-    const file2 = filesCreated.find((f) => f.dxid === file2Dxid)
+    const file2 = filesCreated.find(f => f.dxid === file2Dxid)
     expect(file2?.project).to.equal(job.project)
     expect(file2?.name).to.equal('file2')
     expect(file2?.fileSize).to.equal(200)
@@ -274,7 +298,7 @@ describe('Job service tests', () => {
     expect(file2?.scope).to.equal(STATIC_SCOPE.PRIVATE.toString())
     expect(file2?.uid).to.equal(`${file2?.dxid}-1`)
 
-    const file3 = filesCreated.find((f) => f.dxid === file3Dxid)
+    const file3 = filesCreated.find(f => f.dxid === file3Dxid)
     expect(file3?.project).to.equal(job.project)
     expect(file3?.name).to.equal('file3')
     expect(file3?.fileSize).to.equal(300)
@@ -453,6 +477,95 @@ describe('Job service tests', () => {
     }
   })
 
+  context('checkAlive', () => {
+    it('returns true if workstation client is alive', async () => {
+      const job = create.jobHelper.create(em, { user }, { dxid: 'job-1' })
+      await em.flush()
+      const key = 'test-cli-key'
+
+      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
+      const result = await jobService.checkAlive(job.uid, key)
+      expect(result).to.be.true()
+      expect(aliveStub.calledOnceWithExactly(job.uid, key)).to.be.true()
+    })
+
+    it('returns false if workstation client is not alive', async () => {
+      const job = create.jobHelper.create(em, { user }, { dxid: 'job-1' })
+      await em.flush()
+      const key = 'test-cli-key'
+
+      aliveStub.resolves(false)
+      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
+      const result = await jobService.checkAlive(job.uid, key)
+      expect(result).to.be.false()
+      expect(aliveStub.calledOnceWithExactly(job.uid, key)).to.be.true()
+    })
+  })
+
+  context('setAPIKey', () => {
+    it('should call setAPIKey on workstation client', async () => {
+      const job = create.jobHelper.create(em, { user }, { dxid: 'job-1' })
+      await em.flush()
+      const dto = new JobSetAPIKeyBodyDTO()
+      dto.key = 'test-cli-key'
+      dto.code = 'authToken'
+
+      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
+      await jobService.setAPIKey(job.uid, dto)
+      expect(setAPIKeyStub.calledOnceWithExactly(job.uid, dto.code, dto.key)).to.be.true()
+    })
+
+    it('should throw error if setAPIKey on workstation client fails', async () => {
+      const job = create.jobHelper.create(em, { user }, { dxid: 'job-1' })
+      await em.flush()
+      const dto = new JobSetAPIKeyBodyDTO()
+      dto.key = 'test-cli-key'
+      dto.code = 'authToken'
+
+      setAPIKeyStub.throws(new InvalidStateError(`Cannot obtain job url for job ${job.id}`))
+
+      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
+      await expect(jobService.setAPIKey(job.uid, dto)).to.be.rejectedWith(
+        InvalidStateError,
+        `Cannot obtain job url for job ${job.id}`,
+      )
+      expect(setAPIKeyStub.calledOnceWithExactly(job.uid, dto.code, dto.key)).to.be.true()
+    })
+  })
+
+  context('createWorkstationSnapshot', () => {
+    it('should call snapshot on workstation client', async () => {
+      const job = create.jobHelper.create(em, { user }, { dxid: 'job-1' })
+      await em.flush()
+      const authCode = 'authToken'
+      const key = 'test-cli-key'
+      const name = 'snapshot-name'
+      const terminate = true
+
+      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
+      await jobService.createWorkstationSnapshot(job.uid, authCode, key, name, terminate)
+      expect(snapshotStub.calledOnceWithExactly(job.uid, authCode, key, name, terminate)).to.be.true()
+    })
+
+    it('should throw error if snapshot on workstation client fails', async () => {
+      const job = create.jobHelper.create(em, { user }, { dxid: 'job-1' })
+      await em.flush()
+      const authCode = 'authToken'
+      const key = 'test-cli-key'
+      const name = 'snapshot-name'
+      const terminate = true
+
+      snapshotStub.throws(new InvalidStateError(`Cannot obtain job url for job ${job.id}`))
+
+      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
+      await expect(jobService.createWorkstationSnapshot(job.uid, authCode, key, name, terminate)).to.be.rejectedWith(
+        InvalidStateError,
+        `Cannot obtain job url for job ${job.id}`,
+      )
+      expect(snapshotStub.calledOnceWithExactly(job.uid, authCode, key, name, terminate)).to.be.true()
+    })
+  })
+
   const getJobServiceInstance = (platformClient: PlatformClient): JobService => {
     const jobCountService = {
       count: stub().resolves(0),
@@ -470,6 +583,7 @@ describe('Job service tests', () => {
       spaceMembershipRepo,
       eventHelper,
       jobCountService,
+      jobWorkstationService,
     )
   }
 })

@@ -1,14 +1,14 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
+import { Job, JobOptions, Queue } from 'bull'
 import { config } from '@shared/config'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError } from '@shared/errors'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { getJobStatusMessage } from '@shared/queue/queue.utils'
-import { CheckStatusJob, CopyNodesJob, Task, TASK_TYPE } from '@shared/queue/task.input'
+import { CheckStatusJob, CopyNodesJob, Task, TASK_TYPE, WorkstationSnapshotJob } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { formatDuration } from '@shared/utils/format'
-import { Job, JobOptions, Queue } from 'bull'
 
 // TODO originally this was file sync job producer, but now it handles other user file related jobs as well
 // might be worth renaming the class to better reflect its purpose
@@ -22,10 +22,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
     super()
   }
 
-  async createCopyNodesTask(
-    data: CopyNodesJob['payload'],
-    user: UserCtx,
-  ): Promise<Job<CopyNodesJob>> {
+  async createCopyNodesTask(data: CopyNodesJob['payload'], user: UserCtx): Promise<Job<CopyNodesJob>> {
     const wrapped: CopyNodesJob = {
       type: TASK_TYPE.COPY_NODES,
       payload: data,
@@ -91,6 +88,16 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
       jobId: `${wrapped.type}.${this.user.dxuser}-${+new Date()}`,
     }
     return await this.addToQueue(wrapped, options)
+  }
+
+  async createWorkstationSnapshotTask(data: WorkstationSnapshotJob['payload']): Promise<Job> {
+    const wrapped = {
+      type: TASK_TYPE.WORKSTATION_SNAPSHOT,
+      payload: data,
+      user: this.user,
+    }
+    const jobId = `${wrapped.type}.${data.jobUid}`
+    return await this.addToQueueEnsureUnique(wrapped, jobId)
   }
 
   private async createSyncTask<T extends Task>(task: T, dxid: string): Promise<Job> {

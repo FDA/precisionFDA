@@ -1,13 +1,17 @@
 import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
+import { Job as BullJob } from 'bull'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 import { EmailService } from '@shared/domain/email/email.service'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body.dto'
 import { Job } from '@shared/domain/job/job.entity'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { JobCountService } from '@shared/domain/job/services/job-count.service'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { JobWorkstationService } from '@shared/domain/job/services/job-workstation.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
@@ -18,7 +22,7 @@ import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Job as BullJob } from 'bull'
+import { WorkstationAPIResponse } from '@shared/workstation-client/workstation-client'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 import * as errors from '../../errors'
 import { PlatformClient } from '../../platform-client'
@@ -34,7 +38,6 @@ import { EventHelper } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { JobRepository } from './job.repository'
-import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 
 @Injectable()
 export class JobService implements SearchableByUid<'job'> {
@@ -54,6 +57,7 @@ export class JobService implements SearchableByUid<'job'> {
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
     private readonly eventHelper: EventHelper,
     private readonly jobCountService: JobCountService,
+    private readonly jobWorkstationService: JobWorkstationService,
   ) {}
 
   /**
@@ -155,6 +159,24 @@ export class JobService implements SearchableByUid<'job'> {
     }
   }
 
+  async checkAlive(jobUid: Uid<'job'>, key: string): Promise<boolean> {
+    return await this.jobWorkstationService.alive(jobUid, key)
+  }
+
+  async setAPIKey(jobUid: Uid<'job'>, dto: JobSetAPIKeyBodyDTO): Promise<void> {
+    await this.jobWorkstationService.setAPIKey(jobUid, dto.code, dto.key)
+  }
+
+  async createWorkstationSnapshot(
+    jobUid: Uid<'job'>,
+    code: string,
+    key: string,
+    name: string,
+    terminate: boolean,
+  ): Promise<WorkstationAPIResponse> {
+    return await this.jobWorkstationService.snapshot(jobUid, code, key, name, terminate)
+  }
+
   private async getOrCreateOutputFolder(job: Job): Promise<Folder | null> {
     if (job.runData.output_folder_path) {
       const folders = await this.nodeService.createFoldersOnPath(
@@ -197,11 +219,7 @@ export class JobService implements SearchableByUid<'job'> {
     return outputFiles
   }
 
-  private async createNotification(
-    jobDxId: string,
-    userId: number,
-    sessionId: string,
-  ): Promise<void> {
+  private async createNotification(jobDxId: string, userId: number, sessionId: string): Promise<void> {
     await this.notificationService.createNotification({
       message: `Outputs for job ${jobDxId} have been synchronized`,
       severity: SEVERITY.INFO,
@@ -212,7 +230,7 @@ export class JobService implements SearchableByUid<'job'> {
   }
 
   private async persistFiles(outputFiles: UserFile[], user: User): Promise<void> {
-    const filePromises = outputFiles.map(async (outputFile) => {
+    const filePromises = outputFiles.map(async outputFile => {
       await this.em.persistAndFlush(outputFile) // flush for id
 
       const fileEvent = await this.eventHelper.createFileEvent(
@@ -248,9 +266,7 @@ export class JobService implements SearchableByUid<'job'> {
     parentFolder: Folder | null,
   ): UserFile {
     if (!fileStateResult.describe) {
-      throw new errors.InvalidStateError(
-        `Platform didn't give describe for file id ${fileStateResult.id}`,
-      )
+      throw new errors.InvalidStateError(`Platform didn't give describe for file id ${fileStateResult.id}`)
     }
     const file = new UserFile(user)
     file.dxid = fileStateResult.id
@@ -320,7 +336,7 @@ export class JobService implements SearchableByUid<'job'> {
 
   private remapArrayOfFiles(value: DnanexusLink[], output: JobOutput, key: string): void {
     const linkArray: string[] = []
-    value.forEach((item) => {
+    value.forEach(item => {
       if (this.isDnaNexusLink(item)) {
         linkArray.push(item.$dnanexus_link)
       }
@@ -345,7 +361,7 @@ export class JobService implements SearchableByUid<'job'> {
       if (output.hasOwnProperty(key)) {
         const value = output[key]
         if (Array.isArray(value)) {
-          value.forEach((item) => {
+          value.forEach(item => {
             if (this.isDnaNexusLink(item)) {
               uniqueFileDxIds.add(item.$dnanexus_link)
             }
