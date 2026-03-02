@@ -9,7 +9,7 @@ export class DiscussionReplyRepository extends AccessControlRepository<Discussio
   protected async getAccessibleWhere(): Promise<FilterQuery<DiscussionReply>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
     const accessibleSpaces = await user.accessibleSpaces()
-    const scopes = accessibleSpaces.map((space) => space.scope)
+    const scopes = accessibleSpaces.map(space => space.scope)
 
     const isSiteAdmin = await user.isSiteAdmin()
     if (isSiteAdmin) {
@@ -25,10 +25,11 @@ export class DiscussionReplyRepository extends AccessControlRepository<Discussio
 
   protected async getEditableWhere(): Promise<FilterQuery<DiscussionReply>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
-    const leadableSpaces = await user.leadableSpaces()
+    // fetch editable first to prevent only leadable memberships caching
     const editableSpaces = await user.editableSpaces()
-    const leadSpaceScopes = leadableSpaces.map((space) => space.scope)
-    const editSpaceScopes = editableSpaces.map((space) => space.scope)
+    const leadableSpaces = await user.leadableSpaces()
+    const leadSpaceScopes = leadableSpaces.map(space => space.scope)
+    const editSpaceScopes = editableSpaces.map(space => space.scope)
 
     const isSiteAdmin = await user.isSiteAdmin()
     if (isSiteAdmin) {

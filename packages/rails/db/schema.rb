@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_20_174015) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_10_122113) do
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
     t.integer "user_id"
@@ -59,22 +59,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_174015) do
     t.string "batch_id"
     t.index ["user_id"], name: "index_analyses_on_user_id"
     t.index ["workflow_id"], name: "fk_rails_ea76af2894"
-  end
-
-  create_table "answers", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "discussion_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "note_id"
-    t.string "reply_type"
-    t.integer "parent_id"
-    t.integer "old_comment_id"
-    t.index ["discussion_id"], name: "index_answers_on_discussion_id"
-    t.index ["note_id"], name: "index_answers_on_note_id"
-    t.index ["old_comment_id"], name: "index_answers_on_old_comment_id"
-    t.index ["parent_id"], name: "index_answers_on_parent_id"
-    t.index ["user_id"], name: "index_answers_on_user_id"
   end
 
   create_table "app_series", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -307,6 +291,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_174015) do
     t.index ["dxid"], name: "index_dbclusters_on_dxid", unique: true
     t.index ["uid"], name: "index_dbclusters_on_uid", unique: true
     t.index ["user_id"], name: "index_dbclusters_on_user_id"
+  end
+
+  create_table "discussion_replies", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "discussion_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "note_id"
+    t.string "reply_type"
+    t.integer "parent_id"
+    t.index ["discussion_id"], name: "index_discussion_replies_on_discussion_id"
+    t.index ["note_id"], name: "index_discussion_replies_on_note_id"
+    t.index ["parent_id"], name: "index_discussion_replies_on_parent_id"
+    t.index ["user_id"], name: "index_discussion_replies_on_user_id"
   end
 
   create_table "discussions", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -1025,10 +1023,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_174015) do
   add_foreign_key "admin_memberships", "admin_groups"
   add_foreign_key "admin_memberships", "users"
   add_foreign_key "analyses", "workflows"
-  add_foreign_key "answers", "comments", column: "old_comment_id"
-  add_foreign_key "answers", "discussions"
-  add_foreign_key "answers", "notes"
-  add_foreign_key "answers", "users"
   add_foreign_key "app_series", "apps", column: "latest_revision_app_id"
   add_foreign_key "app_series", "apps", column: "latest_version_app_id"
   add_foreign_key "app_series", "users"
@@ -1050,6 +1044,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_174015) do
   add_foreign_key "data_portals", "nodes", column: "card_image_id"
   add_foreign_key "data_portals", "spaces"
   add_foreign_key "dbclusters", "users"
+  add_foreign_key "discussion_replies", "discussions"
+  add_foreign_key "discussion_replies", "notes"
+  add_foreign_key "discussion_replies", "users"
   add_foreign_key "discussions", "notes"
   add_foreign_key "discussions", "users"
   add_foreign_key "expert_answers", "expert_questions"

@@ -3,6 +3,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { Answer } from '@shared/domain/answer/answer.entity'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 import { DiscussionReplyComment } from '@shared/domain/discussion-reply/discussion-reply-comment.entity'
 import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
 import { DiscussionReplyRepository } from '@shared/domain/discussion-reply/discussion-reply.repository'
@@ -13,6 +14,7 @@ import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discus
 import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
+import { DiscussionCountService } from '@shared/domain/discussion/services/discussion-count.service'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
@@ -27,8 +29,6 @@ import { CreateReplyDTO } from '../dto/create-reply.dto'
 import { DiscussionReplyDTO } from '../dto/discussion-reply.dto'
 import { SimpleDiscussionDTO } from '../dto/simple-discussion.dto'
 import { UpdateReplyDTO } from '../dto/update-reply.dto'
-import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
-import { DiscussionCountService } from '@shared/domain/discussion/services/discussion-count.service'
 
 @Injectable()
 export class DiscussionService {
@@ -55,26 +55,20 @@ export class DiscussionService {
     const discussion = await this.discussionRepository.findAccessibleOne({ id: discussionId })
 
     if (!discussion) {
-      throw new errors.NotFoundError(
-        'Unable to get discussion: not found or insufficient permissions.',
-      )
+      throw new errors.NotFoundError('Unable to get discussion: not found or insufficient permissions.')
     }
 
-    await this.em.populate(
-      discussion,
-      ['note', 'user', 'follows', 'replies', 'replies.user', 'replies.note'],
-      {
-        orderBy: {
-          replies: {
-            id: 'ASC',
-          },
+    await this.em.populate(discussion, ['note', 'user', 'follows', 'replies', 'replies.user', 'replies.note'], {
+      orderBy: {
+        replies: {
+          id: 'ASC',
         },
       },
-    )
+    })
 
     const isFollowing = discussion.follows
       .getItems()
-      .some((follow) => follow.followerId === this.userCtx.id && follow.followerType === 'User')
+      .some(follow => follow.followerId === this.userCtx.id && follow.followerType === 'User')
 
     return DiscussionDTO.fromEntity(discussion, isFollowing)
   }
@@ -95,7 +89,7 @@ export class DiscussionService {
     this.em.persist(newNote)
 
     const newDiscussion = new Discussion(newNote, user)
-    await this.em.persistAndFlush(newDiscussion)
+    await this.em.persist(newDiscussion).flush()
 
     const newFollow = new DiscussionFollow(newDiscussion)
     newFollow.followerId = user.id
@@ -107,15 +101,10 @@ export class DiscussionService {
 
   @Transactional()
   async updateDiscussion(id: number, discussionInput: UpdateDiscussionDTO): Promise<DiscussionDTO> {
-    const discussion = await this.discussionRepository.findEditableOne(
-      { id },
-      { populate: ['note', 'user'] },
-    )
+    const discussion = await this.discussionRepository.findEditableOne({ id }, { populate: ['note', 'user'] })
 
     if (!discussion) {
-      throw new errors.NotFoundError(
-        'Unable to update discussion: not found or insufficient permissions.',
-      )
+      throw new errors.NotFoundError('Unable to update discussion: not found or insufficient permissions.')
     }
     const note = discussion.note.getEntity()
     if (discussionInput.title) {
@@ -124,7 +113,7 @@ export class DiscussionService {
     if (discussionInput.content) {
       note.content = discussionInput.content
     }
-    await this.em.persistAndFlush(note)
+    await this.em.persist(note).flush()
     return DiscussionDTO.fromEntity(discussion)
   }
 
@@ -134,28 +123,18 @@ export class DiscussionService {
     const discussion = await this.discussionRepository.findEditableOne(
       { id: discussionId },
       {
-        populate: [
-          'note',
-          'note.attachments',
-          'discussionReplies',
-          'discussionReplies.note',
-          'discussionReplies.note.attachments',
-        ],
+        populate: ['note', 'note.attachments', 'replies', 'replies.note', 'replies.note.attachments', 'follows'],
       },
     )
 
     if (!discussion) {
-      throw new errors.NotFoundError(
-        'Unable to delete discussion: not found or insufficient permissions.',
-      )
+      throw new errors.NotFoundError('Unable to delete discussion: not found or insufficient permissions.')
     }
 
-    await this.em.removeAndFlush(discussion)
+    await this.em.remove(discussion).flush()
   }
 
-  async listDiscussions(
-    query: DiscussionPaginationDTO,
-  ): Promise<PaginatedResult<SimpleDiscussionDTO>> {
+  async listDiscussions(query: DiscussionPaginationDTO): Promise<PaginatedResult<SimpleDiscussionDTO>> {
     const noteAnd: ObjectFilterQuery<Note>[] = []
     const { scope, sort } = query
     const { title } = query.filter ?? {}
@@ -184,7 +163,7 @@ export class DiscussionService {
         },
       })
 
-      const scopes = spaces.map((s) => s.scope)
+      const scopes = spaces.map(s => s.scope)
       noteAnd.push({ scope: { $in: scopes } })
     } else {
       const spaceId = getIdFromScopeName(scope)
@@ -196,9 +175,7 @@ export class DiscussionService {
         },
       })
       if (!space) {
-        throw new errors.PermissionError(
-          'Unable to get discussions in selected space: insufficient permissions.',
-        )
+        throw new errors.PermissionError('Unable to get discussions in selected space: insufficient permissions.')
       }
 
       noteAnd.push({ scope: scope })
@@ -212,7 +189,7 @@ export class DiscussionService {
       },
     )
 
-    const discussionIds = result.data.map((d) => d.id)
+    const discussionIds = result.data.map(d => d.id)
     const answerCount = await this.discussionReplyRepository.getCountByDiscussionIds(
       discussionIds,
       DISCUSSION_REPLY_TYPE.ANSWER,
@@ -221,13 +198,8 @@ export class DiscussionService {
       discussionIds,
       DISCUSSION_REPLY_TYPE.COMMENT,
     )
-    const discussions = result.data.map((discussion) =>
-      SimpleDiscussionDTO.fromEntity(
-        discussion,
-        false,
-        answerCount[discussion.id],
-        commentCount[discussion.id],
-      ),
+    const discussions = result.data.map(discussion =>
+      SimpleDiscussionDTO.fromEntity(discussion, false, answerCount[discussion.id], commentCount[discussion.id]),
     )
 
     return {
@@ -239,15 +211,10 @@ export class DiscussionService {
   async createReply(discussionId: number, dto: CreateReplyDTO): Promise<DiscussionReplyDTO> {
     const user = await this.userCtx.loadEntity()
 
-    const discussion = await this.discussionRepository.findAccessibleOne(
-      { id: discussionId },
-      { populate: ['note'] },
-    )
+    const discussion = await this.discussionRepository.findAccessibleOne({ id: discussionId }, { populate: ['note'] })
 
     if (!discussion) {
-      throw new errors.NotFoundError(
-        'Unable to create reply: discussion not found or inaccessible.',
-      )
+      throw new errors.NotFoundError('Unable to create reply: discussion not found or inaccessible.')
     }
     const discussionNote = discussion.note.getEntity()
     if (discussionNote.scope === 'private') {
@@ -276,9 +243,7 @@ export class DiscussionService {
         replyType: DISCUSSION_REPLY_TYPE.ANSWER,
       })
       if (existingAnswer) {
-        throw new errors.ValidationError(
-          'Unable to create reply: user already has an answer for this discussion.',
-        )
+        throw new errors.ValidationError('Unable to create reply: user already has an answer for this discussion.')
       }
     }
 
@@ -291,7 +256,7 @@ export class DiscussionService {
       this.em.persist(newNote)
       const newReply = new DiscussionReply(newNote, discussion, user, parentReply)
       newReply.replyType = dto.type
-      await this.em.persistAndFlush(newReply)
+      await this.em.persist(newReply).flush()
       return DiscussionReplyDTO.fromEntity(newReply)
     })
   }
@@ -305,9 +270,7 @@ export class DiscussionService {
     )
 
     if (!reply) {
-      throw new errors.NotFoundError(
-        'Unable to update reply: not found or insufficient permissions.',
-      )
+      throw new errors.NotFoundError('Unable to update reply: not found or insufficient permissions.')
     }
 
     const updatedReply = await this.em.transactional(async () => {
@@ -316,8 +279,8 @@ export class DiscussionService {
         note.content = input.content
       }
 
-      await this.em.persistAndFlush(note)
-      await this.em.persistAndFlush(reply)
+      await this.em.persist(note).flush()
+      await this.em.persist(reply).flush()
 
       return DiscussionReplyDTO.fromEntity(reply)
     })
@@ -336,9 +299,7 @@ export class DiscussionService {
     )
 
     if (!reply) {
-      throw new errors.NotFoundError(
-        'Unable to delete reply: not found or insufficient permissions.',
-      )
+      throw new errors.NotFoundError('Unable to delete reply: not found or insufficient permissions.')
     }
 
     if (reply.replyType === DISCUSSION_REPLY_TYPE.ANSWER) {
@@ -347,15 +308,13 @@ export class DiscussionService {
 
     // TODO PFDA-5997 - part 1: cleanup answerVotes and noteVotes
 
-    await this.em.removeAndFlush(reply)
+    await this.em.remove(reply).flush()
   }
 
   async getDiscussionReply(replyId: number): Promise<DiscussionReplyDTO> {
     const reply = await this.discussionReplyRepository.findAccessibleOne({ id: replyId })
     if (!reply) {
-      throw new errors.NotFoundError(
-        'Unable to get discussion reply: not found or insufficient permissions.',
-      )
+      throw new errors.NotFoundError('Unable to get discussion reply: not found or insufficient permissions.')
     }
     await this.em.populate(reply, ['note', 'user'])
     return DiscussionReplyDTO.fromEntity(reply)
@@ -380,7 +339,7 @@ export class DiscussionService {
       newFollow.followerId = user.id
       newFollow.followerType = 'User'
       newFollow.blocked = false
-      await this.em.persistAndFlush(newFollow)
+      await this.em.persist(newFollow).flush()
     }
   }
 
@@ -401,14 +360,12 @@ export class DiscussionService {
     })
 
     if (follow) {
-      await this.em.removeAndFlush(follow)
+      await this.em.remove(follow).flush()
     }
   }
 
   async getDiscussionUiLink(discussionId: number): Promise<string> {
-    this.logger.log(
-      `Generating UI-link to discussion: ${discussionId} for user: ${this.userCtx.id}`,
-    )
+    this.logger.log(`Generating UI-link to discussion: ${discussionId} for user: ${this.userCtx.id}`)
     const discussion = await this.discussionRepository.findOne({ id: discussionId })
     return this.entityLinkService.getUiLink(discussion)
   }
@@ -424,8 +381,6 @@ export class DiscussionService {
     this.logger.log(`Generating UI-link to comment: ${commentId} for user: ${this.userCtx.id}`)
     const comment = await this.discussionReplyRepository.findOne({ id: commentId })
     // Cast DiscussionReply to DiscussionReplyComment
-    return this.entityLinkService.getUiLink(
-      Object.setPrototypeOf(comment, DiscussionReplyComment.prototype),
-    )
+    return this.entityLinkService.getUiLink(Object.setPrototypeOf(comment, DiscussionReplyComment.prototype))
   }
 }

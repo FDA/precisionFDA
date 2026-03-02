@@ -1,14 +1,4 @@
-import {
-  Cascade,
-  Collection,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  Property,
-  Ref,
-  Reference,
-} from '@mikro-orm/core'
+import { Cascade, Collection, Entity, ManyToOne, OneToMany, OneToOne, Property, Ref, Reference } from '@mikro-orm/core'
 import { BaseEntity } from '@shared/database/base.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Note } from '@shared/domain/note/note.entity'
@@ -18,7 +8,7 @@ import { DiscussionReplyRepository } from './discussion-reply.repository'
 
 @Entity({
   abstract: true,
-  tableName: 'answers',
+  tableName: 'discussion_replies',
   repository: () => DiscussionReplyRepository,
   discriminatorColumn: 'reply_type',
 })
