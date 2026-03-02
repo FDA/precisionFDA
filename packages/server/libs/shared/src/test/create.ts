@@ -1,5 +1,6 @@
 import { Reference, wrap } from '@mikro-orm/core'
 import { EntityManager, Loaded } from '@mikro-orm/mysql'
+import { Chance } from 'chance'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
 import { AdminMembership } from '@shared/domain/admin-membership/admin-membership.entity'
@@ -45,7 +46,6 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { HashUtils } from '@shared/utils/hash.utils'
-import { Chance } from 'chance'
 import { config } from '../config'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import * as generate from './generate'
@@ -58,10 +58,7 @@ const attachmentHelper = {
     },
     data: Partial<Attachment>,
   ): Attachment => {
-    const attachment = wrap(new Attachment(data.itemId, data.itemType, references.note)).assign(
-      data,
-      { em },
-    )
+    const attachment = wrap(new Attachment(data.itemId, data.itemType, references.note)).assign(data, { em })
     em.persist(attachment)
     return attachment
   },
@@ -76,10 +73,7 @@ const acceptedLicenseHelper = {
     },
     data?: Partial<AcceptedLicense>,
   ): AcceptedLicense => {
-    const acceptedLicense = wrap(new AcceptedLicense(references.license, references.user)).assign(
-      data ?? {},
-      { em },
-    )
+    const acceptedLicense = wrap(new AcceptedLicense(references.license, references.user)).assign(data ?? {}, { em })
     em.persist(acceptedLicense)
     return acceptedLicense
   },
@@ -93,14 +87,11 @@ const createAlert = (em: EntityManager, generator: () => AlertData, data?: Alert
 }
 
 const alertHelper = {
-  createActive: (em: EntityManager, data?: AlertData): Alert =>
-    createAlert(em, generate.alert.active, data),
+  createActive: (em: EntityManager, data?: AlertData): Alert => createAlert(em, generate.alert.active, data),
 
-  createFuture: (em: EntityManager, data?: AlertData): Alert =>
-    createAlert(em, generate.alert.future, data),
+  createFuture: (em: EntityManager, data?: AlertData): Alert => createAlert(em, generate.alert.future, data),
 
-  createExpired: (em: EntityManager, data?: AlertData): Alert =>
-    createAlert(em, generate.alert.expired, data),
+  createExpired: (em: EntityManager, data?: AlertData): Alert => createAlert(em, generate.alert.expired, data),
 }
 const assetHelper = {
   create: (em: EntityManager, references: { user: User }, data?: Partial<Asset>): Asset => {
@@ -283,11 +274,7 @@ const userHelper = {
 }
 
 const discussionHelper = {
-  create: (
-    em: EntityManager,
-    references: { user: User },
-    data?: Partial<Discussion>,
-  ): Discussion => {
+  create: (em: EntityManager, references: { user: User }, data?: Partial<Discussion>): Discussion => {
     const note = wrap(new Note(references.user)).assign({
       title: generate.random.word(),
       content: generate.random.chance.paragraph(),
@@ -322,11 +309,7 @@ const discussionHelper = {
     return discussion
   },
 
-  createPublic: (
-    em: EntityManager,
-    references: { user: User },
-    data?: Partial<Discussion>,
-  ): Discussion => {
+  createPublic: (em: EntityManager, references: { user: User }, data?: Partial<Discussion>): Discussion => {
     const note = wrap(new Note(references.user)).assign({
       title: generate.random.word(),
       content: generate.random.chance.paragraph(),
@@ -358,10 +341,7 @@ const discussionHelper = {
     })
     em.persist(note)
 
-    const answer = wrap(new Answer(note, references.discussion, references.user)).assign(
-      data ?? {},
-      { em },
-    )
+    const answer = wrap(new Answer(note, references.discussion, references.user)).assign(data ?? {}, { em })
     em.persist(answer)
     return answer
   },
@@ -385,9 +365,10 @@ const discussionHelper = {
     })
     em.persist(note)
 
-    const reply = wrap(
-      new DiscussionReply(note, references.discussion, references.user, references.parent),
-    ).assign(data ?? {}, { em })
+    const reply = wrap(new DiscussionReply(note, references.discussion, references.user, references.parent)).assign(
+      data ?? {},
+      { em },
+    )
     reply.replyType = type
     em.persist(reply)
     return reply
@@ -461,6 +442,22 @@ const appHelper = {
     return app
   },
 
+  createWorkstation: (em: EntityManager, references: { user: User }, data?: Partial<App>): App => {
+    const app = wrap(new App(references.user)).assign(
+      {
+        ...generate.app.https(),
+        internal: {
+          platform_tags: ['pfda_workstation_api:1.2.0', 'pfda_httpsAppState_enabled'],
+        },
+        ...data,
+      },
+      { em },
+    )
+
+    em.persist(app)
+    return app
+  },
+
   createWithSpace: (
     em: EntityManager,
     references: { user: User },
@@ -485,11 +482,7 @@ const appHelper = {
 }
 
 const appSeriesHelper = {
-  create: (
-    em: EntityManager,
-    references: { user: User },
-    appSeriesData: Partial<AppSeries>,
-  ): AppSeries => {
+  create: (em: EntityManager, references: { user: User }, appSeriesData: Partial<AppSeries>): AppSeries => {
     const appSeries = wrap(new AppSeries(references.user)).assign(
       {
         ...generate.appSeries.simple(),
@@ -679,11 +672,7 @@ const workflowHelper = {
 }
 
 const workflowSeriesHelper = {
-  create: (
-    em: EntityManager,
-    references: { user: User },
-    data?: Partial<WorkflowSeries>,
-  ): WorkflowSeries => {
+  create: (em: EntityManager, references: { user: User }, data?: Partial<WorkflowSeries>): WorkflowSeries => {
     const workflowSeries = wrap(new WorkflowSeries(references.user)).assign(
       {
         ...generate.workflowSeries.simple(),
@@ -719,11 +708,7 @@ const sessionHelper = {
 }
 
 const dataPortalsHelper = {
-  create: (
-    em: EntityManager,
-    references: { space: Space },
-    data?: Partial<DataPortal>,
-  ): DataPortal => {
+  create: (em: EntityManager, references: { space: Space }, data?: Partial<DataPortal>): DataPortal => {
     const dataPortal = wrap(new DataPortal(references.space)).assign(
       data ?? { urlSlug: `default-${references.space.id}` },
       { em },
@@ -767,11 +752,7 @@ const spacesHelper = {
     em.persist(space)
     return space
   },
-  createConfidentialReview: (
-    em: EntityManager,
-    space: Space,
-    side: SPACE_MEMBERSHIP_SIDE,
-  ): Space => {
+  createConfidentialReview: (em: EntityManager, space: Space, side: SPACE_MEMBERSHIP_SIDE): Space => {
     const confidentialReviewSpace = em.create(Space, {
       name: space.name,
       description: space.description,
@@ -910,9 +891,9 @@ const comparisonHelper = {
     },
     data?: Partial<ComparisonInput>,
   ): ComparisonInput => {
-    const comparisonInput = wrap(
-      new ComparisonInput(references.comparison, references.userFile),
-    ).assign(data ?? {}, { em })
+    const comparisonInput = wrap(new ComparisonInput(references.comparison, references.userFile)).assign(data ?? {}, {
+      em,
+    })
 
     em.persist(comparisonInput)
     return comparisonInput

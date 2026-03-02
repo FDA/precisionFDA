@@ -259,9 +259,9 @@ module Api
 
     # PATCH /api/jobs/:id/refresh_api_key
     # Refresh the pFDA CLI API key in the workstation
-    # The :id used should be the job's dxid
+    # The :id used should be the job's uid
     def refresh_api_key
-      job = Job.accessible_by(@context).find_by(dxid: params[:id])
+      job = Job.accessible_by(@context).find_by(uid: params[:id])
       raise ApiError, "You have no permissions to access this job" unless job
 
       response = refresh_api_key_internal(job, background: false)
@@ -275,7 +275,7 @@ module Api
       code = api.get_https_job_auth_token(job)
       key = generate_auth_key
 
-      return https_apps_client.workstation_set_api_key(job.dxid, code, key) unless background
+      return https_apps_client.workstation_set_api_key(job.uid, code, key) unless background
 
       context = RequestContext.instance.dup
       # rubocop:disable Style/BlockDelimiters
@@ -284,7 +284,7 @@ module Api
       Thread.start {
         begin
           RequestContext.begin_request(context.user_id, context.username, context.token, new_headers)
-          https_apps_client.workstation_set_api_key(job.dxid, code, key)
+          https_apps_client.workstation_set_api_key(job.uid, code, key)
         ensure
           RequestContext.end_request
         end
@@ -295,9 +295,9 @@ module Api
     # PATCH /api/jobs/:id/snapshot
     # Ask the workstation to create a snapshot
     #
-    # Note: The :id used above should be the job's dxid
+    # Note: The :id used above should be the job's uid
     def snapshot
-      job = Job.accessible_by(@context).find_by(dxid: params[:id])
+      job = Job.accessible_by(@context).find_by(uid: params[:id])
       raise ApiError, "You have no permissions to access this job" unless job
 
       api = DIContainer.resolve("api.auth_user")

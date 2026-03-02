@@ -2,9 +2,9 @@ import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussio
 import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { NodesCopyDTO } from '@shared/domain/user-file/dto/nodes-copy.dto'
 import type { EmailSendInput } from '../domain/email/email.config'
 import type { UserCtx } from '../types'
-import { NodesCopyDTO } from '@shared/domain/user-file/dto/nodes-copy.dto'
 
 export type Task = {
   type: TASK_TYPE
@@ -141,5 +141,17 @@ export type ProvisionNewUserJob = TaskWithAuth & {
   payload: {
     ids: number[]
     spaceIds: number[]
+  }
+}
+
+export type WorkstationSnapshotJob = TaskWithAuth & {
+  type: TASK_TYPE.WORKSTATION_SNAPSHOT
+  payload: {
+    jobUid: Uid<'job'>
+    code: string // Auth code from auth server
+    // TODO: generate from user context in nodejs instead of passing from Rails
+    key: string // Key for the pFDA CLI
+    name: string
+    terminate: boolean
   }
 }

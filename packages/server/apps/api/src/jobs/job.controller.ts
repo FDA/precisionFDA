@@ -1,20 +1,19 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Body, Controller, Inject, Logger, Param, Patch, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { Body, Controller, Param, Patch, UseGuards } from '@nestjs/common'
+import { ApiOperation } from '@nestjs/swagger'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
-import { WorkstationService } from '@shared/domain/job/workstation.service'
+import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body.dto'
+import { JobSnapshotBodyDTO } from '@shared/domain/job/dto/job-snapshot-body.dto'
+import { JobUidParamDTO } from '@shared/domain/job/dto/job-uid-param.dto'
+import { WorkstationAliveBodyDTO } from '@shared/domain/job/dto/workstation-alive-body.dto'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobService } from '@shared/domain/job/job.service'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { createSyncJobStatusTask } from '@shared/queue'
-import { UserOpsCtx } from '@shared/types'
+import { JobWorkstationFacade } from '@shared/facade/job/job-workstation.facade'
+import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { DxidValidationPipe } from '../validation/pipes/dxid.pipe'
-import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body.dto'
-import { JobSnapshotBodyDTO } from '@shared/domain/job/dto/job-snapshot-body.dto'
-import { WorkstationAliveBodyDTO } from '@shared/domain/job/dto/workstation-alive-body.dto'
-import { Job } from '@shared/domain/job/job.entity'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 @UseGuards(UserContextGuard)
 @Controller('/jobs')
@@ -22,81 +21,49 @@ export class JobController {
   constructor(
     private readonly user: UserContext,
     private readonly jobSynchronizationService: JobSynchronizationService,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly logger: Logger,
+    private readonly jobService: JobService,
+    private readonly mainQueueJobProducer: MainQueueJobProducer,
+    private readonly jobWorkstationFacade: JobWorkstationFacade,
   ) {}
 
   // ------------------------
   //    HTTPS Workstations
   // ------------------------
   @Patch('/:dxid/terminate')
-  async terminateJob(
-    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>,
-  ): Promise<Job> {
+  async terminateJob(@Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>): Promise<Job> {
     return await this.jobSynchronizationService.requestTerminateJob(dxid)
   }
 
   @Patch('/:dxid/syncJob')
-  async syncJobStatus(
-    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>,
-  ): Promise<{
+  async syncJobStatus(@Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>): Promise<{
     message: string
   }> {
-    await createSyncJobStatusTask({ dxid }, this.user)
+    await this.mainQueueJobProducer.createSyncJobStatusTask({ dxid }, this.user)
     return { message: 'Job sync task created' }
   }
 
-  @Patch('/:dxid/checkAlive')
-  async checkAlive(
-    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>,
-    @Body() body: WorkstationAliveBodyDTO,
-  ): Promise<boolean> {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
-    const workstationService = await new WorkstationService(opsCtx, body.code).initWithJob(dxid)
-
-    return await workstationService.alive()
+  @ApiOperation({ summary: 'Check if the workstation is alive, only dev use' })
+  @Patch('/:uid/alive')
+  async checkAlive(@Param() params: JobUidParamDTO, @Body() body: WorkstationAliveBodyDTO): Promise<boolean> {
+    return await this.jobService.checkAlive(params.uid, body.code)
   }
 
+  @ApiOperation({ summary: 'Set CLI key for the workstation, internal call from Rails app' })
   @UseGuards(InternalRouteGuard)
-  @Patch('/:dxid/setAPIKey')
-  async setApiKey(
-    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>,
-    @Body() body: JobSetAPIKeyBodyDTO,
-  ): Promise<void> {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
-    const workstationService = await new WorkstationService(opsCtx, body.code).initWithJob(dxid)
-
-    return await workstationService.setAPIKey(body.key)
+  @Patch('/:uid/setAPIKey')
+  async setApiKey(@Param() params: JobUidParamDTO, @Body() body: JobSetAPIKeyBodyDTO): Promise<void> {
+    return await this.jobService.setAPIKey(params.uid, body)
   }
 
-  @Patch('/:dxid/snapshot')
+  @ApiOperation({ summary: 'Create a snapshot of the workstation, internal call from Rails app' })
+  @UseGuards(InternalRouteGuard)
+  @Patch('/:uid/snapshot')
   async createSnapshot(
-    @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) jobDxid: DxId<'job'>,
+    @Param() params: JobUidParamDTO,
     @Body() body: JobSnapshotBodyDTO,
   ): Promise<{ message: string }> {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
+    await this.jobWorkstationFacade.createWorkstationSnapshotTask(params.uid, body)
 
-    const input = {
-      ...body,
-      jobDxid,
-    }
-
-    await new WorkstationSnapshotOperation(opsCtx).enqueue(input)
-
-    return { message: `Snapshot for workstation ${input.jobDxid} started` }
+    return { message: `Snapshot for workstation ${params.uid} started` }
   }
 }

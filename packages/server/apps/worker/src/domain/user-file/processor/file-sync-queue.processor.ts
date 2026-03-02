@@ -1,23 +1,23 @@
 import { Processor } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
+import { Job } from 'bull'
 import { config } from '@shared/config'
 import { JobService } from '@shared/domain/job/job.service'
-import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { JobWorkstationFacade } from '@shared/facade/job/job-workstation.facade'
+import { CopyNodesFacade } from '@shared/facade/node-copy/copy-nodes.facade'
+import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
 import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { CheckStatusJob, CopyNodesJob, TASK_TYPE } from '@shared/queue/task.input'
+import { CheckStatusJob, CopyNodesJob, TASK_TYPE, WorkstationSnapshotJob } from '@shared/queue/task.input'
 import { TypeUtils } from '@shared/utils/type-utils'
-import { Job } from 'bull'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 import { BaseQueueProcessor } from '../../../queues/processor/base-queue.processor'
-import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
-import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
-import { CopyNodesFacade } from '@shared/facade/node-copy/copy-nodes.facade'
 
 @Processor(config.workerJobs.queues.fileSync.name)
 export class FileSyncQueueProcessor extends BaseQueueProcessor {
@@ -33,6 +33,7 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
     private readonly copyNodesFacade: CopyNodesFacade,
     private readonly notificationService: NotificationService,
     private readonly jobServiceWithPlatformClient: JobService,
+    private readonly jobWorkstationFacade: JobWorkstationFacade,
   ) {
     super()
   }
@@ -52,10 +53,7 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
   async removeNodes(job: Job): Promise<void> {
     const ids: number[] = job.data.payload as number[]
     try {
-      const { removedFilesCount, removedFoldersCount } = await this.removeNodesFacade.removeNodes(
-        ids,
-        true,
-      )
+      const { removedFilesCount, removedFoldersCount } = await this.removeNodesFacade.removeNodes(ids, true)
       await this.notificationService.createNotification({
         message: getSuccessMessage(removedFilesCount, removedFoldersCount, 'Successfully deleted'),
         severity: SEVERITY.INFO,
@@ -67,8 +65,7 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
       this.logger.error(error)
       await this.notificationService.createNotification({
         message:
-          TypeUtils.getPropertyValueFromUnknownObject<string>(error, 'message') ??
-          'Error deleting files and folders.',
+          TypeUtils.getPropertyValueFromUnknownObject<string>(error, 'message') ?? 'Error deleting files and folders.',
         severity: SEVERITY.ERROR,
         action: NOTIFICATION_ACTION.NODES_REMOVED,
         userId: this.user.id,
@@ -90,10 +87,14 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.WORKSTATION_SNAPSHOT)
-  async createWorkstationSnapshot(job: Job): Promise<void> {
-    await this.handleUserTask(job, async (ctx, input) => {
-      return await new WorkstationSnapshotOperation(ctx).execute(input)
-    })
+  async createWorkstationSnapshot(job: Job<WorkstationSnapshotJob>): Promise<void> {
+    await this.jobWorkstationFacade.snapshot(
+      job.data.payload.jobUid,
+      job.data.payload.code,
+      job.data.payload.key,
+      job.data.payload.name,
+      job.data.payload.terminate,
+    )
   }
 
   @ProcessWithContext(TASK_TYPE.USER_DATA_CONSISTENCY_REPORT)

@@ -1,11 +1,12 @@
-/* eslint-disable max-len */
-import { ClientRequestError, IncompatibleVersionError, InternalError } from '@shared/errors'
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
-import { compareVersions } from 'compare-versions'
 import type { Logger } from '@nestjs/common'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { compareVersions } from 'compare-versions'
 import { CookieJar } from 'tough-cookie'
-import { maskAuthHeader } from '../utils/logging'
+import { ClientRequestError, IncompatibleVersionError, InternalError } from '@shared/errors'
 import { getLogger } from '../logger'
+import { maskAuthHeader } from '../utils/logging'
+
+// TODO (PFDA-6774): moving this to job package and move the type definitions to the type file
 
 export type SnapshotParams = {
   name?: string
@@ -18,21 +19,26 @@ export type CLIConfigParams = {
   Scope?: string
 }
 
-interface IWorkstationClient {
-  apiVersion: string
-  oauthAccess(authToken: string): Promise<void>
-  alive(): Promise<boolean>
-  snapshot(params: SnapshotParams): Promise<any>
-  setAPIKey(key: string): Promise<void>
-  setPFDAConfig(params: CLIConfigParams): Promise<void>
+export type WorkstationAPIResponse = {
+  result?: 'success' | 'error'
+  data?: unknown // legacy structure, deprecated in the current workstation API
+  error?: string | object
 }
 
+interface IWorkstationClient {
+  apiVersion: string
+  oauthAccess(authToken: string): Promise<AxiosResponse>
+  alive(): Promise<boolean>
+  snapshot(params: SnapshotParams): Promise<WorkstationAPIResponse>
+  setAPIKey(key: string): Promise<WorkstationAPIResponse>
+  setPFDAConfig(params: CLIConfigParams): Promise<WorkstationAPIResponse>
+}
 
 const defaultLog = getLogger('workstation-client-logger')
 
 const API_PORT = '8081'
-const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
-
+const USER_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
 
 // WorkstationClient encapsulates communications with the workstation API
 // including managing oauth access tokens and setting the necessary headers
@@ -66,7 +72,7 @@ class WorkstationClient implements IWorkstationClient {
   // OAuth access to the workstation
   // This requires an authToken that's obtained by calling
   // auth server's /system/newAuthToken endpoint
-  async oauthAccess(authToken: string): Promise<void> {
+  async oauthAccess(authToken: string): Promise<AxiosResponse> {
     // First get the Referer url
     const jobResponse = await this.axiosInstance.get(this.workstationUrl)
     const refrerUrl = jobResponse.config.url
@@ -86,7 +92,7 @@ class WorkstationClient implements IWorkstationClient {
     }
 
     try {
-      const response = await this.sendRequest(options, true)
+      const response = (await this.sendRequest(options, true)) as AxiosResponse
       const cookie = await this.extractWorkstationCookie(response)
       if (!cookie) {
         throw new InternalError('Unable to obtain workstation cookie')
@@ -96,11 +102,14 @@ class WorkstationClient implements IWorkstationClient {
       // Should not print cookie to logs, the following is for debugging
       // this.log.verbose(`WorkstationClient got cookie: ${this.cookie}`)
 
-      this.logger.log({
-        workstationUrl: this.workstationUrl,
-        host: this.host,
-        baseUrl: this.baseUrl,
-      },'WorkstationClient oauth success')
+      this.logger.log(
+        {
+          workstationUrl: this.workstationUrl,
+          host: this.host,
+          baseUrl: this.baseUrl,
+        },
+        'WorkstationClient oauth success',
+      )
       return response
     } catch (error) {
       this.logger.error(`Oauth request error: ${error}`)
@@ -110,19 +119,17 @@ class WorkstationClient implements IWorkstationClient {
 
   private async extractWorkstationCookie(response: any): Promise<string | null> {
     const jar = response.config.jar as CookieJar
-    this.logger.log({ jar }, 'extractWorkstationCookie jar')
-
     const cookies = await jar.getCookies(this.workstationUrl)
-    this.logger.log({ cookies }, 'extractWorkstationCookie cookies')
+    this.logger.log(`extractWorkstationCookie got cookie keys: ${cookies.map(c => c.key).join(', ')}`)
     for (const cookie of cookies) {
-      if (cookie.key.startsWith('job-')) {
+      if (cookie.key.startsWith('session') || cookie.key.startsWith('job-')) {
         return `${cookie.key}=${cookie.value}`
       }
     }
     return null
   }
 
-  private validateCookie() {
+  private validateCookie(): void {
     if (this.cookie === undefined) {
       throw new InternalError('Workstation cookie is not present. Check for oauth failure')
     }
@@ -141,7 +148,8 @@ class WorkstationClient implements IWorkstationClient {
       url,
     }
     try {
-      return await this.sendRequest(options)
+      await this.sendRequest(options)
+      return true
     } catch {
       return false
     }
@@ -152,7 +160,7 @@ class WorkstationClient implements IWorkstationClient {
    *
    * Available on workstation_api v1.0 or above
    */
-  async snapshot(params: SnapshotParams): Promise<any> {
+  async snapshot(params: SnapshotParams): Promise<WorkstationAPIResponse> {
     this.validateCookie()
 
     const url = `${this.baseUrl}/snapshot`
@@ -170,7 +178,7 @@ class WorkstationClient implements IWorkstationClient {
    *
    * Available on workstation_api v1.0 or above
    */
-  async setAPIKey(key: string): Promise<void> {
+  async setAPIKey(key: string): Promise<WorkstationAPIResponse> {
     this.validateCookie()
 
     const url = `${this.baseUrl}/setPFDAKey`
@@ -188,7 +196,7 @@ class WorkstationClient implements IWorkstationClient {
    *
    * Available on workstation_api v1.1 or above
    */
-  async setPFDAConfig(params: CLIConfigParams): Promise<void> {
+  async setPFDAConfig(params: CLIConfigParams): Promise<WorkstationAPIResponse> {
     if (this.apiVersion && compareVersions(this.apiVersion, '1.1') < 0) {
       const message = `Cannot use /api/setPFDAConfig because job's api version (${this.apiVersion}) is less than 1.1`
       this.logger.error(message)
@@ -207,7 +215,10 @@ class WorkstationClient implements IWorkstationClient {
     return await this.sendRequest(options)
   }
 
-  protected async sendRequest(options: AxiosRequestConfig, returnFullResponse?: boolean) {
+  protected async sendRequest(
+    options: AxiosRequestConfig,
+    returnFullResponse?: boolean,
+  ): Promise<AxiosResponse | WorkstationAPIResponse> {
     returnFullResponse = returnFullResponse ?? false
     try {
       this.logClientRequest(options)
@@ -220,7 +231,7 @@ class WorkstationClient implements IWorkstationClient {
     }
   }
 
-  protected setupHeaders() {
+  protected setupHeaders(): Record<string, string> {
     // For requests to work, the following headers must be present and correct. e.g.
     // 'Cookie': 'job-GP59k0Q00xb0bvXG20gJG4BK=4ZvJE-zH etc etc'
     // 'Host': 'job-gp59k0q00xb0bvxg20gjg4bk.internal.dnanexus.cloud'
@@ -234,7 +245,7 @@ class WorkstationClient implements IWorkstationClient {
   }
 
   protected maskRequestData(data: any): void {
-    return (data && data.Key) ? {...data, 'Key': '[masked]'} : data
+    return data && data.Key ? { ...data, Key: '[masked]' } : data
   }
 
   protected logClientRequest(options: AxiosRequestConfig): void {
@@ -272,13 +283,10 @@ class WorkstationClient implements IWorkstationClient {
       if (customErrorThrower) {
         customErrorThrower(statusCode, errorType, errorMessage)
       }
-      throw new ClientRequestError(
-        `${errorType} (${statusCode}): ${errorMessage}`,
-        {
-          clientResponse: err.response.data,
-          clientStatusCode: statusCode,
-        },
-      )
+      throw new ClientRequestError(`${errorType} (${statusCode}): ${errorMessage}`, {
+        clientResponse: err.response.data,
+        clientStatusCode: statusCode,
+      })
     } else if (err.request) {
       // the request was made but no response was received
       this.logger.error({ err }, 'Failed workstation request - no response received')
@@ -288,7 +296,4 @@ class WorkstationClient implements IWorkstationClient {
   }
 }
 
-export {
-  IWorkstationClient,
-  WorkstationClient,
-}
+export { IWorkstationClient, WorkstationClient }

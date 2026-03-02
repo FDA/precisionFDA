@@ -1,24 +1,24 @@
+import React, { useMemo } from 'react'
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
-import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import * as Yup from 'yup'
+import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { FieldGroup } from '../../components/form/FieldGroup'
 import { CheckboxLabel, InputError } from '../../components/form/styles'
 import { InputText } from '../../components/InputText'
 import { Loader } from '../../components/Loader'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 import { colors } from '../../styles/theme'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { workstationSnapshotRequest } from './executions.api'
 import { IExecution } from './executions.types'
-import { Button } from '../../components/Button'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 const StyledForm = styled.form`
   padding: 24px;
@@ -55,7 +55,13 @@ const getDefaultSnapshotName = (execution: IExecution): string => {
   return `${execution.name} ${dateString}`
 }
 
-const SnapshotForm = ({ execution, onSubmit }: { execution: IExecution; onSubmit: (data: CreateSnapshotForm) => void }) => {
+const SnapshotForm = ({
+  execution,
+  onSubmit,
+}: {
+  execution: IExecution
+  onSubmit: (data: CreateSnapshotForm) => void
+}) => {
   const {
     register,
     handleSubmit,
@@ -98,7 +104,7 @@ export function useSnapshotModal({ selected }: { selected: IExecution }) {
   const memoSelected = useMemo(() => selected, [isShown])
   const mutation = useMutation({
     mutationKey: ['snapshot-job'],
-    mutationFn: (vals: CreateSnapshotForm) => workstationSnapshotRequest(selected.dxid, vals),
+    mutationFn: (vals: CreateSnapshotForm) => workstationSnapshotRequest(selected.uid, vals),
     onError: (e: AxiosError) => {
       const payload = e.response?.data as { error?: { message: string } }
       const message = payload?.error?.message ?? e.message
