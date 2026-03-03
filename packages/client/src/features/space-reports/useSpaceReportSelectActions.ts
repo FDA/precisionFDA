@@ -11,19 +11,17 @@ export const userReportSelectActions = ({
   selectedItems,
   resetSelected,
 }: {
-  scope?: string,
-  selectedItems: ISpaceReport[],
-  resetSelected?: () => void,
+  scope?: string
+  selectedItems: ISpaceReport[]
+  resetSelected?: () => void
 }) => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
 
-  const {
-    modalComp: deleteModal,
-    setShowModal: setDeleteModal,
-  } = useDeleteSpaceReportModal({
+  const { modalComp: deleteModal, setShowModal: setDeleteModal } = useDeleteSpaceReportModal({
     selected,
+    scope,
     onClose: () => {
       queryClient.invalidateQueries({
         queryKey: ['space-reports'],
@@ -34,7 +32,7 @@ export const userReportSelectActions = ({
         navigate('/home/reports')
       }
 
-      if(resetSelected) resetSelected()
+      if (resetSelected) resetSelected()
     },
   })
 
@@ -48,7 +46,7 @@ export const userReportSelectActions = ({
   ]
 
   const modals = {
-    'Delete': deleteModal,
+    Delete: deleteModal,
   }
 
   return { actions, modals }

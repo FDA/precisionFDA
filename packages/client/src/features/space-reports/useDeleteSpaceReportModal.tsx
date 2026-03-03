@@ -1,11 +1,11 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import styled from 'styled-components'
-import { Button } from '../../components/Button'
-import { Loader } from '../../components/Loader'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
-import { StyledTable, StyledTD } from '../../components/ResourceTable'
-import { formatDate, itemsCountString } from '../../utils/formatting'
+import { Button } from '@/components/Button'
+import { Loader } from '@/components/Loader'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { StyledTable, StyledTD } from '@/components/ResourceTable'
+import { formatDate, itemsCountString } from '@/utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
@@ -17,7 +17,15 @@ const StyledReportTable = styled(StyledTable)`
   padding: 0.5rem;
 `
 
-export function useDeleteSpaceReportModal({ selected, onClose }: { selected: ISpaceReport[]; onClose?: () => void }) {
+export function useDeleteSpaceReportModal({
+  selected,
+  scope,
+  onClose,
+}: {
+  selected: ISpaceReport[]
+  scope?: string
+  onClose?: () => void
+}) {
   const { isShown, setShowModal } = useModal()
   const queryClient = useQueryClient()
 
@@ -36,7 +44,12 @@ export function useDeleteSpaceReportModal({ selected, onClose }: { selected: ISp
     },
     onSuccess: async res => {
       // Invalidate counters to refresh report count in sidebar
-      await queryClient.invalidateQueries({ queryKey: ['counters'] })
+      if (scope?.includes('space-')) {
+        // space counters are inside the space object, not standalone counters object
+        await queryClient.invalidateQueries({ queryKey: ['space', scope.replace('space-', '')] })
+      } else {
+        await queryClient.invalidateQueries({ queryKey: ['counters'] })
+      }
       close()
       toastSuccess(`${itemsCountString('report', res?.length ?? 0)} deleted`)
     },
