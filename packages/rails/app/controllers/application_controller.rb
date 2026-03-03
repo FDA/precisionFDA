@@ -233,7 +233,15 @@ class ApplicationController < ActionController::Base
     accessible = object.accessible_by?(@context)
     item_sliced = object.context_slice(@context, *object.describe_fields)
     scope = item_sliced[:scope]
-    review_space = object.space_object if object.in_space?
+    review_space = begin
+      object.space_object if object.in_space?
+    rescue ActiveRecord::RecordNotFound => e
+      Rails.logger.warn(
+        "[describe_for_api] ActiveRecord::RecordNotFound when loading space_object " \
+        "for object_class=#{object.class} object_id=#{object.id} scope=#{scope.inspect}: #{e.message}"
+      )
+      nil
+    end
 
     describe = {
       id: item_sliced[:id],

@@ -182,7 +182,9 @@ module Permissions
   end
 
   def space_object
-    Space.from_scope(scope)
+    # Use `unscoped` so we can resolve spaces even if they are soft-deleted; downstream
+    # permission checks are responsible for handling deleted/invalid space states.
+    Space.unscoped { Space.from_scope(scope) }
   end
 
   def context_slice(context, *args)
