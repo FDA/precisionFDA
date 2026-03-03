@@ -86,7 +86,9 @@ export const SpaceReportList = ({
       return
     }
     query.refetch()
-    client.invalidateQueries({ queryKey: ['space', scope] })
+    if (scope.includes('space-')) {
+      client.invalidateQueries({ queryKey: ['space', scope.replace('space-', '')] })
+    }
   }, [lastJsonMessage])
 
   const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(selectedIndexes, query.data?.reports)

@@ -1,13 +1,14 @@
-import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useState } from 'react'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router'
-import { Button, TransparentButton } from '../../../components/Button'
-import { FieldGroup } from '../../../components/form/FieldGroup'
-import { CrossIcon } from '../../../components/icons/PlusIcon'
-import { QuestionIcon } from '../../../components/icons/QuestionIcon'
-import { InputNumber, InputText } from '../../../components/InputText'
-import { IUser } from '../../../types/user'
+import { Button, TransparentButton } from '@/components/Button'
+import { FieldGroup } from '@/components/form/FieldGroup'
+import { CrossIcon } from '@/components/icons/PlusIcon'
+import { QuestionIcon } from '@/components/icons/QuestionIcon'
+import { InputNumber, InputText } from '@/components/InputText'
+import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { IUser } from '@/types/user'
 import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
 import { TreeOnSelectInfo } from '../../files/files.types'
 import { Empty } from '../../home/home.styles'
@@ -57,7 +58,6 @@ import {
   useUserComputeInstances,
   validateFile,
 } from './utils'
-import { toastError } from '../../../components/NotificationCenter/ToastHelper'
 
 /**
  * If params are specified in the URL, decode them and set them as default values.
@@ -66,13 +66,17 @@ import { toastError } from '../../../components/NotificationCenter/ToastHelper'
  * @param hash
  * @param opts
  */
-const getDefaults = (hash: string, opts: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] }): RunJobFormType => {
+const getDefaults = (
+  hash: string,
+  opts: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] },
+): RunJobFormType => {
   const base64Encoded = hash.split('#')[1]
   const decoded = base64Encoded ? atob(base64Encoded) : '{}'
   const values = JSON.parse(decodeURIComponent(decoded))
 
   return {
     jobName: values.jobName ?? opts.app.name,
+
     jobLimit: values.jobLimit ?? opts.userJobLimit,
     output_folder_path: values.output_folder_path ?? '',
     scope: values.scope,
@@ -169,7 +173,15 @@ const importFormData = async (
   }
 }
 
-export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] }) => {
+export const RunJobForm = ({
+  app,
+  userJobLimit,
+  spec,
+}: {
+  app: IApp
+  spec: AppSpec
+  userJobLimit: IUser['job_limit']
+}) => {
   const { data: computeInstances, isLoading: computeInstancesLoading } = useUserComputeInstances()
   const { data: selectableContexts } = useSelectableContexts(app.scope, app.entity_type)
   const { data: selectableSpaces } = useSelectableSpaces(app.scope)
@@ -441,7 +453,11 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                       control={control}
                       name={`inputs.${batchIndex}.fields.${inputSpec.name}`}
                       render={({ field }) => (
-                        <FieldGroup label={getLabel(inputSpec)} required={!inputSpec.optional} key={inputSpec.name + inputSpec}>
+                        <FieldGroup
+                          label={getLabel(inputSpec)}
+                          required={!inputSpec.optional}
+                          key={inputSpec.name + inputSpec}
+                        >
                           <JobRunInput
                             key={inputSpec.name + inputSpec}
                             field={field}
@@ -464,7 +480,12 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
             </SectionBody>
           </Section>
         ))}
-        <SetOutputFolder control={control} isSubmitting={isSubmitting} spec={spec} setShowModal={setSelectFolderModal} />
+        <SetOutputFolder
+          control={control}
+          isSubmitting={isSubmitting}
+          spec={spec}
+          setShowModal={setSelectFolderModal}
+        />
       </AppsConfiguration>
       <StyledActionsContainer>
         <Button

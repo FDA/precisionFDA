@@ -1,13 +1,13 @@
+import { FormEvent, useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
-import { FormEvent, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Button } from '../../components/Button'
-import { Checkbox } from '../../components/CheckboxNext'
-import { FieldGroup, FieldLabelRow } from '../../components/form/styles'
-import { Loader } from '../../components/Loader'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
-import { Radio } from '../../components/Radio'
+import { Button } from '@/components/Button'
+import { Checkbox } from '@/components/CheckboxNext'
+import { FieldGroup, FieldLabelRow } from '@/components/form/styles'
+import { Loader } from '@/components/Loader'
+import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { Radio } from '@/components/Radio'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll, StyledForm } from '../modal/styles'
 import { useModal } from '../modal/useModal'
@@ -39,7 +39,12 @@ export function useGenerateSpaceReportModal({ scope, onClose }: { scope: string;
     mutationFn: () => createReport(scope, reportFormat, options),
     onSuccess: async () => {
       // Invalidate counters to refresh report count in sidebar
-      await queryClient.invalidateQueries({ queryKey: ['counters'] })
+      if (scope.includes('space-')) {
+        // space counters are inside the space object, not standalone counters object
+        await queryClient.invalidateQueries({ queryKey: ['space', scope.replace('space-', '')] })
+      } else {
+        await queryClient.invalidateQueries({ queryKey: ['counters'] })
+      }
       close()
     },
     onError: (e: AxiosError<{ error: { message: string } }>) => {
