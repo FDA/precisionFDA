@@ -2,6 +2,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { SpaceMembershipPlatformAccessProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access.provider'
 import { SPACE_MEMBERSHIP_TO_PLATFORM_ACCESS_PROVIDER_MAP } from '@shared/domain/space-membership/providers/platform-access/space-membership-to-platform-access-provider.provider'
+import { SpaceMembershipCountService } from '@shared/domain/space-membership/service/space-membership-count.service'
 import { SPACE_MEMBERSHIP_PERMISSION_TO_UPDATE_PROVIDER_MAP } from '@shared/domain/space-membership/service/update-permission/space-membership-to-update-permission-provider.provider'
 import { SpaceMembershipUpdatePermissionHelper } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.helper'
 import { SpaceMembershipUpdatePermissionProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.provider'
@@ -41,7 +42,12 @@ export class SpaceMembershipService {
     private readonly spaceMembershipToPlatformAccessProviderMap: {
       [T in SpaceMembershipPermission]: SpaceMembershipPlatformAccessProvider
     },
+    private readonly spaceMembershipCountService: SpaceMembershipCountService,
   ) {}
+
+  async countBySpace(spaceId: number): Promise<number> {
+    return this.spaceMembershipCountService.countBySpace(spaceId)
+  }
 
   async getCurrentMembership(spaceId: number, userId: number): Promise<SpaceMembership> {
     const membership = await this.spaceMembershipRepository.getMembership(spaceId, userId)
@@ -80,9 +86,7 @@ export class SpaceMembershipService {
     if (space.type === SPACE_TYPE.REVIEW) {
       await this.em.populate(space, ['confidentialSpaces'])
       newMembership.spaces.add(
-        currentMembership.isHost()
-          ? space.confidentialReviewerSpace
-          : space.confidentialSponsorSpace,
+        currentMembership.isHost() ? space.confidentialReviewerSpace : space.confidentialSponsorSpace,
       )
     }
     await this.em.persist(newMembership).flush()
@@ -117,10 +121,7 @@ export class SpaceMembershipService {
     currentLeadMember: SpaceMembership,
     newLeadUser: User,
   ): Promise<SpaceMembership[]> {
-    const newLeadMember = await this.spaceMembershipRepository.getMembership(
-      sharedSpace.id,
-      newLeadUser.id,
-    )
+    const newLeadMember = await this.spaceMembershipRepository.getMembership(sharedSpace.id, newLeadUser.id)
 
     if (newLeadMember) {
       if (newLeadMember.id === currentLeadMember.id) {
@@ -133,9 +134,7 @@ export class SpaceMembershipService {
 
     const allLeadMemberships: SpaceMembership[] = []
     if (!newLeadMember) {
-      this.logger.log(
-        `Created new lead membership for user ${newLeadUser.dxuser} in space ${sharedSpace.id}`,
-      )
+      this.logger.log(`Created new lead membership for user ${newLeadUser.dxuser} in space ${sharedSpace.id}`)
       const leadMembership = await this.createMembership(
         currentLeadMember,
         sharedSpace,
@@ -147,12 +146,11 @@ export class SpaceMembershipService {
       allLeadMemberships.push(newLeadMember)
       // TODO (PFDA-6418): handle multiple members linked to shared space and confidential space, remove this after fixing the database
       if (sharedSpace.type === SPACE_TYPE.REVIEW) {
-        const cfNewLeadMembership =
-          await this.spaceMembershipRepository.findConfidentialMembershipByUser(
-            sharedSpace.id,
-            newLeadMember.user.id,
-            newLeadMember.side,
-          )
+        const cfNewLeadMembership = await this.spaceMembershipRepository.findConfidentialMembershipByUser(
+          sharedSpace.id,
+          newLeadMember.user.id,
+          newLeadMember.side,
+        )
         if (cfNewLeadMembership && cfNewLeadMembership.id !== newLeadMember.id) {
           allLeadMemberships.push(cfNewLeadMembership)
         }
@@ -161,7 +159,7 @@ export class SpaceMembershipService {
 
     // Ensure the new lead has admin access in all orgs related to the space
     const spaceOrgs = sharedSpace.getMembershipOrg(currentLeadMember)
-    const promises = spaceOrgs.map((org) =>
+    const promises = spaceOrgs.map(org =>
       this.adminClient
         .orgFindMembers({
           orgDxid: org,
@@ -175,8 +173,7 @@ export class SpaceMembershipService {
                 data: {
                   invitee: newLeadUser.dxid,
                   suppressEmailNotification: true,
-                  ...this.spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN]
-                    .memberAccess,
+                  ...this.spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
                 },
               })
             : Promise.resolve()
@@ -191,7 +188,7 @@ export class SpaceMembershipService {
             orgDxid: oppositeOrgDxid,
             id: [newLeadUser.dxid],
           })
-          .then((findResult) => {
+          .then(findResult => {
             const results = findResult.results
             if (results.length === 0) {
               return
@@ -206,11 +203,7 @@ export class SpaceMembershipService {
       }
     }
     const leadProvider = this.spaceMembershipUpdatePermissionProviderMap[SPACE_MEMBERSHIP_ROLE.LEAD]
-    const updatedMemberships = await leadProvider.update(
-      sharedSpace,
-      currentLeadMember,
-      allLeadMemberships,
-    )
+    const updatedMemberships = await leadProvider.update(sharedSpace, currentLeadMember, allLeadMemberships)
     return updatedMemberships
   }
 
@@ -238,11 +231,10 @@ export class SpaceMembershipService {
       return
     }
 
-    const space = memberships[0].spaces.getItems().find((s) => s.id === spaceId)
-    const membershipAccessPayload =
-      this.spaceMembershipUpdatePermissionHelper.buildMembershipAccessPayload(memberships)
+    const space = memberships[0].spaces.getItems().find(s => s.id === spaceId)
+    const membershipAccessPayload = this.spaceMembershipUpdatePermissionHelper.buildMembershipAccessPayload(memberships)
     const orgs = space.getMembershipOrg(memberships[0])
-    const promises = orgs.map((org) => {
+    const promises = orgs.map(org => {
       return this.platformClient.orgSetMemberAccess({
         orgDxId: org,
         data: membershipAccessPayload,

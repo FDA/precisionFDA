@@ -1,21 +1,21 @@
-import { useMutation } from '@tanstack/react-query'
 import React from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { Outlet, useOutletContext } from 'react-router'
-import { MenuCounter } from '../../../components/MenuCounter'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
-import { BoltIcon } from '../../../components/icons/BoltIcon'
-import { CogsIcon } from '../../../components/icons/Cogs'
-import { CubeIcon } from '../../../components/icons/CubeIcon'
-import { DatabaseIcon } from '../../../components/icons/DatabaseIcon'
-import { DiscussionIcon } from '../../../components/icons/DiscussionIcon'
-import { FileIcon } from '../../../components/icons/FileIcon'
-import { FlapIcon } from '../../../components/icons/FlapIcon'
-import { NetworkIcon } from '../../../components/icons/NetworkIcon'
-import { SpaceReportIcon } from '../../../components/icons/SpaceReportIcon'
-import { UsersIcon } from '../../../components/icons/UsersIcon'
-import { useLocalStorage } from '../../../hooks/useLocalStorage'
-import { SpaceOutletContext } from '../../../routes/spaces'
-import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { BoltIcon } from '@/components/icons/BoltIcon'
+import { CogsIcon } from '@/components/icons/Cogs'
+import { CubeIcon } from '@/components/icons/CubeIcon'
+import { DatabaseIcon } from '@/components/icons/DatabaseIcon'
+import { DiscussionIcon } from '@/components/icons/DiscussionIcon'
+import { FileIcon } from '@/components/icons/FileIcon'
+import { FlapIcon } from '@/components/icons/FlapIcon'
+import { NetworkIcon } from '@/components/icons/NetworkIcon'
+import { SpaceReportIcon } from '@/components/icons/SpaceReportIcon'
+import { UsersIcon } from '@/components/icons/UsersIcon'
+import { MenuCounter } from '@/components/MenuCounter'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { SpaceOutletContext } from '@/routes/spaces'
+import { ErrorBoundary } from '@/utils/ErrorBoundry'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../../home/home.styles'
 import { ApiErrorResponse } from '../../home/types'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
@@ -38,8 +38,9 @@ import {
 } from './styles'
 
 export const SpaceShowLayout = () => {
-  const context = useOutletContext<SpaceOutletContext>()
-  const { space } = context
+  const context = useOutletContext<SpaceOutletContext | undefined>()
+  if (!context?.space) return null
+  const { space, counters } = context
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedSpacesSidebar', true)
 
   const { actions } = useSpaceActions({ space })
@@ -91,7 +92,10 @@ export const SpaceShowLayout = () => {
           <SpaceTopRight>
             {!fixPermissionsAction?.shouldHide && (
               <div>
-                <ActionButton data-testid="fix-space-button" onClick={() => fixSpaceMutation.mutate({ id: space.id.toString() })}>
+                <ActionButton
+                  data-testid="fix-space-button"
+                  onClick={() => fixSpaceMutation.mutate({ id: space.id.toString() })}
+                >
                   Fix Guest Side Permissions
                 </ActionButton>
               </div>
@@ -105,12 +109,16 @@ export const SpaceShowLayout = () => {
           <MenuItem data-testid="files-link" to={`/spaces/${space.id}/files`} activeClassName="active">
             <FileIcon height={14} />
             <MenuText>Files</MenuText>
-            {expandedSidebar && <MenuCounter count={space.counters.files.toString()} active={activeResource === 'files'} />}
+            {expandedSidebar && (
+              <MenuCounter count={(counters?.files ?? 0).toString()} active={activeResource === 'files'} />
+            )}
           </MenuItem>
           <MenuItem data-testid="apps-link" to={`/spaces/${space.id}/apps`} activeClassName="active">
             <CubeIcon height={14} />
             <MenuText>Apps</MenuText>
-            {expandedSidebar && <MenuCounter count={space.counters.apps.toString()} active={activeResource === 'apps'} />}
+            {expandedSidebar && (
+              <MenuCounter count={(counters?.apps ?? 0).toString()} active={activeResource === 'apps'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="home-databases-link"
@@ -122,32 +130,39 @@ export const SpaceShowLayout = () => {
             <DatabaseIcon height={14} />
             <MenuText>Databases</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={space.counters?.dbclusters.toString()} active={activeResource === 'databases'} />
+              <MenuCounter count={(counters?.dbclusters ?? 0).toString()} active={activeResource === 'databases'} />
             )}
           </MenuItem>
           <MenuItem data-testid="workflows-link" to={`/spaces/${space.id}/workflows`} activeClassName="active">
             <NetworkIcon height={18} />
             <MenuText>Workflows</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={space.counters.workflows.toString()} active={activeResource === 'workflows'} />
+              <MenuCounter count={(counters?.workflows ?? 0).toString()} active={activeResource === 'workflows'} />
             )}
           </MenuItem>
           <MenuItem data-testid="executions-link" to={`/spaces/${space.id}/executions`} activeClassName="active">
             <BoltIcon height={15} />
             <MenuText>Executions</MenuText>
-            {expandedSidebar && <MenuCounter count={space.counters.jobs.toString()} active={activeResource === 'executions'} />}
+            {expandedSidebar && (
+              <MenuCounter count={(counters?.jobs ?? 0).toString()} active={activeResource === 'executions'} />
+            )}
           </MenuItem>
           <MenuItem data-testid="space-reports-link" to={`/spaces/${space.id}/reports`} activeClassName="active">
             <SpaceReportIcon height={14} />
             <MenuText>Reports</MenuText>
-            {expandedSidebar && <MenuCounter count={space.counters.reports.toString()} active={activeResource === 'reports'} />}
+            {expandedSidebar && (
+              <MenuCounter count={(counters?.reports ?? 0).toString()} active={activeResource === 'reports'} />
+            )}
           </MenuItem>
           {showDiscussions && (
             <MenuItem data-testid="discussions-link" to={`/spaces/${space.id}/discussions`} activeClassName="active">
               <DiscussionIcon height={14} />
               <MenuText>Discussions</MenuText>
               {expandedSidebar && (
-                <MenuCounter count={space.counters.discussions.toString()} active={activeResource === 'discussions'} />
+                <MenuCounter
+                  count={(counters?.discussions ?? 0).toString()}
+                  active={activeResource === 'discussions'}
+                />
               )}
             </MenuItem>
           )}
@@ -155,7 +170,9 @@ export const SpaceShowLayout = () => {
             <MenuItem data-testid="members-link" to={`/spaces/${space.id}/members`} activeClassName="active">
               <UsersIcon height={14} />
               <MenuText>Members</MenuText>
-              {expandedSidebar && <MenuCounter count={space.counters.members.toString()} active={activeResource === 'members'} />}
+              {expandedSidebar && (
+                <MenuCounter count={(counters?.members ?? 0).toString()} active={activeResource === 'members'} />
+              )}
             </MenuItem>
           )}
           <Fill />

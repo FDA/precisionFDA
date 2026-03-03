@@ -1,9 +1,9 @@
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { AssetScopeFilterProvider } from '@shared/domain/user-file/service/asset-scope-filter.provider'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
+import { AssetScopeFilterProvider } from '@shared/domain/user-file/service/asset-scope-filter.provider'
 import { FILE_STATE_PFDA, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { User } from '@shared/domain/user/user.entity'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('AssetScopeFilterProvider', () => {
   const USER_ID = 1
@@ -100,7 +100,7 @@ describe('AssetScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
@@ -114,7 +114,7 @@ describe('AssetScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
   })

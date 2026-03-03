@@ -89,7 +89,7 @@ describe('SpaceReportCountService', () => {
     })
 
     describe('SPACES scope', () => {
-      it('should return 0 for SPACES scope (space reports are not shown in spaces)', async () => {
+      it('should query space reports filtered by space scopes', async () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.SPACES,
@@ -98,8 +98,24 @@ describe('SpaceReportCountService', () => {
 
         const result = await getInstance().count(context)
 
+        expect(result).to.eq(6)
+        expect(countCalls).to.have.lengthOf(1)
+        const reportCall = countCalls[0]
+        expect(reportCall.where).to.deep.include({
+          scope: { $in: SPACE_SCOPES },
+        })
+      })
+
+      it('should return 0 when user has no accessible spaces', async () => {
+        const context: ScopeFilterContext = {
+          user: USER,
+          scope: HOME_SCOPE.SPACES,
+          spaceScopes: [],
+        }
+
+        const result = await getInstance().count(context)
+
         expect(result).to.eq(0)
-        // Should not make any DB calls
         expect(countCalls).to.have.lengthOf(0)
       })
     })

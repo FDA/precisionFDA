@@ -65,7 +65,7 @@ export interface ConfidentialSpace {
   cts: string
   created_at: string
   updated_at: string
-  counters: Counters
+  counters?: Counters
   links: Links
   updatable: boolean
   shared_space_id: number
@@ -91,7 +91,7 @@ export interface ISpace {
   created_at: string
   updated_at: string
   space_create?: string
-  counters: Counters
+  counters?: Counters
   /** @deprecated create links from client side */
   links: Links
   updatable: boolean

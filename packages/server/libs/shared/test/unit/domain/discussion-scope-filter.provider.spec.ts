@@ -1,8 +1,8 @@
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { DiscussionScopeFilterProvider } from '@shared/domain/discussion/discussion-scope-filter.provider'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
+import { DiscussionScopeFilterProvider } from '@shared/domain/discussion/discussion-scope-filter.provider'
+import { User } from '@shared/domain/user/user.entity'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('DiscussionScopeFilterProvider', () => {
   const USER_ID = 1
@@ -26,7 +26,7 @@ describe('DiscussionScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
@@ -86,7 +86,7 @@ describe('DiscussionScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
@@ -100,7 +100,7 @@ describe('DiscussionScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
   })
