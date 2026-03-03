@@ -1,8 +1,8 @@
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { SpaceReportScopeFilterProvider } from '@shared/domain/space-report/space-report-scope-filter.provider'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
+import { SpaceReportScopeFilterProvider } from '@shared/domain/space-report/space-report-scope-filter.provider'
+import { User } from '@shared/domain/user/user.entity'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('SpaceReportScopeFilterProvider', () => {
   const USER_ID = 1
@@ -43,7 +43,7 @@ describe('SpaceReportScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
@@ -57,12 +57,12 @@ describe('SpaceReportScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
     describe('HOME_SCOPE.SPACES', () => {
-      it('should return null because space reports are not shown in spaces scope', () => {
+      it('should return condition filtering by space scopes', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.SPACES,
@@ -71,10 +71,12 @@ describe('SpaceReportScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.deep.equal({
+          scope: { $in: SPACE_SCOPES },
+        })
       })
 
-      it('should return null even when user has accessible spaces', () => {
+      it('should return null when user has no accessible spaces', () => {
         const context: ScopeFilterContext = {
           user: USER,
           scope: HOME_SCOPE.SPACES,
@@ -83,7 +85,7 @@ describe('SpaceReportScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
@@ -97,7 +99,7 @@ describe('SpaceReportScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
   })

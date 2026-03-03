@@ -1,8 +1,8 @@
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { DbClusterScopeFilterProvider } from '@shared/domain/db-cluster/db-cluster-scope-filter.provider'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
+import { DbClusterScopeFilterProvider } from '@shared/domain/db-cluster/db-cluster-scope-filter.provider'
+import { User } from '@shared/domain/user/user.entity'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('DbClusterScopeFilterProvider', () => {
   const USER_ID = 1
@@ -43,7 +43,7 @@ describe('DbClusterScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
@@ -57,7 +57,7 @@ describe('DbClusterScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
@@ -85,7 +85,7 @@ describe('DbClusterScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
@@ -99,7 +99,7 @@ describe('DbClusterScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
   })

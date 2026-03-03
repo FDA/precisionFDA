@@ -12,7 +12,6 @@ class SpaceSerializer < ApplicationSerializer
     :cts,
     :created_at,
     :updated_at,
-    :counters,
     :links,
     :updatable,
     :protected,
@@ -88,21 +87,6 @@ class SpaceSerializer < ApplicationSerializer
     formatted_time(object.updated_at)
   end
 
-  # Returns space counters for related objects.
-  # @return [Hash] Space counters for members, files and notes, apps, comments.
-  def counters
-    {
-      files: files_count,
-      apps: apps_count,
-      workflows: workflows_count,
-      jobs: jobs_count,
-      members: members_count,
-      reports: reports_count,
-      discussions: discussions_count,
-      dbclusters: dbclusters_count,
-    }
-  end
-
   # Returns a private (confidential) review space.
   # @return [Space] Private review space.
   def confidential_space
@@ -124,54 +108,6 @@ class SpaceSerializer < ApplicationSerializer
   end
 
   private
-
-  # Returns apps count.
-  # @return [Integer] Apps count.
-  def apps_count
-    object.latest_revision_apps.unremoved.count
-  end
-
-  # Returns dbclusters count.
-  # @return [Integer] DbCluster count.
-  def dbclusters_count
-    object.dbclusters.count
-  end
-
-  # Returns files count.
-  # @return [Integer] Files count.
-  def files_count
-    object.files.count + object.assets.count
-  end
-
-  # Returns jobs count.
-  # @return [Integer] Jobs count.
-  def jobs_count
-    object.jobs.count
-  end
-
-  # Returns space members count.
-  # @return [Integer] Space members count.
-  def members_count
-    object.space_memberships.count
-  end
-
-  # Returns space reports count.
-  # @return [Integer] Space members count.
-  def reports_count
-    object.space_reports.count
-  end
-
-  # Returns workflows count.
-  # @return [Integer] Workflows count.
-  def workflows_count
-    object.workflows.unremoved.count
-  end
-
-  # Returns space discussions count.
-  # @return [Integer] Space members count.
-  def discussions_count
-    object.discussions.count
-  end
 
   # Returns current user space membership
   # @return [SpaceMembership] Space membership.

@@ -1,8 +1,8 @@
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { WorkflowSeriesScopeFilterProvider } from '@shared/domain/workflow-series/workflow-series-scope-filter.provider'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
+import { User } from '@shared/domain/user/user.entity'
+import { WorkflowSeriesScopeFilterProvider } from '@shared/domain/workflow-series/workflow-series-scope-filter.provider'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('WorkflowSeriesScopeFilterProvider', () => {
   const USER_ID = 1
@@ -94,7 +94,7 @@ describe('WorkflowSeriesScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
 
@@ -108,7 +108,7 @@ describe('WorkflowSeriesScopeFilterProvider', () => {
 
         const result = provider.buildWhereCondition(context)
 
-        expect(result).to.be.null
+        expect(result).to.be.null()
       })
     })
   })

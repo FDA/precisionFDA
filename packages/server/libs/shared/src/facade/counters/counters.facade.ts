@@ -1,19 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { HOME_SCOPE } from '@shared/enums'
+import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
 import {
   CountersResponse,
   ScopeFilterContext,
+  SpaceCountersResponse,
   SpaceScope,
 } from '@shared/domain/counters/counters.types'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
-import { JobService } from '@shared/domain/job/job.service'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { WorkflowSeriesService } from '@shared/domain/workflow-series/service/workflow-series.service'
-import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { JobService } from '@shared/domain/job/job.service'
+import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
+import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { WorkflowSeriesService } from '@shared/domain/workflow-series/service/workflow-series.service'
+import { HOME_SCOPE } from '@shared/enums'
+import { NotFoundError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class CountersFacade {
@@ -29,6 +33,8 @@ export class CountersFacade {
     private readonly workflowSeriesService: WorkflowSeriesService,
     private readonly spaceReportService: SpaceReportService,
     private readonly discussionService: DiscussionService,
+    private readonly spaceService: SpaceService,
+    private readonly spaceMembershipService: SpaceMembershipService,
   ) {}
 
   /**
@@ -39,21 +45,20 @@ export class CountersFacade {
 
     const user = await this.userContext.loadEntity()
     const accessibleSpaces = await user.accessibleSpaces()
-    const spaceScopes: SpaceScope[] = accessibleSpaces.map((space) => space.scope as SpaceScope)
+    const spaceScopes: SpaceScope[] = accessibleSpaces.map(space => space.scope as SpaceScope)
 
     const context: ScopeFilterContext = { user, scope, spaceScopes }
 
-    const [files, apps, assets, jobs, dbclusters, workflows, reports, discussions] =
-      await Promise.all([
-        this.nodeService.countFiles(context),
-        this.appSeriesService.countByScope(context),
-        this.nodeService.countAssets(context),
-        this.jobService.countByScope(context),
-        this.dbClusterService.countByScope(context),
-        this.workflowSeriesService.countByScope(context),
-        this.spaceReportService.countByScope(context),
-        this.discussionService.countByScope(context),
-      ])
+    const [files, apps, assets, jobs, dbclusters, workflows, reports, discussions] = await Promise.all([
+      this.nodeService.countFiles(context),
+      this.appSeriesService.countByScope(context),
+      this.nodeService.countAssets(context),
+      this.jobService.countByScope(context),
+      this.dbClusterService.countByScope(context),
+      this.workflowSeriesService.countByScope(context),
+      this.spaceReportService.countByScope(context),
+      this.discussionService.countByScope(context),
+    ])
 
     return {
       files,
@@ -64,6 +69,52 @@ export class CountersFacade {
       workflows,
       reports,
       discussions,
+    }
+  }
+
+  /**
+   * Get counters for a specific space.
+   * Validates that the current user has access to the space.
+   */
+  async getSpaceCounters(spaceId: number): Promise<SpaceCountersResponse> {
+    this.logger.log(`Getting counters for space: ${spaceId}`)
+
+    const space = await this.spaceService.getAccessibleSpace(spaceId)
+    if (!space) {
+      throw new NotFoundError('Space does not exist or is not accessible')
+    }
+
+    const user = await this.userContext.loadEntity()
+
+    // Reuse existing count services by passing a single-space ScopeFilterContext
+    const context: ScopeFilterContext = {
+      user,
+      scope: HOME_SCOPE.SPACES,
+      spaceScopes: [space.scope],
+    }
+
+    const [files, assets, apps, workflows, jobs, dbclusters, discussions, reports, members] = await Promise.all([
+      this.nodeService.countFiles(context),
+      this.nodeService.countAssets(context),
+      this.appSeriesService.countByScope(context),
+      this.workflowSeriesService.countByScope(context),
+      this.jobService.countByScope(context),
+      this.dbClusterService.countByScope(context),
+      this.discussionService.countByScope(context),
+      this.spaceReportService.countByScope(context),
+      this.spaceMembershipService.countBySpace(spaceId),
+    ])
+
+    return {
+      files,
+      assets,
+      apps,
+      workflows,
+      jobs,
+      members,
+      reports,
+      discussions,
+      dbclusters,
     }
   }
 }

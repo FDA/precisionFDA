@@ -7,8 +7,8 @@ import { SpaceReport } from './entity/space-report.entity'
 
 /**
  * Scope filter provider for SpaceReport entities.
- * SpaceReports are only counted/listed for the ME scope.
- * They are always private to the user who created them.
+ * In ME scope, reports are private to the user who created them.
+ * In SPACES scope, reports are filtered by the space scopes (inherits base class behavior).
  */
 @Injectable()
 export class SpaceReportScopeFilterProvider extends AbstractScopeFilterProvider<SpaceReport> {
@@ -28,12 +28,6 @@ export class SpaceReportScopeFilterProvider extends AbstractScopeFilterProvider<
   }
 
   protected override buildEverybodyCondition(
-    _context: ScopeFilterContext,
-  ): FilterQuery<SpaceReport> | null {
-    return null
-  }
-
-  protected override buildSpacesCondition(
     _context: ScopeFilterContext,
   ): FilterQuery<SpaceReport> | null {
     return null

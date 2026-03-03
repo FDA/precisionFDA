@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { IFilter, MetaV2 } from '../home/types'
 import { Params, prepareListFetchV2 } from '../home/utils'
-import { ISpace, ISpaceV2 } from './spaces.types'
+import { Counters, ISpace, ISpaceV2 } from './spaces.types'
 
 export type FetchSpacesListResponse = { meta: MetaV2; data: ISpaceV2[] }
 export type FetchSpaceDetailsResponse = { meta: unknown; space: ISpace }
@@ -28,6 +28,10 @@ export async function spaceRequest({ id }: { id?: string | number }): Promise<Fe
     console.error('Space ID is required for fetching space details')
   }
   return axios.get(`/api/spaces/${id}`).then(res => res.data)
+}
+
+export async function spaceCountersRequest(spaceId: string | number): Promise<Counters> {
+  return axios.get(`/api/v2/counters/spaces/${spaceId}`).then(res => res.data)
 }
 
 export async function fixGuestPermissions({ id }: { id: string | number }): Promise<unknown> {
