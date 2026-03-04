@@ -73,6 +73,7 @@ const customKeyMappings = {
   launched_by: 'username',
   launched_on: 'created_at',
   dx_instance_class: 'instance',
+  createdAtDateTime: 'createdAt',
 }
 // Some of the list API's order_by values do not match their keys in JSON responses
 // so we need a custom mapping
