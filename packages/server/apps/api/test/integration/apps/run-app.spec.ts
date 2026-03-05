@@ -3,20 +3,21 @@ import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import {
+  allowedFeatures,
+  allowedInstanceTypes,
   DEFAULT_INSTANCE_TYPE,
   JOB_DB_ENTITY_TYPE,
   JOB_STATE,
-  allowedFeatures,
-  allowedInstanceTypes,
 } from '@shared/domain/job/job.enum'
 import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { ErrorCodes } from '@shared/errors'
 import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
 import supertest from 'supertest'
 import { testedApp } from '../../index'
-import { getDefaultHeaderData, stripEntityDates } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('POST /apps/:id/run', () => {
   let em: EntityManager
@@ -38,109 +39,41 @@ describe('POST /apps/:id/run', () => {
 
   it('response shape', async () => {
     const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/apps/${app.dxid}/run`)
+      .post(`/apps/${app.uid}/run`)
       .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
       .expect(201)
-    expect(body).to.deep.include({
-      id: 1,
-      name: app.title,
-      dxid: generate.job.jobId(),
-      entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-      project: user.privateFilesProject,
-      state: JOB_STATE.IDLE,
-      scope: 'private',
-    })
-    expect(body.app).to.deep.include({
-      dxid: app.dxid,
-      title: app.title,
-      scope: app.scope,
-    })
-    expect(body.user).to.deep.include({
-      dxuser: user.dxuser,
-    })
-  })
-
-  it('builds json fields in the db', async () => {
-    const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/apps/${app.dxid}/run`)
-      .set(getDefaultHeaderData(user))
-      .send(generate.app.runAppInput())
-      .expect(201)
-    const jobInDb = await em.findOne(Job, body.id)
-    expect(jobInDb).to.have.property('uid', `${generate.job.jobId()}-1`)
-    expect(jobInDb).to.have.property('describe', '{}')
+    expect(body).to.have.property('id')
+    const jobInDb = await em.findOne(Job, { uid: body.id })
+    expect(jobInDb.describe).to.equal(null)
+    expect(jobInDb.app.id).to.equal(app.id)
     var provenance = jobInDb?.provenance
     expect(provenance).to.deep.equal({
       [generate.job.jobId()]: {
         app_dxid: app.dxid,
         app_id: app.id,
-        inputs: {},
+        inputs: {
+          duration: 30,
+          feature: 'PYTHON_R',
+        },
       },
     })
   })
 
   it('response shape - ttyd app (still user.private project)', async () => {
     const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/apps/${app.dxid}/run`)
+      .post(`/apps/${app.uid}/run`)
       .set(getDefaultHeaderData(user))
       .send(generate.app.runTtydAppInput())
       .expect(201)
-    expect(stripEntityDates(body)).to.deep.include({
-      id: 1,
-      name: app.title,
-      dxid: generate.job.jobId(),
-      entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-      // default app type
-      project: user.privateFilesProject,
-      state: JOB_STATE.IDLE,
-      scope: 'private',
-    })
-    expect(body.app).to.deep.include({
-      dxid: app.dxid,
-      title: app.title,
-      scope: app.scope,
-    })
-    expect(body.user).to.deep.include({
-      dxuser: user.dxuser,
-    })
-  })
-
-  it('accepts snapshot file dxid', async () => {
-    const snapshotFile = create.filesHelper.create(em, { user })
-    await em.flush()
-    const input = {
-      ...generate.app.runAppInput(),
-      input: {
-        snapshot: snapshotFile.uid,
-      },
-    }
-    const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/apps/${app.dxid}/run`)
-      .set(getDefaultHeaderData(user))
-      .send(input)
-      .expect(201)
-    const jobInDb = await em.findOneOrFail(Job, { id: body.id })
-    var provenanceInDb = jobInDb?.provenance
-    expect(provenanceInDb).to.be.deep.equal({
-      [generate.job.jobId()]: {
-        app_dxid: app.dxid,
-        app_id: app.id,
-        inputs: { snapshot: snapshotFile.dxid },
-      },
-    })
-
-    const inputFiles = await jobInDb.inputFiles.loadItems()
-    expect(inputFiles).to.be.an('array').with.lengthOf(1)
-    expect(inputFiles[0].id).to.equal(snapshotFile.id)
-    // correct API call shape
-    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
-    expect(platformCall).to.have.property('input')
-    expect(platformCall.input)
-      .to.have.property('snapshot')
-      .that.deep.equals({
-        $dnanexus_link: { id: snapshotFile.dxid, project: snapshotFile.project },
-      })
+    const jobInDb = await em.findOne(Job, { uid: body.id })
+    expect(jobInDb.project).to.equal(user.privateFilesProject)
+    expect(jobInDb.entityType).to.equal(JOB_DB_ENTITY_TYPE.HTTPS)
+    expect(jobInDb.state).to.equal(JOB_STATE.IDLE)
+    expect(jobInDb.scope).to.equal(STATIC_SCOPE.PRIVATE)
+    expect(jobInDb.state).to.equal(JOB_STATE.IDLE)
+    expect(jobInDb.app.id).to.equal(app.id)
+    expect(jobInDb.user.id).to.equal(user.id)
   })
 
   it('accepts params for jupyter app (uses all overrides and optionals)', async () => {
@@ -149,7 +82,7 @@ describe('POST /apps/:id/run', () => {
       instanceType: 'himem-2',
       jobLimit: 50,
       name: 'my-job-name',
-      input: {
+      inputs: {
         duration: 60,
         feature: 'ML_IP',
         imagename: 'my-imagename',
@@ -157,7 +90,7 @@ describe('POST /apps/:id/run', () => {
       },
     }
     await supertest(testedApp.getHttpServer())
-      .post(`/apps/${app.dxid}/run`)
+      .post(`/apps/${app.uid}/run`)
       .set(getDefaultHeaderData(user))
       .send(inputComplete)
       .expect(201)
@@ -166,10 +99,10 @@ describe('POST /apps/:id/run', () => {
     expect(platformCall).to.have.property('name', inputComplete.name)
     expect(platformCall).to.have.property('costLimit', inputComplete.jobLimit)
     expect(platformCall).to.have.property('input').that.deep.equals({
-      duration: inputComplete.input.duration,
+      duration: inputComplete.inputs.duration,
       feature: allowedFeatures.ML_IP,
-      imagename: inputComplete.input.imagename,
-      cmd: inputComplete.input.cmd,
+      imagename: inputComplete.inputs.imagename,
+      cmd: inputComplete.inputs.cmd,
     })
     expect(platformCall)
       .to.have.property('systemRequirements')
@@ -190,12 +123,10 @@ describe('POST /apps/:id/run', () => {
       instanceType: 'himem-2',
       jobLimit: 25.25,
       name: 'my-ttyd',
-      input: {
-        port: 8081,
-      },
+      inputs: {},
     }
     await supertest(testedApp.getHttpServer())
-      .post(`/apps/${ttydApp.dxid}/run`)
+      .post(`/apps/${ttydApp.uid}/run`)
       .set(getDefaultHeaderData(user))
       .send(ttydAppInput)
       .expect(201)
@@ -203,13 +134,57 @@ describe('POST /apps/:id/run', () => {
     const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
     expect(platformCall).to.have.property('name', ttydAppInput.name)
     expect(platformCall).to.have.property('costLimit', ttydAppInput.jobLimit)
-    expect(platformCall).to.have.property('input').that.deep.equals({
-      port: ttydAppInput.input.port,
-    })
+    expect(platformCall).to.have.property('input').that.deep.equals({})
     expect(platformCall)
       .to.have.property('systemRequirements')
       .that.deep.equals({
         '*': { instanceType: allowedInstanceTypes[ttydAppInput.instanceType] },
+      })
+  })
+
+  it('accepts snapshot file dxid', async () => {
+    const ttydApp = create.appHelper.createHTTPS(
+      em,
+      { user },
+      { spec: generate.app.ttydAppSpecData() },
+    )
+    const snapshotFile = create.filesHelper.create(em, { user })
+    await em.flush()
+    const ttydAppInput = {
+      ...generate.app.runTtydAppInput(),
+      instanceType: 'himem-2',
+      jobLimit: 25.25,
+      name: 'my-ttyd',
+      inputs: {
+        snapshot: snapshotFile.uid,
+      },
+    }
+    const { body } = await supertest(testedApp.getHttpServer())
+      .post(`/apps/${ttydApp.uid}/run`)
+      .set(getDefaultHeaderData(user))
+      .send(ttydAppInput)
+      .expect(201)
+
+    const jobInDb = await em.findOneOrFail(Job, { uid: body.id })
+    var provenanceInDb = jobInDb?.provenance
+    expect(provenanceInDb).to.be.deep.equal({
+      [generate.job.jobId()]: {
+        app_dxid: ttydApp.dxid,
+        app_id: ttydApp.id,
+        inputs: { snapshot: snapshotFile.uid },
+      },
+    })
+
+    const inputFiles = await jobInDb.inputFiles.loadItems()
+    expect(inputFiles).to.be.an('array').with.lengthOf(1)
+    expect(inputFiles[0].id).to.equal(snapshotFile.id)
+    // correct API call shape
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall).to.have.property('input')
+    expect(platformCall.input)
+      .to.have.property('snapshot')
+      .that.deep.equals({
+        $dnanexus_link: { id: snapshotFile.dxid, project: snapshotFile.project },
       })
   })
 
@@ -219,12 +194,12 @@ describe('POST /apps/:id/run', () => {
     await em.flush()
     const input = {
       ...generate.app.runRshinyAppInput(),
-      input: {
+      inputs: {
         app_gz: gzipFile.uid,
       },
     }
     const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/apps/${rshinyApp.dxid}/run`)
+      .post(`/apps/${rshinyApp.uid}/run`)
       .set(getDefaultHeaderData(user))
       .send(input)
       .expect(201)
@@ -234,14 +209,14 @@ describe('POST /apps/:id/run', () => {
       .that.deep.equals({
         app_gz: { $dnanexus_link: { id: gzipFile.dxid, project: gzipFile.project } },
       })
-    const jobInDb = await em.findOneOrFail(Job, { id: body.id })
+    const jobInDb = await em.findOneOrFail(Job, { uid: body.id })
     expect(jobInDb).to.have.property('provenance')
     var provenanceInDb = jobInDb?.provenance
     expect(provenanceInDb).to.be.deep.equal({
       [generate.job.jobId()]: {
         app_dxid: rshinyApp.dxid,
         app_id: rshinyApp.id,
-        inputs: { app_gz: gzipFile.dxid },
+        inputs: { app_gz: gzipFile.uid },
       },
     })
     const inputFiles = await jobInDb.inputFiles.loadItems()
@@ -251,19 +226,24 @@ describe('POST /apps/:id/run', () => {
 
   it('accepts minimal input params (uses all defaults)', async () => {
     const inputComplete = {
+      name: 'Name',
       scope: 'private',
       jobLimit: 50,
-      input: {},
+      inputs: {},
+      instanceType: 'baseline-2',
     }
     await supertest(testedApp.getHttpServer())
-      .post(`/apps/${app.dxid}/run`)
+      .post(`/apps/${app.uid}/run`)
       .set(getDefaultHeaderData(user))
       .send(inputComplete)
       .expect(201)
     // all defaults took place
     const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
-    expect(platformCall).to.have.property('name').that.is.undefined()
-    expect(platformCall).to.have.property('input').that.deep.equals({})
+    expect(platformCall).to.have.property('name').that.equals(inputComplete.name)
+    expect(platformCall).to.have.property('input').that.deep.equals({
+      duration: 240,
+      feature: 'PYTHON_R',
+    })
     expect(platformCall)
       .to.have.property('systemRequirements')
       .that.deep.equals({
@@ -273,36 +253,11 @@ describe('POST /apps/:id/run', () => {
 
   it('calls the platform API', async () => {
     await supertest(testedApp.getHttpServer())
-      .post(`/apps/${app.dxid}/run`)
+      .post(`/apps/${app.uid}/run`)
       .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
       .expect(201)
     expect(fakes.client.jobCreateFake.calledOnce).to.be.true()
-  })
-
-  it('calls queue helper', async () => {
-    const args = []
-    fakes.queue.createSyncJobStatusTaskFake.callsFake((...a) => {
-      a[1] = { ...a[1] }
-      args.push(a)
-    })
-
-    const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/apps/${app.dxid}/run`)
-      .set(getDefaultHeaderData(user))
-      .send(generate.app.runAppInput())
-      .expect(201)
-    expect(fakes.queue.createSyncJobStatusTaskFake.calledOnce).to.be.true()
-    const fakeCallArgs = args[0]
-    expect(fakeCallArgs[0]).to.deep.equal({
-      dxid: body.dxid,
-    })
-    expect(fakeCallArgs[1]).to.deep.contain({
-      id: user.id,
-      accessToken: 'fake-token',
-      dxuser: user.dxuser,
-      sessionId: `session-id-${user.dxuser}`,
-    })
   })
 
   // todo: should test different project selection anyways
@@ -310,7 +265,7 @@ describe('POST /apps/:id/run', () => {
   context('error states', () => {
     it('throws 401 when user does not exist', async () => {
       const { body } = await supertest(testedApp.getHttpServer())
-        .post(`/apps/${app.dxid}/run`)
+        .post(`/apps/${app.uid}/run`)
         .set({
           ...getDefaultHeaderData({ ...user, id: user.id + 1 } as User),
         })
@@ -323,7 +278,7 @@ describe('POST /apps/:id/run', () => {
       user.privateFilesProject = null
       await em.flush()
       const { body } = await supertest(testedApp.getHttpServer())
-        .post(`/apps/${app.dxid}/run`)
+        .post(`/apps/${app.uid}/run`)
         .set(getDefaultHeaderData(user))
         .query({ id: user.id })
         .send(generate.app.runAppInput())
@@ -337,17 +292,17 @@ describe('POST /apps/:id/run', () => {
       const anotherApp = create.appHelper.createHTTPS(em, { user: anotherUser })
       await em.flush()
       const { body } = await supertest(testedApp.getHttpServer())
-        .post(`/apps/${anotherApp.dxid}/run`)
+        .post(`/apps/${anotherApp.uid}/run`)
         .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
       expect(body.error).to.have.property('code', ErrorCodes.APP_NOT_FOUND)
     })
 
     it('throws 404 if requested app does not follow the requirements', async () => {
-      const anotherApp = create.appHelper.createHTTPS(em, { user }, { scope: 'private' })
+      const nonExistentAppUid = 'app-000000000000000000000000-1'
       await em.flush()
       const { body } = await supertest(testedApp.getHttpServer())
-        .post(`/apps/${anotherApp.dxid}/run`)
+        .post(`/apps/${nonExistentAppUid}/run`)
         .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
         .expect(404)
@@ -356,9 +311,9 @@ describe('POST /apps/:id/run', () => {
 
     it('throws 404 when snapshot is provided but file does not exist', async () => {
       const { body } = await supertest(testedApp.getHttpServer())
-        .post(`/apps/${app.dxid}/run`)
+        .post(`/apps/${app.uid}/run`)
         .set(getDefaultHeaderData(user))
-        .send({ ...generate.app.runAppInput(), input: { snapshot: generate.random.dxstr() } })
+        .send({ ...generate.app.runAppInput(), inputs: { snapshot: generate.random.dxstr() } })
         .expect(404)
       expect(body.error).to.have.property('code', ErrorCodes.USER_FILE_NOT_FOUND)
     })

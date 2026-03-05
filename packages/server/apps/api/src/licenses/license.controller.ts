@@ -1,38 +1,22 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Inject,
-  ParseArrayPipe,
-  Post,
-  UseGuards,
-} from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { Body, Controller, Get, HttpCode, ParseArrayPipe, Post, UseGuards } from '@nestjs/common'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
+import { AcceptedLicenseService } from '@shared/domain/accepted-license/accepted-license.service'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { LicenseService } from '@shared/domain/license/license.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { License } from '@shared/domain/license/license.entity'
+import { LicenseService } from '@shared/domain/license/license.service'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @UseGuards(UserContextGuard)
 @Controller('/licenses')
 export class LicenseController {
   constructor(
-    private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly licenseService: LicenseService,
+    private readonly acceptedLicenseService: AcceptedLicenseService,
   ) {}
 
   @Get('/accepted')
   async listAcceptedLicences(): Promise<AcceptedLicense[]> {
-    const [acceptedLicenses] = await this.em.findAndCount(AcceptedLicense, {
-      user: this.user.id,
-    })
-
-    return acceptedLicenses
+    return this.acceptedLicenseService.acceptLicenseForUser()
   }
 
   @HttpCode(200)

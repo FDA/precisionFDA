@@ -6,6 +6,7 @@ export class UserContext {
     readonly id: number,
     readonly accessToken: string,
     readonly dxuser: string,
+    readonly expiration?: number,
     readonly sessionId?: string, // CLI doesn't deal with session id
     readonly requestId?: string, // requestId is used for logging and tracing purposes
     // sessionId was introduced for notifications to be sent to a given session id

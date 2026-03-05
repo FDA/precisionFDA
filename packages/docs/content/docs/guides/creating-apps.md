@@ -62,6 +62,9 @@ Apps run inside a virtual machine (VM); a computer on the cloud with a specific 
 
 By default, apps do not have access to the Internet. Removing Internet access ensures that apps cannot communicate with the outside world over the Internet -- this increases user comfort and lowers the barriers for users to try out apps. If your app requires Internet access (for example, to communicate with a third-party database over the Internet, to fetch files from URLs, or to fetch and install external software at runtime), you can enable it in this tab.
 
+> [!info] precisionFDA CLI Support
+> When internet access is enabled, the precisionFDA CLI (`pfda`) is automatically installed and configured inside the app's virtual machine. This allows your app script to interact with the precisionFDA platform directly, with no additional setup required in your script.
+
 The default instance type denotes the particular hardware configuration that the app will run on. Each instance type comes with a specific amount of memory, number of CPU cores, and hard disk storage. See the section on [available instance types](/guides/creating-apps#available-instance-types) below for more information. Although you can choose a default one in the "VM Environment" tab, users can still override the default choice when launching the app. This is useful if you have a single app that can work for both small inputs (such as an exome) and large inputs (such as a whole genome).
 
 > [!info] Tip

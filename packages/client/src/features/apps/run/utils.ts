@@ -103,7 +103,7 @@ export const prepareValidations = (inputSpec: InputSpec[], userJobLimit: IUser['
   })
 
   const validationObject = {
-    output_folder_path: Yup.string(),
+    outputFolderPath: Yup.string(),
     jobName: Yup.string().required('Job name required'),
     jobLimit: Yup.number()
       .required('Execution cost limit required')
@@ -216,11 +216,11 @@ export const createRequestObject = (
   inputs = cleanObject(inputs)
 
   return {
-    id: app.uid,
+    appUid: app.uid,
     name: jobName,
-    job_limit: jobLimit,
-    output_folder_path: outputFolderPath ?? '',
-    instance_type: instanceType ?? '',
+    jobLimit,
+    outputFolderPath: outputFolderPath ?? '',
+    instanceType: instanceType ?? '',
     scope,
     inputs,
   } satisfies RunJobRequest

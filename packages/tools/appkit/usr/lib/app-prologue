@@ -39,6 +39,7 @@ mkdir -p /work/
 cd /work
 HOME=/work
 cp -f /home/dnanexus/job_input.json /work/job_input.json
+cp /home/dnanexus/.pfda_config /work/.pfda_config 2>/dev/null || true
 
 # https://github.com/dnanexus/dx-toolkit/blob/master/src/python/scripts/dx-print-bash-vars
 dx-print-bash-vars > /tmp/.bash_vars

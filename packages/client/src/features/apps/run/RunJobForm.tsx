@@ -77,7 +77,7 @@ const getDefaults = (
   return {
     jobName: values.jobName ?? opts.app.name,
     jobLimit: values.jobLimit ?? opts.userJobLimit,
-    output_folder_path: values.output_folder_path ?? '',
+    outputFolderPath: values.outputFolderPath ?? '',
     scope: values.scope,
     inputs: values.inputs
       ? [values.inputs['0']]
@@ -223,7 +223,7 @@ export const RunJobForm = ({
     submitCaption: 'Select folder',
     scope: app.scope === 'public' ? 'private' : app.scope, // show private folders for public apps
     onHandleSubmit: (folderId, info: TreeOnSelectInfo) => {
-      setValue('output_folder_path', info.node.path)
+      setValue('outputFolderPath', info.node.path)
       setSelectFolderModal(false)
     },
   })
@@ -291,7 +291,7 @@ export const RunJobForm = ({
             const req = createRequestObject(
               isBatchRun ? `${vals.jobName} (${index + 1} of ${vals.inputs.length})` : vals.jobName,
               vals.jobLimit,
-              vals.output_folder_path,
+              vals.outputFolderPath,
               batchInput.instanceType.value,
               vals.scope.value as ServerScope,
               batchInput.fields,
@@ -370,7 +370,7 @@ export const RunJobForm = ({
                 </FieldGroup>
               </StyledJobName>
               <FieldGroup label="Execution Cost Limit ($)" required>
-                <InputNumber min="0" step="10" {...register('jobLimit')} disabled={isSubmitting} />
+                <InputNumber min="0" step="10" {...register('jobLimit', { valueAsNumber: true })} disabled={isSubmitting} />
                 <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobLimit" />
               </FieldGroup>
               {app.entity_type === 'https' && (

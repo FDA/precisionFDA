@@ -11,6 +11,7 @@ export function ProcessInUserContext(descriptor: PropertyDescriptor): PropertyDe
       user?.id,
       user?.accessToken,
       user?.dxuser,
+      user?.expiration,
       user?.sessionId,
       user?.requestId,
     )

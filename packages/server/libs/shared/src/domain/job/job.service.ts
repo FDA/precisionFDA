@@ -2,6 +2,8 @@ import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { Job as BullJob } from 'bull'
+import { config } from '@shared/config'
+import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from '@shared/config/constants'
 import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 import { EmailService } from '@shared/domain/email/email.service'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -9,6 +11,7 @@ import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-u
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body.dto'
 import { Job } from '@shared/domain/job/job.entity'
+import { allowedInstanceTypes } from '@shared/domain/job/job.enum'
 import { JobCountService } from '@shared/domain/job/services/job-count.service'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { JobWorkstationService } from '@shared/domain/job/services/job-workstation.service'
@@ -22,6 +25,9 @@ import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { JobCreateParams } from '@shared/platform-client/platform-client.params'
+import { IOType } from '@shared/types/common'
+import { TimeUtils } from '@shared/utils/time.utils'
 import { WorkstationAPIResponse } from '@shared/workstation-client/workstation-client'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 import * as errors from '../../errors'
@@ -33,10 +39,13 @@ import {
   JobOutput,
 } from '../../platform-client/platform-client.responses'
 import { Maybe } from '../../types'
+import { App } from '../app/app.entity'
+import { RunAppDTO } from '../app/dto/run-app.dto'
 import { DxId } from '../entity/domain/dxid'
 import { EventHelper } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
+import { JobInput, Provenance } from './job.input'
 import { JobRepository } from './job.repository'
 
 @Injectable()
@@ -175,6 +184,44 @@ export class JobService implements SearchableByUid<'job'> {
     terminate: boolean,
   ): Promise<WorkstationAPIResponse> {
     return await this.jobWorkstationService.snapshot(jobUid, code, key, name, terminate)
+  }
+
+  buildProvenance(jobDxId: DxId<'job'>, app: App, inputs: Record<string, IOType>): Provenance {
+    return {
+      [jobDxId]: { app_dxid: app.dxid, app_id: app.id, inputs },
+    }
+  }
+
+  buildClientApiCall(app: App, projectDxId: DxId<'project'>, jobInput: JobInput, input: RunAppDTO): JobCreateParams {
+    return {
+      project: projectDxId,
+      appId: app.dxid,
+      systemRequirements: {
+        '*': {
+          instanceType: allowedInstanceTypes[input.instanceType],
+        },
+      },
+      timeoutPolicyByExecutable: {
+        [app.dxid]: {
+          '*': {
+            minutes: this.computeTimeoutPolicyForPlatformInMinutes(),
+          },
+        },
+      },
+      costLimit: input.jobLimit,
+      name: input.name ?? app.title,
+      input: { ...jobInput },
+    }
+  }
+
+  // Let the worker terminate the job first, then let platform do it (with 5 minutes delay)
+  private computeTimeoutPolicyForPlatformInMinutes(): number {
+    // value in config is in seconds, platform needs days|hours|minutes
+    const platformTimeoutInMinutes =
+      TimeUtils.secondsToCeilingMinutes(config.workerJobs.syncJob.staleJobsTerminateAfter) + 5
+    const maxPlatformAllowedTimeoutInMinutes = TimeUtils.secondsToCeilingMinutes(MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS)
+
+    return Math.min(platformTimeoutInMinutes, maxPlatformAllowedTimeoutInMinutes)
   }
 
   private async getOrCreateOutputFolder(job: Job): Promise<Folder | null> {

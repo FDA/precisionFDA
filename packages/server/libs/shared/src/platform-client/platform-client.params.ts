@@ -1,5 +1,10 @@
+import {
+  AppAccess,
+  AppInputSpecItem,
+  AppSpecItem,
+  SystemRequirements,
+} from '@shared/domain/app/app.input'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { PlatformSpec } from '../domain/app/app.input'
 import { AnyObject } from '../types'
 
 type Starting = {
@@ -25,7 +30,9 @@ type PackageMapping = {
 type RunSpec = {
   code: string
   interpreter: string
-  systemRequirements: any
+  systemRequirements: {
+    [key: '*' | string]: SystemRequirements
+  }
   distribution: string
   release: string
   execDepends: PackageMapping[]
@@ -36,11 +43,11 @@ type AppletCreateParams = {
   project?: string
   name?: string
   title?: string
-  inputSpec: PlatformSpec[]
-  outputSpec: PlatformSpec[]
+  inputSpec: AppInputSpecItem[]
+  outputSpec: AppSpecItem[]
   runSpec: RunSpec
   dxapi: string
-  access: any
+  access?: AppAccess
 }
 
 type AppUpdateParams = {
@@ -55,10 +62,11 @@ type AppCreateParams = {
   description?: string
   version: string
   resources?: string[] // deprecated field!
-  details?: any
+  details?: AnyObject
   openSource?: boolean
   billTo?: string
-  access?: any
+  access?: AppAccess
+  regionalOptions?: AnyObject
 }
 
 type AppAddAuthorizedUsersParams = {
@@ -244,13 +252,13 @@ type DescribeDataObjectsParams = {
 export type OrgDescribeParams = {
   dxid: string
   defaultFields?: boolean
-  fields?: any
+  fields?: unknown
 }
 
 type UserDescribeParams = {
   dxid: string
   defaultFields?: boolean
-  fields?: any
+  fields?: unknown
 }
 
 type UserResetMfaParams = {
@@ -295,15 +303,14 @@ type CloneObjectsParams = {
 type ProjectLeaveParams = {
   projectDxid: string
 }
-
 export {
   AppAddAuthorizedUsersParams,
   AppAddDevelopersParams,
   AppCreateParams,
-  AppUpdateParams,
   AppDescribeParams,
   AppletCreateParams,
   AppPublishParams,
+  AppUpdateParams,
   CloneObjectsParams,
   CreateFolderParams,
   DbClusterActionParams,

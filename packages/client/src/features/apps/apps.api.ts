@@ -19,12 +19,12 @@ export interface FetchAppsQuery {
 }
 
 export interface RunJobRequest {
-  id: string
+  appUid: string
   name: string
-  job_limit: number
-  instance_type: string
+  jobLimit: number
+  instanceType: string
+  outputFolderPath: string
   scope: ServerScope
-  output_folder_path: string
   inputs: {
     [key: string]: string | number | boolean | string[] | number[] | null | undefined | ComputeInstance
   }
@@ -35,8 +35,9 @@ export interface RunJobResponse {
   error?: Error
 }
 
-export async function runJob(request: RunJobRequest) {
-  return axios.post<RunJobResponse>('/apps/run', request).then(r => r.data)
+export async function runJob(runData: RunJobRequest) {
+  const { appUid, ...payload } = runData
+  return axios.post<RunJobResponse>(`/api/v2/apps/${appUid}/run`, payload).then(r => r.data)
 }
 
 export async function fetchApps(filters: IFilter[], params: Params): Promise<FetchAppsQuery> {

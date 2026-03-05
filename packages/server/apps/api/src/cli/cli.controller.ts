@@ -9,25 +9,9 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common'
-import { CliNodeSearchDTO } from '@shared/domain/cli/dto/cli-node-search.dto'
-import { CliService } from '@shared/domain/cli/service/cli.service'
-import { DxId } from '@shared/domain/entity/domain/dxid'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { DbClusterUidParamDto } from '../dbclusters/model/dbcluster-uid-param.dto'
+import { ApiOperation } from '@nestjs/swagger'
 import { CliCreateDiscussionDTO } from '@shared/domain/cli/dto/cli-create-discussion.dto'
 import { CliCreateReplyDTO } from '@shared/domain/cli/dto/cli-create-reply.dto'
-import { CliEditDiscussionDTO } from '@shared/domain/cli/dto/cli-edit-discussion.dto'
-import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
-import { CliCreateDiscussionFacade } from '../facade/cli/cli-create-discussion.facade'
-import { CliCreateDiscussionReplyFacade } from '../facade/cli/cli-create-discussion-reply.facade'
-import { CliUpdateDiscussionFacade } from '../facade/cli/cli-update-discussion.facade'
-import { CliUpdateDiscussionReplyFacade } from '../facade/cli/cli-update-discussion-reply.facade'
-import { CliDescribeEntityFacade } from '../facade/cli/cli-describe-entity.facade'
-import { CliJobScopeFacade } from '../facade/cli/cli-job-scope.facade'
-import { EntityScope } from '@shared/types/common'
-import { CliNodeRemoveDTO } from '@shared/domain/cli/dto/cli-node-remove.dto'
-import { CliNodeRemoveFacade } from '../facade/cli/cli-node-remove.facade'
-import { CliListMembersFacade } from '../facade/cli/cli-list-members.facade'
 import {
   CliAppDescribeDTO,
   CliDbClusterDescribeDTO,
@@ -37,13 +21,33 @@ import {
   CliFolderDescribeDTO,
   CliWorkflowDescribeDTO,
 } from '@shared/domain/cli/dto/cli-describe.dto'
-import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/cli-space-member.dto'
 import { CliDiscussionDTO } from '@shared/domain/cli/dto/cli-discussion.dto'
+import { CliEditDiscussionDTO } from '@shared/domain/cli/dto/cli-edit-discussion.dto'
+import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
+import { CliExchangeTokenInputDTO } from '@shared/domain/cli/dto/cli-exchange-token-input.dto'
+import { CliExchangeTokenOutputDTO } from '@shared/domain/cli/dto/cli-exchange-token-output.dto'
+import { CliNodeRemoveDTO } from '@shared/domain/cli/dto/cli-node-remove.dto'
+import { CliNodeSearchDTO } from '@shared/domain/cli/dto/cli-node-search.dto'
 import { CliNodeDTO } from '@shared/domain/cli/dto/cli-node.dto'
-import { CliListDiscussionsFacade } from '../facade/cli/cli-list-discussions.facade'
-import { CliFindNodesFacade } from '../facade/cli/cli-find-nodes.facade'
-import { SetPropertiesFacade } from '@shared/facade/property/set-properties.facade'
+import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/cli-space-member.dto'
+import { CliService } from '@shared/domain/cli/service/cli.service'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { SetPropertiesDTO } from '@shared/domain/property/dto/set-properties.dto'
+import { CliExchangeFacade } from '@shared/facade/cli-exchange/cli-exchange.facade'
+import { SetPropertiesFacade } from '@shared/facade/property/set-properties.facade'
+import { EntityScope } from '@shared/types/common'
+import { DbClusterUidParamDto } from '../dbclusters/model/dbcluster-uid-param.dto'
+import { CliCreateDiscussionReplyFacade } from '../facade/cli/cli-create-discussion-reply.facade'
+import { CliCreateDiscussionFacade } from '../facade/cli/cli-create-discussion.facade'
+import { CliDescribeEntityFacade } from '../facade/cli/cli-describe-entity.facade'
+import { CliFindNodesFacade } from '../facade/cli/cli-find-nodes.facade'
+import { CliJobScopeFacade } from '../facade/cli/cli-job-scope.facade'
+import { CliListDiscussionsFacade } from '../facade/cli/cli-list-discussions.facade'
+import { CliListMembersFacade } from '../facade/cli/cli-list-members.facade'
+import { CliNodeRemoveFacade } from '../facade/cli/cli-node-remove.facade'
+import { CliUpdateDiscussionReplyFacade } from '../facade/cli/cli-update-discussion-reply.facade'
+import { CliUpdateDiscussionFacade } from '../facade/cli/cli-update-discussion.facade'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 // SPECIAL ROUTES INTENDED FOR CLI USAGE ONLY. CONTAINS CLI SPECIFIC LOGIC & SPECIAL RESPONSE OBJECTS.
 @Controller('/cli')
@@ -61,6 +65,7 @@ export class CliController {
     private readonly cliListDiscussionsFacade: CliListDiscussionsFacade,
     private readonly cliFindNodesFacade: CliFindNodesFacade,
     private readonly cliSetPropertiesFacade: SetPropertiesFacade,
+    private readonly cliExchangeFacade: CliExchangeFacade,
   ) {}
 
   @UseGuards(UserContextGuard)
@@ -79,6 +84,13 @@ export class CliController {
   @Get('/version/latest')
   getLatestVersion(): { version: string } {
     return { version: '2.11.1' }
+  }
+
+  @ApiOperation({ summary: 'Exchange CLI token for platform workers' })
+  @Post('/token/exchange')
+  @HttpCode(200)
+  async exchangeToken(@Body() body: CliExchangeTokenInputDTO): Promise<CliExchangeTokenOutputDTO> {
+    return this.cliExchangeFacade.exchangeCLIToken(body.code)
   }
 
   @UseGuards(UserContextGuard)

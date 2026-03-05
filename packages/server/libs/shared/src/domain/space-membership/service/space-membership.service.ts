@@ -57,6 +57,15 @@ export class SpaceMembershipService {
     return membership
   }
 
+  async getMembership(spaceId: number, userId: number): Promise<SpaceMembership> {
+    return this.spaceMembershipRepository.findOne({
+      user: userId,
+      spaces: {
+        id: spaceId,
+      },
+    })
+  }
+
   async getMembershipInSpace(spaceId: number, membershipId: number): Promise<SpaceMembership> {
     return this.spaceMembershipRepository.findOne({
       id: membershipId,

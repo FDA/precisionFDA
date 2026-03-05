@@ -9,10 +9,12 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { JobRunData } from '@shared/domain/job/job.types'
 import { JobProperty } from '@shared/domain/property/job-property.entity'
+import { JobTagging } from '@shared/domain/tagging/job-tagging.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -24,8 +26,6 @@ import { JOB_DB_ENTITY_TYPE, JOB_STATE, TERMINAL_STATES } from './job.enum'
 import { isStateActive, isStateTerminal } from './job.helper'
 import { Provenance } from './job.input'
 import { JobRepository } from './job.repository'
-import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
-import { JobTagging } from '@shared/domain/tagging/job-tagging.entity'
 
 @Entity({ tableName: 'jobs', repository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
@@ -99,7 +99,7 @@ export class Job extends ScopedEntity {
     hidden: true,
     type: WorkaroundJsonType,
   })
-  describe: JobDescribeResponse
+  describe: JobDescribeResponse | null
 
   @Property({ type: WorkaroundJsonType })
   provenance: Provenance

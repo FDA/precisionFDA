@@ -58,6 +58,10 @@ export class TimeUtils {
     return milliseconds / this.MILLISECONDS_IN_SECOND
   }
 
+  static secondsToCeilingMinutes(seconds: number): number {
+    return Math.ceil(seconds / this.SECONDS_IN_MINUTE)
+  }
+
   static elapsedTimeSinceStringFormatted(createdAt: Date): string {
     const elapsed = this.milisecondsToSeconds(Date.now() - createdAt.getTime())
     const days = Math.floor(elapsed / this.daysToSeconds(1))

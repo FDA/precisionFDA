@@ -95,6 +95,7 @@ export class UserContextMiddleware implements NestMiddleware {
       userSession.user_id,
       userSession.token,
       userSession.username,
+      userSession.expiration,
       userSession.session_id,
       req.id.toString(),
     )
@@ -122,6 +123,7 @@ export class UserContextMiddleware implements NestMiddleware {
       userSession.user_id,
       userSession.token,
       userSession.username,
+      userSession.expiration,
       null,
       req.id.toString(),
     )

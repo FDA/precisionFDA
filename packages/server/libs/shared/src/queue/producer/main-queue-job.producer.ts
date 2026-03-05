@@ -50,11 +50,11 @@ export class MainQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(task, options)
   }
 
-  async createSyncJobStatusTask(data: CheckStatusJob['payload'], user: UserCtx): Promise<Job> {
+  async createSyncJobStatusTask(data: CheckStatusJob['payload']): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.SYNC_JOB_STATUS as const,
       payload: data,
-      user,
+      user: this.user,
     }
     // unique jobId ensures that every createTask call actually creates a new repeatable job
     // even with the same payload! -> have to clean up the queue correctly

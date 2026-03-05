@@ -28,6 +28,7 @@ interface UserCtx {
   id: number
   accessToken: string
   dxuser: string
+  expiration?: number
   sessionId?: string
 }
 

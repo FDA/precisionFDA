@@ -1,3 +1,4 @@
+import { wrap } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { LicenseService } from '@shared/domain/license/license.service'
@@ -6,7 +7,6 @@ import { App } from '@shared/domain/app/app.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { wrap } from '@mikro-orm/core'
 import { PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
 import { create, db } from '../../../src/test'
 
@@ -44,7 +44,7 @@ describe('licenses for workflow tests', () => {
     asset2.apps.add(app2)
     await em.flush()
 
-    const license1 = create.licenceHelper.createForAsset(
+    const license1 = create.licenseHelper.createForAsset(
       em,
       { user, asset: asset1 },
       { content: 'approval required', title: 'with approval', approvalRequired: true },
@@ -55,7 +55,7 @@ describe('licenses for workflow tests', () => {
     )
     em.persist(licensedItem1)
 
-    const license2 = create.licenceHelper.createForAsset(
+    const license2 = create.licenseHelper.createForAsset(
       em,
       { user, asset: asset2 },
       { content: 'accepted license', title: 'with accepted license', approvalRequired: true },

@@ -1,3 +1,4 @@
+import { wrap } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { LicenseService } from '@shared/domain/license/license.service'
@@ -6,7 +7,6 @@ import { App } from '@shared/domain/app/app.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '../../../src/test'
 import { expect } from 'chai'
-import { wrap } from '@mikro-orm/core'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 
 describe("licenses for app's assets tests", () => {
@@ -40,7 +40,7 @@ describe("licenses for app's assets tests", () => {
     asset2.apps.add(app)
     asset3.apps.add(app)
 
-    const licenseOnAssets = create.licenceHelper.create(
+    const licenseOnAssets = create.licenseHelper.create(
       em,
       { user },
       { title: 'license for assets' },

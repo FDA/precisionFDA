@@ -1,9 +1,8 @@
 import { Control, Controller } from 'react-hook-form'
-import React from 'react'
-import { InputTextRightMargin, Section, SectionBody, SectionHeader, StyledLabel } from './styles'
-import { FieldGroup } from '../../../components/form/FieldGroup'
 import { Button } from '../../../components/Button'
+import { FieldGroup } from '../../../components/form/FieldGroup'
 import { AppSpec, RunJobFormType } from '../apps.types'
+import { InputTextRightMargin, Section, SectionBody, SectionHeader, StyledLabel } from './styles'
 
 const filesOutputClasses = ['file', 'array:file']
 const hasAppFileOutputs = (outputSpec: AppSpec['output_spec']): boolean => {
@@ -31,7 +30,7 @@ export const SetOutputFolder = ({
 
   return render ? (
     <Controller
-      name="output_folder_path"
+      name="outputFolderPath"
       control={control}
       render={({ field }) => (
         <Section>

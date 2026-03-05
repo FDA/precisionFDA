@@ -70,6 +70,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
         decryptedUserSession.user_id,
         decryptedUserSession.token,
         decryptedUserSession.username,
+        decryptedUserSession.expiration,
         decryptedUserSession.session_id,
       )
 

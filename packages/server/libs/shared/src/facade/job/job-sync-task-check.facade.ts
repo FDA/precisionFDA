@@ -35,7 +35,7 @@ export class JobSyncTaskCheckFacade {
       const bullJob = await findRepeatable(bullJobId)
       if (!bullJob) {
         this.logger.log({}, `Recreated missing SyncJobOperation for ${job.dxid}`)
-        await this.mainQueueJobProducer.createSyncJobStatusTask({ dxid: job.dxid }, this.user)
+        await this.mainQueueJobProducer.createSyncJobStatusTask({ dxid: job.dxid })
       } else if (isJobOrphaned(bullJob)) {
         this.logger.log(
           {
@@ -45,7 +45,7 @@ export class JobSyncTaskCheckFacade {
           'Status sync task found, but it is orphaned. Removing and recreating it',
         )
         await removeRepeatableJob(bullJob, getMainQueue())
-        await this.mainQueueJobProducer.createSyncJobStatusTask({ dxid: job.dxid }, this.user)
+        await this.mainQueueJobProducer.createSyncJobStatusTask({ dxid: job.dxid })
       }
     }
   }

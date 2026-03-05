@@ -7,6 +7,7 @@ import sinon from 'sinon'
 import { RedisClient } from 'redis'
 import { FileCloseParams } from '../platform-client/platform-client.params'
 import * as generate from './generate'
+import { random } from './generate'
 import {
   DBCLUSTER_DESC_RES,
   FILE_REMOVED_RES,
@@ -16,7 +17,6 @@ import {
   FOLDERS_LIST_RES,
 } from './mock-responses'
 import { createMockServiceFactory } from './mock-service-factory'
-import { random } from './generate'
 
 const mockServiceFactory = createMockServiceFactory()
 
@@ -91,6 +91,9 @@ const mocksSetDefaultBehaviour = () => {
       instanceType: 'mem1_ssd1_x2_fedramp',
       executionPolicy: {},
       totalPrice: 1.47,
+      input: {},
+      originalInput: {},
+      runInput: {},
     }),
   )
   fakes.client.jobCreateFake.callsFake(() => ({ id: generate.job.jobId() }))
