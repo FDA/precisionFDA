@@ -39,13 +39,6 @@ module CloudResourcesConcern
     )
   end
 
-  def user_database_resource_labels
-    format_resource_labels_by_whitelist(
-      DATABASE_RESOURCE_LABELS,
-      @context.user.resources.intersection(DbCluster::DX_INSTANCE_CLASSES.keys),
-    )
-  end
-
   def format_resource_labels_by_whitelist(labels, allowed_keys)
     user_labels = labels.select { |label| allowed_keys.include?(label[:value]) }
     user_labels.map { |label| { value: label[:value], label: "#{label[:label]}    #{label[:pricing]}$/hour" } }

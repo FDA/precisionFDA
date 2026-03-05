@@ -1,0 +1,18 @@
+.form {
+    margin: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+@media (min-width: 640px) {
+    .form {
+        max-width: 500px;
+    }
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}

@@ -1,17 +1,17 @@
 import axios from 'axios'
+import { IChallenge } from '@/types/challenge'
 import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
+import { CopyResponse } from '../actionModals/useCopyToPrivateModal'
+import { CopyToSpaceProperties } from '../actionModals/useCopyToSpace'
 import { DeleteResponse } from '../actionModals/useDeleteModal'
-import { IChallenge } from '../../types/challenge'
-import { FetchAccessibleFilesResponse, fetchAccessibleFiles } from '../databases/databases.api'
+import { fetchAccessibleFiles, FetchAccessibleFilesResponse } from '../databases/databases.api'
 import { IExecution } from '../executions/executions.types'
 import { FileScope } from '../files/files.types'
 import { ApiResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
-import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
+import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
 import { License } from '../licenses/types'
 import { ISpace } from '../spaces/spaces.types'
-import { AppRevision, AppSpec, ComputeInstance, IApp, IOSpec, InputSpec } from './apps.types'
-import { CopyResponse } from '../actionModals/useCopyToPrivateModal'
-import { CopyToSpaceProperties } from '../actionModals/useCopyToSpace'
+import { AppRevision, AppSpec, ComputeInstance, IApp, InputSpec, IOSpec } from './apps.types'
 
 export interface FetchAppsQuery {
   apps: IApp[]
@@ -52,10 +52,6 @@ export async function fetchSelectableSpaces(id: string): Promise<ISpace[]> {
 
 export async function fetchLicensesOnApp(uid: string): Promise<License[]> {
   return axios.get(`/api/apps/${uid}/licenses_to_accept`).then(r => r.data)
-}
-
-export async function fetchUserComputeInstances() {
-  return axios.get<ComputeInstance[]>('/api/apps/user_compute_resources').then(r => r.data)
 }
 
 export async function fetchFilteredFiles({
@@ -113,16 +109,17 @@ interface FetchAppExecutionsParams extends Params {
   appUid: string
 }
 
-export async function fetchAppExecutions(
-  filters: IFilter[],
-  params: FetchAppExecutionsParams,
-) {
+export async function fetchAppExecutions(filters: IFilter[], params: FetchAppExecutionsParams) {
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query).toString()}`
   return axios.get<FetchAppsExecutionsResponse>(`/api/apps/${params.appUid}/jobs${paramQ}`).then(r => r.data)
 }
 
-export async function copyAppsRequest(scope: string, ids: string[], properties?: CopyToSpaceProperties): Promise<ApiResponse> {
+export async function copyAppsRequest(
+  scope: string,
+  ids: string[],
+  properties?: CopyToSpaceProperties,
+): Promise<ApiResponse> {
   const requestProperties = properties || { createAppSeries: true, createAppRevision: false }
   return axios.post('/api/apps/copy', { item_ids: ids, scope, properties: requestProperties }).then(r => r.data)
 }

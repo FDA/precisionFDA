@@ -1,12 +1,19 @@
 import React, { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Loader } from '../../components/Loader'
-import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
-import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
-import { RESOURCE_LABELS } from '../../types/user'
+import { format } from 'date-fns'
+import { Link, useLocation } from 'react-router'
+import { DatabaseIcon } from '@/components/icons/DatabaseIcon'
+import { Loader } from '@/components/Loader'
+import { ActionsMenu } from '@/components/Menu'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
+import { useLastWSNotification } from '@/hooks/useLastWSNotification'
+import { DATABASE_RESOURCE_LABELS } from '@/types/user'
+import { getSpaceIdFromScope } from '@/utils'
+import { getBackPathNext } from '@/utils/getBackPath'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
+import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
 import {
   Description,
   HeaderLeft,
@@ -22,18 +29,11 @@ import {
   Title,
   Topbox,
 } from '../home/show.styles'
+import { HomeScope, NOTIFICATION_ACTION } from '../home/types'
 import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
-import { useDatabaseSelectActions } from './useDatabaseSelectActions'
-import { HomeScope, NOTIFICATION_ACTION } from '../home/types'
 import { DBStatus } from './DbStatus'
-import { getBackPathNext } from '../../utils/getBackPath'
-import { getSpaceIdFromScope } from '../../utils'
-import { format } from 'date-fns'
-import { useLastWSNotification } from '../../hooks/useLastWSNotification'
-import { ActionsMenu } from '../../components/Menu'
-import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
-import { Link, useLocation } from 'react-router'
+import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 
 const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(db.scope)
@@ -66,7 +66,9 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
         </MetadataItem>
         <MetadataItem>
           <MetadataKey>Created On</MetadataKey>
-          <MetadataVal data-testid="db-created-on">{format(new Date(db.createdAtDateTime), 'yyyy-MM-dd HH:mm:ss')}</MetadataVal>
+          <MetadataVal data-testid="db-created-on">
+            {format(new Date(db.createdAtDateTime), 'yyyy-MM-dd HH:mm:ss')}
+          </MetadataVal>
         </MetadataItem>
       </MetadataRow>
       <MetadataRow>
@@ -90,7 +92,9 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
         </MetadataItem>
         <MetadataItem>
           <MetadataKey>Instance</MetadataKey>
-          <MetadataVal data-testid="db-instance">{RESOURCE_LABELS[db.dxInstanceClass] ?? db.dxInstanceClass}</MetadataVal>
+          <MetadataVal data-testid="db-instance">
+            {DATABASE_RESOURCE_LABELS[db.dxInstanceClass] ?? db.dxInstanceClass}
+          </MetadataVal>
         </MetadataItem>
         <MetadataItem>
           <MetadataKey>Synchronization Status</MetadataKey>
@@ -142,7 +146,7 @@ export const DatabaseShow = ({
   homeContext?: HomeScopeContextValue
 }) => {
   const { homeScope, setDisplayScope, isHome } = homeContext
-  
+
   const location = useLocation()
   const { data, isLoading } = useQuery({
     queryKey: ['dbclusters', databaseId],
@@ -247,8 +251,8 @@ export const DatabaseShow = ({
                 <MetadataKey>Info</MetadataKey>
                 <Description>
                   This database cluster is currently stopped. Seven days after it was stopped, the database cluster will
-                  automatically re-activate and begin incurring charges. If you do not wish to keep this database cluster, use the
-                  Terminate action to permanently stop it and delete its contents.
+                  automatically re-activate and begin incurring charges. If you do not wish to keep this database
+                  cluster, use the Terminate action to permanently stop it and delete its contents.
                 </Description>
               </MetadataItem>
             </MetadataRow>

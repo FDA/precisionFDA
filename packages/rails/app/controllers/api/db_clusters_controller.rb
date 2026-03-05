@@ -93,10 +93,6 @@ module Api
       render json: {}, status: :no_content
     end
 
-    def allowed_db_instances_by_user
-      render json: user_database_resource_labels
-    end
-
     private
 
     def find_db_cluster

@@ -19,6 +19,7 @@ import { SavingModal } from '../../modal/SavingModal'
 import { fetchLicensesOnApp } from '../apps.api'
 import { AppSpec, BatchInput, IApp, RunJobFormType } from '../apps.types'
 import { getDefaultValueFromServer } from '../form/common'
+import { useComputeInstances } from '../useComputeInstances'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { JobRunInput } from './JobRunInput'
 import { SelectContext } from './SelectContext'
@@ -55,7 +56,6 @@ import {
   useDefaultScopeSelection,
   useSelectableContexts,
   useSelectableSpaces,
-  useUserComputeInstances,
   validateFile,
 } from './utils'
 
@@ -76,7 +76,6 @@ const getDefaults = (
 
   return {
     jobName: values.jobName ?? opts.app.name,
-
     jobLimit: values.jobLimit ?? opts.userJobLimit,
     output_folder_path: values.output_folder_path ?? '',
     scope: values.scope,
@@ -182,7 +181,7 @@ export const RunJobForm = ({
   spec: AppSpec
   userJobLimit: IUser['job_limit']
 }) => {
-  const { data: computeInstances, isLoading: computeInstancesLoading } = useUserComputeInstances()
+  const { computeInstances, isLoading: computeInstancesLoading } = useComputeInstances()
   const { data: selectableContexts } = useSelectableContexts(app.scope, app.entity_type)
   const { data: selectableSpaces } = useSelectableSpaces(app.scope)
   const { hash, pathname } = useLocation()
@@ -246,7 +245,7 @@ export const RunJobForm = ({
   const runningButtonText = isBatchRun ? getRunningLabelText() : 'Running App'
 
   const addInput = () => {
-    if (computeInstances) {
+    if (computeInstances.length > 0) {
       const lastId = getValues().inputs[getValues().inputs.length - 1].id ?? 0
       inputs.append(
         {
@@ -396,7 +395,7 @@ export const RunJobForm = ({
                 <SelectInstanceType
                   control={control}
                   selectedInstance={watch().inputs[0].instanceType}
-                  name={'inputs.0.instanceType' as keyof RunJobFormType}
+                  name={'inputs.0.instanceType'}
                   jobLimit={watch().jobLimit}
                   isSubmitting={isSubmitting}
                   computeInstances={computeInstances}
@@ -436,7 +435,7 @@ export const RunJobForm = ({
                 <SelectInstanceType
                   control={control}
                   selectedInstance={watch().inputs[batchIndex].instanceType}
-                  name={`inputs.${batchIndex}.instanceType` as keyof RunJobFormType}
+                  name={`inputs.${batchIndex}.instanceType`}
                   jobLimit={watch().jobLimit}
                   isSubmitting={isSubmitting}
                   computeInstances={computeInstances}
@@ -530,7 +529,7 @@ export const RunJobForm = ({
               </Button>
             </>
           )}
-          {computeInstances && (
+          {computeInstances.length > 0 && (
             <Button data-variant="success" disabled={isSubmitting} type="button" onClick={addInput}>
               Add batch
             </Button>

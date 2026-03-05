@@ -1,28 +1,10 @@
+import { ComputeResourceKey } from '@/types/user'
 import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
 import { Note } from '../actionModals/AttachToModal/useListNotesQuery'
 import { IJob } from '../executions/executions.types'
 import { FileUid } from '../files/files.types'
 import { HomeScope, ServerScope } from '../home/types'
 import { CreateAppPayload } from './apps.api'
-
-export enum PricingMap {
-  'baseline-2' = 0.286,
-  'baseline-4' = 0.572,
-  'baseline-8' = 1.144,
-  'baseline-16' = 2.288,
-  'baseline-36' = 5.148,
-  'hidisk-2' = 0.372,
-  'hidisk-4' = 0.744,
-  'hidisk-8' = 1.488,
-  'hidisk-16' = 2.976,
-  'hidisk-36' = 6.696,
-  'himem-2' = 0.474,
-  'himem-4' = 0.948,
-  'himem-8' = 1.896,
-  'himem-16' = 3.792,
-  'himem-32' = 7.584,
-  'gpu-8' = 10.787,
-}
 
 export interface IOSpec {
   class: 'string' | 'array:string' | 'file' | 'array:file' | 'int' | 'array:int' | 'float' | 'array:float' | 'boolean'
@@ -94,7 +76,7 @@ export interface OutputSpec extends IOSpec {
 }
 
 export interface AppSpec {
-  instance_type: string
+  instance_type: ComputeResourceKey
   internet_access: boolean
   input_spec: InputSpec[]
   output_spec: OutputSpec[]
@@ -144,7 +126,16 @@ export interface SelectType {
   value: string
 }
 
-export type FormInput = string | string[] | boolean | number | number[] | FileUid | FileUid[] | ComputeInstance | undefined
+export type FormInput =
+  | string
+  | string[]
+  | boolean
+  | number
+  | number[]
+  | FileUid
+  | FileUid[]
+  | ComputeInstance
+  | undefined
 
 export interface BatchInput {
   id?: number

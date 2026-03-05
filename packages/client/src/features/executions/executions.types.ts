@@ -1,4 +1,4 @@
-import { RESOURCE_LABELS } from '../../types/user'
+import { COMPUTE_RESOURCE_LABELS } from '@/types/user'
 import { RESOURCE_TYPES } from '../admin/users/types'
 import { FileOrg, FileUser, FormInput, IOSpec } from '../apps/apps.types'
 import { ServerScope } from '../home/types'
@@ -58,7 +58,7 @@ export interface Job {
   run_input_data: RunData[]
   run_output_data: RunData[]
   run_data_updates: RunDataUpdates
-  instance_type: keyof typeof RESOURCE_LABELS
+  instance_type: keyof typeof COMPUTE_RESOURCE_LABELS
   duration: string
   duration_in_seconds: number
   energy_consumption: string
@@ -101,7 +101,7 @@ export interface IJob {
 }
 
 export interface IExecution {
-  id: number|string
+  id: number | string
   state: JobState
   uid: string
   dxid: string
@@ -127,7 +127,7 @@ export interface IExecution {
   startedRunning?: number
   stoppedRunning?: number
   showLicensePending?: boolean
-  instance_type: keyof typeof RESOURCE_LABELS
+  instance_type: keyof typeof COMPUTE_RESOURCE_LABELS
   launched_by: string
   launched_by_dxuser: string
   launched_on: string

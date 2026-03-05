@@ -234,7 +234,6 @@ Rails.application.routes.draw do
           get :everybody
           get :spaces
           get :cli_apps
-          get :user_compute_resources
           get :licenses_to_accept
 
           put :feature, to: "apps#invert_feature"
@@ -411,7 +410,6 @@ Rails.application.routes.draw do
              to: "db_clusters#run",
              as: :run,
              api_method: /(start|stop|terminate)/
-        get :allowed_instances, on: :collection, to: "db_clusters#allowed_db_instances_by_user"
         resources :comments
       end
 

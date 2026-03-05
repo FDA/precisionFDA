@@ -1,4 +1,4 @@
-import { IChallenge } from '../../types/challenge'
+import { IChallenge } from '@/types/challenge'
 import { IOSpec } from '../apps/apps.types'
 import { License } from '../licenses/types'
 
@@ -72,7 +72,15 @@ export type APIResource =
 
 export type HomeScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
-export type PropertiesResource = 'files' | 'folders' | 'node' | 'asset' | 'workflowSeries' | 'job' | 'appSeries' | 'dbCluster'
+export type PropertiesResource =
+  | 'files'
+  | 'folders'
+  | 'node'
+  | 'asset'
+  | 'workflowSeries'
+  | 'job'
+  | 'appSeries'
+  | 'dbCluster'
 
 export type DialogType = 'radio' | 'checkbox'
 
