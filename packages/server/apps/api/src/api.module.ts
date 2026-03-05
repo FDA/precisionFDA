@@ -1,6 +1,6 @@
 import { MikroOrmMiddleware } from '@mikro-orm/nestjs'
-import { MiddlewareConsumer, Module } from '@nestjs/common'
 import { CacheModule } from '@nestjs/cache-manager'
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common'
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { DatabaseModule } from '@shared/database/database.module'
 import { UserContextModule } from '@shared/domain/user-context/user-context.module'
@@ -109,8 +109,12 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
 })
 export class ApiModule {
   configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(MikroOrmMiddleware, UserContextMiddleware).forRoutes('{*splat}')
+    // Apply UserContext and CSRF middlewares to all routes except CLI token exchange
+    // CLI token exchange is used by job workers where CSRF token is not applicable
     consumer
-      .apply(MikroOrmMiddleware, UserContextMiddleware, CSRFVerificationMiddleware)
+      .apply(CSRFVerificationMiddleware)
+      .exclude({ path: 'cli/token/exchange', method: RequestMethod.POST })
       .forRoutes('{*splat}')
   }
 }

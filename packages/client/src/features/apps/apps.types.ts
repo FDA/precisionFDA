@@ -144,7 +144,7 @@ export interface BatchInput {
 }
 
 export interface RunJobFormType {
-  output_folder_path: string | null
+  outputFolderPath: string | null
   jobName: string
   jobLimit: number
   scope: SelectType

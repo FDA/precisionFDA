@@ -38,7 +38,7 @@ export class JobController {
   async syncJobStatus(@Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>): Promise<{
     message: string
   }> {
-    await this.mainQueueJobProducer.createSyncJobStatusTask({ dxid }, this.user)
+    await this.mainQueueJobProducer.createSyncJobStatusTask({ dxid })
     return { message: 'Job sync task created' }
   }
 

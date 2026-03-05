@@ -120,10 +120,8 @@ describe('JobSyncTaskCheckFacade', () => {
       expect(fakes.queue.findRepeatableFake.getCall(2).args[0]).to.equal(BULL_JOB_ID_3)
 
       expect(createSyncJobStatusTaskStub.callCount).to.equal(2)
-      expect(createSyncJobStatusTaskStub.getCall(0).args[0]).to.deep.equal({ dxid: JOB_1.dxid })
-      expect(createSyncJobStatusTaskStub.getCall(0).args[1]).to.equal(USER_CONTEXT)
-      expect(createSyncJobStatusTaskStub.getCall(1).args[0]).to.deep.equal({ dxid: JOB_3.dxid })
-      expect(createSyncJobStatusTaskStub.getCall(1).args[1]).to.equal(USER_CONTEXT)
+      expect(createSyncJobStatusTaskStub.getCall(0).args).to.deep.equal([{ dxid: JOB_1.dxid }])
+      expect(createSyncJobStatusTaskStub.getCall(1).args).to.deep.equal([{ dxid: JOB_3.dxid }])
 
       expect(fakes.queue.removeRepeatableJobsFake.calledOnce).to.be.true()
       expect(fakes.queue.removeRepeatableJobsFake.getCall(0).args[0]).to.equal(BULL_JOB_3)

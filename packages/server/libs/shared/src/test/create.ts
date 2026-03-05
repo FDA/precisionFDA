@@ -109,7 +109,7 @@ const assetHelper = {
   },
 }
 
-const licenceHelper = {
+const licenseHelper = {
   create: (em: EntityManager, references: { user: User }, data?: Partial<License>): License => {
     const license = wrap(new License(references.user)).assign(data ?? {}, { em })
     em.persist(license)
@@ -999,14 +999,13 @@ export {
   filesHelper,
   invitationHelper,
   jobHelper,
-  licenceHelper,
+  licenseHelper,
   newsHelper,
   noteHelper,
   orgHelper,
   profileHelper,
   sessionHelper,
   spacesHelper,
-  tagsHelper,
   userHelper,
   workflowHelper,
   workflowSeriesHelper,

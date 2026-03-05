@@ -1,6 +1,6 @@
+import { dump, load } from '@hyrious/marshal'
 import { config } from '@shared/config'
 import crypto from 'crypto'
-import Marshal from 'marshal'
 import { SecurityUtils } from '../security.utils'
 
 export type CliUserSession = {
@@ -20,7 +20,7 @@ export class CliEncryptor {
   private static readonly encryptedCookieSalt = 'encrypted cookie'
   private static readonly encryptedSignedCookieSalt = 'signed encrypted cookie'
 
-  private static get derivedKey() {
+  private static get derivedKey(): Buffer {
     return crypto.pbkdf2Sync(
       this.secretKeyBase,
       this.encryptedCookieSalt,
@@ -30,7 +30,7 @@ export class CliEncryptor {
     )
   }
 
-  private static get signedSecretKey() {
+  private static get signedSecretKey(): Buffer {
     return crypto.pbkdf2Sync(
       this.secretKeyBase,
       this.encryptedSignedCookieSalt,
@@ -40,10 +40,31 @@ export class CliEncryptor {
     )
   }
 
-  private static validateToken = (data: string, digest: string) => {
+  private static validateToken = (data: string, digest: string): boolean => {
     const hmac = crypto.createHmac('sha256', this.signedSecretKey)
     hmac.update(data)
     return SecurityUtils.secureCompare(hmac.digest(), Buffer.from(digest, 'hex'))
+  }
+
+  static encrypt(session: CliUserSession): string {
+    try {
+      const iv = crypto.randomBytes(16)
+      const cipher = crypto.createCipheriv(this.algorithm, this.derivedKey, iv)
+      let encrypted = cipher.update(
+        Buffer.from(dump(JSON.stringify({ context: session }))).toString('hex'),
+        'hex',
+        'base64',
+      )
+      encrypted += cipher.final('base64')
+      const data = `${encrypted}--${iv.toString('base64')}`
+      const token = Buffer.from(data).toString('base64')
+      const hmac = crypto.createHmac('sha256', this.signedSecretKey)
+      hmac.update(token)
+      const digest = hmac.digest()
+      return `${token}--${Buffer.from(digest).toString('hex')}`
+    } catch (error) {
+      throw new Error(`Failed to encrypt token: ${error}`)
+    }
   }
 
   static decrypt(token: string): CliUserSession {
@@ -64,8 +85,7 @@ export class CliEncryptor {
       let dec = decipher.update(encryptedValue, 'base64', 'hex')
       dec += decipher.final('hex')
 
-      const m = new Marshal(dec, 'hex')
-      return JSON.parse(m.parsed).context
+      return JSON.parse(load(Buffer.from(dec, 'hex')) as string).context
     } catch (error) {
       throw new Error(`Failed to decrypt token: ${error}`)
     }

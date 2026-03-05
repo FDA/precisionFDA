@@ -199,6 +199,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_10_122113) do
     t.index ["status"], name: "index_challenges_on_status"
   end
 
+  create_table "cli_exchange_tokens", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
+    t.string "dxid"
+    t.string "code", null: false
+    t.datetime "expires_at", null: false
+    t.string "encrypted_key", limit: 1023, null: false
+    t.string "scope", null: false
+    t.string "salt", null: false
+  end
+
   create_table "comments", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "commentable_id"
     t.string "commentable_type"

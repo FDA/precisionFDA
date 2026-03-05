@@ -10,7 +10,7 @@ export const config: ConfigOverride = () => ({
     fdaSubnet: {
       allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
     },
-    appKit: 'project-GYP09280XPx4p0gJ8XPY27b0:/appKit-1.2.tgz',
+    appKit: 'project-GYP09280XPx4p0gJ8XPY27b0:/appKit-1.3.tgz',
     captchaEnabled: true,
   },
   database: {

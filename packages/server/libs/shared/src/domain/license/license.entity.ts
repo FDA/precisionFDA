@@ -1,8 +1,9 @@
-import { Collection, Entity, Ref, ManyToOne, OneToMany, Property, Reference } from '@mikro-orm/core'
+import { Collection, Entity, ManyToOne, OneToMany, Property, Ref, Reference } from '@mikro-orm/core'
+import { LicenseRepository } from '@shared/domain/license/license.repository'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
-import { LicenseRepository } from '@shared/domain/license/license.repository'
+import { AcceptedLicense } from '../accepted-license/accepted-license.entity'
 
 @Entity({ tableName: 'licenses', repository: () => LicenseRepository })
 export class License extends BaseEntity {
@@ -26,6 +27,12 @@ export class License extends BaseEntity {
     mappedBy: 'license',
   })
   licensedItems = new Collection<LicensedItem>(this)
+
+  @OneToMany({
+    entity: () => AcceptedLicense,
+    mappedBy: 'license',
+  })
+  acceptedLicenses = new Collection<AcceptedLicense>(this)
 
   constructor(user: User) {
     super()

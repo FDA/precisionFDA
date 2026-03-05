@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { LicensedItem } from './licensed-item.entity'
 
 @Injectable()
 export class LicensedItemService {
@@ -20,6 +21,12 @@ export class LicensedItemService {
       licensedItems.forEach((licensedItem) => {
         this.em.remove(licensedItem)
       })
+    })
+  }
+
+  async getLicensedItemsForNodes(licenseableIds: number[]): Promise<LicensedItem[]> {
+    return await this.licensedItemRepository.find({
+      licenseableId: { $in: licenseableIds },
     })
   }
 }

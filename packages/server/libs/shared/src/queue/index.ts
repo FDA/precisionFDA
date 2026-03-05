@@ -133,10 +133,8 @@ const findRepeatable = async (bullJobId: string): Promise<Bull.JobInformation> =
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createSyncJobStatusTask = async (
-  data: CheckStatusJob['payload'],
-  user: UserCtx,
-): Promise<Job> => mainJobProducer.createSyncJobStatusTask(data, user)
+const createSyncJobStatusTask = async (data: CheckStatusJob['payload']): Promise<Job> =>
+  mainJobProducer.createSyncJobStatusTask(data)
 
 /**
  * @deprecated Use the job producer directly within the DI

@@ -1,6 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
+import { CountStats } from '@shared/database/statistics.type'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
+import { SPACE_STATE } from '@shared/domain/space/space.enum'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderService } from '@shared/domain/user-file/folder.service'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FOLLOW_UP_ACTION, nodeQueryFilter } from '@shared/domain/user-file/user-file.input'
 import {
   ExistingFileSet,
@@ -10,30 +24,16 @@ import {
   FileOrAsset,
   SelectedNode,
 } from '@shared/domain/user-file/user-file.types'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { SPACE_STATE } from '@shared/domain/space/space.enum'
-import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
-import { PermissionError } from '@shared/errors'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import { FetchChildrenDTO } from 'apps/api/src/folders/model/fetch-children.dto'
 import { STATIC_SCOPE } from '@shared/enums'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
-import { FolderService } from '@shared/domain/user-file/folder.service'
+import { PermissionError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EntityScope, SCOPE } from '@shared/types/common'
 import { InputEntityUnion } from '@shared/utils/object-utils'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { CountStats } from '@shared/database/statistics.type'
 import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
 import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
+import { FetchChildrenDTO } from 'apps/api/src/folders/model/fetch-children.dto'
 
 @Injectable()
 export class NodeService {
@@ -79,6 +79,16 @@ export class NodeService {
       uid,
       stiType: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET],
     }) as Promise<UserFile>
+  }
+
+  getAccessibleEntitiesByUids(
+    uids: Uid<'file'>[],
+    stiTypes?: FILE_STI_TYPE[],
+  ): Promise<FileOrAsset[]> {
+    return this.nodeRepository.findAccessible({
+      uid: { $in: uids },
+      stiType: stiTypes ?? [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET],
+    }) as Promise<UserFile[]>
   }
 
   /**
@@ -274,6 +284,13 @@ export class NodeService {
 
   async unlockFile(fileId: number): Promise<void> {
     await this.userFileService.unlockFile(fileId)
+  }
+
+  async getRunnableFileByAccessibleScope(
+    uids: Uid<'file'>[],
+    scope: EntityScope,
+  ): Promise<UserFile[]> {
+    return await this.userFileService.getRunnableFileByAccessibleScope(uids, scope)
   }
 
   async createFoldersOnPath(

@@ -10,6 +10,7 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
@@ -19,15 +20,14 @@ import { getLogger } from '../../logger'
 import { DxId } from '../entity/domain/dxid'
 import { Uid } from '../entity/domain/uid'
 import { ENTITY_TYPE } from './app.enum'
-import type { Spec } from './app.input'
+import type { AppInputSpecItem, AppSpecItem } from './app.input'
 import { AppRepository } from './app.repository'
-import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 const logger = getLogger('app.entity')
 
 export interface AppSpec {
-  input_spec: Spec[]
-  output_spec: Spec[]
+  input_spec: AppInputSpecItem[]
+  output_spec: AppSpecItem[]
   internet_access: boolean
   instance_type: string
 }
@@ -85,6 +85,9 @@ export class App extends ScopedEntity {
 
   @Property()
   release: string
+
+  @Property()
+  deleted: boolean
 
   @Property()
   forkedFrom: string | null

@@ -1,7 +1,12 @@
 import { App } from '@shared/domain/app/app.entity'
+import { getCLIKeyInputSpec } from '@shared/domain/app/app.helper'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import {
   AppDescribeResponse,
@@ -11,11 +16,7 @@ import {
   WorkflowDescribeResponse,
 } from '@shared/platform-client/platform-client.responses'
 import { EntityScope } from '@shared/types/common'
-import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
-import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { invertObj } from 'ramda'
-import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 export class CliFileDescribeDTO {
   types: string[]
@@ -139,6 +140,18 @@ export class CliExecutionDescribeDTO {
     platformJobData: JobDescribeResponse,
     execution: Job,
   ): Promise<CliExecutionDescribeDTO> {
+    const ignoreInputKeys = getCLIKeyInputSpec().map((spec) => spec.name)
+    platformJobData.input = Object.fromEntries(
+      Object.entries(platformJobData.input).filter(([key]) => !ignoreInputKeys.includes(key)),
+    )
+    platformJobData.runInput = Object.fromEntries(
+      Object.entries(platformJobData.runInput).filter(([key]) => !ignoreInputKeys.includes(key)),
+    )
+    platformJobData.originalInput = Object.fromEntries(
+      Object.entries(platformJobData.originalInput).filter(
+        ([key]) => !ignoreInputKeys.includes(key),
+      ),
+    )
     return {
       ...platformJobData,
       dxid: platformJobData.id,

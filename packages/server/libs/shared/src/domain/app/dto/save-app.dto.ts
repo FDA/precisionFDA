@@ -1,9 +1,9 @@
-import { IsBoolean, IsString, IsArray, IsOptional } from 'class-validator'
+import { AppInputSpecItem, AppSpecItem } from '@shared/domain/app/app.input'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { Spec } from '@shared/domain/app/app.input'
 import { EntityScope } from '@shared/types/common'
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator'
 
-export class SaveAppDto {
+export class SaveAppDTO {
   @IsBoolean()
   createAppSeries = false
 
@@ -55,9 +55,9 @@ export class SaveAppDto {
   entity_type?: string
 
   @IsArray()
-  input_spec: Spec[]
+  input_spec: AppInputSpecItem[]
 
   @IsOptional()
   @IsArray()
-  output_spec?: Spec[]
+  output_spec?: AppSpecItem[]
 }

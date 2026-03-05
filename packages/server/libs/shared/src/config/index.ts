@@ -55,7 +55,7 @@ const defaultConfig = {
   env,
   api: {
     port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
-    appKit: 'project-GVg2Zg80fQb20gg39J507VYx:/appKit-1.2.tgz',
+    appKit: 'project-GVg2Zg80fQb20gg39J507VYx:/appKit-1.3.tgz',
     enableSsl: parseBooleanFromProcess(process.env.NODE_ENABLE_SSL, true),
     certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
@@ -220,6 +220,9 @@ const defaultConfig = {
       id: process.env.DBCLUSTER_SYNCHRONIZATION_APP_ID,
       encryptionKey: process.env.DBCLUSTER_SYNCHRONIZATION_APP_ENCRYPTION_KEY,
     },
+  },
+  job: {
+    tokenEncryptionKey: process.env.JOB_TOKEN_ENCRYPTION_KEY,
   },
   devFlags: {
     middleware: {

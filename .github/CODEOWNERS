@@ -15,4 +15,4 @@
 # Backend (Node & Ruby)
 /packages/server @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes @nganphtgit
 /packages/rails @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes @nganphtgit
-
+/packages/server/libs/shared/src/domain/cli-exchange-token/services/cli-exchange-token.service.ts @jselbaz @marektamaskovic @keithmccartney-dna

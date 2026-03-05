@@ -26,6 +26,9 @@ importers:
       '@bull-board/ui':
         specifier: ^6.15.0
         version: 6.17.0
+      '@hyrious/marshal':
+        specifier: ^0.3.3
+        version: 0.3.3
       '@mikro-orm/core':
         specifier: 6.6.7
         version: 6.6.7
@@ -125,9 +128,6 @@ importers:
       marked:
         specifier: ^12.0.1
         version: 12.0.2
-      marshal:
-        specifier: 0.5.4
-        version: 0.5.4
       mjml:
         specifier: ^4.17.1
         version: 4.18.0
@@ -1017,6 +1017,10 @@ packages:
   '@humanwhocodes/retry@0.4.2':
     resolution: {integrity: sha512-xeO57FpIu4p1Ri3Jq/EXq4ClRm86dVF2z/+kvFnyqVYRavTZmaFaUBbWCOuuTh0o/g7DSsk6kc2vrS4Vl5oPOQ==}
     engines: {node: '>=18.18'}
+
+  '@hyrious/marshal@0.3.3':
+    resolution: {integrity: sha512-Sprz5CmX+V5MEbgOfXB0iqJS2i703RsV2cXSKC3++Y+4EeUvZPJlv0tgvoBRNT7mvb6aUu7UeOzfiowXlAOmew==}
+    engines: {node: ^14.18.0 || >=16.0.0}
 
   '@ianvs/prettier-plugin-sort-imports@4.7.1':
     resolution: {integrity: sha512-jmTNYGlg95tlsoG3JLCcuC4BrFELJtLirLAkQW/71lXSyOhVt/Xj7xWbbGcuVbNq1gwWgSyMrPjJc9Z30hynVw==}
@@ -3730,15 +3734,6 @@ packages:
       supports-color:
         optional: true
 
-  debug@4.3.3:
-    resolution: {integrity: sha512-/zxw5+vh1Tfv+4Qn7a5nsbcJKPaSvCDhojn6FEl9vupwK2VCSDtEiEtqr8DFtzYFOdz63LBkxec7DYuc2jon6Q==}
-    engines: {node: '>=6.0'}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-
   debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
     engines: {node: '>=6.0'}
@@ -5273,10 +5268,6 @@ packages:
     resolution: {integrity: sha512-qXUm7e/YKFoqFPYPa3Ukg9xlI5cyAtGmyEIzMfW//m6kXwCy2Ps9DYf5ioijFKQ8qyuscrHoY04iJGctu2Kg0Q==}
     engines: {node: '>= 18'}
     hasBin: true
-
-  marshal@0.5.4:
-    resolution: {integrity: sha512-f82P3ZYEDjREiuyO6Sqh3+nsZlweBeFyQkrYkkumazgwf7+aKVzuCmSTRif5r59dYJ2giR2TWnKySZM8TM81tA==}
-    engines: {node: '>=12.22.9'}
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
@@ -7926,6 +7917,8 @@ snapshots:
   '@humanwhocodes/retry@0.3.1': {}
 
   '@humanwhocodes/retry@0.4.2': {}
+
+  '@hyrious/marshal@0.3.3': {}
 
   '@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@3.8.1)':
     dependencies:
@@ -11279,10 +11272,6 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  debug@4.3.3:
-    dependencies:
-      ms: 2.1.2
-
   debug@4.3.4:
     dependencies:
       ms: 2.1.2
@@ -13211,12 +13200,6 @@ snapshots:
       tmpl: 1.0.5
 
   marked@12.0.2: {}
-
-  marshal@0.5.4:
-    dependencies:
-      debug: 4.3.3
-    transitivePeerDependencies:
-      - supports-color
 
   math-intrinsics@1.1.0: {}
 

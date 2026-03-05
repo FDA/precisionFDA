@@ -2,15 +2,23 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { EventHelper } from '@shared/domain/event/event.helper'
+import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { User } from '@shared/domain/user/user.entity'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
 import {
   ASSET_VALIDATION_ERROR,
   DeleteRelationError,
@@ -38,14 +46,6 @@ import {
   SelectedFolder,
   SelectedNode,
 } from '../user-file.types'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
-import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
-import { EventHelper } from '@shared/domain/event/event.helper'
-import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 
 @Injectable()
 export class UserFileService {
@@ -66,6 +66,22 @@ export class UserFileService {
     private readonly spaceEventService: SpaceEventService,
     private readonly notificationService: NotificationService,
   ) {}
+
+  async getRunnableFileByAccessibleScope(
+    uids: Uid<'file'>[],
+    accessibleScope: EntityScope,
+  ): Promise<FileOrAsset[]> {
+    let accessibleWhere = {}
+    if (accessibleScope === STATIC_SCOPE.PRIVATE) {
+      accessibleWhere = { user: this.userCtx.id, scope: STATIC_SCOPE.PRIVATE }
+    } else {
+      accessibleWhere = { scope: accessibleScope }
+    }
+    return this.fileRepo.find({
+      uid: { $in: uids },
+      $or: [{ scope: STATIC_SCOPE.PUBLIC }, { ...accessibleWhere }],
+    })
+  }
 
   async lockFile(fileId: number): Promise<void> {
     this.logger.log(`Locking file with id: ${fileId}`)

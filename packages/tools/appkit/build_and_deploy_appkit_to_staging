@@ -6,10 +6,10 @@
 # Project context id might be changed
 echo "creating appkit archive"
 
-tar czf appKit-1.1.tgz ./usr
+tar czf appKit-1.3.tgz ./usr
 
 echo "uploading remote appkit"
 
-dx upload appKit-1.1.tgz --project-context-id project-GVg2Zg80fQb20gg39J507VYx
+dx upload appKit-1.3.tgz --project-context-id project-GVg2Zg80fQb20gg39J507VYx
 
 echo "SUCCESS - appkit created"

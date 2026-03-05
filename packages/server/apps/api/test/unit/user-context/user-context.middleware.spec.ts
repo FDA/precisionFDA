@@ -207,6 +207,7 @@ describe('UserContextMiddleware', () => {
       id: USER_ID,
       accessToken: PLATFORM_TOKEN,
       dxuser: USER_NAME,
+      expiration: USER_SESSION.expiration,
       sessionId: SESSION_ID,
       requestId: REQUEST_ID,
     })
@@ -241,6 +242,7 @@ describe('UserContextMiddleware', () => {
       id: USER_ID,
       accessToken: PLATFORM_TOKEN,
       dxuser: USER_NAME,
+      expiration: USER_SESSION.expiration,
       sessionId: null, // no session id in cli key
       requestId: REQUEST_ID,
     })

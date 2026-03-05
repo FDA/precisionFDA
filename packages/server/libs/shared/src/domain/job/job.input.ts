@@ -1,7 +1,8 @@
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
-import { SCOPE } from '../../types/common'
+import { PlatformIOType, SCOPE } from '../../types/common'
 import { DxId } from '../entity/domain/dxid'
+import { Uid } from '../entity/domain/uid'
 import { Job } from './job.entity'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
 
@@ -22,15 +23,18 @@ type RunAppInput = {
     imagename?: string
     port?: number // ttyd
   }
+  appUid: Uid<'app'>
   appDxId: DxId<'app'>
   output_folder_path?: string
 }
 
+type JobInput = Record<string, PlatformIOType>
+
 type Provenance = {
   [k: string]: {
-    app_dxid: string
+    app_dxid: DxId<'app'>
     app_id: number
-    inputs: { [k: string]: string }
+    inputs: JobInput
   }
 }
 
@@ -108,6 +112,7 @@ const runAppSchema: JSONSchema7 = {
 export {
   DescribeJobInput,
   DxIdInput,
+  JobInput,
   ListJobsInput,
   PageJobs,
   Provenance,

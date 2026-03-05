@@ -31,7 +31,7 @@ export class Encryptor {
   private static readonly keySize = 32
   private static readonly pfdaSession = 'cookie._precision-fda_session'
 
-  private static get derivedKey() {
+  private static get derivedKey(): Buffer {
     return crypto.pbkdf2Sync(
       this.secretKeyBase,
       this.authEncryptedCookie,

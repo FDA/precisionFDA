@@ -28,6 +28,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { UserExtras } from '@shared/domain/user/user-extras'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { JobInformation } from 'bull'
 import Chance from 'chance'
@@ -40,14 +41,14 @@ import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
 import { Comparison, COMPARISON_STATE } from '../domain/comparison/comparison.entity'
 import {
   ENGINE as DB_CLUSTER_ENGINE,
-  ENGINES,
   STATUS as DB_CLUSTER_STATUS,
   DB_SYNC_STATUS,
+  ENGINES,
 } from '../domain/db-cluster/db-cluster.enum'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '../domain/job/job.enum'
 import {
-  ENTITY_TYPE as SPACE_EVENT_ENTITY_TYPE,
   SPACE_EVENT_ACTIVITY_TYPE,
+  ENTITY_TYPE as SPACE_EVENT_ENTITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '../domain/space-event/space-event.enum'
 import {
@@ -55,11 +56,10 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '../domain/space-membership/space-membership.enum'
 import { FILE_STATE_DX, FILE_STI_TYPE, PARENT_TYPE } from '../domain/user-file/user-file.types'
-import { User, USER_STATE } from '../domain/user/user.entity'
+import { PRICING_MAP, User, USER_STATE } from '../domain/user/user.entity'
 import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
-import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 
 const chance = new Chance()
 
@@ -97,6 +97,17 @@ const user = {
     publicFilesProject: `project-${random.dxstr()}`,
     privateComparisonsProject: `project-${random.dxstr()}`,
     publicComparisonsProject: `project-${random.dxstr()}`,
+    cloudResourceSettings: {
+      job_limit: 100,
+      total_limit: 200,
+      resources: ['baseline-2', 'baseline-4', 'hidisk-2', 'hidisk-4', 'himem-2', 'himem-4'],
+      pricing_map: PRICING_MAP,
+      charges_baseline: {
+        computeCharges: 0.05,
+        storageCharges: 0.01,
+        dataEgressCharges: 0.02,
+      },
+    },
   }),
 }
 
@@ -224,16 +235,21 @@ const app = {
     return {
       internet_access: true,
       instance_type: 'baseline-2',
-      // output_spec: [],
+      output_spec: [],
       input_spec: [
         {
-          name: 'port',
-          class: 'int',
-          default: 443,
-          label: 'ttyd port',
-          help: 'ttyd shell will appear on this port',
+          name: 'snapshot',
+          label: 'Snapshot',
+          help: 'Snapshot file to restore onto the workstation',
+          class: 'file',
           optional: true,
-          choices: [443, 8081, 8080],
+        },
+        {
+          name: 'path_to_executable',
+          label: 'Path to an executable script',
+          help: 'If snapshot is provided, user can specify a path to an executable script in the snapshot to execute the script during job initialization.',
+          class: 'string',
+          optional: true,
         },
       ],
     } as AppSpec
@@ -266,7 +282,7 @@ const app = {
       },
       release: 'default-release-value',
       entityType: ENTITY_TYPE.NORMAL,
-      version: '1',
+      version: '1.0.0',
       revision: 1,
       readme: 'readme',
       internal: {} as unknown as Internal,
@@ -278,6 +294,7 @@ const app = {
     const dxid = `app-${random.dxstr()}` as DxId<'app'>
     return {
       dxid,
+      uid: `${dxid}-1`,
       title: 'https-app-title',
       scope: 'public',
       spec: {
@@ -289,12 +306,14 @@ const app = {
       release: 'default-release-value',
       entityType: ENTITY_TYPE.HTTPS,
       verified: true,
+      version: '1.0.0',
     }
   },
   rshiny: (): Partial<InstanceType<typeof App>> => {
     const dxid = `app-${random.dxstr()}` as DxId<'app'>
     return {
       dxid,
+      uid: `${dxid}-1`,
       title: 'app-rshiny-title',
       scope: 'public',
       entityType: ENTITY_TYPE.HTTPS,
@@ -313,27 +332,34 @@ const app = {
         output_spec: [],
         internet_access: true,
         instance_type: 'baseline-4',
+        version: '1.0.0',
       },
     }
   },
   runAppInput: (): AnyObject => ({
-    scope: 'private',
+    name: 'Test App Run',
+    scope: STATIC_SCOPE.PRIVATE,
     jobLimit: 32.67,
-    input: {
+    instanceType: 'baseline-2',
+    inputs: {
       duration: 30,
     },
   }),
   runTtydAppInput: (): AnyObject => ({
-    scope: 'private',
+    name: 'Test ttyd App Run',
+    scope: STATIC_SCOPE.PRIVATE,
     jobLimit: 50,
-    input: {
+    instanceType: 'baseline-2',
+    inputs: {
       port: 8080,
     },
   }),
   runRshinyAppInput: (): AnyObject => ({
-    scope: 'private',
+    name: 'Test Rshiny App Run',
+    scope: STATIC_SCOPE.PRIVATE,
     jobLimit: 50,
-    input: {
+    instanceType: 'baseline-4',
+    inputs: {
       app_gz: 'app-gzipped-file',
     },
   }),
@@ -345,7 +371,7 @@ const app = {
       featured: false,
       deleted: false,
       verified: true,
-      scope: 'private',
+      scope: STATIC_SCOPE.PRIVATE,
     }
   },
   appId: (): string => 'app-GP3J1V00XbPPz5qP4QPGxQ08',
@@ -442,7 +468,13 @@ const job = {
       dxid,
       project: `project-${random.dxstr()}`,
       runData,
-      describe: { id: dxid, class: 'job' } as unknown as JobDescribeResponse,
+      describe: {
+        id: dxid,
+        class: 'job',
+        input: {},
+        originalInput: {},
+        runInput: {},
+      } as unknown as JobDescribeResponse,
       state: JOB_STATE.IDLE,
       name: chance.name(),
       scope: STATIC_SCOPE.PRIVATE,
@@ -797,7 +829,7 @@ const bullQueue = {
 }
 
 const bullQueueRepeatable = {
-  syncFilesState: (dxuser: string) => ({
+  syncFilesState: (dxuser: string): JobInformation => ({
     key: `__default__:${SyncFilesStateFacade.getBullJobId(dxuser)}:::*/2 * * * *`,
     name: '__default__',
     id: SyncFilesStateFacade.getBullJobId(dxuser),

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import { Control, Controller } from 'react-hook-form'
 import { Link } from 'react-router'
 import styled from 'styled-components'
@@ -219,6 +219,9 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
             </FieldLabelRow>
           )}
         />
+        <Tip>
+          <b>TIP:</b> The precisionFDA CLI is only available when internet access is enabled
+        </Tip>
       </FieldGroup>
 
       <FieldGroup>
