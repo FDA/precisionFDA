@@ -1,14 +1,14 @@
-import { ColumnDef, Column } from '@tanstack/react-table'
 import React from 'react'
+import { Column, ColumnDef } from '@tanstack/react-table'
 import { Link, useLocation } from 'react-router'
-import { propertiesColumnDef, selectColumnDef } from '../../components/Table/selectColumnDef'
-import { StyledTagItem, StyledTags } from '../../components/Tags'
-import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
-import { RESOURCE_LABELS } from '../../types/user'
-import { StyledNameCell } from '../home/home.styles'
-import { DBStatus } from './DbStatus'
-import { IDatabase } from './databases.types'
+import { DatabaseIcon } from '@/components/icons/DatabaseIcon'
+import { propertiesColumnDef, selectColumnDef } from '@/components/Table/selectColumnDef'
+import { StyledTagItem, StyledTags } from '@/components/Tags'
+import { DATABASE_RESOURCE_LABELS } from '@/types/user'
 import BaseSelectFilter, { baseSelectFilterFn } from '../../components/Table/components/BaseSelectFilter'
+import { StyledNameCell } from '../home/home.styles'
+import { IDatabase } from './databases.types'
+import { DBStatus } from './DbStatus'
 
 const DATABASE_STATUS_OPTIONS = [
   { label: 'Available', value: 'available' },
@@ -25,7 +25,7 @@ const DATABASE_ENGINE_OPTIONS = [
   { label: 'PostgreSQL', value: 'aurora-postgresql' },
 ]
 
-export const useDatabaseColumns = ({ properties = []}: { properties?: string[] }): ColumnDef<IDatabase>[] => {
+export const useDatabaseColumns = ({ properties = [] }: { properties?: string[] }): ColumnDef<IDatabase>[] => {
   const location = useLocation()
   return [
     selectColumnDef<IDatabase>(),
@@ -75,7 +75,7 @@ export const useDatabaseColumns = ({ properties = []}: { properties?: string[] }
       header: 'Instance',
       accessorKey: 'dxInstanceClass',
       filterFn: 'includesString',
-      cell: c => <>{RESOURCE_LABELS[c.row.original.dxInstanceClass] ?? c.row.original.dxInstanceClass}</>,
+      cell: c => <>{DATABASE_RESOURCE_LABELS[c.row.original.dxInstanceClass] ?? c.row.original.dxInstanceClass}</>,
     },
     {
       header: 'Created',

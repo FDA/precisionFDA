@@ -2,18 +2,18 @@ import React, { useRef } from 'react'
 import { Control, Controller } from 'react-hook-form'
 import { Link } from 'react-router'
 import styled from 'styled-components'
-import { Button, TransparentButton } from '../../../components/Button'
+import { Button, TransparentButton } from '@/components/Button'
+import { Checkbox } from '@/components/CheckboxNext'
+import { FieldGroup, FieldLabelRow, SelectFieldLabel } from '@/components/form/styles'
+import { ArrowLeftIcon } from '@/components/icons/ArrowLeftIcon'
+import { CrossIcon } from '@/components/icons/PlusIcon'
+import { Svg } from '@/components/icons/Svg'
 import ExternalLink from '../../../components/Controls/ExternalLink'
-import { FieldGroup, FieldLabelRow, SelectFieldLabel } from '../../../components/form/styles'
-import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
-import { CrossIcon } from '../../../components/icons/PlusIcon'
-import { Svg } from '../../../components/icons/Svg'
 import { useAssetAttachModal } from '../../actionModals/useAssetAttachModal'
 import { CreateAppForm } from '../apps.types'
 import { InputTextS } from './Fields'
-import { FormFields, Help } from './styles'
 import { InstanceTypeSelect } from './InstanceTypeSelect'
-import { Checkbox } from '../../../components/CheckboxNext'
+import { FormFields, Help } from './styles'
 
 const AssetList = styled.div`
   display: flex;
@@ -149,13 +149,7 @@ const PackageList = styled.ul`
   }
 `
 
-const UbuntuPackageSelect = ({
-  onChange,
-  value,
-}: {
-  onChange: (p: string[]) => void
-  value: string[]
-}) => {
+const UbuntuPackageSelect = ({ onChange, value }: { onChange: (p: string[]) => void; value: string[] }) => {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const addItem = () => {

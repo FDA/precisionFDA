@@ -1,4 +1,4 @@
-import { RESOURCE_LABELS } from '../../types/user'
+import { DATABASE_RESOURCE_LABELS } from '@/types/user'
 import { ServerScope } from '../home/types'
 
 export interface Links {
@@ -46,7 +46,7 @@ export interface IDatabase {
   createdAtDateTime: string
   engine: string
   engineVersion: string
-  dxInstanceClass: keyof typeof RESOURCE_LABELS
+  dxInstanceClass: keyof typeof DATABASE_RESOURCE_LABELS
   statusAsOf: Date
   statusUpdatedDateTime: string
   host: string

@@ -1,17 +1,18 @@
+import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { isSafeInteger, uniq } from 'lodash'
-import React, { useEffect } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import * as Yup from 'yup'
-import { IUser } from '../../../types/user'
-import { cleanObject } from '../../../utils/object'
+import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { IUser } from '@/types/user'
+import { cleanObject } from '@/utils/object'
 import { fetchAccessibleFilesByUID } from '../../databases/databases.api'
 import { FileUid } from '../../files/files.types'
 import { ServerScope } from '../../home/types'
 import { fetchLicensesForFiles } from '../../licenses/api'
 import { License } from '../../licenses/types'
 import { RunWorkflowFormType } from '../../workflows/run/RunWorkflowForm'
-import { fetchUserComputeInstances, RunJobRequest } from '../apps.api'
+import { RunJobRequest } from '../apps.api'
 import {
   AcceptedLicense,
   BatchInput,
@@ -24,7 +25,6 @@ import {
 } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
-import { toastError } from '../../../components/NotificationCenter/ToastHelper'
 
 export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
 
@@ -203,7 +203,8 @@ export const createRequestObject = (
   app: IApp,
   inputSpecs: InputSpec[],
 ): RunJobRequest => {
-  let inputs: { [key: string]: string | string[] | number | number[] | boolean | undefined | null | ComputeInstance } = {}
+  let inputs: { [key: string]: string | string[] | number | number[] | boolean | undefined | null | ComputeInstance } =
+    {}
 
   Object.keys(inputsParam).forEach(key => {
     const value = getValue(key, inputsParam[key], inputSpecs)
@@ -279,17 +280,6 @@ export const useSelectableContexts = (appScope: ServerScope, entityType: string)
   })
 }
 
-export const useUserComputeInstances = () => {
-  return useQuery({
-    queryKey: ['user-compute-instances'],
-    queryFn: () =>
-      fetchUserComputeInstances().catch(e => {
-        toastError('Error loading compute instances')
-        throw e
-      }),
-  })
-}
-
 export const useSelectableSpaces = (appScope: ServerScope) => {
   return useQuery({
     queryKey: ['selectable-spaces', appScope],
@@ -303,16 +293,19 @@ export const useSelectableSpaces = (appScope: ServerScope) => {
 
 export const useDefaultInstanceType = (
   formValues: RunJobFormType,
-  computeInstances: ComputeInstance[] | undefined,
+  computeInstances: ComputeInstance[],
   instanceType: string,
   setValue: UseFormSetValue<RunJobFormType>,
 ) => {
   useEffect(() => {
-    if (formValues?.inputs?.[0]?.instanceType || !computeInstances) {
+    if (formValues?.inputs?.[0]?.instanceType || computeInstances.length === 0) {
       return
     }
 
-    setValue('inputs.0.instanceType', computeInstances.find(instance => instance.value === instanceType) ?? computeInstances[0])
+    setValue(
+      'inputs.0.instanceType',
+      computeInstances.find(instance => instance.value === instanceType) ?? computeInstances[0],
+    )
   }, [computeInstances, instanceType, setValue])
 }
 
@@ -397,7 +390,10 @@ export const getBaseLink = (spaceId?: number | string) => (spaceId ? `spaces/${s
 
 export const generateCopyUrl = (displayData: string, url: string, app: IApp, copyType: 'app' | 'appSeries'): string => {
   const base64Encoded = btoa(encodeURIComponent(displayData))
-  const newAppUrl = url.replace(/app-[^/]+/, copyType === 'app' ? app.uid : `app-series-${app.app_series_id.toString()}`)
+  const newAppUrl = url.replace(
+    /app-[^/]+/,
+    copyType === 'app' ? app.uid : `app-series-${app.app_series_id.toString()}`,
+  )
 
   return `${newAppUrl}#${base64Encoded}`
 }

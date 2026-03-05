@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { FileScope, FileState, IFile } from '../files/files.types'
-import { HomeScope, IFilter, MetaV2 } from '../home/types'
+import { HomeScope, IFilter, MetaV2, ServerScope } from '../home/types'
 import { formatScopeQuery, Params, prepareListFetchV2 } from '../home/utils'
 import { IDatabase, MethodType } from './databases.types'
 
@@ -14,14 +14,6 @@ export async function fetchDatabaseList(filters: IFilter[], params: Params): Pro
   const paramQ = '&' + new URLSearchParams(query).toString()
   const scopeQ = formatScopeQuery(params.scope as HomeScope, params.spaceId)
   return axios.get(`/api/v2/dbclusters/${scopeQ}${paramQ}`).then(r => r.data)
-}
-
-interface AllowedInstance {
-  value: string
-  label: string
-}
-export async function getDatabaseAllowedInstances() {
-  return axios.get<AllowedInstance[]>('/api/dbclusters/allowed_instances').then(r => r.data)
 }
 
 export async function fetchDatabaseRequest(uid: string): Promise<IDatabase> {
@@ -62,7 +54,7 @@ export async function fetchAccessibleFilesByUID(body: FetchAccessibleFilesReques
 export interface CreateDatabasePayload {
   name: string
   description: string
-  scope: string
+  scope: ServerScope
   engine: string | null
   dxInstanceClass: string
   engineVersion: string

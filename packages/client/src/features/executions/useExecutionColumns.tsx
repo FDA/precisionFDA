@@ -1,22 +1,22 @@
+import React from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Column, ColumnDef } from '@tanstack/react-table'
-import React from 'react'
 import { useLocation } from 'react-router'
-import { FeaturedToggle } from '../../components/FeaturedToggle'
-import { propertiesColumnDef, selectColumnDef } from '../../components/Table/selectColumnDef'
-import { StyledTagItem, StyledTags } from '../../components/Tags'
-import { BoltIcon } from '../../components/icons/BoltIcon'
-import { CubeIcon } from '../../components/icons/CubeIcon'
-import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
-import { RESOURCE_LABELS } from '../../types/user'
-import { getSpaceIdFromScope } from '../../utils'
+import { FeaturedToggle } from '@/components/FeaturedToggle'
+import { BoltIcon } from '@/components/icons/BoltIcon'
+import { CubeIcon } from '@/components/icons/CubeIcon'
+import { NetworkIcon } from '@/components/icons/NetworkIcon'
+import { ObjectGroupIcon } from '@/components/icons/ObjectGroupIcon'
+import { expanderColumnDef } from '@/components/Table/expanderColumnDef'
+import { propertiesColumnDef, selectColumnDef } from '@/components/Table/selectColumnDef'
+import { StyledTagItem, StyledTags } from '@/components/Tags'
+import { COMPUTE_RESOURCE_LABELS } from '@/types/user'
+import { getSpaceIdFromScope } from '@/utils'
+import SelectFilter, { selectFilterFn } from '../../components/Table/components/SelectFilter'
 import { StyledLinkCell } from '../home/home.styles'
 import { getBasePath, getBasePathFromScope } from '../home/utils'
-import { StateCell } from './StateCell'
 import { IExecution } from './executions.types'
-import SelectFilter, { selectFilterFn } from '../../components/Table/components/SelectFilter'
-import { expanderColumnDef } from '../../components/Table/expanderColumnDef'
-import { NetworkIcon } from '../../components/icons/NetworkIcon'
+import { StateCell } from './StateCell'
 
 export const useExecutionColumns = ({
   isAdmin = false,
@@ -146,7 +146,10 @@ export const useExecutionColumns = ({
         }
 
         return (
-          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`} $disable={!row.original.app_active}>
+          <StyledLinkCell
+            to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`}
+            $disable={!row.original.app_active}
+          >
             <CubeIcon height={14} />
             {row.original.app_title}
           </StyledLinkCell>
@@ -190,7 +193,7 @@ export const useExecutionColumns = ({
         props.row.original.jobs ? (
           <></>
         ) : (
-          <>{RESOURCE_LABELS[props.row.original.instance_type] ?? props.row.original.instance_type}</>
+          <>{COMPUTE_RESOURCE_LABELS[props.row.original.instance_type] ?? props.row.original.instance_type}</>
         ),
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-instance-type` } : {}),
     },
@@ -232,7 +235,9 @@ export const useExecutionColumns = ({
       enableColumnFilter: false,
       size: 198,
       cell: props =>
-        props.row.original.launched_on === null ? props.row.original.created_at_date_time : props.row.original.launched_on,
+        props.row.original.launched_on === null
+          ? props.row.original.created_at_date_time
+          : props.row.original.launched_on,
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-on` } : {}),
     },
     {

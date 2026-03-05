@@ -1,17 +1,16 @@
+import { useEffect, useEffectEvent, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link, Route, Routes, useLocation } from 'react-router'
 import { HomeLabel } from '@/components/HomeLabel'
+import { BoltIcon } from '@/components/icons/BoltIcon'
 import { StyledTab, StyledTabList, StyledTabPanel } from '@/components/Tabs'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
-import { BoltIcon } from '@/components/icons/BoltIcon'
 import { useLastWSNotification } from '@/hooks/useLastWSNotification'
-import { RESOURCE_LABELS } from '@/types/user'
+import { COMPUTE_RESOURCE_LABELS, ComputeResourceKey, ComputeResourcePricingMap } from '@/types/user'
 import { pluralize } from '@/utils/formatting'
 import { getBackPathNext } from '@/utils/getBackPath'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useEffectEvent, useState } from 'react'
-import { Link, Route, Routes, useLocation } from 'react-router'
-import { PricingMap } from '../../apps/apps.types'
-import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
 import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
+import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
 import {
   HeaderLeft,
   HeaderRight,
@@ -29,18 +28,12 @@ import {
 import { NOTIFICATION_ACTION } from '../../home/types'
 import { getBasePath } from '../../home/utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
+import { fetchExecution } from '../executions.api'
+import { IExecution } from '../executions.types'
 import { InputsAndOutputs } from '../InputsAndOutputs'
 import { Logs } from '../Log'
 import { StateCell } from '../StateCell'
-import { fetchExecution } from '../executions.api'
-import { IExecution } from '../executions.types'
 import { FailureMessage, TitleLeft } from './styles'
-
-const calculateCost = (durationInSeconds: number, instanceType: string): string => {
-  const runtimeHours = durationInSeconds / 3600
-  const perHourCost: number = PricingMap[instanceType as keyof typeof PricingMap]
-  return `$${parseFloat((runtimeHours * perHourCost).toFixed(2))}`
-}
 
 export const ExecutionDetails = ({
   executionUid,
@@ -53,6 +46,16 @@ export const ExecutionDetails = ({
 }) => {
   const { homeScope, isHome, setDisplayScope } = homeContext
   const location = useLocation()
+
+  const calculateCost = (durationInSeconds: number, instanceType: string): string => {
+    const runtimeHours = durationInSeconds / 3600
+    const perHourCost =
+      instanceType in ComputeResourcePricingMap
+        ? ComputeResourcePricingMap[instanceType as ComputeResourceKey]
+        : undefined
+    if (!perHourCost) return 'N/A'
+    return `$${parseFloat((runtimeHours * perHourCost).toFixed(2))}`
+  }
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['execution', executionUid],
@@ -185,11 +188,18 @@ export const ExecutionDetails = ({
                 </FailureMessage>
               )}
             </TitleLeft>
-            {execution.showLicensePending && <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" />}
+            {execution.showLicensePending && (
+              <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" />
+            )}
           </HeaderLeft>
           <HeaderRight>
             <ActionsRow>
-              <ExecutionActionsRow homeScope={homeScope} execution={execution} refetch={refetch} isFetching={isFetching} />
+              <ExecutionActionsRow
+                homeScope={homeScope}
+                execution={execution}
+                refetch={refetch}
+                isFetching={isFetching}
+              />
             </ActionsRow>
           </HeaderRight>
         </ResourceHeader>
@@ -255,7 +265,7 @@ export const ExecutionDetails = ({
             <MetadataItem>
               <MetadataKey>Instance Type</MetadataKey>
               <MetadataVal data-testid="execution-instance-type">
-                {RESOURCE_LABELS[execution.instance_type] ?? execution.instance_type}
+                {COMPUTE_RESOURCE_LABELS[execution.instance_type] ?? execution.instance_type}
               </MetadataVal>
             </MetadataItem>
           </MetadataRow>

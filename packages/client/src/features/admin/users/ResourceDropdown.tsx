@@ -1,12 +1,12 @@
 import React from 'react'
 import { MutationFunction, useMutation, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import styled from 'styled-components'
-import { RESOURCES, RESOURCE_LABELS } from '../../../types/user'
+import { BackendError } from '@/api/types'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { RESOURCE_LABELS, RESOURCES } from '@/types/user'
 import { bulkDisableAllResources, bulkDisableResource, bulkEnableAllResources, bulkEnableResource } from './api'
 import { User } from './types'
-import { AxiosError } from 'axios'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
-import { BackendError } from '../../../api/types'
 
 export type ResourceState = 'all' | 'some' | 'none'
 

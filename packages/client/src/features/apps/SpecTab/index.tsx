@@ -1,5 +1,5 @@
 import React from 'react'
-import { RESOURCE_LABELS } from '../../../types/user'
+import { COMPUTE_RESOURCE_LABELS } from '@/types/user'
 import { MetadataKey } from '../../home/show.styles'
 import { AppSpec } from '../apps.types'
 import { SpecTable } from './SpecTable'
@@ -17,7 +17,7 @@ export const SpecTab = ({ spec, spaceId }: { spec: AppSpec; spaceId?: string }):
         <div className="__header_item">
           <MetadataKey>default instance type</MetadataKey>
           <div data-testid="app-default-instance-type" className="__header_item_value">
-            {RESOURCE_LABELS[spec.instance_type as keyof typeof RESOURCE_LABELS] ?? spec.instance_type}
+            {COMPUTE_RESOURCE_LABELS[spec.instance_type]}
           </div>
         </div>
         <div className="__header_item">

@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import Axios from 'axios'
 import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
@@ -24,23 +23,6 @@ async function enableMocking() {
   })
 }
 
-const queryClient = new QueryClient()
-
-async function initializeApp() {
-  try {
-    // Only prefetch if we have auth token
-    const authToken = getAuthenticityToken()
-    if (authToken) {
-      await queryClient.prefetchQuery({
-        queryKey: ['auth-user'],
-        queryFn: () => Axios.get('/api/user').then(r => r.data),
-      })
-    }
-  } catch (error) {
-    console.log('Auth prefetch failed:', error)
-    // Don't block app initialization on auth failure
-  }
-}
 Axios.defaults.headers.common['X-CSRF-Token'] = getAuthenticityToken()
 
 const renderApp = () => {
@@ -51,13 +33,7 @@ const renderApp = () => {
     ReactModal.setAppElement('#app-root')
     loadRuntimeEnv().then(() => {
       enableMocking().then(() => {
-        initializeApp().then(() => {
-          root.render(
-            <QueryClientProvider client={queryClient}>
-              <Root />
-            </QueryClientProvider>,
-          )
-        })
+        root.render(<Root />)
       })
     })
   }

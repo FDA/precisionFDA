@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { Tooltip } from 'react-tooltip'
-import { Button } from '../../components/Button'
-import { ActionsMenu } from '../../components/Menu'
-import { ActionsMenuContent } from '../home/ActionMenuContent'
-import { Running } from '../../components/icons/StateIcons'
-import { getSpaceIdFromScope } from '../../utils'
-import { getBaseLink, useSelectableSpaces, useUserComputeInstances } from '../apps/run/utils'
+import { Button } from '@/components/Button'
+import { Running } from '@/components/icons/StateIcons'
+import { ActionsMenu } from '@/components/Menu'
+import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { getSpaceIdFromScope } from '@/utils'
+import { getBaseLink, useSelectableSpaces } from '../apps/run/utils'
+import { useComputeInstances } from '../apps/useComputeInstances'
 import { useAuthUser } from '../auth/useAuthUser'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { HomeScope } from '../home/types'
 import { StyledRefresh, StyledStatusText } from './details/styles'
 import { IExecution } from './executions.types'
 import { useExecutionSelectActions } from './useExecutionSelectActions'
-import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
 
 export const ExecutionActionsRow = ({
   homeScope,
@@ -62,11 +63,11 @@ export const ExecutionActionsRow = ({
   }
 
   const [rerunDisabled, setRerunDisabled] = useState(false)
-  const { data: computeInstances } = useUserComputeInstances()
+  const { computeInstances } = useComputeInstances()
   const { data: selectableSpaces } = useSelectableSpaces(execution.scope)
 
   useEffect(() => {
-    setRerunDisabled(execution.state === 'idle' || !computeInstances || !selectableSpaces)
+    setRerunDisabled(execution.state === 'idle' || computeInstances.length === 0 || !selectableSpaces)
   }, [execution, computeInstances, selectableSpaces])
 
   const getScope = () => {

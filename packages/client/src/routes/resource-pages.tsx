@@ -1,33 +1,49 @@
 import React from 'react'
 import { Navigate, useLocation, useOutletContext, useParams, useSearchParams } from 'react-router'
-import { Markdown } from '../components/Markdown'
-import { AppShowOutletContext } from '../features/apps/AppsShow'
-import { StyledMarkdownAppShow } from '../features/apps/form/styles'
-import { useAuthUser } from '../features/auth/useAuthUser'
-import { HomeScopeContextValue, useHomeScope } from '../features/home/HomeScopeContext'
-import { ISpace } from '../features/spaces/spaces.types'
+import { Markdown } from '@/components/Markdown'
+import { AppShowOutletContext } from '@/features/apps/AppsShow'
+import { StyledMarkdownAppShow } from '@/features/apps/form/styles'
+import { useAuthUser } from '@/features/auth/useAuthUser'
+import { HomeScopeContextValue, useHomeScope } from '@/features/home/HomeScopeContext'
+import { ISpace } from '@/features/spaces/spaces.types'
 import { SpaceOutletContext } from './spaces'
 
-const MembersList = React.lazy(() => import('../features/spaces/members/MembersList').then(m => ({ default: m.MembersList })))
+const MembersList = React.lazy(() =>
+  import('../features/spaces/members/MembersList').then(m => ({ default: m.MembersList })),
+)
 const AppList = React.lazy(() => import('../features/apps/AppList').then(m => ({ default: m.AppList })))
 const AppsShow = React.lazy(() => import('../features/apps/AppsShow').then(m => ({ default: m.AppsShow })))
 const SpecTab = React.lazy(() => import('../features/apps/SpecTab').then(m => ({ default: m.SpecTab })))
 const AppExecutionsList = React.lazy(() =>
   import('../features/apps/AppExecutionsList').then(m => ({ default: m.AppExecutionsList })),
 )
-const EditAppPage = React.lazy(() => import('../features/apps/form/EditAppPage').then(m => ({ default: m.EditAppPage })))
-const ForkAppPage = React.lazy(() => import('../features/apps/form/ForkAppPage').then(m => ({ default: m.ForkAppPage })))
+const EditAppPage = React.lazy(() =>
+  import('../features/apps/form/EditAppPage').then(m => ({ default: m.EditAppPage })),
+)
+const ForkAppPage = React.lazy(() =>
+  import('../features/apps/form/ForkAppPage').then(m => ({ default: m.ForkAppPage })),
+)
 const RunJobPage = React.lazy(() => import('../features/apps/run/RunJobPage').then(m => ({ default: m.RunJobPage })))
-const DatabaseList = React.lazy(() => import('../features/databases/DatabaseList').then(m => ({ default: m.DatabaseList })))
-const DatabaseShow = React.lazy(() => import('../features/databases/DatabaseShow').then(m => ({ default: m.DatabaseShow })))
+const DatabaseList = React.lazy(() =>
+  import('../features/databases/DatabaseList').then(m => ({ default: m.DatabaseList })),
+)
+const DatabaseShow = React.lazy(() =>
+  import('../features/databases/DatabaseShow').then(m => ({ default: m.DatabaseShow })),
+)
 const CreateDatabase = React.lazy(() =>
   import('../features/databases/create/CreateDatabase').then(m => ({ default: m.CreateDatabase })),
 )
 const AssetList = React.lazy(() => import('../features/assets/AssetList').then(m => ({ default: m.AssetList })))
 const AssetShow = React.lazy(() => import('../features/assets/AssetShow').then(m => ({ default: m.AssetShow })))
-const WorkflowList = React.lazy(() => import('../features/workflows/WorkflowList').then(m => ({ default: m.WorkflowList })))
-const WorkflowShow = React.lazy(() => import('../features/workflows/WorkflowShow').then(m => ({ default: m.WorkflowShow })))
-const ExecutionList = React.lazy(() => import('../features/executions/ExecutionList').then(m => ({ default: m.ExecutionList })))
+const WorkflowList = React.lazy(() =>
+  import('../features/workflows/WorkflowList').then(m => ({ default: m.WorkflowList })),
+)
+const WorkflowShow = React.lazy(() =>
+  import('../features/workflows/WorkflowShow').then(m => ({ default: m.WorkflowShow })),
+)
+const ExecutionList = React.lazy(() =>
+  import('../features/executions/ExecutionList').then(m => ({ default: m.ExecutionList })),
+)
 const ExecutionDetails = React.lazy(() =>
   import('../features/executions/details/ExecutionDetails').then(m => ({ default: m.ExecutionDetails })),
 )
@@ -100,7 +116,14 @@ export const FilesListPage = () => {
   }
 
   const showFolderActions = context.homeContext?.homeScope !== 'featured'
-  return <FileList homeScope={context.homeContext?.homeScope} space={context.space} isAdmin={user?.isAdmin} showFolderActions={showFolderActions} />
+  return (
+    <FileList
+      homeScope={context.homeContext?.homeScope}
+      space={context.space}
+      isAdmin={user?.isAdmin}
+      showFolderActions={showFolderActions}
+    />
+  )
 }
 
 export const FileShowPage = () => {
@@ -202,7 +225,7 @@ export const DatabaseShowPage = () => {
 export const CreateDatabasePage = () => {
   const context = useUnifiedRouteContext()
 
-  return <CreateDatabase homeScope={context.homeContext?.homeScope} spaceId={context.space?.id} />
+  return <CreateDatabase spaceId={context.space?.id} />
 }
 
 export const AssetsListPage = () => {
@@ -268,7 +291,9 @@ export const ExecutionListPage = () => {
     return <Navigate to="?scope=me" replace />
   }
 
-  return <ExecutionList homeScope={context.homeContext?.homeScope} spaceId={context.space?.id} isAdmin={user?.isAdmin} />
+  return (
+    <ExecutionList homeScope={context.homeContext?.homeScope} spaceId={context.space?.id} isAdmin={user?.isAdmin} />
+  )
 }
 
 export const ExecutionDetailsPage = () => {
@@ -296,7 +321,11 @@ export const DiscussionListPage = () => {
 export const DiscussionShowPage = () => {
   const context = useUnifiedRouteContext()
   const user = useAuthUser()
-  const { discussionId, answerId, commentId } = useParams<{ discussionId: string; answerId?: string; commentId?: string }>()
+  const { discussionId, answerId, commentId } = useParams<{
+    discussionId: string
+    answerId?: string
+    commentId?: string
+  }>()
 
   return (
     <DiscussionShow
@@ -313,7 +342,9 @@ export const DiscussionShowPage = () => {
 export const CreateDiscussionPageWrapper = () => {
   const context = useUnifiedRouteContext()
 
-  const displayWarning = context.space ? context.space.type === 'review' && Boolean(context.space.private_space_id) : false
+  const displayWarning = context.space
+    ? context.space.type === 'review' && Boolean(context.space.private_space_id)
+    : false
   const scope = context.space ? (`space-${context.space.id}` as const) : 'public'
 
   return <CreateDiscussionPage displayWarning={displayWarning} scope={scope} />

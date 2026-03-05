@@ -314,9 +314,6 @@ module Api
       render json: apps
     end
 
-    def user_compute_resources
-      render json: user_compute_resource_labels
-    end
 
     def describe
       find_app # check if app accesible by current user first

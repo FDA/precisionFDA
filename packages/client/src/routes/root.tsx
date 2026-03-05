@@ -1,27 +1,26 @@
-import { QueryClientProvider } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { createBrowserRouter, Navigate, Outlet } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
+import { AlertDismissedProvider } from '@/features/admin/alerts/useAlertDismissedLocalStorage'
+import { ExpiringSessionModal } from '@/features/auth/ExpiringSessionModal'
+import { SessionExpiredModal } from '@/features/auth/SessionExpiredModal'
+import { useModal } from '@/features/modal/useModal'
+import { LayoutLoader, UserLayout } from '@/layouts/UserLayout'
+import { PFDAToastContainer } from '@/utils/PFDAToastContainer'
+import queryClientInstance, { setAuthFailureCallback } from '@/utils/queryClient'
 import AuthWall from '../AuthWall'
 import Header from '../components/Header/HeaderNext'
-import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
-import { ExpiringSessionModal } from '../features/auth/ExpiringSessionModal'
-import { SessionExpiredModal } from '../features/auth/SessionExpiredModal'
-import { useModal } from '../features/modal/useModal'
-import { LayoutLoader, UserLayout } from '../layouts/UserLayout'
 import NoFoundPage from '../pages/NoFoundPage'
 import GlobalStyle from '../styles/global'
-import { PFDAToastContainer } from '../utils/PFDAToastContainer'
-import queryClient from '../utils/queryClient'
-
 import 'react-tooltip/dist/react-tooltip.css'
-import HomeShowLayout from '../features/home/HomeShowLayout'
-import RequestAccessPage from '../features/request-access/RequestAccessPage'
-import { ColorModeProvider } from '../utils/ThemeContext'
-import { homeRoutes } from './home'
-import spacesRoutes from './spaces'
 import { FileUploadModalProvider } from '@/features/files/actionModals/useFileUploadModal'
 import { OnlineStatusProvider } from '@/utils/OnlineStatusContext'
+import { ColorModeProvider } from '@/utils/ThemeContext'
+import HomeShowLayout from '../features/home/HomeShowLayout'
+import RequestAccessPage from '../features/request-access/RequestAccessPage'
+import { homeRoutes } from './home'
+import spacesRoutes from './spaces'
 
 const DataPortalRoutes = React.lazy(() => import('../features/data-portals/routes'))
 const ExpertsSinglePage = React.lazy(() => import('../features/experts/details/index'))
@@ -53,6 +52,10 @@ const RootComponent = () => {
   const [railsAlertHeight, setRailsAlertHeight] = useState(0)
 
   useEffect(() => {
+    setAuthFailureCallback(() => sessionExpiredModal.setShowModal(true))
+  }, [])
+
+  useEffect(() => {
     // Calculate the height of the rails-alert element
     const alertElement = document.querySelector('.rails-alert')
     if (alertElement) {
@@ -64,11 +67,7 @@ const RootComponent = () => {
     <ColorModeProvider>
       <React.Fragment>
         <GlobalStyle railsAlertHeight={railsAlertHeight} />
-        <QueryClientProvider
-          client={queryClient({
-            onAuthFailure: () => sessionExpiredModal.setShowModal(true),
-          })}
-        >
+        <QueryClientProvider client={queryClientInstance}>
           <OnlineStatusProvider>
             <FileUploadModalProvider>
               <AlertDismissedProvider>
