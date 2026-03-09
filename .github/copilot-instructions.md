@@ -73,4 +73,4 @@ Always flag:
 - API changes should update MSW mocks in `packages/client/src/mocks/handlers.ts`
 
 # Verification
-If you comment on any code, you must end your comment with the emoji: 🕵️ (The Detective).
+- If you see a comment containing the string "ABCDF", flag it as a debug marker that must be removed before merging.
