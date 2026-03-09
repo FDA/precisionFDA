@@ -73,4 +73,4 @@ Always flag:
 - API changes should update MSW mocks in `packages/client/src/mocks/handlers.ts`
 
 # Verification
-- If you see a comment containing the string "ABCDF", flag it as a debug marker that must be removed before merging.
+- To every PR commit you (Github Copilot) create append - "Verified." at the end of the comment 
