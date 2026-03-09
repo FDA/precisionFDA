@@ -3,11 +3,7 @@ import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
 
 export abstract class PaginatedRepository<T extends object> extends EntityRepository<T> {
-  async paginate<
-    Hint extends string = never,
-    Fields extends string = '*',
-    Excludes extends string = never,
-  >(
+  async paginate<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
     pagination: PaginationDTO<T>,
     where: FilterQuery<T> = {},
     // options?: Omit<FindOptions<T, Hint, Fields, Excludes>, 'limit' | 'offset' | 'orderBy'>,
