@@ -753,6 +753,8 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_file
+    fail "User is not allowed to create public files" if params[:scope] == "public" && !current_user.site_admin?
+
     project = UserFile.publication_project!(current_user, @scope)
 
     parent = current_user

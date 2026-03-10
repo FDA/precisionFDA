@@ -115,10 +115,12 @@ export const FilesListPage = () => {
     return <Navigate to="?scope=me" replace />
   }
 
-  const showFolderActions = context.homeContext?.homeScope !== 'featured'
+  const homeScope = context.homeContext?.homeScope
+  const showFolderActions =
+    !['spaces', 'featured'].includes(homeScope ?? '') && (homeScope !== 'everybody' || user?.isAdmin)
   return (
     <FileList
-      homeScope={context.homeContext?.homeScope}
+      homeScope={homeScope}
       space={context.space}
       isAdmin={user?.isAdmin}
       showFolderActions={showFolderActions}
