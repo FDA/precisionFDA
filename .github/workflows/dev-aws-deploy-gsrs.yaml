@@ -1,4 +1,4 @@
-name: DEV - Deploy GSRS to AWS
+name: DEV - Deploy GSRS ECS
 
 permissions:
   id-token: write
