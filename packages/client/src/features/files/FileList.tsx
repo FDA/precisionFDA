@@ -11,7 +11,6 @@ import {
 import { clsx } from 'clsx'
 import { ArrowUpRightFromSquareIcon } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
-import { Button } from '@/components/Button'
 import { CopyText } from '@/components/CopyText/CopyText'
 import { FileIcon } from '@/components/icons/FileIcon'
 import { FolderIcon } from '@/components/icons/FolderIcon'
@@ -21,6 +20,7 @@ import { ContentFooter } from '@/components/Page/ContentFooter'
 import { Pagination } from '@/components/Pagination'
 import Table from '@/components/Table'
 import { StyledPageTable } from '@/components/Table/components/styles'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
@@ -160,7 +160,7 @@ export const FileList = ({
             {showFolderActions && (
               <>
                 <Button
-                  data-variant="primary"
+                  variant="default"
                   data-testid="home-files-add-folder-button"
                   onClick={() => {
                     const action = findAction('Add Folder')
@@ -172,7 +172,7 @@ export const FileList = ({
                   <FolderIcon height={14} /> Create Folder
                 </Button>
                 <Button
-                  data-variant="primary"
+                  variant="default"
                   data-testid="home-files-add-files-button"
                   onClick={() => {
                     const actionName = space?.id ? 'Choose Add Option' : 'Add Files'
@@ -189,19 +189,18 @@ export const FileList = ({
           </QuickActions>
           <QuickActions>
             {selectedFileIds.length > 0 && (
-              <Button
-                data-variant="outline"
-                as={CopyText}
+              <CopyText
                 value={selectedFileIds.join(', ')}
                 iconColor="currentColor"
-                iconSuccessColor="white"
+                iconSuccessColor="currentColor"
+                className={buttonVariants({ variant: 'outline' })}
               >
                 Copy IDs
-              </Button>
+              </CopyText>
             )}
             {openAction && selectedFileIds.length > 0 && (
               <Button
-                data-variant="outline"
+                variant="outline"
                 onClick={() => {
                   if ('func' in openAction && openAction.func) {
                     openAction.func(false)

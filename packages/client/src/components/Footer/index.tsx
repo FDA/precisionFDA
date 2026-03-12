@@ -1,87 +1,26 @@
 import React from 'react'
 import { Link } from 'react-router'
-import styled from 'styled-components'
 import fdaLogo from '../../assets/logo-fda.svg'
 import { EnvelopeIcon } from '../icons/EnvelopeIcon'
 import { ThemeToggle } from '../ThemeToggle'
 
-const StyledFooterContainer = styled.div`
-  background-color: var(--c-bg-300);
-  border-top: 1px solid var(--c-layout-border-200);
-`
-
-const StyledFooterWrapper = styled.div`
-  max-width: 1330px;
-  margin: 0 auto;
-`
-const Center = styled.div`
-  display: flex;
-  justify-content: center;
-`
-const StyledFooter = styled.footer`
-  display: grid;
-  grid-gap: 16px;
-
-  ${Center} {
-    justify-content: flex-start;
-  }
-  @media (min-width: 1030px) {
-    display: grid;
-    grid-template-columns: auto 2fr 0.5fr;
-  }
-  padding: 32px 32px;
-  font-size: 14px;
-  line-height: 1.428571429;
-  ul {
-    display: flex;
-    list-style: none;
-    padding-left: 0;
-    margin-left: -5px;
-    margin-top: 0;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-  }
-  li {
-    display: flex;
-    align-items: center;
-    padding-left: 5px;
-    padding-right: 5px;
-    white-space: nowrap;
-    margin-bottom: 10px;
-  }
-  p {
-    margin: 0 0 10px;
-  }
-`
-
-const SocialLink = styled.li`
-  height: 20px;
-  display: flex;
-  align-items: flex-end;
-  a {
-    height: 14px;
-  }
-`
-
-const StyledFooterAddress = styled.div`
-  padding-right: 32px;
-`
-
-const StyledFDALogo = styled.a`
-  display: block;
-  margin-bottom: 10px;
-`
+const footerListClassName = 'mt-0 mb-0 -ml-[5px] flex list-none flex-wrap pl-0'
+const footerListItemClassName = 'mb-[10px] flex items-center whitespace-nowrap px-[5px]'
+const footerTextClassName = 'mb-[10px]'
 
 const PFDAFooter = () => {
   return (
-    <StyledFooterContainer>
-      <StyledFooterWrapper>
-        <StyledFooter role="contentinfo">
+    <div className="border-line bg-surface-subtle border-t">
+      <div className="mx-auto max-w-[1330px]">
+        <footer
+          role="contentinfo"
+          className="grid gap-4 p-8 text-sm leading-[1.428571429] min-[1030px]:grid-cols-[auto_2fr_0.5fr]"
+        >
           <div>
-            <StyledFDALogo href="http://www.fda.gov" title="FDA Home Page">
+            <a href="http://www.fda.gov" title="FDA Home Page" className="mb-[10px] block">
               <img src={fdaLogo} alt="FDA Home Page" width="41px" height="46px" />
-            </StyledFDALogo>
-            <StyledFooterAddress>
+            </a>
+            <div className="pr-8">
               <address>
                 <strong>U.S. Food and Drug Administration</strong>
                 <br />
@@ -96,51 +35,55 @@ const PFDAFooter = () => {
                   Contact FDA
                 </a>
               </address>
-            </StyledFooterAddress>
+            </div>
           </div>
-          <Center>
+          <div className="flex justify-start">
             <div>
-              <ul>
-                <li>
+              <ul className={footerListClassName}>
+                <li className={footerListItemClassName}>
                   <Link to="/" title="precisionFDA Home Page">
                     precisionFDA
                   </Link>
                 </li>
-                <li aria-hidden="true">|</li>
-                <li>
+                <li className={footerListItemClassName} aria-hidden="true">
+                  |
+                </li>
+                <li className={footerListItemClassName}>
                   <a href="/docs" target="_blank">
                     Docs
                   </a>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <Link to="/terms" title="precisionFDA Terms of Service">
                     Terms of Service
                   </Link>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <Link to="/security" title="precisionFDA Security">
                     Security Statement
                   </Link>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <a data-turbolinks="false" href="/guidelines">
                     Guidelines
                   </a>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <a data-turbolinks="false" href="/presskit">
                     Press Kit
                   </a>
                 </li>
-                <li aria-hidden="true">|</li>
-                <SocialLink>
+                <li className={footerListItemClassName} aria-hidden="true">
+                  |
+                </li>
+                <li className="mb-2 flex items-center px-[5px]">
                   <a href="mailto:precisionfda@fda.hhs.gov">
                     <EnvelopeIcon />
                   </a>
-                </SocialLink>
+                </li>
               </ul>
-              <ul>
-                <li>
+              <ul className={footerListClassName}>
+                <li className={footerListItemClassName}>
                   <a
                     href="http://www.fda.gov/"
                     target="_blank"
@@ -151,8 +94,10 @@ const PFDAFooter = () => {
                     FDA
                   </a>
                 </li>
-                <li aria-hidden="true">|</li>
-                <li>
+                <li className={footerListItemClassName} aria-hidden="true">
+                  |
+                </li>
+                <li className={footerListItemClassName}>
                   <a
                     href="http://www.fda.gov/AboutFDA/AboutThisWebsite/Accessibility/default.htm"
                     target="_blank"
@@ -162,7 +107,7 @@ const PFDAFooter = () => {
                     Accessibility
                   </a>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <a
                     href="http://www.fda.gov/AboutFDA/Transparency/Basics/default.htm"
                     target="_blank"
@@ -172,7 +117,7 @@ const PFDAFooter = () => {
                     Basics
                   </a>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <a
                     href="http://www.fda.gov/RegulatoryInformation/FOI/default.htm"
                     target="_blank"
@@ -182,7 +127,7 @@ const PFDAFooter = () => {
                     FOIA
                   </a>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <a
                     href="http://www.fda.gov/AboutFDA/WorkingatFDA/NoFearAct/default.htm"
                     target="_blank"
@@ -192,7 +137,7 @@ const PFDAFooter = () => {
                     No Fear Act
                   </a>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <a
                     href="http://www.fda.gov/AboutFDA/Transparency/default.htm"
                     target="_blank"
@@ -202,7 +147,7 @@ const PFDAFooter = () => {
                     Transparency
                   </a>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <a
                     href="http://www.fda.gov/AboutFDA/AboutThisWebsite/WebsitePolicies/default.htm"
                     target="_blank"
@@ -212,7 +157,7 @@ const PFDAFooter = () => {
                     Website Policies
                   </a>
                 </li>
-                <li>
+                <li className={footerListItemClassName}>
                   <a
                     href="https://www.hhs.gov/vulnerability-disclosure-policy/index.html"
                     target="_blank"
@@ -224,15 +169,19 @@ const PFDAFooter = () => {
                 </li>
               </ul>
               <div>
-                <p>Some links on this website may direct you to non-FDA locations.</p>
-                <p>FDA does not endorse or guarantee the integrity of information on these external sites.</p>
+                <p className={footerTextClassName}>Some links on this website may direct you to non-FDA locations.</p>
+                <p className={footerTextClassName}>
+                  FDA does not endorse or guarantee the integrity of information on these external sites.
+                </p>
               </div>
-              <ThemeToggle />
             </div>
-          </Center>
-        </StyledFooter>
-      </StyledFooterWrapper>
-    </StyledFooterContainer>
+          </div>
+          <div className="flex justify-start min-[1030px]:items-start min-[1030px]:justify-end">
+            <ThemeToggle className="self-start" />
+          </div>
+        </footer>
+      </div>
+    </div>
   )
 }
 

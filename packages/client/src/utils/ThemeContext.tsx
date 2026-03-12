@@ -26,12 +26,6 @@ export const ColorModeProvider = ({ children }: { children: React.ReactNode }) =
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light')
-
-    if (theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark')
-    } else {
-      document.documentElement.removeAttribute('data-theme')
-    }
   }
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -48,11 +42,7 @@ export const ColorModeProvider = ({ children }: { children: React.ReactNode }) =
   }, [theme])
   
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark')
-    } else {
-      document.documentElement.removeAttribute('data-theme')
-    }
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
   return <ColorModeContext.Provider value={{ theme, toggleTheme }}><ThemeProvider theme={{ colorMode: theme }}>{children}</ThemeProvider></ColorModeContext.Provider>

@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
-import { useParticipantsQuery } from './useParticipantsQuery'
 import { compactScrollBar } from '../../components/Page/styles'
+import { useParticipantsQuery } from './useParticipantsQuery'
 
 const StyledParticipantsList = styled.ul`
   ${compactScrollBar}
@@ -13,7 +13,6 @@ const StyledParticipantsList = styled.ul`
   grid-gap: 5px;
   overflow-x: auto;
   list-style-type: none;
-
 
   li {
     display: inline-block;
@@ -29,16 +28,7 @@ const StyledParticipantsList = styled.ul`
 
     filter: grayscale(1);
     transition: filter 0.2s ease;
-    
-    &:hover {
-      filter: none;
-    }
-  }
 
-  [data-theme="dark"] & img {
-    filter: grayscale(1) invert(1);
-    transition: filter 0.2s ease;
-    
     &:hover {
       filter: none;
     }
@@ -54,11 +44,7 @@ export const ParticipantOrgsList = () => {
   return (
     <StyledParticipantsList>
       {orgs.map(participant => (
-        <li
-          title={participant.title}
-          data-toggle="tooltip"
-          key={participant.id}
-        >
+        <li title={participant.title} data-toggle="tooltip" key={participant.id}>
           <img src={participant.image_url} alt={participant.title} />
         </li>
       ))}

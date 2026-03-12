@@ -83,8 +83,11 @@ export const FilesList = {
    * Open file detail page by clicking on the file name
    */
   async openDetail(page: Page, fileName: string) {
-    // Target the Name column specifically to avoid matching Origin column
-    const fileLink = page.getByTestId('table-col-name').getByText(fileName, { exact: true })
+    // Retries can leave behind duplicate filenames, so open the first visible match.
+    const fileLink = page
+      .getByTestId('file-row-name')
+      .filter({ hasText: new RegExp(`^${UrlHelper.escapeRegExp(fileName)}$`) })
+      .first()
     await expect(fileLink).toBeVisible({ timeout: 15000 })
     await fileLink.click()
     // Wait for detail page to load by checking for a detail-specific element
@@ -103,7 +106,24 @@ export const FilesList = {
    * Search for a file, wait for it to be closed (show size in bytes), then open detail
    */
   async searchFileAndOpenDetailWhenClosed(page: Page, fileName: string) {
-    await FilesList.searchFile(page, fileName)
+    const fileLink = page
+      .getByTestId('file-row-name')
+      .filter({ hasText: new RegExp(`^${UrlHelper.escapeRegExp(fileName)}$`) })
+      .first()
+
+    await expect
+      .poll(
+        async () => {
+          await FilesList.searchFile(page, fileName)
+          return await fileLink.count()
+        },
+        {
+          timeout: TIMEOUTS.fileUploadComplete,
+          intervals: [500, 1000, 2000],
+        },
+      )
+      .toBeGreaterThan(0)
+
     await FilesList.openDetail(page, fileName)
   },
 }
@@ -156,7 +176,15 @@ export const FileDetail = {
   },
 
   async validateAddedByUsername(page: Page, username: string) {
-    await expect(page.getByTestId('file-added-by').locator(`a[href="/users/${username}"]`)).toBeVisible()
+    const addedBy = page.getByTestId('file-added-by')
+    const profileLink = addedBy.getByRole('link').first()
+
+    await expect(addedBy).toBeVisible()
+    await expect(profileLink).toBeVisible()
+    await expect(profileLink).toHaveAttribute(
+      'href',
+      new RegExp(`/users/${UrlHelper.escapeRegExp(username)}(?:[/?#].*)?$`),
+    )
   },
 
   async validateOrigin(page: Page, origin: string) {
@@ -182,6 +210,12 @@ export const FileDetail = {
 
   async validateEmptyTags(page: Page) {
     await expect(page.getByTestId('tags-container')).not.toBeVisible()
+  },
+
+  async expectPropertiesUpdatedToast(page: Page) {
+    await expect(page.getByRole('alert').filter({ hasText: 'Properties updated' }).last()).toBeVisible({
+      timeout: TIMEOUTS.pageLoad,
+    })
   },
 
   /**
@@ -236,7 +270,7 @@ export const FileDetail = {
 
     await page.getByRole('button', { name: 'Edit Properties' }).click()
 
-    await expect(page.getByText('Properties updated')).toBeVisible({ timeout: TIMEOUTS.pageLoad })
+    await FileDetail.expectPropertiesUpdatedToast(page)
 
     await FileDetail.validateProperty(page, 'Cypress Property Key', 'Cypress Property Value')
 
@@ -249,7 +283,7 @@ export const FileDetail = {
 
     await page.getByRole('button', { name: 'Edit Properties' }).click()
 
-    await expect(page.getByText('Properties updated')).toBeVisible({ timeout: TIMEOUTS.pageLoad })
+    await FileDetail.expectPropertiesUpdatedToast(page)
 
     await FileDetail.validateProperty(page, 'Cypress Property Key', 'Cypress Property Value')
     await FileDetail.validateProperty(page, 'Cypress Second Property Key', 'Cypress Second Property Value')
@@ -275,7 +309,7 @@ export const FileDetail = {
 
     await page.getByRole('button', { name: 'Edit Properties' }).click()
 
-    await expect(page.getByText('Properties updated')).toBeVisible({ timeout: TIMEOUTS.pageLoad })
+    await FileDetail.expectPropertiesUpdatedToast(page)
 
     await FileDetail.validateProperty(page, 'Cypress Property Key - Edited', 'Cypress Property Value - Edited')
     await FileDetail.validateProperty(
@@ -305,7 +339,7 @@ export const FileDetail = {
 
     await page.getByRole('button', { name: 'Edit Properties' }).click()
 
-    await expect(page.getByText('Properties updated')).toBeVisible({ timeout: TIMEOUTS.pageLoad })
+    await FileDetail.expectPropertiesUpdatedToast(page)
 
     await expect(page.getByTestId('properties-container')).not.toBeVisible()
     await FileDetail.validateEmptyProperties(page)

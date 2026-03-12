@@ -161,6 +161,8 @@ test.describe('My Home - Folders & Files', () => {
   })
 
   test('Add Files', async ({ page, app }) => {
+    test.setTimeout(150000)
+
     await app.ensureRoute('/home/files')
     
     // Create test files
@@ -400,22 +402,22 @@ test.describe('My Home - Folders & Files', () => {
     await FileDetail.addTagsTest(page)
   })
 
-  // TODO: remove skip when PFDA-6609 is merged
-  test.skip('Add Properties', async ({ page }) => {
+  test('Add Properties', async ({ page, app }) => {
+    await app.ensureRoute('/home/files')
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
     await FileDetail.addPropertiesTest(page)
   })
 
-  // TODO: remove skip when PFDA-6609 is merged
-  test.skip('Edit Properties', async ({ page }) => {
+  test('Edit Properties', async ({ page, app }) => {
+    await app.ensureRoute('/home/files')
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
     await FileDetail.editPropertiesTest(page)
   })
 
-  // TODO: remove skip when PFDA-6609 is merged
-  test.skip('Delete Properties', async ({ page }) => {
+  test('Delete Properties', async ({ page, app }) => {
+    await app.ensureRoute('/home/files')
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
     await FileDetail.deletePropertiesTest(page)
@@ -451,7 +453,8 @@ test.describe('My Home - Folders & Files', () => {
     await expect(page.getByText('Cypress Comment - Edited')).toBeVisible()
   })
 
-  test.skip('Delete Comment', async ({ page }) => {
+  test('Delete Comment', async ({ page, app }) => {
+    await app.ensureRoute('/home/files')
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
     await FileDetail.clickActionsMenuItem(page, 'Comments')

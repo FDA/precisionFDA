@@ -1,7 +1,6 @@
 import clsx from 'clsx'
 import { Link } from 'react-router'
 import Xarrow from 'react-xarrows'
-import uniqid from 'uniqid'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { Loader } from '../../../components/Loader'
 import type { InputOutput, Stage as WorkflowStage } from '../workflows.types'
@@ -35,7 +34,7 @@ const AppOutputs = ({
         })
 
         return (
-          <div key={uniqid(`${idx}`)} className="shifted-io">
+          <div key={output.name ?? idx} className="shifted-io">
             <i
               id={outputRef.toString()}
               className={outputClass}
@@ -79,7 +78,7 @@ const AppInputs = ({ inputs, slotId }: { inputs: InputOutput[]; slotId: string }
         ) : null
 
         return (
-          <div key={uniqid(`${idx}`)} className="shifted-io">
+          <div key={input.name ?? idx} className="shifted-io">
             <i id={inputRef.toString()} className={inputClass} title={title} />
             {appArrows}
           </div>
@@ -121,7 +120,7 @@ const Stage = ({ apps, stageIndex }: { apps?: WorkflowStage[]; stageIndex: numbe
 
   const stageApps = apps.map((app: WorkflowStage, idx: number) => {
     return (
-      <div key={uniqid(idx.toString())} className="wf-diagram-slot">
+      <div key={app.slotId ?? idx} className="wf-diagram-slot">
         <SlotApp app={app} />
       </div>
     )
@@ -141,7 +140,7 @@ const WorkflowsDiagram = ({ workflowId }: { workflowId: string }) => {
 
   const stageList = Object.entries(data!.stages).map((apps, idx) => {
     return (
-      <Stage key={uniqid(`${idx}`)} stageIndex={idx} apps={apps[1] as WorkflowStage[]} />
+      <Stage key={idx} stageIndex={idx} apps={apps[1] as WorkflowStage[]} />
     )
   })
 
