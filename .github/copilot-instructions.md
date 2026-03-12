@@ -73,4 +73,4 @@ Always flag:
 - API changes should update MSW mocks in `packages/client/src/mocks/handlers.ts`
 
 # Verification
-- To every PR commit you (Github Copilot) create append - "Verified." at the end of the comment 
+- To every PR commit you (GitHub Copilot) create append - "Verified." at the end of the comment

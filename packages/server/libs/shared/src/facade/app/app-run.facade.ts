@@ -153,17 +153,18 @@ export class AppRunFacade {
     const runInput = {}
     const inputSpec = app.spec.input_spec
     for (const spec of inputSpec) {
-      if (!spec.optional && appInputs[spec.name] === undefined && !spec.default) {
-        // input could be 0
-        throw new InvalidStateError(`Input "${app.uid}:${spec.name}" is required but no value provided`)
-      }
-
-      if (spec.default && appInputs[spec.name] === undefined) {
-        appInputs[spec.name] = spec.default
+      if (appInputs[spec.name] === null) {
+        continue
       }
 
       if (appInputs[spec.name] === undefined) {
-        continue
+        if (spec.default) {
+          appInputs[spec.name] = spec.default
+        } else if (spec.optional) {
+          continue
+        } else {
+          throw new InvalidStateError(`Input "${app.uid}:${spec.name}" is required but no value provided`)
+        }
       }
 
       if (spec.class === 'file') {
@@ -210,7 +211,7 @@ export class AppRunFacade {
     const inputFiles: UserFile[] = []
 
     for (const spec of appInputSpec) {
-      if (appInputs[spec.name] === undefined) {
+      if (appInputs[spec.name] === undefined || appInputs[spec.name] === null) {
         continue
       }
 
