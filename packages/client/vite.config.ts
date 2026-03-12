@@ -8,6 +8,7 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const isProduction = mode === 'production'
+  const fontAssetPattern = /\.(woff2?|ttf|otf|eot)$/i
 
   // Check if certs exist for HTTPS (dev server only)
   const keyPath = path.resolve(__dirname, '../../key.pem')
@@ -57,6 +58,7 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
+      assetsInlineLimit: filePath => (fontAssetPattern.test(filePath) ? false : undefined),
       outDir: env.VITE_OUT_DIR || (isProduction ? '../rails/public/packs' : 'dist'),
       emptyOutDir: true,
       manifest: true,

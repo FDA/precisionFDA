@@ -106,3 +106,4 @@ vendor/assets/bower_components/
 *.pyc
 .cursor/
 .specify/
+.playwright-cli

@@ -1,9 +1,10 @@
 import React from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
+import { ChevronDownIcon } from 'lucide-react'
+import { cn } from '../../utils/cn'
+import { buttonVariants } from '../ui/button'
 import styles from './ActionsMenu.module.css'
 import baseStyles from './Menu.module.css'
-import { ArrowIcon } from '../icons/ArrowIcon'
-import { cn } from '../../utils/cn'
 
 export interface ActionsMenuProps {
   children: React.ReactNode
@@ -48,12 +49,12 @@ function ActionsMenuTrigger({
   'data-testid'?: string
 }) {
   return (
-    <BaseMenu.Trigger 
-      className={cn(baseStyles.trigger, styles.trigger, className)}
+    <BaseMenu.Trigger
       disabled={disabled}
+      className={cn(buttonVariants({ variant: 'default' }), styles.trigger, className)}
       {...props}
     >
-      {label} <ArrowIcon />
+      {label} <ChevronDownIcon height={10} />
     </BaseMenu.Trigger>
   )
 }
@@ -118,25 +119,25 @@ function ActionsMenuMessage({ children }: ActionsMenuMessageProps) {
   return <div className={styles.message}>{children}</div>
 }
 
-export function ActionsMenu({ 
-  children, 
+export function ActionsMenu({
+  children,
   label = 'Actions',
   disabled,
-  open, 
+  open,
   onOpenChange,
   className,
   'data-testid': dataTestId,
 }: ActionsMenuProps) {
   return (
     <BaseMenu.Root open={open} onOpenChange={onOpenChange}>
-      <ActionsMenuTrigger 
-        label={label} 
-        disabled={disabled}
-        className={className}
-        data-testid={dataTestId}
-      />
+      <ActionsMenuTrigger label={label} disabled={disabled} className={className} data-testid={dataTestId} />
       <BaseMenu.Portal>
-        <BaseMenu.Positioner sideOffset={3} className={`${baseStyles.positioner} ${styles.positioner}`} side="bottom" align="end">
+        <BaseMenu.Positioner
+          sideOffset={3}
+          className={`${baseStyles.positioner} ${styles.positioner}`}
+          side="bottom"
+          align="end"
+        >
           <BaseMenu.Popup className={baseStyles.popup} role="menu" aria-label={`${label} menu`}>
             {children}
           </BaseMenu.Popup>

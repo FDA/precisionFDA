@@ -330,7 +330,7 @@ import { cn } from '@/utils/cn'
 
 ### Dark Mode Support
 
-Variables automatically adjust for dark mode via `html[data-theme="dark"]` selectors. Use the semantic variables (e.g., `--background`, `--c-text-600`) rather than hardcoded colors.
+Variables automatically adjust for dark mode via `:global(html.dark)` selectors. Use the semantic variables (e.g., `--background`, `--c-text-600`) rather than hardcoded colors.
 
 ### shadcn/ui Inspiration
 
