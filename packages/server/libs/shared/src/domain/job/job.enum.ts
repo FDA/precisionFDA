@@ -15,7 +15,6 @@ enum JOB_DB_ENTITY_TYPE {
 
 const TERMINAL_STATES = [JOB_STATE.DONE, JOB_STATE.FAILED, JOB_STATE.TERMINATED]
 const ACTIVE_STATES = [JOB_STATE.IDLE, JOB_STATE.RUNNING]
-const NON_TERMINAL_STATES = ACTIVE_STATES.concat(JOB_STATE.TERMINATING)
 
 const allowedInstanceTypes = {
   'baseline-2': 'mem1_ssd1_x2_fedramp',
@@ -33,7 +32,7 @@ const allowedInstanceTypes = {
   'hidisk-8': 'mem1_ssd2_x8_fedramp',
   'hidisk-16': 'mem1_ssd2_x16_fedramp',
   'hidisk-36': 'mem1_ssd2_x36_fedramp',
-  'gpu-8' : 'mem3_ssd1_gpu_x8_fedramp',
+  'gpu-8': 'mem3_ssd1_gpu_x8_fedramp',
 } as const
 
 type JobInstanceType = keyof typeof allowedInstanceTypes
@@ -49,7 +48,6 @@ export {
   JOB_STATE,
   TERMINAL_STATES,
   ACTIVE_STATES,
-  NON_TERMINAL_STATES,
   JOB_DB_ENTITY_TYPE,
   DEFAULT_INSTANCE_TYPE,
   allowedFeatures,
