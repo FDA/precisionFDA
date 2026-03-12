@@ -167,6 +167,14 @@ export function mapInputKeyVals(inputVals: RunJobFormType['inputs'], inputSpecs:
       }
     })
     inputs = cleanObject(inputs)
+
+    // Explicitly send null for inputs with defaults that were cleared by the user.
+    inputSpecs.forEach(spec => {
+      if (spec.default != null && !(spec.name in inputs)) {
+        inputs[spec.name] = null
+      }
+    })
+
     inputVal.fields = inputs
   }
 
@@ -214,6 +222,15 @@ export const createRequestObject = (
   })
 
   inputs = cleanObject(inputs)
+
+  // Explicitly send null for inputs with defaults that were cleared by the user.
+  // This tells the backend that the user intentionally cleared the input,
+  // rather than it being absent from the form.
+  inputSpecs.forEach(spec => {
+    if (spec.default != null && !(spec.name in inputs)) {
+      inputs[spec.name] = null
+    }
+  })
 
   return {
     appUid: app.uid,

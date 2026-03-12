@@ -48,11 +48,16 @@ class InputSpecPreparer
 
       if inputs.has_key?(key)
         value = inputs[key]
+        # A nil value means the user explicitly cleared this input on the frontend
+        if value.nil?
+          next
+        end
+      elsif optional
+        # Input is optional and no value was provided — skip it even if a
+        # default exists. The user may have intentionally cleared it.
+        next
       elsif has_default
         value = default
-      elsif optional
-        # No given value and no default, but input is optional; move on
-        next
       else
         # Required input is missing
         add_error "#{key}: required input is missing"
@@ -60,7 +65,7 @@ class InputSpecPreparer
       end
 
       # Check compatibility with choices
-      add_error "#{key}: incompatiblity with choices" if choices.present? && !validate_choices(choices, value)
+      add_error "#{key}: incompatibility with choices" if choices.present? && !validate_choices(choices, value)
 
       case klass
       when "file"
