@@ -16,7 +16,7 @@ module CloudResourcesConcern
     { value: "hidisk-8", label: "High Disk 8", pricing: 1.488 },
     { value: "hidisk-16", label: "High Disk 16", pricing: 2.976 },
     { value: "hidisk-36", label: "High Disk 36", pricing: 6.696 },
-    { value: "gpu-8", label: "GPU 8", pricing: 7.584 },
+    { value: "gpu-8", label: "GPU 8", pricing: 10.787 },
   ].freeze
 
   # TODO(samuel) define
