@@ -2,84 +2,87 @@
 title: Spaces
 ---
 
-**Review spaces** are custom environments on precisionFDA, designed to let two collaborating groups work cooperatively on a project.
+**Spaces** are collaborative environments on precisionFDA, where multiple users may work together and share files, apps, executions, and more.
+
+There are several different types of Spaces:
+
+* **Group Spaces** provide a single shared environment, where multiple users may access data objects uploaded or copied to the Space.
+* **Review Spaces** are custom environments on precisionFDA, designed to let two collaborating groups work cooperatively on a project. Review Spaces include 3 different areas - one for the reviewer, one for the sponsor organization, and a shared cooperative area.
 
 ![Review spaces schema with Sponsor-Private,Sponsor-Reviewer and Reviewer-Private areas](./assets/schema.png)
 
-A **review space** provides two private areas - one for the reviewer, and one for the sponsor organization. Both groups also have access to a shared, cooperative space, where they may both interact with common files, run apps and examine jobs.
+* **Government Spaces** are a form of Group Space where access is limited to users with a .gov email associated with their account. Non-government users may not be added to this Space.
+* **Private Spaces** are single-person Spaces accessible only to the user who created them; they're a useful way to archive old data.
 
-## Creating the Review Space
+## Requesting a new Space
 
-To begin working with a sponsor org as a review lead, you will create a review space. You can start this by navigating to the Spaces area of the precisionFDA website from the top menu bar and selecting **Provision a space**.
+Most Spaces must be initially created by a precisionFDA administrator. If you need a new Group, Review, or Government Space, it can be requested via email to [precisionFDA@fda.hhs.gov](mailto:precisionfda@fda.hhs.gov).
 
-![Spaces page overview](./assets/creating.png)
+Any user can create any number of Private Spaces. Keep in mind that Private Spaces do not have a membership feature; no one else can access a Private Space except for you. It's like an extension from your My Home area.
 
-You must select **review** as the type of space.
+To begin working with a sponsor org as a review lead, you will need a Review Space.
 
-![Create new space page with Type,Name,Description,Reviewe lead,Sponsor Org and CTS fields](./assets/creating2.png)
 
-You can then provide a name for the space, a description, and a reviewer lead and sponsor org.**The reviewer** lead should be either yourself or the person leading the review, as their account will have permission to complete the space setup process.**The sponsor org** should be the organization whose work you are reviewing. You may also choose to load a template space that was used for app verification, if you choose to do so.
+## Using Group Spaces
 
-![Inactive Test review space](./assets/testing.png)
+Once a Space Administrator has created your Group Space, it will activate, and both the host lead and the guest lead may log into the Space. From here, they may add files, apps, executions, and discussions, and they may add other members to the space.
 
-After creating the review space, both the reviewer lead and the sponsor org must accept the space. Both groups will receive an email prompting them to accept the space, and they must log in to precisionFDA to do so.
+![Active Group space with no content](./assets/groupspace.png)
 
-## Using the Confidential Review Space
+To add data to a space, you can click on the **Create Files** button located in the upper left hand corner. This will bring up a modal where you can copy in existing files on the precisionFDA platform (such as in My Home or another Space), or you can directly upload files from your local computer to the Space.
 
-Once the review space has been accepted by both groups, it will activate, and both the review lead and the sponsor org administrator may log into their **confidential spaces**. From here, they may add files, apps, jobs and notes, and they may add other members to the space.
+To invite other users to a space, you can click on the **Members** tab, located in the left-hand navigation bar on the page, and add them by username. When adding new members, you may also set their permissions level for the space:
 
-![Active Confidential review space with Activity Summary and expanded filter options](./assets/confidential.png)
+* Administrator - able to add, remove, and modify data in the Space. Able to add, remove, and modify the permissions of other members of the Space.
+* Contributor - able to add, remove, and modify data in the Space.
+* Viewer - able to see all data in the Space and can copy it out, but cannot add, modify, or delete any data in the Space.
 
-To add data to a space, you can click on the **Move data to space** button located in the upper right hand corner. To invite other users to a space, you can click on the **Members** tab, located in the middle of the page, and add them by username. When adding new members, you may also set their permissions level for the space.
+## Using Review Spaces
 
-## Using the Cooperative Review Space
+Review Spaces are a special three-area Space, set up between a reviewer and a sponsor. Each side gets their own private area, while both sides have access to a shared area.
 
-To access the shared, cooperative review space, you can click the link labeled **To Cooperative** in the upper left, next to the name of the review space.
+> Important note: you will only ever see two of the three areas of the Review Space! If you are on the Reviewer side, you cannot see the Sponsor's private area, and vice versa.
 
-![Navigation link to Cooperative review space above a Confidential review space](./assets/cooperative.png)
+To access the shared, cooperative area of the Review Space, click the green button labeled **Shared Area** in the upper right, opposite to the name of the Review Space. To swap back to the private area of the Review Space, click the purple button labeled **Private Area**.
 
-**The cooperative space** appears very similar to the private space, and includes all of the same features. You can add files, notes, assets, apps and jobs, and run apps in this space. Here, however, you’ll note that the members of both spaces have access - any data objects you add to this space can be accessed by both parties, so make sure you only add objects that you wish to share!
+![Example of an empty Review Space](./assets/reviewspace.png)
 
-To add data directly to the cooperative space, you can use the **Move data to space** button located in the upper right corner, just like in the private space.
+**The Shared Area** appears very similar to the private area, and includes all of the same features. You can add files, assets, apps, executions, and Discussions, and can run apps in this space. Here, however, you’ll note that the members of both sides of the Review Space have access - any data objects you add to this space can be accessed by both the reviewers and the sponsors, so make sure you only add objects that you wish to share!
 
-If you wish to transfer a data object from your private, confidential space to the shared, cooperative space, you may do so by going to the page of that data object.
+To add data directly to the Shared Space, you can use the **Create Files** button located in the upper left corner.
 
-![Transferring data from private to cooperative space](./assets/transfer.png)
+If you wish to transfer a data object from your Private Area to the Shared Area, you may do so by going to the page of that data object.
 
-If this data object does not currently exist in the cooperative space, you will see a green button labeled **Copy to Cooperative**. When you click this button, a copy of this data object will be created in the shared cooperative space. Once again, note that this action cannot be undone, so you will receive an **Are you sure?** prompt.
+![Transferring data from My Home to a Space - Actions menu](./assets/actionsmenu.png)
 
-## Running Workflows in Review Spaces
+Click the checkbox to select the object(s), and then click the Actions menu, then select Copy to... in the dropdown. This should bring up a list of all Spaces; for Review Spaces, each area (Private vs. Shared) will be listed separately. Select the appropriate area then click Copy on the modal.
 
-Similar to apps, workflows can be made available in group, verification, and review spaces. There are two methods for moving a workflow to a space: 1) publishing the workflow from the “Workflows” screen, or 2) moving the workflow to a space from the “Spaces” screen.
+![Transferring data from My Home to a Space - Copy menu](./assets/copymodal.png)
 
-Workflows cannot be removed from a space once added, so take caution when adding a workflow to a space. Additionally, once a workflow has been added to one space, it cannot be added to any other space. However, a workflow can be “forked” to create a new copy of the workflow that can optionally be modified and then added to another space if desired.
+When adding members to a Review Space, note that they will be added to your "team," either Sponsor or Reviewer. They will be able to see the Shared Area and the Private Area for your team. If you are a reviewer, do not add any sponsors to the Review Space! They'll be able to see the Reviewer Private Area if you add them. Ask the Sponsor Lead to add them.
 
-## Publishing a Workflow
+## Running Apps and Workflows in Review Spaces
 
-To publish a workflow, go to the workflows tab, select the workflow you would like to publish, and then select the ‘Publish’ button. An example is shown below.
+Apps and workflows can be made available in Group and Review Spaces. There are two methods for moving an app or workflow to a Space: 1) publishing the app or workflow from your My Home area, or 2) moving the app or workflow to a Space from the “Spaces” screen.
 
-![Workflows tab overview with highlighted Publish button](./assets/workflow_publish1.png)
+After the workflow has been added to the Space, it is now runnable in the Space, and can be accessed under the "Apps" or “Workflows” tab on the left side.
 
-Upon pressing ‘Publish’, the spaces you have available will appear as a set of selections. Find and choose the workspace that you would like to publish the workflow to. An example is shown below.
+![Running an app on Spaces page](./assets/appinspace.png)
 
-![Dropdown list of spaces to Publish](./assets/workflow_publish2.png)
+## For Space Admins: Creating new Spaces
 
-This will take you to a page which will ask if you are willing to share the objects which are included in the workflow that is being published. If, for example, a component app was privately built by you, then you must check “share” to include all of the resources contained within that app. Alternatively, if the component object in your workflow is public, it will be automatically shared to the space. See the example case below.
+For Space Admins, new Spaces can be created by navigating to the Spaces Overview area of precisionFDA from the top menu bar and selecting **Create Space**.
 
-![Share workflow objects page](./assets/workflow_publish3.png)
+You may select a Space type: Administrator (visible and accessible only to Site Admins), Review, or Group.
 
-Once the ‘Share’ button has been checked, the resources contained in the object that will be shared will appear.
+![Create new space page with Type, Name, Description, Reviewer lead, Sponsor Lead and optional settings fields](./assets/newspacecreation.png)
 
-![Shared object resources with checkbox selected for Shared option](./assets/workflow_publish4.png)
+You can then provide a name for the Space, a description, and a two leads of the Space. Note that this information can be changed later, once the Space is created.
 
-After you’ve decided to share all of the data objects within the workflow, you may press 'Share select objects to “<space name>”'. The workflow will then be published to that space. Only public objects can be shared with cooperative spaces. Both public and private objects can be shared to confidential spaces.
+If creating a Group Space, there is no functional difference between the Host vs. Guest Lead roles.
 
-## Moving a workflow
+If creating a Review Space, the **Reviewer Lead** should be either yourself or the person leading the review. The **Sponsor Lead** should be the representative of the organization whose work you are reviewing.
 
-A workflow may also be added to a Space by clicking the “Move data to space…” button in the upper right corner, and selecting the workflow in the popup.
+After creating the Review Space, both the Reviewer and Sponsor Leads will receive an email notifying them that the new Space was created.
 
-![Move data to space page overview with Workflows tab selected](./assets/workflow_moving1.png)
-
-After the workflow has been added to the space, it is now runnable in the space, and can be accessed under the “Workflows” tab on the left side.
-
-![Workflows tab overview on Spaces page](./assets/workflow_moving2.png)
+If, at a later point, either Lead wishes to pass their Lead role on to another member of the Space on their side, they may do so from the Members page by selecting the awardee and clicking Change Role.
