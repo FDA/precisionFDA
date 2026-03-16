@@ -27,6 +27,11 @@ export class DbClusterCheckNonTerminatedFacade {
   async checkNonTerminatedDbClusters(): Promise<DbCluster[]> {
     const nonTerminatedDbClusters = await this.dbClusterService.getNonTerminatedDbClusters()
 
+    if (nonTerminatedDbClusters.length === 0) {
+      this.logger.log('No unterminated database clusters found, skipping email notification')
+      return nonTerminatedDbClusters
+    }
+
     const body = buildEmailTemplate<ReportNonTerminatedDbClustersTemplateInput>(
       reportNonTerminatedDbClustersTemplate,
       {
