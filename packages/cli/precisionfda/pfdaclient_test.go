@@ -22,8 +22,23 @@ func TestChunkSize(t *testing.T) {
 	pfdaclient := NewPFDAClient(server)
 	test.Equals(t, pfdaclient.ChunkSize, 1<<26)
 
-	pfdaclient.SetChunkSize(chunkSize)
+	err := pfdaclient.SetChunkSize(chunkSize)
+	test.Equals(t, err, nil)
 	test.Equals(t, pfdaclient.ChunkSize, chunkSize)
+}
+
+func TestChunkSizeInvalid(t *testing.T) {
+	pfdaclient := NewPFDAClient("test.precisionfda.com")
+
+	err := pfdaclient.SetChunkSize(1)
+	if err == nil {
+		t.Fatal("expected error for chunk size below minimum")
+	}
+
+	err = pfdaclient.SetChunkSize(6 * 1024 * 1024 * 1024)
+	if err == nil {
+		t.Fatal("expected error for chunk size above maximum")
+	}
 }
 
 func TestMaxRoutines(t *testing.T) {
@@ -31,8 +46,23 @@ func TestMaxRoutines(t *testing.T) {
 	pfdaclient := NewPFDAClient(server)
 	test.Equals(t, pfdaclient.NumRoutines, 10)
 
-	pfdaclient.SetNumRoutines(5)
+	err := pfdaclient.SetNumRoutines(5)
+	test.Equals(t, err, nil)
 	test.Equals(t, pfdaclient.NumRoutines, 5)
+}
+
+func TestMaxRoutinesInvalid(t *testing.T) {
+	pfdaclient := NewPFDAClient("test.precisionfda.com")
+
+	err := pfdaclient.SetNumRoutines(0)
+	if err == nil {
+		t.Fatal("expected error for num routines below minimum")
+	}
+
+	err = pfdaclient.SetNumRoutines(101)
+	if err == nil {
+		t.Fatal("expected error for num routines above maximum")
+	}
 }
 
 func TestUploadFile(t *testing.T) {
@@ -51,7 +81,7 @@ func TestUploadFile(t *testing.T) {
 		rw.WriteHeader(http.StatusOK)
 		rw.Write([]byte(`{"value":"fixed"}`))
 	}))
-	defer server.Close()	// Close the server when test finishes
+	defer server.Close() // Close the server when test finishes
 
 	pfdaclient := NewPFDAClient(server.URL)
 	pfdaclient.UploadFile("./README.md", "", "", true)

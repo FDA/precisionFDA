@@ -1,24 +1,21 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { User } from '@shared/domain/user/user.entity'
-import { create, db, generate } from '@shared/test'
+import { expect } from 'chai'
 import supertest from 'supertest'
 import { database } from '@shared/database'
-import { expect } from 'chai'
-import { testedApp } from '../../index'
-import { getDefaultHeaderData } from '../../utils/expect-helper'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { ErrorCodes } from '@shared/errors'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { SetPropertiesDTO } from '@shared/domain/property/dto/set-properties.dto'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
-import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
+import { ErrorCodes } from '@shared/errors'
+import { create, db, generate } from '@shared/test'
+import { testedApp } from '../../index'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('/cli', async () => {
   let em: EntityManager<MySqlDriver>
@@ -43,7 +40,7 @@ describe('/cli', async () => {
     expect(body).to.be.an('object')
     expect(body).to.have.property('version')
     expect(body.version).to.be.a('string')
-    expect(body.version).to.equal('2.11.1')
+    expect(body.version).to.equal('2.11.2')
   })
 
   describe('cli describe', () => {
@@ -273,9 +270,7 @@ describe('/cli', async () => {
       expect(body).to.be.an('object')
       expect(body).to.have.property('error').that.is.an('object')
       expect(body.error).to.have.property('code').that.equals(ErrorCodes.NOT_FOUND)
-      expect(body.error)
-        .to.have.property('message')
-        .that.equals(`Job ${job.dxid} was not found or is not accessible`)
+      expect(body.error).to.have.property('message').that.equals(`Job ${job.dxid} was not found or is not accessible`)
       expect(body.error).to.have.property('statusCode').that.equals(404)
       expect(body).to.have.property('stack').that.is.a('string')
     })
@@ -284,16 +279,8 @@ describe('/cli', async () => {
       const user2 = create.userHelper.create(em)
       const groupSpace = create.spacesHelper.create(em, generate.space.group())
       await em.flush()
-      create.spacesHelper.addMember(
-        em,
-        { user: user, space: groupSpace },
-        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
-      )
-      create.spacesHelper.addMember(
-        em,
-        { user: user2, space: groupSpace },
-        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
-      )
+      create.spacesHelper.addMember(em, { user: user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      create.spacesHelper.addMember(em, { user: user2, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
 
       const job = create.jobHelper.create(em, { user: user2 }, { scope: groupSpace.scope })
       await em.flush()
@@ -376,11 +363,7 @@ describe('/cli', async () => {
     // create a discussion
     it('POST /spaces/:id/discussions creates a discussion with attachments and returns a link to it', async () => {
       const groupSpace = create.spacesHelper.create(em, generate.space.group())
-      create.spacesHelper.addMember(
-        em,
-        { user, space: groupSpace },
-        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
-      )
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
       await em.flush()
       const file = create.filesHelper.createUploaded(em, { user }, { scope: groupSpace.scope })
       const job = create.jobHelper.create(em, { user }, { scope: groupSpace.scope })
@@ -403,10 +386,7 @@ describe('/cli', async () => {
         .expect(201)
 
       expect(body).to.be.an('object')
-      expect(body)
-        .to.have.property('url')
-        .that.is.a('string')
-        .that.contains(`/spaces/${groupSpace.id}/discussions/1`)
+      expect(body).to.have.property('url').that.is.a('string').that.contains(`/spaces/${groupSpace.id}/discussions/1`)
       const res = await em.findAll(Discussion)
       expect(res).to.be.an('array').of.length(1)
       const savedDiscussion = res[0]
@@ -422,11 +402,7 @@ describe('/cli', async () => {
 
     it('PUT /spaces/:id/discussions appends new content and attachment to the discussion', async () => {
       const groupSpace = create.spacesHelper.create(em, generate.space.group())
-      create.spacesHelper.addMember(
-        em,
-        { user, space: groupSpace },
-        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
-      )
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
       await em.flush()
       const discussion = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
       const file = create.filesHelper.createUploaded(em, { user }, { scope: groupSpace.scope })
@@ -447,10 +423,7 @@ describe('/cli', async () => {
         .expect(200)
 
       expect(body).to.be.an('object')
-      expect(body)
-        .to.have.property('url')
-        .that.is.a('string')
-        .that.contains(`/spaces/${groupSpace.id}/discussions/1`)
+      expect(body).to.have.property('url').that.is.a('string').that.contains(`/spaces/${groupSpace.id}/discussions/1`)
 
       em.clear()
       const res = await em.findAll(Discussion)
@@ -464,17 +437,9 @@ describe('/cli', async () => {
 
     it('GET /spaces/:id/discussions returns all discussions in the space', async () => {
       const groupSpace = create.spacesHelper.create(em, generate.space.group())
-      create.spacesHelper.addMember(
-        em,
-        { user, space: groupSpace },
-        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
-      )
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
       const otherSpace = create.spacesHelper.create(em, generate.space.group())
-      create.spacesHelper.addMember(
-        em,
-        { user, space: otherSpace },
-        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
-      )
+      create.spacesHelper.addMember(em, { user, space: otherSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
       await em.flush()
       const discussion1 = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
       const discussion2 = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
@@ -642,11 +607,7 @@ describe('/cli', async () => {
     it('POST /nodes returns empty array for file in different folder', async () => {
       const folder = create.filesHelper.createFolder(em, { user }, { name: 'test-folder' })
       await em.flush()
-      create.filesHelper.createUploaded(
-        em,
-        { user, parentFolder: folder },
-        { name: 'test-file.txt' },
-      )
+      create.filesHelper.createUploaded(em, { user, parentFolder: folder }, { name: 'test-file.txt' })
       await em.flush()
 
       const { body } = await supertest(testedApp.getHttpServer())
@@ -665,16 +626,8 @@ describe('/cli', async () => {
 
     it('POST /nodes returns empty array for file in a different space folder', async () => {
       const groupSpace = create.spacesHelper.create(em, generate.space.group())
-      create.spacesHelper.addMember(
-        em,
-        { user, space: groupSpace },
-        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
-      )
-      const folder = create.filesHelper.createFolder(
-        em,
-        { user },
-        { name: 'test-folder', scope: groupSpace.scope },
-      )
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      const folder = create.filesHelper.createFolder(em, { user }, { name: 'test-folder', scope: groupSpace.scope })
       await em.flush()
       create.filesHelper.createUploaded(
         em,
@@ -756,7 +709,7 @@ describe('/cli', async () => {
       ]
 
       const responses = await Promise.all(requests)
-      for (const body of responses.map((r) => r.body)) {
+      for (const body of responses.map(r => r.body)) {
         expect(body).to.be.empty()
       }
       em.clear()
@@ -836,11 +789,7 @@ describe('/cli', async () => {
       const workflowSeries = create.workflowSeriesHelper.create(em, { user })
       await em.flush()
       const app = create.appHelper.createRegular(em, { user }, { appSeriesId: appSeries.id })
-      const workflow = create.workflowHelper.create(
-        em,
-        { user },
-        { workflowSeriesId: workflowSeries.id },
-      )
+      const workflow = create.workflowHelper.create(em, { user }, { workflowSeriesId: workflowSeries.id })
       await em.flush()
       const dbClusterDTO: SetPropertiesDTO = {
         targetId: dbCluster.uid,
@@ -885,7 +834,7 @@ describe('/cli', async () => {
       ]
 
       const responses = await Promise.all(requests)
-      for (const body of responses.map((r) => r.body)) {
+      for (const body of responses.map(r => r.body)) {
         expect(body).to.be.empty()
       }
       em.clear()

@@ -141,6 +141,10 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.11.2 (2026-03-12)
+
+- upgrade Go to 1.26.0
+
 ### 2.11.1 (2025-10-28)
 
 - fixed issue with json output in upload-file

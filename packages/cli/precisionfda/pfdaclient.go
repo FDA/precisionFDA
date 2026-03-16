@@ -84,8 +84,8 @@ type IPFDAClient interface {
 	RotateDbClusterPassword(dbClusterID string) error
 	RefreshToken(autoRefresh bool) (string, error)
 	GetLatestVersion() (string, error)
-	SetChunkSize(chunkSize int)
-	SetNumRoutines(numRoutines int)
+	SetChunkSize(chunkSize int) error
+	SetNumRoutines(numRoutines int) error
 }
 
 type PFDAClient struct {
@@ -1087,20 +1087,20 @@ func (c *PFDAClient) GetLatestVersion() (string, error) {
 	return resultJSON["version"].(string), nil
 }
 
-func (c *PFDAClient) SetChunkSize(chunkSize int) {
+func (c *PFDAClient) SetChunkSize(chunkSize int) error {
 	if chunkSize > maxChunkSize || chunkSize < minChunkSize {
-		inputError("Chunk size must be between 16MB and 5GB")
-	} else {
-		c.ChunkSize = chunkSize
+		return fmt.Errorf("chunk size must be between 16MB and 5GB")
 	}
+	c.ChunkSize = chunkSize
+	return nil
 }
 
-func (c *PFDAClient) SetNumRoutines(numRoutines int) {
+func (c *PFDAClient) SetNumRoutines(numRoutines int) error {
 	if numRoutines > maxRoutines || numRoutines < minRoutines {
-		inputError("Maximum number of threads must an integer within the range of [1-100]")
-	} else {
-		c.NumRoutines = numRoutines
+		return fmt.Errorf("maximum number of threads must be an integer within the range of [1-100]")
 	}
+	c.NumRoutines = numRoutines
+	return nil
 }
 
 func (c *PFDAClient) createFileID(url string, data []byte) (string, error) {

@@ -1,4 +1,4 @@
-FROM golang:1.23.1
+FROM golang:1.26.0
 
 ENV GOPATH="/go"
 
@@ -11,5 +11,5 @@ RUN mkdir -p /go/src/dnanexus.com/precision-fda-cli
 WORKDIR /go/src/dnanexus.com/precision-fda-cli
 
 ENTRYPOINT filename="pfda_${GOOS}_${GOARCH}" \
-           && GOEXPERIMENT=boringcrypto go build -ldflags "-X main.Version=${VERSION} -X main.BuildTime=${BUILDTIME} -X main.commitID=${COMMITID} -X main.OsArch=${GOOS}/${GOARCH}"  -o dist/$filename -a pfda.go \
+           && GOEXPERIMENT=boringcrypto go build -trimpath -ldflags "-X main.Version=${VERSION} -X main.BuildTime=${BUILDTIME} -X main.commitID=${COMMITID} -X main.OsArch=${GOOS}/${GOARCH}" -o dist/$filename pfda.go \
            && chmod +x dist/$filename
