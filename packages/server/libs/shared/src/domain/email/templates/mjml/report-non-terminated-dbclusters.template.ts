@@ -52,7 +52,7 @@ export const reportNonTerminatedDbClustersTemplate = (
     <mj-section css-class="header-title">
       <mj-column>
         <mj-text align="right">
-          Report: Stale Jobs</mj-text>
+          Report: Unterminated DB Clusters</mj-text>
         </mj-text>
       </mj-column>
     </mj-section>
