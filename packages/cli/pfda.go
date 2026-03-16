@@ -98,33 +98,52 @@ var (
 // ACTION FUNCTIONS
 // Wrapping calls to pfdaclient allow us to replace these functions in pfda_test.go with mocks
 var invokeUploadFile = func(client precisionfda.IPFDAClient, inputFilePath *string, folderID *string, spaceID *string, inputChunkSize *int, inputNumRoutines *int) error {
-	client.SetChunkSize(*inputChunkSize)
-	client.SetNumRoutines(*inputNumRoutines)
+	if err := client.SetChunkSize(*inputChunkSize); err != nil {
+		return err
+	}
+	if err := client.SetNumRoutines(*inputNumRoutines); err != nil {
+		return err
+	}
 	return client.UploadFile(*inputFilePath, *folderID, *spaceID, true)
 }
 
 var invokeUploadStdinFile = func(client precisionfda.IPFDAClient, fileName *string, folderID *string, spaceID *string, inputChunkSize *int, inputNumRoutines *int) error {
-	client.SetChunkSize(*inputChunkSize)
-	client.SetNumRoutines(*inputNumRoutines)
+	if err := client.SetChunkSize(*inputChunkSize); err != nil {
+		return err
+	}
+	if err := client.SetNumRoutines(*inputNumRoutines); err != nil {
+		return err
+	}
 	return client.UploadStdin(*fileName, *folderID, *spaceID, true)
-
 }
 
 var invokeUploadMultipleFiles = func(client precisionfda.IPFDAClient, filePaths *[]string, folderID *string, spaceID *string, inputChunkSize *int, inputNumRoutines *int) error {
-	client.SetChunkSize(*inputChunkSize)
-	client.SetNumRoutines(*inputNumRoutines)
+	if err := client.SetChunkSize(*inputChunkSize); err != nil {
+		return err
+	}
+	if err := client.SetNumRoutines(*inputNumRoutines); err != nil {
+		return err
+	}
 	return client.UploadMultipleFiles(*filePaths, *folderID, *spaceID)
 }
 
 var invokeUploadFolder = func(client precisionfda.IPFDAClient, inputPath *string, folderID *string, spaceID *string, inputChunkSize *int, inputNumRoutines *int) error {
-	client.SetChunkSize(*inputChunkSize)
-	client.SetNumRoutines(*inputNumRoutines)
+	if err := client.SetChunkSize(*inputChunkSize); err != nil {
+		return err
+	}
+	if err := client.SetNumRoutines(*inputNumRoutines); err != nil {
+		return err
+	}
 	return client.UploadFolder(*inputPath, *folderID, *spaceID)
 }
 
 var invokeUploadAsset = func(client precisionfda.IPFDAClient, assetFolderPath *string, assetName *string, readmeFilePath *string, inputChunkSize *int, inputNumRoutines *int) error {
-	client.SetChunkSize(*inputChunkSize)
-	client.SetNumRoutines(*inputNumRoutines)
+	if err := client.SetChunkSize(*inputChunkSize); err != nil {
+		return err
+	}
+	if err := client.SetNumRoutines(*inputNumRoutines); err != nil {
+		return err
+	}
 	return client.UploadAsset(*assetFolderPath, *assetName, *readmeFilePath)
 }
 
@@ -942,7 +961,9 @@ func mainInternal() int {
 		}
 
 		config.Key = newToken
-		helpers.SaveConfig(config, *flagJson)
+		if err := helpers.SaveConfig(config, *flagJson); err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
 		return 0
 
 	case "api":
@@ -972,11 +993,10 @@ func mainInternal() int {
 
 	// Write configuration and save key
 	if *authKey != "" {
-		if configErr != nil && os.IsNotExist(configErr) {
-			config = helpers.CreateConfig()
-		}
 		config.Key = *authKey
-		helpers.SaveConfig(config, *flagJson)
+		if err := helpers.SaveConfig(config, *flagJson); err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
 	}
 
 	return 0

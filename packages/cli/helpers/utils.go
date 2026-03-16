@@ -3,6 +3,7 @@ package helpers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/url"
@@ -108,7 +109,7 @@ func ErrorFromError(err error, asJSON bool) int {
 }
 
 func ErrorFromString(msg string, asJSON bool) int {
-	PrintError(fmt.Errorf(msg), asJSON)
+	PrintError(errors.New(msg), asJSON)
 	return 1
 }
 

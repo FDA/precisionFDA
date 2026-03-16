@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Param,
-  Post,
-  Put,
-  UseGuards,
-} from '@nestjs/common'
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { ApiOperation } from '@nestjs/swagger'
 import { CliCreateDiscussionDTO } from '@shared/domain/cli/dto/cli-create-discussion.dto'
 import { CliCreateReplyDTO } from '@shared/domain/cli/dto/cli-create-reply.dto'
@@ -83,7 +73,7 @@ export class CliController {
 
   @Get('/version/latest')
   getLatestVersion(): { version: string } {
-    return { version: '2.11.1' }
+    return { version: '2.11.2' }
   }
 
   @ApiOperation({ summary: 'Exchange CLI token for platform workers' })
@@ -132,9 +122,7 @@ export class CliController {
   // TODO: REMOVE IN V3.0.0, migrated to /cli/{uid}/describe
   @UseGuards(UserContextGuard)
   @Get('/discussions/:discussionId/describe')
-  async describeDiscussion(
-    @Param('discussionId') discussionId: number,
-  ): Promise<CliDiscussionDescribeDTO> {
+  async describeDiscussion(@Param('discussionId') discussionId: number): Promise<CliDiscussionDescribeDTO> {
     return this.cliDescribeEntityFacade.describeDiscussion(discussionId)
   }
 
@@ -184,10 +172,7 @@ export class CliController {
 
   @UseGuards(UserContextGuard)
   @Put('/discussions/:id')
-  async editDiscussion(
-    @Param('id') id: number,
-    @Body() body: CliEditDiscussionDTO,
-  ): Promise<{ url: string }> {
+  async editDiscussion(@Param('id') id: number, @Body() body: CliEditDiscussionDTO): Promise<{ url: string }> {
     const url = await this.cliUpdateDiscussionFacade.updateDiscussion(id, body)
     return { url }
   }

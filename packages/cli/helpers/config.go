@@ -11,24 +11,24 @@ import (
 
 var ConfigPath = filepath.Join(getUserHomeDir(), ".pfda_config")
 
+var spaceRegex = regexp.MustCompile(`^space-(\d+)$`)
+
 type jsonConfig struct {
 	Key    string `json:"key"`
 	Server string `json:"server"`
 	Scope  string `json:"scope"`
 }
 
-func CreateConfig() *jsonConfig {
-	config := jsonConfig{}
-	return &config
-}
-
 // GetConfig loads the pFDA config file and returns the struct.
 // A successful call returns (config, nil).
-// In case the config was not found in FS or an error occurred, (nil, err) is returned.
+// If the config file does not exist, (&jsonConfig{}, os.ErrNotExist) is returned.
+// On other errors, (nil, err) is returned.
 func GetConfig() (*jsonConfig, error) {
 	f, err := os.ReadFile(ConfigPath)
 	if err != nil {
-		// Internal error reading config
+		if os.IsNotExist(err) {
+			return &jsonConfig{}, err
+		}
 		return nil, err
 	}
 	var config jsonConfig
@@ -39,35 +39,31 @@ func GetConfig() (*jsonConfig, error) {
 	return &config, nil
 }
 
-func SaveConfig(config *jsonConfig, jsonFlag bool) {
-	// If key was given by -key option in the command line
-	// marshal it to json and write into .pfda__config
-	// if marshaling fails, issue warning and exit
+func SaveConfig(config *jsonConfig, jsonFlag bool) error {
 	jsonData, err := json.Marshal(config)
-	if err != nil && !jsonFlag {
-		fmt.Printf("While the file has been uploaded succesfully\n, the authorization key can't be marshaled to json and saved in '%s': %s\n", ConfigPath, err.Error())
-		fmt.Printf("You will need to submit authorization key in the command line in the next operation.\n")
-		// exit gracefully, without panic
+	if err != nil {
+		if !jsonFlag {
+			fmt.Fprintf(os.Stderr, "Authorization key could not be serialized: %s\n", err)
+		}
+		return err
 	}
 
-	// below is a more compact and cleaner implementation which is recommended when writing small files
-	// It doesn't use separate Create / Write from os package, as before but takes advantage of
-	// os.WriteFile which opens, writes and closes a file in one swoop
-	// denote, that it also works on Windows ( checked on AWS EC2 windows instance )
-	// despite Linux style file permissions are given
-	// if .pfda_config exists it is truncated before writing
-	// denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it
-	err = os.WriteFile(ConfigPath, jsonData, 0644) // 0644 is '-rw -r- -r-'
-	if err != nil && !jsonFlag {
-		fmt.Printf("Could not save authorization key in config file '%s': %s\n", ConfigPath, err.Error())
-	} else if !jsonFlag {
-		fmt.Printf("Saved authorization key in config file '%s'. \nA new key does not need to be provided for 24 hours from the generation time of the provided key.\n", ConfigPath)
+	err = os.WriteFile(ConfigPath, jsonData, 0600) // 0600 is '-rw-------' (owner-only read/write permissions)
+	if err != nil {
+		if !jsonFlag {
+			fmt.Fprintf(os.Stderr, "Could not save authorization key in config file '%s': %s\n", ConfigPath, err)
+		}
+		return err
 	}
+
+	if !jsonFlag {
+		fmt.Printf("Saved authorization key in '%s'.\n", ConfigPath)
+	}
+	return nil
 }
 
 func (c *jsonConfig) GetSpaceId() string {
-	re := regexp.MustCompile(`^space-(\d+)$`)
-	matches := re.FindStringSubmatch(c.Scope)
+	matches := spaceRegex.FindStringSubmatch(c.Scope)
 	if len(matches) != 2 {
 		// scope is private/public
 		return ""
