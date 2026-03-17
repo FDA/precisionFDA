@@ -1,18 +1,19 @@
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import React, { useEffect, useState } from 'react'
+import { SpaceType } from '@/features/spaces/spaces.types'
 import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/CheckboxNext'
-import { InputText } from '../../../components/InputText'
-import { Loader } from '../../../components/Loader'
-import { Radio } from '../../../components/Radio'
-import { ItemTitle, StyledName } from '../../../components/ResourceTable'
-import { useDebounce } from '../../../components/Table/useDebounce'
 import { FieldInfo } from '../../../components/form/FieldInfo'
 import { ArrowUpRightFromSquareIcon } from '../../../components/icons/ArrowUpRightFromSquareIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { GlobeIcon } from '../../../components/icons/GlobeIcon'
 import { LockIcon } from '../../../components/icons/LockIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
+import { InputText } from '../../../components/InputText'
+import { Loader } from '../../../components/Loader'
+import { Radio } from '../../../components/Radio'
+import { ItemTitle, StyledName } from '../../../components/ResourceTable'
+import { useDebounce } from '../../../components/Table/useDebounce'
 import {
   ButtonBadge,
   Card,
@@ -45,14 +46,22 @@ import { DialogType } from '../../home/types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { useFetchFilesByUIDQuery } from '../query/useFetchFilesByUIDQuery'
 import { noAccessText } from '../file.utils'
+import { useFetchFilesByUIDQuery } from '../query/useFetchFilesByUIDQuery'
+
+const spaceTypeMap: Record<SpaceType, string> = {
+  review: 'Review',
+  groups: 'Group',
+  private_type: 'Private',
+  government: 'Government',
+  administrator: 'Administrator',
+}
 
 const FileIconAndLabel = ({ file }: { file: IAccessibleFile }) => {
   let icon = null
   let label = 'N/A'
 
-  const { private: isPrivate, public: isPublic, space_private, space_public, in_space } = file
+  const { private: isPrivate, public: isPublic, space_public, in_space } = file
 
   if (isPrivate) {
     icon = <LockIcon height={13} />
@@ -60,15 +69,13 @@ const FileIconAndLabel = ({ file }: { file: IAccessibleFile }) => {
   } else if (isPublic) {
     icon = <GlobeIcon height={13} />
     label = 'Public'
-  } else if (space_private) {
-    icon = <ObjectGroupIcon height={13} />
-    label = 'Shared in Space (Confidential)'
-  } else if (space_public) {
-    icon = <ObjectGroupIcon height={13} />
-    label = 'Shared in Space (Cooperative)'
   } else if (in_space) {
     icon = <ObjectGroupIcon height={13} />
-    label = 'Shared in Space'
+    if (file.spaceType === 'review') {
+      label = `${file.spaceName!} (${space_public ? 'Shared' : 'Private'} Review)`
+    } else {
+      label = `${file.spaceName!} (${spaceTypeMap[file.spaceType!]})`
+    }
   }
 
   return (
@@ -256,11 +263,21 @@ const FileSelectTabs = ({ type, scopes, setShowModal, handleSelect, uids }: File
                 <TabContent>
                   <Card>
                     <div>{uids.length === 1 ? noAccessText.single : noAccessText.multi}</div>
-                    <div>{uids?.filter(i => !accessibleUids?.includes(i)).map(i => <SyledUid key={i}>{i}</SyledUid>)}</div>
+                    <div>
+                      {uids
+                        ?.filter(i => !accessibleUids?.includes(i))
+                        .map(i => (
+                          <SyledUid key={i}>{i}</SyledUid>
+                        ))}
+                    </div>
                   </Card>
                 </TabContent>
               )}
-              {noneSelected ? <StyledHeading>No selected files</StyledHeading> : <StyledHeading>Selected Files</StyledHeading>}
+              {noneSelected ? (
+                <StyledHeading>No selected files</StyledHeading>
+              ) : (
+                <StyledHeading>Selected Files</StyledHeading>
+              )}
 
               {isFetching && (
                 <StyledLoader>
@@ -326,19 +343,17 @@ export const useSelectFileModal = (
   }
 
   const modalComp = (
-    <ModalNext
-      id="select-file-modal"
-      headerText={title}
-      hide={() => setShowModal(false)}
-      isShown={isShown}
-    >
-      <ModalHeaderTop
-        headerText={title}
-        hide={() => setShowModal(false)}
-      />
+    <ModalNext id="select-file-modal" headerText={title} hide={() => setShowModal(false)} isShown={isShown}>
+      <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
 
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <FileSelectTabs type={type} scopes={scopes} setShowModal={setShowModal} handleSelect={handleSelect} uids={uids || []} />
+      <FileSelectTabs
+        type={type}
+        scopes={scopes}
+        setShowModal={setShowModal}
+        handleSelect={handleSelect}
+        uids={uids || []}
+      />
     </ModalNext>
   )
   return {

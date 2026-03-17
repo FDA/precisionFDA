@@ -329,7 +329,6 @@ export const RunJobForm = ({
           }
         } catch (error) {
           console.error('Error starting job :', error)
-          toastError('Failed to start job.')
         }
       }
     }
@@ -370,7 +369,12 @@ export const RunJobForm = ({
                 </FieldGroup>
               </StyledJobName>
               <FieldGroup label="Execution Cost Limit ($)" required>
-                <InputNumber min="0" step="10" {...register('jobLimit', { valueAsNumber: true })} disabled={isSubmitting} />
+                <InputNumber
+                  min="0"
+                  step="10"
+                  {...register('jobLimit', { valueAsNumber: true })}
+                  disabled={isSubmitting}
+                />
                 <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobLimit" />
               </FieldGroup>
               {app.entity_type === 'https' && (

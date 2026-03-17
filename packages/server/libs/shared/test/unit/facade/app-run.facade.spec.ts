@@ -32,7 +32,7 @@ describe('AppRunFacade tests', () => {
   const getValidAccessibleAppStub = stub()
   const findLicensedItemsByNodeUidsStub = stub()
   const getMembershipStub = stub()
-  const getRunnableFileByAccessibleScopeStub = stub()
+  const getAccessibleEntitiesByUidsStub = stub()
   const generateCliKeyStub = stub()
   const jobCreateStub = stub()
   const buildClientApiCallStub = stub()
@@ -238,7 +238,7 @@ describe('AppRunFacade tests', () => {
     getValidAccessibleApp: getValidAccessibleAppStub,
   } as unknown as AppService
   const nodeService = {
-    getRunnableFileByAccessibleScope: getRunnableFileByAccessibleScopeStub,
+    getAccessibleEntitiesByUids: getAccessibleEntitiesByUidsStub,
   } as unknown as NodeService
   const spaceMembershipService = {
     getMembership: getMembershipStub,
@@ -286,11 +286,11 @@ describe('AppRunFacade tests', () => {
     getMembershipStub.withArgs(SPACE.id, USER.id).resolves(MEMBERSHIP)
     getMembershipStub.withArgs(SPACE.id, VIEWER.id).resolves(VIEWER_MEMBERSHIP)
 
-    getRunnableFileByAccessibleScopeStub.reset()
-    getRunnableFileByAccessibleScopeStub.throws()
-    getRunnableFileByAccessibleScopeStub.resolves([])
-    getRunnableFileByAccessibleScopeStub.withArgs([PRIVATE_FILE.uid], 'private').resolves([PRIVATE_FILE])
-    getRunnableFileByAccessibleScopeStub.withArgs([SPACE_FILE.uid], `space-${SPACE.id}`).resolves([SPACE_FILE])
+    getAccessibleEntitiesByUidsStub.reset()
+    getAccessibleEntitiesByUidsStub.throws()
+    getAccessibleEntitiesByUidsStub.resolves([])
+    getAccessibleEntitiesByUidsStub.withArgs([PRIVATE_FILE.uid]).resolves([PRIVATE_FILE])
+    getAccessibleEntitiesByUidsStub.withArgs([SPACE_FILE.uid]).resolves([SPACE_FILE])
 
     generateCliKeyStub.reset()
     generateCliKeyStub.throws()
@@ -444,16 +444,20 @@ describe('AppRunFacade tests', () => {
   it('throws NotFoundError if input files are not found', async () => {
     const facade = getInstance()
     const runAppDTO = new RunAppDTO()
+    const notExistentFileUid = 'file-nonexistent-1'
     runAppDTO.jobLimit = USER_JOB_LIMIT
     runAppDTO.instanceType = 'baseline-2'
     runAppDTO.inputs = {
-      file_input: 'file-nonexistent-1',
+      file_input: notExistentFileUid,
     }
     runAppDTO.scope = 'private'
 
-    getRunnableFileByAccessibleScopeStub.withArgs(['file-nonexistent-1'], 'private').resolves([])
+    getAccessibleEntitiesByUidsStub.withArgs([notExistentFileUid]).resolves([])
 
-    await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(NotFoundError, '1 file in input but found 0:')
+    await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
+      NotFoundError,
+      `1 file not found (${notExistentFileUid})`,
+    )
   })
 
   it('throws InvalidStateError if input is not provided for a non-optional input spec', async () => {
@@ -560,11 +564,9 @@ describe('AppRunFacade tests', () => {
     expect(populateStub.calledOnce).to.be.true()
     expect(populateStub.firstCall.args[0]).to.deep.equal(APP)
     expect(populateStub.firstCall.args[1]).to.deep.equal(['assets'])
-    expect(getRunnableFileByAccessibleScopeStub.calledTwice).to.be.true()
-    expect(getRunnableFileByAccessibleScopeStub.firstCall.args[0]).to.deep.equal([PRIVATE_FILE.uid])
-    expect(getRunnableFileByAccessibleScopeStub.firstCall.args[1]).to.equal('private')
-    expect(getRunnableFileByAccessibleScopeStub.secondCall.args[0]).to.deep.equal([PRIVATE_FILE.uid])
-    expect(getRunnableFileByAccessibleScopeStub.secondCall.args[1]).to.equal('private')
+    expect(getAccessibleEntitiesByUidsStub.calledTwice).to.be.true()
+    expect(getAccessibleEntitiesByUidsStub.firstCall.args[0]).to.deep.equal([PRIVATE_FILE.uid])
+    expect(getAccessibleEntitiesByUidsStub.secondCall.args[0]).to.deep.equal([PRIVATE_FILE.uid])
     expect(buildClientApiCallStub.calledOnce).to.be.true()
     expect(buildClientApiCallStub.firstCall.args[0]).to.deep.equal(APP)
     expect(buildClientApiCallStub.firstCall.args[1]).to.equal(USER.privateFilesProject)
@@ -614,11 +616,9 @@ describe('AppRunFacade tests', () => {
     expect(populateStub.firstCall.args[1]).to.deep.equal(['assets'])
     expect(populateStub.secondCall.args[0]).to.deep.equal(MEMBERSHIP)
     expect(populateStub.secondCall.args[1]).to.deep.equal(['spaces'])
-    expect(getRunnableFileByAccessibleScopeStub.calledTwice).to.be.true()
-    expect(getRunnableFileByAccessibleScopeStub.firstCall.args[0]).to.deep.equal([SPACE_FILE.uid])
-    expect(getRunnableFileByAccessibleScopeStub.firstCall.args[1]).to.equal(`space-${SPACE.id}`)
-    expect(getRunnableFileByAccessibleScopeStub.secondCall.args[0]).to.deep.equal([SPACE_FILE.uid])
-    expect(getRunnableFileByAccessibleScopeStub.secondCall.args[1]).to.equal(`space-${SPACE.id}`)
+    expect(getAccessibleEntitiesByUidsStub.calledTwice).to.be.true()
+    expect(getAccessibleEntitiesByUidsStub.firstCall.args[0]).to.deep.equal([SPACE_FILE.uid])
+    expect(getAccessibleEntitiesByUidsStub.secondCall.args[0]).to.deep.equal([SPACE_FILE.uid])
     expect(buildClientApiCallStub.calledOnce).to.be.true()
     expect(buildClientApiCallStub.firstCall.args[0]).to.deep.equal(APP)
     expect(buildClientApiCallStub.firstCall.args[1]).to.equal(SPACE.hostProject)
@@ -661,9 +661,8 @@ describe('AppRunFacade tests', () => {
     expect(populateStub.calledOnce).to.be.true()
     expect(populateStub.firstCall.args[0]).to.deep.equal(APP_WITH_CLI)
     expect(populateStub.firstCall.args[1]).to.deep.equal(['assets'])
-    expect(getRunnableFileByAccessibleScopeStub.calledOnce).to.be.true()
-    expect(getRunnableFileByAccessibleScopeStub.firstCall.args[0]).to.deep.equal([PRIVATE_FILE.uid])
-    expect(getRunnableFileByAccessibleScopeStub.firstCall.args[1]).to.equal('private')
+    expect(getAccessibleEntitiesByUidsStub.calledOnce).to.be.true()
+    expect(getAccessibleEntitiesByUidsStub.firstCall.args[0]).to.deep.equal([PRIVATE_FILE.uid])
     expect(generateCliKeyStub.calledOnceWithExactly(TimeUtils.hoursToSeconds(24))).to.be.true()
     expect(createNewTokenStub.calledOnce).to.be.true()
     expect(createNewTokenStub.firstCall.args[1]).to.deep.equal(runAppDTO.scope)

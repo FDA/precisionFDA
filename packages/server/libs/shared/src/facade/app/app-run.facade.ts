@@ -209,6 +209,7 @@ export class AppRunFacade {
     this.logger.log(`Retrieving input files for app run: ${input.scope}`)
     const appInputs = input.inputs
     const inputFiles: UserFile[] = []
+    const notFoundFileUids: Uid<'file'>[] = []
 
     for (const spec of appInputSpec) {
       if (appInputs[spec.name] === undefined || appInputs[spec.name] === null) {
@@ -226,17 +227,22 @@ export class AppRunFacade {
         }
       }
 
-      const foundFiles = await this.nodeService.getRunnableFileByAccessibleScope(fileUids, input.scope)
+      const foundFiles = await this.nodeService.getAccessibleEntitiesByUids(fileUids)
       if (foundFiles.length !== fileUids.length) {
-        const foundFileUids = foundFiles.map(f => f.uid)
-        throw new NotFoundError(
-          `${getPluralizedTerm(fileUids.length, 'file')} in input but found ${foundFileUids.length}: ${foundFileUids.join(', ')}`,
-          {
-            code: ErrorCodes.USER_FILE_NOT_FOUND,
-          },
-        )
+        const foundFileUidsSet = new Set(foundFiles.map(f => f.uid))
+        notFoundFileUids.push(...fileUids.filter(uid => !foundFileUidsSet.has(uid)))
       }
       inputFiles.push(...foundFiles)
+    }
+
+    if (notFoundFileUids.length > 0) {
+      const uniqueNotFoundFileUids = Array.from(new Set(notFoundFileUids))
+      throw new NotFoundError(
+        `${getPluralizedTerm(uniqueNotFoundFileUids.length, 'file')} not found (${uniqueNotFoundFileUids.join(', ')})`,
+        {
+          code: ErrorCodes.USER_FILE_NOT_FOUND,
+        },
+      )
     }
 
     return inputFiles
