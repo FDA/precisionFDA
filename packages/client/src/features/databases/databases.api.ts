@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { SpaceType } from '@/features/spaces/spaces.types'
 import { FileScope, FileState, IFile } from '../files/files.types'
 import { HomeScope, IFilter, MetaV2, ServerScope } from '../home/types'
 import { formatScopeQuery, Params, prepareListFetchV2 } from '../home/utils'
@@ -26,6 +27,8 @@ export interface IAccessibleFile extends IFile {
   space_public: boolean
   in_space: boolean
   file_path: string
+  spaceName?: string
+  spaceType?: SpaceType
 }
 
 export interface FetchAccessibleFilesResponse {

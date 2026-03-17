@@ -260,6 +260,8 @@ class ApplicationController < ActionController::Base
       in_space: object.in_space?,
       space_private: review_space.present? && review_space.confidential?,
       space_public: review_space.present? && review_space.shared?,
+      spaceName: review_space&.name, # temporary fix file location
+      spaceType: review_space&.space_type, # temporary fix file location
     }
 
     if accessible && !item_sliced[:item].nil?
