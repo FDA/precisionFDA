@@ -1,4 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { config } from '@shared/config'
 import { database } from '@shared/database'
 import { SpaceMembershipPlatformAccessToAdminProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-admin.provider'
@@ -6,6 +8,8 @@ import { SpaceMembershipPlatformAccessToContributorProvider } from '@shared/doma
 import { SpaceMembershipPlatformAccessToInactiveProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-inactive.provider'
 import { SpaceMembershipPlatformAccessToViewerProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-viewer.provider'
 import { SpaceMembershipPlatformAccessProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access.provider'
+import { SpaceMembershipCountFilterProvider } from '@shared/domain/space-membership/service/space-membership-count-filter.provider'
+import { SpaceMembershipCountService } from '@shared/domain/space-membership/service/space-membership-count.service'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { SpaceMembershipUpdatePermissionToActiveProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-active.provider'
 import { SpaceMembershipUpdatePermissionToAdminProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-admin.provider'
@@ -16,21 +20,16 @@ import { SpaceMembershipUpdatePermissionToViewerProvider } from '@shared/domain/
 import { SpaceMembershipUpdatePermissionHelper } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.helper'
 import { SpaceMembershipUpdatePermissionProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.provider'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { SpaceMembershipPermission } from '@shared/domain/space-membership/space-membership.type'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
-import { InvalidStateError, PermissionError } from '@shared/errors'
+import { ClientRequestError, InvalidStateError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { create, db } from '@shared/test'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SpaceMembershipService', () => {
   let em: SqlEntityManager
@@ -42,6 +41,7 @@ describe('SpaceMembershipService', () => {
   let spaceMembershipToPlatformAccessProviderMap: {
     [T in SpaceMembershipPermission]: SpaceMembershipPlatformAccessProvider
   }
+  let spaceMembershipCountService: SpaceMembershipCountService
   let spaceMembershipUpdatePermissionHelper: SpaceMembershipUpdatePermissionHelper
   let groupSpace: Space
   let hostLead: User
@@ -88,18 +88,9 @@ describe('SpaceMembershipService', () => {
       loadEntity: (): Promise<User> => Promise.resolve(hostLead),
     }
     const adminAccesProvider = new SpaceMembershipPlatformAccessToAdminProvider(em, platformClient)
-    const contributorAccessProvider = new SpaceMembershipPlatformAccessToContributorProvider(
-      em,
-      platformClient,
-    )
-    const viewerAccessProvider = new SpaceMembershipPlatformAccessToViewerProvider(
-      em,
-      platformClient,
-    )
-    const inactiveAccessProvider = new SpaceMembershipPlatformAccessToInactiveProvider(
-      em,
-      platformClient,
-    )
+    const contributorAccessProvider = new SpaceMembershipPlatformAccessToContributorProvider(em, platformClient)
+    const viewerAccessProvider = new SpaceMembershipPlatformAccessToViewerProvider(em, platformClient)
+    const inactiveAccessProvider = new SpaceMembershipPlatformAccessToInactiveProvider(em, platformClient)
     spaceMembershipToPlatformAccessProviderMap = {
       [SPACE_MEMBERSHIP_ROLE.LEAD]: adminAccesProvider,
       [SPACE_MEMBERSHIP_ROLE.ADMIN]: adminAccesProvider,
@@ -111,27 +102,24 @@ describe('SpaceMembershipService', () => {
     spaceMembershipUpdatePermissionHelper = new SpaceMembershipUpdatePermissionHelper(
       spaceMembershipToPlatformAccessProviderMap,
     )
-    const spaceMembershipUpdatePermissionToActiveProvider =
-      new SpaceMembershipUpdatePermissionToActiveProvider(
-        em,
-        platformClient,
-        spaceMembershipRepository,
-        spaceMembershipUpdatePermissionHelper,
-      )
-    const spaceMembershipUpdatePermissionToInactiveProvider =
-      new SpaceMembershipUpdatePermissionToInactiveProvider(
-        em,
-        platformClient,
-        spaceMembershipRepository,
-        inactiveAccessProvider,
-      )
-    const spaceMembershipUpdatePermissionToViewerProvider =
-      new SpaceMembershipUpdatePermissionToViewerProvider(
-        em,
-        platformClient,
-        spaceMembershipRepository,
-        viewerAccessProvider,
-      )
+    const spaceMembershipUpdatePermissionToActiveProvider = new SpaceMembershipUpdatePermissionToActiveProvider(
+      em,
+      platformClient,
+      spaceMembershipRepository,
+      spaceMembershipUpdatePermissionHelper,
+    )
+    const spaceMembershipUpdatePermissionToInactiveProvider = new SpaceMembershipUpdatePermissionToInactiveProvider(
+      em,
+      platformClient,
+      spaceMembershipRepository,
+      inactiveAccessProvider,
+    )
+    const spaceMembershipUpdatePermissionToViewerProvider = new SpaceMembershipUpdatePermissionToViewerProvider(
+      em,
+      platformClient,
+      spaceMembershipRepository,
+      viewerAccessProvider,
+    )
     const spaceMembershipUpdatePermissionToContributorProvider =
       new SpaceMembershipUpdatePermissionToContributorProvider(
         em,
@@ -139,21 +127,19 @@ describe('SpaceMembershipService', () => {
         spaceMembershipRepository,
         contributorAccessProvider,
       )
-    const spaceMembershipUpdatePermissionToAdminProvider =
-      new SpaceMembershipUpdatePermissionToAdminProvider(
-        em,
-        platformClient,
-        spaceMembershipRepository,
-        adminAccesProvider,
-      )
-    const spaceMembershipUpdatePermissionToLeadProvider =
-      new SpaceMembershipUpdatePermissionToLeadProvider(
-        em,
-        platformClient,
-        spaceMembershipRepository,
-        adminAccesProvider,
-        adminClient,
-      )
+    const spaceMembershipUpdatePermissionToAdminProvider = new SpaceMembershipUpdatePermissionToAdminProvider(
+      em,
+      platformClient,
+      spaceMembershipRepository,
+      adminAccesProvider,
+    )
+    const spaceMembershipUpdatePermissionToLeadProvider = new SpaceMembershipUpdatePermissionToLeadProvider(
+      em,
+      platformClient,
+      spaceMembershipRepository,
+      adminAccesProvider,
+      adminClient,
+    )
     spaceMembershipUpdatePermissionProviderMap = {
       ['enable']: spaceMembershipUpdatePermissionToActiveProvider,
       ['disable']: spaceMembershipUpdatePermissionToInactiveProvider,
@@ -162,6 +148,8 @@ describe('SpaceMembershipService', () => {
       [SPACE_MEMBERSHIP_ROLE.ADMIN]: spaceMembershipUpdatePermissionToAdminProvider,
       [SPACE_MEMBERSHIP_ROLE.LEAD]: spaceMembershipUpdatePermissionToLeadProvider,
     }
+    const spaceMembershipCountFilterProvider = new SpaceMembershipCountFilterProvider()
+    spaceMembershipCountService = new SpaceMembershipCountService(em, spaceMembershipCountFilterProvider)
 
     groupSpace = create.spacesHelper.create(em, {
       type: SPACE_TYPE.GROUPS,
@@ -242,12 +230,7 @@ describe('SpaceMembershipService', () => {
 
     it('should throw InvalidStateError if no memberships can be changed', async () => {
       await expect(
-        getInstance().updatePermission(
-          groupSpace,
-          hostLeadMembership,
-          [-1, -2],
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
+        getInstance().updatePermission(groupSpace, hostLeadMembership, [-1, -2], SPACE_MEMBERSHIP_ROLE.ADMIN),
       ).to.be.rejectedWith(InvalidStateError, 'No memberships can be changed')
     })
 
@@ -260,19 +243,125 @@ describe('SpaceMembershipService', () => {
       )
       expect(result).to.deep.equal([groupViewerMembership, groupContributorMembership])
     })
+
+    it('should skip org access update if updater does not have access to guest org in Group space', async () => {
+      orgSetMemberAccessStub
+        .withArgs({
+          orgDxId: groupSpace.guestDxOrg,
+          data: {
+            [groupViewerMembership.user.getEntity().dxid]:
+              spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+          },
+        })
+        .throws(
+          new ClientRequestError(
+            `PermissionDenied (401): Administrator access to ${groupSpace.guestDxOrg} required to perform this operation`,
+            { clientStatusCode: 401, clientResponse: '' },
+          ),
+        )
+
+      const result = await getInstance().updatePermission(
+        groupSpace,
+        hostLeadMembership,
+        [groupViewerMembership.id],
+        SPACE_MEMBERSHIP_ROLE.ADMIN,
+      )
+      expect(result).to.deep.equal([groupViewerMembership])
+    })
+
+    it('should skip org access update if updater does not have access to host org in Group space', async () => {
+      orgSetMemberAccessStub
+        .withArgs({
+          orgDxId: groupSpace.hostDxOrg,
+          data: {
+            [groupViewerMembership.user.getEntity().dxid]:
+              spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+          },
+        })
+        .throws(
+          new ClientRequestError(
+            `PermissionDenied (401): Administrator access to ${groupSpace.hostDxOrg} required to perform this operation`,
+            { clientStatusCode: 401, clientResponse: '' },
+          ),
+        )
+
+      const result = await getInstance().updatePermission(
+        groupSpace,
+        groupGuestLeadMembership,
+        [groupViewerMembership.id],
+        SPACE_MEMBERSHIP_ROLE.ADMIN,
+      )
+      expect(result).to.deep.equal([groupViewerMembership])
+    })
+
+    it('should throw error if org access update fails by other platform error', async () => {
+      orgSetMemberAccessStub
+        .withArgs({
+          orgDxId: groupSpace.hostDxOrg,
+          data: {
+            [groupViewerMembership.user.getEntity().dxid]:
+              spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+          },
+        })
+        .throws(new ClientRequestError(`Some other platform error`, { clientStatusCode: 500, clientResponse: '' }))
+
+      await expect(
+        getInstance().updatePermission(
+          groupSpace,
+          groupGuestLeadMembership,
+          [groupViewerMembership.id],
+          SPACE_MEMBERSHIP_ROLE.ADMIN,
+        ),
+      ).to.be.rejectedWith(ClientRequestError, 'Some other platform error')
+    })
+
+    it('should throw error if org access update fails in non-Group space', async () => {
+      const reviewSpace = create.spacesHelper.create(em, {
+        type: SPACE_TYPE.REVIEW,
+        state: SPACE_STATE.ACTIVE,
+        hostProject: 'project-reviewhost',
+        guestProject: 'project-reviewguest',
+      })
+      const spaceHostLead = create.spacesHelper.addMember(
+        em,
+        { user: hostLead, space: reviewSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      const reviewSpaceMember = create.spacesHelper.addMember(
+        em,
+        { user: create.userHelper.create(em), space: reviewSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      await em.flush()
+      orgSetMemberAccessStub
+        .withArgs({
+          orgDxId: reviewSpace.hostDxOrg,
+          data: {
+            [reviewSpaceMember.user.getEntity().dxid]:
+              spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+          },
+        })
+        .throws(new ClientRequestError(`Some other platform error`, { clientStatusCode: 500, clientResponse: '' }))
+
+      await expect(
+        getInstance().updatePermission(reviewSpace, spaceHostLead, [reviewSpaceMember.id], SPACE_MEMBERSHIP_ROLE.ADMIN),
+      ).to.be.rejectedWith(ClientRequestError, 'Some other platform error')
+    })
   })
 
   context('changeLeadRole', () => {
     it('should throw InvalidStateError if the new lead is already the current lead', async () => {
-      await expect(
-        getInstance().changeLeadRole(groupSpace, hostLeadMembership, hostLead),
-      ).to.be.rejectedWith(InvalidStateError, 'The new lead is already the current lead')
+      await expect(getInstance().changeLeadRole(groupSpace, hostLeadMembership, hostLead)).to.be.rejectedWith(
+        InvalidStateError,
+        'The new lead is already the current lead',
+      )
     })
 
     it('should throw InvalidStateError if the new lead is already a lead in the space', async () => {
-      await expect(
-        getInstance().changeLeadRole(groupSpace, hostLeadMembership, guestLead),
-      ).to.be.rejectedWith(InvalidStateError, 'The new lead is already a lead in the space')
+      await expect(getInstance().changeLeadRole(groupSpace, hostLeadMembership, guestLead)).to.be.rejectedWith(
+        InvalidStateError,
+        'The new lead is already a lead in the space',
+      )
     })
 
     it('should update lead role if user is already a member', async () => {
@@ -386,16 +475,8 @@ describe('SpaceMembershipService', () => {
         hostProject: 'project-reviewhost',
         guestProject: 'project-reviewguest',
       })
-      const cfHostSpace = create.spacesHelper.createConfidentialReview(
-        em,
-        reviewSpace,
-        SPACE_MEMBERSHIP_SIDE.HOST,
-      )
-      const cfGuestSpace = create.spacesHelper.createConfidentialReview(
-        em,
-        reviewSpace,
-        SPACE_MEMBERSHIP_SIDE.GUEST,
-      )
+      const cfHostSpace = create.spacesHelper.createConfidentialReview(em, reviewSpace, SPACE_MEMBERSHIP_SIDE.HOST)
+      const cfGuestSpace = create.spacesHelper.createConfidentialReview(em, reviewSpace, SPACE_MEMBERSHIP_SIDE.GUEST)
 
       create.spacesHelper.addMember(
         em,
@@ -569,8 +650,7 @@ describe('SpaceMembershipService', () => {
         [groupViewerMembership.user.getEntity().dxid]:
           spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.VIEWER].memberAccess,
         [groupContributorMembership.user.getEntity().dxid]:
-          spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]
-            .memberAccess,
+          spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR].memberAccess,
       }
 
       const result = await getInstance().syncPlatformAccess(groupSpace.id, [
@@ -606,9 +686,7 @@ describe('SpaceMembershipService', () => {
     })
 
     it('should not update billTo if project billTo matches user organization', async () => {
-      adminProjectDescribeStub
-        .withArgs(groupSpace.hostProject)
-        .resolves({ billTo: hostLead.billTo() })
+      adminProjectDescribeStub.withArgs(groupSpace.hostProject).resolves({ billTo: hostLead.billTo() })
 
       await getInstance().syncSpaceLeadBillTo(hostLeadMembership.id)
       expect(adminProjectDescribeStub.calledOnce).to.be.true()
@@ -640,6 +718,7 @@ describe('SpaceMembershipService', () => {
       spaceMembershipUpdatePermissionProviderMap,
       spaceMembershipUpdatePermissionHelper,
       spaceMembershipToPlatformAccessProviderMap,
+      spaceMembershipCountService,
     )
   }
 })
