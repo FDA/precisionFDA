@@ -471,7 +471,6 @@ class EcsDeployer:
         print(f"Task {service_name} submitted successfully.")
 
         if self.wait_for_completion == "true":
-            self.wait_for_task_completion(service_name, task_arn)
             print(f"Waiting for {service_name} task to finish...")
 
             # Wait for the task to stop
