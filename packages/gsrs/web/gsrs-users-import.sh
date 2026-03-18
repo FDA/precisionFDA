@@ -12,11 +12,23 @@
 # OLD_DB_NAME="ixginasDATE"
 # OLD_DB_USER="admin"
 # OLD_DB_PASS="INSERT_PASSWORD"
-OLD_DB_HOST="127.0.0.1"
-OLD_DB_PORT=32900
-OLD_DB_NAME="ixginasDATE"
-OLD_DB_USER="root"
-OLD_DB_PASS="password"
+OLD_DB_HOST="${GSRS_DATABASE_HOST:-127.0.0.1}"
+OLD_DB_PORT="${GSRS_DATABASE_PORT:-3306}"
+OLD_DB_NAME="${OLD_DB_NAME:-ixginasDATE}"
+OLD_DB_USER="${GSRS_DATABASE_USERNAME:-root}"
+OLD_DB_PASS="${GSRS_DATABASE_PASSWORD:-password}"
+
+# Allow OLD_DB_HOST in host:port format, e.g. mydb.example.com:3306
+if [[ "$OLD_DB_HOST" == *:* ]]; then
+  host_part="${OLD_DB_HOST%%:*}"
+  port_part="${OLD_DB_HOST##*:}"
+
+  # Only override port if port_part is non\-empty
+  if [[ -n "$port_part" ]]; then
+    OLD_DB_PORT="$port_part"
+  fi
+  OLD_DB_HOST="$host_part"
+fi
 
 # Technical users do not have an email set and we don't want to re-import these
 users=$(mysql -h $OLD_DB_HOST -P $OLD_DB_PORT -u $OLD_DB_USER \

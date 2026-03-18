@@ -87,8 +87,12 @@ runs:
           # --- GSRS Nginx: config tree fingerprint ---
           SHORT_SHA=$(git rev-parse --short HEAD:packages/gsrs/nginx)
 
+        elif [ "${{ inputs.package }}" = "gsrs_data_update" ]; then
+          # --- GSRS Data Update: config tree fingerprint ---
+          SHORT_SHA=$(git rev-parse --short HEAD:packages/gsrs/data_update)
+        
         else
-          echo "Error: package must be 'gsrs_web' or 'gsrs_nginx'"
+          echo "Error: package must be 'gsrs_web', 'gsrs_nginx' or 'gsrs_data_update'"
           exit 1
         fi
 
@@ -136,6 +140,8 @@ runs:
           echo "DOCKERFILE=${{ inputs.dockerfile }}" >> $GITHUB_ENV
         elif [ "${{ inputs.package }}" = "gsrs_nginx" ]; then
           echo "DOCKERFILE=packages/gsrs/nginx/Dockerfile" >> $GITHUB_ENV
+        elif [ "${{ inputs.package }}" = "gsrs_data_update" ]; then
+          echo "DOCKERFILE=packages/gsrs/data_update/Dockerfile" >> $GITHUB_ENV
         else
           echo "DOCKERFILE=packages/gsrs/web/Dockerfile" >> $GITHUB_ENV
         fi

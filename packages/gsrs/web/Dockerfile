@@ -96,6 +96,8 @@ COPY config/application.conf /tmp/application.conf.template
 COPY config/config.json /tmp/config.json.template
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
+COPY gsrs-users-import.sh /usr/local/bin/gsrs-users-import.sh
+RUN chmod +x /usr/local/bin/gsrs-users-import.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh && \
     chmod -R g+w conf

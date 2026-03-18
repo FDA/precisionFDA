@@ -54,3 +54,38 @@ Some parameters need to be specified to run this container. These are typically 
 | `GSRS_DATABASE_USERNAME` | (database user) |
 | `GSRS_DATABASE_PASSWORD` | (database password) |
 | `GSRS_DATABASE_NAME` | (database name) |
+
+
+## Database & Index Restore Workflow
+
+Within the data_update folder, we have the dockerfile and script for restoring the database and index.
+The corresponding workflow is defined in the `data_update.yml` file.
+
+It performs two main steps:
+
+### 1. Database Restore
+- Downloads a gzipped SQL dump from S3  
+- Creates the target database  
+- Imports the dump into MariaDB/MySQL  
+- Ensures a required roles trigger exists  
+
+### 2. Index Transfer
+- Downloads a compressed index archive from S3  
+- Extracts the contents  
+- Uploads the index files to the target S3 bucket under the configured prefix  
+
+---
+
+## Optional Skip Flags
+
+You can control execution using the following environment variables:
+
+- `GSRS_SKIP_DB_UPDATE`  
+  Set to `"true"` to skip the database restore step.  
+  Defaults to `"false"`.
+
+- `GSRS_SKIP_INDEX_UPDATE`  
+  Set to `"true"` to skip the index transfer step.  
+  Defaults to `"false"`.
+
+This allows you to restore only the database, only the index, or both, depending on your use case.
