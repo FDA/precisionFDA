@@ -153,6 +153,17 @@ services:
           - name: gsrs-nginx-sg
       targetGroupName: assets-ecs-tg
 
+    gsrs-data-update:
+      imageName: gsrs_data_update
+      desiredCount: 0
+      container:
+        cpu: 256
+        memoryReservation: 512
+      containerPort: 80
+      serviceConnect:
+        securityGroups:
+          - name: gsrs-web-sg
+
 ############ ENV OVERRIDE ############
 
   dev:

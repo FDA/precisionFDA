@@ -15,6 +15,10 @@ on:
         description: "Tag/Branch for ncats/GSRSFrontend"
         required: true
         default: "pfda"
+      DATABASE_NAME:
+        description: GSRS Database and Index Name
+        type: string
+        default: ixginas20260219
       FORCE_DEPLOY_SERVICES:
         description: "Comma-separated list of services to force redeploy (e.g., gsrs-web, gsrs-nginx)"
         required: false
@@ -99,6 +103,11 @@ jobs:
           ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
           echo "AWS Account ID: $ACCOUNT_ID"
           echo "ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
+
+      - name: Set SSM Parameters
+        run: |
+          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/app/environment/GSRS_DATABASE_NAME --value '${{ inputs.DATABASE_NAME }}' --overwrite >/dev/null
+
 
       - name: Deploy GSRS ECS Service
         working-directory: infra/ecs

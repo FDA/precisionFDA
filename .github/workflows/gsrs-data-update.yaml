@@ -1,4 +1,4 @@
-name: STAGING - Deploy GSRS ECS
+name: RUN - GSRS Data Update
 
 permissions:
   id-token: write
@@ -7,42 +7,41 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      GSRS_MAIN_BRANCH:
-        description: "Branch/Tag for ncats/gsrs3-main-deployment"
-        required: true
-        default: "GSRSv3.1.2PUB"
-      FRONTEND_TAG:
-        description: "Tag/Branch for ncats/GSRSFrontend"
-        required: true
-        default: "pfda"
-      DATABASE_NAME:
-        description: GSRS Database and Index Name
-        type: string
-        default: ixginas20260219
-      FORCE_DEPLOY_SERVICES:
-        description: "Comma-separated list of services to force redeploy (e.g., gsrs-web, gsrs-nginx)"
-        required: false
-        default: ""
+      ENVIRONMENT:
+        description: Deployment Environment
+        type: choice
+        options:
+          - dev_8517
+          - test_4711
+          - staging_4711
+          - production
+        default: dev_8517
+      SKIP_DB_UPDATE:
+        description: Skip Database Update
+        type: boolean
+        default: false
+      SKIP_INDEX_UPDATE:
+        description: Skip Index Update
+        type: boolean
+        default: false
 
 concurrency:
-  group: dev-deploy-gsrs-ecs
+  group: ${{inputs.ENVIRONMENT}}-gsrs-data-update
   cancel-in-progress: false
 
+run-name: GSRS DATA update ENV=${{ inputs.ENVIRONMENT }}
 jobs:
   build-and-push-gsrs-images:
     runs-on: ubuntu-latest
     environment:
-      name: staging_4711
+      name: ${{ inputs.ENVIRONMENT }}
     outputs:
-      gsrs_web_image_tag: ${{ steps.set_output.outputs.gsrs_web_image_tag }}
-      gsrs_nginx_image_tag: ${{ steps.set_output.outputs.gsrs_nginx_image_tag }}
+      gsrs_data_update_image_tag: ${{ steps.set_output.outputs.gsrs_data_update_image_tag }}
     strategy:
       matrix:
         include:
-          - package: gsrs_web
-            context: "packages/gsrs/web"
-          - package: gsrs_nginx
-            context: "packages/gsrs/nginx"
+          - package: gsrs_data_update
+            context: "packages/gsrs/data_update"
     steps:
       - name: Checkout code
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
@@ -56,8 +55,6 @@ jobs:
           orchestration-account-id: ${{ vars.ORCHESTRATION_ACCOUNT_ID }}
           package: ${{ matrix.package }}
           context: ${{ matrix.context }}
-          gsrs-main-branch: ${{ inputs.GSRS_MAIN_BRANCH }}
-          frontend-tag: ${{ inputs.FRONTEND_TAG }}
 
       - name: Set matrix job output
         id: set_output
@@ -76,7 +73,7 @@ jobs:
     needs: build-and-push-gsrs-images
     runs-on: ubuntu-latest
     environment:
-      name: staging_4711
+      name: ${{ inputs.ENVIRONMENT }}
     steps:
       - name: Checkout code
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
@@ -106,23 +103,23 @@ jobs:
 
       - name: Set SSM Parameters
         run: |
-          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/app/environment/GSRS_DATABASE_NAME --value '${{ inputs.DATABASE_NAME }}' --overwrite >/dev/null
+          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/app/environment/GSRS_SKIP_DB_UPDATE --value '${{ inputs.SKIP_DB_UPDATE }}' --type String --overwrite >/dev/null
+          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/app/environment/GSRS_SKIP_INDEX_UPDATE --value '${{ inputs.SKIP_INDEX_UPDATE }}' --overwrite >/dev/null
 
-      - name: Deploy GSRS ECS Service
+      - name: Run GSRS Data Update
         working-directory: infra/ecs
         env:
           AWS_REGION: ${{ vars.REGION }}
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
-          GSRS_WEB_TAG: ${{ needs.build-and-push-gsrs-images.outputs.gsrs_web_image_tag }}
-          GSRS_NGINX_TAG: ${{ needs.build-and-push-gsrs-images.outputs.gsrs_nginx_image_tag }}
-          FORCE_DEPLOY_SERVICES: ${{ inputs.FORCE_DEPLOY_SERVICES }}
+          GSRS_DATA_UPDATE_TAG: ${{ needs.build-and-push-gsrs-images.outputs.gsrs_data_update_image_tag }}
+          FORCE_DEPLOY_SERVICES: "gsrs-data-update"
           GIT_BRANCH: ${{ github.ref_name }}
           DEPLOYMENT_TYPE: "gsrs"
           PYTHONUNBUFFERED: "1"
+          WAIT_FOR_COMPLETION: "false"
         run: |
           echo "Deploying GSRS to $ENVIRONMENT..."
-          echo "GSRS_WEB_TAG=$GSRS_WEB_TAG"
-          echo "GSRS_NGINX_TAG=$GSRS_NGINX_TAG"
+          echo "GSRS_DATA_UPDATE_TAG=$GSRS_DATA_UPDATE_TAG"
 
           python deploy-ecs-service.py
         shell: bash

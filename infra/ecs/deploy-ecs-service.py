@@ -28,6 +28,7 @@ class EcsDeployer:
         self.ecr_account = "991033550868"
         self.branch = os.environ.get("GIT_BRANCH")
         self.deployment_type = os.environ.get("DEPLOYMENT_TYPE", "pfda").lower()
+        self.wait_for_completion = os.environ.get("WAIT_FOR_COMPLETION", "true").lower()
         self.services_file = services_file
         self.otel_cpu = 50
         self.otel_memory = 128
@@ -44,7 +45,8 @@ class EcsDeployer:
             "NGINX": os.getenv("NGINX_TAG"),
             "DOCS": os.getenv("DOCS_TAG"),
             "GSRS_WEB": os.getenv("GSRS_WEB_TAG"),
-            "GSRS_NGINX": os.getenv("GSRS_NGINX_TAG")
+            "GSRS_NGINX": os.getenv("GSRS_NGINX_TAG"),
+            "GSRS_DATA_UPDATE": os.getenv("GSRS_DATA_UPDATE_TAG"),
         }
 
         force_services_str = os.getenv("FORCE_DEPLOY_SERVICES", "")
@@ -75,9 +77,10 @@ class EcsDeployer:
         ]
 
         if self.deployment_type == "gsrs":
-            self.stages = [
-                ["gsrs-web", "gsrs-nginx"],
-            ]
+            if self.image_tags["GSRS_DATA_UPDATE"]:
+                self.stages = [["gsrs-data-update"]]
+            else:
+                self.stages = [["gsrs-web", "gsrs-nginx"]]
 
 
         self.prod_branches_patterns = [r"^master$",r"^production$",r"^release.*",r"^staging.*"]
@@ -135,8 +138,8 @@ class EcsDeployer:
             # Only if a new task definition was registered, deployment for a service will happen
             if prev_task_def_arn:
                 self.deployed_services[svc_name] = prev_task_def_arn
-            if svc_name == "pfda-db-migrate":
-                self.run_one_off_task(svc_name, task_def_arn)
+            if svc_name in ["pfda-db-migrate", "gsrs-data-update"]:
+                self.run_one_off_task(svc_name, task_def_arn, svc_conf)
             else:
                 self.create_or_update_service(svc_name, svc_conf, task_def_arn)
 
@@ -429,7 +432,7 @@ class EcsDeployer:
             f"Service {service_name} did not stabilize after {max_attempts} attempts ({delay * max_attempts}s timeout)."
         )
 
-    def run_one_off_task(self, service_name, task_def_arn):
+    def run_one_off_task(self, service_name, task_def_arn, svc_conf=None):
         """
         Run a one-off ECS task (e.g., DB migrations).
         Waits for it to finish and raises an exception if it fails.
@@ -439,6 +442,10 @@ class EcsDeployer:
 
         print(f"Starting one-off task {service_name} using task definition {task_def_arn}...")
 
+        sc_sgs = svc_conf.get("serviceConnect", {}).get("securityGroups") or []
+        sg_names = [item["name"] for item in sc_sgs if isinstance(item, dict) and item.get("name")]
+        sg_names = sg_names or ["common-sg"]
+
         response = self.ecs_client.run_task(
             cluster=self.cluster_name,
             taskDefinition=task_def_arn,
@@ -447,26 +454,37 @@ class EcsDeployer:
             networkConfiguration={
                 "awsvpcConfiguration": {
                     "subnets": self.private_subnets,
-                    "securityGroups": self._get_sg_ids_by_name(["common-sg"]),
+                    "securityGroups": self._get_sg_ids_by_name(sg_names),
                     "assignPublicIp": "DISABLED",
                 }
             },
+            placementConstraints=[
+                {
+                    "type": "memberOf",
+                    "expression": f"attribute:deployment_type == {self.deployment_type}"
+                }
+            ],
         )
 
         task_arn = response["tasks"][0]["taskArn"]
-        print(f"Waiting for {service_name} task to finish...")
 
-        # Wait for the task to stop
-        waiter = self.ecs_client.get_waiter("tasks_stopped")
-        waiter.wait(cluster=self.cluster_name, tasks=[task_arn])
+        print(f"Task {service_name} submitted successfully.")
 
-        # Check exit code
-        desc = self.ecs_client.describe_tasks(cluster=self.cluster_name, tasks=[task_arn])
-        exit_code = desc["tasks"][0]["containers"][0].get("exitCode")
-        if exit_code != 0:
-            raise ServiceDeploymentError(f"One-off task {service_name} failed with exit code {exit_code}")
+        if self.wait_for_completion == "true":
+            self.wait_for_task_completion(service_name, task_arn)
+            print(f"Waiting for {service_name} task to finish...")
 
-        print(f"One-off task {service_name} completed successfully!")
+            # Wait for the task to stop
+            waiter = self.ecs_client.get_waiter("tasks_stopped")
+            waiter.wait(cluster=self.cluster_name, tasks=[task_arn])
+
+            # Check exit code
+            desc = self.ecs_client.describe_tasks(cluster=self.cluster_name, tasks=[task_arn])
+            exit_code = desc["tasks"][0]["containers"][0].get("exitCode")
+            if exit_code != 0:
+                raise ServiceDeploymentError(f"One-off task {service_name} failed with exit code {exit_code}")
+
+            print(f"One-off task {service_name} completed successfully!")
 
 
     # ---------------------- Helper Functions ----------------------
