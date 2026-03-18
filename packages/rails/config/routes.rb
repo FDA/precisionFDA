@@ -413,11 +413,6 @@ Rails.application.routes.draw do
         resources :comments
       end
 
-      resources :notification_preferences do
-        get :index
-        post "change", on: :collection
-      end
-
       post "create_file"
       post "create_challenge_card_image"
       post "create_image_file"

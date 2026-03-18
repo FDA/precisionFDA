@@ -19,7 +19,7 @@ import {
   StyledNotifications,
   StyledPageContainer,
 } from './styles'
-import { AllNotification, NotificationPreferences, NotificationPreferencesPayload } from './types'
+import { AllNotification, NotificationPreferences } from './types'
 
 type NotificationLabelType = Record<string, string>
 
@@ -380,11 +380,7 @@ const NotificationsPage = () => {
       ...variables.private,
     } satisfies Record<AllNotification, boolean>
 
-    const payload: NotificationPreferencesPayload = Object.fromEntries(
-      Object.entries(all).map(([key, value]) => [key, value ? 1 : 0]),
-    ) as NotificationPreferencesPayload
-
-    return notificationsMutation(payload)
+    return notificationsMutation(all)
   }
 
   return (

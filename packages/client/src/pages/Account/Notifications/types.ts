@@ -55,7 +55,7 @@ export type AllNotification =
   | ReviewSpaceAdminNotification
   | PrivateNotification
 
-export type NotificationPreferencesPayload = Record<AllNotification, 1 | 0>
+export type NotificationPreferencesPayload = Record<AllNotification, boolean>
 
 export type NotificationPreferences = {
   group_contributor: Record<GroupContributorNotification, boolean>

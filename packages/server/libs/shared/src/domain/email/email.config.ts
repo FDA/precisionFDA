@@ -1,5 +1,5 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { mergeAll } from 'ramda'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 /**
  * List of all notification bases, which may be applied to a role.
@@ -27,40 +27,6 @@ export const NOTIFICATION_TYPES_BASE = {
   space_invitation: true,
   node_copy: true,
   user_provisioned: true,
-}
-
-export const DEFAULT_NOTIFICATION_PREFERENCES = {
-  group_lead_membership_changed: true,
-  group_lead_comment_activity: true,
-  group_lead_content_added_or_deleted: true,
-  group_lead_member_added_to_space: true,
-  group_lead_space_locked_unlocked_deleted: true,
-  group_contributor_membership_changed: false,
-  group_contributor_comment_activity: true,
-  group_contributor_content_added_or_deleted: false,
-  group_viewer_membership_changed: false,
-  group_viewer_comment_activity: true,
-  group_viewer_content_added_or_deleted: false,
-  shared_lead_membership_changed: true,
-  shared_lead_comment_activity: true,
-  shared_lead_content_added_or_deleted: true,
-  shared_lead_member_added_to_space: true,
-  shared_lead_space_locked_unlocked_deleted: true,
-  shared_contributor_membership_changed: false,
-  shared_contributor_comment_activity: true,
-  shared_contributor_content_added_or_deleted: false,
-  shared_viewer_membership_changed: false,
-  shared_viewer_comment_activity: true,
-  shared_viewer_content_added_or_deleted: false,
-  admin_membership_changed: true,
-  admin_comment_activity: true,
-  admin_content_added_or_deleted: true,
-  admin_member_added_to_space: true,
-  admin_space_locked_unlocked_deleted: true,
-  private_job_finished: false,
-  private_challenge_opened: true,
-  private_challenge_preregister: true,
-  private_job_stale: false,
 }
 
 /**
