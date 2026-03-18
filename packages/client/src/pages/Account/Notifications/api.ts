@@ -6,12 +6,9 @@ type NotificationPreferencesResponse = {
 }
 
 export const fetchNotificationsPreferences = async () => {
-  return axios.get<NotificationPreferencesResponse>('/api/notification_preferences').then(r => r.data)
+  return axios.get<NotificationPreferencesResponse>('/api/v2/notification-preferences').then(r => r.data)
 }
 
-export const saveNotificationsPreferences = async (payload: NotificationPreferencesPayload) => {
-  return axios.post(
-    '/api/notification_preferences/change',
-    payload,
-  ).then(r => r.data)
+export const saveNotificationsPreferences = async (payload: NotificationPreferencesPayload): Promise<void> => {
+  await axios.put('/api/v2/notification-preferences', payload)
 }
