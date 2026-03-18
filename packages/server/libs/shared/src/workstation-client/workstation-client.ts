@@ -122,7 +122,7 @@ class WorkstationClient implements IWorkstationClient {
     const cookies = await jar.getCookies(this.workstationUrl)
     this.logger.log(`extractWorkstationCookie got cookie keys: ${cookies.map(c => c.key).join(', ')}`)
     for (const cookie of cookies) {
-      if (cookie.key.startsWith('session') || cookie.key.startsWith('job-')) {
+      if (cookie.key === 'dx-https-app-session' || cookie.key.startsWith('job-')) {
         return `${cookie.key}=${cookie.value}`
       }
     }
