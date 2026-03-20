@@ -70,7 +70,7 @@ export class AppRunFacade {
     const processedInput = await this.buildJobInput(runAppInput, app, inputFiles)
 
     let exchangeToken: CliExchangeToken
-    if (app.spec.internet_access && compareVersions(app.version, '1.3.0') >= 0 && !app.isHTTPS()) {
+    if (app.spec.internet_access && app.version && compareVersions(app.version, '1.3.0') >= 0 && !app.isHTTPS()) {
       this.logger.log(`Generating CLI exchange token for app run with internet access ${app.uid}`)
       const cliKey = await this.authService.generateCliKey(TimeUtils.hoursToSeconds(24))
       const cliConfigs = {
