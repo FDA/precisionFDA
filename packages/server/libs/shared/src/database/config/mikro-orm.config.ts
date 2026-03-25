@@ -1,6 +1,6 @@
 import { LoadStrategy, LoggerOptions } from '@mikro-orm/core'
 import { DefaultLogger, LogContext, MySqlDriver } from '@mikro-orm/mysql'
-import { MikroOrmModuleSyncOptions } from '@mikro-orm/nestjs/typings'
+import { MikroOrmModuleSyncOptions } from '@mikro-orm/nestjs'
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 import { Logger } from '@nestjs/common'
 import { config } from '@shared/config'
@@ -33,7 +33,7 @@ class SQLQueryLogger extends DefaultLogger {
 
   private formatQuery(context: LogContext): string {
     const queryText = this.printValues
-      ? this.fillParams(context.query, context.params || [])
+      ? this.fillParams(context.query, [...(context.params ?? [])])
       : context.query
 
     const parts = [`[QUERY${context.id !== undefined ? ` ${context.id}` : ''}]`, queryText]

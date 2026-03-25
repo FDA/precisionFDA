@@ -52,6 +52,7 @@ describe('DiscussionService tests', () => {
     await em.flush()
     userContext = create.contextHelper.create(user)
     await em.flush()
+
     discussionReplyRepository = {
       findOne: discussionReplyFindOneStub,
       findEditableOne: discussionReplyFindEditableOneStub,

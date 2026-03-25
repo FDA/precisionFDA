@@ -113,7 +113,7 @@ export class PlatformClient {
     const url = `${config.platform.apiUrl}/applet/new`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: { ...omit(['accessToken'], params) },
+      data: params,
       url,
     }
     return await this.sendRequest(options)
@@ -128,7 +128,7 @@ export class PlatformClient {
     const url = `${config.platform.apiUrl}/app/new`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: { ...omit(['accessToken'], params) },
+      data: params,
       url,
     }
     return await this.sendRequest(options)
@@ -143,7 +143,7 @@ export class PlatformClient {
     const url = `${config.platform.apiUrl}/${appId}/update`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: { ...omit(['accessToken'], params) },
+      data: params,
       url,
     }
     return await this.sendRequest(options)
@@ -213,7 +213,7 @@ export class PlatformClient {
     const url = `${config.platform.apiUrl}/system/findJobs`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: { ...omit(['accessToken'], params) },
+      data: params,
       url,
     }
     return await this.sendRequest<FindJobsResponse>(options)
@@ -221,9 +221,10 @@ export class PlatformClient {
 
   async jobCreate(params: JobCreateParams): Promise<JobCreateResponse> {
     const url = `${config.platform.apiUrl}/${params.appId}/run`
+    const data = omit(['appId'], params)
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: { ...omit(['accessToken', 'appId'], params) },
+      data,
       url,
     }
     return await this.sendRequest(options)
@@ -557,7 +558,7 @@ export class PlatformClient {
     const url = `${config.platform.apiUrl}/dbcluster/new`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: { ...omit(['accessToken'], params) },
+      data: params,
       url,
     }
 
@@ -566,9 +567,10 @@ export class PlatformClient {
 
   async dbClusterDescribe(params: DbClusterDescribeParams): Promise<DbClusterDescribeResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const data = omit(['dxid'], params)
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: { ...omit(['accessToken', 'dxid'], params) },
+      data,
       url,
     }
 
@@ -1085,7 +1087,7 @@ export class PlatformClient {
       // Error response from the platform has the following response data:
       //   "error": {
       //     "type": "PermissionDenied",
-      //     "message": "BillTo for this job's project must have the \"httpsApp\" feature enabled to run this executable"
+      //     "message": "BillTo for this job's project must have the "httpsApp" feature enabled to run this executable"
       //   }
       //
       // However, there's also a class of error response where the response payload is HTML

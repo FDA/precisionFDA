@@ -3,8 +3,7 @@ import * as queue from '@shared/queue'
 import * as redis from '@shared/services/redis.service'
 import Bull from 'bull'
 import sinon from 'sinon'
-// import { handler } from '../../src/jobs'
-import { RedisClient } from 'redis'
+import { RedisClientType } from 'redis'
 import { FileCloseParams } from '../platform-client/platform-client.params'
 import * as generate from './generate'
 import { random } from './generate'
@@ -78,7 +77,7 @@ const fakes = {
   emailService: mockServiceFactory.emailService,
 }
 
-const mocksSetDefaultBehaviour = () => {
+const mocksSetDefaultBehaviour = (): void => {
   // all the stubs should be listed here
   fakes.client.jobDescribeFake.callsFake((jobDxId) =>
     Promise.resolve({
@@ -171,7 +170,7 @@ const mocksSetDefaultBehaviour = () => {
   mockServiceFactory.reset()
 }
 
-const mocksSetup = () => {
+const mocksSetup = (): void => {
   mocksSetDefaultBehaviour()
   // client
   sandbox.replace(PlatformClient.prototype, 'jobDescribe', fakes.client.jobDescribeFake)
@@ -237,14 +236,17 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
   sandbox.replace(queue, 'createSyncJobStatusTask', fakes.queue.createSyncJobStatusTaskFake)
   sandbox.replace(queue, 'clearOrphanedRepeatableJobs', fakes.queue.clearOrphanedRepeatableJobs)
-  sandbox.stub(redis, 'createRedisClient').returns({
-    publish() {},
-    subscribe() {},
-    quit() {},
-  } as RedisClient)
+  const redisClientMock = {
+    publish: async (): Promise<number> => 0,
+    subscribe: async (): Promise<void> => undefined,
+    quit: async (): Promise<string> => 'OK',
+  }
+  sandbox
+    .stub(redis, 'createRedisClient')
+    .resolves(redisClientMock as unknown as RedisClientType)
 }
 
-const mocksReset = () => {
+const mocksReset = (): void => {
   fakes.client.jobDescribeFake.reset()
   fakes.client.jobCreateFake.reset()
   fakes.client.jobTerminateFake.reset()
@@ -288,7 +290,7 @@ const mocksReset = () => {
   mocksSetDefaultBehaviour()
 }
 
-const mocksRestore = () => {
+const mocksRestore = (): void => {
   sandbox.restore()
 }
 
