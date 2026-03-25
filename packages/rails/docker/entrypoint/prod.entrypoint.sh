@@ -5,7 +5,7 @@ set -e
 # Generate runtime environment for frontend
 # ------------------------------
 source /precision-fda/docker/entrypoint/runtime-env.sh
-
+source /precision-fda/docker/entrypoint/robots-txt.sh
 # ------------------------------
 # Generate database.yml from DATABASE_URL
 # ------------------------------
