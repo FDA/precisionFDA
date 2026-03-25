@@ -75,10 +75,6 @@ Rails.application.routes.draw do
         post :dissolve
       end
 
-      resources :participants, except: [:show] do
-        post :update_positions, on: :collection
-      end
-
       resources :org_requests do
         member do
           put "approve", to: "org_requests#approve"
@@ -216,9 +212,6 @@ Rails.application.routes.draw do
         post :ask_question, on: :member
       end
 
-      resources :participants, path: "participants" do
-        get :index
-      end
 
       resources :apps do
         get :describe, on: :member, to: "apps#describe"

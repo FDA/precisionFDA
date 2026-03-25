@@ -45,7 +45,7 @@ export const ParticipantOrgsList = () => {
     <StyledParticipantsList>
       {orgs.map(participant => (
         <li title={participant.title} data-toggle="tooltip" key={participant.id}>
-          <img src={participant.image_url} alt={participant.title} />
+          <img src={participant.imageUrl} alt={participant.title} />
         </li>
       ))}
     </StyledParticipantsList>
