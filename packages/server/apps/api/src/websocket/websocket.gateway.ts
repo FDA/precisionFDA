@@ -1,4 +1,5 @@
-import { CreateRequestContext, SqlEntityManager } from '@mikro-orm/mysql'
+import { RequestContext } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Logger, UseInterceptors } from '@nestjs/common'
 import {
   ConnectedSocket,
@@ -11,7 +12,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets'
 import { COOKIE_SESSION_KEY } from '@shared/config/consts'
-import { database } from '@shared/database'
 import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.interceptor'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { JobRepository } from '@shared/domain/job/job.repository'
@@ -52,73 +52,74 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     )
   }
 
-  @CreateRequestContext(() => database.orm())
   async handleConnection(client: PfdaWebSocket, message: IncomingMessage): Promise<void> {
-    try {
-      this.logger.verbose(`WebSocket client connected, IP: ${message.socket.remoteAddress}`)
+    await RequestContext.create(this.em.fork(), async () => {
+      try {
+        this.logger.verbose(`WebSocket client connected, IP: ${message.socket.remoteAddress}`)
 
-      const token = CookieUtils.getCookie(COOKIE_SESSION_KEY, message.headers.cookie)
-      if (!token) {
-        this.logger.verbose('WebSocket connection missing authentication token')
-        client.close(4001, 'Missing authentication token')
-        return
+        const token = CookieUtils.getCookie(COOKIE_SESSION_KEY, message.headers.cookie)
+        if (!token) {
+          this.logger.verbose('WebSocket connection missing authentication token')
+          client.close(4001, 'Missing authentication token')
+          return
+        }
+
+        const decryptedUserSession = Encryptor.decrypt(token)
+
+        client.pfdaUserContext = new UserContext(
+          decryptedUserSession.user_id,
+          decryptedUserSession.token,
+          decryptedUserSession.username,
+          decryptedUserSession.expiration,
+          decryptedUserSession.session_id,
+        )
+
+        const session = await this.em.findOne(Session, {
+          key: HashUtils.hashSessionId(client.pfdaUserContext.sessionId),
+          user: client.pfdaUserContext.id,
+        })
+        if (!session) {
+          this.logger.verbose(`Session with id ${client.pfdaUserContext.sessionId} was not found`)
+          client.close(4001, 'Session not found')
+          return
+        }
+
+        if (session.isExpired()) {
+          this.logger.verbose(`Session with id ${session.id} expired`)
+          client.close(4001, 'Session expired')
+          return
+        }
+
+        const userId = client.pfdaUserContext.id
+        const dxuser = client.pfdaUserContext.dxuser
+
+        if (!this.clientConnections.has(userId)) {
+          this.clientConnections.set(userId, new Set())
+        }
+
+        this.clientConnections.get(userId).add(client)
+
+        this.logger.debug({
+          message: 'User authenticated for WebSocket notifications',
+          user: dxuser,
+          userId: userId,
+        })
+
+        // move to endpoint call.
+        // const unreadNotifications = await this.notificationService.getUnreadNotifications(userId)
+        // unreadNotifications.forEach((notification) => {
+        //   client.send(
+        //     JSON.stringify({
+        //       type: WEBSOCKET_EVENTS.NOTIFICATION,
+        //       data: notification,
+        //     }),
+        //   )
+        // })
+      } catch (e) {
+        this.logger.error({ message: 'WebSocket connection error', error: e.message })
+        client.close(4001, e.message)
       }
-
-      const decryptedUserSession = Encryptor.decrypt(token)
-
-      client.pfdaUserContext = new UserContext(
-        decryptedUserSession.user_id,
-        decryptedUserSession.token,
-        decryptedUserSession.username,
-        decryptedUserSession.expiration,
-        decryptedUserSession.session_id,
-      )
-
-      const session = await this.em.findOne(Session, {
-        key: HashUtils.hashSessionId(client.pfdaUserContext.sessionId),
-        user: client.pfdaUserContext.id,
-      })
-      if (!session) {
-        this.logger.verbose(`Session with id ${client.pfdaUserContext.sessionId} was not found`)
-        client.close(4001, 'Session not found')
-        return
-      }
-
-      if (session.isExpired()) {
-        this.logger.verbose(`Session with id ${session.id} expired`)
-        client.close(4001, 'Session expired')
-        return
-      }
-
-      const userId = client.pfdaUserContext.id
-      const dxuser = client.pfdaUserContext.dxuser
-
-      if (!this.clientConnections.has(userId)) {
-        this.clientConnections.set(userId, new Set())
-      }
-
-      this.clientConnections.get(userId).add(client)
-
-      this.logger.debug({
-        message: 'User authenticated for WebSocket notifications',
-        user: dxuser,
-        userId: userId,
-      })
-
-      // move to endpoint call.
-      // const unreadNotifications = await this.notificationService.getUnreadNotifications(userId)
-      // unreadNotifications.forEach((notification) => {
-      //   client.send(
-      //     JSON.stringify({
-      //       type: WEBSOCKET_EVENTS.NOTIFICATION,
-      //       data: notification,
-      //     }),
-      //   )
-      // })
-    } catch (e) {
-      this.logger.error({ message: 'WebSocket connection error', error: e.message })
-      client.close(4001, e.message)
-    }
+    })
   }
 
   handleDisconnect(client: PfdaWebSocket): void {

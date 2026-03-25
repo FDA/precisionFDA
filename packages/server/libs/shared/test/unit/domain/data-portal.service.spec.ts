@@ -36,6 +36,8 @@ import { create, db } from '../../../src/test'
 import * as generate from '../../../src/test/generate'
 
 describe('DataPortalService', () => {
+  const randomSuffix = (): string => Math.random().toString(36).slice(2, 10)
+
   const FILE_DXID = 'file-dxid'
   const FILE_UID = `${FILE_DXID}-1`
   const FILE_NAME = 'file-name'
@@ -63,7 +65,7 @@ describe('DataPortalService', () => {
       dxuser: 'dxuser',
       sessionId: 'sessionId',
       async loadEntity(): Promise<User> {
-        return this.user
+        return await em.findOneOrFail(User, { id: userId })
       },
     }
     dataPortalRepository = {
@@ -96,12 +98,10 @@ describe('DataPortalService', () => {
     await em.flush()
 
     userClient = {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      async fileDownloadLink(params: FileDownloadLinkParams): Promise<FileDownloadLinkResponse> {
+      async fileDownloadLink(_params: FileDownloadLinkParams): Promise<FileDownloadLinkResponse> {
         return { url: 'testingURL' } as FileDownloadLinkResponse
       },
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      async fileCreate(params: FileCreateParams): Promise<ClassIdResponse> {
+      async fileCreate(_params: FileCreateParams): Promise<ClassIdResponse> {
         return { id: FILE_DXID } as ClassIdResponse
       },
     } as PlatformClient
@@ -137,7 +137,7 @@ describe('DataPortalService', () => {
     urlSlug: string,
     role: SPACE_MEMBERSHIP_ROLE,
     isSiteAdminUser: boolean = false,
-  ): Promise<any> => {
+  ): Promise<{ userId: number; portalId: number }> => {
     const space = create.spacesHelper.create(em, { name: portalName })
     const internalUser = isSiteAdminUser
       ? create.userHelper.createSiteAdmin(em)
@@ -385,7 +385,7 @@ describe('DataPortalService', () => {
     })
 
     it('both id and url slug works to retrieve data portal', async () => {
-      const portalName = `Portal ${new Date().toLocaleString()}`
+      const portalName = `Portal-${randomSuffix()}`
       const urlSlug = 'portal-url-slug'
 
       // THE portal
@@ -398,7 +398,7 @@ describe('DataPortalService', () => {
       // Some random portals to fill the DB
       for (let i = 0; i < 10; i++) {
         await createPortalAndAddMember(
-          new Date().toLocaleString(),
+          `portal-${randomSuffix()}-${i}`,
           `slug_${i}`,
           SPACE_MEMBERSHIP_ROLE.VIEWER,
         )
@@ -641,22 +641,23 @@ describe('DataPortalService', () => {
     })
 
     it('fail with lack of privileges', async () => {
+      const uniq = Math.floor(Math.random() * 1_000_000_000)
       const viewer = await createPortalAndAddMember(
         'portal1',
-        'portal1',
+        `portal1-${uniq}`,
         SPACE_MEMBERSHIP_ROLE.VIEWER,
       )
       const contributor = await createPortalAndAddMember(
         'portal2',
-        'portal2',
+        `portal2-${uniq}`,
         SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
       )
       const admin = await createPortalAndAddMember(
         'portal3',
-        'portal3',
+        `portal3-${uniq}`,
         SPACE_MEMBERSHIP_ROLE.ADMIN,
       )
-      const lead = await createPortalAndAddMember('portal4', 'portal4', SPACE_MEMBERSHIP_ROLE.LEAD)
+      const lead = await createPortalAndAddMember('portal4', `portal4-${uniq}`, SPACE_MEMBERSHIP_ROLE.LEAD)
 
       // following should be fine
       dataPortalService = createDataPortalService(viewer.userId)
@@ -727,25 +728,26 @@ describe('DataPortalService', () => {
     })
 
     it('filter by user roles', async () => {
+      const uniq = Math.floor(Math.random() * 1_000_000_000)
       const viewer = await createPortalAndAddMember(
         'portal1',
-        'portal1',
+        `portal1-${uniq}`,
         SPACE_MEMBERSHIP_ROLE.VIEWER,
       )
       const contributor = await createPortalAndAddMember(
         'portal2',
-        'portal2',
+        `portal2-${uniq}`,
         SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
       )
       const admin = await createPortalAndAddMember(
         'portal3',
-        'portal3',
+        `portal3-${uniq}`,
         SPACE_MEMBERSHIP_ROLE.ADMIN,
       )
-      const lead = await createPortalAndAddMember('portal4', 'portal4', SPACE_MEMBERSHIP_ROLE.LEAD)
+      const lead = await createPortalAndAddMember('portal4', `portal4-${uniq}`, SPACE_MEMBERSHIP_ROLE.LEAD)
       const siteAdmin = await createPortalAndAddMember(
         'portal5',
-        'portal5',
+        `portal5-${uniq}`,
         SPACE_MEMBERSHIP_ROLE.ADMIN,
         true,
       )

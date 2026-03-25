@@ -15,7 +15,7 @@ export const createRedisClient = async (): Promise<any> => {
       socket: {
         port: parseInt(url.port),
         host: url.hostname,
-        tls: config.redis.isSecure,
+        ...(config.redis.isSecure && { tls: true as const }),
       },
       ...(config.redis.isSecure && { password: config.redis.authPassword }),
     })
