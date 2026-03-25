@@ -31,6 +31,7 @@ import { NodesApiModule } from './nodes/nodes.api.module'
 import { NotesApiModule } from './notes/notes.api.module'
 import { NotificationPreferencesApiModule } from './notification-preferences/notification-preferences.api.module'
 import { NotificationsApiModule } from './notifications/notifications.api.module'
+import { ParticipantsApiModule } from './participants/participants.api.module'
 import { PropertiesApiModule } from './properties/properties.api.module'
 import { PublishApiModule } from './publish/publish.api.module'
 import { ReportsApiModule } from './reports/reports.api.module'
@@ -85,6 +86,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     NotificationPreferencesApiModule,
     NotificationsApiModule,
     NotesApiModule,
+    ParticipantsApiModule,
     PropertiesApiModule,
     SiteSettingsApiModule,
     SpacesApiModule,

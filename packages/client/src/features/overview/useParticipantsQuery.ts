@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ParticipantsResponse } from './types'
 
 export async function getParticipantsQuery() {
-  return axios.get('/api/participants/').then(r => r.data as ParticipantsResponse)
+  return axios.get('/api/v2/participants/').then(r => r.data as ParticipantsResponse)
 }
 
 export const useParticipantsQuery = () => {

@@ -1,14 +1,14 @@
 export interface Org {
-  id: number;
-  title: string;
-  image_url: string;
-  public?: boolean;
-  kind: string;
-  position: number;
-  created_at: Date;
-  updated_at: Date;
+  id: number
+  title: string | null
+  imageUrl: string | null
+  public?: boolean | null
+  kind: string | null
+  position: number | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface ParticipantsResponse {
-  orgs: Org[];
+  orgs: Org[]
 }

@@ -7,7 +7,6 @@ import { UsersIcon } from '../../../components/icons/UsersIcon'
 import { BullsEyeIcon } from '../../../components/icons/BullsEyeIcon'
 import { ChartColumnIcon } from '../../../components/icons/ChartColumnIcon'
 import { BellIcon } from '../../../components/icons/BellIcon'
-import { HandshakeIcon } from '../../../components/icons/HandshakeIcon'
 import { ChartLineIcon } from '../../../components/icons/ChartLineIcon'
 import { NewspaperIcon } from '../../../components/icons/NewspaperIcon'
 import { Loader } from '../../../components/Loader'
@@ -218,12 +217,6 @@ export function AdminDashboard() {
                 <NewspaperIcon height={22} />
               </div>
               <div className={styles.actionLabel}>News</div>
-            </button>
-            <button className={styles.actionButton} onClick={() => (window.location.href = '/admin/participants')}>
-              <div className={styles.actionIcon}>
-                <HandshakeIcon height={22} />
-              </div>
-              <div className={styles.actionLabel}>Participants</div>
             </button>
             <button className={styles.actionButton} onClick={() => (window.location.href = '/admin/comparator_settings')}>
               <div className={styles.actionIcon}>
