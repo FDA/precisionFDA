@@ -93,7 +93,7 @@ export class UserCheckupFacade {
 
   private doesUserNeedFullCheckup(user: User): boolean {
     const lastCheckupTime = user.lastDataCheckup ? user.lastDataCheckup.getTime() : 0
-    const now = new Date().getTime()
+    const now = Date.now()
     // N.B. getTime return milliseconds, config settings are in seconds
     return now - lastCheckupTime > config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
   }

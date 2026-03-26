@@ -11,6 +11,7 @@ import { QueueOptions } from 'bull'
 export class BullQueueModule {
   static forRoot(): DynamicModule {
     const redisOptions: QueueOptions['redis'] = {
+      // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
       tls: config.redis.isSecure as any,
     }
     if (config.redis.isSecure) {

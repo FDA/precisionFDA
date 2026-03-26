@@ -7,7 +7,7 @@ import { Observable } from 'rxjs'
 export class OrmContextInterceptor implements NestInterceptor {
   constructor(private readonly em: SqlEntityManager) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<void>> {
+  intercept(_context: ExecutionContext, next: CallHandler): Promise<Observable<void>> {
     return RequestContext.create(this.em, async () => next.handle())
   }
 }

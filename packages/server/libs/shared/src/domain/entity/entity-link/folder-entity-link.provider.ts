@@ -23,6 +23,6 @@ export class FolderEntityLinkProvider extends EntityLinkProvider<'folder'> {
   }
 
   private getUrlSegment(folder: Folder): string {
-    return 'files?folder_id=' + folder.id
+    return `files?folder_id=${folder.id}`
   }
 }

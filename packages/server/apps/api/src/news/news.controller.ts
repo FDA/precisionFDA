@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Logger,
   Param,
   ParseIntPipe,
   Post,
@@ -17,13 +16,10 @@ import { NewsItemDTO } from '@shared/domain/news-item/dto/news-item.dto'
 import { NewsListDTO } from '@shared/domain/news-item/dto/news-list.dto'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { NewsService } from '@shared/domain/news-item/service/new-item.service'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 
 @Controller('/news')
 export class NewsController {
-  @ServiceLogger()
-  private readonly logger: Logger
   constructor(private readonly newsService: NewsService) {}
 
   @Get()

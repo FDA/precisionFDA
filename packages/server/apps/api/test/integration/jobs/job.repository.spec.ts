@@ -143,13 +143,13 @@ describe('JobRepository and JobEntity', () => {
       expect(job.runTime()).to.equal(jobStoppedRunning.getTime() - jobStartedRunning.getTime())
 
       job = await jobRepo.findOne({ dxid: runningJob.dxid })
-      expect(job.runTime()).to.be.closeTo(new Date().getTime() - jobStartedRunning.getTime(), 100)
+      expect(job.runTime()).to.be.closeTo(Date.now() - jobStartedRunning.getTime(), 100)
     })
 
     it('formats elapsed time string', async () => {
       const jobRepo = em.getRepository(Job)
 
-      let job = await jobRepo.findOne({ dxid: terminatedJob.dxid })
+      const job = await jobRepo.findOne({ dxid: terminatedJob.dxid })
       expect(job.runTimeString()).to.equal('2m 57s')
 
       job.describe = createJobDescribeStoppedRunning(jobStoppedRunning.getTime() + 2*60*60*1000)

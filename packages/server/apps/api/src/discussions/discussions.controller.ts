@@ -86,7 +86,6 @@ export class DiscussionsController {
   @HttpCode(204)
   @Patch('/:discussionId/replies/:replyId')
   async updateDiscussionReply(
-    @Param('discussionId', ParseIntPipe) discussionId: number,
     @Param('replyId', ParseIntPipe) replyId: number,
     @Body() body: UpdateReplyDTO,
   ): Promise<void> {

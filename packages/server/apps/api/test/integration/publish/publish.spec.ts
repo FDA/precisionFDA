@@ -35,7 +35,7 @@ describe('Publish Controller', () => {
     await supertest(testedApp.getHttpServer())
       .post('/publish')
       .set(getDefaultHeaderData(user))
-      .send({ identifier: 'folder-' + folder.id, type: 'folder' })
+      .send({ identifier: `folder-${folder.id}`, type: 'folder' })
       .expect(200)
 
     const publishedFolder = await em.findOneOrFail(Folder, folder.id)

@@ -5,7 +5,6 @@ import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
-import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { BatchComplete } from '@shared/domain/space-report/model/batch-complete'
 import {
   SpaceReportPartSourceType,
@@ -126,7 +125,7 @@ export class SpaceReportBatchResultGenerateFacade {
 
     return await Promise.all(
       entities.map(async (entity) => {
-        const reportPart = reportParts.find((srp) => entity.id === srp.sourceId)!
+        const reportPart = reportParts.find((srp) => entity.id === srp.sourceId)
 
         return {
           id: reportPart.id,

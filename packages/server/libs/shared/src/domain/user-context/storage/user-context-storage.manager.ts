@@ -1,6 +1,6 @@
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
-import { AsyncLocalStorage } from 'async_hooks'
+import { AsyncLocalStorage } from 'node:async_hooks'
 
 export function createUserContextManager(storage: AsyncLocalStorage<UserContext>): UserContext {
   const getCurrentContext = (): UserContext => {

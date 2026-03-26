@@ -77,6 +77,7 @@ export class PropertyService {
   }
 
   private async getConditionByType(scope: string, targetType: PropertyType) {
+    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
     const condition: FilterQuery<any> = {}
     let scopes: string[] = []
 
@@ -109,13 +110,13 @@ export class PropertyService {
 
     switch (targetType) {
       case 'node':
-        condition['node'] = {
+        condition.node = {
           scope: { $in: scopes },
           stiType: [FILE_STI_TYPE.FOLDER, FILE_STI_TYPE.USERFILE],
         }
         break
       case 'asset':
-        condition['node'] = {
+        condition.node = {
           scope: { $in: scopes },
           stiType: [FILE_STI_TYPE.ASSET],
         }
@@ -134,7 +135,7 @@ export class PropertyService {
 
     if (scope == STATIC_SCOPE.PRIVATE) {
       if (targetType == 'asset') {
-        condition['node'] = { ...condition['node'], user: this.user.id }
+        condition.node = { ...condition.node, user: this.user.id }
       } else {
         condition[targetType] = { ...condition[targetType], user: this.user.id }
       }

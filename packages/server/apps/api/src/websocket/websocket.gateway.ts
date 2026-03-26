@@ -25,7 +25,7 @@ import { CookieUtils } from '@shared/utils/cookie.utils'
 import { Encryptor } from '@shared/utils/encryptors/encryptor'
 import { HashUtils } from '@shared/utils/hash.utils'
 import { PfdaWebSocket, WEBSOCKET_EVENTS } from '@shared/websocket/model/pfda-web-socket'
-import { IncomingMessage } from 'http'
+import { IncomingMessage } from 'node:http'
 import { Server } from 'ws'
 import { UserContextTokenInterceptor } from '../user-context/interceptor/user-context-token.interceptor'
 

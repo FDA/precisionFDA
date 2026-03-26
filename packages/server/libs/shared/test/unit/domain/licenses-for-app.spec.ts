@@ -1,6 +1,7 @@
 import { wrap } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { LicenseService } from '@shared/domain/license/license.service'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
 import { App } from '@shared/domain/app/app.entity'
@@ -76,9 +77,9 @@ describe("licenses for app's assets tests", () => {
     const freshEm = database.orm().em.fork() as EntityManager<MySqlDriver>
 
     try {
-      await freshEm.findOneOrFail(App, { uid: 'bullshit' as any })
+      await freshEm.findOneOrFail(App, { uid: 'bullshit' as Uid<'app'> })
       expect.fail('Operation is expected to fail')
-    } catch (error: any) {
+    } catch (error: unknown) {
       expect(error.message).to.equal("App not found ({ uid: 'bullshit' })")
     }
   })

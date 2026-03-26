@@ -1,15 +1,15 @@
 import { partition } from 'ramda'
-import { Space } from '../space.entity'
+import { PlatformClient } from '@shared/platform-client'
+import { UserInviteToOrgParams } from '@shared/platform-client/platform-client.params'
+import { OrgFindMembersReponse, PlatformMember } from '@shared/platform-client/platform-client.responses'
+import { UserOpsCtx } from '@shared/types'
+import { WorkerBaseOperation } from '@shared/utils/base-operation'
 import { SpaceMembership } from '../../space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
+import { Space } from '../space.entity'
 import { SPACE_TYPE } from '../space.enum'
-import { UserOpsCtx } from '../../../types'
-import { PlatformClient } from '../../../platform-client'
-import { WorkerBaseOperation } from '../../../utils/base-operation'
-import { OrgFindMembersReponse, PlatformMember } from '../../../platform-client/platform-client.responses'
-import { UserInviteToOrgParams, UserRemoveFromOrgParams } from '../../../platform-client/platform-client.params'
 
-type SyncSpacesPermissionsInput = {}
+type SyncSpacesPermissionsInput = object
 
 
 export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
@@ -20,7 +20,7 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
   protected client: PlatformClient
   protected membership: SpaceMembership
 
-  async run(input: SyncSpacesPermissionsInput): Promise<void> {
+  async run(): Promise<void> {
     this.client = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
     const userId = this.ctx.user.id
     const em = this.ctx.em
@@ -141,7 +141,7 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
   async addPlatformPermissions(pfdaMembership: SpaceMembership, space: Space): Promise<void> {
     const pfdaUserHandle = pfdaMembership.user.getEntity().dxuser
     const invitee = `user-${pfdaUserHandle}`
-    let data: any = {
+    let data: UserInviteToOrgParams['data'] = {
       invitee,
       level: pfdaMembership.isAdminOrLead() ? 'ADMIN' : 'MEMBER',
       suppressEmailNotification: true, // do not notify user

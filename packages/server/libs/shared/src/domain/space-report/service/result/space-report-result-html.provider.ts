@@ -12,10 +12,10 @@ import { SpaceReportResultProvider } from '@shared/domain/space-report/service/r
 import { Space } from '@shared/domain/space/space.entity'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
 import DOMPurify from 'isomorphic-dompurify'
 import { JSDOM } from 'jsdom'
-import path from 'path'
+import path from 'node:path'
 
 // TODO(PFDA-4835) - use import after introducing bundler with nestjs
 const assetsPath = path.join(

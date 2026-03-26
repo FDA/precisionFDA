@@ -107,7 +107,7 @@ export class FolderRepository extends AccessControlRepository<Folder> {
   ): Promise<Folder | null> {
     const addTaggings = tagEnable
       ? { populate: ['taggings.tag'] }
-      : ({} as { populate: string[] } | {})
+      : ({} as { populate: string[] } | object)
     const parentKey = scope.startsWith('space') ? 'scopedParentFolderId' : 'parentFolderId'
 
     return scope === STATIC_SCOPE.PRIVATE

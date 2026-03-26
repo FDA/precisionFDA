@@ -7,20 +7,20 @@ import {
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { AnyObject } from '../types'
 
-type Starting = {
+export type Starting = {
   project: string
   id: string
 }
 
-interface IPaginatedParams {
+export interface IPaginatedParams {
   // the API uses it as a starting point when doing pagination
   starting?: Starting
 }
 
-type JobDescribeParams = { jobDxId: DxId<'job'> }
-type JobTerminateParams = { jobId: string }
+export type JobDescribeParams = { jobDxId: DxId<'job'> }
+export type JobTerminateParams = { jobId: string }
 
-type PackageMapping = {
+export type PackageMapping = {
   name: string
   packageManager?: string
   version?: string
@@ -39,7 +39,7 @@ type RunSpec = {
   version?: string
 }
 
-type AppletCreateParams = {
+export type AppletCreateParams = {
   project?: string
   name?: string
   title?: string
@@ -50,11 +50,11 @@ type AppletCreateParams = {
   access?: AppAccess
 }
 
-type AppUpdateParams = {
+export type AppUpdateParams = {
   billTo?: string
 }
 
-type AppCreateParams = {
+export type AppCreateParams = {
   applet: string // deprecated field!
   name?: string
   title?: string
@@ -69,22 +69,22 @@ type AppCreateParams = {
   regionalOptions?: AnyObject
 }
 
-type AppAddAuthorizedUsersParams = {
+export type AppAddAuthorizedUsersParams = {
   appId: string
   authorizedUsers: string[]
 }
 
-type AppAddDevelopersParams = {
+export type AppAddDevelopersParams = {
   appId: string
   developers: string[] // user/org dxids
 }
 
-type AppPublishParams = {
+export type AppPublishParams = {
   appId: string
   makeDefault?: boolean
 }
 
-type JobFindParams = {
+export type JobFindParams = {
   id?: string[] // job dxid
   project?: string // ID of the project context, or the project in which the job was launched
 
@@ -94,7 +94,7 @@ type JobFindParams = {
   state?: string[]
 }
 
-type JobCreateParams = {
+export type JobCreateParams = {
   appId: string
   project: string
   name?: string
@@ -110,33 +110,33 @@ type JobCreateParams = {
   }
 }
 
-type FileRemoveParams = {
+export type FileRemoveParams = {
   projectId: string
   ids: string[]
 }
 
-type ListFilesParams = IPaginatedParams & {
+export type ListFilesParams = IPaginatedParams & {
   project: string
   folder?: string
   includeDescProps?: boolean
 }
 
-type FileCreateParams = {
+export type FileCreateParams = {
   name: string
   description: string
   project: string
 }
 
-type FileCloseParams = {
+export type FileCloseParams = {
   fileDxid: string
 }
 
-type FileDescribeParams = {
+export type FileDescribeParams = {
   fileDxid: string
   projectDxid: string
 }
 
-type FileDownloadLinkParams = {
+export type FileDownloadLinkParams = {
   fileDxid: string
   filename: string
   project: string
@@ -144,39 +144,39 @@ type FileDownloadLinkParams = {
   preauthenticated?: boolean
 }
 
-type FileGetUploadUrlParams = {
+export type FileGetUploadUrlParams = {
   dxid: string
   size: number
   md5: string
   index: number
 }
 
-type FileStatesParams = {
+export type FileStatesParams = {
   fileDxids: string[]
   projectDxid: string
 }
 
-type DescribeFoldersParams = {
+export type DescribeFoldersParams = {
   projectId: string
 }
 
-type RenameFolderParams = {
+export type RenameFolderParams = {
   folderPath: string
   newName: string
   projectId: string
 }
 
-type RemoveFolderParams = {
+export type RemoveFolderParams = {
   folderPath: string
   projectId: string
 }
 
-type CreateFolderParams = {
+export type CreateFolderParams = {
   folderPath: string
   projectId: string
 }
 
-type OrgFindMembersParams = {
+export type OrgFindMembersParams = {
   orgDxid: string
   level?: string
   id?: string | string[]
@@ -185,21 +185,21 @@ type OrgFindMembersParams = {
   limit?: number
 }
 
-type OrgMemberAccess = {
+export type OrgMemberAccess = {
   level: 'ADMIN' | 'MEMBER'
   allowBillableActivities?: boolean
   appAccess?: boolean
   projectAccess?: 'ADMINISTER' | 'CONTRIBUTE' | 'UPLOAD' | 'VIEW' | 'NONE'
 }
 
-type OrgSetMemberAccessParams = {
+export type OrgSetMemberAccessParams = {
   orgDxId: DxId<'org'>
   data: {
     [userDxId: DxId<'user'>]: OrgMemberAccess
   }
 }
 
-type UserInviteToOrgParams = {
+export type UserInviteToOrgParams = {
   orgDxId: string
   data: {
     invitee: string
@@ -210,7 +210,7 @@ type UserInviteToOrgParams = {
     suppressEmailNotification?: boolean
   }
 }
-type UserRemoveFromOrgParams = {
+export type UserRemoveFromOrgParams = {
   orgDxId: string
   data: {
     user: string
@@ -219,13 +219,13 @@ type UserRemoveFromOrgParams = {
   }
 }
 
-type MoveFilesParams = {
+export type MoveFilesParams = {
   destinationFolderPath: string
   fileIds: string[]
   projectId: string
 }
 
-type DbClusterCreateParams = {
+export type DbClusterCreateParams = {
   name: string
   project: string
   engine: string
@@ -234,18 +234,18 @@ type DbClusterCreateParams = {
   adminPassword: string
 }
 
-type DbClusterDescribeParams = {
+export type DbClusterDescribeParams = {
   dxid: string
   project?: string
 }
 
-type DbClusterActionParams = { dxid: string }
+export type DbClusterActionParams = { dxid: string }
 
-type ObjectsParams = {
+export type ObjectsParams = {
   objects: string[]
 }
 
-type DescribeDataObjectsParams = {
+export type DescribeDataObjectsParams = {
   objects: Array<string | Record<string, string>>
 }
 
@@ -255,13 +255,13 @@ export type OrgDescribeParams = {
   fields?: unknown
 }
 
-type UserDescribeParams = {
+export type UserDescribeParams = {
   dxid: string
   defaultFields?: boolean
   fields?: unknown
 }
 
-type UserResetMfaParams = {
+export type UserResetMfaParams = {
   dxid: string
   data: {
     user_id: string
@@ -269,7 +269,7 @@ type UserResetMfaParams = {
   }
 }
 
-type UserUnlockParams = {
+export type UserUnlockParams = {
   dxid: string
   data: {
     user_id: string
@@ -277,7 +277,7 @@ type UserUnlockParams = {
   }
 }
 
-type UserCreateData = {
+export type UserCreateData = {
   username: string
   email: string
   first: string
@@ -286,66 +286,20 @@ type UserCreateData = {
   pfdasso?: boolean
 }
 
-type AppDescribeParams = {
+export type AppDescribeParams = {
   dxid: string
 }
 
-type WorkflowDescribeParams = {
+export type WorkflowDescribeParams = {
   dxid: string
 }
 
-type CloneObjectsParams = {
+export type CloneObjectsParams = {
   sourceProject: string
   destinationProject: string
   objects: string[]
 }
 
-type ProjectLeaveParams = {
+export type ProjectLeaveParams = {
   projectDxid: string
-}
-export {
-  AppAddAuthorizedUsersParams,
-  AppAddDevelopersParams,
-  AppCreateParams,
-  AppDescribeParams,
-  AppletCreateParams,
-  AppPublishParams,
-  AppUpdateParams,
-  CloneObjectsParams,
-  CreateFolderParams,
-  DbClusterActionParams,
-  DbClusterCreateParams,
-  DbClusterDescribeParams,
-  DescribeDataObjectsParams,
-  DescribeFoldersParams,
-  FileCloseParams,
-  FileCreateParams,
-  FileDescribeParams,
-  FileDownloadLinkParams,
-  FileGetUploadUrlParams,
-  FileRemoveParams,
-  FileStatesParams,
-  IPaginatedParams,
-  JobCreateParams,
-  JobDescribeParams,
-  JobFindParams,
-  JobTerminateParams,
-  ListFilesParams,
-  MoveFilesParams,
-  ObjectsParams,
-  OrgFindMembersParams,
-  OrgMemberAccess,
-  OrgSetMemberAccessParams,
-  PackageMapping,
-  ProjectLeaveParams,
-  RemoveFolderParams,
-  RenameFolderParams,
-  Starting,
-  UserCreateData,
-  UserDescribeParams,
-  UserInviteToOrgParams,
-  UserRemoveFromOrgParams,
-  UserResetMfaParams,
-  UserUnlockParams,
-  WorkflowDescribeParams,
 }

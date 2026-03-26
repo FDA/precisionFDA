@@ -28,6 +28,6 @@ export class AnswerEntityLinkProvider extends EntityLinkProvider<'answer'> {
   }
 
   private getUrlSegment(answer: Answer): string {
-    return 'answers/' + answer.id
+    return `answers/${answer.id}`
   }
 }

@@ -34,12 +34,12 @@ describe('UnlockNodeFacade', () => {
     state: FILE_STATE_PFDA.REMOVING,
   } as unknown as UserFile
 
-  let nodeServiceLoadNodesStub = stub()
-  let nodeServiceUnlockFileStub = stub()
-  let notificationServiceCreateNotificationStub = stub()
-  let nodeHelperFilterNodesByUserStub = stub()
-  let emFlushStub = stub()
-  let createUnlockNodesJobTaskStub = stub()
+  const nodeServiceLoadNodesStub = stub()
+  const nodeServiceUnlockFileStub = stub()
+  const notificationServiceCreateNotificationStub = stub()
+  const nodeHelperFilterNodesByUserStub = stub()
+  const emFlushStub = stub()
+  const createUnlockNodesJobTaskStub = stub()
 
   const em = {
     flush: emFlushStub,

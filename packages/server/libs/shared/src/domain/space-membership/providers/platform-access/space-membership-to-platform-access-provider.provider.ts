@@ -33,7 +33,7 @@ export const SpaceMembershipToPlatformAccessProviderProvider: Provider = {
       [SPACE_MEMBERSHIP_ROLE.ADMIN]: toAdmin,
       [SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]: toContributor,
       [SPACE_MEMBERSHIP_ROLE.VIEWER]: toViewer,
-      ['disable']: toInactive,
+      'disable': toInactive,
     }
   },
 }

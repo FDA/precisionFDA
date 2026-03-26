@@ -3,7 +3,7 @@ import { Space } from '@shared/domain/space/space.entity'
 import { getSpaceTypeEnum, SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { Transform } from 'class-transformer'
 import { IsBoolean, IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator'
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 export class CreateSpaceDTO {
   @IsString()

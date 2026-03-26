@@ -20,7 +20,6 @@ describe('app.entity tests', () => {
 
   // HTTPS app / job that has workstation API
   let httpsAppWithAPI: App
-  let httpsJobWithAPI: Job
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -52,7 +51,7 @@ describe('app.entity tests', () => {
         internal: generate.app.ttydAppInternalWithAPI('1.0.0'),
       },
     )
-    httpsJobWithAPI = create.jobHelper.create(
+    create.jobHelper.create(
       em,
       { user, app: httpsAppWithAPI },
       { scope: 'private', state: JOB_STATE.RUNNING },
@@ -102,7 +101,7 @@ describe('app.entity tests', () => {
   })
 
   it('save and load JSON types appEntity.spec and appEntity.internal', async () => {
-    const app = create.appHelper.createRegular(
+    create.appHelper.createRegular(
       em,
       { user },
       {

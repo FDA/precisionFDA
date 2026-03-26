@@ -12,7 +12,7 @@ import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { DbClusterPasswordFacade } from 'apps/api/src/facade/db-cluster/password-facade/db-cluster-password.facade'
 import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
 import { expect } from 'chai'
-import { stub } from 'sinon'
+import { stub, SinonStub } from 'sinon'
 
 describe('DbClusterPasswordFacade', () => {
   const USER_ID = 0
@@ -28,7 +28,7 @@ describe('DbClusterPasswordFacade', () => {
     loadEntity,
   }
 
-  let createPasswordRotatedEventStub
+  let createPasswordRotatedEventStub: SinonStub
   let dbClusterService: DbClusterService
   const transactionalStub = stub()
   const em = {

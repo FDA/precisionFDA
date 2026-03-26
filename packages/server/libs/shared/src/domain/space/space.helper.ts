@@ -11,8 +11,8 @@ const getIdFromScopeName = (name: string): number => {
   if (prefix !== 'space') {
     throw new InternalError('Scope space name has to start with "space" prefix')
   }
-  const idValue = parseInt(id)
-  if (isNaN(idValue) || idValue <= 0) {
+  const idValue = parseInt(id, 10)
+  if (Number.isNaN(idValue) || idValue <= 0) {
     throw new InternalError('Invalid id number value')
   }
   return idValue
@@ -23,7 +23,7 @@ const scopeContainsId = (name: string): boolean => {
     getIdFromScopeName(name)
     return true
     /* eslint-disable @typescript-eslint/no-unused-vars */
-  } catch (err) {
+  } catch (_err) {
     log.debug({ scopeName: name }, 'Invalid scope name provided, error swallowed')
     return false
   }

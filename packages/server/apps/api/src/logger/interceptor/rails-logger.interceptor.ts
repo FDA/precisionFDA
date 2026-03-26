@@ -8,7 +8,7 @@ import { config } from '@shared/config'
 import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
 import { BaseError } from '@shared/errors'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { STATUS_CODES } from 'http'
+import { STATUS_CODES } from 'node:http'
 import { catchError, Observable, tap } from 'rxjs'
 
 @Injectable()

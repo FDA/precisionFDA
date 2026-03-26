@@ -1,6 +1,6 @@
 import { dump, load } from '@hyrious/marshal'
 import { config } from '@shared/config'
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import { SecurityUtils } from '../security.utils'
 
 export type CliUserSession = {

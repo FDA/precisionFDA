@@ -20,8 +20,8 @@ export type AppSpecItem = {
 }
 
 export type AppInputSpecItem = AppSpecItem & {
-  suggestions?: Object[]
-  choices?: Object[]
+  suggestions?: object[]
+  choices?: object[]
 }
 
 export type AppAccess = {

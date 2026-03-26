@@ -21,7 +21,7 @@ import { NOTIFICATION_ACTION } from '@shared/enums'
 
 describe('DbClusterService', () => {
   let removeRepeatableStub: sinon.SinonStub
-  let originalRemoveRepeatable
+  let originalRemoveRepeatable: () => unknown
   let em: EntityManager
   let user: User
   let userContext: UserContext

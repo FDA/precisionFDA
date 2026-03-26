@@ -570,13 +570,13 @@ describe('AppRunFacade tests', () => {
     expect(buildClientApiCallStub.calledOnce).to.be.true()
     expect(buildClientApiCallStub.firstCall.args[0]).to.deep.equal(APP)
     expect(buildClientApiCallStub.firstCall.args[1]).to.equal(USER.privateFilesProject)
-    expect(buildClientApiCallStub.firstCall.args[2]['file_input']).to.deep.equal({
+    expect(buildClientApiCallStub.firstCall.args[2].file_input).to.deep.equal({
       $dnanexus_link: { id: PRIVATE_FILE.dxid, project: PRIVATE_FILE.project },
     })
-    expect(buildClientApiCallStub.firstCall.args[2]['file_array_input']).to.deep.equal([
+    expect(buildClientApiCallStub.firstCall.args[2].file_array_input).to.deep.equal([
       { $dnanexus_link: { id: PRIVATE_FILE.dxid, project: PRIVATE_FILE.project } },
     ])
-    expect(buildClientApiCallStub.firstCall.args[2]['default_text_input']).to.equal('default value')
+    expect(buildClientApiCallStub.firstCall.args[2].default_text_input).to.equal('default value')
     expect(buildClientApiCallStub.firstCall.args[3]).to.equal(runAppDTO)
     expect(jobCreateStub.calledOnce).to.be.true()
     expect(jobCreateStub.firstCall.args[0]).to.deep.equal({})

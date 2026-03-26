@@ -20,7 +20,7 @@ declare type DeepPartial<T> = {
 declare type Maybe<T> = T | undefined | null
 
 declare type AnyObject = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
   [s: string]: any
 }
 

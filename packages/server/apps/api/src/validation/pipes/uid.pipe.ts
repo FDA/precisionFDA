@@ -16,7 +16,7 @@ import { UidUtils } from '@shared/utils/uid.utils'
 export class UidValidationPipe implements PipeTransform<string> {
   transform(value: string): string {
     if (!UidUtils.isValidUId(value)) {
-      throw new ValidationError('Invalid UID format: ' + value)
+      throw new ValidationError(`Invalid UID format: ${value}`)
     }
 
     return value

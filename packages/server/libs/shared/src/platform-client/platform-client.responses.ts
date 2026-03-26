@@ -3,9 +3,10 @@ import { PlatformEntityType } from '@shared/domain/entity/domain/platform.entity
 import { JOB_STATE } from '../domain/job/job.enum'
 import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
 import { AnyObject } from '../types'
-import { DnanexusLink, IOType } from '../types/common'
+import { IOType } from '../types/common'
+export { DnanexusLink } from '../types/common'
 
-type DbClusterDescribeResponse = {
+export type DbClusterDescribeResponse = {
   id: DxId<'dbcluster'>
   project: string
   name: string
@@ -22,7 +23,7 @@ type DbClusterDescribeResponse = {
   failureReason?: string
 } & AnyObject
 
-interface IPaginatedResponse<T> {
+export interface IPaginatedResponse<T> {
   next?: {
     project: string
     id: string
@@ -30,24 +31,24 @@ interface IPaginatedResponse<T> {
   results: T[]
 }
 
-type FileCloseResponse = {
+export type FileCloseResponse = {
   id: string
   detail?: string
 }
 
-type FileDownloadLinkResponse = {
+export type FileDownloadLinkResponse = {
   url: string
   headers: AnyObject[] // key:value pairs
   expires?: number
 }
 
-interface GetUploadURLResponse {
+export interface GetUploadURLResponse {
   url: string
   headers: Record<string, string>
   expires: number
 }
 
-type ListFilesResult = {
+export type ListFilesResult = {
   id: DxId<'file'>
   project: string
   describe?: {
@@ -58,9 +59,9 @@ type ListFilesResult = {
   }
 }
 
-type ListFilesResponse = IPaginatedResponse<ListFilesResult>
+export type ListFilesResponse = IPaginatedResponse<ListFilesResult>
 
-type FileStateResult = {
+export type FileStateResult = {
   id: DxId<'file'>
   project: string
   describe?: {
@@ -72,21 +73,21 @@ type FileStateResult = {
   }
 }
 
-type FileStatesResponse = IPaginatedResponse<FileStateResult>
+export type FileStatesResponse = IPaginatedResponse<FileStateResult>
 
-type DescribeDataObjectsResponse = {
+export type DescribeDataObjectsResponse = {
   results: Array<{
-    describe?: any[]
-    error?: any[]
+    describe?: unknown[]
+    error?: unknown[]
     statusCode: number
   }>
 }
 
-type FileRemoveResponse = {
+export type FileRemoveResponse = {
   id: string
 } & AnyObject
 
-type FileDescribeResponse = {
+export type FileDescribeResponse = {
   id: string
   name: string
   state: string
@@ -98,12 +99,12 @@ type FileDescribeResponse = {
   created: number
   modified: number
   hidden: boolean
-  createdBy: any
+  createdBy: string
   // add more here
   // See output of https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
 }
 
-type PlatformMember = {
+export type PlatformMember = {
   id: string
   level: 'MEMBER' | 'ADMIN'
   allowBillableActivities: boolean
@@ -111,7 +112,7 @@ type PlatformMember = {
   appAccess: boolean
 }
 
-type OrgFindMembersReponse = {
+export type OrgFindMembersReponse = {
   results: PlatformMember[]
 }
 
@@ -150,7 +151,7 @@ export type UserCreateResponse = {
   userId: string
 }
 
-type UserDescribeResponse = {
+export type UserDescribeResponse = {
   id: string
   class?: string
   first?: string
@@ -163,39 +164,39 @@ type UserDescribeResponse = {
   billTo?: string
 }
 
-type UserInviteToOrgResponse = {
+export type UserInviteToOrgResponse = {
   id: string
   state: string
 }
 
-type UserRemoveFromOrgResponse = {
+export type UserRemoveFromOrgResponse = {
   id: string
   projects: AnyObject[] // key:value pairs
   apps: AnyObject[] // key:value pairs
 }
 
-type DescribeFoldersResponse = {
+export type DescribeFoldersResponse = {
   id: string
   folders: string[]
 }
 
-type JobCreateResponse = {
+export type JobCreateResponse = {
   id: DxId<'job'>
 }
 
-type FindJobsResponse = {
+export type FindJobsResponse = {
   results: JobDescribeResponse[]
 }
 
-type JobTerminateResponse = JobCreateResponse
+export type JobTerminateResponse = JobCreateResponse
 
-type ClassIdResponse<
+export type ClassIdResponse<
   ENTITY extends DXEntityType | PlatformEntityType = DXEntityType | PlatformEntityType,
 > = {
   id: DxId<ENTITY>
 }
 
-class AppDescribeResponse {
+export class AppDescribeResponse {
   id: string
   class: string
   billTo: string
@@ -219,8 +220,8 @@ class AppDescribeResponse {
   title: string
   summary: string
   description: string
-  access: any // don't know what this could be
-  lineItemPerTest: any // don't know what this could be
+  access: unknown // don't know what this could be
+  lineItemPerTest: unknown // don't know what this could be
   inputSpec: InputSpec[]
   outputSpec: OutputSpec[]
   runSpec: RunSpec
@@ -252,33 +253,33 @@ type OutputSpec = {
 
 type RunSpec = {
   interpreter: string
-  bundledDependsByRegion: { [key: string]: any[] }
-  systemRequirements: { [key: string]: any }
-  executionPolicy: {}
+  bundledDependsByRegion: { [key: string]: unknown[] }
+  systemRequirements: { [key: string]: unknown }
+  executionPolicy: object
   headJobOnDemand: boolean
-  execDepends: any[] // don't know what this could be
+  execDepends: unknown[] // don't know what this could be
   distribution: string
   release: string
   version: string
-  systemRequirementsByRegion: { [key: string]: any }
+  systemRequirementsByRegion: { [key: string]: unknown }
 }
 
 type Details = {
-  ordered_assets: any[] // don't know what this could be
+  ordered_assets: unknown[] // don't know what this could be
 }
 
-class WorkflowDescribeResponse {
+export class WorkflowDescribeResponse {
   id: string
   project: string
   class: string
   sponsored: boolean
   name: string
-  types: any[] // don't know what this could be
+  types: unknown[] // don't know what this could be
   state: string
   hidden: boolean
-  links: any[] // don't know what this could be
+  links: unknown[] // don't know what this could be
   folder: string
-  tags: any[] // don't know what this could be
+  tags: unknown[] // don't know what this could be
   created: number
   modified: number
   createdBy: string
@@ -288,8 +289,8 @@ class WorkflowDescribeResponse {
   description: string
   outputFolder: string | null
   temporary: boolean
-  inputs: any // don't know what this could be
-  outputs: any // don't know what this could be
+  inputs: unknown // don't know what this could be
+  outputs: unknown // don't know what this could be
   stages: Stage[]
   inputSpec: SpecItem[]
   outputSpec: SpecItem[]
@@ -300,9 +301,9 @@ interface Stage {
   name: string
   executable: string
   folder: string | null
-  input: any // don't know what this could be
-  executionPolicy: any // don't know what this could be
-  systemRequirements: any[]
+  input: unknown // don't know what this could be
+  executionPolicy: unknown // don't know what this could be
+  systemRequirements: unknown[]
   accessible: boolean
 }
 
@@ -314,20 +315,20 @@ interface SpecItem {
   help: string
   optional: boolean
   group: string
-  default?: any // don't know what this could be
+  default?: unknown // don't know what this could be
 }
 
-type CloneObjectsResponse = {
+export type CloneObjectsResponse = {
   id: string
   project: string
 }
 
-type JobOutput = {
+export type JobOutput = {
   [key: string]: IOType
 }
 
 // just basic types we are interested in at the moment
-type JobDescribeResponse = {
+export type JobDescribeResponse = {
   id: string
   name: string
   state: JOB_STATE
@@ -355,40 +356,7 @@ type JobDescribeResponse = {
   totalPrice?: number
 } & AnyObject
 
-type UpdateBillingInformationResponse = {
+export type UpdateBillingInformationResponse = {
   message: string
   status: string
-}
-
-//TODO: this will start to grow significantly, consider splitting into multiple files/modules.
-export {
-  AppDescribeResponse,
-  ClassIdResponse,
-  CloneObjectsResponse,
-  DbClusterDescribeResponse,
-  DescribeDataObjectsResponse,
-  DescribeFoldersResponse,
-  DnanexusLink,
-  FileCloseResponse,
-  FileDescribeResponse,
-  FileDownloadLinkResponse,
-  FileRemoveResponse,
-  FileStateResult,
-  FileStatesResponse,
-  FindJobsResponse,
-  GetUploadURLResponse,
-  IPaginatedResponse,
-  JobCreateResponse,
-  JobDescribeResponse,
-  JobOutput,
-  JobTerminateResponse,
-  ListFilesResponse,
-  ListFilesResult,
-  OrgFindMembersReponse,
-  PlatformMember,
-  UpdateBillingInformationResponse,
-  UserDescribeResponse,
-  UserInviteToOrgResponse,
-  UserRemoveFromOrgResponse,
-  WorkflowDescribeResponse,
 }

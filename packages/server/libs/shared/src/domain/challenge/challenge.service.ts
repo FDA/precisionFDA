@@ -308,7 +308,7 @@ export class ChallengeService implements Searchable<Challenge> {
 
     if (!this.user.id || !this.user.accessToken || !this.user.sessionId) {
       canProposeChallenge = await this.captchaService.verifyCaptchaAssessment(
-        body.captchaValue!,
+        body.captchaValue,
         'propose',
       )
     }

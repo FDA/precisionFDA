@@ -38,7 +38,7 @@ export class JobLogService {
           }),
         )
         // close signal from platform
-        if (log['source'] === 'SYSTEM' && log['msg'] === 'END_LOG') {
+        if (log.source === 'SYSTEM' && log.msg === 'END_LOG') {
           ws.terminate()
           return
         }

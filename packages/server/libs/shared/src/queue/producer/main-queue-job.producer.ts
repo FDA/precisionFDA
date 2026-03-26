@@ -83,7 +83,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
       user,
     }
     const options: JobOptions = {
-      jobId: `${wrapped.type}.${payload.uid}.${new Date().getTime()}`,
+      jobId: `${wrapped.type}.${payload.uid}.${Date.now()}`,
     }
 
     await this.addToQueue(wrapped, options)

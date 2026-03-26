@@ -37,7 +37,7 @@ describe('SpaceService', () => {
       return callback(em as SqlEntityManager)
     },
   } as unknown as SqlEntityManager
-  let referenceStub
+  let referenceStub: SinonStub
 
   const spaceRepoFindOneStub = stub()
   const spaceRepoFindEditableOneStub = stub()

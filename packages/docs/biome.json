@@ -1,0 +1,19 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.7/schema.json",
+  "root": false,
+  "extends": "//",
+  "files": {
+    "includes": ["app/**", "biome.json"]
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnusedVariables": "warn"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noImportCycles": "warn"
+      }
+    }
+  }
+}

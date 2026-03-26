@@ -19,10 +19,10 @@ const resizeData = {
 const debounce = (func, delay) => {
   let inDebounce
   return function () {
-    const context = this
+    // biome-ignore lint/complexity/noArguments: Should be fixed
     const args = arguments
     clearTimeout(inDebounce)
-    inDebounce = setTimeout(() => func.apply(context, args), delay)
+    inDebounce = setTimeout(() => func.apply(this, args), delay)
   }
 }
 
@@ -59,13 +59,13 @@ ready(function () {
           resizeData.maxWidth,
         )
 
-        resizeData.resizeTarget.style.width = newWidth + 'px'
+        resizeData.resizeTarget.style.width = `${newWidth}px`
         resizer.classList.add('resizing')
       }
     }, 1),
   )
 
-  window.addEventListener('mouseup', function (event) {
+  window.addEventListener('mouseup', function () {
     if (resizeData.tracking) {
       resizeData.tracking = false
       resizer.classList.remove('resizing')

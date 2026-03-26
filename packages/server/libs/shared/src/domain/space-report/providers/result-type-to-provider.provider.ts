@@ -9,9 +9,9 @@ export const SPACE_REPORT_RESULT_TYPE_TO_PROVIDER_MAP = 'SPACE_REPORT_RESULT_TYP
 export const resultTypeToProviderProvider: Provider = {
   provide: SPACE_REPORT_RESULT_TYPE_TO_PROVIDER_MAP,
   inject: [SpaceReportResultHtmlProvider, SpaceReportResultJsonProvider],
-  useFactory: (HTML: SpaceReportResultHtmlProvider, JSON: SpaceReportResultJsonProvider) =>
+  useFactory: (htmlProvider: SpaceReportResultHtmlProvider, jsonProvider: SpaceReportResultJsonProvider) =>
     ({
-      HTML,
-      JSON,
+      HTML: htmlProvider,
+      JSON: jsonProvider,
     }) satisfies { [T in SpaceReportFormat]: SpaceReportResultProvider<T> },
 }

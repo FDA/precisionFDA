@@ -9,7 +9,7 @@ type BillableOrg = {
 
 export type ProjectInfo = {
   status: string
-  projectDescribe: any
+  projectDescribe: unknown
 }
 
 export type PrivateProject = {

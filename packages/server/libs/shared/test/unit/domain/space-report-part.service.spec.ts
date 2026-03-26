@@ -81,9 +81,9 @@ describe('SpaceReportPartService', () => {
       PART_3_COMPLETE,
     ] as unknown as BatchComplete[]
 
-    let PART_1
-    let PART_2
-    let PART_3
+    let PART_1: { id: number, state: string }
+    let PART_2: { id: number, state: string }
+    let PART_3: { id: number, state: string }
 
     beforeEach(() => {
       transactionalStub.reset()

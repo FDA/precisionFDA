@@ -5,7 +5,7 @@ export type UserDataConsistencyReportTemplateInput = {
   content: UserDataConsistencyReportOutput
 }
 
-const createSection = (title: string, count: number | undefined, content: any) => {
+const createSection = (title: string, count: number | undefined, content: object) => {
   return `
     <mj-column width="100%">
       <mj-raw>

@@ -852,6 +852,7 @@ export class PlatformClient {
    * @param {object} body - OPTIONAL - Inputs.
    * @return {any}
    */
+  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
   async projectDescribe(projectDxid: DxId<'project'>, body?: unknown): Promise<any> {
     const url = `${config.platform.apiUrl}/${projectDxid}/describe`
     const options: AxiosRequestConfig = {
@@ -1070,6 +1071,7 @@ export class PlatformClient {
   }
 
   private handleFailed(
+    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
     err: any,
     customErrorThrower?: (statusCode: number, errorType: string, errorMessage: string) => void,
   ): never {

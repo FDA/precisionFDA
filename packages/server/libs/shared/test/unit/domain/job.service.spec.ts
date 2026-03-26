@@ -1,7 +1,8 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { JobCountService } from '@shared/domain/job/services/job-count.service'
 import { Queue } from 'bull'
 import { expect } from 'chai'
-import { stub } from 'sinon'
+import { stub, SinonStub } from 'sinon'
 import { database } from '@shared/database'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
@@ -50,7 +51,7 @@ describe('Job service tests', () => {
   let eventHelper: EventHelper
   let jobWorkstationService: JobWorkstationService
 
-  let getMainQueueStub
+  let getMainQueueStub: SinonStub
   const userContextLoadEntityStub = stub()
   const userRepoFindOneOrFailStub = stub()
   const userRepoFindAdminUserStub = stub()
@@ -569,7 +570,7 @@ describe('Job service tests', () => {
   const getJobServiceInstance = (platformClient: PlatformClient): JobService => {
     const jobCountService = {
       count: stub().resolves(0),
-    } as any
+    } as unknown as JobCountService
     return new JobService(
       em,
       userCtx,

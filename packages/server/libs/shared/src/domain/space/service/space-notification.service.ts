@@ -31,7 +31,7 @@ export class SpaceNotificationService {
     const emailTask: EmailSendInput = {
       emailType: EMAIL_TYPES.spaceCreated,
       to: email,
-      subject: '[precisionFDA] Your Space was created: ' + space.name,
+      subject: `[precisionFDA] Your Space was created: ${space.name}`,
       body,
     }
 

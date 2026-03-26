@@ -24,8 +24,8 @@ describe('DxIdUtils', () => {
     })
 
     it('should return false for a non-string value', () => {
-      const invalidDxId = 123
-      expect(DxIdUtils.isDxIdValid(invalidDxId as any)).to.be.false()
+      const invalidDxId = 123 as unknown as string
+      expect(DxIdUtils.isDxIdValid(invalidDxId)).to.be.false()
     })
 
     it('should return false for a DxId with an invalid format', () => {

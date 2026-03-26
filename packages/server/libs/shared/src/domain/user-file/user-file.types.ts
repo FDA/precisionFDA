@@ -5,29 +5,29 @@ import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 
 // File state from the platform
-enum FILE_STATE_DX {
+export enum FILE_STATE_DX {
   ABANDONED = 'abandoned', // See PFDA-685
   CLOSING = 'closing',
   CLOSED = 'closed',
   OPEN = 'open',
 }
 
-enum FILE_STATE_PFDA {
+export enum FILE_STATE_PFDA {
   // pFDA internal state, used for files that are being copied by a worker.
   COPYING = 'copying',
   REMOVING = 'removing',
 }
 
-type FILE_STATE = FILE_STATE_DX | FILE_STATE_PFDA
-type FOLDER_STATE = FILE_STATE_PFDA.REMOVING | null
+export type FILE_STATE = FILE_STATE_DX | FILE_STATE_PFDA
+export type FOLDER_STATE = FILE_STATE_PFDA.REMOVING | null
 
-enum FILE_STI_TYPE {
+export enum FILE_STI_TYPE {
   USERFILE = 'UserFile',
   ASSET = 'Asset',
   FOLDER = 'Folder',
 }
 
-enum PARENT_TYPE {
+export enum PARENT_TYPE {
   USER = 'User',
   JOB = 'Job',
   ASSET = 'Asset',
@@ -35,12 +35,12 @@ enum PARENT_TYPE {
   NODE = 'Node',
 }
 
-interface BulkDownloadFile {
+export interface BulkDownloadFile {
   url: string
   path: string
 }
 
-interface BulkDownloadFiles {
+export interface BulkDownloadFiles {
   files: BulkDownloadFile[]
   scope: string
 }
@@ -48,7 +48,7 @@ interface BulkDownloadFiles {
 export type FileOrAsset = UserFile | Asset
 export type FileOrAssetOrFolder = UserFile | Asset | Folder
 
-interface NodeResponse {
+export interface NodeResponse {
   id: number
   name: string
   type: 'Folder' | 'UserFile' | 'Asset'
@@ -62,7 +62,7 @@ interface NodeResponse {
   parent_folder_id: number | null
 }
 
-interface ResolvePath {
+export interface ResolvePath {
   path: string
   scope: SCOPE
   nodes: NodeResponse[]
@@ -73,7 +73,7 @@ interface ExistingFile {
   targetScopePath: string
 }
 
-interface ExistingFileSet {
+export interface ExistingFileSet {
   [key: Uid<'file'>]: ExistingFile
 }
 
@@ -86,32 +86,15 @@ interface ISelectedNode {
   sourceFolderId: number
 }
 
-interface SelectedFile extends ISelectedNode {
+export interface SelectedFile extends ISelectedNode {
   type: FILE_STI_TYPE.USERFILE
   state: FILE_STATE
   uid: Uid<'file'>
 }
 
-interface SelectedFolder extends ISelectedNode {
+export interface SelectedFolder extends ISelectedNode {
   type: FILE_STI_TYPE.FOLDER
   children: SelectedFile[]
 }
 
-type SelectedNode = SelectedFile | SelectedFolder
-
-export {
-  BulkDownloadFile,
-  BulkDownloadFiles,
-  ExistingFileSet,
-  FILE_STATE,
-  FILE_STATE_DX,
-  FILE_STATE_PFDA,
-  FILE_STI_TYPE,
-  FOLDER_STATE,
-  NodeResponse,
-  PARENT_TYPE,
-  ResolvePath,
-  SelectedFile,
-  SelectedFolder,
-  SelectedNode,
-}
+export type SelectedNode = SelectedFile | SelectedFolder

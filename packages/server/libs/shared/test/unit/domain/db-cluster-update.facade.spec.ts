@@ -61,11 +61,8 @@ describe('DbClusterUpdateFacade', () => {
       description: 'db-cluster-description-updated',
     })
 
-    // @ts-ignore
     expect(dbClusterUpdated.dxid).eq('dbcluster-xxx1')
-    // @ts-ignore
     expect(dbClusterUpdated.name).eq('db-cluster-updated')
-    // @ts-ignore
     expect(dbClusterUpdated.description).eq('db-cluster-description-updated')
   })
 
@@ -95,11 +92,8 @@ describe('DbClusterUpdateFacade', () => {
       description: 'db-cluster-description-updated',
     })
 
-    // @ts-ignore
     expect(dbClusterUpdated.dxid).eq('dbcluster-xxx1')
-    // @ts-ignore
     expect(dbClusterUpdated.name).eq('db-cluster-updated')
-    // @ts-ignore
     expect(dbClusterUpdated.description).eq('db-cluster-description-updated')
   })
 

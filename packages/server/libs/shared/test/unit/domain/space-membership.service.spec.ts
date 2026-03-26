@@ -96,8 +96,8 @@ describe('SpaceMembershipService', () => {
       [SPACE_MEMBERSHIP_ROLE.ADMIN]: adminAccesProvider,
       [SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]: contributorAccessProvider,
       [SPACE_MEMBERSHIP_ROLE.VIEWER]: viewerAccessProvider,
-      ['disable']: inactiveAccessProvider,
-      ['enable']: null,
+      'disable': inactiveAccessProvider,
+      'enable': null,
     }
     spaceMembershipUpdatePermissionHelper = new SpaceMembershipUpdatePermissionHelper(
       spaceMembershipToPlatformAccessProviderMap,
@@ -141,8 +141,8 @@ describe('SpaceMembershipService', () => {
       adminClient,
     )
     spaceMembershipUpdatePermissionProviderMap = {
-      ['enable']: spaceMembershipUpdatePermissionToActiveProvider,
-      ['disable']: spaceMembershipUpdatePermissionToInactiveProvider,
+      'enable': spaceMembershipUpdatePermissionToActiveProvider,
+      'disable': spaceMembershipUpdatePermissionToInactiveProvider,
       [SPACE_MEMBERSHIP_ROLE.VIEWER]: spaceMembershipUpdatePermissionToViewerProvider,
       [SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]: spaceMembershipUpdatePermissionToContributorProvider,
       [SPACE_MEMBERSHIP_ROLE.ADMIN]: spaceMembershipUpdatePermissionToAdminProvider,

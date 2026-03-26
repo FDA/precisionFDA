@@ -110,7 +110,7 @@ describe('AssetRepository', () => {
     // get ids for all assets (test filtering)
     const uids = assets.map((asset) => asset.uid)
     const repo = em.getRepository(Asset) as AssetRepository
-    let result = await repo.findAccessibleByUser(user1.id, uids, [1])
+    const result = await repo.findAccessibleByUser(user1.id, uids, [1])
 
     expect(result.length).to.equal(4)
     const publicAsset = result.filter((asset) => asset.isPublic())[0]

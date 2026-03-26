@@ -21,7 +21,7 @@ export class SiteSettingsController {
 
   @Get()
   async getSiteSettings(@Headers() headers: Record<string, string>) {
-    let body
+    let body: object
 
     // Request-specific logic
     if (isRequestFromFdaSubnet(this.logger, headers[config.api.nginxIpHeader])) {

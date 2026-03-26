@@ -45,7 +45,7 @@ export class NoteProvenanceDataService extends EntityProvenanceDataService<'note
   async getParents(note: Note): Promise<EntityProvenanceSourceUnion[]> {
     const attachments = await note.attachments.loadItems()
     const entities: EntityProvenanceSourceUnion[] = []
-    for (let attachment of attachments) {
+    for (const attachment of attachments) {
       const entity = await this.attachmentTypeToRepositoryMap[attachment.itemType].findOneOrFail({
         id: attachment.itemId,
       })

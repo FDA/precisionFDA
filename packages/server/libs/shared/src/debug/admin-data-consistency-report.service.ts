@@ -6,13 +6,17 @@ import {
   getBullJobIdForEmailOperation,
 } from '@shared/domain/email/email.helper'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FILE_STATE, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { EntityScope } from '@shared/types/common'
 import { TimeUtils } from '@shared/utils/time.utils'
 import { EmailSendInput } from '../domain/email/email.config'
 import {
@@ -21,10 +25,11 @@ import {
 } from '../domain/email/templates/mjml/admin-data-consistency-report.template'
 import { JobRepository } from '../domain/job/job.repository'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
-import { SPACE_TYPE } from '../domain/space/space.enum'
+import { SPACE_STATE, SPACE_TYPE } from '../domain/space/space.enum'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
+// biome-ignore-start lint/suspicious/noExplicitAny: Should be fixed
 export type AdminDataConsistencyReportOutput = {
   pfdaOnlyFoldersCount?: number
   pfdaOnlyFolders?: any
@@ -38,6 +43,42 @@ export type AdminDataConsistencyReportOutput = {
   legacyOrgsCount?: number
   spaces?: any
   spacesWithErrorsCount?: number
+}
+// biome-ignore-end lint/suspicious/noExplicitAny: Should be fixed
+
+export interface AdminDataConsistencyReportNodeWithParent {
+  id: number
+  name: string
+  parentFolderId: number
+  scopedParentFolderId: number
+  scope: EntityScope
+  state: FILE_STATE
+  stiType: FILE_STI_TYPE
+  errors: string
+}
+
+export interface AdminDataConsistencyReportSpaceInfo {
+  id: number
+  name: string
+  spaceType: string
+  spaceId: number
+  state: SPACE_STATE
+  hostDxOrg: DxId<'org'>
+  hostLead: string
+  guestDxtOrg: DxId<'org'>
+  guestLead: string
+  status: string
+}
+
+export interface AdminDataConsistencyReportRunningJobInfo {
+  dxid: DxId<'job'>
+  id: number
+  uid: Uid<'job'>
+  userId: number
+  userDxid: DxId<'user'>
+  scope: EntityScope
+  entityType: string
+  elapsedTime: string
 }
 
 // AdminDataConsistencyReportService is to be run by an admin to check on the overall
@@ -67,6 +108,7 @@ export class AdminDataConsistencyReportService {
     this.logger.log('AdminDataConsistencyReportService: Starting createReport')
 
     try {
+      // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
       const infoMapping = (f: any): any => {
         return {
           id: f.id,
@@ -88,7 +130,7 @@ export class AdminDataConsistencyReportService {
       output.pfdaOnlyFoldersCount = pfdaOnlyFolders.length
       output.pfdaOnlyFolders = pfdaOnlyFolders.map(infoMapping)
 
-      const nodesWithParents: any[] = await this.checkInconsistentNodes()
+      const nodesWithParents = await this.checkInconsistentNodes()
       output.foldersWithParent = nodesWithParents
       output.foldersWithParentCount = nodesWithParents.length
 
@@ -104,11 +146,11 @@ export class AdminDataConsistencyReportService {
       output.unclosedFilesCount = unclosedFiles.length
       output.unclosedFiles = unclosedFiles.map(infoMapping)
 
-      const runningJobsInfo: any[] = await this.checkRunningJobs()
+      const runningJobsInfo = await this.checkRunningJobs()
       output.runningJobs = runningJobsInfo
       output.runningJobsCount = runningJobsInfo.length
 
-      const spacesInfo: any[] = await this.checkInconsistentSpaces()
+      const spacesInfo = await this.checkInconsistentSpaces()
       output.spaces = spacesInfo
       output.spacesWithErrorsCount = spacesInfo.length
 
@@ -122,10 +164,10 @@ export class AdminDataConsistencyReportService {
     return output
   }
 
-  async checkInconsistentSpaces(): Promise<any[]> {
+  async checkInconsistentSpaces(): Promise<AdminDataConsistencyReportSpaceInfo[]> {
     // Check Spaces for leads inconsistency
     // Billing inconsistencies can only be checked using the lead's token and is done in AdminDataConsistencyReportService
-    const spacesInfo: any[] = []
+    const spacesInfo: AdminDataConsistencyReportSpaceInfo[] = []
     const spaceRepo = this.em.getRepository(Space)
     const spaces = await spaceRepo.findAll({
       populate: ['spaceMemberships', 'spaceMemberships.user'],
@@ -190,10 +232,10 @@ export class AdminDataConsistencyReportService {
     return spacesInfo
   }
 
-  async checkRunningJobs(): Promise<any[]> {
+  async checkRunningJobs(): Promise<AdminDataConsistencyReportRunningJobInfo[]> {
     const jobsRepo: JobRepository = this.em.getRepository(Job)
     const runningJobs = await jobsRepo.findAllRunningJobs()
-    const runningJobsInfo: any[] = []
+    const runningJobsInfo: AdminDataConsistencyReportRunningJobInfo[] = []
     for (const job of runningJobs) {
       await job.user.load()
       const user = job.user.getEntity()
@@ -211,14 +253,14 @@ export class AdminDataConsistencyReportService {
     return runningJobsInfo
   }
 
-  async checkInconsistentNodes(): Promise<any[]> {
+  async checkInconsistentNodes(): Promise<AdminDataConsistencyReportNodeWithParent[]> {
     // Check for files/folders/assets with inconsistent parents
     const allNodes = await this.em.getRepository(Node).find({
       parentFolder: { $ne: null },
       scopedParentFolder: { $ne: null },
     })
 
-    const nodesWithParents: any[] = []
+    const nodesWithParents: AdminDataConsistencyReportNodeWithParent[] = []
     for (const node of allNodes) {
       const nodeInfo = {
         id: node.id,

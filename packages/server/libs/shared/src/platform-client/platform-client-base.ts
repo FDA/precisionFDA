@@ -32,9 +32,10 @@ class PlatformClientBase {
   }
 
   protected handleFailed(
+    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
     err: any,
     customErrorThrower?: (statusCode: number, errorType: string, errorMessage: string) => void,
-  ): any {
+  ): never {
     // response status code is NOT 2xx
     if (err.response) {
       this.logger.error(

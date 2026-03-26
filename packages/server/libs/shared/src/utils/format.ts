@@ -6,7 +6,7 @@ export const formatDuration = (duration: number): string => {
   const minutes = (hours % 1) * 60
   const seconds = (minutes % 1) * 60
 
-  let result = Math.floor(minutes) + 'm ' + Math.round(seconds) + 's'
+  let result = `${Math.floor(minutes)}m ${Math.round(seconds)}s`
   const hoursInt = Math.floor(hours)
   const daysInt = Math.floor(days)
   if (hoursInt) {

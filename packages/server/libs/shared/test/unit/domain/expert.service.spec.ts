@@ -1,5 +1,6 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
@@ -17,8 +18,8 @@ describe('ExpertService tests', () => {
   let siteAdmin: User
   let userCtx: UserContext
   let expertService: ExpertService
-  let user1, user2, user3
-  let exp1, exp2, exp3
+  let user1: User, user2: User, user3: User
+  let exp1: Expert, exp2: Expert, exp3: Expert
 
   const nodesRemoveStub = stub().throws()
   const paginateStub = stub().throws()

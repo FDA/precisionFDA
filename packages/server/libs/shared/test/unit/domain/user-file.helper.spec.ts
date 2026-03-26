@@ -56,15 +56,15 @@ describe('user-file.helper', () => {
     it('findFileOrAssetsWithDxid should return a file', async () => {
       const result = await findFileOrAssetsWithDxid(em, file.dxid)
       expect(result).to.be.not.null()
-      expect(result!.length).to.equal(1)
-      expect(result![0].dxid).to.equal(file.dxid)
+      expect(result.length).to.equal(1)
+      expect(result[0].dxid).to.equal(file.dxid)
     })
 
     it('findFileOrAssetsWithDxid should return an asset', async () => {
       const result = await findFileOrAssetsWithDxid(em, asset.dxid)
       expect(result).to.be.not.null()
-      expect(result!.length).to.equal(1)
-      expect(result![0].dxid).to.equal(asset.dxid)
+      expect(result.length).to.equal(1)
+      expect(result[0].dxid).to.equal(asset.dxid)
     })
 
     it('findFileOrAssetsWithDxid should return null if the uid is neither file or asset', async () => {

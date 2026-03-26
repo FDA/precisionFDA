@@ -2182,7 +2182,7 @@ pnpm build:dev        # Development build
 
 # Other
 pnpm storybook        # Start Storybook
-pnpm lint             # Run ESLint
+pnpm lint             # Run Biome
 pnpm tsc              # TypeScript check
 ```
 

@@ -32,7 +32,7 @@ import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { JobInformation } from 'bull'
 import Chance from 'chance'
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import { DateTime } from 'luxon'
 import { customAlphabet } from 'nanoid'
 import { App, AppSpec, Internal } from '../domain/app/app.entity'
@@ -678,7 +678,6 @@ const comment = {
     body: chance.sentence(),
     commentableType: 'Space',
     contentObjectType: 'Job',
-    //@ts-ignore
     commentableId: 1,
     contentObjectId: 1,
   }),

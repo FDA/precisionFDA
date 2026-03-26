@@ -307,7 +307,7 @@ export class CopyNodesFacade {
   }
 
   private createCorrectType(sourceNode: Node, user: User): Asset | UserFile | Folder {
-    let newlyCreatedNode
+    let newlyCreatedNode: Asset | UserFile | Folder
     switch (sourceNode.stiType) {
       case FILE_STI_TYPE.ASSET:
         newlyCreatedNode = new Asset(user)
@@ -364,7 +364,7 @@ export class CopyNodesFacade {
   }
 
   private getParentFolderId(node: Node): number | undefined {
-    return node.scopedParentFolderId ?? node.parentFolderId!
+    return node.scopedParentFolderId ?? node.parentFolderId
   }
 
   private hasParentFolder(node: Node): boolean {

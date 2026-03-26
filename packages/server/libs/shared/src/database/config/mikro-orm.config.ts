@@ -74,7 +74,7 @@ export function getMikroOrmConfig(opts: MikroOrmConfigOptions): MikroOrmModuleSy
     entitiesTs: [
       getEntityGlob(opts.sourcePath, 'ts'),
       getEntityGlob('./libs/shared/src', 'ts'),
-      getEntityGlob(opts.distPath + '/**', 'd.ts'),
+      getEntityGlob(`${opts.distPath}/**`, 'd.ts'),
     ],
     driver: MySqlDriver,
     // v5 introduced strict checking. Having this enabled would mean a lot

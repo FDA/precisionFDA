@@ -231,7 +231,7 @@ describe('user-file.helper', () => {
         { user, parentFolder: subfolder },
         { name: 'sub-sub-folder' },
       )
-      const subfolder2 = create.filesHelper.createFolder(
+      create.filesHelper.createFolder(
         em,
         { user, parentFolder },
         { name: 'sub-folder2' },

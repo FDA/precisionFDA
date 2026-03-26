@@ -44,7 +44,7 @@ import {
 import { EntityScope } from '@shared/types/common'
 import { codeRemap } from '@shared/utils/app'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import * as crypto from 'crypto'
+import * as crypto from 'node:crypto'
 
 @Injectable()
 export class AppCreateFacade {
@@ -436,7 +436,7 @@ export class AppCreateFacade {
 
     if (!/^[a-zA-Z0-9._-]+$/.test(spec.name)) {
       this.throwValidationError(
-        `The ${type} name \'${spec.name}\' can only contain the characters A-Z, a-z, 0-9, ` +
+        `The ${type} name '${spec.name}' can only contain the characters A-Z, a-z, 0-9, ` +
           "'.' (period), '_' (underscore) and '-' (dash).",
       )
     }

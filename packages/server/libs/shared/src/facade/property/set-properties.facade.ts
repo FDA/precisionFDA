@@ -101,6 +101,6 @@ export class SetPropertiesFacade {
 
   isFolderId(id: string): boolean {
     const parts = id.split('-')
-    return !(parts.length !== 2 || parts[0] !== 'folder' || isNaN(Number(parts[1])))
+    return !(parts.length !== 2 || parts[0] !== 'folder' || Number.isNaN(Number(parts[1])))
   }
 }

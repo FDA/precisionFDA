@@ -1,11 +1,11 @@
-import React, { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import styled from 'styled-components'
 import { Loader } from '@/components/Loader'
 import { NotAllowedPage } from '@/components/NotAllowed'
 import { useAuthUser } from '@/features/auth/useAuthUser'
-import Logo from '../../components/Logo'
-import { ErrorBoundary } from '@/utils/ErrorBoundry'
 import { useScrollMode } from '@/hooks/useScrollMode'
+import { ErrorBoundary } from '@/utils/ErrorBoundry'
+import Logo from '../../components/Logo'
 
 const StyledLayoutLoader = styled.div`
   display: flex;

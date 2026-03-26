@@ -1,7 +1,9 @@
 /* eslint-disable import/group-exports */
+import { Job, JobInformation } from 'bull'
 import Bull from 'bull'
 import { getQueues } from '.'
 
+export interface DebugQueueJobResult { queue: string, job: Job | JobInformation }
 
 // Queue debugging functions
 export const debugQueueJobs = async () => {
@@ -12,14 +14,14 @@ export const debugQueueJobs = async () => {
       name: q.name,
       jobs: jobs,
       jobCounts: await q.getJobCounts(),
-      repeatableJobs: await q.getRepeatableJobs()
+      repeatableJobs: await q.getRepeatableJobs(),
     }
   }))
 }
 
-export const debugQueueJob = async (jobId: string): Promise<any> => {
+export const debugQueueJob = async (jobId: string): Promise<DebugQueueJobResult[]> => {
   const queues = getQueues()
-  const results: any[] = []
+  const results: DebugQueueJobResult[] = []
   for (const q of queues) {
     const job = await q.getJob(jobId)
     if (job) {
@@ -40,13 +42,13 @@ export const debugQueueJob = async (jobId: string): Promise<any> => {
   return results
 }
 
-export const removeJobs = async (pattern: string): Promise<any> => {
+export const removeJobs = async (pattern: string): Promise<string> => {
   const queues = getQueues()
   let jobsCountBefore = 0
   let jobsCountAfter = 0
   const aggregateCounts = (jobCounts: Bull.JobCounts): number => {
     return jobCounts.active + jobCounts.completed + jobCounts.delayed +
-           jobCounts.failed + jobCounts.waiting
+      jobCounts.failed + jobCounts.waiting
   }
   await Promise.all(queues.map(async (q) => {
     const beforeCount = aggregateCounts(await q.getJobCounts())
@@ -58,7 +60,7 @@ export const removeJobs = async (pattern: string): Promise<any> => {
   return `${jobsCountBefore - jobsCountAfter} jobs removed`
 }
 
-export const removeRepeatableDebug = async (key: string): Promise<any> => {
+export const removeRepeatableDebug = async (key: string): Promise<string> => {
   const queues = getQueues()
   let jobsCountBefore = 0
   let jobsCountAfter = 0

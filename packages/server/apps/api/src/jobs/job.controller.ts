@@ -8,7 +8,6 @@ import { WorkstationAliveBodyDTO } from '@shared/domain/job/dto/workstation-aliv
 import { Job } from '@shared/domain/job/job.entity'
 import { JobService } from '@shared/domain/job/job.service'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { JobWorkstationFacade } from '@shared/facade/job/job-workstation.facade'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
@@ -19,7 +18,6 @@ import { DxidValidationPipe } from '../validation/pipes/dxid.pipe'
 @Controller('/jobs')
 export class JobController {
   constructor(
-    private readonly user: UserContext,
     private readonly jobSynchronizationService: JobSynchronizationService,
     private readonly jobService: JobService,
     private readonly mainQueueJobProducer: MainQueueJobProducer,

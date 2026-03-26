@@ -1,7 +1,7 @@
 import { config } from '@shared/config'
 import { COOKIE_SESSION_KEY } from '@shared/config/consts'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
-import { STATUS_CODES } from 'http'
+import { STATUS_CODES } from 'node:http'
 import { nanoid } from 'nanoid'
 import { Params } from 'nestjs-pino/params'
 import pino from 'pino'
@@ -40,11 +40,11 @@ export const pinoConfig: Params = {
       req: pino.stdSerializers.wrapRequestSerializer((req) => {
         const maskedRequest = { ...req, headers: { ...req.headers } }
         if (config.logs.maskSensitive) {
-          if (maskedRequest.headers['cookie']) {
-            maskedRequest.headers['cookie'] = MASKED
+          if (maskedRequest.headers.cookie) {
+            maskedRequest.headers.cookie = MASKED
           }
-          if (maskedRequest.headers['authorization']) {
-            maskedRequest.headers['authorization'] = MASKED
+          if (maskedRequest.headers.authorization) {
+            maskedRequest.headers.authorization = MASKED
           }
           if (maskedRequest.headers['x-csrf-token']) {
             maskedRequest.headers['x-csrf-token'] = MASKED
@@ -53,7 +53,7 @@ export const pinoConfig: Params = {
         return maskedRequest
       }),
       res: pino.stdSerializers.wrapResponseSerializer((res) => {
-        const headers = res.raw['headers']
+        const headers = res.raw.getHeaders()
         if (headers?.['set-cookie'] && config.logs.maskSensitive) {
           let setCookieValue = headers['set-cookie']
           if (Array.isArray(setCookieValue)) {

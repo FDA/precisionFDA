@@ -18,7 +18,7 @@ export abstract class ScopedEntity extends BaseEntity {
     if (!this.isInSpace()) {
       throw new Error('Entity is not in a space')
     }
-    return parseInt(this.scope.replace('space-', ''))
+    return parseInt(this.scope.replace('space-', ''), 10)
   }
 
   isPublic() {

@@ -1,4 +1,4 @@
-enum JOB_STATE {
+export enum JOB_STATE {
   DONE = 'done', // Only for regular apps
   FAILED = 'failed',
   IDLE = 'idle',
@@ -8,15 +8,15 @@ enum JOB_STATE {
   TERMINATING = 'terminating', // Only for HTTPS apps
 }
 
-enum JOB_DB_ENTITY_TYPE {
+export enum JOB_DB_ENTITY_TYPE {
   REGULAR = 0,
   HTTPS = 1,
 }
 
-const TERMINAL_STATES = [JOB_STATE.DONE, JOB_STATE.FAILED, JOB_STATE.TERMINATED]
-const ACTIVE_STATES = [JOB_STATE.IDLE, JOB_STATE.RUNNING]
+export const TERMINAL_STATES = [JOB_STATE.DONE, JOB_STATE.FAILED, JOB_STATE.TERMINATED]
+export const ACTIVE_STATES = [JOB_STATE.IDLE, JOB_STATE.RUNNING]
 
-const allowedInstanceTypes = {
+export const allowedInstanceTypes = {
   'baseline-2': 'mem1_ssd1_x2_fedramp',
   'baseline-4': 'mem1_ssd1_x4_fedramp',
   'baseline-8': 'mem1_ssd1_x8_fedramp',
@@ -35,22 +35,11 @@ const allowedInstanceTypes = {
   'gpu-8': 'mem3_ssd1_gpu_x8_fedramp',
 } as const
 
-type JobInstanceType = keyof typeof allowedInstanceTypes
+export type JobInstanceType = keyof typeof allowedInstanceTypes
 
-const DEFAULT_INSTANCE_TYPE = allowedInstanceTypes['baseline-2']
+export const DEFAULT_INSTANCE_TYPE = allowedInstanceTypes['baseline-2']
 
-const allowedFeatures = {
+export const allowedFeatures = {
   PYTHON_R: 'PYTHON_R',
   ML_IP: 'ML_IP',
-}
-
-export {
-  JOB_STATE,
-  TERMINAL_STATES,
-  ACTIVE_STATES,
-  JOB_DB_ENTITY_TYPE,
-  DEFAULT_INSTANCE_TYPE,
-  allowedFeatures,
-  allowedInstanceTypes,
-  JobInstanceType,
 }

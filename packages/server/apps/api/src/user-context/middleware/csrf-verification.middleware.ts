@@ -34,8 +34,8 @@ export class CSRFVerificationMiddleware implements NestMiddleware {
         reqMethod,
         hasSessionCookie: isReqWithCookie,
         authHeader: !!req.headers.authorization,
-        receivedToken: reqCsrfToken?.slice(0, 6) + '…',
-        expectedToken: csrfToken?.slice(0, 6) + '…',
+        receivedToken: `${reqCsrfToken?.slice(0, 6)}…`,
+        expectedToken: `${csrfToken?.slice(0, 6)}…`,
         userSessionDecrypted: Boolean(userSession),
       })
 

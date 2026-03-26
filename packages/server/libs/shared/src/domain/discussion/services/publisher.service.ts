@@ -45,7 +45,6 @@ export class PublisherService {
     let count = 0
     for (const app of apps) {
       const appSeries = await this.em.findOneOrFail(AppSeries, { id: app.appSeriesId })
-      // @ts-ignore
       if (!['private', scope].includes(appSeries.scope)) {
         throw new errors.InvalidStateError(
           `Unable to publish app ${app.uid}: app series ${appSeries.id} and ${app.uid} have different scope.`,
@@ -118,12 +117,11 @@ export class PublisherService {
             `Unable to publish comparison with id: ${comparison.id}: source and destination projects collision for ${item.uid}.`,
           )
         }
+        // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
         if (projects.hasOwnProperty(item.project)) {
-          // @ts-ignore fixme: don't know how to avoid ts-ignore here
-          projects[item.project].push(item)
+          projects[item.project].push(item as FileOrAsset)
         } else {
-          // @ts-ignore fixme: don't know how to avoid ts-ignore here
-          projects[item.project] = [item]
+          projects[item.project] = [item as FileOrAsset]
         }
       }
     }
@@ -132,7 +130,7 @@ export class PublisherService {
       if (files.length === 0) {
         continue
       }
-      const filesDxids: string[] = files.map((file) => file.dxid!)
+      const filesDxids: string[] = files.map((file) => file.dxid)
       await this.client.cloneObjects({
         sourceProject: project,
         destinationProject,
@@ -160,7 +158,7 @@ export class PublisherService {
     }
 
     for (const [project, files] of Object.entries(projects)) {
-      const filesDxids: string[] = files.map((file) => file.dxid!)
+      const filesDxids: string[] = files.map((file) => file.dxid)
       await this.client.fileRemove({ projectId: project, ids: filesDxids })
     }
 
@@ -199,7 +197,7 @@ export class PublisherService {
     const nodesToProcess = [...nodes]
 
     while (nodesToProcess.length > 0) {
-      const node = nodesToProcess.shift()!
+      const node = nodesToProcess.shift()
       allNodesToProcess.push(node)
 
       if (node.stiType === FILE_STI_TYPE.FOLDER) {

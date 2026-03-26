@@ -120,7 +120,7 @@ describe('UserCheckupFacade', () => {
 
   it('queues UserDataConsistencyReportTask and BillToAdjustmentTask if last checkup is over the limit', async () => {
     const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
-    user.lastDataCheckup = new Date(new Date().getTime() - (repeat + 1) * 1000)
+    user.lastDataCheckup = new Date(Date.now()- (repeat + 1) * 1000)
     await em.flush()
 
     await getInstance().runCheckup(job)

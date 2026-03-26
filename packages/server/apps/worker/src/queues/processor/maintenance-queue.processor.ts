@@ -9,14 +9,15 @@ import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
 import { JobSyncTaskCheckFacade } from '@shared/facade/job/job-sync-task-check.facade'
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
 import { SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
-import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
+import {
+  DbClusterCheckNonTerminatedFacade,
+} from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
 import { Job } from 'bull'
 import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
-import { BaseQueueProcessor } from './base-queue.processor'
 
 @Processor(config.workerJobs.queues.maintenance.name)
-export class MaintenanceQueueProcessor extends BaseQueueProcessor {
+export class MaintenanceQueueProcessor {
   constructor(
     private readonly adminDataConsistencyReportService: AdminDataConsistencyReportService,
     private readonly dbClusterCheckNonTerminatedFacade: DbClusterCheckNonTerminatedFacade,
@@ -26,9 +27,7 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     private readonly jobStaleCheckFacade: JobStaleCheckFacade,
     private readonly jobSyncTaskCheckFacade: JobSyncTaskCheckFacade,
     private readonly jobSyncService: JobSynchronizationService,
-  ) {
-    super()
-  }
+  ) {}
 
   @ProcessWithContext(TASK_TYPE.CHECK_CHALLENGE_JOBS)
   async checkChallengeJobs(): Promise<void> {

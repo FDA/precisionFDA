@@ -1,6 +1,5 @@
 import { Processor } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
-import { Job } from 'bull'
 import { config } from '@shared/config'
 import { JobService } from '@shared/domain/job/job.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
@@ -16,11 +15,11 @@ import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-c
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { CheckStatusJob, CopyNodesJob, TASK_TYPE, WorkstationSnapshotJob } from '@shared/queue/task.input'
 import { TypeUtils } from '@shared/utils/type-utils'
+import { Job } from 'bull'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
-import { BaseQueueProcessor } from '../../../queues/processor/base-queue.processor'
 
 @Processor(config.workerJobs.queues.fileSync.name)
-export class FileSyncQueueProcessor extends BaseQueueProcessor {
+export class FileSyncQueueProcessor {
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -34,9 +33,7 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
     private readonly notificationService: NotificationService,
     private readonly jobServiceWithPlatformClient: JobService,
     private readonly jobWorkstationFacade: JobWorkstationFacade,
-  ) {
-    super()
-  }
+  ) {}
 
   @ProcessWithContext(TASK_TYPE.COPY_NODES)
   async copyNodes(job: Job<CopyNodesJob>): Promise<void> {

@@ -2,6 +2,7 @@ import { footer, getBottomSpacer, getMiddleSpacer, getViewSpaceButton, header } 
 
 export type SpaceChangeTemplateInput = {
   firstName: string
+  receiver?: { id?: string }
   content: {
     initiator: { fullName: string }
     action: string
@@ -31,7 +32,6 @@ export const spaceChangedTemplate = (data: SpaceChangeTemplateInput): string => 
           The space ${data.content.space.name} was ${data.content.action}
         </mj-text>
         ${
-          // @ts-ignore
           (data.content.receiversSides[data.receiver.id] === 'GUEST' &&
             data.content.action === 'locked') ||
           data.content.action === 'deleted'

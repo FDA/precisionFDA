@@ -21,14 +21,14 @@ type UserResetMfaParams = {
   }
 }
 
-interface IPlatformAuthClient {
+export interface IPlatformAuthClient {
   newAuthToken(redirectUri: string): Promise<NewAuthTokenResponse>
-  userResetMfa(params: UserResetMfaParams): Promise<any>
+  userResetMfa(params: UserResetMfaParams): Promise<unknown>
 }
 
 // Client for communicating with Platform's auth server
 //
-class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClient {
+export class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClient {
   private readonly baseUrl: string
   private readonly accessToken: string
   readonly axiosInstance: AxiosInstance
@@ -89,7 +89,7 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
   /**
    * Reset a user's MFA
    */
-  async userResetMfa(params: UserResetMfaParams): Promise<any> {
+  async userResetMfa(params: UserResetMfaParams): Promise<unknown> {
     const url = `${config.platform.authApiUrl}/${params.dxid}/resetUserMFA`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -112,5 +112,3 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
     }
   }
 }
-
-export { IPlatformAuthClient, PlatformAuthClient }

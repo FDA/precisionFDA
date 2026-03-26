@@ -39,8 +39,8 @@ export const SpaceMembershipToPermissionUpdateProviderProvider: Provider = {
       [SPACE_MEMBERSHIP_ROLE.ADMIN]: toAdmin,
       [SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]: toContributor,
       [SPACE_MEMBERSHIP_ROLE.VIEWER]: toViewer,
-      ['enable']: toActive,
-      ['disable']: toInactive,
+      'enable': toActive,
+      'disable': toInactive,
     }
   },
 }

@@ -25,8 +25,8 @@ describe('SyncOutputsHandler tests', () => {
   })
 
   it('Test execute output syncing', async () => {
-    let jobDxIdParam
-    let userIdParam
+    let jobDxIdParam: string
+    let userIdParam: number
     const app = create.appHelper.createRegular(em as SqlEntityManager, { user }, { dxid: 'app-1' })
     const job = create.jobHelper.create(em as SqlEntityManager, { user, app }, { dxid: 'job-1' })
 

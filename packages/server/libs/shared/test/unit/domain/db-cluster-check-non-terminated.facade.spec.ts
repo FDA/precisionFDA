@@ -5,7 +5,7 @@ import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.s
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
 import { expect } from 'chai'
-import { match, stub } from 'sinon'
+import { match, stub, SinonStub } from 'sinon'
 import * as queue from '@shared/queue'
 import { config } from '@shared/config'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
@@ -29,7 +29,7 @@ describe('DbClusterCheckNonTerminatedFacade', () => {
     loadEntity,
   }
 
-  let getMainQueueStub
+  let getMainQueueStub: SinonStub
 
   const createSendEmailTaskStub = stub()
   const findStub = stub()

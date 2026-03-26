@@ -4,9 +4,9 @@ export class StringUtils {
   }
 
   static isInteger(value: string): boolean {
-    const number = parseInt(value)
+    const number = parseInt(value, 10)
 
-    return !isNaN(number) && String(number) === value
+    return !Number.isNaN(number) && String(number) === value
   }
 
   static parseDateRange(range: string): { lower?: Date; upper?: Date } | undefined {

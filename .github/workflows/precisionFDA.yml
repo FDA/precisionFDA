@@ -115,22 +115,6 @@ jobs:
       - name: Install modules
         run: pnpm install
 
-      - name: Run eslint on changed files (server)
-        uses: tj-actions/eslint-changed-files@74f98653675512158746d3136cd2d9326fbfb6e1 #v25.3.0
-        with:
-          path: packages/server
-          config_path: "./eslint.config.mjs"
-          level: "info"
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run eslint on changed files (client)
-        uses: tj-actions/eslint-changed-files@74f98653675512158746d3136cd2d9326fbfb6e1 #v25.3.0
-        with:
-          path: packages/client
-          config_path: "./eslint.config.mjs"
-          level: "info"
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Get changed files (server)
         id: changed-server
         uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32 #v46.0.1
@@ -139,10 +123,14 @@ jobs:
             packages/server/apps/**/*.ts
             packages/server/libs/**/*.ts
 
-      - name: Check prettier formatting (server)
+      - name: Run Biome CI on changed files (server)
         if: steps.changed-server.outputs.any_changed == 'true'
         working-directory: packages/server
-        run: pnpm exec prettier --check ${FILES//packages\/server\//}
+        shell: bash
+        run: |
+          FILES_TO_CHECK=(${FILES//packages\/server\//})
+
+          pnpm exec biome ci "${FILES_TO_CHECK[@]}"
         env:
           FILES: ${{ steps.changed-server.outputs.all_changed_files }}
 
@@ -154,10 +142,14 @@ jobs:
             packages/client/src/**/*.ts
             packages/client/src/**/*.tsx
 
-      - name: Check prettier formatting (client)
+      - name: Run Biome CI on changed files (client)
         if: steps.changed-client.outputs.any_changed == 'true'
         working-directory: packages/client
-        run: pnpm exec prettier --check ${FILES//packages\/client\//}
+        shell: bash
+        run: |
+          FILES_TO_CHECK=(${FILES//packages\/client\//})
+
+          pnpm exec biome ci "${FILES_TO_CHECK[@]}"
         env:
           FILES: ${{ steps.changed-client.outputs.all_changed_files }}
 

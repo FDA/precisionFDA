@@ -5,7 +5,7 @@ import { setupNestApp, setupSwagger } from '@shared/app-initialization'
 import { config } from '@shared/config'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import { WebsocketAdapter } from '@shared/websocket/adapter/websocket.adapter'
-import fs from 'fs'
+import fs from 'node:fs'
 import { ApiModule } from './api.module'
 import { log } from './logger'
 

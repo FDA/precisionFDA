@@ -1,4 +1,4 @@
-enum ENVS {
+export enum ENVS {
   DEV = 'dev',
   CI_TEST = 'ci_test',
   TEST = 'test',
@@ -7,21 +7,21 @@ enum ENVS {
   PRODUCTION = 'production',
 }
 
-enum STATIC_SCOPE {
+export enum STATIC_SCOPE {
   PRIVATE = 'private',
   PUBLIC = 'public',
 }
 
-type Scope = STATIC_SCOPE | `space-${number}`
+export type Scope = STATIC_SCOPE | `space-${number}`
 
-enum HOME_SCOPE {
+export enum HOME_SCOPE {
   ME = 'me',
   FEATURED = 'featured',
   EVERYBODY = 'everybody',
   SPACES = 'spaces',
 }
 
-enum NOTIFICATION_ACTION {
+export enum NOTIFICATION_ACTION {
   JOB_RUNNING = 'JOB_RUNNING',
   JOB_RUNNABLE = 'JOB_RUNNABLE',
   JOB_DONE = 'JOB_DONE',
@@ -50,10 +50,8 @@ enum NOTIFICATION_ACTION {
   DB_CLUSTER_UPDATED = 'DB_CLUSTER_UPDATED',
 }
 
-enum SEVERITY {
+export enum SEVERITY {
   ERROR = 'ERROR',
   WARN = 'WARN',
   INFO = 'INFO',
 }
-
-export { ENVS, HOME_SCOPE, NOTIFICATION_ACTION, Scope, SEVERITY, STATIC_SCOPE }

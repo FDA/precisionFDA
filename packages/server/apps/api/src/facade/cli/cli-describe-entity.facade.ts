@@ -69,9 +69,9 @@ export class CliDescribeEntityFacade {
       case 'job':
         return await this.describeExecution(uid as Uid<'job'>)
       case 'discussion':
-        return await this.describeDiscussion(parseInt(uid.split('-')[1]))
+        return await this.describeDiscussion(parseInt(uid.split('-')[1], 10))
       case 'folder':
-        return await this.describeFolder(parseInt(uid.split('-')[1]))
+        return await this.describeFolder(parseInt(uid.split('-')[1], 10))
       case 'dbcluster':
         return await this.describeDbCluster(uid as Uid<'dbcluster'>)
       default:
