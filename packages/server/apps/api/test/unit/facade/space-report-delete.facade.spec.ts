@@ -145,7 +145,7 @@ describe('SpaceReportDeleteFacade', () => {
     expect(await result).to.be.eq(SPACE_REPORT_IDS)
   })
 
-  async function expectReject(error: Error | Function, message?: string, user?) {
+  async function expectReject(error: Error | ((...args: never) => unknown), message?: string, user?) {
     const result = getInstance(user).deleteSpaceReports(SPACE_REPORT_IDS)
 
     await expect(result).to.be.rejectedWith(error, message)

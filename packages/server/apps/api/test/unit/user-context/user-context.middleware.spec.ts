@@ -13,7 +13,7 @@ import { SinonStub, stub } from 'sinon'
 import { UserContextMiddleware } from '../../../src/user-context/middleware/user-context.middleware'
 
 describe('UserContextMiddleware', () => {
-  let sessionExpirationMinutes
+  let sessionExpirationMinutes: number
 
   const SESSION_ID = '123'
   const REQUEST_ID = nanoid()

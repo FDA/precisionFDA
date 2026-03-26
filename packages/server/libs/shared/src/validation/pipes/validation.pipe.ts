@@ -16,7 +16,7 @@ import { ValidationError } from '@shared/errors'
  **/
 @Injectable()
 export class CustomValidationPipe extends ValidationPipe {
-  async transform(value: any, metadata: ArgumentMetadata) {
+  async transform(value: unknown, metadata: ArgumentMetadata) {
     try {
       return await super.transform(value, metadata)
     } catch (error) {
@@ -25,9 +25,9 @@ export class CustomValidationPipe extends ValidationPipe {
         const response = error.getResponse()
         let message = 'Validation failed'
         if (typeof response === 'object' && 'message' in response) {
-          message = Array.isArray(response['message'])
-            ? response['message'].join(', ')
-            : response['message'].toString()
+          message = Array.isArray(response.message)
+            ? response.message.join(', ')
+            : response.message.toString()
         }
         throw new ValidationError(message)
       }

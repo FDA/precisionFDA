@@ -13,7 +13,7 @@ export class HttpExceptionFilter extends AbstractExceptionFilter<HttpException> 
     const response = exception.getResponse()
     let message = 'Bad request'
     if (typeof response === 'object' && 'message' in response) {
-      message = Array.isArray(response['message']) ? response['message'].join(', ') : response['message'].toString()
+      message = Array.isArray(response.message) ? response.message.join(', ') : response.message.toString()
     }
 
     const payload: ErrorPayload = {

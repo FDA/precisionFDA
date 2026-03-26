@@ -13,7 +13,7 @@ import { EntityManager } from '@mikro-orm/core'
  * Once this is done, this test file should be renamed to event.helper.spec.ts
  */
 describe('EventHelper', () => {
-  let orgLoadStub = stub()
+  const orgLoadStub = stub()
 
   const org = { handle: 'org1' } as unknown as Organization
   const user = {

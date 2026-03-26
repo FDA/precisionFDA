@@ -217,7 +217,7 @@ export class UserProvisionFacade {
     } as UserCreateData
 
     if (isGovEmail(invitation.email)) {
-      userParams['pfdasso'] = true
+      userParams.pfdasso = true
     }
 
     await this.adminClient.createUser(userParams)

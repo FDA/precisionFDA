@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
 import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/producer/space-report-queue-job.producer'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
@@ -18,7 +19,7 @@ export class SpaceReportCreateFacade {
     this.spaceReportService = spaceReportService
   }
 
-  async createSpaceReport(createDto: SpaceReportCreateDto) {
+  async createSpaceReport(createDto: SpaceReportCreateDto): Promise<SpaceReport> {
     const report = await this.spaceReportService.createReport(createDto)
     const partIds: number[] = report.reportParts.getItems().map((p) => p.id)
     const reportBatches = ArrayUtils.batchArray(partIds, this.REPORT_PART_BATCH_SIZE)

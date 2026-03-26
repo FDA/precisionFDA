@@ -61,6 +61,7 @@ export class JobWorkstationService {
       jar,
       withCredentials: true, // required when using cookies
     }
+    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
     const axiosInstance = wrapper(axios.create(config) as any)
 
     const job = await this.jobRepository.findAccessibleOne({ uid: jobUid }, { populate: ['app'] })

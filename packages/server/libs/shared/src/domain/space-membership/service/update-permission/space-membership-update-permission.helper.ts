@@ -21,7 +21,7 @@ export class SpaceMembershipUpdatePermissionHelper {
     return memberships.reduce(
       (acc, membership) => {
         acc[membership.user.getEntity().dxid] = !membership.active
-          ? this.spaceMembershipToPlatformAccessProviderMap['disable'].memberAccess
+          ? this.spaceMembershipToPlatformAccessProviderMap.disable.memberAccess
           : this.spaceMembershipToPlatformAccessProviderMap[membership.role].memberAccess
         return acc
       },

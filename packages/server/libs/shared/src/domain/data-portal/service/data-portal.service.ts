@@ -18,7 +18,6 @@ import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import {
   DataPortalUrlSlugFormatError,
   DataPortalUrlSlugNotUniqueError,
-  InternalError,
   NotFoundError,
   PermissionError,
 } from '@shared/errors'
@@ -30,7 +29,6 @@ import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.e
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
 import { FILE_STATE_DX, PARENT_TYPE } from '../../user-file/user-file.types'
 import { DataPortal } from '../data-portal.entity'
-import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
 import { CreateResourceResponse } from './data-portal.types'
 
 @Injectable()
@@ -278,6 +276,7 @@ export class DataPortalService {
 
   private async findPortalBySlugOrId(
     identifier: string,
+    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
     options: FindOneOptions<DataPortal, any> = {
       populate: ['space.spaceMemberships.user', 'cardImage'],
     },
@@ -287,7 +286,7 @@ export class DataPortalService {
 
     if (!portal && /^\d+$/.test(identifier)) {
       // Data portal not found by url slug -> try to find it by id
-      portal = await this.em.findOne(DataPortal, { id: parseInt(identifier) }, options)
+      portal = await this.em.findOne(DataPortal, { id: parseInt(identifier, 10) }, options)
     }
 
     return portal
@@ -326,6 +325,7 @@ export class DataPortalService {
     ]
 
     for (const property of propertiesToUpdate) {
+      // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
       if (input.hasOwnProperty(property)) {
         portal[property] = input[property]
       }
@@ -452,20 +452,5 @@ export class DataPortalService {
     }
 
     throw new NotFoundError(`DataPortal with identifier ${identifier} was not found`)
-  }
-
-  private getRole(role: SPACE_MEMBERSHIP_ROLE): DATA_PORTAL_MEMBER_ROLE {
-    switch (role) {
-      case SPACE_MEMBERSHIP_ROLE.ADMIN:
-        return DATA_PORTAL_MEMBER_ROLE.ADMIN
-      case SPACE_MEMBERSHIP_ROLE.LEAD:
-        return DATA_PORTAL_MEMBER_ROLE.LEAD
-      case SPACE_MEMBERSHIP_ROLE.VIEWER:
-        return DATA_PORTAL_MEMBER_ROLE.VIEWER
-      case SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR:
-        return DATA_PORTAL_MEMBER_ROLE.CONTRIBUTOR
-      default:
-        throw new InternalError(`Unknown role ${role}`)
-    }
   }
 }

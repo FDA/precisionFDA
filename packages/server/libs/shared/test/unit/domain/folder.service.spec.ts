@@ -297,7 +297,6 @@ describe('FolderService', () => {
     const folderService = new FolderService(em, userContext, folderRepo, nodeHelper, eventHelper)
 
     try {
-      // @ts-ignore
       await folderService.createFoldersOnPath(null, STATIC_SCOPE.PRIVATE, userId)
       expect.fail('Should throw error')
     } catch (err) {

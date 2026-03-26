@@ -8,6 +8,7 @@ import {
   STATUSES,
 } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
+import { DbClusterCountService } from '@shared/domain/db-cluster/service/db-cluster-count.service'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -232,7 +233,7 @@ describe('DbClusterService', () => {
     } as unknown as NotificationService
     const dbClusterCountService = {
       count: stub().resolves(0),
-    } as any
+    } as unknown as DbClusterCountService
 
     return new DbClusterService(em, dbClusterRepo, userContext, notificationService, dbClusterCountService)
   }

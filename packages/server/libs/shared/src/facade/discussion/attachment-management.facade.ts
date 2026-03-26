@@ -36,7 +36,7 @@ export class AttachmentManagementFacade {
 
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
-          `Unable to attach ${res?.uid ?? 'file ' + id}: file not found or is in a wrong scope.`,
+          `Unable to attach ${res?.uid ?? `file ${id}`}: file not found or is in a wrong scope.`,
         )
       }
       const exists = await this.attachmentRepository.findOne({
@@ -77,7 +77,7 @@ export class AttachmentManagementFacade {
       const res = await this.nodeRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
-          `Unable to attach ${res?.uid ?? 'asset ' + id}: asset not found or is in a wrong scope.`,
+          `Unable to attach ${res?.uid ?? `asset ${id}`}: asset not found or is in a wrong scope.`,
         )
       }
       const exists = await this.attachmentRepository.findOne({
@@ -96,7 +96,7 @@ export class AttachmentManagementFacade {
       const res = await this.appRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
-          `Unable to attach app ${res.uid ?? 'app ' + id}: app not found or is in a wrong scope.`,
+          `Unable to attach app ${res.uid ?? `app ${id}`}: app not found or is in a wrong scope.`,
         )
       }
       const exists = await this.attachmentRepository.findOne({
@@ -115,7 +115,7 @@ export class AttachmentManagementFacade {
       const res = await this.jobRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
-          `Unable to attach ${res?.uid ?? 'job ' + id}: job not found or is in a wrong scope.`,
+          `Unable to attach ${res?.uid ?? `job ${id}`}: job not found or is in a wrong scope.`,
         )
       }
       const exists = await this.attachmentRepository.findOne({

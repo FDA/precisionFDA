@@ -7,7 +7,7 @@ import {
   GetUploadURLResponse,
 } from '@shared/platform-client/platform-client.responses'
 import axios from 'axios'
-import { createHash } from 'crypto'
+import { createHash } from 'node:crypto'
 
 @Injectable()
 export class PlatformFileService {

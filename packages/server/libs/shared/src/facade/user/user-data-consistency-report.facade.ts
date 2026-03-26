@@ -319,7 +319,7 @@ export class UserDataConsistencyReportFacade {
       SPACE_MEMBERSHIP_ROLE.LEAD,
     )
     for (const membership of leadMemberships) {
-      let isHostSide = membership.side === SPACE_MEMBERSHIP_SIDE.HOST
+      const isHostSide = membership.side === SPACE_MEMBERSHIP_SIDE.HOST
       for (const space of membership.spaces) {
         const errors: string[] = []
         const projectDxid = isHostSide ? space.hostProject : space.guestProject

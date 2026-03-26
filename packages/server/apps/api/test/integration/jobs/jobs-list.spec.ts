@@ -142,24 +142,6 @@ describe.skip('GET /jobs', () => {
     })
   })
 
-  // TODO
-  it.skip('returns jobs list for different scopes', async () => {
-    const { body } = await supertest(testedApp.getHttpServer())
-      .get('/jobs')
-      .set(getDefaultHeaderData(user1))
-      .query({ scope: HOME_SCOPE.EVERYBODY })
-      .expect(200)
-  })
-
-  // TODO
-  it.skip('returns jobs list for a space', async () => {
-    const { body } = await supertest(testedApp.getHttpServer())
-      .get('/jobs')
-      .set(getDefaultHeaderData(user1))
-      .query({ scope: EntityScopeUtils.getScopeFromSpaceId(space.id) })
-      .expect(200)
-  })
-
   context('error states', () => {
     it('returns 400 when scope is invalid', async () => {
       const badScope = 'foobar'

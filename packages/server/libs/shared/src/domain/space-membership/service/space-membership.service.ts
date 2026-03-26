@@ -174,7 +174,7 @@ export class SpaceMembershipService {
           orgDxid: org,
           id: [newLeadUser.dxid],
         })
-        .then((findResult): Promise<UserInviteToOrgResponse | void> => {
+        .then((findResult): Promise<UserInviteToOrgResponse | undefined> => {
           const results = findResult.results
           return results.length === 0
             ? this.adminClient.inviteUserToOrganization({
@@ -185,7 +185,7 @@ export class SpaceMembershipService {
                   ...this.spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
                 },
               })
-            : Promise.resolve()
+            : Promise.resolve(undefined)
         }),
     )
     await Promise.all(promises)

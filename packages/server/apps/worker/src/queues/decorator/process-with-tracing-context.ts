@@ -8,8 +8,8 @@ export function ProcessWithTracingContext(
   return (descriptor: PropertyDescriptor): PropertyDescriptor => {
     const originalMethod = descriptor.value as (job: Job) => Promise<unknown>
 
-    descriptor.value = function (...args: any[]): Promise<unknown> {
-      const original = originalMethod as (...a: any[]) => Promise<unknown>
+    descriptor.value = function (...args: unknown[]): Promise<unknown> {
+      const original = originalMethod as (...a: unknown[]) => Promise<unknown>
       const job = args[0] as Job | undefined
 
       // If it's not a valid job, bypass tracing immediately

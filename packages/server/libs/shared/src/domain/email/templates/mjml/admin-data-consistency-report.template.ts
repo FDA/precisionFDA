@@ -5,7 +5,7 @@ export type AdminDataConsistencyReportTemplateInput = {
   content: AdminDataConsistencyReportOutput
 }
 
-const createSection = (title: string, count: number | undefined, content: any[]) => {
+const createSection = (title: string, count: number | undefined, content: unknown[]) => {
   return `
     <mj-column width="100%">
       <mj-raw>

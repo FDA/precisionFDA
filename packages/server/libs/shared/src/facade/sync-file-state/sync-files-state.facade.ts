@@ -133,6 +133,7 @@ export class SyncFilesStateFacade {
       // platform API call, which is VERY slow if this is not present
       const openFilesByProject = groupBy((file: FileOrAsset) => file.project, recentClosingFiles)
       for (const projectDxid in openFilesByProject) {
+        // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
         if (openFilesByProject.hasOwnProperty(projectDxid)) {
           const openFilesInProject = openFilesByProject[projectDxid]
           this.logger.log(

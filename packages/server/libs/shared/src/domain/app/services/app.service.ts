@@ -1,16 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 import { ErrorCodes, InvalidStateError, NotFoundError } from '@shared/errors'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { App } from '../app.entity'
 import { AppRepository } from '../app.repository'
 
 @Injectable()
 export class AppService implements SearchableByUid<'app'> {
-  @ServiceLogger()
-  private readonly logger: Logger
-
   constructor(private readonly appRepository: AppRepository) {}
 
   getAccessibleEntityByUid(uid: Uid<'app'>): Promise<App | null> {

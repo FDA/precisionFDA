@@ -82,7 +82,7 @@ describe('licenses for workflow tests', () => {
     const freshWorkflow = await freshEm.findOneOrFail(Workflow, { uid: workflow.uid })
 
     const licenseArrays = await Promise.all(
-      freshWorkflow.spec.input_spec.stages.map(async (stage: any) => {
+      freshWorkflow.spec.input_spec.stages.map(async (stage: unknown) => {
         const app = await freshEm.findOneOrFail(App, { uid: stage.app_uid })
         await app.assets.init()
         const assetIds = app.assets.getItems().map((asset) => asset.id)

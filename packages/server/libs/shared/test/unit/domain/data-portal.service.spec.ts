@@ -23,10 +23,6 @@ import { DataPortalUrlSlugFormatError, NotFoundError, PermissionError } from '@s
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import type { PlatformClient } from '@shared/platform-client'
 import type {
-  FileCreateParams,
-  FileDownloadLinkParams,
-} from '@shared/platform-client/platform-client.params'
-import type {
   ClassIdResponse,
   FileDownloadLinkResponse,
 } from '@shared/platform-client/platform-client.responses'
@@ -98,13 +94,13 @@ describe('DataPortalService', () => {
     await em.flush()
 
     userClient = {
-      async fileDownloadLink(_params: FileDownloadLinkParams): Promise<FileDownloadLinkResponse> {
+      async fileDownloadLink(): Promise<FileDownloadLinkResponse> {
         return { url: 'testingURL' } as FileDownloadLinkResponse
       },
-      async fileCreate(_params: FileCreateParams): Promise<ClassIdResponse> {
+      async fileCreate(): Promise<ClassIdResponse> {
         return { id: FILE_DXID } as ClassIdResponse
       },
-    } as PlatformClient
+    } as unknown as PlatformClient
 
     notificationService = {
       async createNotification(params: NotificationInput): Promise<void> {
@@ -137,7 +133,7 @@ describe('DataPortalService', () => {
     urlSlug: string,
     role: SPACE_MEMBERSHIP_ROLE,
     isSiteAdminUser: boolean = false,
-  ): Promise<{ userId: number; portalId: number }> => {
+  ): Promise<{ userId: number, portalId: number }> => {
     const space = create.spacesHelper.create(em, { name: portalName })
     const internalUser = isSiteAdminUser
       ? create.userHelper.createSiteAdmin(em)

@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 export class SecurityUtils {
   static secureCompare(bufferA: Buffer, bufferB: Buffer): boolean {

@@ -1,4 +1,4 @@
-import { writeHeapSnapshot } from 'v8'
+import { writeHeapSnapshot } from 'node:v8'
 import { bootstrap } from './bootstrap'
 import { log } from './utils/logger'
 

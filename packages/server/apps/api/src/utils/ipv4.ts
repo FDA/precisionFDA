@@ -5,7 +5,7 @@ import { parseIpv4Address } from '@shared/validation/parsers'
 // Predicate - all IP range numbers expected to be in range 0-255
 // TODO(samuel) tuple type should be used instead of array
 export const ipv4QuadrupleToBooleanArray = (ipv4Quadruple: number[]) =>
-  ipv4Quadruple.map((n) => Array.from(n.toString(2).padStart(8)).map((c) => c === '1')).flat()
+  ipv4Quadruple.flatMap((n) => Array.from(n.toString(2).padStart(8)).map((c) => c === '1'))
 
 export const ipv4StringToQuadruple = (ipv4String: string | undefined) => {
   try {
@@ -14,7 +14,6 @@ export const ipv4StringToQuadruple = (ipv4String: string | undefined) => {
     throw new InvalidIpHeaderError(
       `Invalid IPv4 address parsed from '${config.api.nginxIpHeader}' header`,
       {
-        //@ts-ignore
         validationError,
       },
     )

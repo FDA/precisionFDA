@@ -60,6 +60,6 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
   }
 
   private getCommentUrlSegment(comment: DiscussionReplyComment): string {
-    return 'comments/' + comment.id
+    return `comments/${comment.id}`
   }
 }

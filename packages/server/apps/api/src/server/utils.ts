@@ -21,7 +21,7 @@ export const isRequestFromFdaSubnet = (logger: Logger, ipv4Header: string): bool
   // Client IP should be 1st value in provided list
   const ipv4String = ipv4Header.split(',')[0]
   logger.debug({ ip: ipv4String }, 'Processing IP address')
-  let incomingIpv4Bits
+  let incomingIpv4Bits: boolean[]
 
   try {
     incomingIpv4Bits = ipv4QuadrupleToBooleanArray(ipv4StringToQuadruple(ipv4String))

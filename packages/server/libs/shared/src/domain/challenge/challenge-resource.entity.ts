@@ -12,7 +12,7 @@ class ChallengeResource extends BaseEntity {
   url: string
 
   @Property({ type: WorkaroundJsonType })
-  meta: any
+  meta: unknown
 
   @ManyToOne({ entity: () => Challenge })
   challenge: Ref<Challenge>

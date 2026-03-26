@@ -3,15 +3,7 @@ import { AccessControlRepository } from '@shared/database/repository/access-cont
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import { PaginationParams } from '../../types/common'
-import { buildEntityQueryAndFilter } from '../permissions/permissions.filters'
 import { Job } from './job.entity'
-
-// Either find by spaceId or userId
-interface JobsFindPaginatedParams extends PaginationParams {
-  spaceId?: number
-  userId?: number
-}
 
 export class JobRepository extends AccessControlRepository<Job> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Job>> {
@@ -42,23 +34,6 @@ export class JobRepository extends AccessControlRepository<Job> {
         { scope: { $in: scopes } },
       ],
     }
-  }
-  async findPaginated(input: JobsFindPaginatedParams): Promise<[Job[], number]> {
-    // return with users and apps
-    const { page, limit } = input
-    const offset = (page - 1) * limit
-    const [query, filters] = buildEntityQueryAndFilter(input)
-    // test how smart pagination is with the references
-    // N.B. Prefer to populate joins outside this call to make the code cleaner
-    //      e.g. await em.populate(jobs, ['app', 'user'])
-    const [jobs, count] = await this.findAndCount(query, {
-      filters: filters,
-      orderBy: { createdAt: 'DESC' },
-      limit,
-      offset,
-      fields: ['id', 'dxid', 'entityType', 'name', 'scope', 'state'],
-    })
-    return [jobs as Job[], count]
   }
 
   async findAllRunningJobs(): Promise<Job[]> {

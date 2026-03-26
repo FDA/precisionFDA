@@ -1,3 +1,4 @@
+import { RedisClientType } from '@shared/domain/notification/services/notification.service'
 import { createClient } from 'redis'
 import { config } from '../config'
 import { getLogger } from '../logger'
@@ -7,13 +8,13 @@ import { getLogger } from '../logger'
  *
  * @returns
  */
-export const createRedisClient = async (): Promise<any> => {
+export const createRedisClient = async (): Promise<RedisClientType> => {
   const url = new URL(config.redis.url)
 
   try {
     const client = createClient({
       socket: {
-        port: parseInt(url.port),
+        port: parseInt(url.port, 10),
         host: url.hostname,
         ...(config.redis.isSecure && { tls: true as const }),
       },

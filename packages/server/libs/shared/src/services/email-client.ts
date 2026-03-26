@@ -3,10 +3,10 @@ import * as nodemailer from 'nodemailer'
 import { config } from '../config'
 import { getLogger } from '../logger'
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import { EmailSendInput } from '@shared/domain/email/email.config'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 
 const log = getLogger('nodemailer-logger')
 
@@ -21,7 +21,7 @@ class SMTPEmailClient extends EmailClient {
     super()
     const transportConfig: SMTPTransport.Options = {
       host: config.emails.smtp.host,
-      port: parseInt(config.emails.smtp.port) || 0,
+      port: parseInt(config.emails.smtp.port, 10) || 0,
       secure: true,
       auth: {
         user: config.emails.smtp.username,

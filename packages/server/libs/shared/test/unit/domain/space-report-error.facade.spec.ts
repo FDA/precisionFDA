@@ -2,6 +2,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportState } from '@shared/domain/space-report/model/space-report-state.type'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { SpaceReportErrorFacade } from '@shared/facade/space-report/space-report-error.facade'
 import { expect } from 'chai'
@@ -11,7 +12,7 @@ describe('SpaceReportErrorFacade', () => {
   const SPACE_REPORT_ID = 0
   const SPACE_REPORT_CREATOR_ID = 10
 
-  let SPACE_REPORT
+  let SPACE_REPORT: { id: number, state: SpaceReportState, createdBy: { id: number } }
 
   const PART_1_ID = 100
   const PART_1 = { id: PART_1_ID, spaceReport: { id: SPACE_REPORT_ID } }

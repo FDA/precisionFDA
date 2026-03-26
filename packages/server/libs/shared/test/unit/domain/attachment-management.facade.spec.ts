@@ -1,3 +1,9 @@
+import { App } from '@shared/domain/app/app.entity'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { stub } from 'sinon'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { expect } from 'chai'
@@ -23,12 +29,12 @@ describe('AttachmentManagementFacade', () => {
   let note: Note
 
   // attachments
-  let file
-  let folder
-  let asset
-  let app
-  let job
-  let comparison
+  let file: UserFile
+  let folder: Folder
+  let asset: Asset
+  let app: App
+  let job: Job
+  let comparison: Comparison
 
   const SPACE_SCOPE = 'space-123'
 

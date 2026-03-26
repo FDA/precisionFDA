@@ -25,7 +25,6 @@ import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { InvitationService } from '@shared/domain/invitation/services/invitation.service'
 import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { UserManagementService } from '@shared/domain/user/service/user-management.service'
 import { UserService } from '@shared/domain/user/service/user.service'
@@ -39,7 +38,6 @@ import { SiteAdminGuard } from './guards/site-admin.guard'
 @Controller('/admin')
 export class AdminController {
   constructor(
-    private readonly user: UserContext,
     private readonly userService: UserService,
     private readonly invitationService: InvitationService,
     private readonly userManagementService: UserManagementService,

@@ -1,20 +1,19 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { Node } from '@shared/domain/user-file/node.entity'
-import sanitize from 'sanitize-filename'
-import { FILE_STATE_DX, FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { STATIC_SCOPE } from '@shared/enums'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Space } from '@shared/domain/space/space.entity'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { Injectable } from '@nestjs/common'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FILE_STATE_DX, FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { STATIC_SCOPE } from '@shared/enums'
+import sanitize from 'sanitize-filename'
 
 interface FilesByFolder {
   [key: string]: Node[]
@@ -26,8 +25,6 @@ interface FilesByFolder {
  */
 @Injectable()
 export class NodeHelper {
-  @ServiceLogger()
-  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
@@ -252,10 +249,8 @@ export class NodeHelper {
             newName = this.renameFile(name, nameCounts[name])
             nameCounts[name] = nameCounts[name] + 1 || 1 // Increment the count for the original name
           } while (nameCounts[newName])
-          {
             // Ensure the new name is also unique within the folder
             name = newName
-          }
         }
         nameCounts[name] = (nameCounts[name] || 0) + 1 // Initialize or increment the count for the new/unique name
         node.name = name // Update the node's name

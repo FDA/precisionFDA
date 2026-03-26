@@ -449,7 +449,7 @@ export class DbClusterSynchronizeFacade {
       return
     }
 
-    delete platformJobData['sshHostKey']
+    delete platformJobData.sshHostKey
     this.logger.log(
       { platformJobData: platformJobData },
       'Received DbCluster sync job/describe from platform',
@@ -462,7 +462,7 @@ export class DbClusterSynchronizeFacade {
         { remoteState, job: payload.jobDxid, dbCluster: payload.dbClusterUid },
         'Remote DbCluster sync job state is terminal',
       )
-      let msg = []
+      const msg = []
       let syncStatus = DB_SYNC_STATUS.FAILED
       const ws = this.userClient.streamJobLogs(payload.jobDxid)
 
@@ -477,12 +477,12 @@ export class DbClusterSynchronizeFacade {
           const log = JSON.parse(logStr)
           msg.push(log)
 
-          if (log['source'] === 'APP' && log['msg'] === 'Synchronization completed!') {
+          if (log.source === 'APP' && log.msg === 'Synchronization completed!') {
             syncStatus = DB_SYNC_STATUS.COMPLETED
           }
 
           // close signal from platform
-          if (log['source'] === 'SYSTEM' && log['msg'] === 'END_LOG') {
+          if (log.source === 'SYSTEM' && log.msg === 'END_LOG') {
             this.logger.log(
               { job: payload.jobDxid, dbCluster: payload.dbClusterUid, log: msg },
               `Complete log of the DbCluster sync ${payload.jobDxid}`,

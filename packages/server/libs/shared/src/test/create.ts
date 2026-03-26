@@ -400,7 +400,7 @@ const jobHelper = {
     data?: Partial<Job>,
   ): Job => {
     const isHTTPS = references.app?.isHTTPS()
-    const defaults = isHTTPS ? generate.job.simple(references.app!) : generate.job.regular()
+    const defaults = isHTTPS ? generate.job.simple(references.app) : generate.job.regular()
 
     const job = wrap(new Job(references.user, references.app)).assign(
       {

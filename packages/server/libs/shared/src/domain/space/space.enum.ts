@@ -5,7 +5,7 @@ import { PrivateSpaceCreationProcess } from '@shared/domain/space/create/private
 import { GovernmentSpaceCreationProcess } from '@shared/domain/space/create/government-space-creation.process'
 import { AdministratorSpaceCreationProcess } from '@shared/domain/space/create/administrator-space-creation.process'
 
-enum SPACE_TYPE {
+export enum SPACE_TYPE {
   GROUPS = 0,
   REVIEW = 1,
   PRIVATE_TYPE = 3,
@@ -15,16 +15,16 @@ enum SPACE_TYPE {
   VERIFICATION = 2,
 }
 
-type SpaceProcessTypeMap = {
+export type SpaceProcessTypeMap = {
   [SPACE_TYPE.GROUPS]: GroupsSpaceCreationProcess
   [SPACE_TYPE.REVIEW]: ReviewSpaceCreationProcess
   [SPACE_TYPE.PRIVATE_TYPE]: PrivateSpaceCreationProcess
   [SPACE_TYPE.GOVERNMENT]: GovernmentSpaceCreationProcess
   [SPACE_TYPE.ADMINISTRATOR]: AdministratorSpaceCreationProcess
-  [SPACE_TYPE.VERIFICATION]: Object // unused
+  [SPACE_TYPE.VERIFICATION]: object // unused
 }
 
-function getSpaceTypeEnum(key: string): SPACE_TYPE {
+export function getSpaceTypeEnum(key: string): SPACE_TYPE {
   switch (key?.toUpperCase()) {
     case 'GROUPS':
       return SPACE_TYPE.GROUPS
@@ -41,11 +41,9 @@ function getSpaceTypeEnum(key: string): SPACE_TYPE {
   }
 }
 
-enum SPACE_STATE {
+export enum SPACE_STATE {
   UNACTIVATED = 0,
   ACTIVE = 1,
   LOCKED = 2,
   DELETED = 3,
 }
-
-export { getSpaceTypeEnum, SPACE_STATE, SPACE_TYPE, SpaceProcessTypeMap }

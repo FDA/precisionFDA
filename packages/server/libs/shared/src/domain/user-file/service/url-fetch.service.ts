@@ -39,7 +39,7 @@ export class UrlFetchService {
       size,
     })
     this.logger.log(
-      `Generated upload URL for fileDxId: ${fileDxid}` + JSON.stringify(uploadUrlResponse),
+      `Generated upload URL for fileDxId: ${fileDxid}${JSON.stringify(uploadUrlResponse)}`,
     )
     return uploadUrlResponse
   }

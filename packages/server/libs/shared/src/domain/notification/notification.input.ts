@@ -1,7 +1,7 @@
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { NotificationMeta } from './notification.entity'
 
-type NotificationInput = {
+export type NotificationInput = {
   id?: number
   action: NOTIFICATION_ACTION
   message: string
@@ -11,5 +11,3 @@ type NotificationInput = {
   deliveredAt?: Date
   userId?: number
 }
-
-export { NotificationInput }

@@ -30,7 +30,7 @@ export class AppProvenanceDataService extends EntityProvenanceDataService<'app'>
     }))
   }
 
-  async getChildren(source: App): Promise<EntityProvenanceSourceUnion[]> {
+  async getChildren(): Promise<EntityProvenanceSourceUnion[]> {
     return []
   }
 }

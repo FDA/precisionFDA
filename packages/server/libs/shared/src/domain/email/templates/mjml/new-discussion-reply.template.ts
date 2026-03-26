@@ -17,7 +17,7 @@ export const newDiscussionReplyTemplate = (data: DiscussionEmailInput): string =
   <mj-section css-class="body-section">
     <mj-column width="100%">
       <mj-text>
-<p>As a member of precisionFDA${data.spaceName ? ' space ' + data.spaceName : ''}, you are receiving this notification because a fellow member has posted a new discussion reply${data.spaceName ? ' in this space' : ''} that they would like you to read or that you are following.</p>      </mj-text>
+<p>As a member of precisionFDA${data.spaceName ? ` space ${data.spaceName}` : ''}, you are receiving this notification because a fellow member has posted a new discussion reply${data.spaceName ? ' in this space' : ''} that they would like you to read or that you are following.</p>      </mj-text>
       </mj-text>
       <mj-button
         background-color="#1F70B5"

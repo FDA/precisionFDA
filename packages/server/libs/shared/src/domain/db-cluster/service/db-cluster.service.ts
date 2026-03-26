@@ -201,7 +201,7 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
     const searchTerm = text.toString().toLowerCase()
 
     return Object.keys(enumObj)
-      .filter((key) => isNaN(Number(key)))
+      .filter((key) => Number.isNaN(Number(key)))
       .filter((key) => key.toLowerCase().includes(searchTerm))
       .map((key) => enumObj[key as keyof typeof enumObj])
       .map(Number)

@@ -36,7 +36,7 @@ export class CliFileDescribeDTO {
   id: string
   state: string
   class: string
-  properties: {}
+  properties: object
   content?: string[]
 
   static async fromEntity(
@@ -60,7 +60,7 @@ export class CliFileDescribeDTO {
     }
 
     if (file.isAsset) {
-      let assetFile = file as Asset
+      const assetFile = file as Asset
       await assetFile.archiveEntries.loadItems()
       response = {
         ...response,
@@ -183,7 +183,7 @@ export class CliDbClusterDescribeDTO {
   host: string
   port: string
   tags: string[]
-  properties: {}
+  properties: object
 
   static fromEntity(
     platformDbClusterData: DbClusterDescribeResponse,

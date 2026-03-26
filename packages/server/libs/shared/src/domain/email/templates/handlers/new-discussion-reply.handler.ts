@@ -107,7 +107,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
     }
 
     return Array.from(new Set(users.map((user) => user.id))).map(
-      (id) => users.find((user) => user.id === id)!,
+      (id) => users.find((user) => user.id === id),
     )
   }
 

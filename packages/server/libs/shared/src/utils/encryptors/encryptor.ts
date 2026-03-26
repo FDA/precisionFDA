@@ -1,5 +1,5 @@
 import { config } from '@shared/config'
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 type RailsToken = {
   _rails: {

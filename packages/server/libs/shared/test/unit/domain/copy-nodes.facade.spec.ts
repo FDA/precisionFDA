@@ -472,7 +472,7 @@ describe('CopyNodesFacade', () => {
       spaceEventService,
       spaceMembershipRepo,
     )
-    ;(service as any).logger = {
+    ;(service as unknown as { logger: object }).logger = {
       log: loggerLogStub,
       error: loggerErrorStub,
       warn: stub(),

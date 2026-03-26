@@ -25,7 +25,7 @@ export type WorkstationAPIResponse = {
   error?: string | object
 }
 
-interface IWorkstationClient {
+export interface IWorkstationClient {
   apiVersion: string
   oauthAccess(authToken: string): Promise<AxiosResponse>
   alive(): Promise<boolean>
@@ -47,7 +47,7 @@ const USER_AGENT =
 // A design choice here is to keep this class as isolated as possible from other precisionFDA code
 // as we may want to package it to be used by scripts or other clients
 //
-class WorkstationClient implements IWorkstationClient {
+export class WorkstationClient implements IWorkstationClient {
   private readonly logger: Logger
   // Axios instance must be passed in, to inherit the same session and cookies from PlatformAuthClient
   private readonly axiosInstance: AxiosInstance
@@ -117,6 +117,7 @@ class WorkstationClient implements IWorkstationClient {
     }
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
   private async extractWorkstationCookie(response: any): Promise<string | null> {
     const jar = response.config.jar as CookieJar
     const cookies = await jar.getCookies(this.workstationUrl)
@@ -244,8 +245,9 @@ class WorkstationClient implements IWorkstationClient {
     }
   }
 
-  protected maskRequestData(data: any): void {
-    return data && data.Key ? { ...data, Key: '[masked]' } : data
+  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
+  protected maskRequestData(data: any): any {
+    return data?.Key ? { ...data, Key: '[masked]' } : data
   }
 
   protected logClientRequest(options: AxiosRequestConfig): void {
@@ -273,9 +275,11 @@ class WorkstationClient implements IWorkstationClient {
   }
 
   protected handleFailed(
+    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
     err: any,
     customErrorThrower?: (statusCode: number, errorType: string, errorMessage: string) => void,
-  ): any {
+    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
+    ): any {
     if (err.response) {
       const statusCode = err.response.status
       const errorType = err.response.data?.error?.type || 'Server Error'
@@ -295,5 +299,3 @@ class WorkstationClient implements IWorkstationClient {
     }
   }
 }
-
-export { IWorkstationClient, WorkstationClient }

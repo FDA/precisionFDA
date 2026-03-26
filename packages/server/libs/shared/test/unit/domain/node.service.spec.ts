@@ -9,6 +9,8 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
+import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
+import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { nodeQueryFilter } from '@shared/domain/user-file/user-file.input'
 import {
@@ -21,7 +23,7 @@ import { UserRepository } from '@shared/domain/user/user.repository'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
 import { expect } from 'chai'
-import { stub } from 'sinon'
+import { stub, SinonStub } from 'sinon'
 import { SCOPE } from '@shared/types/common'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { FolderService } from '@shared/domain/user-file/folder.service'
@@ -35,8 +37,8 @@ describe('NodeService', () => {
   const nodeRepositoryFindAccessibleStub = stub()
   const spaceRepositoryFindOneStub = stub()
   const nodeHelperCollectChildrenStub = stub()
-  let referenceStub
-  let defaultUser = { id: 1, isSiteAdmin: () => false } as unknown as User
+  let referenceStub: SinonStub
+  const defaultUser = { id: 1, isSiteAdmin: () => false } as unknown as User
 
   const createNodeService = (user: User): NodeService => {
     const em = {
@@ -62,10 +64,10 @@ describe('NodeService', () => {
     const userCtx = { id: user.id } as unknown as UserContext
     const fileCountService = {
       count: stub().resolves(0),
-    } as any
+    } as unknown as FileCountService
     const assetCountService = {
       count: stub().resolves(0),
-    } as any
+    } as unknown as AssetCountService
     return new NodeService(
       em,
       userCtx,

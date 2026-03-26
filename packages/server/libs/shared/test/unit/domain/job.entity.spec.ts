@@ -46,7 +46,6 @@ describe('Job entity tests', () => {
         run_inputs: {},
         run_outputs: {},
       },
-      // @ts-ignore
       describe: {
         httpsApp: {
           dns: {

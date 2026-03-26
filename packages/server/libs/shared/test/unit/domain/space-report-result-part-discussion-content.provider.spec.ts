@@ -151,7 +151,6 @@ describe('SpaceReportResultPartDiscussionHtmlContentProvider', () => {
 
   it('should include answered text', async () => {
     const res = await getInstance().provide(REPORT_PART, TITLE_ID)
-    const a = `${ANSWER_CREATED_BY} started the discussion on ${ANSWER_CREATED_AT.toLocaleString()}`
     expect(res.textContent).to.include(
       `${ANSWER_CREATED_BY} answered on ${ANSWER_CREATED_AT.toLocaleString()}`,
     )

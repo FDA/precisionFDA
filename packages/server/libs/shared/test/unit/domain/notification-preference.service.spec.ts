@@ -1,11 +1,15 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { User } from '@shared/domain/user/user.entity'
 import chai, { expect } from 'chai'
 import dirtyChai from 'dirty-chai'
 import { SinonStub, stub } from 'sinon'
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '@shared/domain/notification-preference/notification-preference.config'
 import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { NotificationPreferenceRepository } from '@shared/domain/notification-preference/notification-preference.repository'
-import { NotificationPreferenceService } from '@shared/domain/notification-preference/notification-preference.service'
+import {
+  NotificationPreferenceService,
+  PreferenceKey,
+} from '@shared/domain/notification-preference/notification-preference.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 chai.use(dirtyChai)
@@ -90,7 +94,7 @@ describe('NotificationPreferenceService', () => {
     it('should default missing keys to false', async () => {
       // Simulate a stored record missing some keys (e.g. newly added preference)
       const partialData = { ...DEFAULT_NOTIFICATION_PREFERENCES }
-      delete (partialData as Record<string, unknown>)['private_job_stale']
+      delete (partialData as Record<string, unknown>).private_job_stale
 
       const pref = { data: partialData } as unknown as NotificationPreference
       findOneStub.resolves(pref)
@@ -171,7 +175,7 @@ describe('NotificationPreferenceService', () => {
       const service = getInstance()
       await service.updatePreferences({
         totally_fake_key: true,
-      } as any)
+      } as Partial<Record<PreferenceKey, boolean>>)
 
       // Should not have added the fake key
       expect(pref.data).to.not.have.property('totally_fake_key')
@@ -182,7 +186,7 @@ describe('NotificationPreferenceService', () => {
       const newPref = { data: { ...DEFAULT_NOTIFICATION_PREFERENCES } } as unknown as NotificationPreference
 
       const service = getInstance()
-      stub(service as any, 'findOrCreateForCurrentUser').resolves(newPref)
+      stub(service, 'findOrCreateForCurrentUser').resolves(newPref)
 
       await service.updatePreferences({
         private_job_finished: true,
@@ -205,7 +209,7 @@ describe('NotificationPreferenceService', () => {
 
     const user = {
       id: USER_ID,
-      loadEntity: stub().resolves({ id: USER_ID } as any),
+      loadEntity: stub().resolves({ id: USER_ID } as User),
     } as unknown as UserContext
 
     return new NotificationPreferenceService(em, user, repo)

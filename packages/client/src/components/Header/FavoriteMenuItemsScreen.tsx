@@ -1,8 +1,7 @@
-import React from 'react'
 import {
   closestCenter,
   DndContext,
-  DragEndEvent,
+  type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -16,11 +15,12 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import type { ReactNode } from 'react'
 import styled from 'styled-components'
 import { useAuthUser } from '@/features/auth/useAuthUser'
 import { TransparentButton } from '../Button'
 import { StarIcon } from '../icons/StarIcon'
-import { SiteNavItemType } from './NavItems'
+import type { SiteNavItemType } from './NavItems'
 import { HeaderItemText, IconWrap } from './styles'
 import { useUpdateFavoritesMutation } from './useNavFavorites'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
@@ -68,7 +68,7 @@ export const StyledFavorites = styled.div`
   padding: 4px var(--modal-padding-LR);
 `
 
-const SiteNavItem = (props: { item: SiteNavItemType; onClick: () => void; children: React.ReactNode }) => {
+const SiteNavItem = (props: { item: SiteNavItemType; onClick: () => void; children: ReactNode }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: props.item.id })
 
   return (

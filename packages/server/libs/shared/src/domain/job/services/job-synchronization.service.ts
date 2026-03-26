@@ -75,8 +75,8 @@ export class JobSynchronizationService {
     return `${TASK_TYPE.SYNC_JOB_STATUS}.${jobDxid}`
   }
 
-  static getJobDxidFromBullJobId(bullJobId: string): string {
-    return bullJobId.replace('sync_job_status.', '')
+  static getJobDxidFromBullJobId(bullJobId: string): DxId<'job'> {
+    return bullJobId.replace('sync_job_status.', '') as DxId<'job'>
   }
 
   /**
@@ -204,7 +204,7 @@ export class JobSynchronizationService {
     }
 
     // TODO(samuel) this shoudl be part of platform client
-    delete platformJobData['sshHostKey']
+    delete platformJobData.sshHostKey
     this.logger.log({ platformJobData: platformJobData }, 'Received job/describe from platform')
 
     const isOverNotifyMaxDuration = buildIsOverMaxDuration('notify')

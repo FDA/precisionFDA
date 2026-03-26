@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common'
 import { InvalidStateError } from '@shared/errors'
 import { getJobStatusMessageWithElapsedTime } from '@shared/queue/queue.utils'
-import { Task } from '@shared/queue/task.input'
+import { Task, TaskWithAuth } from '@shared/queue/task.input'
 import { Job, JobOptions, Queue } from 'bull'
 import { context, propagation } from '@opentelemetry/api'
 
@@ -13,7 +13,7 @@ export abstract class QueueJobProducer {
   protected async addToQueue<T extends Task>(
     task: T,
     options?: JobOptions,
-    payloadFn?: (payload: any) => any,
+    payloadFn?: (payload: unknown) => unknown,
   ): Promise<Job<T>> {
     this.validateQueue()
 
@@ -51,6 +51,7 @@ export abstract class QueueJobProducer {
       // Do not allow a second job to be added to the queue
       const existingJob = await this.queue.getJob(jobId)
       if (existingJob) {
+        // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
         const errorMessage = existingJob.hasOwnProperty('getState')
           ? await getJobStatusMessageWithElapsedTime(existingJob, task.type)
           : `Job with id ${jobId} already exists in queue`
@@ -70,8 +71,8 @@ export abstract class QueueJobProducer {
     return {
       type: task.type,
       // TODO(samuel) fix
-      payload: whitelistPayloadFn((task as any).payload),
-      userId: (task as any)?.user?.id,
+      payload: whitelistPayloadFn((task as TaskWithAuth).payload),
+      userId: (task as TaskWithAuth)?.user?.id,
     }
   }
 

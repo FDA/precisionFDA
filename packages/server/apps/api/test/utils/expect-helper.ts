@@ -5,7 +5,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { CSRFUtils } from '@shared/utils/csrf.utils'
 import { Encryptor } from '@shared/utils/encryptors/encryptor'
 import { TimeUtils } from '@shared/utils/time.utils'
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import { omit } from 'ramda'
 
 const stripEntityDates = (entity: BaseEntity): Omit<BaseEntity, 'createdAt' | 'updatedAt'> => {

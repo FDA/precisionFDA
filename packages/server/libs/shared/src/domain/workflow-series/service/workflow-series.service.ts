@@ -1,12 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { Injectable } from '@nestjs/common'
 import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 import { WorkflowSeriesCountService } from '@shared/domain/workflow-series/workflow-series-count.service'
 
 @Injectable()
 export class WorkflowSeriesService {
-  @ServiceLogger()
-  private readonly logger: Logger
 
   constructor(private readonly workflowSeriesCountService: WorkflowSeriesCountService) {}
 

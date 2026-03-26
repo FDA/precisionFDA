@@ -64,12 +64,12 @@ describe('FolderRepository tests', () => {
 
   it('findForUser', async () => {
     const repo: FolderRepository = em.getRepository(Folder)
-    let result1 = await repo.findForUser({ userId: user1.id })
+    const result1 = await repo.findForUser({ userId: user1.id })
     expect(result1).to.have.length(2)
     expect(result1[0].name).to.equal('user1_folder1')
     expect(result1[1].name).to.equal('user1_folder2')
 
-    let result2 = await repo.findForUser({ userId: user2.id })
+    const result2 = await repo.findForUser({ userId: user2.id })
     expect(result2).to.have.length(2)
     expect(result2[0].name).to.equal('user2_folder1')
     expect(result2[1].name).to.equal('user2_folder2')

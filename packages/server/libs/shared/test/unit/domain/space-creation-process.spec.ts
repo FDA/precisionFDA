@@ -24,7 +24,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import * as generate from '@shared/test/generate'
 import { expect } from 'chai'
-import { stub } from 'sinon'
+import { stub, SinonStub } from 'sinon'
 
 describe('space creation process tests', () => {
   const SHARED_SPACE_ID = 2
@@ -41,7 +41,7 @@ describe('space creation process tests', () => {
   let spaceNotificationService: SpaceNotificationService
   let taggingService: TaggingService
   let userRepository: UserRepository
-  let referenceStub
+  let referenceStub: SinonStub
 
   const createOrgStub = stub()
   const inviteUserToOrgStub = stub()
@@ -602,7 +602,7 @@ describe('space creation process tests', () => {
         }
       })
       addTaggingForEntityStub.reset()
-      emCreateStub.callsFake((entityClass, entityData) => entityData)
+      emCreateStub.callsFake((_entityClass, entityData) => entityData)
       emPopulateStub.resolves({})
       createOrgStub.callsFake((handle) => {
         if (handle.includes('guest')) {

@@ -44,6 +44,7 @@ export class IsEmailInputValidConstraint implements ValidatorConstraintInterface
     return true
   }
 
+  // biome-ignore-start lint/complexity/useLiteralKeys: Should be fixed
   defaultMessage(args: ValidationArguments) {
     const object = args.object as TypedEmailBodyDto
     const type = object.type
@@ -52,6 +53,7 @@ export class IsEmailInputValidConstraint implements ValidatorConstraintInterface
       : ''
     return `Email Input does not satisfy constraints for the provided type "${type}"${additionalErrors}`
   }
+  // biome-ignore-end lint/complexity/useLiteralKeys: Should be fixed
 }
 
 export function IsEmailInputValid(validationOptions?: ValidationOptions) {

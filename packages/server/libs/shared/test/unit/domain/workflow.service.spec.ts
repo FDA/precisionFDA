@@ -1,9 +1,10 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
 import { App } from '@shared/domain/app/app.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
+import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
 
 describe('WorkflowService', () => {
   const APP_1_UID = 'app 1 uid'
@@ -101,11 +102,8 @@ describe('WorkflowService', () => {
     const em = {
       find: findStub,
     } as unknown as SqlEntityManager
-    const workflowRepository = {} as any
-    const workflowCountService = {
-      count: stub().resolves(0),
-    } as any
+    const workflowRepository = {} as unknown as WorkflowRepository
 
-    return new WorkflowService(em, workflowRepository, workflowCountService)
+    return new WorkflowService(em, workflowRepository)
   }
 })

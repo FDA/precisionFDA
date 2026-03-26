@@ -12,7 +12,7 @@ import { Logger } from '@nestjs/common'
  * }
  */
 export function ServiceLogger() {
-  return function (target: object, propertyKey: string | symbol): any {
+  return function (target: object, propertyKey: string | symbol): void {
     let value: Logger
 
     Object.defineProperty(target, propertyKey, {

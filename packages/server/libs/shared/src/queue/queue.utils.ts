@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { Job, JobInformation, Queue } from 'bull'
+import { Job, JobInformation, Queue, JobStatusClean, JobStatus } from 'bull'
 import { removeRepeatableJob } from '.'
 import { formatDuration } from '../utils/format'
 
@@ -51,7 +51,7 @@ const clearOrphanedRepeatableJobs = async (queue: Queue): Promise<JobInformation
 }
 
 // state: Any valid bull queue state like 'failed' or 'completed'
-const clearJobs = async (q: Queue, state: any, log: Logger): Promise<Job[]> => {
+const clearJobs = async (q: Queue, state: JobStatusClean & JobStatus, log: Logger): Promise<Job[]> => {
   const jobs = await q.getJobs([state])
   const count = jobs.length
   if (count > 0) {
@@ -65,7 +65,7 @@ const clearJobs = async (q: Queue, state: any, log: Logger): Promise<Job[]> => {
   return jobs
 }
 
-const clearFailedJobs = async (q: Queue, log: Logger): Promise<any> => {
+const clearFailedJobs = async (q: Queue, log: Logger): Promise<Job[]> => {
   return await clearJobs(q, 'failed', log)
 }
 

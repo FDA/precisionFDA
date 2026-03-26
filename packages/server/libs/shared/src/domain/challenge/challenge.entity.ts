@@ -77,8 +77,4 @@ export class Challenge extends ScopedEntity {
 
   @OneToMany({ entity: () => ChallengeResource, mappedBy: 'challenge', orphanRemoval: true })
   challengeResources = new Collection<ChallengeResource>(this)
-
-  constructor() {
-    super()
-  }
 }

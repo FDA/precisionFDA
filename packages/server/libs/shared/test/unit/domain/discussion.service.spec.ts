@@ -12,6 +12,7 @@ import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discus
 import { CreateReplyDTO } from '@shared/domain/discussion/dto/create-reply.dto'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { UpdateReplyDTO } from '@shared/domain/discussion/dto/update-reply.dto'
+import { DiscussionCountService } from '@shared/domain/discussion/services/discussion-count.service'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
@@ -69,7 +70,7 @@ describe('DiscussionService tests', () => {
 
     const discussionCountService = {
       count: stub().resolves(0),
-    } as any
+    } as unknown as DiscussionCountService
     discussionService = new DiscussionService(
       em,
       userContext,
@@ -348,7 +349,7 @@ describe('DiscussionService tests', () => {
 
     const discussionCountService = {
       count: stub().resolves(0),
-    } as any
+    } as unknown as DiscussionCountService
     discussionService = new DiscussionService(
       em,
       adminUserCtx,

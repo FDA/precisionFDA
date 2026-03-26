@@ -1,9 +1,29 @@
 {
-  "eslint.workingDirectories": ["./packages/server", "./packages/client"],
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": true,
+  "editor.tabSize": 2,
+  "editor.defaultFormatter": "biomejs.biome",
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit"
+  },
+  "biome.enabled": true,
+  "biome.requireConfiguration": true,
+  "biome.lsp.bin": "./node_modules/@biomejs/biome/bin/biome",
   "markdown.preview.scrollPreviewWithEditor": false,
-  // Debug settings
   "debug.openDebug": "openOnDebugBreak",
   "debug.internalConsoleOptions": "openOnSessionStart",
   "workbench.colorCustomizations": {
@@ -12,5 +32,37 @@
     "titleBar.activeForeground": "#FAFBF8",
     "titleBar.inactiveBackground": "#05304E",
     "titleBar.inactiveForeground": "#F8FCFF"
-  }
+  },
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/.next/**": true,
+    "**/packs/**": true,
+    "**/.pnpm-store/**": true,
+    "**/.turbo/**": true,
+    "**/coverage/**": true,
+    "**/dist/**": true,
+    "**/log/**": true,
+    "**/node_modules/**": true,
+    "**/storage/**": true,
+    "**/tmp/**": true,
+    "**/vendor/**": true
+  },
+  "search.exclude": {
+    "**/.next": true,
+    "**/packs/**": true,
+    "**/.pnpm-store": true,
+    "**/.turbo": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/log": true,
+    "**/node_modules": true,
+    "**/storage": true,
+    "**/tmp": true,
+    "**/vendor": true
+  },
+  "files.exclude": {
+    "**/.pnpm-store": true
+  },
+  "typescript.updateImportsOnFileMove.enabled": "prompt",
+  "javascript.updateImportsOnFileMove.enabled": "prompt"
 }

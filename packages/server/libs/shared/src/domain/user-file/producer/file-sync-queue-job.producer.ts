@@ -29,7 +29,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
       user,
     }
     const options: JobOptions = {
-      jobId: `${wrapped.type}.${user.dxuser}-${+new Date()}`,
+      jobId: `${wrapped.type}.${user.dxuser}-${Date.now()}`,
     }
     return await this.addToQueue(wrapped, options)
   }
@@ -50,7 +50,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
       user,
     }
     const options: JobOptions = {
-      jobId: `${wrapped.type}.${user.dxuser}-${+new Date()}`,
+      jobId: `${wrapped.type}.${user.dxuser}-${Date.now()}`,
     }
     return await this.addToQueue(wrapped, options)
   }
@@ -62,7 +62,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
       user,
     }
     const options: JobOptions = {
-      jobId: `${wrapped.type}.${user.dxuser}-${+new Date()}`,
+      jobId: `${wrapped.type}.${user.dxuser}-${Date.now()}`,
     }
     return await this.addToQueue(wrapped, options)
   }
@@ -74,7 +74,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
       user,
     }
     const options: JobOptions = {
-      jobId: `${wrapped.type}.${user.dxuser}-${+new Date()}`,
+      jobId: `${wrapped.type}.${user.dxuser}-${Date.now()}`,
     }
     return await this.addToQueue(wrapped, options)
   }
@@ -85,7 +85,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
       user: this.user,
     }
     const options: JobOptions = {
-      jobId: `${wrapped.type}.${this.user.dxuser}-${+new Date()}`,
+      jobId: `${wrapped.type}.${this.user.dxuser}-${Date.now()}`,
     }
     return await this.addToQueue(wrapped, options)
   }

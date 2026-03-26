@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { EntityService } from '@shared/domain/entity/entity.service'
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
 import DOMPurify from 'isomorphic-dompurify'
 import { JSDOM } from 'jsdom'
-import path from 'path'
+import path from 'node:path'
 import { EntityProvenance } from '../../model/entity-provenance'
 import { EntityProvenanceSvgOptions } from '../../model/entity-provenance-svg-options'
 import { EntityProvenanceResultTransformerService } from './entity-provenance-result-transformer.service'
@@ -133,7 +133,7 @@ export class EntityProvenanceSvgResultTransformerService
       g.selectAll('foreignObject.node').classed('pixelated', true)
     }
 
-    return DOMPurify.sanitize(dom.window.document.querySelector('svg.canvas')!.outerHTML, {
+    return DOMPurify.sanitize(dom.window.document.querySelector('svg.canvas').outerHTML, {
       ADD_TAGS: ['foreignObject'],
       ADD_ATTR: ['target'],
       HTML_INTEGRATION_POINTS: {'foreignobject': true},

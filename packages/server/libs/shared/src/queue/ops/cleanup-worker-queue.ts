@@ -10,6 +10,7 @@ import { TASK_TYPE } from '../task.input'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 // Clean up the bull queue
+// biome-ignore lint/suspicious/noExplicitAny: Should be fixed
 export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => {
   const now = Date.now()
 
@@ -22,7 +23,9 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
   const repeatableJobs = await mainQueue.getRepeatableJobs()
 
   const jobRepo = em.getRepository(Job)
+  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
   const removedRepeatableJobs: any[] = []
+  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
   const possiblyExpiredJobs: any[] = []
   for (const job of repeatableJobs) {
     const timeSinceNext = now - job.next
@@ -106,21 +109,6 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
     failedFileSyncJobs,
     failedEmailJobs,
   }
-}
-
-// state: Any valid bull queue state like 'failed' or 'completed'
-const clearJobs = async (q: any, state: any, log: any): Promise<any> => {
-  const jobs = await q.getJobs(state)
-  const count = jobs.length
-  if (count > 0) {
-    log.log({ jobs }, `Removing ${state} jobs from ${q.name}`)
-    q.clean(0, state);
-    log.log({ count }, `Removed ${count} ${state} jobs from ${q.name}`)
-  }
-  else {
-    log.log(`No ${state} jobs in ${q.name}`)
-  }
-  return jobs
 }
 
 // For use in the worker

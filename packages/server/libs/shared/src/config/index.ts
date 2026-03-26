@@ -1,7 +1,7 @@
 import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { parseEnumValueFromString } from '@shared/validation/parsers'
 import { default as dotenv } from 'dotenv'
-import path from 'path'
+import path from 'node:path'
 import { mergeDeepRight } from 'ramda'
 import { ENVS } from '../enums'
 import { DeepPartial } from '../types'
@@ -17,7 +17,7 @@ export const parseIntFromProcess = (envValue: string | undefined): Maybe<number>
   // TODO(samuel) validate that this is not undefined
   if (envValue) {
     const value = parseInt(envValue, 10)
-    return isNaN(value) ? null : value
+    return Number.isNaN(value) ? null : value
   }
   return null
 }
@@ -256,6 +256,7 @@ const defaultConfig = {
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV
+// biome-ignore lint/performance/noDynamicNamespaceImportAccess: legacy env to be rewritten
 const envOverride = overrides[env] ? overrides[env]() : {}
 const config = mergeDeepRight(defaultConfig, envOverride) as typeof defaultConfig
 Object.freeze(config)

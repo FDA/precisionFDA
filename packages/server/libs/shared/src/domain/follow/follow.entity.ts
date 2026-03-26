@@ -15,10 +15,4 @@ export class Follow extends BaseEntity {
 
   @Property()
   blocked: boolean
-
-  constructor() {
-    super()
-    // this.followableId = Reference.create(discussion).id
-    // this.followableType = 'Discussion'
-  }
 }

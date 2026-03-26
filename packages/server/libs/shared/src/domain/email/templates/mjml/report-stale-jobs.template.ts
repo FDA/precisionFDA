@@ -67,7 +67,7 @@ export const reportStaleJobsTemplate = (data: ReportStaleJobsTemplateInput): str
           <mj-divider border-width="1px" border-color="lightgrey" padding-top="24px" padding-bottom="24px" />
           `,
         )}
-        <mj-text>Jobs are stale after ${parseInt(data.content.maxDuration) / (60 * 60 * 24)} days</mj-text>
+        <mj-text>Jobs are stale after ${parseInt(data.content.maxDuration, 10) / (60 * 60 * 24)} days</mj-text>
       </mj-column>
     </mj-section>
   ${footer}

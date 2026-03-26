@@ -7,7 +7,7 @@ import { ProvisionUsersDTO } from '@shared/domain/invitation/dto/provision-users
 import { InvalidStateError } from '@shared/errors'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { StringUtils } from '@shared/utils/string.utils'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import { InvitationPaginationDTO } from '../dto/invitation-pagination.dto'
 import { RequestAccessDTO } from '../dto/request-access.dto'
 import { Extras, Invitation } from '../invitation.entity'

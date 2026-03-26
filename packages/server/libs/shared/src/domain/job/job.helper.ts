@@ -26,7 +26,7 @@ export const buildIsOverMaxDuration = (
       ? config.workerJobs.syncJob.staleJobsTerminateAfter
       : config.workerJobs.syncJob.staleJobsEmailAfter
   const maxDuration = Duration.fromObject({
-    seconds: typeof seconds === 'string' ? parseInt(seconds) : seconds,
+    seconds: typeof seconds === 'string' ? parseInt(seconds, 10) : seconds,
   })
   const current = DateTime.now()
   return (job: Job): boolean => {

@@ -1,4 +1,5 @@
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { isString } from '@nestjs/common/utils/shared.utils'
 import { UidUtils } from '@shared/utils/uid.utils'
 import {
   registerDecorator,
@@ -11,14 +12,18 @@ import { DXEntityType, DXEntities } from '../domain/dxid'
 
 @ValidatorConstraint({ async: true })
 class IsValidEntityIdentifierConstraint implements ValidatorConstraintInterface {
-  async validate(value: any, args: ValidationArguments) {
+  async validate(value: unknown, args: ValidationArguments) {
+    if (!isString(value)) {
+      return false
+    }
+
     let entityType: EntityType = args.constraints[0]
     if (!entityType) {
       entityType = value.split('-')[0] as EntityType
     }
 
-    return (DXEntities as ReadonlyArray<string>).includes(entityType)
-      ? UidUtils.isValidUId(value, entityType as DXEntityType)
+    return this.isDxEntityType(entityType)
+      ? UidUtils.isValidUId(value, entityType)
       : new RegExp(`^${entityType}-\\d+$`).test(value)
   }
 
@@ -31,6 +36,10 @@ class IsValidEntityIdentifierConstraint implements ValidatorConstraintInterface 
     }
 
     return `${message} for entity type "${entityType}"`
+  }
+
+  private isDxEntityType(value: string): value is DXEntityType {
+    return DXEntities.includes(value as DXEntityType)
   }
 }
 

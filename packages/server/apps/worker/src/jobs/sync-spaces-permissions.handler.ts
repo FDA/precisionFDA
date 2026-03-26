@@ -10,8 +10,7 @@ export const syncSpacesPermissionsHandler = async (bullJob: Job<SyncSpacesPermis
   const log = getChildLogger(requestId)
 
   const ctx = {
-    // TODO(samuel) fix by declaration merging
-    em: database.orm().em.fork() as any,
+    em: database.orm().em.fork(),
     log,
     user: data.user,
     job: bullJob,

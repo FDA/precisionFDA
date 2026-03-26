@@ -136,7 +136,7 @@ const mocksSetDefaultBehaviour = (): void => {
   fakes.client.appPublishFake.callsFake(() => ({ id: generate.app.appId() }))
   fakes.client.appDescribeFake.callsFake((appDxId) => ({
     id: appDxId,
-    name: 'app-name-' + appDxId,
+    name: `app-name-${appDxId}`,
     inputSpec: [],
     outputSpec: [],
     runSpec: [],

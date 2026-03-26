@@ -205,7 +205,7 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
   async function getResultSvg(options?: EntityProvenanceSvgOptions) {
     return new JSDOM(
       await getInstance().transform(PROVENANCE, options),
-    ).window.document.querySelector('svg')!
+    ).window.document.querySelector('svg')
   }
 
   function getInstance() {

@@ -97,7 +97,7 @@ export class DbCluster extends ScopedEntity {
   }
 
   elapsedTimeSinceCreation(): number {
-    return new Date().getTime() - this.createdAt.getTime()
+    return Date.now() - this.createdAt.getTime()
   }
 
   elapsedTimeSinceCreationString(): string {

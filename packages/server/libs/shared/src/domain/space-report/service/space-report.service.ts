@@ -138,7 +138,7 @@ export class SpaceReportService {
       state: { $ne: 'DONE' },
     })
 
-    return !Boolean(notDoneTask)
+    return !notDoneTask
   }
 
   async completeReportForResultFile(resultFileUid: Uid<'file'>) {

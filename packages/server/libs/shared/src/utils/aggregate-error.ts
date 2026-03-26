@@ -34,10 +34,11 @@ type AggregatedErrorEntry = {
   path: JsonPath
 }
 
-const resolveSchemaEffectsVisitor = <SchemaT extends any>(
+const resolveSchemaEffectsVisitor = <SchemaT>(
   schema: SchemaT,
   caughtErrors: AggregatedErrorEntry[],
   path: Array<string | number>,
+  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
 ): any => {
   if (typeof schema === 'function') {
     try {
@@ -57,7 +58,7 @@ const resolveSchemaEffectsVisitor = <SchemaT extends any>(
   }
   if (typeof schema === 'object') {
     return Object.fromEntries(
-      Object.entries(schema as any).map(([key, value]) => [
+      Object.entries(schema).map(([key, value]) => [
         key,
         resolveSchemaEffectsVisitor(value, caughtErrors, [...path, key]),
       ]),
@@ -67,7 +68,7 @@ const resolveSchemaEffectsVisitor = <SchemaT extends any>(
   return schema
 }
 
-export const aggregateSchemaErrors = <SchemaT extends any>(schema: SchemaT) => {
+export const aggregateSchemaErrors = <SchemaT>(schema: SchemaT) => {
   const errors: AggregatedErrorEntry[] = []
   const result = resolveSchemaEffectsVisitor(schema, errors, [])
   return {

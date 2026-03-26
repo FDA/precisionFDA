@@ -22,8 +22,6 @@ export type SyncFileJobInput = FileUidInput &
 
 export type UidAndFollowUpInput = UidInput & FollowUpInput
 
-type nodeQueryFilter = {
+export type nodeQueryFilter = {
   locked?: boolean
 }
-
-export { nodeQueryFilter }

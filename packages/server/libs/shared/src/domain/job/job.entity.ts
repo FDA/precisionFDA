@@ -169,7 +169,7 @@ export class Job extends ScopedEntity {
       return 0
     }
     if (!this.describe?.stoppedRunning) {
-      return new Date().getTime() - this.describe?.startedRunning
+      return Date.now()- this.describe?.startedRunning
     }
     return this.describe.stoppedRunning - this.describe.startedRunning
   }
@@ -179,7 +179,7 @@ export class Job extends ScopedEntity {
   }
 
   elapsedTimeSinceCreation(): number {
-    return new Date().getTime() - this.createdAt.getTime()
+    return Date.now()- this.createdAt.getTime()
   }
 
   elapsedTimeSinceCreationString(): string {

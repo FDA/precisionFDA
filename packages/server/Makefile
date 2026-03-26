@@ -72,8 +72,8 @@ watch-admin-platform-client:
 build:
 	pnpm run build
 
-run-prettier:
-	$(bin)prettier --write ./apps/**/src/**/*.ts
+run-format:
+	pnpm run format
 
 test-shared:
 	pnpm exec mocha --config ./libs/shared/.mocharc.js \

@@ -660,9 +660,9 @@ describe('UserFileService', () => {
       } as unknown as Node
       spaceFindOneStub.returns({
         spaceMemberships: {
-          getItems: () => {
+          getItems: () => ({
             find: (membership): SpaceMembership => membership
-          },
+          }),
         },
       } as unknown as Space)
 

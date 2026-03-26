@@ -17,8 +17,8 @@ describe('UserFileDownloadFacade', () => {
 
   let getUserFileOrAsset: SinonStub
   let getDownloadLinkStub: SinonStub
-  let entityServiceGetEntityDownloadLinkStub = stub()
   let canUserDownloadFromStub: SinonStub
+  const entityServiceGetEntityDownloadLinkStub = stub()
 
   beforeEach(() => {
     getUserFileOrAsset = stub().throws()

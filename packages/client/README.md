@@ -90,7 +90,7 @@ docker compose -f docker/dev.docker-compose.yml up frontend
 | `pnpm test:e2e:debug`  | Debug E2E tests                                    |
 | `pnpm storybook`       | Start Storybook on port 6006                       |
 | `pnpm build-storybook` | Build static Storybook                             |
-| `pnpm lint`            | Run ESLint                                         |
+| `pnpm lint`            | Run Biome lint |                                              |
 | `pnpm tsc`             | Type-check with TypeScript                         |
 
 ## Testing
@@ -207,7 +207,7 @@ packages/client/
 │   └── utils/           # Utility functions
 ├── vite.config.ts       # Vite configuration
 ├── tsconfig.json        # TypeScript configuration
-└── eslint.config.mjs    # ESLint configuration
+└── biome.json           # Biome lint/format configuration
 ```
 
 ## API Proxy Configuration

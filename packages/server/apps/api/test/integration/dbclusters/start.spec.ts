@@ -43,7 +43,7 @@ describe('POST /dbclusters/start', () => {
 
     const fakeCalls = fakes.client.dbClusterActionFake.getCalls()
 
-    expect([fakeCalls[0].args[0]['dxid'], fakeCalls[1].args[0]['dxid']]).to.have.members(dxids)
+    expect([fakeCalls[0].args[0].dxid, fakeCalls[1].args[0].dxid]).to.have.members(dxids)
     expect(fakeCalls[0].args[1]).to.be.equal('start')
     expect(fakeCalls[1].args[1]).to.be.equal('start')
   })

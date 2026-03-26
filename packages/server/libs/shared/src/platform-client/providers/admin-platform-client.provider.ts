@@ -6,7 +6,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { firstValueFrom } from 'rxjs'
 import { WebSocket } from 'ws'
 
-const ADMIN_PLATFORM_CLIENT_URL = config.service.adminPlatformClient.url + '/execute'
+const ADMIN_PLATFORM_CLIENT_URL = `${config.service.adminPlatformClient.url}/execute`
 const logger = new Logger('AdminPlatformClient')
 
 const streamJobLogs = (jobDxId: string) => {

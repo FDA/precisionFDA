@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { stub } from 'sinon'
+import { stub, SinonStub } from 'sinon'
 import { config } from '@shared/config'
 import { Answer } from '@shared/domain/answer/answer.entity'
 import { App } from '@shared/domain/app/app.entity'
@@ -66,7 +66,7 @@ describe('EntityLinkService', () => {
     const DISCUSSION = { id: DISCUSSION_ID } as unknown as Discussion
     const DISCUSSION_LINK = 'DISCUSSION_LINK'
 
-    let getEntityTypeForEntityStub
+    let getEntityTypeForEntityStub: SinonStub
 
     beforeEach(() => {
       appGetLinkStub.withArgs(APP).resolves(APP_LINK)

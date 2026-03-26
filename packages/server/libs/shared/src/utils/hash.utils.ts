@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 export class HashUtils {
   private static ID_VERSION = 2

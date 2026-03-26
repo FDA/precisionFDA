@@ -13,7 +13,7 @@ class InvitationFilter {
     if (typeof value === 'string') {
       value = value.split(',')
     }
-    return value.map((id) => parseInt(id))
+    return value.map((id) => parseInt(id, 10))
   })
   @IsNumber({}, { each: true })
   ids: number[]
