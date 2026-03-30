@@ -1,4 +1,4 @@
-import type { Logger } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { compareVersions } from 'compare-versions'
 import { CookieJar } from 'tough-cookie'

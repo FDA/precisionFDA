@@ -8,6 +8,7 @@ import { getIdFromScopeName } from '@shared/domain/space/space.helper'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { LicenseService } from '@shared/domain/license/license.service'
 
 @Injectable()
 export class DbClusterGetFacade {
@@ -19,6 +20,7 @@ export class DbClusterGetFacade {
     private readonly userContext: UserContext,
     private readonly spaceService: SpaceService,
     private readonly spaceMembershipService: SpaceMembershipService,
+    private readonly licenseService: LicenseService,
   ) {}
 
   async getDbCluster(uid: Uid<'dbcluster'>): Promise<DbClusterDTO> {
@@ -34,8 +36,10 @@ export class DbClusterGetFacade {
       throw new NotFoundError('DbCluster not found or not accessible')
     }
 
+    const fileLicense = await this.licenseService.findLicenseRefByLicenseableId('DbCluster', dbCluster.id)
+
     if (dbCluster.isPrivate()) {
-      return DbClusterDTO.mapToDTO(dbCluster)
+      return DbClusterDTO.mapToDTO(dbCluster, null, null, fileLicense)
     }
 
     const spaceId = getIdFromScopeName(dbCluster.scope)
@@ -55,6 +59,6 @@ export class DbClusterGetFacade {
       this.userContext.id,
     )
 
-    return DbClusterDTO.mapToDTO(dbCluster, space, membership)
+    return DbClusterDTO.mapToDTO(dbCluster, space, membership, fileLicense)
   }
 }

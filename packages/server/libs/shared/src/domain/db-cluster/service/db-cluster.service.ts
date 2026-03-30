@@ -106,9 +106,7 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
       port: describeDbClusterRes.port,
       scope: input.scope,
       description: input.description,
-      statusAsOf: describeDbClusterRes.statusAsOf
-        ? new Date(describeDbClusterRes.statusAsOf)
-        : null,
+      statusAsOf: describeDbClusterRes.statusAsOf ? new Date(describeDbClusterRes.statusAsOf) : null,
       salt: salt,
     })
 
@@ -140,11 +138,7 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
     return await this.dbClusterRepo.find({ scope: `space-${spaceId}` })
   }
 
-  async updateDbClusterProperties(
-    dbCluster: DbCluster,
-    newName: string,
-    newDesc: string,
-  ): Promise<void> {
+  async updateDbClusterProperties(dbCluster: DbCluster, newName: string, newDesc: string): Promise<void> {
     return await this.em.transactional(async () => {
       dbCluster.name = newName
       dbCluster.description = newDesc
@@ -153,7 +147,7 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
 
   public buildCommonFilters(pagination: DbClusterPaginationDTO): ObjectFilterQuery<DbCluster> {
     const where: ObjectFilterQuery<DbCluster> = {}
-    const { name, status, engine, instance, tags } = pagination.filters ?? {}
+    const { name, status, engine, instance, tags } = pagination.filter ?? {}
 
     if (name) {
       where.name = { $like: `%${name}%` }
@@ -163,8 +157,10 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
       where.status = { $in: statusArr }
     }
     if (engine) {
-      const engineArr = this.getMatchedEnumValues(ENGINE, engine)
-      where.engine = { $in: engineArr }
+      const engineKey = invertObj(ENGINES)[engine] as keyof typeof ENGINE | undefined
+      if (engineKey !== undefined) {
+        where.engine = { $in: [ENGINE[engineKey]] }
+      }
     }
     if (instance) {
       where.dxInstanceClass = { $like: `%${instance}%` }
@@ -172,7 +168,7 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
     if (tags) {
       const cleanedTags = tags
         .split(',')
-        .map((t) => t.trim())
+        .map(t => t.trim())
         .filter(Boolean)
       where.taggings = { tag: { name: { $in: cleanedTags } } }
     }
@@ -180,16 +176,74 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
     return where
   }
 
+  /**
+   * Known sortable column names on the DbCluster entity.
+   * Any sort key not in this set is treated as a property name.
+   */
+  private static readonly ENTITY_SORT_FIELDS = new Set([
+    'id',
+    'createdAt',
+    'updatedAt',
+    'scope',
+    'dxid',
+    'uid',
+    'name',
+    'project',
+    'dxInstanceClass',
+    'engineVersion',
+    'host',
+    'port',
+    'description',
+    'statusAsOf',
+    'salt',
+    'status',
+    'syncStatus',
+    'engine',
+    'failureReason',
+  ])
+
   async paginate(
     pagination: DbClusterPaginationDTO,
     where: FilterQuery<DbCluster>,
-  ): Promise<
-    PaginatedResult<Loaded<DbCluster, 'user' | 'properties' | 'taggings.tag', '*', never>>
-  > {
+  ): Promise<PaginatedResult<Loaded<DbCluster, 'user' | 'properties' | 'taggings.tag', '*', never>>> {
+    const propertySortEntry = this.extractPropertySort(pagination)
+
+    if (propertySortEntry) {
+      const { propertyName, orderDir } = propertySortEntry
+      return await this.dbClusterRepo.paginateWithPropertySort(
+        propertyName,
+        orderDir,
+        where,
+        pagination.page ?? 1,
+        pagination.pageSize ?? 10,
+        'properties',
+        ['user', 'properties', 'taggings.tag'],
+      )
+    }
+
     return await this.dbClusterRepo.paginate(pagination, where, {
       orderBy: { createdAt: 'DESC' },
       populate: ['user', 'properties', 'taggings.tag'],
     })
+  }
+
+  private extractPropertySort(
+    pagination: DbClusterPaginationDTO,
+  ): { propertyName: string; orderDir: 'ASC' | 'DESC' } | null {
+    const sort = pagination.sort
+    if (!sort || typeof sort !== 'object') return null
+
+    for (const key of Object.keys(sort)) {
+      if (!DbClusterService.ENTITY_SORT_FIELDS.has(key)) {
+        const dir = (sort as Record<string, string>)[key]?.toUpperCase?.()
+        return {
+          propertyName: key,
+          orderDir: dir === 'ASC' ? 'ASC' : 'DESC',
+        }
+      }
+    }
+
+    return null
   }
 
   private getMatchedEnumValues = (
@@ -201,30 +255,22 @@ export class DbClusterService implements SearchableByUid<'dbcluster'> {
     const searchTerm = text.toString().toLowerCase()
 
     return Object.keys(enumObj)
-      .filter((key) => Number.isNaN(Number(key)))
-      .filter((key) => key.toLowerCase().includes(searchTerm))
-      .map((key) => enumObj[key as keyof typeof enumObj])
+      .filter(key => Number.isNaN(Number(key)))
+      .filter(key => key.toLowerCase().includes(searchTerm))
+      .map(key => enumObj[key as keyof typeof enumObj])
       .map(Number)
   }
 
   async createPasswordRotatedEvent(user: User, dbCluster: DbCluster): Promise<void> {
-    this.logger.log(
-      `Creating dbcluster password rotated event for dbcluster ${dbCluster.uid} and user ${user.id}`,
-    )
+    this.logger.log(`Creating dbcluster password rotated event for dbcluster ${dbCluster.uid} and user ${user.id}`)
     const event = await createDbClusterPasswordRotated(user, dbCluster)
     await this.em.persistAndFlush(event)
   }
 
-  async updateSyncStatus(
-    dbClusterUid: Uid<'dbcluster'>,
-    newSyncStatus: DB_SYNC_STATUS,
-  ): Promise<void> {
-    this.logger.log(
-      { dbClusterUid: dbClusterUid, newSyncStatus: newSyncStatus },
-      "Updating DbCluster's sync status.",
-    )
+  async updateSyncStatus(dbClusterUid: Uid<'dbcluster'>, newSyncStatus: DB_SYNC_STATUS): Promise<void> {
+    this.logger.log({ dbClusterUid: dbClusterUid, newSyncStatus: newSyncStatus }, "Updating DbCluster's sync status.")
 
-    await this.em.transactional(async (transactionalEntityManager) => {
+    await this.em.transactional(async transactionalEntityManager => {
       const dbCluster = await transactionalEntityManager.findOneOrFail(DbCluster, {
         uid: dbClusterUid,
       })

@@ -26,7 +26,13 @@ export const mockDatabases = [
 ]
 
 export const dbclusterMocks = [
-  http.post('/api/dbclusters', () =>
+  http.get('/api/v2/dbclusters/allowed-instances', () =>
+    HttpResponse.json([
+      { value: 'db_std1_x2', label: 'DB Baseline 1 x 2    0.273$/hour' },
+      { value: 'db_mem1_x8', label: 'DB Mem 1 x 8    3.867$/hour' },
+    ]),
+  ),
+  http.post('/api/v2/dbclusters', () =>
     HttpResponse.json(
       {
         db_cluster: {
@@ -52,24 +58,14 @@ export const dbclusterMocks = [
           port: null,
           show_license_pending: false,
           tags: [],
-          links: {
-            show: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-            user: '/users/minch.yoda',
-            create: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-            update: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-            track: '/track?id=dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F-1',
-            start: '/api/dbclusters/start',
-            stop: '/api/dbclusters/stop',
-            terminate: '/api/dbclusters/terminate',
-          },
           scope: 'private',
         },
       },
-      { status: 200 },
+      { status: 201 },
     ),
   ),
-  http.post('/api/dbclusters/stop', () => HttpResponse.json(null, { status: 204 })),
-  http.post('/api/dbclusters/start', () =>
+  http.post('/api/v2/dbclusters/stop', () => HttpResponse.json(null, { status: 204 })),
+  http.post('/api/v2/dbclusters/start', () =>
     HttpResponse.json({
       message: 'Databases start operation completed successfully',
       meta: {
@@ -77,7 +73,7 @@ export const dbclusterMocks = [
       },
     }),
   ),
-  http.post('/api/dbclusters/terminate', () =>
+  http.post('/api/v2/dbclusters/terminate', () =>
     HttpResponse.json({
       message: 'Databases terminate operation completed successfully',
       meta: {
@@ -85,7 +81,7 @@ export const dbclusterMocks = [
       },
     }),
   ),
-  http.get('/api/dbclusters', () =>
+  http.get('/api/v2/dbclusters', () =>
     HttpResponse.json(
       {
         dbclusters: [
@@ -112,16 +108,6 @@ export const dbclusterMocks = [
             port: '3306',
             show_license_pending: false,
             tags: [],
-            links: {
-              show: '/api/dbclusters/dbcluster-GJVGV600JqyQ9pBj0698Fbbx',
-              user: '/users/minch.yoda',
-              create: '/api/dbclusters/dbcluster-GJVGV600JqyQ9pBj0698Fbbx',
-              update: '/api/dbclusters/dbcluster-GJVGV600JqyQ9pBj0698Fbbx',
-              track: '/track?id=dbcluster-GJVGV600JqyQ9pBj0698Fbbx-1',
-              start: '/api/dbclusters/start',
-              stop: '/api/dbclusters/stop',
-              terminate: '/api/dbclusters/terminate',
-            },
             scope: 'private',
           },
           {
@@ -147,16 +133,6 @@ export const dbclusterMocks = [
             port: '3306',
             show_license_pending: false,
             tags: [],
-            links: {
-              show: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              user: '/users/minch.yoda',
-              create: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              update: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              track: '/track?id=dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F-1',
-              start: '/api/dbclusters/start',
-              stop: '/api/dbclusters/stop',
-              terminate: '/api/dbclusters/terminate',
-            },
             scope: 'private',
           },
           {
@@ -182,16 +158,6 @@ export const dbclusterMocks = [
             port: '3306',
             show_license_pending: false,
             tags: [],
-            links: {
-              show: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              user: '/users/minch.yoda',
-              create: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              update: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              track: '/track?id=dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F-1',
-              start: '/api/dbclusters/start',
-              stop: '/api/dbclusters/stop',
-              terminate: '/api/dbclusters/terminate',
-            },
             scope: 'private',
           },
         ],
@@ -231,16 +197,6 @@ export const dbclusterMocks = [
             showLicensePending: false,
             tags: [],
             properties: {},
-            links: {
-              show: '/api/dbclusters/dbcluster-GJVGV600JqyQ9pBj0698Fbbx',
-              user: '/users/minch.yoda',
-              create: '/api/dbclusters/dbcluster-GJVGV600JqyQ9pBj0698Fbbx',
-              update: '/api/dbclusters/dbcluster-GJVGV600JqyQ9pBj0698Fbbx',
-              track: '/track?id=dbcluster-GJVGV600JqyQ9pBj0698Fbbx-1',
-              start: '/api/dbclusters/start',
-              stop: '/api/dbclusters/stop',
-              terminate: '/api/dbclusters/terminate',
-            },
             scope: 'private',
             featured: false,
           },
@@ -268,16 +224,6 @@ export const dbclusterMocks = [
             showLicensePending: false,
             tags: [],
             properties: {},
-            links: {
-              show: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              user: '/users/minch.yoda',
-              create: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              update: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              track: '/track?id=dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F-1',
-              start: '/api/dbclusters/start',
-              stop: '/api/dbclusters/stop',
-              terminate: '/api/dbclusters/terminate',
-            },
             scope: 'private',
             featured: false,
           },
@@ -305,27 +251,17 @@ export const dbclusterMocks = [
             showLicensePending: false,
             tags: [],
             properties: {},
-            links: {
-              show: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              user: '/users/minch.yoda',
-              create: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              update: '/api/dbclusters/dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
-              track: '/track?id=dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F-1',
-              start: '/api/dbclusters/start',
-              stop: '/api/dbclusters/stop',
-              terminate: '/api/dbclusters/terminate',
-            },
             scope: 'private',
             featured: false,
           },
         ],
         meta: {
           count: 3,
-          pagination: { 
-            current_page: 1, 
-            next_page: null, 
-            prev_page: null, 
-            total_pages: 1, 
+          pagination: {
+            current_page: 1,
+            next_page: null,
+            prev_page: null,
+            total_pages: 1,
             total_count: 3,
           },
         },

@@ -5,11 +5,11 @@ import { ButtonRow, Footer, StyledModalContent } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
 import { detachLicenseRequest } from './api'
-import { Button } from '../../components/Button'
-import { IFile } from '../files/files.types'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import { Button } from '@/components/Button'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { LicenseCarrier } from './license-carrier.types'
 
-export function useDetachLicenseModal<T extends { uid?: string; dxid?: string; file_license?: IFile['file_license'] }>({
+export function useDetachLicenseModal<T extends LicenseCarrier>({
   selected,
   resource,
   onSuccess,
@@ -18,6 +18,7 @@ export function useDetachLicenseModal<T extends { uid?: string; dxid?: string; f
   resource: APIResource
   onSuccess?: (res: unknown) => void
 }) {
+  const selectedLicenseRef = selected?.fileLicense ?? selected?.file_license
   const selectedId = selected?.uid || selected?.dxid
   const { isShown, setShowModal } = useModal()
 
@@ -39,8 +40,8 @@ export function useDetachLicenseModal<T extends { uid?: string; dxid?: string; f
   })
 
   const onSubmit = () => {
-    if (selected?.file_license?.id && selectedId) {
-      editFileMutation.mutateAsync({ licenseId: selected.file_license.id, dxid: selectedId })
+    if (selectedLicenseRef?.id && selectedId) {
+      editFileMutation.mutateAsync({ licenseId: selectedLicenseRef.id, dxid: selectedId })
     }
   }
 
@@ -57,7 +58,7 @@ export function useDetachLicenseModal<T extends { uid?: string; dxid?: string; f
       <StyledModalContent>
         Are you sure you want to detach the license:{' '}
         <p>
-          <b>{selected?.file_license?.title}</b>
+          <b>{selectedLicenseRef?.title}</b>
         </p>
       </StyledModalContent>
       <Footer>

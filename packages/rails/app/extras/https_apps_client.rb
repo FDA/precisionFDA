@@ -600,32 +600,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def dbcluster_action(dxids, action)
-    raise Error, "Wrong action #{action}" unless %w(start stop terminate).include?(action)
-
-    request(
-      "/dbclusters/#{action}",
-      { dxids: dxids },
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
-  def dbcluster_create(opts)
-    request(
-      "/dbclusters",
-      opts,
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
-  def dbcluster_update(uid, opts)
-    request(
-      "/dbclusters/#{uid}",
-      opts,
-      Net::HTTP::Put::METHOD,
-    )
-  end
-
   def dbcluster_sync(space_id)
     request(
       "/dbclusters/sync",

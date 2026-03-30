@@ -1,29 +1,6 @@
 import { DATABASE_RESOURCE_LABELS } from '@/types/user'
+import { FileLicense } from '../assets/assets.types'
 import { ServerScope } from '../home/types'
-
-export interface Links {
-  user?: string
-  attach_to?: string
-  publish?: string
-  copy?: string
-  run_workflow?: string
-  batch_run_workflow?: string
-  edit?: string
-  fork?: string
-  cwl_export?: string
-  wdl_export?: string
-  set_tags?: string
-  set_tags_target?: string
-  delete?: string
-  create?: string
-  update?: string
-  track?: string
-  start?: string
-  stop?: string
-  terminate?: string
-  license?: string
-  detach_license?: string
-}
 
 export type DBStatus = 'creating' | 'available' | 'stopped' | 'stopping' | 'starting' | 'terminating' | 'terminated'
 
@@ -56,12 +33,14 @@ export interface IDatabase {
   properties: {
     [key: string]: string
   }
-  /** @deprecated create links from client side */
-  links: Links
   scope: ServerScope
   featured: boolean
   failureReason: string
   currentUserRole?: string
+  canStart?: boolean
+  canStop?: boolean
+  canTerminate?: boolean
+  fileLicense?: FileLicense | null
 }
 
 export type MethodType = 'start' | 'stop' | 'terminate'

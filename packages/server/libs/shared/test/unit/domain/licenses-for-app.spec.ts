@@ -4,6 +4,9 @@ import { database } from '@shared/database'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { LicenseService } from '@shared/domain/license/license.service'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
+import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { App } from '@shared/domain/app/app.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '../../../src/test'
@@ -61,7 +64,10 @@ describe("licenses for app's assets tests", () => {
     await em.flush()
 
     const freshEm = database.orm().em.fork() as EntityManager<MySqlDriver>
-    const freshLicenseService = new LicenseService(freshEm)
+    const freshLicenseService = new LicenseService(
+      freshEm.getRepository(LicensedItem) as LicensedItemRepository,
+      freshEm.getRepository(Node) as unknown as NodeRepository,
+    )
 
     const freshApp = await freshEm.findOneOrFail(App, { uid: app.uid })
     await freshApp.assets.init()
@@ -93,7 +99,10 @@ describe("licenses for app's assets tests", () => {
     await em.flush()
 
     const freshEm = database.orm().em.fork() as EntityManager<MySqlDriver>
-    const freshLicenseService = new LicenseService(freshEm)
+    const freshLicenseService = new LicenseService(
+      freshEm.getRepository(LicensedItem) as LicensedItemRepository,
+      freshEm.getRepository(Node) as unknown as NodeRepository,
+    )
 
     const freshApp = await freshEm.findOneOrFail(App, { uid: app.uid })
     await freshApp.assets.init()

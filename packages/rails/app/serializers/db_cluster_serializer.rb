@@ -1,5 +1,7 @@
 # DB Cluster serializer.
 class DbClusterSerializer < ApplicationSerializer
+  V2_DBCLUSTERS_PATH = "/api/v2/dbclusters".freeze
+
   attributes(
     :id,
     :dxid,
@@ -68,23 +70,20 @@ class DbClusterSerializer < ApplicationSerializer
     {}.tap do |links|
       links[:user] = user_path(added_by_dxuser)
       links[:space] = space_path if object.in_space?
-      links[:create] = api_dbcluster_path(uid: object.uid)
-      links[:update] = api_dbcluster_path(uid: object.uid)
+      links[:create] = V2_DBCLUSTERS_PATH
+      links[:update] = "#{V2_DBCLUSTERS_PATH}/#{object.uid}"
 
       licenses_links!(links)
     end
   end
 
   def licenses_links!(links)
-    unless license
-      links_for_run_actions!(links)
-      return
-    end
+    return unless license
 
     links[:show_license] = license_path(license)
 
     if object.license_status?(current_user, AcceptedLicense::STATUS_ACTIVE)
-      links_for_run_actions!(links) unless license.owned_by_user?(current_user)
+      # no-op: run actions are now derived on the client side
     elsif license.approval_required &&
           !object.license_status?(current_user, AcceptedLicense::STATUS_PENDING)
       links[:request_approval_license] = request_approval_license_path(license)
@@ -100,11 +99,5 @@ class DbClusterSerializer < ApplicationSerializer
 
     links[:object_license] = api_license_path(license)
     links[:detach_license] = "/api/licenses/:id/remove_item/:item_uid"
-  end
-
-  def links_for_run_actions!(links)
-    links[:start] = run_api_dbclusters_path(api_method: :start)
-    links[:stop] = run_api_dbclusters_path(api_method: :stop)
-    links[:terminate] = run_api_dbclusters_path(api_method: :terminate)
   end
 end
