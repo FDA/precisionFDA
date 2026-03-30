@@ -1,21 +1,65 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { License } from '@shared/domain/license/license.entity'
-import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
+import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
 
 @Injectable()
 export class LicenseService {
-  constructor(private readonly em: SqlEntityManager) {}
+  constructor(
+    private readonly licensedItemRepo: LicensedItemRepository,
+    private readonly nodeRepo: NodeRepository,
+  ) {}
+
+  async findLicenseRefsByLicenseableIds(
+    licenseableType: string,
+    licenseableIds: number[],
+  ): Promise<Map<number, { id: string; title: string; uid?: string }>> {
+    const result = new Map<number, { id: string; title: string; uid?: string }>()
+
+    if (licenseableIds.length === 0) {
+      return result
+    }
+
+    const licensedItems = await this.licensedItemRepo.find(
+      {
+        licenseableType,
+        licenseableId: { $in: licenseableIds },
+      },
+      { populate: ['license'] },
+    )
+
+    for (const item of licensedItems) {
+      if (result.has(item.licenseableId)) {
+        continue
+      }
+
+      const license = item.license.getEntity()
+      const licenseWithUid = license as License & { uid?: string }
+      result.set(item.licenseableId, {
+        id: String(license.id),
+        title: license.title,
+        ...(licenseWithUid.uid ? { uid: licenseWithUid.uid } : {}),
+      })
+    }
+
+    return result
+  }
+
+  async findLicenseRefByLicenseableId(
+    licenseableType: string,
+    licenseableId: number,
+  ): Promise<{ id: string; title: string; uid?: string } | undefined> {
+    const refs = await this.findLicenseRefsByLicenseableIds(licenseableType, [licenseableId])
+    return refs.get(licenseableId)
+  }
 
   async findLicensedItemsByNodeUids(nodeUids: Uid<'file'>[]): Promise<License[]> {
-    const nodes = await this.em.find(Node, { uid: { $in: nodeUids } })
+    const nodes = await this.nodeRepo.find({ uid: { $in: nodeUids } })
 
     const nodeIds = nodes.map((node) => node.id)
 
-    const licensedItems = await this.em.find(
-      LicensedItem,
+    const licensedItems = await this.licensedItemRepo.find(
       { licenseableId: { $in: nodeIds } },
       { populate: ['license'] },
     )
@@ -28,8 +72,7 @@ export class LicenseService {
       return []
     }
 
-    const licensedItems = await this.em.find(
-      LicensedItem,
+    const licensedItems = await this.licensedItemRepo.find(
       { licenseableId: { $in: nodeIds }, licenseableType: 'Node' },
       { populate: ['license'] },
     )

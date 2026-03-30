@@ -40,7 +40,7 @@ export const DB_SYNC_STATUSES = {
   FAILED: 'failed',
 } as const
 
-export const allowedInstanceTypes = [
+export const allowedInstanceTypes: string[] = [
   'db_std1_x2',
   'db_mem1_x2',
   'db_mem1_x4',
@@ -52,9 +52,9 @@ export const allowedInstanceTypes = [
   'db_mem1_x96',
 ]
 
-export const allowedEngineVersions = ['8.0.mysql_aurora.3.04.1', '11.9', '12.9', '13.9', '14.6']
+export const allowedEngineVersions: string[] = ['8.0.mysql_aurora.3.04.1', '11.9', '12.9', '13.9', '14.6']
 
-export const allowedEngines = ['aurora-mysql', 'aurora-postgresql']
+export const allowedEngines: string[] = ['aurora-mysql', 'aurora-postgresql']
 
 export interface ActionConfig {
   requiredStatus: STATUS

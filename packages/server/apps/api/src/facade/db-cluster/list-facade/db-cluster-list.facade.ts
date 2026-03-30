@@ -12,6 +12,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { LicenseService } from '@shared/domain/license/license.service'
 
 @Injectable()
 export class DbClusterListFacade {
@@ -23,6 +24,7 @@ export class DbClusterListFacade {
     private readonly userContext: UserContext,
     private readonly spaceService: SpaceService,
     private readonly spaceMembershipService: SpaceMembershipService,
+    private readonly licenseService: LicenseService,
   ) {}
 
   async listDbClusters(pagination: DbClusterPaginationDTO): Promise<PaginatedResult<DbClusterDTO>> {
@@ -67,16 +69,22 @@ export class DbClusterListFacade {
     where: FilterQuery<DbCluster>,
   ): Promise<PaginatedResult<DbClusterDTO>> {
     const response = await this.dbClusterService.paginate(pagination, where)
+    const licensesByDbClusterId = await this.licenseService.findLicenseRefsByLicenseableIds(
+      'DbCluster',
+      response.data.map((cluster) => cluster.id),
+    )
+
     const dbclusters = await Promise.all(
       response.data.map(async (dbcluster) => {
+        const fileLicense = licensesByDbClusterId.get(dbcluster.id)
         if (dbcluster.isInSpace()) {
           const membership = await this.spaceMembershipService.getCurrentMembership(
             dbcluster.getSpaceId(),
             this.userContext.id,
           )
-          return DbClusterDTO.mapToDTO(dbcluster, null, membership)
+          return DbClusterDTO.mapToDTO(dbcluster, null, membership, fileLicense)
         }
-        return DbClusterDTO.mapToDTO(dbcluster)
+        return DbClusterDTO.mapToDTO(dbcluster, null, null, fileLicense)
       }),
     )
     return { ...response, data: dbclusters }

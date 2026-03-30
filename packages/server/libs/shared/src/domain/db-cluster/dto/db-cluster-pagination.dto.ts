@@ -1,7 +1,7 @@
 import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
 import { Type } from 'class-transformer'
 import { IsIn, IsOptional, IsString, ValidateNested } from 'class-validator'
-import { allowedEngines, allowedInstanceTypes, STATUSES } from '../db-cluster.enum'
+import { allowedEngines, STATUSES } from '../db-cluster.enum'
 import { EntityScope } from '@shared/types/common'
 import { DbCluster } from '../db-cluster.entity'
 import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
@@ -24,7 +24,6 @@ class DbClusterFilter {
 
   @IsOptional()
   @IsString()
-  @IsIn(allowedInstanceTypes)
   instance?: string
 
   @IsOptional()
@@ -41,5 +40,5 @@ export class DbClusterPaginationDTO extends PaginationDTO<DbCluster> {
   @IsOptional()
   @ValidateNested()
   @Type(() => DbClusterFilter)
-  filters?: DbClusterFilter
+  filter?: DbClusterFilter
 }

@@ -3,7 +3,11 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { LicenseService } from '@shared/domain/license/license.service'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
+import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { App } from '@shared/domain/app/app.entity'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
@@ -49,10 +53,7 @@ describe('licenses for workflow tests', () => {
       { user, asset: asset1 },
       { content: 'approval required', title: 'with approval', approvalRequired: true },
     )
-    const licensedItem1 = wrap(new LicensedItem(license1, asset1.id)).assign(
-      { licenseableType: 'Node' },
-      { em },
-    )
+    const licensedItem1 = wrap(new LicensedItem(license1, asset1.id)).assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItem1)
 
     const license2 = create.licenseHelper.createForAsset(
@@ -60,38 +61,40 @@ describe('licenses for workflow tests', () => {
       { user, asset: asset2 },
       { content: 'accepted license', title: 'with accepted license', approvalRequired: true },
     )
-    const licensedItem2 = wrap(new LicensedItem(license2, asset2.id)).assign(
-      { licenseableType: 'Node' },
-      { em },
-    )
+    const licensedItem2 = wrap(new LicensedItem(license2, asset2.id)).assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItem2)
 
     await em.flush()
 
     const spec = {
       input_spec: { stages: [{ app_uid: app1.uid }, { app_uid: app2.uid }] },
-    }
+      output_spec: { stages: [] },
+    } as unknown as Workflow['spec']
 
     const workflow = create.workflowHelper.create(em, { user }, { spec })
     em.persist(workflow)
     await em.flush()
 
     const freshEm = database.orm().em.fork() as EntityManager<MySqlDriver>
-    const freshLicenseService = new LicenseService(freshEm)
+    const freshLicenseService = new LicenseService(
+      freshEm.getRepository(LicensedItem) as LicensedItemRepository,
+      freshEm.getRepository(Node) as unknown as NodeRepository,
+    )
 
     const freshWorkflow = await freshEm.findOneOrFail(Workflow, { uid: workflow.uid })
+    const stages = freshWorkflow.spec.input_spec.stages as Array<{ app_uid: string }>
 
     const licenseArrays = await Promise.all(
-      freshWorkflow.spec.input_spec.stages.map(async (stage: unknown) => {
-        const app = await freshEm.findOneOrFail(App, { uid: stage.app_uid })
+      stages.map(async stage => {
+        const app = await freshEm.findOneOrFail(App, { uid: stage.app_uid as Uid<'app'> })
         await app.assets.init()
-        const assetIds = app.assets.getItems().map((asset) => asset.id)
+        const assetIds = app.assets.getItems().map(asset => asset.id)
         return freshLicenseService.findLicensesForNodeIds(assetIds)
       }),
     )
 
     const licenses = licenseArrays.flat()
-    const uniqueLicenses = [...new Map(licenses.map((item) => [item.id, item])).values()]
+    const uniqueLicenses = [...new Map(licenses.map(item => [item.id, item])).values()]
 
     expect(uniqueLicenses.length).to.equal(2)
   })

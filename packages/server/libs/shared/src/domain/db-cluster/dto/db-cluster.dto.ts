@@ -1,3 +1,4 @@
+import { invertObj } from 'ramda'
 import {
   DB_SYNC_STATUS,
   DB_SYNC_STATUSES,
@@ -8,13 +9,13 @@ import {
   STATUS,
   STATUSES,
 } from '@shared/domain/db-cluster/db-cluster.enum'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { spaceMembershipTypeToNameMap } from '@shared/domain/space-membership/space-membership-type-to-name.map'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { Space } from '@shared/domain/space/space.entity'
 import { EntityScope } from '@shared/types/common'
 import { DbCluster } from '../db-cluster.entity'
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { invertObj } from 'ramda'
-import { Space } from '@shared/domain/space/space.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { spaceMembershipTypeToNameMap } from '@shared/domain/space-membership/space-membership-type-to-name.map'
 
 export class DbClusterDTO {
   id: number
@@ -43,13 +44,26 @@ export class DbClusterDTO {
   properties: {
     [key: string]: string
   }
-  links: {
-    [key: string]: string
-  }
   scope: EntityScope
   failureReason: string
+  canStart: boolean
+  canStop: boolean
+  canTerminate: boolean
+  fileLicense?: {
+    id: string
+    title: string
+    uid?: string
+  }
 
-  static mapToDTO(dbcluster: DbCluster, space?: Space, membership?: SpaceMembership): DbClusterDTO {
+  static mapToDTO(
+    dbcluster: DbCluster,
+    space?: Space,
+    membership?: SpaceMembership,
+    fileLicense?: { id: string; title: string; uid?: string },
+  ): DbClusterDTO {
+    const isViewer = membership?.role === SPACE_MEMBERSHIP_ROLE.VIEWER
+    const canMutate = !isViewer
+
     return {
       id: dbcluster.id,
       dxid: dbcluster.dxid,
@@ -73,7 +87,7 @@ export class DbClusterDTO {
       host: dbcluster.host,
       port: dbcluster.port,
       showLicensePending: false,
-      tags: dbcluster.taggings.map((t) => t?.tag?.name),
+      tags: dbcluster.taggings.map(t => t?.tag?.name),
       properties: dbcluster.properties.getItems().reduce(
         (acc, prop) => {
           acc[prop.propertyName] = prop.propertyValue
@@ -82,15 +96,11 @@ export class DbClusterDTO {
         {} as Record<string, string>,
       ),
       scope: dbcluster.scope,
-      links: {
-        user: `/users/${dbcluster.user.getEntity().dxuser}`,
-        create: `/api/dbclusters/${dbcluster.uid}`,
-        update: `/api/dbclusters/${dbcluster.uid}`,
-        start: '/api/dbclusters/start',
-        stop: '/api/dbclusters/stop',
-        terminate: '/api/dbclusters/terminate',
-      },
       failureReason: dbcluster.failureReason,
+      canStart: canMutate && dbcluster.status === STATUS.STOPPED,
+      canStop: canMutate && dbcluster.status === STATUS.AVAILABLE,
+      canTerminate: canMutate && dbcluster.status === STATUS.AVAILABLE,
+      ...(fileLicense ? { fileLicense } : {}),
       ...(membership && { currentUserRole: spaceMembershipTypeToNameMap[membership.role] }),
     }
   }
@@ -100,7 +110,7 @@ const titleize = (str: string): string => {
   return str
     .toLowerCase()
     .split(' ')
-    .map((word) => word.charAt(0).toLocaleUpperCase() + word.slice(1))
+    .map(word => word.charAt(0).toLocaleUpperCase() + word.slice(1))
     .join(' ')
 }
 const getLocation = (space: Space): string => {

@@ -1,9 +1,8 @@
 import { LicenseService } from '@shared/domain/license/license.service'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { match, stub } from 'sinon'
+import { stub } from 'sinon'
 import { expect } from 'chai'
-import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
+import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
 
 describe('LicenseService', () => {
   const findStub = stub()
@@ -18,42 +17,41 @@ describe('LicenseService', () => {
       findStub.resolves([])
       const service = getInstance()
 
-      const result = await service.findLicensedItemsByNodeUids(['1', '2'])
+      const result = await service.findLicensedItemsByNodeUids(['file-a-1', 'file-b-2'])
 
       expect(result).to.deep.equal([])
     })
 
     it('should return empty licenses for existing ids without licenses', async () => {
-      findStub.withArgs(Node, match.any).resolves([1, 2])
-      findStub.withArgs(LicensedItem, match.any, match.any).resolves([])
+      findStub.onFirstCall().resolves([1, 2])
+      findStub.onSecondCall().resolves([])
       const service = getInstance()
 
-      const result = await service.findLicensedItemsByNodeUids(['1', '2'])
+      const result = await service.findLicensedItemsByNodeUids(['file-a-1', 'file-b-2'])
 
       expect(result).to.deep.equal([])
     })
 
     it('should return licenses for existing ids with licenses', async () => {
-      findStub.withArgs(Node, match.any).resolves([1, 2])
+      findStub.onFirstCall().resolves([1, 2])
       findStub
-        .withArgs(LicensedItem, match.any, match.any)
+        .onSecondCall()
         .resolves([
-          { license: { getEntity: () => 'license1' } },
-          { license: { getEntity: () => 'license2' } },
+          { license: { getEntity: (): string => 'license1' } },
+          { license: { getEntity: (): string => 'license2' } },
         ])
       const service = getInstance()
 
-      const result = await service.findLicensedItemsByNodeUids(['1', '2'])
+      const result = await service.findLicensedItemsByNodeUids(['file-a-1', 'file-b-2'])
 
       expect(result).to.deep.equal(['license1', 'license2'])
     })
   })
 
-  const em = {
-    find: findStub,
-  } as unknown as SqlEntityManager
+  const licensedItemRepo = { find: findStub } as unknown as LicensedItemRepository
+  const nodeRepo = { find: findStub } as unknown as NodeRepository
 
-  function getInstance() {
-    return new LicenseService(em)
+  function getInstance(): LicenseService {
+    return new LicenseService(licensedItemRepo, nodeRepo)
   }
 })

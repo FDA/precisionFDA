@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, Resolver, useForm } from 'react-hook-form'
 import { useLocation } from 'react-router'
 import * as Yup from 'yup'
 import { useCreateDatabaseMutation } from '@/api/mutations/database'
@@ -34,13 +34,16 @@ interface CreateDatabaseForm {
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Database name is required'),
+  description: Yup.string().defined(),
   engine: Yup.string().required('Database engine is required'),
   dxInstanceClass: Yup.object({
+    label: Yup.string().required(),
     value: Yup.string().required('Database instance is required'),
   })
     .nullable()
     .required('Database instance is required'),
   engineVersion: Yup.object({
+    label: Yup.string().required(),
     value: Yup.string().required('Engine version is required'),
   })
     .nullable()
@@ -55,7 +58,7 @@ export const CreateDatabase = ({ spaceId }: { spaceId?: number }) => {
     if (!user) return []
     return user.resources.filter(isDatabaseResource).map(r => ({
       value: r,
-      // Adding non-breaking space and em dash to ensure label doesn't break into multiple lines and price is always at the end of the label
+      // Keep price suffix aligned and prevent awkward wraps in dropdown labels.
       label: `${RESOURCE_LABELS[r]}\xa0 \u2014 \xa0$${DatabaseInstancePricingMap[r]}\xa0/\xa0hour`,
     }))
   }, [user])
@@ -72,7 +75,7 @@ export const CreateDatabase = ({ spaceId }: { spaceId?: number }) => {
     getValues,
   } = useForm<CreateDatabaseForm>({
     mode: 'onBlur',
-    resolver: yupResolver(validationSchema),
+    resolver: yupResolver(validationSchema) as Resolver<CreateDatabaseForm>,
     defaultValues: {
       name: '',
       description: '',
@@ -116,6 +119,7 @@ export const CreateDatabase = ({ spaceId }: { spaceId?: number }) => {
       </>
     )
   }
+
   return (
     <>
       <StyledBackLink linkTo={backPath}>Back to Databases</StyledBackLink>

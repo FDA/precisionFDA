@@ -397,15 +397,6 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :dbclusters, controller: :db_clusters,
-                param: :uid, only: %i(create update) do
-        post ":api_method", on: :collection,
-             to: "db_clusters#run",
-             as: :run,
-             api_method: /(start|stop|terminate)/
-        resources :comments
-      end
-
       post "create_file"
       post "create_challenge_card_image"
       post "create_image_file"

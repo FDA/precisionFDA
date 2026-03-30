@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import styled from 'styled-components'
-import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
-import { ResourceTable, StyledName } from '../../components/ResourceTable'
+import { CircleCheckIcon } from '@/components/icons/CircleCheckIcon'
+import { ResourceTable, StyledName } from '@/components/ResourceTable'
 import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
 import { attachLicenseRequest } from './api'
@@ -10,10 +10,10 @@ import { License } from './types'
 import { useLicensesListQuery } from './queries'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
-import { Button } from '../../components/Button'
+import { Button } from '@/components/Button'
 import { Empty } from '../home/home.styles'
-import { IFile } from '../files/files.types'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { LicenseCarrier } from './license-carrier.types'
 
 const HiddenElement = styled.div`
   width: 16px;
@@ -29,7 +29,7 @@ const ScrollWrapper = styled(ModalScroll)`
   padding-bottom: 12px;
 `
 
-export function useAttachLicensesModal<T extends { uid?: string; dxid?: string; file_license?: IFile['file_license'] }>({
+export function useAttachLicensesModal<T extends LicenseCarrier>({
   selected,
   resource,
   onSuccess,
@@ -38,13 +38,14 @@ export function useAttachLicensesModal<T extends { uid?: string; dxid?: string; 
   resource: APIResource
   onSuccess?: (res: unknown) => void
 }) {
+  const selectedLicenseRef = selected?.fileLicense ?? selected?.file_license
   const selectedId = selected?.uid || selected?.dxid
   const { isShown, setShowModal } = useModal()
   const queryClient = useQueryClient()
   const [selectedLicense, setSelectedLicenses] = useState<string | undefined>()
   useEffect(() => {
-    setSelectedLicenses(selected?.file_license?.id)
-  }, [selected])
+    setSelectedLicenses(selectedLicenseRef?.id)
+  }, [selectedLicenseRef])
   const { data } = useLicensesListQuery()
 
   const resetSelected = () => {
@@ -129,7 +130,7 @@ export function useAttachLicensesModal<T extends { uid?: string; dxid?: string; 
           <Button
             data-variant="primary"
             onClick={() => handleSubmit(selectedLicense)}
-            disabled={!selectedLicense || selectedLicense === selected?.file_license?.id}
+            disabled={!selectedLicense || selectedLicense === selectedLicenseRef?.id}
           >
             Attach
           </Button>
