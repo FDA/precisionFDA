@@ -5,6 +5,7 @@ import { AppShowOutletContext } from '@/features/apps/AppsShow'
 import { StyledMarkdownAppShow } from '@/features/apps/form/styles'
 import { useAuthUser } from '@/features/auth/useAuthUser'
 import { HomeScopeContextValue, useHomeScope } from '@/features/home/HomeScopeContext'
+import { isContributorOrHigherRole } from '@/features/spaces/common'
 import { ISpace } from '@/features/spaces/spaces.types'
 import { SpaceOutletContext } from './spaces'
 
@@ -117,7 +118,9 @@ export const FilesListPage = () => {
 
   const homeScope = context.homeContext?.homeScope
   const showFolderActions =
-    !['spaces', 'featured'].includes(homeScope ?? '') && (homeScope !== 'everybody' || user?.isAdmin)
+    homeScope === 'me' ||
+    (homeScope === 'everybody' && user?.isAdmin) ||
+    (context.space && isContributorOrHigherRole(context.space.current_user_membership.role))
   return (
     <FileList
       homeScope={homeScope}
@@ -145,7 +148,7 @@ export const AppsListPage = () => {
   }
 
   const isContributorOrHigher = context.space
-    ? ['lead', 'admin', 'contributor'].includes(context.space.current_user_membership.role)
+    ? isContributorOrHigherRole(context.space.current_user_membership.role)
     : undefined
   return (
     <AppList
@@ -266,7 +269,7 @@ export const WorkflowListPage = () => {
   }
 
   const isContributorOrHigher = context.space
-    ? ['lead', 'admin', 'contributor'].includes(context.space.current_user_membership.role)
+    ? isContributorOrHigherRole(context.space.current_user_membership.role)
     : undefined
   return (
     <WorkflowList
@@ -310,7 +313,7 @@ export const DiscussionListPage = () => {
 
   const canCreateDiscussion = context.isHome
     ? context?.homeContext?.homeScope === 'everybody'
-    : ['lead', 'admin', 'contributor'].includes(context.space!.current_user_membership.role)
+    : isContributorOrHigherRole(context.space!.current_user_membership.role)
   return (
     <DiscussionList
       homeScope={context.homeContext?.homeScope}
@@ -362,7 +365,7 @@ export const SpaceReportListPage = () => {
 
   const scope = context.space ? `space-${context.space.id}` : 'private'
   const isContributorOrHigher = context.space
-    ? ['lead', 'admin', 'contributor'].includes(context.space.current_user_membership.role)
+    ? isContributorOrHigherRole(context.space.current_user_membership.role)
     : undefined
   return <SpaceReportList scope={scope} isContributorOrHigher={isContributorOrHigher} />
 }
