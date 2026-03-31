@@ -11,6 +11,7 @@ import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { JobService } from '@shared/domain/job/job.service'
 import { JobRunData } from '@shared/domain/job/job.types'
+import { JobCountService } from '@shared/domain/job/services/job-count.service'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { JobWorkstationService } from '@shared/domain/job/services/job-workstation.service'
 import { Notification } from '@shared/domain/notification/notification.entity'
@@ -30,8 +31,6 @@ import { FileStatesParams, JobFindParams } from '@shared/platform-client/platfor
 import {
   FileStateResult,
   FindJobsResponse,
-  JobDescribeResponse,
-  JobOutput,
 } from '@shared/platform-client/platform-client.responses'
 import * as queueDomain from '@shared/queue'
 import { create, db } from '@shared/test'
@@ -164,38 +163,40 @@ describe('Job service tests', () => {
   })
 
   function getPlatformClientWithComplexResults(): PlatformClient {
-    return {
-      async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
+    const platformClient = {
+      jobFind: async (params: JobFindParams): Promise<FindJobsResponse> => {
         expect(params.id.length).eq(1)
         expect(params.id[0]).contains('job-')
 
-        return {
-          results: [
+        const mockedOutput: unknown = {
+          string_output: 'string output',
+          file_output: {
+            $dnanexus_link: file1Dxid,
+          },
+          string_array_output: ['string1', 'string2'],
+          file_array_output: [
             {
-              id: 'job-1',
-              name: 'job-1-name',
-              describe: {
-                output: {
-                  string_output: 'string output',
-                  file_output: {
-                    $dnanexus_link: file1Dxid,
-                  },
-                  string_array_output: ['string1', 'string2'],
-                  file_array_output: [
-                    {
-                      $dnanexus_link: file2Dxid,
-                    },
-                    {
-                      $dnanexus_link: file3Dxid,
-                    },
-                  ],
-                } as JobOutput,
-              },
-            } as JobDescribeResponse,
+              $dnanexus_link: file2Dxid,
+            },
+            {
+              $dnanexus_link: file3Dxid,
+            },
           ],
-        } as FindJobsResponse
+        }
+
+        const mockedResult = {
+          id: 'job-1',
+          name: 'job-1-name',
+          describe: {
+            output: mockedOutput,
+          },
+        }
+
+        return JSON.parse(JSON.stringify({
+          results: [mockedResult],
+        })) as FindJobsResponse
       },
-      async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
+      fileStates: async (params: FileStatesParams): Promise<FileStateResult[]> => {
         expect(params.fileDxids.length).eq(3)
         expect(params.fileDxids).contains(file1Dxid)
         expect(params.fileDxids).contains(file2Dxid)
@@ -236,9 +237,11 @@ describe('Job service tests', () => {
               state: FILE_STATE_DX.CLOSED,
             },
           },
-        ]
+        ] as FileStateResult[]
       },
-    } as PlatformClient
+    }
+
+    return platformClient as unknown as PlatformClient
   }
 
   function getPlatformClientWithEmptyResults(): PlatformClient {
@@ -566,6 +569,7 @@ describe('Job service tests', () => {
       expect(snapshotStub.calledOnceWithExactly(job.uid, authCode, key, name, terminate)).to.be.true()
     })
   })
+
 
   const getJobServiceInstance = (platformClient: PlatformClient): JobService => {
     const jobCountService = {

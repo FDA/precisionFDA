@@ -105,4 +105,35 @@ export class TimeUtils {
       microseconds: '000',
     }
   }
+
+  /** Format a Date as "MM/DD/YYYY". */
+  static formatShortDate(date: Date): string {
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const year = date.getFullYear()
+    return `${month}/${day}/${year}`
+  }
+
+  /** Format a Date as "YYYY-MM-DD HH:MM:SS UTC". */
+  static formatDateTimeUTC(date: Date): string {
+    return date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC')
+  }
+
+  /** Convert a number of seconds into a human-readable string like "2 days 3 hours 15 minutes 4 seconds". */
+  static humanizeSeconds(secs: number): string {
+    if (secs <= 0) return 'N/A'
+
+    const days = Math.floor(secs / 86400)
+    const hours = Math.floor((secs % 86400) / 3600)
+    const minutes = Math.floor((secs % 3600) / 60)
+    const seconds = secs % 60
+
+    const parts: string[] = []
+    if (days > 0) parts.push(`${days} days`)
+    if (hours > 0) parts.push(`${hours} hours`)
+    if (minutes > 0) parts.push(`${minutes} minutes`)
+    parts.push(`${seconds} seconds`)
+
+    return parts.join(' ')
+  }
 }

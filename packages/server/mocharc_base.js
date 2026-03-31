@@ -11,10 +11,9 @@ const fs = require('fs')
 
 const getConfig = (packagePath) => {
   const configForIDETestsTs = './test/index.ts'
-  const configForCIJs = `${packagePath}/test/index.js`
   const configForCITs = `${packagePath}/test/index.ts`
 
-  const candidates = [configForIDETestsTs, configForCIJs]
+  const candidates = [configForIDETestsTs]
   let file = configForCITs
 
   for (const candidate of candidates) {

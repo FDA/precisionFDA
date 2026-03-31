@@ -176,15 +176,15 @@ export const ExecutionsListTable = ({
   function filterColsByScope(c: ColumnDefResolved<IExecution>): boolean {
     // Check if any of the conditions is true, then hide the column
     return !(
-      // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
+      // If the homeScope is 'me', hide 'addedBy' regardless of other conditions.
       (
-        (homeScope === 'me' && c.accessorKey === 'added_by') ||
+        (homeScope === 'me' && c.accessorKey === 'addedBy') ||
         // Hide 'location' for all homeScopes except 'spaces'.
         (homeScope !== 'spaces' && c.accessorKey === 'location') ||
         // Hide 'featured' for all homeScopes except 'everybody'.
         (homeScope !== 'everybody' && c.accessorKey === 'featured') ||
-        c.accessorKey === 'created_at_date_time' ||
-        c.accessorKey === 'workflow_title'
+        c.accessorKey === 'createdAtDateTime' ||
+        c.accessorKey === 'workflowTitle'
       )
     )
   }

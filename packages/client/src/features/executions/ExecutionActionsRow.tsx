@@ -14,6 +14,7 @@ import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { HomeScope } from '../home/types'
 import { StyledRefresh, StyledStatusText } from './details/styles'
 import { IExecution } from './executions.types'
+import { getOpenExternalUrl, isOpenExternalAvailable } from './executions.util'
 import { useExecutionSelectActions } from './useExecutionSelectActions'
 
 export const ExecutionActionsRow = ({
@@ -35,15 +36,17 @@ export const ExecutionActionsRow = ({
     resourceKeys: ['execution', execution.uid],
   })
 
-  const isJobOwner = user?.dxuser === execution.launched_by_dxuser
+  const isJobOwner = user?.dxuser === execution.launchedByDxuser
   const isJobStartingOrRunning = ['idle', 'runnable', 'running'].includes(execution.state)
 
+  const openExternalAvailable = isOpenExternalAvailable(execution)
+
   const onOpenWorkstationClick = () => {
-    if (execution.launched_by === user?.full_name) {
-      window.open(execution.links.open_external, '_blank', 'noopener,noreferrer')
+    if (execution.launchedBy === user?.full_name) {
+      window.open(getOpenExternalUrl(execution.uid), '_blank', 'noopener,noreferrer')
     } else {
       toastError(
-        `This Workstation was launched by ${execution.launched_by} and can only be accessed by them. If you wish to use a Workstation in this Space, please launch your own execution`,
+        `This Workstation was launched by ${execution.launchedBy} and can only be accessed by them. If you wish to use a Workstation in this Space, please launch your own execution`,
       )
     }
   }
@@ -82,17 +85,17 @@ export const ExecutionActionsRow = ({
   }
 
   const getRerunExecutionLink = () => {
-    const link = `/${getBaseLink(getSpaceIdFromScope(execution.scope))}/apps/${execution.app_uid}/jobs/new`
+    const link = `/${getBaseLink(getSpaceIdFromScope(execution.scope))}/apps/${execution.appUid}/jobs/new`
     const formValues = {
       jobName: execution.name,
-      jobLimit: execution.cost_limit,
+      jobLimit: execution.costLimit,
       scope: getScope(),
-      output_folder_path: execution.run_data_updates?.output_folder_path,
+      output_folder_path: execution.runDataUpdates?.output_folder_path,
       inputs: [
         {
           id: 1,
-          fields: execution.run_data_updates?.run_inputs,
-          instanceType: computeInstances?.find(i => i.value === execution.run_data_updates?.run_instance_type),
+          fields: execution.runDataUpdates?.run_inputs,
+          instanceType: computeInstances?.find(i => i.value === execution.runDataUpdates?.run_instance_type),
         },
       ],
     }
@@ -109,12 +112,12 @@ export const ExecutionActionsRow = ({
           <Running />
         </StyledRefresh>
       )}
-      {isJobOwner && execution.entity_type === 'https' && isJobStartingOrRunning && (
+      {isJobOwner && execution.entityType === 'https' && isJobStartingOrRunning && (
         <Button
           data-variant="primary"
           data-tooltip-id="workstation-starting"
           data-tooltip-content="The workstation is starting up and you can connect to it when it is ready"
-          disabled={!execution.links.open_external}
+          disabled={!openExternalAvailable}
           onClick={onOpenWorkstationClick}
         >
           Open Workstation
@@ -125,7 +128,7 @@ export const ExecutionActionsRow = ({
           data-variant="primary"
           data-tooltip-id="workstation-starting"
           data-tooltip-content="The workstation is starting up and you can create a snapshot when it is ready"
-          disabled={!execution.links.open_external}
+          disabled={!openExternalAvailable}
           onClick={() => {
             const snapshotAction = actions.find(action => action.name === 'Snapshot')
             if (snapshotAction && snapshotAction.type === 'modal') {
@@ -136,7 +139,7 @@ export const ExecutionActionsRow = ({
           Snapshot
         </Button>
       )}
-      {execution.app_active && (
+      {execution.appActive && (
         <Link to={getRerunExecutionLink()}>
           <Button disabled={rerunDisabled} data-variant="primary">
             Re-Run Execution
@@ -152,7 +155,7 @@ export const ExecutionActionsRow = ({
           }
         />
       </ActionsMenu>
-      {isJobStartingOrRunning && !execution.links.open_external && <Tooltip id="workstation-starting" />}
+      {isJobStartingOrRunning && !openExternalAvailable && <Tooltip id="workstation-starting" />}
       <ActionModalsRenderer modals={modals} />
     </>
   )

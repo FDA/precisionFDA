@@ -47,5 +47,14 @@ describe('UidUtils', () => {
       const invalidUId = 'user-123-'
       expect(UidUtils.isValidUId(invalidUId)).to.be.false()
     })
+
+    it('should return false for a non-string value', () => {
+      expect(UidUtils.isValidUId(null)).to.be.false()
+      expect(UidUtils.isValidUId(undefined)).to.be.false()
+      expect(UidUtils.isValidUId(123)).to.be.false()
+      expect(UidUtils.isValidUId({})).to.be.false()
+      expect(UidUtils.isValidUId([])).to.be.false()
+      expect(UidUtils.isValidUId(true)).to.be.false()
+    })
   })
 })

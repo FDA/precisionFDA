@@ -5,9 +5,13 @@ import { StringUtils } from '@shared/utils/string.utils'
 
 export class UidUtils {
   static isValidUId<T extends DXEntityType = DXEntityType>(
-    value: string,
+    value: unknown,
     entityType?: T,
   ): value is Uid<T> {
+    if (typeof value !== 'string') {
+      return false
+    }
+
     const lastDashIndex = value.lastIndexOf('-')
 
     if (lastDashIndex === -1) {

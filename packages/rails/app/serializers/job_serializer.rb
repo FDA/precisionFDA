@@ -39,6 +39,7 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
     :logged_dxuser,
     :cost_limit,
     :snapshot,
+    :is_publishable,
   )
 
   attribute :started_running, key: :startedRunning
@@ -212,7 +213,12 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
   # current_user is the owner of the job, independently of object scope.
   # At the same time job should be in a terminal state and not be public already
   def publishable_by_owner
-    object.user.id == logged_user.id && object.terminal? && !object.public?
+    logged_user.present? && object.user_id == logged_user.id && object.terminal? && !object.public?
+  end
+
+  # Expose backend-owned publishability decision to the frontend.
+  def is_publishable
+    publishable_by_owner
   end
 
   # Builds links.

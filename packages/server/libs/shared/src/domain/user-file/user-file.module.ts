@@ -74,6 +74,7 @@ import { AssetScopeFilterProvider } from '@shared/domain/user-file/service/asset
     AssetScopeFilterProvider,
   ],
   exports: [
+    UserFileService,
     NodeService,
     NodeHelper,
     ArchiveEntryService,

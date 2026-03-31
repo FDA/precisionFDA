@@ -186,30 +186,7 @@ module Api
       raise ApiError, Message.bad_request(e.message)
     end
 
-    # GET /api/jobs/:id  api_job_path
-    # A fetch method for job by file :id, accessible by user.
-    # @param id [Integer] Param for job fetch.
-    # @return job Job object with arrays of assosiated objects:
-    #   notes, answers, comments, discussions, comparisons.
     # rubocop:disable Metrics/MethodLength
-    def show
-      find_job
-      load_relations(@job)
-      comments_data(@job)
-      @job.current_user = current_user
-
-      @item_comments_path = pathify_comments(@job)
-
-      render json:
-               @job, adapter: :json,
-             meta: {
-               notes: @notes,
-               answers: @answers,
-               discussions: @discussions,
-               comments: @comments,
-               links: meta_links(@job),
-             }
-    end
 
     # POST /api/jobs/terminate terminate_api_jobs_path
     # Provide a call to DNAnexusAPI - to terminate an accessible job.

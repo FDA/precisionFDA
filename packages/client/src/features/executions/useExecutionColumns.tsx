@@ -16,6 +16,7 @@ import SelectFilter, { selectFilterFn } from '../../components/Table/components/
 import { StyledLinkCell } from '../home/home.styles'
 import { getBasePath, getBasePathFromScope } from '../home/utils'
 import { IExecution } from './executions.types'
+import { getUserLink } from './executions.util'
 import { StateCell } from './StateCell'
 
 export const useExecutionColumns = ({
@@ -39,7 +40,7 @@ export const useExecutionColumns = ({
       filterFn: 'includesString',
       size: 300,
       cell: ({ row }) => {
-        const rowType = row.original.workflow_series_id ? 'workflows' : 'executions'
+        const rowType = row.original.workflowSeriesId ? 'workflows' : 'executions'
         const spaceId = getSpaceIdFromScope(row.original.scope)
         const pathname = `${getBasePath(spaceId)}/${rowType}/${row.original.uid}`
 
@@ -88,13 +89,13 @@ export const useExecutionColumns = ({
     },
     {
       header: 'Workflow',
-      id: 'workflow_title',
-      accessorKey: 'workflow_title',
+      id: 'workflowTitle',
+      accessorKey: 'workflowTitle',
       filterFn: 'includesString',
       size: 200,
       cell: ({ row }) => {
-        const rowType = row.original.workflow_series_id ? 'workflows' : 'executions'
-        const value = row.original.workflow_title
+        const rowType = row.original.workflowSeriesId ? 'workflows' : 'executions'
+        const value = row.original.workflowTitle
         const spaceId = getSpaceIdFromScope(row.original.scope)
         const pathname = `${getBasePath(spaceId)}/${rowType}/${row.original.uid}`
         if (value === 'N/A') {
@@ -136,7 +137,7 @@ export const useExecutionColumns = ({
     },
     {
       header: 'App Title',
-      accessorKey: 'app_title',
+      accessorKey: 'appTitle',
       filterFn: 'includesString',
       size: 200,
       cell: ({ row }) => {
@@ -147,11 +148,11 @@ export const useExecutionColumns = ({
 
         return (
           <StyledLinkCell
-            to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`}
-            $disable={!row.original.app_active}
+            to={`${getBasePath(spaceId)}/apps/${row.original.appUid}`}
+            $disable={!row.original.appActive}
           >
             <CubeIcon height={14} />
-            {row.original.app_title}
+            {row.original.appTitle}
           </StyledLinkCell>
         )
       },
@@ -159,12 +160,12 @@ export const useExecutionColumns = ({
     },
     {
       header: 'Launched By',
-      accessorKey: 'launched_by',
+      accessorKey: 'launchedBy',
       filterFn: 'includesString',
       size: 200,
       cell: props => (
-        <a data-turbolinks="false" href={props.row.original.links.user ?? '#'}>
-          {props.row.original.launched_by}
+        <a data-turbolinks="false" href={getUserLink(props.row.original.launchedByDxuser)}>
+          {props.row.original.launchedBy}
         </a>
       ),
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-by` } : {}),
@@ -185,7 +186,7 @@ export const useExecutionColumns = ({
     {
       header: 'Instance Type',
       accessorKey: 'jobs',
-      id: 'instance_type',
+      id: 'instanceType',
       enableColumnFilter: false,
       enableSorting: false,
       size: 170,
@@ -193,7 +194,7 @@ export const useExecutionColumns = ({
         props.row.original.jobs ? (
           <></>
         ) : (
-          <>{COMPUTE_RESOURCE_LABELS[props.row.original.instance_type] ?? props.row.original.instance_type}</>
+          <>{COMPUTE_RESOURCE_LABELS[props.row.original.instanceType] ?? props.row.original.instanceType}</>
         ),
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-instance-type` } : {}),
     },
@@ -223,21 +224,21 @@ export const useExecutionColumns = ({
       cell: props => {
         const { jobs } = props.row.original
         if (jobs) {
-          return <>{jobs[jobs.length - 1].energy_consumption}</>
+          return <>{jobs[jobs.length - 1].energyConsumption}</>
         }
-        return <>{props.row.original.energy_consumption}</>
+        return <>{props.row.original.energyConsumption}</>
       },
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-energy` } : {}),
     },
     {
       header: 'Launched On',
-      accessorKey: 'launched_on',
+      accessorKey: 'launchedOn',
       enableColumnFilter: false,
       size: 198,
       cell: props =>
-        props.row.original.launched_on === null
-          ? props.row.original.created_at_date_time
-          : props.row.original.launched_on,
+        props.row.original.launchedOn === null
+          ? props.row.original.createdAtDateTime
+          : props.row.original.launchedOn,
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-on` } : {}),
     },
     {

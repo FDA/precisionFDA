@@ -13,6 +13,7 @@ import {
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Job } from '@shared/domain/job/job.entity'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -96,6 +97,9 @@ export class App extends ScopedEntity {
   @Property()
   appSeriesId: number
 
+  @ManyToOne({ entity: () => AppSeries, nullable: true, persist: false, fieldName: 'app_series_id' })
+  appSeries?: Ref<AppSeries>
+
   // references
   @ManyToOne({ entity: () => User, serializedName: 'userId' })
   user!: Ref<User>
@@ -153,6 +157,11 @@ export class App extends ScopedEntity {
   get workstationAPIVersion(): string | null {
     const tag = this.workstationAPITag
     return tag?.split(':')[1] ?? null
+  }
+
+  @Property({ persist: false })
+  get snapshot(): boolean {
+    return this.appSeries?.getEntity()?.snapshot ?? false
   }
 
   constructor(user: User) {
