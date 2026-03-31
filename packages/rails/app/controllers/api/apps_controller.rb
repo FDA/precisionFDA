@@ -289,7 +289,10 @@ module Api
           .where("app_series.name REGEXP ? OR tags.name  REGEXP ?", query, query)
       end
 
-      apps = app_series.map do |app_serie|
+      apps = app_series.filter_map do |app_serie|
+        latest_revision_app = app_serie.latest_revision_app
+        next if latest_revision_app.nil?
+
         revisions = app_serie.accessible_revisions(@context).map do |app|
           {
             revision: app.revision,
@@ -299,8 +302,6 @@ module Api
             version: app.version,
           }
         end
-
-        latest_revision_app = app_serie.latest_revision_app
 
         {
           id: latest_revision_app.id,
