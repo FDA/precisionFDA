@@ -3,28 +3,14 @@ import { RESOURCE_TYPES } from '../admin/users/types'
 import { FileOrg, FileUser, FormInput, IOSpec } from '../apps/apps.types'
 import { ServerScope } from '../home/types'
 
-type Links = Record<string, string>
-
 export type RunInputs = { [key: string]: FormInput }
 export type RunOutputs = Record<string, string | null>
 
-interface RunDataUpdates {
+export interface RunDataUpdates {
   output_folder_path: string
   run_instance_type: (typeof RESOURCE_TYPES)[number]
   run_inputs: RunInputs
   run_outputs: RunOutputs | null
-}
-
-interface Links2 {
-  show: string
-  user: string
-  workflow: string
-  publish: string
-  log: string
-  track: string
-  attach_to: string
-  copy: string
-  app?: string
 }
 
 export type JobState = 'done' | 'failed' | 'idle' | 'running' | 'runnable' | 'terminated' | 'terminating'
@@ -35,11 +21,11 @@ export type RunData = {
   class: IOSpec['class']
   value: FormInput
   state?: 'deleted' | string
-  file_name?: string
+  fileName?: string
   scope?: ServerScope
-  file_uid?: string
-  file_names?: string[]
-  file_uids?: string[]
+  fileUid?: string
+  fileNames?: string[]
+  fileUids?: string[]
   scopes?: ServerScope[]
   type?: string
   link?: string[] | string
@@ -50,31 +36,29 @@ export interface Job {
   uid: string
   state: JobState
   name: string
-  app_title: string
-  app_revision: number
-  app_active: boolean
-  workflow_title: string
-  workflow_uid: string
-  run_input_data: RunData[]
-  run_output_data: RunData[]
-  run_data_updates: RunDataUpdates
-  instance_type: keyof typeof COMPUTE_RESOURCE_LABELS
+  appTitle: string
+  appRevision: number
+  appActive: boolean
+  workflowTitle: string
+  workflowUid: string
+  runInputData: RunData[]
+  runOutputData: RunData[]
+  runDataUpdates: RunDataUpdates
+  instanceType: keyof typeof COMPUTE_RESOURCE_LABELS
   duration: string
-  duration_in_seconds: number
-  energy_consumption: string
-  failure_reason: string
-  failure_message: string
-  created_at: string
-  created_at_date_time: string
+  durationInSeconds: number
+  energyConsumption: string
+  failureReason: string
+  failureMessage: string
+  createdAt: string
+  createdAtDateTime: string
   scope: string
   location: string
-  launched_by: string
-  launched_on: string
+  launchedBy: string
+  launchedOn: string
   featured: boolean
-  /** @deprecated create links from client side */
-  links: Links2
-  entity_type: string
-  logged_dxuser: string
+  entityType: string
+  loggedDxuser: string
   tags: string[]
 }
 
@@ -100,61 +84,72 @@ export interface IJob {
   org: FileOrg
 }
 
-export interface IExecution {
+export interface ExecutionBase {
   id: number | string
   state: JobState
   uid: string
   dxid: string
   name: string
-  title: string
-  added_by: string
-  app_revision: number
-  app_active: boolean
-  app_uid: string
-  app_title: string
-  workstation_api_version: string | null
-  run_input_data: RunData[]
-  run_output_data: RunData[]
-  run_data_updates?: RunDataUpdates
-  failure_message?: string
-  failure_reason?: string
-  created_at: string
-  created_at_date_time: string
-  energy_consumption: string
-  cost_limit: number
+  appRevision: number | null
+  appActive: boolean
+  appUid: string | null
+  appTitle: string | null
+  workstationApiVersion: string | null
+  runInputData: RunData[]
+  runOutputData: RunData[]
+  runDataUpdates?: RunDataUpdates
+  failureMessage?: string
+  failureReason?: string
+  createdAt: string
+  createdAtDateTime: string
+  energyConsumption: string
+  costLimit: number | null
   duration: string
-  duration_in_seconds: number
-  startedRunning?: number
-  stoppedRunning?: number
+  durationInSeconds: number
+  startedRunning?: number | null
+  stoppedRunning?: number | null
   showLicensePending?: boolean
-  instance_type: keyof typeof COMPUTE_RESOURCE_LABELS
-  launched_by: string
-  launched_by_dxuser: string
-  launched_on: string
+  instanceType: keyof typeof COMPUTE_RESOURCE_LABELS
+  launchedBy: string
+  launchedByDxuser: string
+  launchedOn: string
   location: string
-  revision: number
-  readme: string
-  workflow_series_id: number | string
-  version: string
   scope: ServerScope
   featured: boolean
-  active: boolean
-  /** @deprecated create links from client side */
-  links: Links
-  jobs?: Job[]
-  logged_dxuser: string
+  loggedDxuser: string
   tags: string[]
   properties: {
     [key: string]: string
   }
-  workflow_uid?: string
-  platform_tags?: null
-  workflow_title?: string
   snapshot: boolean
-  entity_type: 'regular' | 'https'
+  entityType: 'regular' | 'https'
+  httpsAppState?: JobState | null
+  jobs?: Job[]
+  platformTags: string[] | null
 }
 
-// IExeuction's uid attribute can have the following prefixes
+export interface ExecutionListItem extends ExecutionBase {
+  workflowUid: string
+  workflowTitle: string
+  title: string
+  addedBy: string
+  revision: number
+  readme: string
+  workflowSeriesId: number | string
+  version: string
+  active: boolean
+  isPublishable: boolean
+}
+
+export type ExecutionDetail = ExecutionBase
+
+/**
+ * Legacy alias kept for broad call sites; prefer `ExecutionListItem` or `ExecutionDetail`
+ * when endpoint shape is known.
+ */
+export type IExecution = ExecutionBase
+
+// IExecution uid can have the following prefixes
 export const jobExecutionPrefix = 'job-'
 export const workflowExecutionPrefix = 'workflow-'
 

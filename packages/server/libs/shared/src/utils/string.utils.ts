@@ -36,4 +36,12 @@ export class StringUtils {
   static escapeRegExp(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   }
+
+  static titleize(str: string): string {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
 }

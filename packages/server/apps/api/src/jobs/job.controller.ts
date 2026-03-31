@@ -1,7 +1,8 @@
-import { Body, Controller, Param, Patch, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, Param, Patch, UseGuards } from '@nestjs/common'
 import { ApiOperation } from '@nestjs/swagger'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body.dto'
+import { JobGetDTO } from '@shared/domain/job/dto/job-get.dto'
 import { JobSnapshotBodyDTO } from '@shared/domain/job/dto/job-snapshot-body.dto'
 import { JobUidParamDTO } from '@shared/domain/job/dto/job-uid-param.dto'
 import { WorkstationAliveBodyDTO } from '@shared/domain/job/dto/workstation-alive-body.dto'
@@ -10,6 +11,7 @@ import { JobService } from '@shared/domain/job/job.service'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { JobWorkstationFacade } from '@shared/facade/job/job-workstation.facade'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
+import { JobGetFacade } from '../facade/job/get-facade/job-get.facade'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { DxidValidationPipe } from '../validation/pipes/dxid.pipe'
@@ -22,7 +24,15 @@ export class JobController {
     private readonly jobService: JobService,
     private readonly mainQueueJobProducer: MainQueueJobProducer,
     private readonly jobWorkstationFacade: JobWorkstationFacade,
+    private readonly jobGetFacade: JobGetFacade,
   ) {}
+
+  @ApiOperation({ summary: 'Get job details by uid' })
+  @HttpCode(200)
+  @Get(':uid')
+  async show(@Param() params: JobUidParamDTO): Promise<JobGetDTO> {
+    return await this.jobGetFacade.getJob(params.uid)
+  }
 
   // ------------------------
   //    HTTPS Workstations

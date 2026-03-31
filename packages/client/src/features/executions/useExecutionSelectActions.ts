@@ -12,7 +12,7 @@ import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { HomeScope } from '../home/types'
 import { copyJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
-import { getExecutionJobsList } from './executions.util'
+import { getExecutionJobsList, isOpenExternalAvailable, isPublishable } from './executions.util'
 import { useSnapshotModal } from './useSnapshotModal'
 import { useTerminateModal } from './useTerminateModal'
 
@@ -34,7 +34,7 @@ export const useExecutionSelectActions = ({
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user ? user.admin : false
-  const isJobOwner = user?.dxuser === selected[0]?.launched_by_dxuser
+  const isJobOwner = user?.dxuser === selected[0]?.launchedByDxuser
 
   const featureMutation = useFeatureMutation({
     resource: 'jobs',
@@ -43,7 +43,6 @@ export const useExecutionSelectActions = ({
     },
   })
 
-  // An IExecution can be either a job (app) or workflow, in the case of the workflow
   const selectedJobs = getExecutionJobsList(selected)
 
   const {
@@ -116,7 +115,7 @@ export const useExecutionSelectActions = ({
       name: 'Copy to space',
       type: 'modal',
       func: () => setCopyToSpaceModal(true),
-      isDisabled: selected.length === 0 || selected.some(e => !e.links?.copy),
+      isDisabled: selected.length === 0,
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
@@ -124,14 +123,14 @@ export const useExecutionSelectActions = ({
       name: 'Feature',
       type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) }),
-      isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
+      isDisabled: selected.length === 0 || selected.every(e => e.featured),
       shouldHide: !isAdmin || homeScope !== 'everybody',
     },
     {
       name: 'Unfeature',
       type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) }),
-      isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
+      isDisabled: selected.length === 0 || selected.every(e => !e.featured),
       shouldHide: !isAdmin || (homeScope !== 'everybody' && homeScope !== 'featured'),
     },
     {
@@ -139,7 +138,7 @@ export const useExecutionSelectActions = ({
       type: 'route',
       isDisabled:
         selected.length !== 1 ||
-        !selected[0]?.links?.publish ||
+        !isPublishable(selected[0], user?.dxuser) ||
         (selected[0].jobs && selected[0].scope === 'private') ||
         !user?.allowed_to_publish,
       to: `/publish?identifier=${selected[0]?.uid}&type=job`,
@@ -149,7 +148,7 @@ export const useExecutionSelectActions = ({
       name: 'Snapshot',
       type: 'modal',
       func: () => setSnapshotModal(true),
-      isDisabled: selected.length !== 1 || selected.some(e => !e.links?.open_external),
+      isDisabled: selected.length !== 1 || selected.some(e => !isOpenExternalAvailable(e)),
       shouldHide: selected.some(e => !e.snapshot),
       modal: snapshotModal,
       showModal: isSnapshotModal,
@@ -184,8 +183,6 @@ export const useExecutionSelectActions = ({
     if (isJobOwner) {
       actions = actions.filter(action => !['Make Public', 'Feature', 'Unfeature'].includes(action.name))
     } else {
-      // If the user is not the owner of the job in a space, they cannot connect
-      // to the workstation or perform other actions where ownership is needed
       actions = actions.filter(action =>
         ['Track', 'Copy to space', 'Comments', 'Edit tags', 'Edit properties'].includes(action.name),
       )

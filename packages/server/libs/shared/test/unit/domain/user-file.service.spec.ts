@@ -10,12 +10,7 @@ import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import {
-  FILE_STATE_DX,
-  FILE_STI_TYPE,
-  PARENT_TYPE,
-  SelectedFile,
-} from '@shared/domain/user-file/user-file.types'
+import { FILE_STATE_DX, FILE_STI_TYPE, PARENT_TYPE, SelectedFile } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
 import { ASSET_VALIDATION_ERROR, PermissionError, ValidationError } from '@shared/errors'
@@ -30,7 +25,6 @@ import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-even
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Organization } from '@shared/domain/org/organization.entity'
 
 describe('UserFileService', () => {
@@ -43,7 +37,7 @@ describe('UserFileService', () => {
   const FILE_SCOPE = STATIC_SCOPE.PRIVATE
   const DESCRIPTION = 'description'
   const STATE = FILE_STATE_DX.OPEN
-  const PROJECT = 'project'
+  const PROJECT = 'project-1'
   const DXID = 'file-dxid'
   const UID = `${DXID}-1`
   const NAME = 'name'
@@ -72,6 +66,8 @@ describe('UserFileService', () => {
   const userRepoFindOneOrFailStub = stub()
   const fileRepoFindOneOrFailStub = stub()
   const fileRepoFindOneStub = stub()
+  const fileRepoFindAccessibleStub = stub()
+  const fileRepoFindStub = stub()
   const fileRepoCountStub = stub()
   const fileLoadIfAccessibleByUserStub = stub()
   const folderRepoFindOneStub = stub()
@@ -172,6 +168,8 @@ describe('UserFileService', () => {
     loadIfAccessibleByUser: fileRepoFindOneOrFailStub,
     findOneOrFail: fileRepoFindOneOrFailStub,
     findOne: fileRepoFindOneStub,
+    findAccessible: fileRepoFindAccessibleStub,
+    find: fileRepoFindStub,
     count: fileRepoCountStub,
     findEditable: findEditableStub,
   } as unknown as UserFileRepository
@@ -237,6 +235,12 @@ describe('UserFileService', () => {
 
     fileRepoFindOneStub.reset()
     fileRepoFindOneStub.throws()
+
+    fileRepoFindAccessibleStub.reset()
+    fileRepoFindAccessibleStub.throws()
+
+    fileRepoFindStub.reset()
+    fileRepoFindStub.throws()
 
     folderRepoFindOneStub.reset()
     folderRepoFindOneStub.throws()
@@ -313,7 +317,7 @@ describe('UserFileService', () => {
     emPopulateStub.reset()
     emPopulateStub.throws()
 
-    transactionalStub.callsFake(async (callback) => {
+    transactionalStub.callsFake(async callback => {
       return callback(em)
     })
 
@@ -660,10 +664,14 @@ describe('UserFileService', () => {
       } as unknown as Node
       spaceFindOneStub.returns({
         spaceMemberships: {
-          getItems: () => ({
-            find: (membership): SpaceMembership => membership
-          }),
+          getItems: () => [
+            {
+              role: 3,
+              user: { id: 1 },
+            },
+          ],
         },
+        protected: true,
       } as unknown as Space)
 
       await userFileService.validateProtectedSpaces('action', 1, nodeInSpace)
@@ -725,6 +733,63 @@ describe('UserFileService', () => {
         ValidationError,
         ASSET_VALIDATION_ERROR,
       )
+    })
+  })
+
+  describe('#getFilesByUids', () => {
+    it('returns [] for empty input', async () => {
+      const userFileService = getInstance()
+      const result = await userFileService.getFilesByUids([])
+
+      expect(result).to.deep.equal([])
+      expect(findAccessibleStub.notCalled).to.equal(true)
+    })
+
+    it('queries repository by uid set', async () => {
+      const files = [{ uid: 'file-G111-1' } as unknown as UserFile]
+      findAccessibleStub.withArgs({ uid: { $in: ['file-G111-1'] }, stiType: FILE_STI_TYPE.USERFILE }).resolves(files)
+
+      const userFileService = getInstance()
+      const result = await userFileService.getFilesByUids(['file-G111-1'])
+
+      expect(
+        findAccessibleStub.calledOnceWithExactly({
+          uid: { $in: ['file-G111-1'] },
+          stiType: FILE_STI_TYPE.USERFILE,
+        }),
+      ).to.equal(true)
+      expect(result).to.equal(files)
+    })
+  })
+
+  describe('#getFilesByDxidsInProject', () => {
+    it('returns [] for empty input', async () => {
+      const userFileService = getInstance()
+      const result = await userFileService.getFilesByDxidsInProject([], 'project-G111')
+
+      expect(result).to.deep.equal([])
+      expect(findAccessibleStub.notCalled).to.equal(true)
+    })
+
+    it('queries repository by dxid set and project', async () => {
+      const files = [{ dxid: 'file-G222' } as unknown as UserFile]
+      fileRepoFindAccessibleStub
+        .withArgs({
+          dxid: { $in: ['file-G222'] },
+          project: 'project-G111',
+        })
+        .resolves(files)
+
+      const userFileService = getInstance()
+      const result = await userFileService.getFilesByDxidsInProject(['file-G222'], 'project-G111')
+
+      expect(
+        fileRepoFindAccessibleStub.calledOnceWithExactly({
+          dxid: { $in: ['file-G222'] },
+          project: 'project-G111',
+        }),
+      ).to.equal(true)
+      expect(result).to.equal(files)
     })
   })
 

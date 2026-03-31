@@ -27,7 +27,7 @@ async function fetchEntityScope(identifier: string, entityType: EntityType): Pro
     }
     case 'execution': {
       const data = await fetchExecution(identifier)
-      return { scope: data.job.scope, featured: data.job.featured }
+      return { scope: data.scope, featured: data.featured }
     }
     default:
       // For comparison and note, default to private scope

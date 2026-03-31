@@ -1,4 +1,3 @@
-import { invertObj } from 'ramda'
 import {
   DB_SYNC_STATUS,
   DB_SYNC_STATUSES,
@@ -16,6 +15,9 @@ import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-mem
 import { Space } from '@shared/domain/space/space.entity'
 import { EntityScope } from '@shared/types/common'
 import { DbCluster } from '../db-cluster.entity'
+import { invertObj } from 'ramda'
+import { resolveSpaceLocation } from '@shared/domain/space/space.helper'
+import { StringUtils } from '@shared/utils/string.utils'
 
 export class DbClusterDTO {
   id: number
@@ -72,7 +74,7 @@ export class DbClusterDTO {
       title: dbcluster.name,
       status: STATUSES[invertObj(STATUS)[dbcluster.status]],
       syncStatus: DB_SYNC_STATUSES[invertObj(DB_SYNC_STATUS)[dbcluster.syncStatus]],
-      location: space ? getLocation(space) : titleize(dbcluster.scope),
+      location: space ? resolveSpaceLocation(space) : StringUtils.titleize(dbcluster.scope),
       scopeName: dbcluster.scope,
       description: dbcluster.description,
       addedBy: dbcluster.user.getProperty('dxuser'),
@@ -104,19 +106,4 @@ export class DbClusterDTO {
       ...(membership && { currentUserRole: spaceMembershipTypeToNameMap[membership.role] }),
     }
   }
-}
-
-const titleize = (str: string): string => {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toLocaleUpperCase() + word.slice(1))
-    .join(' ')
-}
-const getLocation = (space: Space): string => {
-  if (space.isConfidential()) {
-    return `${space.name} - Private`
-  }
-
-  return `${space.name} - Shared`
 }

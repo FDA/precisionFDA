@@ -354,6 +354,7 @@ export type JobDescribeResponse = {
   startedRunning?: number
   stoppedRunning?: number
   totalPrice?: number
+  costLimit?: number
 } & AnyObject
 
 export type UpdateBillingInformationResponse = {

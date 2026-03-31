@@ -19,12 +19,7 @@ import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import {
-  ASSET_VALIDATION_ERROR,
-  DeleteRelationError,
-  PermissionError,
-  ValidationError,
-} from '@shared/errors'
+import { ASSET_VALIDATION_ERROR, DeleteRelationError, PermissionError, ValidationError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { FileDescribeResponse } from '@shared/platform-client/platform-client.responses'
@@ -67,10 +62,7 @@ export class UserFileService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async getRunnableFileByAccessibleScope(
-    uids: Uid<'file'>[],
-    accessibleScope: EntityScope,
-  ): Promise<FileOrAsset[]> {
+  async getRunnableFileByAccessibleScope(uids: Uid<'file'>[], accessibleScope: EntityScope): Promise<FileOrAsset[]> {
     let accessibleWhere = {}
     if (accessibleScope === STATIC_SCOPE.PRIVATE) {
       accessibleWhere = { user: this.userCtx.id, scope: STATIC_SCOPE.PRIVATE }
@@ -80,6 +72,28 @@ export class UserFileService {
     return this.fileRepo.find({
       uid: { $in: uids },
       $or: [{ scope: STATIC_SCOPE.PUBLIC }, { ...accessibleWhere }],
+    })
+  }
+
+  async getFilesByUids(uids: Uid<'file'>[]): Promise<UserFile[]> {
+    if (uids.length === 0) {
+      return []
+    }
+
+    return this.nodeRepo.findAccessible({
+      uid: { $in: uids },
+      stiType: FILE_STI_TYPE.USERFILE,
+    }) as Promise<UserFile[]>
+  }
+
+  async getFilesByDxidsInProject(dxids: DxId<'file'>[], project: DxId<'project'>): Promise<UserFile[]> {
+    if (dxids.length === 0) {
+      return []
+    }
+
+    return this.fileRepo.findAccessible({
+      dxid: { $in: dxids },
+      project,
     })
   }
 
@@ -144,10 +158,7 @@ export class UserFileService {
     const userIsAdmin = (await user.isSiteAdmin()) || (await user.isChallengeAdmin())
     if (userIsAdmin) {
       // first read file to find out if it's a challenge file
-      const challengeFile = await this.fileRepo.findOne(
-        { uid: fileUid },
-        { populate: ['challengeResources', 'user'] },
-      )
+      const challengeFile = await this.fileRepo.findOne({ uid: fileUid }, { populate: ['challengeResources', 'user'] })
       if (challengeFile?.isCreatedByChallengeBot()) {
         return [challengeFile, true]
       }
@@ -225,9 +236,7 @@ export class UserFileService {
       return
     }
     if (file.state !== FILE_STATE_DX.OPEN) {
-      throw new ValidationError(
-        `File ${fileUid} is not in open state. Current state: "${file.state}"`,
-      )
+      throw new ValidationError(`File ${fileUid} is not in open state. Current state: "${file.state}"`)
     }
 
     await this.closeFileOnPlatform(file.dxid, isChallengeBotFile)
@@ -361,9 +370,7 @@ export class UserFileService {
       } as SelectedFolder
       for (const child of children) {
         if (child.isFile) {
-          const folderId = child.scope.startsWith('space')
-            ? child.scopedParentFolderId
-            : child.parentFolderId
+          const folderId = child.scope.startsWith('space') ? child.scopedParentFolderId : child.parentFolderId
           folder.children.push(await this.mapFileInformation(child, folderId))
         }
       }
@@ -383,13 +390,13 @@ export class UserFileService {
     const existingFiles = {} as ExistingFileSet
     const user = await this.userCtx.loadEntity()
     const editableSpaces = await user.editableSpaces()
-    const editableScopes = editableSpaces.map((space) => space.scope)
+    const editableScopes = editableSpaces.map(space => space.scope)
     if (targetScope !== 'private' && editableScopes.indexOf(targetScope as SpaceScope) === -1) {
       throw new PermissionError('You do not have permission to copy files to this scope')
     }
 
     const uidsMap: Map<DxId<'file'>, string> = new Map()
-    uids.forEach((uid) => {
+    uids.forEach(uid => {
       const lastDashIndex = uid.lastIndexOf('-')
       const dxid = uid.substring(0, lastDashIndex) as DxId<'file'>
       uidsMap.set(dxid, uid)
@@ -403,12 +410,12 @@ export class UserFileService {
     })
 
     const fileMap: Map<DxId<'file'>, UserFile> = new Map()
-    checkedFiles.forEach((file) => {
+    checkedFiles.forEach(file => {
       fileMap.set(file.dxid, file)
     })
 
     await Promise.all(
-      checkedFiles.map(async (file) => {
+      checkedFiles.map(async file => {
         const uid = uidsMap.get(file.dxid)
         if (file) {
           existingFiles[uid] = {
@@ -446,10 +453,7 @@ export class UserFileService {
 
     const isLeadMember = space.spaceMemberships
       .getItems()
-      .some(
-        (membership) =>
-          membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === userId,
-      )
+      .some(membership => membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === userId)
 
     if (!isLeadMember) {
       throw new Error(`You have no permissions to ${action} from a Protected Space`)

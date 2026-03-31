@@ -43,6 +43,8 @@ import { App } from '../app/app.entity'
 import { RunAppDTO } from '../app/dto/run-app.dto'
 import { DxId } from '../entity/domain/dxid'
 import { EventHelper } from '../event/event.helper'
+import { getIdFromScopeName } from '../space/space.helper'
+import { Space } from '../space/space.entity'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { JobInput, Provenance } from './job.input'
@@ -102,6 +104,12 @@ export class JobService implements SearchableByUid<'job'> {
       throw new errors.NotFoundError(`Job ${dxid} was not found or is not accessible`)
     }
     return job
+  }
+
+  async getSpaceForJob(job: Job): Promise<Space | null> {
+    if (!job.isInSpace()) return null
+    const spaceId = getIdFromScopeName(job.scope)
+    return await this.spaceRepo.findAccessibleOne({ id: spaceId })
   }
 
   async findAllRunningJobs(): Promise<Job[]> {
@@ -369,8 +377,7 @@ export class JobService implements SearchableByUid<'job'> {
   private remapFiles(outputParam: JobOutput): JobOutput {
     const output = JSON.parse(JSON.stringify(outputParam))
     for (const key in output) {
-      // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
-      if (output.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(output, key)) {
         const value = output[key]
         if (Array.isArray(value)) {
           this.remapArrayOfFiles(value, output, key)
@@ -406,8 +413,7 @@ export class JobService implements SearchableByUid<'job'> {
   private collectIds(output: JobOutput): string[] {
     const uniqueFileDxIds = new Set<string>()
     for (const key in output) {
-      // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
-      if (output.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(output, key)) {
         const value = output[key]
         if (Array.isArray(value)) {
           value.forEach(item => {

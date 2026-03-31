@@ -30,6 +30,7 @@ import { getBasePath } from '../../home/utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
 import { fetchExecution } from '../executions.api'
 import { IExecution } from '../executions.types'
+import { getUserLink } from '../executions.util'
 import { InputsAndOutputs } from '../InputsAndOutputs'
 import { Logs } from '../Log'
 import { StateCell } from '../StateCell'
@@ -57,12 +58,12 @@ export const ExecutionDetails = ({
     return `$${parseFloat((runtimeHours * perHourCost).toFixed(2))}`
   }
 
-  const { data, isLoading, refetch, isFetching } = useQuery({
+  const { data: execution, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['execution', executionUid],
     queryFn: () =>
       fetchExecution(executionUid!).then(d => {
         if (isHome) {
-          setDisplayScope(d.job.scope, d.job.featured)
+          setDisplayScope(d.scope, d.featured)
         }
         return d
       }),
@@ -88,30 +89,26 @@ export const ExecutionDetails = ({
     })
   }, [lastJsonMessage, queryCache, executionUid])
 
-  const execution = data?.job
-
   const [liveMetrics, setLiveMetrics] = useState({ cost: '$0', duration: '0s' })
 
   const updateCostAndDuration = useEffectEvent(() => {
-    const e = data?.job
-    if (!e?.startedRunning) {
+    if (!execution?.startedRunning) {
       return
     }
     const now = Date.now()
 
-    const durationInSeconds = Math.floor((now - e.startedRunning) / 1000)
+    const durationInSeconds = Math.floor((now - execution.startedRunning) / 1000)
 
     const days = Math.floor(durationInSeconds / (24 * 3600))
     const hours = Math.floor((durationInSeconds % (24 * 3600)) / 3600)
     const minutes = Math.floor((durationInSeconds % 3600) / 60)
     const seconds = durationInSeconds % 60
 
-    // Create a human-readable string
     const duration = `${days > 0 ? `${days} ${pluralize('day', days)}` : ''}${
       hours > 0 ? `${hours} ${pluralize('hour', hours)} ` : ''
     }${minutes > 0 ? `${minutes} ${pluralize('minute', minutes)} ` : ''}${seconds} ${pluralize('second', seconds)}`
 
-    const cost = calculateCost(durationInSeconds, e.instance_type)
+    const cost = calculateCost(durationInSeconds, execution.instanceType)
 
     setLiveMetrics({ cost, duration })
   })
@@ -137,11 +134,11 @@ export const ExecutionDetails = ({
 
   const getCostMetadataItem = (e: IExecution) => {
     const isActiveState = e.state === 'running' || e.state === 'terminating'
-    const calculatedCost = calculateCost(e.duration_in_seconds, e.instance_type)
+    const calculatedCost = calculateCost(e.durationInSeconds, e.instanceType)
 
     let finalCost: string
     if (!isActiveState) {
-      finalCost = e.energy_consumption === 'N/A' ? calculatedCost : e.energy_consumption
+      finalCost = e.energyConsumption === 'N/A' ? calculatedCost : e.energyConsumption
     } else {
       finalCost = liveMetrics.cost
     }
@@ -182,9 +179,9 @@ export const ExecutionDetails = ({
                 <BoltIcon />
                 <span data-testid="execution-name">{execution.name}</span>
               </Title>
-              {execution?.failure_message && (
+              {execution?.failureMessage && (
                 <FailureMessage>
-                  {execution?.failure_reason}: {execution.failure_message}
+                  {execution?.failureReason}: {execution.failureMessage}
                 </FailureMessage>
               )}
             </TitleLeft>
@@ -240,10 +237,9 @@ export const ExecutionDetails = ({
 
             <MetadataItem>
               <MetadataKey>APP</MetadataKey>
-              {/* TODO: do not rely on link to get app id */}
               <MetadataVal data-testid="execution-app-title">
-                <StyledLink to={`${getBasePath(spaceId)}/apps/${execution.app_uid}`} $disable={!execution.app_active}>
-                  {execution.app_title}
+                <StyledLink to={`${getBasePath(spaceId)}/apps/${execution.appUid}`} $disable={!execution.appActive}>
+                  {execution.appTitle}
                 </StyledLink>
               </MetadataVal>
             </MetadataItem>
@@ -251,21 +247,21 @@ export const ExecutionDetails = ({
             <MetadataItem>
               <MetadataKey>Launched By</MetadataKey>
               <MetadataVal data-testid="execution-launched-by">
-                <Link target="_blank" to={execution.links.user!}>
-                  {execution.launched_by}
+                <Link target="_blank" to={getUserLink(execution.launchedByDxuser)}>
+                  {execution.launchedBy}
                 </Link>
               </MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
               <MetadataKey>Created On</MetadataKey>
-              <MetadataVal data-testid="execution-created">{execution.created_at_date_time}</MetadataVal>
+              <MetadataVal data-testid="execution-created">{execution.createdAtDateTime}</MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
               <MetadataKey>Instance Type</MetadataKey>
               <MetadataVal data-testid="execution-instance-type">
-                {COMPUTE_RESOURCE_LABELS[execution.instance_type] ?? execution.instance_type}
+                {COMPUTE_RESOURCE_LABELS[execution.instanceType] ?? execution.instanceType}
               </MetadataVal>
             </MetadataItem>
           </MetadataRow>
@@ -277,7 +273,7 @@ export const ExecutionDetails = ({
             {getCostMetadataItem(execution)}
             <MetadataItem>
               <MetadataKey>App Revision</MetadataKey>
-              <MetadataVal data-testid="execution-app-revision">{execution.app_revision}</MetadataVal>
+              <MetadataVal data-testid="execution-app-revision">{execution.appRevision}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
@@ -340,8 +336,8 @@ export const ExecutionDetails = ({
             element={
               <InputsAndOutputs
                 executionState={execution.state}
-                runInputData={execution.run_input_data}
-                runOutputData={execution.run_output_data}
+                runInputData={execution.runInputData}
+                runOutputData={execution.runOutputData}
               />
             }
           />

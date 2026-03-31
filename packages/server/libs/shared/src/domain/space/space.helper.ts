@@ -82,12 +82,21 @@ const isAcceptedBy = (
   )
 }
 
+/** Resolve a human-readable location label: "SpaceName - Private/Shared". */
+const resolveSpaceLocation = (space: Space): string => {
+  if (space.isConfidential()) {
+    return `${space.name} - Private`
+  }
+  return `${space.name} - Shared`
+}
+
 export {
   getIdFromScopeName,
   getOppositeOrgDxid,
   getOrgDxid,
   getProjectDxid,
   isAcceptedBy,
+  resolveSpaceLocation,
   scopeContainsId,
   setOrgDxid,
   setProjectDxid,

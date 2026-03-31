@@ -2,7 +2,7 @@
 
 import { createMockExecution, createMockWorkflowExecution } from '../../test/mocks'
 import { IExecution } from './executions.types'
-import { getExecutionJobsList, isJobExecution, isWorkflowExecution } from './executions.util'
+import { getExecutionJobsList, isJobExecution, isOpenExternalAvailable, isWorkflowExecution } from './executions.util'
 
 
 describe('isJobExecution()', () => {
@@ -61,5 +61,39 @@ describe('getExecutionJobsList()', () => {
     expect(jobs[0]).toEqual('job-1-1')
     expect(jobs[2]).toEqual('workflow-2-1-job-1')
     expect(jobs[6]).toEqual('workflow-4-1-job-2')
+  })
+})
+
+describe('isOpenExternalAvailable()', () => {
+  it('returns false when execution is not https or not running', () => {
+    const regular = createMockExecution('job-1', 'job-1-1')
+    regular.entityType = 'regular'
+    expect(isOpenExternalAvailable(regular)).toBeFalsy()
+
+    const httpsNotRunning = createMockExecution('job-2', 'job-2-1')
+    httpsNotRunning.entityType = 'https'
+    httpsNotRunning.state = 'runnable'
+    expect(isOpenExternalAvailable(httpsNotRunning)).toBeFalsy()
+  })
+
+  it('returns true for running https execution when app-state gating is not enabled', () => {
+    const execution = createMockExecution('job-3', 'job-3-1')
+    execution.entityType = 'https'
+    execution.state = 'running'
+    execution.platformTags = ['pfda_workstation_api:1.2.0']
+
+    expect(isOpenExternalAvailable(execution)).toBeTruthy()
+  })
+
+  it('requires httpsAppState to be running when pfda_httpsAppState_enabled is present', () => {
+    const execution = createMockExecution('job-4', 'job-4-1')
+    execution.entityType = 'https'
+    execution.state = 'running'
+    execution.platformTags = ['pfda_httpsAppState_enabled']
+
+    expect(isOpenExternalAvailable(execution)).toBeFalsy()
+
+    execution.httpsAppState = 'running'
+    expect(isOpenExternalAvailable(execution)).toBeTruthy()
   })
 })

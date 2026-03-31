@@ -5,7 +5,7 @@ import { CopyResponse } from '../actionModals/useCopyToPrivateModal'
 import { CopyToSpaceProperties } from '../actionModals/useCopyToSpace'
 import { DeleteResponse } from '../actionModals/useDeleteModal'
 import { fetchAccessibleFiles, FetchAccessibleFilesResponse } from '../databases/databases.api'
-import { IExecution } from '../executions/executions.types'
+import { ExecutionListItem } from '../executions/executions.types'
 import { FileScope } from '../files/files.types'
 import { ApiResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
 import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
@@ -102,7 +102,7 @@ export async function fetchFilteredApps(searchString: string, scopes: ServerScop
 }
 
 export interface FetchAppsExecutionsResponse {
-  jobs: IExecution[]
+  jobs: ExecutionListItem[]
   meta: IMeta
 }
 

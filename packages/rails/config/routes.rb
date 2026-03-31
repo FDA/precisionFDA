@@ -348,7 +348,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :jobs, only: %i(index show create) do
+      resources :jobs, only: %i(index create) do
         get :open_external, on: :member
         patch :refresh_api_key, on: :member
         get :describe, on: :member, to: "jobs#describe"

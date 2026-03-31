@@ -160,12 +160,12 @@ export const InputsAndOutputs = ({
       const { state } = e
 
       if (e.class === 'file') {
-        value = e.state !== 'deleted' ? e.file_name : 'Output file has been deleted'
-        link = e.state !== 'deleted' && e.file_uid ? `${getBasePathFromScope(e.scope)}/files/${e.file_uid}` : ''
+        value = e.state !== 'deleted' ? e.fileName : 'Output file has been deleted'
+        link = e.state !== 'deleted' && e.fileUid ? `${getBasePathFromScope(e.scope)}/files/${e.fileUid}` : ''
       }
       if (e.class === 'array:file') {
-        value = e.file_names
-        link = e.file_uids?.map((uid, index) => `${getBasePathFromScope(e.scopes?.[index])}/files/${uid}`) || []
+        value = e.fileNames
+        link = e.fileUids?.map((uid, index) => `${getBasePathFromScope(e.scopes?.[index])}/files/${uid}`) || []
       }
 
       return {
