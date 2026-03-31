@@ -1634,8 +1634,7 @@ class ApiController < ApplicationController
       params[:scope].presence || Scopes::SCOPE_PRIVATE
     end
 
-    unless [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE].include?(@scope) ||
-           Space.valid_scope?(@scope)
+    unless [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE].include?(@scope) || Space.valid_scope?(@scope)
       raise_api_error "Scope is invalid"
     end
 

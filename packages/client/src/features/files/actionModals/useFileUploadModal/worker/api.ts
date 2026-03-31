@@ -41,11 +41,11 @@ export async function createFileRequest(session: WorkerSession): Promise<void> {
       signal: controller.signal,
     })
 
-    if (!response.ok) {
-      throw new CreateFileError(`Failed to create file: ${response.statusText}`, response.status)
-    }
-
     const result = await response.json()
+
+    if (!response.ok) {
+      throw new CreateFileError(`Failed to create file: ${result.error.message}`, response.status)
+    }
 
     if (result.message?.type === 'error') {
       const errorText = Array.isArray(result.message.text) ? result.message.text.join(', ') : result.message.text

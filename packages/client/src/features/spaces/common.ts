@@ -1,5 +1,8 @@
-import { IFile } from '../files/files.types'
-import { ISpace, SpaceType } from './spaces.types'
+import type { IFile } from '../files/files.types'
+import type { MemberRole } from './members/members.types'
+import type { ISpace, SpaceType } from './spaces.types'
+
+export const CONTRIBUTOR_OR_HIGHER_ROLES: MemberRole[] = ['lead', 'admin', 'contributor']
 
 export const SpaceTypeName = {
   groups: 'Group',
@@ -9,7 +12,7 @@ export const SpaceTypeName = {
   administrator: 'Administrator',
 } as Record<ISpace['type'], string>
 
-export const getHostLeadLabel = (type: SpaceType) => {
+export const getHostLeadLabel = (type: SpaceType): string => {
   if (type === 'review') {
     return 'Reviewer Lead'
   }
@@ -19,7 +22,7 @@ export const getHostLeadLabel = (type: SpaceType) => {
   return ''
 }
 
-export const getGuestLeadLabel = (type: SpaceType) => {
+export const getGuestLeadLabel = (type: SpaceType): string => {
   if (type === 'review') {
     return 'Reviewer Lead'
   }
@@ -32,7 +35,7 @@ export const getGuestLeadLabel = (type: SpaceType) => {
 /**
  * Disable action if current user is not a space lead.
  */
-export const isActionDisabledBasedOnRole = (userId?: number, space?: ISpace) => {
+export const isActionDisabledBasedOnRole = (userId?: number, space?: ISpace): boolean => {
   if (!space) {
     return false
   }
@@ -42,16 +45,24 @@ export const isActionDisabledBasedOnRole = (userId?: number, space?: ISpace) => 
 /**
  * Disable action if space is protected and current user is not lead.
  */
-export const isActionDisabledBasedOnProtected = (userId?: number, space?: ISpace) => {
+export const isActionDisabledBasedOnProtected = (userId?: number, space?: ISpace): boolean => {
   if (!space?.protected) {
     return false
   }
   return isActionDisabledBasedOnRole(userId, space)
 }
 
-export const isActionDisabledBasedOnLocked = (files: IFile[], userId?: number, space?: ISpace) => {
-  if (files.every((file) => !file.locked)) {
+export const isActionDisabledBasedOnLocked = (files: IFile[], userId?: number, space?: ISpace): boolean => {
+  if (files.every(file => !file.locked)) {
     return false
   }
   return isActionDisabledBasedOnRole(userId, space)
+}
+
+export const isContributorOrHigherRole = (role: MemberRole): boolean => {
+  if (!role) {
+    return false
+  }
+
+  return CONTRIBUTOR_OR_HIGHER_ROLES.includes(role)
 }
