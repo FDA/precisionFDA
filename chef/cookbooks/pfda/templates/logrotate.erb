@@ -1,8 +1,0 @@
-<% @log_dirs.each do |dir| %><%= dir %>/*.log <% end %> {
-  <%= @period %>
-  rotate <%= @retention %>
-  copytruncate
-  compress
-  missingok
-  notifempty
-}
