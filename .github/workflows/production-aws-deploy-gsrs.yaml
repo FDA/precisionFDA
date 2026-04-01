@@ -18,7 +18,7 @@ on:
       DATABASE_NAME:
         description: GSRS Database and Index Name
         type: string
-        default: ixginas20260219
+        default: ixginas20260305
       FORCE_DEPLOY_SERVICES:
         description: "Comma-separated list of services to force redeploy (e.g., gsrs-web, gsrs-nginx)"
         required: false
