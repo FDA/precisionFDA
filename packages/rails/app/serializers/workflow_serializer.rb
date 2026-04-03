@@ -79,6 +79,14 @@ class WorkflowSerializer < ApplicationSerializer
     @launched_on = formatted_date_time(launched_on || Time.current)
   end
 
+  # Returns the cost of the last sub-job, matching frontend display behavior.
+  # Needed for in-memory sorting of mixed Job/Workflow arrays by cost.
+  def energy_consumption
+    return "N/A" if jobs.blank?
+
+    jobs.last.energy_consumption
+  end
+
   # Return empty value. We need this field only for comparison during Job rendering
   def app_title
     ""

@@ -30,6 +30,13 @@ module Api
       "app_title" => ->(left, right) { left.app_title <=> right.app_title },
       "username" => ->(left, right) { left.launched_by <=> right.launched_by },
       "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
+      "energy" => lambda { |left, right|
+        extract = ->(obj) {
+          val = obj.energy_consumption
+          val == "N/A" ? -1 : val.delete("$").to_f
+        }
+        extract.call(left) <=> extract.call(right)
+      },
     }.freeze
 
     # GET /api/jobs or GET /api/jobs?space_id=params[:space_id]
@@ -150,6 +157,8 @@ module Api
 
       if params[:order_by_property]
         jobs = jobs.left_outer_joins(:properties).order(create_property_order).per(page_size)
+      elsif params[:order_by] == "energy"
+        jobs = jobs.order(energy_order_sql).page(page_from_params).per(page_size)
       else
         jobs = jobs.order(order_from_params).page(page_from_params).per(page_size)
       end
@@ -347,7 +356,9 @@ module Api
 
     # Default to reverse chronological order unless overriden by params
     def order_params
-      if params[:order_by]
+      if params[:order_by] == "energy"
+        energy_order_sql
+      elsif params[:order_by]
         order_from_params
       else
         { created_at: Sortable::DIRECTION_DESC }
@@ -365,6 +376,15 @@ module Api
       # It will produce something like this - easier to understand for node migration later:
       # CASE WHEN properties.property_name = #{params[:order_by_property]} THEN 0 ELSE 1 END, properties.property_value #{params[:order_dir]}
       [order_by_case, order_by_property_value]
+    end
+
+    # Returns an Arel SQL node for ordering by cost extracted from the JSON describe column.
+    # Jobs without totalPrice (NULL or missing key) sort as -1 to appear at the boundary.
+    def energy_order_sql
+      dir = order_direction(params[:order_dir])
+      Arel.sql(
+        "COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(jobs.describe, '$.totalPrice')) AS DECIMAL(10,3)), -1) #{dir}",
+      )
     end
 
     # A common method for apps list json rendering.
