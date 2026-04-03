@@ -49,7 +49,7 @@ module Sortable
     sort_by = self.class::SORT_FIELDS[params[:order_by] || default_order]
     array = array.sort(&sort_by)
 
-    params[:order_dir] != Sortable::DIRECTION_ASC ? array.reverse : array
+    order_direction(params[:order_dir]) != Sortable::DIRECTION_ASC ? array.reverse : array
   end
 
   # Prepare Order/OrderDirection pair from params (only allowed values).

@@ -219,7 +219,7 @@ export const useExecutionColumns = ({
       accessorKey: 'jobs',
       id: 'energy',
       enableColumnFilter: false,
-      enableSorting: false,
+      enableSorting: true,
       size: 106,
       cell: props => {
         const { jobs } = props.row.original
