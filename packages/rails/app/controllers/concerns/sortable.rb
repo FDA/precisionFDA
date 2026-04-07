@@ -23,7 +23,7 @@ module Sortable
   }.freeze
 
   def order_direction(candidate)
-    candidate&.upcase == DIRECTION_DESC ? DIRECTION_DESC : DIRECTION_ASC
+    candidate&.upcase == DIRECTION_ASC ? DIRECTION_ASC : DIRECTION_DESC
   end
 
   def order_by(candidate, allowed_orderings)

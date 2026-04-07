@@ -107,7 +107,7 @@ class WorkflowSerializer < ApplicationSerializer
 
     {}.tap do |links|
       user_role = if object.in_space?
-        object.space_object.space_memberships.active.find_by(user: logged_user.id).role
+        object.space_object.space_memberships.active.find_by(user: logged_user.id)&.role || "can_run"
       else
         "can_run"
       end
