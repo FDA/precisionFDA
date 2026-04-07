@@ -5,9 +5,7 @@ class ExpertsController < ApplicationController
 
   layout "react", only: %i(index show blog)
 
-  def index
-    @experts = Expert.viewable_by(@context).order(id: :desc)
-  end
+  def index; end
 
   def blog
     @expert = Expert.find(unsafe_params[:id])
@@ -18,8 +16,6 @@ class ExpertsController < ApplicationController
         flash.now[:warning] = "This Expert Q&A Session is currently private and not viewable by the public."
       end
     end
-
-    js expert: @expert.slice(:id, :_blog, :_blog_title)
   end
 
   def new
@@ -167,14 +163,6 @@ class ExpertsController < ApplicationController
       end
     end
 
-    @answered_questions = @expert.
-      answered_questions.
-      sort_by { |q| q.expert_answer.updated_at }.
-      reverse
-    # rubocop:disable Layout/LineLength
-    @user_questions =
-      @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by(&:created_at).reverse : []
-    # rubocop:enable Layout/LineLength
   end
 
   def qa
