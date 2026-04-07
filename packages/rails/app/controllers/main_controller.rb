@@ -28,109 +28,21 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   layout "react", only: %i(about index news terms security data_portals home publish request_access)
 
-  def index # rubocop:todo Metrics/MethodLength
-    show_guidelines = false
-    @consistency_discussion = Discussion.accessible_by_public.find_by(id: CONSISTENCY_DISCUSSION_ID)
-    @truth_discussion = Discussion.accessible_by_public.find_by(id: TRUTH_DISCUSSION_ID)
-
-    @consistency_challenge = FixedChallenge.consistency(@context)
-    @truth_challenge = FixedChallenge.truth(@context)
-    @appathons_challenge = FixedChallenge.appathons(@context)
-
-    @challenges = Challenge.all.order(start_at: :desc)
-
-    @experts = Expert.public.order(created_at: :desc).limit(10) # TODO: filter by published ones only
-
-    @meta_appathon = MetaAppathon.active
-    if @meta_appathon.present?
-      @user_appathon = @context.user.appathon_from_meta(@meta_appathon) if @context.logged_in?
-    end
-
+  def index
     if @context.logged_in?
-      @feed = collect_feed
+      api_with_user_token = DNAnexusAPI.new(@context.token)
 
-      if @context.logged_in?
-        @notes_count = Note.real_notes.editable_by(@context).count
-        @files_count = UserFile.real_files.editable_by(@context).count
-        @comparisons_count = Comparison.editable_by(@context).count
-        @apps_count = App.editable_by(@context).count
-        @jobs_count = Job.editable_by(@context).count
-        @assets_count = Asset.editable_by(@context).count
-        unless @context.user.has_seen_guidelines
-          User.transaction do
-            user = User.find(@context.user_id)
-            unless user.has_seen_guidelines # rubocop:todo Metrics/BlockNesting
-              user.has_seen_guidelines = true
-              user.save(validate: false)
-              show_guidelines = true
-            end
-          end
-        end
-
-        api_with_user_token = DNAnexusAPI.new(@context.token)
-
-        login_tasks_processor = LoginTasksProcessor.new(
-          OrgService::LeaveOrgProcess.new(
-            api_with_user_token,
-            DNAnexusAPI.new(ADMIN_TOKEN),
-            DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI),
-            UserRemovalPolicy,
-            UnusedOrgnameGenerator.new(api_with_user_token),
-          ),
-        )
-        login_tasks_processor.call(@context.user, @context.api)
-      else
-        @tutorials = [
-          {
-            title: "Explore notes",
-            path: Rails.application.routes.url_helpers.explore_notes_path,
-            help_label: "Learn",
-            help_path: "/docs/guides/notes",
-            description: "Read what others are reporting describing their thoughts and their work",
-          },
-          {
-            title: "Explore files",
-            path: "/home/files/everybody",
-            help_label: "Learn",
-            help_path: "/docs/guides/files",
-            description: "Browse the datasets have been publicly shared with the precisionFDA community",
-          },
-          {
-            title: "Explore Comparisons",
-            path: Rails.application.routes.url_helpers.explore_comparisons_path,
-            help_label: "Learn",
-            help_path: "/docs/guides/comparisons",
-            description: "View the differences between test sets and benchmark sets of genomic variants",
-          },
-          {
-            title: "Explore Apps",
-            path: Rails.application.routes.url_helpers.explore_apps_path,
-            help_label: "Learn",
-            help_path: "/docs/guides/apps",
-            description: "Have a look at bioinformatics apps &mdash; and even study their scripts by clicking 'Fork'.",
-          },
-          {
-            title: "Browse Assets",
-            path: "/home/assets/everybody",
-            help_label: "Learn",
-            help_path: "/docs/guides/creating-apps#app-assets",
-            description: "Browse the collection of software assets that are used as building blocks in apps.",
-          },
-          {
-            title: "Try the app editor",
-            path: Rails.application.routes.url_helpers.new_app_path,
-            help_label: "Learn",
-            help_path: "/docs/guides/creating-apps",
-            description: "Find out how easy it is to assemble an app (read-only; results not saved)",
-          },
-        ]
-      end
-    else
-      @participant_orgs = Participant.org.positioned
-      @participants = Participant.person.positioned
+      login_tasks_processor = LoginTasksProcessor.new(
+        OrgService::LeaveOrgProcess.new(
+          api_with_user_token,
+          DNAnexusAPI.new(ADMIN_TOKEN),
+          DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI),
+          UserRemovalPolicy,
+          UnusedOrgnameGenerator.new(api_with_user_token),
+        ),
+      )
+      login_tasks_processor.call(@context.user, @context.api)
     end
-
-    js show_guidelines: show_guidelines
   end
 
   def destroy
@@ -621,12 +533,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     )
   end
   # rubocop:enable Metrics/MethodLength
-
-  def collect_feed
-    [Note, Answer, Discussion, UserFile, Comparison, App, Asset].map do |klass|
-      klass.where(user: User.real).accessible_by_public.order(updated_at: :desc).limit(4)
-    end.flatten.sort_by(&:updated_at).reverse
-  end
 
   def set_time_zone(user) # rubocop:todo Naming/AccessorMethodName
     return if user.time_zone.present?
