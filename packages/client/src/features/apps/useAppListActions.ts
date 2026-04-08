@@ -18,8 +18,9 @@ export const useAppListActions = ({ spaceId }: { spaceId: string }): UseAppListA
   const mutation = useMutation({
     mutationKey: ['add-resource-to-space', 'apps'],
     mutationFn: addDataRequest,
-    onError: (e: AxiosError) => {
-      toastError(`Error adding resource to space. ${e.message}`)
+    onError: (e: AxiosError<{ error?: { message?: string } }>) => {
+      const msg = e.response?.data?.error?.message || e.message
+      toastError(`Error adding resource to space: ${msg}`)
     },
   })
 

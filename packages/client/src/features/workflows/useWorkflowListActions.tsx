@@ -12,8 +12,9 @@ export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
   const mutation = useMutation({
     mutationKey: ['add-resource-to-space', 'workflows'],
     mutationFn: addDataRequest,
-    onError: (e: AxiosError) => {
-      toastError(`Error adding resource to space: ${e.message}`)
+    onError: (e: AxiosError<{ error?: { message?: string } }>) => {
+      const msg = e.response?.data?.error?.message || e.message
+      toastError(`Error adding resource to space: ${msg}`)
     },
   })
 

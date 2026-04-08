@@ -87,7 +87,15 @@ class CopyService
     def copy_dependencies(new_workflow, workflow, scope, properties)
       stages = workflow.stages.map do |stage|
         source_app = App.find_by!(uid: stage["app_uid"])
-        new_app = app_copy_service.copy(source_app, scope, properties)
+        begin
+          new_app = app_copy_service.copy(source_app, scope, properties)
+        rescue HttpsAppsClient::Error => e
+          raise HttpsAppsClient::Error.new(
+            "Error copying app '#{source_app.title}' in workflow '#{workflow.name}': #{e.message}",
+            e.code,
+            e.status_code,
+          )
+        end
 
         stage["app_dxid"] = new_app.dxid
         stage["app_uid"] = new_app.uid
