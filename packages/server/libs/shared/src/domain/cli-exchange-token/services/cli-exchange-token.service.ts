@@ -1,6 +1,7 @@
 import * as crypto from 'node:crypto'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
+import { Resource } from '@shared/domain/user/user.entity'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EntityScope } from '@shared/types/common'
@@ -10,7 +11,9 @@ import { CliExchangeTokenRepository } from '../cli-exchange-token.repository'
 
 @Injectable()
 export class CliExchangeTokenService {
-  private readonly TOKEN_VALIDITY_MINUTES = 5
+  readonly CPU_TOKEN_VALIDITY_MINUTES = 5
+  readonly GPU_TOKEN_VALIDITY_MINUTES = 10
+
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -19,10 +22,17 @@ export class CliExchangeTokenService {
     private readonly cliExchangeTokenRepository: CliExchangeTokenRepository,
   ) {}
 
-  async createNewToken(encryptedKey: string, scope: EntityScope, salt: string): Promise<CliExchangeToken> {
+  async createNewToken(
+    encryptedKey: string,
+    scope: EntityScope,
+    salt: string,
+    instanceType: Resource,
+  ): Promise<CliExchangeToken> {
     const token = new CliExchangeToken()
     token.code = crypto.randomBytes(32).toString('hex')
-    token.expiresAt = new Date(Date.now() + TimeUtils.minutesToMilliseconds(this.TOKEN_VALIDITY_MINUTES))
+    token.expiresAt = new Date(
+      Date.now() + TimeUtils.minutesToMilliseconds(this.getValidityMinutesForInstance(instanceType)),
+    )
     token.encryptedKey = encryptedKey
     token.scope = scope
     token.salt = salt
@@ -31,7 +41,9 @@ export class CliExchangeTokenService {
   }
 
   async getExchangeCliTokenByCode(code: string): Promise<CliExchangeToken> {
-    const exchangeToken = await this.cliExchangeTokenRepository.findOne({ code })
+    const exchangeToken = await this.cliExchangeTokenRepository.findOne({
+      code,
+    })
     if (!exchangeToken) {
       this.logger.warn(`No CLI exchange token found for code: ${code}`)
       throw new NotFoundError('Invalid CLI Authorization code')
@@ -50,5 +62,12 @@ export class CliExchangeTokenService {
     if (token) {
       await this.em.remove(token).flush()
     }
+  }
+
+  private getValidityMinutesForInstance(instanceType: Resource): number {
+    if (instanceType.startsWith('gpu')) {
+      return this.GPU_TOKEN_VALIDITY_MINUTES
+    }
+    return this.CPU_TOKEN_VALIDITY_MINUTES
   }
 }

@@ -1,5 +1,4 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { expect } from 'chai'
 import { database } from '@shared/database'
 import { CliExchangeToken } from '@shared/domain/cli-exchange-token/cli-exchange-token.entity'
 import { CliExchangeTokenRepository } from '@shared/domain/cli-exchange-token/cli-exchange-token.repository'
@@ -8,6 +7,8 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError } from '@shared/errors'
 import { db } from '@shared/test'
 import { TimeUtils } from '@shared/utils/time.utils'
+import { expect } from 'chai'
+import { useFakeTimers } from 'sinon'
 
 describe('CliExchangeTokenService', () => {
   let em: SqlEntityManager
@@ -26,19 +27,52 @@ describe('CliExchangeTokenService', () => {
       const encryptedKey = 'encrypted-key-sample'
       const scope = STATIC_SCOPE.PRIVATE
       const salt = 'random-salt-value'
+      const instanceType = 'baseline-8'
 
-      const token = await service.createNewToken(encryptedKey, scope, salt)
+      const now = Date.now()
+      const clock = useFakeTimers({ now, toFake: ['Date'] })
+      try {
+        const token = await service.createNewToken(encryptedKey, scope, salt, instanceType)
+        expect(token).to.have.property('id')
+        expect(token).to.have.property('code')
+        expect(token.encryptedKey).to.be.equal(encryptedKey)
+        expect(token.scope).to.be.equal(scope)
+        expect(token.expiresAt.getTime()).to.be.equal(
+          now + TimeUtils.minutesToMilliseconds(service.CPU_TOKEN_VALIDITY_MINUTES),
+        )
 
-      expect(token).to.have.property('id')
-      expect(token).to.have.property('code')
-      expect(token.encryptedKey).to.be.equal(encryptedKey)
-      expect(token.scope).to.be.equal(scope)
-      expect(token.expiresAt.getTime()).to.be.greaterThan(Date.now())
+        const foundToken = await cliExchangeTokenRepository.findOne({
+          id: token.id,
+        })
+        expect(foundToken).to.not.be.null()
+        expect(foundToken.code).to.be.equal(token.code)
+        expect(foundToken.salt).to.be.equal(salt)
+      } finally {
+        clock.restore()
+      }
+    })
 
-      const foundToken = await cliExchangeTokenRepository.findOne({ id: token.id })
-      expect(foundToken).to.not.be.null()
-      expect(foundToken.code).to.be.equal(token.code)
-      expect(foundToken.salt).to.be.equal(salt)
+    it('sets a longer expiration time for GPU instance types', async () => {
+      const service = getInstance()
+      const encryptedKey = 'encrypted-key-sample'
+      const scope = STATIC_SCOPE.PRIVATE
+      const salt = 'random-salt-value'
+      const instanceType = 'gpu-8'
+
+      const now = Date.now()
+      const clock = useFakeTimers({ now, toFake: ['Date'] })
+      try {
+        const token = await service.createNewToken(encryptedKey, scope, salt, instanceType)
+        expect(token).to.have.property('id')
+        expect(token).to.have.property('code')
+        expect(token.encryptedKey).to.be.equal(encryptedKey)
+        expect(token.scope).to.be.equal(scope)
+        expect(token.expiresAt.getTime()).to.be.equal(
+          now + TimeUtils.minutesToMilliseconds(service.GPU_TOKEN_VALIDITY_MINUTES),
+        )
+      } finally {
+        clock.restore()
+      }
     })
   })
 

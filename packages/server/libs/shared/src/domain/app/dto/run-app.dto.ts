@@ -1,6 +1,7 @@
 import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
+import { RESOURCE_TYPES, Resource } from '@shared/domain/user/user.entity'
 import { EntityScope, IOType } from '@shared/types/common'
-import { IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-validator'
+import { IsIn, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-validator'
 
 export class RunAppDTO {
   @IsString()
@@ -11,7 +12,8 @@ export class RunAppDTO {
 
   @IsString()
   @IsNotEmpty()
-  instanceType: string
+  @IsIn(RESOURCE_TYPES, { message: 'Instance type must be a valid resource type' })
+  instanceType: Resource
 
   @IsNumber()
   jobLimit: number

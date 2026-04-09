@@ -1,7 +1,6 @@
 import * as crypto from 'node:crypto'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { compareVersions } from 'compare-versions'
 import { config } from '@shared/config'
 import { App } from '@shared/domain/app/app.entity'
 import { APP_CLI_CODE, APP_SERVER_URL } from '@shared/domain/app/app.helper'
@@ -20,14 +19,14 @@ import { JobInput } from '@shared/domain/job/job.input'
 import { JobService } from '@shared/domain/job/job.service'
 import { JobRunData } from '@shared/domain/job/job.types'
 import { LicenseService } from '@shared/domain/license/license.service'
+import { getIdFromScopeName, getProjectDxid } from '@shared/domain/space/space.helper'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
-import { getIdFromScopeName, getProjectDxid } from '@shared/domain/space/space.helper'
+import { User } from '@shared/domain/user/user.entity'
+import { getProjectToRunApp } from '@shared/domain/user/user.helper'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { getProjectToRunApp } from '@shared/domain/user/user.helper'
 import { ErrorCodes, InvalidRequestError, InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
@@ -36,6 +35,7 @@ import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.prod
 import { SCOPE } from '@shared/types/common'
 import { getPluralizedTerm } from '@shared/utils/format'
 import { TimeUtils } from '@shared/utils/time.utils'
+import { compareVersions } from 'compare-versions'
 
 @Injectable()
 export class AppRunFacade {
@@ -81,7 +81,12 @@ export class AppRunFacade {
       const salt = crypto.randomBytes(16).toString('hex')
       const encryptedKey = CliExchangeEncryptor.encrypt(JSON.stringify(cliConfigs), config.job.tokenEncryptionKey, salt)
 
-      exchangeToken = await this.cliExchangeTokenService.createNewToken(encryptedKey, runAppInput.scope, salt)
+      exchangeToken = await this.cliExchangeTokenService.createNewToken(
+        encryptedKey,
+        runAppInput.scope,
+        salt,
+        runAppInput.instanceType,
+      )
       processedInput[APP_CLI_CODE] = exchangeToken.code
       processedInput[APP_SERVER_URL] = config.api.railsHost.replace(/\/$/, '')
     }
