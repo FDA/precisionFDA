@@ -1,16 +1,14 @@
 import { isString } from '@nestjs/common/utils/shared.utils'
 import { DXEntityType, DxId } from '@shared/domain/entity/domain/dxid'
 import { entityTypes } from '@shared/domain/entity/domain/entity.type'
-import {
-  PlatformEntityType,
-  platformEntityTypes,
-} from '@shared/domain/entity/domain/platform.entity.type'
+import { PlatformEntityType, platformEntityTypes } from '@shared/domain/entity/domain/platform.entity.type'
 import { StringUtils } from '@shared/utils/string.utils'
 
 export class DxIdUtils {
-  static isDxIdValid<
-    T extends DXEntityType | PlatformEntityType = DXEntityType | PlatformEntityType,
-  >(value: string, entityType?: T): value is DxId<T> {
+  static isDxIdValid<T extends DXEntityType | PlatformEntityType = DXEntityType | PlatformEntityType>(
+    value: string,
+    entityType?: T,
+  ): value is DxId<T> {
     if (!isString(value)) {
       return false
     }

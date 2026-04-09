@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { ComparisonService } from '@shared/domain/comparison/comparison.service'
 import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
+import { ComparisonService } from '@shared/domain/comparison/comparison.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 describe('ComparisonService', () => {
@@ -37,9 +37,7 @@ describe('ComparisonService', () => {
       findComparisonsByUserFileStub.withArgs(file).resolves([{ id: 1 }])
 
       const comparisonService = createComparisonService()
-      await expect(
-        comparisonService.validateComparisons({ name: 'file' } as UserFile),
-      ).to.be.rejectedWith(
+      await expect(comparisonService.validateComparisons({ name: 'file' } as UserFile)).to.be.rejectedWith(
         Error,
         'File file cannot be deleted because it participates' +
           ' in one or more comparisons. Please delete all the comparisons first.',

@@ -1,4 +1,7 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { DbClusterCreateFacade } from 'apps/api/src/facade/db-cluster/create-facade/db-cluster-create.facade'
+import { expect } from 'chai'
+import { match, stub } from 'sinon'
 import { ENGINES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
@@ -10,9 +13,6 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
-import { DbClusterCreateFacade } from 'apps/api/src/facade/db-cluster/create-facade/db-cluster-create.facade'
-import { expect } from 'chai'
-import { stub, match } from 'sinon'
 
 describe('DbClusterCreateFacade', () => {
   const USER_ID = 1
@@ -36,9 +36,7 @@ describe('DbClusterCreateFacade', () => {
   const persistAndFlushStub = stub()
 
   const isHost = (): true => true
-  const loadItems: () => [{ user: { id: number }; isHost: () => true }] = () => [
-    { user: { id: 1 }, isHost },
-  ]
+  const loadItems: () => [{ user: { id: number }; isHost: () => true }] = () => [{ user: { id: 1 }, isHost }]
 
   beforeEach(async () => {
     dbClusterCreateStub.reset()
@@ -75,20 +73,18 @@ describe('DbClusterCreateFacade', () => {
         adminPassword: match.string,
       })
       .resolves({ id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })
-    dbClusterDescribeStub
-      .withArgs({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82', project: 'project-xxx' })
-      .resolves({
-        name: 'private-cluster-1',
-        id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82',
-        status: 'creating',
-        project: 'project-xxx',
-        dxInstanceClass: 'ins_1',
-        engine: 'aurora-postgresql',
-        engineVersion: '14.6',
-        endpoint: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82.aws.com',
-        port: 5432,
-        statusAsOf: '1.1.1999',
-      })
+    dbClusterDescribeStub.withArgs({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82', project: 'project-xxx' }).resolves({
+      name: 'private-cluster-1',
+      id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82',
+      status: 'creating',
+      project: 'project-xxx',
+      dxInstanceClass: 'ins_1',
+      engine: 'aurora-postgresql',
+      engineVersion: '14.6',
+      endpoint: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82.aws.com',
+      port: 5432,
+      statusAsOf: '1.1.1999',
+    })
     createStub.withArgs(match({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })).returns({
       id: 1,
       dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82',
@@ -98,13 +94,9 @@ describe('DbClusterCreateFacade', () => {
       project: 'project-xxx',
     })
 
-    persistAndFlushStub
-      .withArgs(match({ id: 1, dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' }))
-      .resolves({})
+    persistAndFlushStub.withArgs(match({ id: 1, dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })).resolves({})
 
-    createDbClusterSyncTaskStub
-      .withArgs({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' }, userContext)
-      .resolves({})
+    createDbClusterSyncTaskStub.withArgs({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' }, userContext).resolves({})
 
     const dbCluster = await getInstance().createDbCluster({
       name: 'private-cluster-1',
@@ -142,20 +134,18 @@ describe('DbClusterCreateFacade', () => {
         adminPassword: match.string,
       })
       .resolves({ id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })
-    dbClusterDescribeStub
-      .withArgs({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82', project: 'project-xxx' })
-      .resolves({
-        name: 'space-cluster',
-        id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82',
-        status: 'creating',
-        project: 'project-xxx',
-        dxInstanceClass: 'ins_1',
-        engine: 'aurora-postgresql',
-        engineVersion: '14.6',
-        endpoint: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82.aws.com',
-        port: 5432,
-        statusAsOf: '1.1.1999',
-      })
+    dbClusterDescribeStub.withArgs({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82', project: 'project-xxx' }).resolves({
+      name: 'space-cluster',
+      id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82',
+      status: 'creating',
+      project: 'project-xxx',
+      dxInstanceClass: 'ins_1',
+      engine: 'aurora-postgresql',
+      engineVersion: '14.6',
+      endpoint: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82.aws.com',
+      port: 5432,
+      statusAsOf: '1.1.1999',
+    })
 
     createStub.withArgs(match({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })).returns({
       id: 1,
@@ -166,13 +156,9 @@ describe('DbClusterCreateFacade', () => {
       project: 'project-xxx',
     })
 
-    persistAndFlushStub
-      .withArgs(match({ id: 1, dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' }))
-      .resolves({})
+    persistAndFlushStub.withArgs(match({ id: 1, dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })).resolves({})
 
-    createDbClusterSyncTaskStub
-      .withArgs({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' }, userContext)
-      .resolves({})
+    createDbClusterSyncTaskStub.withArgs({ dxid: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' }, userContext).resolves({})
 
     const dbCluster = await getInstance().createDbCluster({
       name: 'space-cluster',
@@ -208,10 +194,7 @@ describe('DbClusterCreateFacade', () => {
         engineVersion: '14.6',
         dxInstanceClass: 'db_std1_x2',
       }),
-    ).to.be.rejectedWith(
-      NotFoundError,
-      `Couldn't get project to create DbCluster in selected context.`,
-    )
+    ).to.be.rejectedWith(NotFoundError, `Couldn't get project to create DbCluster in selected context.`)
     expect(dbClusterCreateStub.calledOnce).to.be.false()
     expect(dbClusterDescribeStub.calledOnce).to.be.false()
     expect(createDbClusterSyncTaskStub.calledOnce).to.be.false()
@@ -242,12 +225,7 @@ describe('DbClusterCreateFacade', () => {
       create: createStub,
     } as unknown as DbClusterRepository
     const notificationService = {} as unknown as NotificationService
-    const dbClusterService = new DbClusterService(
-      em,
-      dbClusterRepo,
-      userContext,
-      notificationService,
-    )
+    const dbClusterService = new DbClusterService(em, dbClusterRepo, userContext, notificationService)
     const userClient = {
       dbClusterCreate: dbClusterCreateStub,
       dbClusterDescribe: dbClusterDescribeStub,

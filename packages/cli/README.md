@@ -141,6 +141,11 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.12.0 (2026-03-31)
+
+- New feature - run; launches an application with the specified configuration
+- New feature - terminate; terminates a running job
+
 ### 2.11.2 (2026-03-12)
 
 - upgrade Go to 1.26.0

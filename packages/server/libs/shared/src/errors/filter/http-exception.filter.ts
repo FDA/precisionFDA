@@ -1,4 +1,4 @@
-import { Catch, HttpStatus, HttpException } from '@nestjs/common'
+import { Catch, HttpException, HttpStatus } from '@nestjs/common'
 import { config } from '@shared/config'
 import { ErrorCodes } from '@shared/errors'
 import { AbstractExceptionFilter, ErrorPayload } from './abstract-exception.filter'
@@ -30,5 +30,4 @@ export class HttpExceptionFilter extends AbstractExceptionFilter<HttpException> 
 
     return payload
   }
-
 }

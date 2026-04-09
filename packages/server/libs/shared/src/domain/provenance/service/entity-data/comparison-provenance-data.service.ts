@@ -1,11 +1,11 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { COMPARISON_STATE, Comparison } from '@shared/domain/comparison/comparison.entity'
-import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
-import { EntityProvenanceDataService } from './entity-provenance-data.service'
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
+import { EntityProvenanceDataService } from './entity-provenance-data.service'
 
 @Injectable()
 export class ComparisonProvenanceDataService extends EntityProvenanceDataService<'comparison'> {
@@ -25,7 +25,7 @@ export class ComparisonProvenanceDataService extends EntityProvenanceDataService
   async getParents(comparison: Comparison): Promise<EntityProvenanceSourceUnion[]> {
     const files = await comparison.inputFiles.loadItems()
 
-    return files.map((f) => ({ type: 'file', entity: f }))
+    return files.map(f => ({ type: 'file', entity: f }))
   }
 
   async getChildren(comparison: Comparison): Promise<EntityProvenanceSourceUnion[]> {
@@ -37,6 +37,6 @@ export class ComparisonProvenanceDataService extends EntityProvenanceDataService
       parentId: comparison.id,
     })
 
-    return outputFiles.map((f) => ({ type: 'file', entity: f }))
+    return outputFiles.map(f => ({ type: 'file', entity: f }))
   }
 }

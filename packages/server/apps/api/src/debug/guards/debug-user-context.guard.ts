@@ -6,7 +6,7 @@ import { UserContextGuard } from '../../user-context/guard/user-context.guard'
 export class DebugUserContextGuard implements CanActivate {
   constructor(private readonly userContextGuard: UserContextGuard) {}
 
-  canActivate() {
+  canActivate(): Promise<boolean> | boolean {
     if (config.devFlags.middleware.skipUserMiddlewareForDebugRoutes) {
       return true
     }

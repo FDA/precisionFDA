@@ -1,5 +1,5 @@
-import { EntityManager } from '@mikro-orm/core'
-import { SqlEntityManager } from '@mikro-orm/mysql'
+import { EntityManager, FindOptions } from '@mikro-orm/core'
+import { FilterQuery, Loaded, SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { Job as BullJob } from 'bull'
 import { config } from '@shared/config'
@@ -16,14 +16,14 @@ import { JobCountService } from '@shared/domain/job/services/job-count.service'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { JobWorkstationService } from '@shared/domain/job/services/job-workstation.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { JobCreateParams } from '@shared/platform-client/platform-client.params'
 import { IOType } from '@shared/types/common'
@@ -43,8 +43,8 @@ import { App } from '../app/app.entity'
 import { RunAppDTO } from '../app/dto/run-app.dto'
 import { DxId } from '../entity/domain/dxid'
 import { EventHelper } from '../event/event.helper'
-import { getIdFromScopeName } from '../space/space.helper'
 import { Space } from '../space/space.entity'
+import { getIdFromScopeName } from '../space/space.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { JobInput, Provenance } from './job.input'
@@ -86,14 +86,6 @@ export class JobService implements SearchableByUid<'job'> {
     return this.jobRepo.findEditableOne({ uid })
   }
 
-  getEditableEntityById(id: number): Promise<Job | null> {
-    return this.jobRepo.findEditableOne({ id })
-  }
-
-  getAccessibleEntityById(id: number): Promise<Job | null> {
-    return this.jobRepo.findAccessibleOne({ id })
-  }
-
   async synchronizeJob(jobDxid: DxId<'job'>, bullJob: BullJob): Promise<Maybe<Job>> {
     return await this.jobSyncService.synchronizeJob(jobDxid, bullJob)
   }
@@ -104,6 +96,13 @@ export class JobService implements SearchableByUid<'job'> {
       throw new errors.NotFoundError(`Job ${dxid} was not found or is not accessible`)
     }
     return job
+  }
+
+  async listAccessible<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
+    where: FilterQuery<Job>,
+    options?: Omit<FindOptions<Job, Hint, Fields, Excludes>, 'limit' | 'offset'>,
+  ): Promise<Loaded<Job, Hint, Fields, Excludes>[]> {
+    return this.jobRepo.findAccessible(where, options)
   }
 
   async getSpaceForJob(job: Job): Promise<Space | null> {
@@ -286,7 +285,7 @@ export class JobService implements SearchableByUid<'job'> {
 
   private async persistFiles(outputFiles: UserFile[], user: User): Promise<void> {
     const filePromises = outputFiles.map(async outputFile => {
-      await this.em.persistAndFlush(outputFile) // flush for id
+      await this.em.persist(outputFile).flush() // flush for id
 
       const fileEvent = await this.eventHelper.createFileEvent(
         EVENT_TYPES.FILE_CREATED,
@@ -296,7 +295,7 @@ export class JobService implements SearchableByUid<'job'> {
         PARENT_TYPE.JOB,
       )
 
-      return this.em.persistAndFlush(fileEvent)
+      return this.em.persist(fileEvent).flush()
     })
 
     await Promise.all(filePromises)
@@ -377,6 +376,7 @@ export class JobService implements SearchableByUid<'job'> {
   private remapFiles(outputParam: JobOutput): JobOutput {
     const output = JSON.parse(JSON.stringify(outputParam))
     for (const key in output) {
+      // biome-ignore lint/suspicious/noPrototypeBuiltins: fails in CI
       if (Object.prototype.hasOwnProperty.call(output, key)) {
         const value = output[key]
         if (Array.isArray(value)) {
@@ -413,6 +413,7 @@ export class JobService implements SearchableByUid<'job'> {
   private collectIds(output: JobOutput): string[] {
     const uniqueFileDxIds = new Set<string>()
     for (const key in output) {
+      // biome-ignore lint/suspicious/noPrototypeBuiltins: fails in CI
       if (Object.prototype.hasOwnProperty.call(output, key)) {
         const value = output[key]
         if (Array.isArray(value)) {

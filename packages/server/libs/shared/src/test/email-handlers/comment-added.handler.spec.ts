@@ -1,30 +1,27 @@
-import { stub } from 'sinon'
-import { EmailClient } from '@shared/services/email-client'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { CommentAddedEmailHandler } from '@shared/domain/email/templates/handlers/comment-added.handler'
-import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
-import { CommentRepository } from '@shared/domain/comment/comment.repository'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { AppRepository } from '@shared/domain/app/app.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { Comment } from '@shared/domain/comment/comment.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { expect } from 'chai'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { App } from '@shared/domain/app/app.entity'
-import { Job } from '@shared/domain/job/job.entity'
+import { stub } from 'sinon'
 import { config } from '@shared/config'
+import { App } from '@shared/domain/app/app.entity'
+import { AppRepository } from '@shared/domain/app/app.repository'
+import { Comment } from '@shared/domain/comment/comment.entity'
+import { CommentRepository } from '@shared/domain/comment/comment.repository'
 import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { CommentAddedEmailHandler } from '@shared/domain/email/templates/handlers/comment-added.handler'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('CommentAddedEmailHandler', () => {
   const USER_ID = 7
@@ -124,22 +121,11 @@ describe('CommentAddedEmailHandler', () => {
       comment.contentObjectId = NODE_ID
       const userFile = new UserFile(user)
       userFile.uid = `file-${NODE_ID}-1`
-      const spaceMembership = new SpaceMembership(
-        user,
-        space,
-        SPACE_MEMBERSHIP_SIDE.GUEST,
-        SPACE_MEMBERSHIP_ROLE.ADMIN,
-      )
+      const spaceMembership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.GUEST, SPACE_MEMBERSHIP_ROLE.ADMIN)
 
-      spaceEventRepoFindOneOrFailStub
-        .withArgs({ id: SPACE_EVENT_ID }, { populate: ['space'] })
-        .resolves(spaceEvent)
-      commentRepoFindOneOrFailStub
-        .withArgs({ id: COMMENT_ID }, { populate: ['user'] })
-        .resolves(comment)
-      userFileRepoFindOneOrFailStub
-        .withArgs({ id: NODE_ID }, { populate: ['user'] })
-        .resolves(userFile)
+      spaceEventRepoFindOneOrFailStub.withArgs({ id: SPACE_EVENT_ID }, { populate: ['space'] }).resolves(spaceEvent)
+      commentRepoFindOneOrFailStub.withArgs({ id: COMMENT_ID }, { populate: ['user'] }).resolves(comment)
+      userFileRepoFindOneOrFailStub.withArgs({ id: NODE_ID }, { populate: ['user'] }).resolves(userFile)
       spaceMembershipRepoFindStub
         .withArgs({ spaces: SPACE_ID, active: true }, { populate: ['user.notificationPreference'] })
         .resolves([spaceMembership])
@@ -185,19 +171,10 @@ describe('CommentAddedEmailHandler', () => {
       comment.contentObjectId = APP_ID
       const app = new App(user)
       app.uid = `app-${APP_ID}-1`
-      const spaceMembership = new SpaceMembership(
-        user,
-        space,
-        SPACE_MEMBERSHIP_SIDE.GUEST,
-        SPACE_MEMBERSHIP_ROLE.ADMIN,
-      )
+      const spaceMembership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.GUEST, SPACE_MEMBERSHIP_ROLE.ADMIN)
 
-      spaceEventRepoFindOneOrFailStub
-        .withArgs({ id: SPACE_EVENT_ID }, { populate: ['space'] })
-        .resolves(spaceEvent)
-      commentRepoFindOneOrFailStub
-        .withArgs({ id: COMMENT_ID }, { populate: ['user'] })
-        .resolves(comment)
+      spaceEventRepoFindOneOrFailStub.withArgs({ id: SPACE_EVENT_ID }, { populate: ['space'] }).resolves(spaceEvent)
+      commentRepoFindOneOrFailStub.withArgs({ id: COMMENT_ID }, { populate: ['user'] }).resolves(comment)
       appRepoFindOneOrFailStub.withArgs({ id: APP_ID }, { populate: ['user'] }).resolves(app)
       spaceMembershipRepoFindStub
         .withArgs({ spaces: SPACE_ID, active: true }, { populate: ['user.notificationPreference'] })
@@ -244,19 +221,10 @@ describe('CommentAddedEmailHandler', () => {
       comment.contentObjectId = JOB_ID
       const job = new Job(user)
       job.uid = `job-${JOB_ID}-1`
-      const spaceMembership = new SpaceMembership(
-        user,
-        space,
-        SPACE_MEMBERSHIP_SIDE.GUEST,
-        SPACE_MEMBERSHIP_ROLE.ADMIN,
-      )
+      const spaceMembership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.GUEST, SPACE_MEMBERSHIP_ROLE.ADMIN)
 
-      spaceEventRepoFindOneOrFailStub
-        .withArgs({ id: SPACE_EVENT_ID }, { populate: ['space'] })
-        .resolves(spaceEvent)
-      commentRepoFindOneOrFailStub
-        .withArgs({ id: COMMENT_ID }, { populate: ['user'] })
-        .resolves(comment)
+      spaceEventRepoFindOneOrFailStub.withArgs({ id: SPACE_EVENT_ID }, { populate: ['space'] }).resolves(spaceEvent)
+      commentRepoFindOneOrFailStub.withArgs({ id: COMMENT_ID }, { populate: ['user'] }).resolves(comment)
       jobRepoFindOneOrFailStub.withArgs({ id: JOB_ID }, { populate: ['user'] }).resolves(job)
       spaceMembershipRepoFindStub
         .withArgs({ spaces: SPACE_ID, active: true }, { populate: ['user.notificationPreference'] })

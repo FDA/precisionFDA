@@ -1,13 +1,13 @@
+import { expect } from 'chai'
 import { stub } from 'sinon'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { ExpertAddedHandler } from '@shared/domain/email/templates/handlers/expert-added.handler'
-import { EmailClient } from '@shared/services/email-client'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
 import { Organization } from '@shared/domain/org/organization.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { Expert } from '@shared/domain/expert/entity/expert.entity'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('ExpertAddedHandler', () => {
   const EXPERT_ID = 34
@@ -42,9 +42,7 @@ describe('ExpertAddedHandler', () => {
       user.lastName = 'Tavic'
       user.email = 'test@email.com'
       const expert = new Expert(user)
-      expertRepoFindOneOrFailStub
-        .withArgs({ id: EXPERT_ID }, { populate: ['user'] })
-        .resolves(expert)
+      expertRepoFindOneOrFailStub.withArgs({ id: EXPERT_ID }, { populate: ['user'] }).resolves(expert)
       emailClientSendEmailStub.reset()
 
       const input = new ObjectIdInputDTO()

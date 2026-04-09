@@ -1,10 +1,10 @@
-import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
-import { PlatformClient } from '@shared/platform-client'
-import { stub } from 'sinon'
 import { expect } from 'chai'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { stub } from 'sinon'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { PlatformClient } from '@shared/platform-client'
 
 describe('UrlFetchService', () => {
   const nodeRepoFindOneOrFailStub = stub()

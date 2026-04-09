@@ -2,8 +2,8 @@ import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs
 import { EntityIdentifierQueryDTO } from '@shared/domain/entity/domain/entity-identifier-query.dto'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { PublishApiFacade } from '../facade/publish/publish.facade'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { PublisherFacade } from '../facade/publish/publisher.facade'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @UseGuards(UserContextGuard, SiteAdminGuard)
 @Controller('/publish')

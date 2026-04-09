@@ -1,11 +1,11 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
+import { Queue } from 'bull'
 import { config } from '@shared/config'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
-import { Queue } from 'bull'
 
 @Injectable()
 export class QueueProxy {

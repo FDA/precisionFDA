@@ -1,6 +1,6 @@
+import { expect } from 'chai'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReportResultPartProvenanceTreeHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-provenance-tree-html-content.provider'
-import { expect } from 'chai'
 
 describe('SpaceReportResultPartProvenanceTreeContentProvider', () => {
   const CREATED = new Date('2023-09-01T14:58:08.000Z')

@@ -1,7 +1,7 @@
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { FILE_STATE_DX, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { expect } from 'chai'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { FILE_STATE_DX, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 
 describe('NodeHelper', () => {
   const nodeHelper = new NodeHelper()
@@ -22,9 +22,7 @@ describe('NodeHelper', () => {
         { stiType: FILE_STI_TYPE.USERFILE, state: FILE_STATE_DX.OPEN, name: 'file2' } as Node,
       ]
       const result = nodeHelper.getWarningsForUnclosedFiles(files)
-      expect(result).to.eq(
-        "Warning: The following files couldn't be attached in the download: 'file2'.",
-      )
+      expect(result).to.eq("Warning: The following files couldn't be attached in the download: 'file2'.")
     })
   })
 

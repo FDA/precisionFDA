@@ -1,29 +1,19 @@
+import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { entityTypeToEntityMap } from '@shared/domain/entity/domain/entity-type-to-entity.map'
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Extends } from '@shared/utils/types/extends'
 import { PropertyKeysOfType } from '@shared/utils/types/property-keys-of-type'
 
 type NamedEntityType = Extends<
   EntityType,
-  | 'app'
-  | 'asset'
-  | 'comparison'
-  | 'file'
-  | 'folder'
-  | 'job'
-  | 'user'
-  | 'workflow'
-  | 'resource'
-  | 'note'
-  | 'dbcluster'
+  'app' | 'asset' | 'comparison' | 'file' | 'folder' | 'job' | 'user' | 'workflow' | 'resource' | 'note' | 'dbcluster'
 >
 type NamedEntity = EntityInstance<NamedEntityType>
 
 export class EntityUtils {
   static getEntityTypeForEntity<T extends EntityType>(entity: EntityInstance<T>): T {
     const entityType: T = Object.keys(entityTypeToEntityMap).find(
-      (entityType) => entity instanceof entityTypeToEntityMap[entityType],
+      entityType => entity instanceof entityTypeToEntityMap[entityType],
     ) as T
 
     if (entityType) {

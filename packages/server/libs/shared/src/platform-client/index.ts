@@ -1,8 +1,8 @@
 import type { Logger } from '@nestjs/common'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 import axios, { AxiosRequestConfig } from 'axios'
 import { isNil, omit } from 'ramda'
 import { WebSocket } from 'ws'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { config } from '../config'
 import { ClientRequestError, MfaAlreadyResetError } from '../errors'
 import { getLogger } from '../logger'
@@ -288,7 +288,7 @@ export class PlatformClient {
         }),
       )
     })
-    ws.on('error', (error) => {
+    ws.on('error', error => {
       ws.terminate()
       this.logger.error(`Error streaming job logs: ${error}`)
     })
@@ -371,10 +371,7 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
-  async fileStatesPaginated(
-    params: FileStatesParams,
-    starting: Starting | undefined,
-  ): Promise<FileStatesResponse> {
+  async fileStatesPaginated(params: FileStatesParams, starting: Starting | undefined): Promise<FileStatesResponse> {
     const data: AnyObject = {
       class: 'file',
       limit: config.platform.findDataObjectsQueryLimit,
@@ -412,8 +409,8 @@ export class PlatformClient {
    * the /system/findDataObjects call is very inefficient and can take a long time
    */
   async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>(
-      (nextMapping) => this.fileStatesPaginated(params, nextMapping),
+    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>(nextMapping =>
+      this.fileStatesPaginated(params, nextMapping),
     )
   }
 
@@ -457,8 +454,8 @@ export class PlatformClient {
   }
 
   async filesList(params: ListFilesParams): Promise<ListFilesResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>(
-      (nextMapping) => this.filesListPaginated(params, nextMapping),
+    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>(nextMapping =>
+      this.filesListPaginated(params, nextMapping),
     )
   }
 
@@ -540,10 +537,7 @@ export class PlatformClient {
   //    D B C L U S T E R
   // -----------------------
 
-  async dbClusterAction(
-    params: DbClusterActionParams,
-    action: DbClusterAction,
-  ): Promise<ClassIdResponse> {
+  async dbClusterAction(params: DbClusterActionParams, action: DbClusterAction): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/${action}`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -646,9 +640,7 @@ export class PlatformClient {
    * Removes user from provided organization. Also revokes access to projects & apps associated with org.
    * @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
    */
-  async removeUserFromOrganization(
-    params: UserRemoveFromOrgParams,
-  ): Promise<UserRemoveFromOrgResponse> {
+  async removeUserFromOrganization(params: UserRemoveFromOrgParams): Promise<UserRemoveFromOrgResponse> {
     const url = `${config.platform.apiUrl}/${params.orgDxId}/removeMember`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -825,11 +817,7 @@ export class PlatformClient {
    *  @param {string} level - Permission level.
    *  @return [don't know yet]
    */
-  async projectInvite(
-    projectDxid: string,
-    invitee: string,
-    level: string,
-  ): Promise<{ id: string; state: string }> {
+  async projectInvite(projectDxid: string, invitee: string, level: string): Promise<{ id: string; state: string }> {
     const url = `${config.platform.apiUrl}/${projectDxid}/invite`
     const options: AxiosRequestConfig = {
       method: 'POST',

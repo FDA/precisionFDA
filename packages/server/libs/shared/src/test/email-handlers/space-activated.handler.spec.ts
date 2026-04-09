@@ -1,19 +1,16 @@
-import { stub } from 'sinon'
-import { SpaceActivatedHandler } from '@shared/domain/email/templates/handlers/space-activated.handler'
-import { User } from '@shared/domain/user/user.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EmailClient } from '@shared/services/email-client'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { expect } from 'chai'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { stub } from 'sinon'
 import { config } from '@shared/config'
 import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { SpaceActivatedHandler } from '@shared/domain/email/templates/handlers/space-activated.handler'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('SpaceActivatedHandler', () => {
   const SPACE_MEMBERSHIP_ID = 10
@@ -48,12 +45,7 @@ describe('SpaceActivatedHandler', () => {
       const space = new Space()
       space.id = SPACE_ID
       space.name = 'Test Space'
-      const spaceMembership = new SpaceMembership(
-        user,
-        space,
-        SPACE_MEMBERSHIP_SIDE.HOST,
-        SPACE_MEMBERSHIP_ROLE.LEAD,
-      )
+      const spaceMembership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.LEAD)
 
       spaceMembershipRepoFindOneOrFail
         .withArgs({ id: SPACE_MEMBERSHIP_ID }, { populate: ['user', 'spaces'] })
@@ -67,17 +59,11 @@ describe('SpaceActivatedHandler', () => {
       await handler.sendEmail(input)
 
       expect(emailClientSendEmailStub.calledOnce).to.be.true()
-      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
-        EMAIL_TYPES.spaceActivated,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.spaceActivated)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq('Space Activated')
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `Dear ${user.firstName} ${user.lastName}`,
-      )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `${config.api.railsHost}/spaces/${space.id}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`Dear ${user.firstName} ${user.lastName}`)
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`${config.api.railsHost}/spaces/${space.id}`)
     })
   })
 })

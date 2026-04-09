@@ -4,6 +4,7 @@ import { App } from '@shared/domain/app/app.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Job } from '@shared/domain/job/job.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { BatchComplete } from '@shared/domain/space-report/model/batch-complete'
 import {
@@ -12,11 +13,10 @@ import {
 } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/producer/space-report-queue-job.producer'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
-import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { InvalidStateError } from '@shared/errors'
 import { SOURCE_TYPE_TO_RESULT_PROVIDER_MAP } from '@shared/facade/space-report/provider/source-type-to-result-provider-map.provider'
@@ -71,19 +71,16 @@ export class SpaceReportBatchResultGenerateFacade {
         return
       }
 
-      const reportPartSources: Record<SpaceReportPartSourceType, SpaceReportPart[]> =
-        reportParts.reduce(
-          (acc: Record<SpaceReportPartSourceType, SpaceReportPart[]>, rp) => {
-            acc[rp.sourceType].push(rp)
-            return acc
-          },
-          { file: [], app: [], job: [], workflow: [], asset: [], user: [], discussion: [] },
-        )
+      const reportPartSources: Record<SpaceReportPartSourceType, SpaceReportPart[]> = reportParts.reduce(
+        (acc: Record<SpaceReportPartSourceType, SpaceReportPart[]>, rp) => {
+          acc[rp.sourceType].push(rp)
+          return acc
+        },
+        { file: [], app: [], job: [], workflow: [], asset: [], user: [], discussion: [] },
+      )
 
       const types = Object.keys(reportPartSources) as SpaceReportPartSourceType[]
-      const batchPromises = types.map((entityType) =>
-        this.getBatchCompletes(entityType, reportPartSources[entityType]),
-      )
+      const batchPromises = types.map(entityType => this.getBatchCompletes(entityType, reportPartSources[entityType]))
       const batchCompletes = (await Promise.all(batchPromises)).flat(1)
 
       await this.spaceReportService.completePartsBatch(await Promise.all(batchCompletes))
@@ -106,12 +103,10 @@ export class SpaceReportBatchResultGenerateFacade {
       throw new InvalidStateError(`Unsupported space report part type - ${type}`)
     }
 
-    const entities = await this.sourceTypeToRepositoryMap[type].find(
-      reportParts.map((rps) => rps.sourceId),
-    )
+    const entities = await this.sourceTypeToRepositoryMap[type].find(reportParts.map(rps => rps.sourceId))
 
     this.deletePartsWithMissingSources(
-      entities.map((e) => e.id),
+      entities.map(e => e.id),
       reportParts,
     )
 
@@ -124,16 +119,12 @@ export class SpaceReportBatchResultGenerateFacade {
       : null
 
     return await Promise.all(
-      entities.map(async (entity) => {
-        const reportPart = reportParts.find((srp) => entity.id === srp.sourceId)
+      entities.map(async entity => {
+        const reportPart = reportParts.find(srp => entity.id === srp.sourceId)
 
         return {
           id: reportPart.id,
-          result: await this.SOURCE_TYPE_TO_RESULT_PROVIDER[type].getResult(
-            entity,
-            space,
-            report.format,
-          ),
+          result: await this.SOURCE_TYPE_TO_RESULT_PROVIDER[type].getResult(entity, space, report.format),
         }
       }),
     )
@@ -142,7 +133,7 @@ export class SpaceReportBatchResultGenerateFacade {
   private deletePartsWithMissingSources(sourcesIds: number[], reportParts: SpaceReportPart[]) {
     const entityIdsSet = new Set(sourcesIds)
 
-    const partsWithoutSources = reportParts.filter((rps) => !entityIdsSet.has(rps.sourceId))
+    const partsWithoutSources = reportParts.filter(rps => !entityIdsSet.has(rps.sourceId))
 
     if (ArrayUtils.isEmpty(partsWithoutSources)) {
       return

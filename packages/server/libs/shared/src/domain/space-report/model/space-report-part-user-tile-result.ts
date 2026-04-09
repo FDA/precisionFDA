@@ -1,7 +1,4 @@
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceReportPartResultBase } from '@shared/domain/space-report/model/space-report-part-result-base'
 
 export interface SpaceReportPartUserTileBaseResult extends SpaceReportPartResultBase {

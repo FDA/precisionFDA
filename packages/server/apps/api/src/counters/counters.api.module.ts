@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { CountersController } from './counters.controller'
 import { CountersFacadeModule } from '@shared/facade/counters/counters-facade.module'
+import { CountersController } from './counters.controller'
 
 @Module({
   imports: [CountersFacadeModule],

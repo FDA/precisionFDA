@@ -1,13 +1,13 @@
 /* eslint-disable max-len */
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '@shared/test'
-import { expect } from 'chai'
 import { database } from '../../../src/database'
 
 describe('UserFileRepository tests', () => {
@@ -220,12 +220,12 @@ describe('UserFileRepository tests', () => {
 
     result = await repo.findUnclosedFiles(user1.id)
     expect(result).to.have.length(3)
-    let resultUids = result.map((x) => x.uid)
+    let resultUids = result.map(x => x.uid)
     expect(resultUids).to.deep.equal([files[1].uid, files[2].uid, files[4].uid])
 
     result = await repo.findUnclosedFiles(user2.id)
     expect(result).to.have.length(1)
-    resultUids = result.map((x) => x.uid)
+    resultUids = result.map(x => x.uid)
     expect(resultUids).to.deep.equal([files[5].uid])
   })
 
@@ -249,7 +249,7 @@ describe('UserFileRepository tests', () => {
 
     let result = await repo.findUnclosedFiles(user1.id)
     expect(result).to.have.length(2)
-    const resultUids = result.map((x) => x.uid)
+    const resultUids = result.map(x => x.uid)
     expect(resultUids).to.deep.equal([jobFile1.uid, jobFile2.uid])
 
     result = await repo.findUnclosedFiles(user2.id)

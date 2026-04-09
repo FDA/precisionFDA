@@ -1,7 +1,7 @@
 import { QueryOrder } from '@mikro-orm/core'
-import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
 import { Transform, Type } from 'class-transformer'
 import { IsArray, IsEnum, IsNumber, IsOptional, ValidateNested } from 'class-validator'
+import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
 import { Invitation } from '../invitation.entity'
 import { PROVISIONING_STATE } from '../invitation.enum'
 
@@ -13,7 +13,7 @@ class InvitationFilter {
     if (typeof value === 'string') {
       value = value.split(',')
     }
-    return value.map((id) => parseInt(id, 10))
+    return value.map(id => parseInt(id, 10))
   })
   @IsNumber({}, { each: true })
   ids: number[]

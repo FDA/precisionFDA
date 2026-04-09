@@ -10,9 +10,7 @@ export class StringUtils {
   }
 
   static parseDateRange(range: string): { lower?: Date; upper?: Date } | undefined {
-    const [lower, upper] = range
-      .split(',')
-      .map((value) => (value && value !== '0' ? new Date(value) : undefined))
+    const [lower, upper] = range.split(',').map(value => (value && value !== '0' ? new Date(value) : undefined))
 
     if (range === ',' || (!lower && !upper)) {
       return { lower: undefined, upper: undefined }
@@ -21,13 +19,11 @@ export class StringUtils {
     return { lower, upper }
   }
 
-  static parseNumberRange(
-    range: string,
-  ): { lower: number | undefined; upper: number | undefined } | undefined {
+  static parseNumberRange(range: string): { lower: number | undefined; upper: number | undefined } | undefined {
     if (range === ',') {
       return { lower: undefined, upper: undefined }
     }
-    const [lower, upper] = range.split(',').map((value) => (value ? parseFloat(value) : undefined))
+    const [lower, upper] = range.split(',').map(value => (value ? parseFloat(value) : undefined))
     return { lower, upper }
   }
 
@@ -41,7 +37,7 @@ export class StringUtils {
     return str
       .toLowerCase()
       .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ')
   }
 }

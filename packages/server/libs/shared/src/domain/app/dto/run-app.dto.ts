@@ -1,7 +1,7 @@
+import { IsIn, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-validator'
 import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
 import { RESOURCE_TYPES, Resource } from '@shared/domain/user/user.entity'
 import { EntityScope, IOType } from '@shared/types/common'
-import { IsIn, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-validator'
 
 export class RunAppDTO {
   @IsString()

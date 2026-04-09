@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
-import { MfaAlreadyResetError } from '@shared/errors'
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+
 import type { Logger } from '@nestjs/common'
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import { MfaAlreadyResetError } from '@shared/errors'
 import { config } from '../config'
 import { getLogger } from '../logger'
 import { PlatformClientBase } from './platform-client-base'

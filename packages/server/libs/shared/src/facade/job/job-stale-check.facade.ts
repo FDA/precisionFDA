@@ -71,9 +71,7 @@ export class JobStaleCheckFacade {
     this.logger.log('Completed stale jobs check and notification process')
   }
 
-  private async sendRunningJobsReportToAdmin(
-    jobsInfo: Map<number, JobStaleCheckDTO>,
-  ): Promise<void> {
+  private async sendRunningJobsReportToAdmin(jobsInfo: Map<number, JobStaleCheckDTO>): Promise<void> {
     const input: TypedEmailBodyDto<EMAIL_TYPES.staleJobsReport> = {
       type: EMAIL_TYPES.staleJobsReport,
       input: {

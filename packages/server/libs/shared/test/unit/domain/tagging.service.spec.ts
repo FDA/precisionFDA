@@ -1,10 +1,10 @@
-import sinon from 'sinon'
-import { expect } from 'chai'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
-import { TaggingRepository } from '@shared/domain/tagging/tagging.repository'
-import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { expect } from 'chai'
+import sinon from 'sinon'
 import { TagRepository } from '@shared/domain/tag/tag.repository'
+import { TaggingRepository } from '@shared/domain/tagging/tagging.repository'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 
 describe('TaggingService', () => {
   const tagRepoFindOneStub = sinon.stub()
@@ -23,7 +23,7 @@ describe('TaggingService', () => {
     persist: emPersistStub,
   } as unknown as SqlEntityManager
 
-  emTransactionalStub.callsFake(async (callback) => {
+  emTransactionalStub.callsFake(async callback => {
     return callback(em)
   })
 
@@ -63,7 +63,7 @@ describe('TaggingService', () => {
     emPersistStub.throws()
 
     emTransactionalStub.reset()
-    emTransactionalStub.callsFake((cb) => cb(em))
+    emTransactionalStub.callsFake(cb => cb(em))
   })
 
   describe('#addTaggingForEntity', () => {
@@ -75,19 +75,13 @@ describe('TaggingService', () => {
       tagRepoFindOneStub.resolves(null)
       taggingRepoFindOneStub.resolves(null)
       emPersistAndFlushStub.reset()
-      emPersistAndFlushStub.callsFake((entity) => {
+      emPersistAndFlushStub.callsFake(entity => {
         entity.id = TAG_ID
       })
       emPersistStub.reset()
 
       const service = getTaggingService()
-      await service.addTaggingForEntity(
-        'tag',
-        'taggerType',
-        USER_ID,
-        TAGGABLE_ID,
-        TAGGABLE_TYPE.NODE,
-      )
+      await service.addTaggingForEntity('tag', 'taggerType', USER_ID, TAGGABLE_ID, TAGGABLE_TYPE.NODE)
 
       expect(emTransactionalStub.calledOnce).to.be.true()
       expect(tagRepoFindOneStub.calledOnce).to.be.true()
@@ -108,13 +102,7 @@ describe('TaggingService', () => {
       emPersistStub.reset()
 
       const service = getTaggingService()
-      await service.addTaggingForEntity(
-        'tag',
-        'taggerType',
-        USER_ID,
-        TAGGABLE_ID,
-        TAGGABLE_TYPE.NODE,
-      )
+      await service.addTaggingForEntity('tag', 'taggerType', USER_ID, TAGGABLE_ID, TAGGABLE_TYPE.NODE)
 
       expect(emTransactionalStub.calledOnce).to.be.true()
       expect(tagRepoFindOneStub.calledOnce).to.be.true()
@@ -132,13 +120,7 @@ describe('TaggingService', () => {
       taggingRepoFindOneStub.resolves({})
 
       const service = getTaggingService()
-      await service.addTaggingForEntity(
-        'tag',
-        'taggerType',
-        USER_ID,
-        TAGGABLE_ID,
-        TAGGABLE_TYPE.NODE,
-      )
+      await service.addTaggingForEntity('tag', 'taggerType', USER_ID, TAGGABLE_ID, TAGGABLE_TYPE.NODE)
 
       expect(emTransactionalStub.calledOnce).to.be.true()
       expect(tagRepoFindOneStub.calledOnce).to.be.true()

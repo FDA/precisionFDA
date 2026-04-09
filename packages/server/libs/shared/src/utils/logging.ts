@@ -28,9 +28,7 @@ const maskAccessTokenUserCtx = <T extends Payload>(userCtx: T): T | null => {
   return dataCopy
 }
 
-const maskAuthHeader = (
-  headers: AxiosRequestConfig['headers'],
-): AxiosRequestConfig['headers'] | null => {
+const maskAuthHeader = (headers: AxiosRequestConfig['headers']): AxiosRequestConfig['headers'] | null => {
   if (!headers) {
     return null
   }

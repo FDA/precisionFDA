@@ -1,5 +1,5 @@
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { NodesCopyDTO } from '@shared/domain/user-file/dto/nodes-copy.dto'

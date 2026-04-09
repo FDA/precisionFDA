@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Ref,
-  ManyToOne,
-  PrimaryKey,
-  Property,
-  Reference,
-} from '@mikro-orm/core'
+import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 

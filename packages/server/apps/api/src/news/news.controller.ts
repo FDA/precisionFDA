@@ -60,10 +60,7 @@ export class NewsController {
   @UseGuards(SiteAdminGuard)
   @HttpCode(204)
   @Put('/:id')
-  async updateNews(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: NewsItemDTO,
-  ): Promise<void> {
+  async updateNews(@Param('id', ParseIntPipe) id: number, @Body() body: NewsItemDTO): Promise<void> {
     await this.newsService.updateNews(id, body)
   }
 }

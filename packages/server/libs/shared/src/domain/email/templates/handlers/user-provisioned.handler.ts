@@ -31,9 +31,7 @@ export class UserProvisionedHandler extends EmailHandler<EMAIL_TYPES.userProvisi
     return `Welcome to precisionFDA, ${input.firstName}!`
   }
 
-  protected getTemplateInput(
-    input: UserProvisionedDTO,
-  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.userProvisioned] {
+  protected getTemplateInput(input: UserProvisionedDTO): EmailTypeToTemplateInputMap[EMAIL_TYPES.userProvisioned] {
     return {
       firstName: input.firstName,
       username: input.username,

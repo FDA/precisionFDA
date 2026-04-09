@@ -26,8 +26,8 @@ import { InvitationService } from '@shared/domain/invitation/services/invitation
 import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
-import { UserManagementService } from '@shared/domain/user/service/user-management.service'
 import { UserService } from '@shared/domain/user/service/user.service'
+import { UserManagementService } from '@shared/domain/user/service/user-management.service'
 import { User } from '@shared/domain/user/user.entity'
 import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
 import { StatisticsFacade } from '../facade/statistics/statistics.facade'
@@ -89,9 +89,7 @@ export class AdminController {
   }
 
   @Get('/invitations')
-  async getInvitations(
-    @Query() query: InvitationPaginationDTO,
-  ): Promise<PaginatedResult<Invitation>> {
+  async getInvitations(@Query() query: InvitationPaginationDTO): Promise<PaginatedResult<Invitation>> {
     return this.invitationService.listInvitations(query)
   }
 

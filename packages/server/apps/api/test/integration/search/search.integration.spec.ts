@@ -1,10 +1,10 @@
 import type { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { database } from '@shared/database'
 import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
 import { ExpertMeta } from '@shared/domain/expert/entity/expert.entity'
 import { create, db } from '@shared/test'
-import { expect } from 'chai'
-import supertest from 'supertest'
 import { testedApp } from '../../index'
 
 describe('Search Controller', () => {
@@ -24,17 +24,11 @@ describe('Search Controller', () => {
   })
 
   it('should return 400 for missing query', async () => {
-    await supertest(testedApp.getHttpServer())
-      .get('/search')
-      .query({ entityType: 'challenge' })
-      .expect(400)
+    await supertest(testedApp.getHttpServer()).get('/search').query({ entityType: 'challenge' }).expect(400)
   })
 
   it('should return 400 for missing entity type', async () => {
-    await supertest(testedApp.getHttpServer())
-      .get('/search')
-      .query({ query: 'important' })
-      .expect(400)
+    await supertest(testedApp.getHttpServer()).get('/search').query({ query: 'important' }).expect(400)
   })
 
   it('should return empty result if no matching entities found', async () => {
@@ -142,16 +136,8 @@ describe('Search Controller', () => {
       const expert1 = create.expertHelper.create(em, { user: expertUser1 })
       const expert2 = create.expertHelper.create(em, { user: expertUser2 })
 
-      create.expertQuestionHelper.create(
-        em,
-        { expert: expert1, user: askingUser1 },
-        { body: EXPERT_QUESTION_BODY },
-      )
-      create.expertQuestionHelper.create(
-        em,
-        { expert: expert2, user: askingUser2 },
-        { body: 'some other body' },
-      )
+      create.expertQuestionHelper.create(em, { expert: expert1, user: askingUser1 }, { body: EXPERT_QUESTION_BODY })
+      create.expertQuestionHelper.create(em, { expert: expert2, user: askingUser2 }, { body: 'some other body' })
 
       await em.flush()
     })

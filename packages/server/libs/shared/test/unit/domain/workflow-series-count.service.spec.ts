@@ -1,11 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
 import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
 import { WorkflowSeriesCountService } from '@shared/domain/workflow-series/workflow-series-count.service'
 import { WorkflowSeriesScopeFilterProvider } from '@shared/domain/workflow-series/workflow-series-scope-filter.provider'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('WorkflowSeriesCountService', () => {
   const USER_ID = 1
@@ -130,9 +130,6 @@ describe('WorkflowSeriesCountService', () => {
   })
 
   function getInstance(): WorkflowSeriesCountService {
-    return new WorkflowSeriesCountService(
-      em as unknown as SqlEntityManager,
-      workflowSeriesScopeFilterProvider,
-    )
+    return new WorkflowSeriesCountService(em as unknown as SqlEntityManager, workflowSeriesScopeFilterProvider)
   }
 })

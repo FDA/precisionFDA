@@ -1,3 +1,5 @@
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { Job } from '@shared/domain/job/job.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { JobService } from '@shared/domain/job/job.service'
@@ -8,8 +10,6 @@ import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.prod
 import * as queueUtils from '@shared/queue/queue.utils'
 import { generate } from '@shared/test'
 import { fakes, mocksReset, mocksRestore } from '@shared/test/mocks'
-import { expect } from 'chai'
-import { SinonStub, stub } from 'sinon'
 
 describe('JobSyncTaskCheckFacade', () => {
   const findRunningJobsByUserStub = stub()

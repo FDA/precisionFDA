@@ -1,7 +1,7 @@
-import { IsObject, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
-import { EntityIdentifier } from '@shared/domain/entity/domain/entity-identifier'
+import { IsObject, ValidateNested } from 'class-validator'
 import { IsValidEntityIdentifier } from '@shared/domain/entity/constraint/is-valid-entity-identifier.constraint'
+import { EntityIdentifier } from '@shared/domain/entity/domain/entity-identifier'
 
 export class Property {
   [key: string]: string

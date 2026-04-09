@@ -1,10 +1,10 @@
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Space } from '@shared/domain/space/space.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { InternalError } from '@shared/errors'
 import { defaultLogger as log } from '../../logger'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { SPACE_TYPE } from './space.enum'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 const getIdFromScopeName = (name: string): number => {
   const [prefix, id] = name.split('-')
@@ -22,7 +22,6 @@ const scopeContainsId = (name: string): boolean => {
   try {
     getIdFromScopeName(name)
     return true
-    /* eslint-disable @typescript-eslint/no-unused-vars */
   } catch (_err) {
     log.debug({ scopeName: name }, 'Invalid scope name provided, error swallowed')
     return false
@@ -42,19 +41,11 @@ const setOrgDxid = (space: Space, spaceMembership: SpaceMembership, value: DxId<
 const getProjectDxid = (space: Space, spaceMembership: SpaceMembership): DxId<'project'> =>
   spaceMembership.isHost() ? space.hostProject : space.guestProject
 
-const setProjectDxid = (
-  space: Space,
-  spaceMembership: SpaceMembership,
-  value: DxId<'project'>,
-): void => {
+const setProjectDxid = (space: Space, spaceMembership: SpaceMembership, value: DxId<'project'>): void => {
   spaceMembership.isHost() ? (space.hostProject = value) : (space.guestProject = value)
 }
 
-const isAcceptedBy = (
-  space: Space,
-  confidentialSpaces: Space[],
-  spaceMembership: SpaceMembership,
-): boolean => {
+const isAcceptedBy = (space: Space, confidentialSpaces: Space[], spaceMembership: SpaceMembership): boolean => {
   if (!spaceMembership) {
     return false
   }
@@ -71,14 +62,14 @@ const isAcceptedBy = (
   return (
     (spaceMembership.isHost() &&
       confidentialSpaces
-        ?.filter((s) => s.isConfidentialReviewerSpace())?.[0]
+        ?.filter(s => s.isConfidentialReviewerSpace())?.[0]
         ?.spaceMemberships?.getItems()
-        ?.filter((sm) => sm.isHost() && sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)?.[0] != null) ||
+        ?.filter(sm => sm.isHost() && sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)?.[0] != null) ||
     (spaceMembership.isGuest() &&
       confidentialSpaces
-        ?.filter((s) => s.isConfidentialSponsorSpace())?.[0]
+        ?.filter(s => s.isConfidentialSponsorSpace())?.[0]
         ?.spaceMemberships?.getItems()
-        ?.filter((sm) => sm.isGuest() && sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)?.[0] != null)
+        ?.filter(sm => sm.isGuest() && sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)?.[0] != null)
   )
 }
 

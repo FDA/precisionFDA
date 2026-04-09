@@ -1,13 +1,13 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
-import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
-import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
-import { SpaceReportResultHtmlProvider } from '@shared/domain/space-report/service/result/space-report-result-html.provider'
-import { SpaceReportResultPartHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-html-content.provider'
-import { Space } from '@shared/domain/space/space.entity'
 import { expect } from 'chai'
 import { JSDOM } from 'jsdom'
 import { stub } from 'sinon'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
+import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
+import { SpaceReportResultHtmlProvider } from '@shared/domain/space-report/service/result/space-report-result-html.provider'
+import { SpaceReportResultPartHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-html-content.provider'
 
 describe('SpaceReportResultHtmlProvider', () => {
   const REPORT_ID = 0
@@ -205,7 +205,7 @@ describe('SpaceReportResultHtmlProvider', () => {
     const res = await getResultDocument()
     const links = res.getElementsByTagName('a')
 
-    Array.from(links).forEach((link) => {
+    Array.from(links).forEach(link => {
       const href = link.getAttribute('href')
       expect(href).not.to.be.null()
 
@@ -222,7 +222,7 @@ describe('SpaceReportResultHtmlProvider', () => {
 
     const res = await getResultDocument(STYLES)
     const styles = res.getElementsByTagName('style')
-    const providedStyles = Array.from(styles).find((s) => s.textContent === STYLES)
+    const providedStyles = Array.from(styles).find(s => s.textContent === STYLES)
 
     expect(providedStyles).not.to.be.null()
   })
@@ -244,7 +244,7 @@ describe('SpaceReportResultHtmlProvider', () => {
     { type: 'job', contentStub: jobContentProvideStub },
     { type: 'workflow', contentStub: workflowContentProvideStub },
     { type: 'user', contentStub: userContentProvideStub },
-  ].forEach((prop) => {
+  ].forEach(prop => {
     it(`should use the correct result content provider and repo for source type ${prop.type}`, async () => {
       const TITLE = 'TITLE'
       const REPORT_PART_WITH_TYPE = { id: 5, sourceType: prop.type, result: { title: TITLE } }
@@ -254,9 +254,7 @@ describe('SpaceReportResultHtmlProvider', () => {
 
       prop.contentStub.reset()
       prop.contentStub.throws()
-      prop.contentStub
-        .withArgs(REPORT_PART_WITH_TYPE, TITLE_ID)
-        .returns(getContentFake(TITLE_ID, TITLE))
+      prop.contentStub.withArgs(REPORT_PART_WITH_TYPE, TITLE_ID).returns(getContentFake(TITLE_ID, TITLE))
 
       const res = await getResultDocument()
       const titleElem = res.getElementById(TITLE_ID)

@@ -1,19 +1,19 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { stub } from 'sinon'
 import { expect } from 'chai'
+import { stub } from 'sinon'
+import { database } from '@shared/database'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { User } from '@shared/domain/user/user.entity'
-import { STATIC_SCOPE } from '@shared/enums'
-import { create, db } from '@shared/test'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { FolderService } from '@shared/domain/user-file/folder.service'
+import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { create, db } from '@shared/test'
 
 describe('FolderService', () => {
   let em: EntityManager<MySqlDriver>
@@ -95,19 +95,13 @@ describe('FolderService', () => {
 
     expect(eventHelperCreateFolderEventStub.calledOnce).to.be.true()
     expect(eventHelperCreateFolderEventStub.firstCall.args[0]).to.equal(EVENT_TYPES.FOLDER_CREATED)
-    expect(eventHelperCreateFolderEventStub.firstCall.args[2]).to.equal(
-      `/${parentFolder.name}/${folderName}`,
-    )
+    expect(eventHelperCreateFolderEventStub.firstCall.args[2]).to.equal(`/${parentFolder.name}/${folderName}`)
   })
 
   it('Test create nested folder in space scope', async () => {
     const spaceScope = 'space-1'
     const folderService = new FolderService(em, userContext, folderRepo, nodeHelper, eventHelper)
-    const parentFolder = create.filesHelper.createFolder(
-      em,
-      { user },
-      { name: 'parentFolder', scope: spaceScope },
-    )
+    const parentFolder = create.filesHelper.createFolder(em, { user }, { name: 'parentFolder', scope: spaceScope })
     await em.flush()
     const folderName = 'folder1'
 
@@ -133,9 +127,7 @@ describe('FolderService', () => {
 
     expect(eventHelperCreateFolderEventStub.calledOnce).to.be.true()
     expect(eventHelperCreateFolderEventStub.firstCall.args[0]).to.equal(EVENT_TYPES.FOLDER_CREATED)
-    expect(eventHelperCreateFolderEventStub.firstCall.args[2]).to.equal(
-      `/${parentFolder.name}/${folderName}`,
-    )
+    expect(eventHelperCreateFolderEventStub.firstCall.args[2]).to.equal(`/${parentFolder.name}/${folderName}`)
   })
 
   it('Test create folders in a path - private scope', async () => {
@@ -158,11 +150,7 @@ describe('FolderService', () => {
     })
     eventHelperCreateFolderEventStub.reset()
 
-    const folders = await folderService.createFoldersOnPath(
-      folderPath,
-      STATIC_SCOPE.PRIVATE,
-      userId,
-    )
+    const folders = await folderService.createFoldersOnPath(folderPath, STATIC_SCOPE.PRIVATE, userId)
     expect(folders.length).to.be.equal(3)
 
     const loadedFolders = await em
@@ -170,26 +158,22 @@ describe('FolderService', () => {
       .find({ name: { $in: [folder1Name, folder2Name, folder3Name] } })
     expect(loadedFolders.length).to.be.equal(3)
 
-    const folder1 = loadedFolders.find((f) => f.name === folder1Name)
+    const folder1 = loadedFolders.find(f => f.name === folder1Name)
     expect(folder1?.parentFolder).to.be.null()
 
-    const folder2 = loadedFolders.find((f) => f.name === folder2Name)
+    const folder2 = loadedFolders.find(f => f.name === folder2Name)
     expect(folder2?.parentFolder?.id).to.be.equal(folder1?.id)
 
-    const folder3 = loadedFolders.find((f) => f.name === folder3Name)
+    const folder3 = loadedFolders.find(f => f.name === folder3Name)
     expect(folder3?.parentFolder?.id).to.be.equal(folder2?.id)
 
     expect(eventHelperCreateFolderEventStub.calledThrice).to.be.true()
     expect(eventHelperCreateFolderEventStub.firstCall.args[0]).to.equal(EVENT_TYPES.FOLDER_CREATED)
     expect(eventHelperCreateFolderEventStub.firstCall.args[2]).to.equal(`/${folder1Name}`)
     expect(eventHelperCreateFolderEventStub.secondCall.args[0]).to.equal(EVENT_TYPES.FOLDER_CREATED)
-    expect(eventHelperCreateFolderEventStub.secondCall.args[2]).to.equal(
-      `/${folder1Name}/${folder2Name}`,
-    )
+    expect(eventHelperCreateFolderEventStub.secondCall.args[2]).to.equal(`/${folder1Name}/${folder2Name}`)
     expect(eventHelperCreateFolderEventStub.thirdCall.args[0]).to.equal(EVENT_TYPES.FOLDER_CREATED)
-    expect(eventHelperCreateFolderEventStub.thirdCall.args[2]).to.equal(
-      `/${folder1Name}/${folder2Name}/${folder3Name}`,
-    )
+    expect(eventHelperCreateFolderEventStub.thirdCall.args[2]).to.equal(`/${folder1Name}/${folder2Name}/${folder3Name}`)
   })
 
   it('Test create folders in a path - reuse existing folders in space scope', async () => {
@@ -200,11 +184,7 @@ describe('FolderService', () => {
 
     const folder1 = create.filesHelper.createFolder(em, { user }, { name: folder1Name, scope })
     await em.flush()
-    const folder2 = create.filesHelper.createFolder(
-      em,
-      { user, parentFolder: folder1 },
-      { name: folder2Name, scope },
-    )
+    const folder2 = create.filesHelper.createFolder(em, { user, parentFolder: folder1 }, { name: folder2Name, scope })
     await em.flush()
 
     const folderService = new FolderService(em, userContext, folderRepo, nodeHelper, eventHelper)
@@ -238,11 +218,7 @@ describe('FolderService', () => {
     const folder1Name = 'folder1'
     const folder2Name = 'folder2'
     const folder3Name = 'folder3'
-    const folder1 = create.filesHelper.createFolder(
-      em,
-      { user },
-      { name: folder1Name, scope: STATIC_SCOPE.PRIVATE },
-    )
+    const folder1 = create.filesHelper.createFolder(em, { user }, { name: folder1Name, scope: STATIC_SCOPE.PRIVATE })
     await em.flush()
     const folder2 = create.filesHelper.createFolder(
       em,
@@ -256,11 +232,7 @@ describe('FolderService', () => {
     nodeHelperGetNodePathStub.resolves(folderPath)
     eventHelperCreateFolderEventStub.reset()
 
-    const folders = await folderService.createFoldersOnPath(
-      folderPath,
-      STATIC_SCOPE.PRIVATE,
-      userId,
-    )
+    const folders = await folderService.createFoldersOnPath(folderPath, STATIC_SCOPE.PRIVATE, userId)
 
     expect(folders.length).to.be.equal(3)
     expect(folders[0].id).to.be.equal(folder1.id)
@@ -316,11 +288,7 @@ describe('FolderService', () => {
 
     const user2 = create.userHelper.create(em, { id: 200 })
     await em.flush()
-    create.filesHelper.createFolder(
-      em,
-      { user: user2 },
-      { name: folder1Name, scope: STATIC_SCOPE.PRIVATE },
-    )
+    create.filesHelper.createFolder(em, { user: user2 }, { name: folder1Name, scope: STATIC_SCOPE.PRIVATE })
     await em.flush()
 
     await folderService.createFoldersOnPath(folderPath, STATIC_SCOPE.PRIVATE, userId)
@@ -328,9 +296,9 @@ describe('FolderService', () => {
     const loadedFolders = await em.getRepository(Folder).find({ name: folder1Name })
 
     expect(loadedFolders.length).to.be.equal(2)
-    const user1Folder = loadedFolders.find((f) => f.user.id === userId)
+    const user1Folder = loadedFolders.find(f => f.user.id === userId)
     expect(user1Folder).to.be.not.null()
-    const user2Folder = loadedFolders.find((f) => f.user.id === userId)
+    const user2Folder = loadedFolders.find(f => f.user.id === userId)
     expect(user2Folder).to.be.not.null()
   })
 })

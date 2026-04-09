@@ -13,6 +13,6 @@ export class ParticipantService {
       { orderBy: { position: 'ASC', id: 'ASC' } },
     )
 
-    return participants.map((participant) => ParticipantDTO.fromEntity(participant))
+    return participants.map(participant => ParticipantDTO.fromEntity(participant))
   }
 }

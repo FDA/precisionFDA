@@ -1,7 +1,7 @@
-import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import { DiscussionEntityLinkProvider } from '@shared/domain/entity/entity-link/discussion-entity-link.provider'
 import { expect } from 'chai'
 import { config } from '@shared/config'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { DiscussionEntityLinkProvider } from '@shared/domain/entity/entity-link/discussion-entity-link.provider'
 
 describe('DiscussionEntityLinkProvider', () => {
   const ID = 0

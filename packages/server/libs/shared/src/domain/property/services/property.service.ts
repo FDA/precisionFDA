@@ -1,17 +1,17 @@
 import { FilterQuery } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
+import { Property } from '@shared/domain/property/dto/set-properties.dto'
+import { PropertyRepository } from '@shared/domain/property/property.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import * as errors from '../../../errors'
 import { SPACE_STATE } from '../../space/space.enum'
 import { getIdFromScopeName, scopeContainsId } from '../../space/space.helper'
 import { FILE_STI_TYPE } from '../../user-file/user-file.types'
 import { GeneralProperty, PropertyType } from '../property.entity'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { PropertyRepository } from '@shared/domain/property/property.repository'
-import { Property } from '@shared/domain/property/dto/set-properties.dto'
 
 @Injectable()
 export class PropertyService {
@@ -55,7 +55,7 @@ export class PropertyService {
       await this.getConditionByType(scope, targetType),
     )
 
-    return Promise.resolve([...new Set(results.map((p) => p.propertyName))])
+    return Promise.resolve([...new Set(results.map(p => p.propertyName))])
   }
 
   private getEntityByType(targetType: PropertyType): string {
@@ -91,7 +91,7 @@ export class PropertyService {
             },
           },
         })
-        .then((spaces) => spaces.map((s) => `space-${s.id}`))
+        .then(spaces => spaces.map(s => `space-${s.id}`))
     } else if (scopeContainsId(scope)) {
       await this.em.findOneOrFail(Space, {
         id: getIdFromScopeName(scope),

@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, OneToOne, Property, Ref, Reference } from '@mikro-orm/core'
 import { BaseEntity } from '@shared/database/base.entity'
-import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
 import { Expert } from '@shared/domain/expert/entity/expert.entity'
+import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
 
 @Entity({ tableName: 'expert_answers' })
 export class ExpertAnswer extends BaseEntity {

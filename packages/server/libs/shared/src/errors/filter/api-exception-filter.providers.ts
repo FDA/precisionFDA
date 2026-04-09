@@ -1,9 +1,9 @@
 import { Provider } from '@nestjs/common'
 import { APP_FILTER } from '@nestjs/core'
 import { BaseErrorExceptionFilter } from '@shared/errors/filter/base-error-exception.filter'
+import { DatabaseExceptionFilter } from '@shared/errors/filter/database-exception.filter'
 import { DefaultExceptionFilter } from '@shared/errors/filter/default-exception.filter'
 import { HttpExceptionFilter } from '@shared/errors/filter/http-exception.filter'
-import { DatabaseExceptionFilter } from '@shared/errors/filter/database-exception.filter'
 
 export const apiExceptionFilterProviders: Provider[] = [
   {

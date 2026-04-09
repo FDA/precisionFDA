@@ -1,26 +1,23 @@
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { SpaceChangedEmailHandler } from '@shared/domain/email/templates/handlers/space-change.handler'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EmailClient } from '@shared/services/email-client'
-import { stub } from 'sinon'
-import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
-import { NotFoundError } from '@shared/errors'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { config } from '@shared/config'
-import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { Reference } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { config } from '@shared/config'
+import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { SpaceChangedEmailHandler } from '@shared/domain/email/templates/handlers/space-change.handler'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { NotFoundError } from '@shared/errors'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('SpaceChangedEmailHandler', () => {
   const SPACE_ID = 15
@@ -76,10 +73,7 @@ describe('SpaceChangedEmailHandler', () => {
       input.spaceMembershipId = SPACE_MEMBERSHIP_ID
 
       const handler = getHandler()
-      await expect(handler.sendEmail(input)).to.be.rejectedWith(
-        NotFoundError,
-        `Space id ${input.spaceId} not found`,
-      )
+      await expect(handler.sendEmail(input)).to.be.rejectedWith(NotFoundError, `Space id ${input.spaceId} not found`)
     })
 
     it('user not found', async () => {
@@ -94,10 +88,7 @@ describe('SpaceChangedEmailHandler', () => {
       input.spaceMembershipId = SPACE_MEMBERSHIP_ID
 
       const handler = getHandler()
-      await expect(handler.sendEmail(input)).to.be.rejectedWith(
-        NotFoundError,
-        `User id ${USER_ID} not found`,
-      )
+      await expect(handler.sendEmail(input)).to.be.rejectedWith(NotFoundError, `User id ${USER_ID} not found`)
     })
 
     it('basic', async () => {
@@ -121,12 +112,7 @@ describe('SpaceChangedEmailHandler', () => {
       space.id = SPACE_ID
       space.name = 'space-name'
       space.type = SPACE_TYPE.GROUPS
-      const spaceMembership = new SpaceMembership(
-        user,
-        space,
-        SPACE_MEMBERSHIP_SIDE.HOST,
-        SPACE_MEMBERSHIP_ROLE.LEAD,
-      )
+      const spaceMembership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.LEAD)
       const adminSpaceMembership = new SpaceMembership(
         adminUser,
         space,
@@ -162,15 +148,9 @@ describe('SpaceChangedEmailHandler', () => {
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
         `${user.firstName} ${user.lastName} locked the space ${space.name}`,
       )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `Hello ${adminUser.firstName}!`,
-      )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `The space ${space.name} was locked`,
-      )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `${config.api.railsHost}/spaces/${space.id}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`Hello ${adminUser.firstName}!`)
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`The space ${space.name} was locked`)
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`${config.api.railsHost}/spaces/${space.id}`)
     })
   })
 })

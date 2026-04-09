@@ -1,8 +1,8 @@
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { AppSeriesScopeFilterProvider } from '@shared/domain/app-series/app-series-scope-filter.provider'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
+import { User } from '@shared/domain/user/user.entity'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('AppSeriesScopeFilterProvider', () => {
   const USER_ID = 1

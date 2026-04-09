@@ -1,12 +1,12 @@
-import { NodeCopyInputDTO } from '@shared/domain/email/dto/node-copy-input.dto'
-import { User } from '@shared/domain/user/user.entity'
-import { NodeCopyHandler } from '@shared/domain/email/templates/handlers/node-copy.handler'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { EmailClient } from '@shared/services/email-client'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { Organization } from '@shared/domain/org/organization.entity'
+import { NodeCopyInputDTO } from '@shared/domain/email/dto/node-copy-input.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { NodeCopyHandler } from '@shared/domain/email/templates/handlers/node-copy.handler'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('NodeCopyHandler', () => {
   const USER_ID = 11
@@ -64,15 +64,11 @@ describe('NodeCopyHandler', () => {
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
         `The following folders haven't been copied since they already exist in ${input.destination}`,
       )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `${input.notCopiedFolderNames.join(', ')}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`${input.notCopiedFolderNames.join(', ')}`)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
         `The following files haven't been copied since they already exist in ${input.destination}`,
       )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `${input.notCopiedFileNames.join(', ')}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`${input.notCopiedFileNames.join(', ')}`)
     })
   })
 })

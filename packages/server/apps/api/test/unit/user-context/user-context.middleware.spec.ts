@@ -1,4 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { Request, Response } from 'express'
+import { nanoid } from 'nanoid'
+import { SinonStub, stub } from 'sinon'
 import { Session } from '@shared/domain/session/session.entity'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
 import { UnauthorizedRequestError } from '@shared/errors'
@@ -6,10 +10,6 @@ import { CliEncryptor } from '@shared/utils/encryptors/cli-encryptor'
 import { Encryptor } from '@shared/utils/encryptors/encryptor'
 import { HashUtils } from '@shared/utils/hash.utils'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { expect } from 'chai'
-import { Request, Response } from 'express'
-import { nanoid } from 'nanoid'
-import { SinonStub, stub } from 'sinon'
 import { UserContextMiddleware } from '../../../src/user-context/middleware/user-context.middleware'
 
 describe('UserContextMiddleware', () => {
@@ -33,9 +33,7 @@ describe('UserContextMiddleware', () => {
     token: PLATFORM_TOKEN,
     get expiration(): number {
       const now = new Date()
-      const expirationDate = new Date(
-        now.getTime() + TimeUtils.minutesToMilliseconds(sessionExpirationMinutes),
-      )
+      const expirationDate = new Date(now.getTime() + TimeUtils.minutesToMilliseconds(sessionExpirationMinutes))
 
       return TimeUtils.floorMilisecondsToSeconds(expirationDate.getTime())
     },
@@ -255,7 +253,7 @@ describe('UserContextMiddleware', () => {
     expect(userContextStorageRunStub.firstCall.args[1]).to.eq(nextStub)
   })
 
-  async function callWithSessionToken(token: string, userAgent = 'Foo'): Promise<void> {
+  async function callWithSessionToken(token: string, userAgent: string = 'Foo'): Promise<void> {
     const middleware = new UserContextMiddleware(em)
     const req = {
       headers: {

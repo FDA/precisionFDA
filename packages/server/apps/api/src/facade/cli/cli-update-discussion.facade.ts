@@ -28,16 +28,14 @@ export class CliUpdateDiscussionFacade {
     }
     if (dto.attachments) {
       const newAttachments = await this.attachmentFacade.transformCliAttachments(dto.attachments)
-      const existingAttachments = await this.attachmentRetrieveFacade.getAttachments(
-        discussion.noteId,
-      )
+      const existingAttachments = await this.attachmentRetrieveFacade.getAttachments(discussion.noteId)
       attachments = {
-        files: existingAttachments.filter((a) => a.type === 'UserFile').map((a) => a.id),
-        folders: existingAttachments.filter((a) => a.type === 'Folder').map((a) => a.id),
-        assets: existingAttachments.filter((a) => a.type === 'Asset').map((a) => a.id),
-        apps: existingAttachments.filter((a) => a.type === 'App').map((a) => a.id),
-        jobs: existingAttachments.filter((a) => a.type === 'Job').map((a) => a.id),
-        comparisons: existingAttachments.filter((a) => a.type === 'Comparison').map((a) => a.id),
+        files: existingAttachments.filter(a => a.type === 'UserFile').map(a => a.id),
+        folders: existingAttachments.filter(a => a.type === 'Folder').map(a => a.id),
+        assets: existingAttachments.filter(a => a.type === 'Asset').map(a => a.id),
+        apps: existingAttachments.filter(a => a.type === 'App').map(a => a.id),
+        jobs: existingAttachments.filter(a => a.type === 'Job').map(a => a.id),
+        comparisons: existingAttachments.filter(a => a.type === 'Comparison').map(a => a.id),
       }
 
       attachments.files.push(...newAttachments.files)

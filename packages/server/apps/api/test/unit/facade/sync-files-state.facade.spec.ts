@@ -1,19 +1,19 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { PlatformClient } from '@shared/platform-client'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
-import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
-import { TASK_TYPE } from '@shared/queue/task.input'
-import { expect } from 'chai'
-import { Job } from 'bull'
-import { User } from '@shared/domain/user/user.entity'
-import { SinonStub, stub } from 'sinon'
 import { Reference } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Job } from 'bull'
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
+import { ChallengeService } from '@shared/domain/challenge/challenge.service'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
 import { FILE_STATE_DX, FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
+import { PlatformClient } from '@shared/platform-client'
 import { FileStateResult } from '@shared/platform-client/platform-client.responses'
-import { ChallengeService } from '@shared/domain/challenge/challenge.service'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { TASK_TYPE } from '@shared/queue/task.input'
 
 describe('SyncFilesStateFacade', () => {
   const user = {
@@ -106,14 +106,7 @@ describe('SyncFilesStateFacade', () => {
   })
 
   function getInstance(): SyncFilesStateFacade {
-    return new SyncFilesStateFacade(
-      em,
-      userCtx,
-      platformClient,
-      challengeService,
-      nodeHelper,
-      removeNodesFacade,
-    )
+    return new SyncFilesStateFacade(em, userCtx, platformClient, challengeService, nodeHelper, removeNodesFacade)
   }
 
   describe('#getBullJobId', () => {
@@ -202,11 +195,7 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as FileOrAsset
 
-      nodeHelperFindRecentClosingFilesAndAssetsStub
-        .onFirstCall()
-        .resolves([file1, file2])
-        .onSecondCall()
-        .resolves([])
+      nodeHelperFindRecentClosingFilesAndAssetsStub.onFirstCall().resolves([file1, file2]).onSecondCall().resolves([])
       nodeHelperFindOldClosingFilesAndAssetsStub.resolves([])
       nodeHelperFindOldOpenFilesAndAssetsStub.resolves([])
 
@@ -258,17 +247,13 @@ describe('SyncFilesStateFacade', () => {
           isCreatedByChallengeBot: () => false,
         } as unknown as FileOrAsset)
       }
-      nodeHelperFindRecentClosingFilesAndAssetsStub
-        .onFirstCall()
-        .resolves(files)
-        .onSecondCall()
-        .resolves([])
+      nodeHelperFindRecentClosingFilesAndAssetsStub.onFirstCall().resolves(files).onSecondCall().resolves([])
       nodeHelperFindOldClosingFilesAndAssetsStub.resolves([])
       nodeHelperFindOldOpenFilesAndAssetsStub.resolves([])
 
       platformClientFileStatesStub
         .withArgs({
-          fileDxids: files.slice(0, MAX_FILES_PER_RUN).map((f) => f.dxid),
+          fileDxids: files.slice(0, MAX_FILES_PER_RUN).map(f => f.dxid),
           projectDxid: 'project-1',
         })
         .resolves(
@@ -280,7 +265,7 @@ describe('SyncFilesStateFacade', () => {
             },
           })) as FileStateResult[],
         )
-      files.slice(0, MAX_FILES_PER_RUN).forEach((file) => {
+      files.slice(0, MAX_FILES_PER_RUN).forEach(file => {
         findFileOrAssetWithUidStub.withArgs(em, file.uid).resolves(file)
       })
 
@@ -309,11 +294,7 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as FileOrAsset
 
-      nodeHelperFindRecentClosingFilesAndAssetsStub
-        .onFirstCall()
-        .resolves([file1])
-        .onSecondCall()
-        .resolves([])
+      nodeHelperFindRecentClosingFilesAndAssetsStub.onFirstCall().resolves([file1]).onSecondCall().resolves([])
       nodeHelperFindOldClosingFilesAndAssetsStub.resolves([])
       nodeHelperFindOldOpenFilesAndAssetsStub.resolves([])
 
@@ -346,11 +327,7 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => true,
       } as unknown as FileOrAsset
 
-      nodeHelperFindRecentClosingFilesAndAssetsStub
-        .onFirstCall()
-        .resolves([file1])
-        .onSecondCall()
-        .resolves([])
+      nodeHelperFindRecentClosingFilesAndAssetsStub.onFirstCall().resolves([file1]).onSecondCall().resolves([])
       nodeHelperFindOldClosingFilesAndAssetsStub.resolves([])
       nodeHelperFindOldOpenFilesAndAssetsStub.resolves([])
 

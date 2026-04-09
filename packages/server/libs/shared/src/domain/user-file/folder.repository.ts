@@ -1,10 +1,10 @@
 import { FilterQuery } from '@mikro-orm/mysql'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { Folder } from './folder.entity'
-import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
-import { User } from '@shared/domain/user/user.entity'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 type FindForUser = {
   userId: number
@@ -33,14 +33,10 @@ export class FolderRepository extends AccessControlRepository<Folder> {
       return null
     }
     const accessibleSpaces = await user.accessibleSpaces()
-    const scopes = accessibleSpaces.map((space) => space.scope)
+    const scopes = accessibleSpaces.map(space => space.scope)
 
     return {
-      $or: [
-        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
-        { scope: STATIC_SCOPE.PUBLIC },
-        { scope: { $in: scopes } },
-      ],
+      $or: [{ user: user.id, scope: STATIC_SCOPE.PRIVATE }, { scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: scopes } }],
     }
   }
 
@@ -51,7 +47,7 @@ export class FolderRepository extends AccessControlRepository<Folder> {
       return null
     }
     const editableSpaces = await user.editableSpaces()
-    const scopes = editableSpaces.map((space) => space.scope)
+    const scopes = editableSpaces.map(space => space.scope)
 
     return {
       $or: [
@@ -84,10 +80,7 @@ export class FolderRepository extends AccessControlRepository<Folder> {
 
   // Find all folders for a particular user
   async findForUser({ userId }: FindForUser): Promise<Folder[]> {
-    return await this.find(
-      { user: this.getReference(userId) },
-      { orderBy: { id: 'ASC' }, populate: ['taggings.tag'] },
-    )
+    return await this.find({ user: this.getReference(userId) }, { orderBy: { id: 'ASC' }, populate: ['taggings.tag'] })
   }
 
   async findAllPFDAOnlyFolders(): Promise<Folder[]> {
@@ -101,20 +94,12 @@ export class FolderRepository extends AccessControlRepository<Folder> {
     return await this.find({ userId }, { filters: ['pfdaonly'], populate: ['taggings.tag'] })
   }
 
-  async findByName(
-    { name, parentId, userId, scope }: FindByName,
-    tagEnable: boolean = false,
-  ): Promise<Folder | null> {
-    const addTaggings = tagEnable
-      ? { populate: ['taggings.tag'] }
-      : ({} as { populate: string[] } | object)
+  async findByName({ name, parentId, userId, scope }: FindByName, tagEnable: boolean = false): Promise<Folder | null> {
+    const addTaggings = tagEnable ? { populate: ['taggings.tag'] } : ({} as { populate: string[] } | object)
     const parentKey = scope.startsWith('space') ? 'scopedParentFolderId' : 'parentFolderId'
 
     return scope === STATIC_SCOPE.PRIVATE
-      ? this.findOne(
-          { name, [parentKey]: parentId, userId, scope: STATIC_SCOPE.PRIVATE },
-          addTaggings,
-        )
+      ? this.findOne({ name, [parentKey]: parentId, userId, scope: STATIC_SCOPE.PRIVATE }, addTaggings)
       : this.findOne({ name, [parentKey]: parentId, scope }, addTaggings)
   }
 }

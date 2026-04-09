@@ -1,4 +1,6 @@
 import { expect } from 'chai'
+import { ValidationError } from '@shared/errors'
+import { CustomAggregateError } from '@shared/utils/aggregate-error'
 import {
   parseBoundedNumberFromString,
   parseEnumValueFromString,
@@ -10,8 +12,6 @@ import {
   wrapMaybeEmpty,
   wrapMaybeUndefined,
 } from '@shared/validation/parsers'
-import { ValidationError } from '@shared/errors'
-import { CustomAggregateError } from '@shared/utils/aggregate-error'
 
 describe('parseNonEmptyString', () => {
   it('should work on parsing non-empty string', () => {

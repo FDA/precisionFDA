@@ -1,5 +1,5 @@
-import { config } from '@shared/config'
 import crypto from 'node:crypto'
+import { config } from '@shared/config'
 
 type RailsToken = {
   _rails: {
@@ -32,13 +32,7 @@ export class Encryptor {
   private static readonly pfdaSession = 'cookie._precision-fda_session'
 
   private static get derivedKey(): Buffer {
-    return crypto.pbkdf2Sync(
-      this.secretKeyBase,
-      this.authEncryptedCookie,
-      this.iterations,
-      this.keySize,
-      this.digest,
-    )
+    return crypto.pbkdf2Sync(this.secretKeyBase, this.authEncryptedCookie, this.iterations, this.keySize, this.digest)
   }
 
   static encrypt(userSession: UserSession): string {
@@ -73,11 +67,7 @@ export class Encryptor {
       const data = decodeURIComponent(token)
       const [encryptedValue, iv, authTag] = data.split('--')
 
-      const decipher = crypto.createDecipheriv(
-        this.algorithm,
-        this.derivedKey,
-        Buffer.from(iv, 'base64'),
-      )
+      const decipher = crypto.createDecipheriv(this.algorithm, this.derivedKey, Buffer.from(iv, 'base64'))
       decipher.setAuthTag(Buffer.from(authTag, 'base64'))
 
       let decrypted = decipher.update(encryptedValue, 'base64', 'utf8')

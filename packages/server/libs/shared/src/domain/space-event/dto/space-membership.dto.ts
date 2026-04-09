@@ -1,8 +1,5 @@
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { IsEnum, IsInt, IsNotEmpty } from 'class-validator'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 
 export class SpaceMembershipDTO {
   @IsInt()

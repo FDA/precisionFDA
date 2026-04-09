@@ -4,6 +4,8 @@ import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { DxId } from '@shared/domain/entity/domain/dxid'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import {
   ENTITY_TYPE,
@@ -15,10 +17,8 @@ import { SpaceMembershipService } from '@shared/domain/space-membership/service/
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipPermission } from '@shared/domain/space-membership/space-membership.type'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { Space } from '@shared/domain/space/space.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserService } from '@shared/domain/user/service/user.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ClientRequestError, InternalError, InvalidStateError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
@@ -40,10 +40,7 @@ export class SpaceMembershipUpdateFacade {
     private readonly emailService: EmailService,
   ) {}
 
-  async updatePermissions(
-    spaceId: number,
-    dto: UpdateSpaceMembershipDTO,
-  ): Promise<SpaceMembership[]> {
+  async updatePermissions(spaceId: number, dto: UpdateSpaceMembershipDTO): Promise<SpaceMembership[]> {
     const sharedSpace = await this.spaceService.getSharedSpace(spaceId)
     if (typeof dto.enabled === 'boolean') {
       return await this.updateState(sharedSpace, dto.membershipIds, dto.enabled)
@@ -53,14 +50,8 @@ export class SpaceMembershipUpdateFacade {
     throw new InvalidStateError('No valid update action provided')
   }
 
-  async updateState(
-    space: Space,
-    memberIds: number[],
-    enabled: boolean,
-  ): Promise<SpaceMembership[]> {
-    const membership = await this.spaceMembershipService.getCurrentUserMembershipInSharedSpace(
-      space.id,
-    )
+  async updateState(space: Space, memberIds: number[], enabled: boolean): Promise<SpaceMembership[]> {
+    const membership = await this.spaceMembershipService.getCurrentUserMembershipInSharedSpace(space.id)
     if (!membership) {
       throw new InvalidStateError('Current user is not a member of the space or invalid space')
     }
@@ -76,23 +67,13 @@ export class SpaceMembershipUpdateFacade {
           activityType = SPACE_EVENT_ACTIVITY_TYPE.membership_disabled
           action = 'disable'
         }
-        const updated = await this.spaceMembershipService.updatePermission(
-          space,
-          membership,
-          memberIds,
-          action,
-        )
+        const updated = await this.spaceMembershipService.updatePermission(space, membership, memberIds, action)
 
         await this.createSpaceEvents(updated, action, activityType)
         return updated
       })
 
-      await this.sendUpdateEmail(
-        updatedMemberships,
-        space.id,
-        SPACE_EVENT_ACTIVITY_TYPE[activityType],
-        action,
-      )
+      await this.sendUpdateEmail(updatedMemberships, space.id, SPACE_EVENT_ACTIVITY_TYPE[activityType], action)
       return updatedMemberships
     } catch (error: unknown) {
       await this.maintenanceQueueJobProducer.createSyncSpaceMemberAccessTask(space.id, memberIds)
@@ -104,14 +85,8 @@ export class SpaceMembershipUpdateFacade {
     }
   }
 
-  async updateRole(
-    space: Space,
-    memberIds: number[],
-    targetRole: SPACE_MEMBERSHIP_ROLE,
-  ): Promise<SpaceMembership[]> {
-    const membership = await this.spaceMembershipService.getCurrentUserMembershipInSharedSpace(
-      space.id,
-    )
+  async updateRole(space: Space, memberIds: number[], targetRole: SPACE_MEMBERSHIP_ROLE): Promise<SpaceMembership[]> {
+    const membership = await this.spaceMembershipService.getCurrentUserMembershipInSharedSpace(space.id)
     if (!membership) {
       throw new InvalidStateError('Current user is not a member of the space or invalid space')
     }
@@ -150,11 +125,7 @@ export class SpaceMembershipUpdateFacade {
     }
   }
 
-  async recoverSpaceLead(
-    sharedSpaceId: number,
-    currentLeadMembershipId: number,
-    newLeadDxuser: string,
-  ): Promise<void> {
+  async recoverSpaceLead(sharedSpaceId: number, currentLeadMembershipId: number, newLeadDxuser: string): Promise<void> {
     const newLeadUser = await this.userService.getUserByDxuser(newLeadDxuser)
     if (!newLeadUser) {
       throw new InvalidStateError(`User ${newLeadDxuser} not found`)
@@ -186,11 +157,7 @@ export class SpaceMembershipUpdateFacade {
     await this.em.populate(newLeadUser, ['organization'])
     const newLeadBillTo = newLeadUser.billTo()
 
-    const errors = await this.preValidateAdminInUserOrg([
-      ...spaceOrgs,
-      currentLeadBillTo,
-      newLeadBillTo,
-    ])
+    const errors = await this.preValidateAdminInUserOrg([...spaceOrgs, currentLeadBillTo, newLeadBillTo])
     if (errors.length > 0) {
       throw new InvalidStateError(`Pre-validation failed: ${errors.join('; ')}`)
     }
@@ -229,7 +196,7 @@ export class SpaceMembershipUpdateFacade {
   }
 
   private async preValidateAdminInUserOrg(orgs: DxId<'org'>[]): Promise<string[]> {
-    const validationPromises = orgs.map((org) => this.checkAdminMembership(org))
+    const validationPromises = orgs.map(org => this.checkAdminMembership(org))
     const results = await Promise.all(validationPromises)
     const errors: string[] = []
     results.forEach((hasAdmin, index) => {

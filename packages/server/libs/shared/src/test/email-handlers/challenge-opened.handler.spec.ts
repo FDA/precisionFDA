@@ -1,26 +1,23 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
-import { EmailClient } from '@shared/services/email-client'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { ChallengeOpenedEmailHandler } from '@shared/domain/email/templates/handlers/challenge-opened.handler'
-import { stub } from 'sinon'
-import { ChallengeOpenedDTO } from '@shared/domain/email/dto/challenge-opened.dto'
-import { expect } from 'chai'
-import { InternalError } from '@shared/errors'
-import { User } from '@shared/domain/user/user.entity'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { pfdaNoReplyUser } from '@shared/domain/email/email.helper'
-import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { Reference } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { ChallengeOpenedDTO } from '@shared/domain/email/dto/challenge-opened.dto'
+import { pfdaNoReplyUser } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { ChallengeOpenedEmailHandler } from '@shared/domain/email/templates/handlers/challenge-opened.handler'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { InternalError } from '@shared/errors'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('ChallengeOpenedEmailHandler', () => {
   const CHALLENGE_ID = 1
@@ -46,13 +43,7 @@ describe('ChallengeOpenedEmailHandler', () => {
   } as unknown as EmailClient
 
   const getHandler = (): ChallengeOpenedEmailHandler => {
-    return new ChallengeOpenedEmailHandler(
-      entityManager,
-      challengeRepo,
-      userRepo,
-      spaceMembershipRepo,
-      emailClient,
-    )
+    return new ChallengeOpenedEmailHandler(entityManager, challengeRepo, userRepo, spaceMembershipRepo, emailClient)
   }
 
   beforeEach(async () => {
@@ -108,28 +99,20 @@ describe('ChallengeOpenedEmailHandler', () => {
       input.challengeId = CHALLENGE_ID
 
       challengeRepoFindOneOrFailStub.withArgs({ id: CHALLENGE_ID }).resolves(challenge)
-      userRepoFindActiveStub
-        .withArgs({ populate: ['notificationPreference'] as never[] })
-        .resolves([user1])
+      userRepoFindActiveStub.withArgs({ populate: ['notificationPreference'] as never[] }).resolves([user1])
       emailClientSendEmailStub.reset()
       const handler = getHandler()
 
       await handler.sendEmail(input)
 
       expect(userRepoFindActiveStub.calledOnce).to.be.true()
-      expect(userRepoFindActiveStub.firstCall.args).to.deep.equal([
-        { populate: ['notificationPreference'] },
-      ])
+      expect(userRepoFindActiveStub.firstCall.args).to.deep.equal([{ populate: ['notificationPreference'] }])
       expect(spaceMembershipRepoFindStub.called).to.be.false()
       expect(emailClientSendEmailStub.calledTwice).to.be.true()
 
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.equal(user1.email)
-      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
-        EMAIL_TYPES.challengeOpened,
-      )
-      expect(emailClientSendEmailStub.firstCall.args[0].subject).to.equal(
-        `New challenge ${challenge.name}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(EMAIL_TYPES.challengeOpened)
+      expect(emailClientSendEmailStub.firstCall.args[0].subject).to.equal(`New challenge ${challenge.name}`)
       expect(emailClientSendEmailStub.secondCall.args[0].to).to.equal(pfdaNoReplyUser.email)
       expect(emailClientSendEmailStub.args[0][0].body).to.contain(challenge.name)
     })
@@ -160,9 +143,7 @@ describe('ChallengeOpenedEmailHandler', () => {
         SPACE_MEMBERSHIP_SIDE.GUEST,
         SPACE_MEMBERSHIP_ROLE.ADMIN,
       )
-      spaceMembershipRepoFindStub
-        .withArgs({ spaces: SPACE_ID, active: true })
-        .resolves([spaceMembership])
+      spaceMembershipRepoFindStub.withArgs({ spaces: SPACE_ID, active: true }).resolves([spaceMembership])
       challengeRepoFindOneOrFailStub.withArgs({ id: CHALLENGE_ID }).resolves(challenge)
       emailClientSendEmailStub.reset()
 
@@ -174,12 +155,8 @@ describe('ChallengeOpenedEmailHandler', () => {
       expect(spaceMembershipRepoFindStub.called).to.be.true()
       expect(emailClientSendEmailStub.calledTwice).to.be.true()
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.equal(user1.email)
-      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
-        EMAIL_TYPES.challengeOpened,
-      )
-      expect(emailClientSendEmailStub.firstCall.args[0].subject).to.equal(
-        `New challenge ${challenge.name}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(EMAIL_TYPES.challengeOpened)
+      expect(emailClientSendEmailStub.firstCall.args[0].subject).to.equal(`New challenge ${challenge.name}`)
       expect(emailClientSendEmailStub.secondCall.args[0].to).to.equal(pfdaNoReplyUser.email)
       expect(emailClientSendEmailStub.args[0][0].body).to.contain(challenge.name)
     })

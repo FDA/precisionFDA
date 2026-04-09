@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { SpaceEventsController } from './space-events.controller'
 import { SpaceEventModule } from '@shared/domain/space-event/space-event.module'
+import { SpaceEventsController } from './space-events.controller'
 
 @Module({
   imports: [SpaceEventModule],

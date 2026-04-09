@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import { NestApplicationOptions } from '@nestjs/common/interfaces/nest-application-options.interface'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
@@ -5,7 +6,6 @@ import { setupNestApp, setupSwagger } from '@shared/app-initialization'
 import { config } from '@shared/config'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import { WebsocketAdapter } from '@shared/websocket/adapter/websocket.adapter'
-import fs from 'node:fs'
 import { ApiModule } from './api.module'
 import { log } from './logger'
 

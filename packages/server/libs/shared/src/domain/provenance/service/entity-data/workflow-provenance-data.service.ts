@@ -22,7 +22,7 @@ export class WorkflowProvenanceDataService extends EntityProvenanceDataService<'
   async getParents(workflow: Workflow): Promise<EntityProvenanceSourceUnion[]> {
     const apps = await this.workflowService.getApps(workflow)
 
-    return apps.map((a) => ({
+    return apps.map(a => ({
       type: 'app',
       entity: a,
     }))

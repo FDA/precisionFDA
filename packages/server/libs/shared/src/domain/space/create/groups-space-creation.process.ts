@@ -1,21 +1,18 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { Space } from '@shared/domain/space/space.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 /**
  * Concrete subclass of {@link SpaceCreationProcess} for creating a Groups space.
@@ -133,17 +130,13 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
       `precisionfda-${space.scope}-HOST`,
       hostLead.user.getEntity().billTo(),
     )
-    this.logger.log(
-      `created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`,
-    )
+    this.logger.log(`created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`)
 
     const guestProject = await this.adminClient.projectCreate(
       `precisionfda-${space.scope}-GUEST`,
       guestLead.user.getEntity().billTo(),
     )
-    this.logger.log(
-      `created guest project: ${guestProject.id} with lead: ${guestLead.user.getProperty('dxuser')}`,
-    )
+    this.logger.log(`created guest project: ${guestProject.id} with lead: ${guestLead.user.getProperty('dxuser')}`)
 
     // we could do two parallel calls to each project,
     // but not to the same one - you will get cannot acquire lock error from platform

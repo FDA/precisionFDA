@@ -11,12 +11,7 @@ import { SPACE_TYPE } from '../space.enum'
 
 type SyncSpacesPermissionsInput = object
 
-
-export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
-  UserOpsCtx,
-  SyncSpacesPermissionsInput,
-  void
-> {
+export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<UserOpsCtx, SyncSpacesPermissionsInput, void> {
   protected client: PlatformClient
   protected membership: SpaceMembership
 
@@ -50,16 +45,15 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
         this.ctx.log.warn(
           {},
           'SyncSpacesPermissionsOperation: CHECKING space_id: %d, type: %s, side: %s on behalf of %s',
-          space.id, SPACE_TYPE[space.type], SPACE_MEMBERSHIP_SIDE[this.membership.side], this.ctx.user.dxuser,
+          space.id,
+          SPACE_TYPE[space.type],
+          SPACE_MEMBERSHIP_SIDE[this.membership.side],
+          this.ctx.user.dxuser,
         )
       } else {
-        this.ctx.log.warn(
-          {},
-          'Triggering user membership was not found for space_id: %s, SKIPPING CHECK', space.id,
-        )
+        this.ctx.log.warn({}, 'Triggering user membership was not found for space_id: %s, SKIPPING CHECK', space.id)
         continue
       }
-
 
       const [host_members, guest_members] = partition(
         (sm: SpaceMembership) => sm.side === SPACE_MEMBERSHIP_SIDE.HOST,
@@ -96,9 +90,15 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
     if (pfdaMembers.length !== platformMembers.length) {
       const side: string = pfdaMembers.length > platformMembers.length ? 'PFDA' : 'PLATFORM'
       this.ctx.log.warn(
-        { pfdaMembers: pfdaMembers.map(m => ({ user: m.user.getEntity().dxuser, role: SPACE_MEMBERSHIP_ROLE[m.role] })), platformMembers, space: space.id },
+        {
+          pfdaMembers: pfdaMembers.map(m => ({ user: m.user.getEntity().dxuser, role: SPACE_MEMBERSHIP_ROLE[m.role] })),
+          platformMembers,
+          space: space.id,
+        },
         'SyncSpacesPermissionsOperation: MEMBERS MISMATCH - %s has more members, PFDA: %d, PLATFORM: %d',
-        side, pfdaMembers.length, platformMembers.length,
+        side,
+        pfdaMembers.length,
+        platformMembers.length,
       )
       await this.fixPermissions(pfdaMembers, platformMembers, space)
     } else {
@@ -110,11 +110,7 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
 
   async fixPermissions(pfdaMembers: SpaceMembership[], platformMembers: PlatformMember[], space: Space): Promise<void> {
     // fixing Platform to match pFDA state
-    this.ctx.log.warn(
-      {},
-      'SyncSpacesPermissionsOperation: Trying to fix space_id: %d platform members.',
-      space.id,
-    )
+    this.ctx.log.warn({}, 'SyncSpacesPermissionsOperation: Trying to fix space_id: %d platform members.', space.id)
     // add all missing members from pFDA to Platform
     for (const pfdaMember of pfdaMembers) {
       const foundPlatformMember = platformMembers.find(m => m.id === `user-${pfdaMember.user.getEntity().dxuser}`)
@@ -132,7 +128,7 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
     // }
   }
 
- /**
+  /**
    * TO BE REFACTORED
    * ----
    * TODO(Jiri) refactor outside of ops into a platform permission service.
@@ -167,18 +163,24 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
       this.ctx.log.warn(
         {},
         'SyncSpacesPermissionsOperation: Successfully added missing member %s to organization %s on the platform.',
-        invitee, params.orgDxId,
+        invitee,
+        params.orgDxId,
       )
     } else {
       this.ctx.log.warn(
         { response },
         'SyncSpacesPermissionsOperation: There was an error adding missing member %s to organization %s on the platform.',
-        invitee, params.orgDxId,
+        invitee,
+        params.orgDxId,
       )
     }
   }
 
-  async validateUserRole(pfdaMembership: SpaceMembership, platformMembers: PlatformMember[], space: Space): Promise<void> {
+  async validateUserRole(
+    pfdaMembership: SpaceMembership,
+    platformMembers: PlatformMember[],
+    space: Space,
+  ): Promise<void> {
     const pfdaUserHandle = pfdaMembership.user.getEntity().dxuser
     const platformMember = platformMembers.find(m => m.id === `user-${pfdaUserHandle}`)
 
@@ -192,7 +194,10 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
         await this.addPlatformPermissions(pfdaMembership, space)
       }
       // check for other roles
-    } else if (pfdaMembership.role === SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR || pfdaMembership.role === SPACE_MEMBERSHIP_ROLE.VIEWER) {
+    } else if (
+      pfdaMembership.role === SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR ||
+      pfdaMembership.role === SPACE_MEMBERSHIP_ROLE.VIEWER
+    ) {
       if (platformMember && platformMember.level !== 'MEMBER') {
         // never seen this in the logs - probably is not happening at all.
         this.logWrongPermissions(platformMember, pfdaMembership, space)
@@ -206,14 +211,14 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
   logWrongPermissions(platformMember: PlatformMember, pfdaMembership: SpaceMembership, space: Space): void {
     this.ctx.log.warn(
       { platformMember, pfdaMembership, space },
-      'SyncSpacesPermissionsOperation: Space\'s platform permissions are wrong.',
+      "SyncSpacesPermissionsOperation: Space's platform permissions are wrong.",
     )
   }
 
   logMissingPermissions(pfdaMembership: SpaceMembership, platformMembers: PlatformMember[], space: Space): void {
     this.ctx.log.warn(
       { platformMembers, pfdaMembership, space },
-      'SyncSpacesPermissionsOperation: Space\'s platform permissions are completely missing for user.',
+      "SyncSpacesPermissionsOperation: Space's platform permissions are completely missing for user.",
     )
   }
 }

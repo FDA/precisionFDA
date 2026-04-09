@@ -1,6 +1,6 @@
 import { FactoryProvider } from '@nestjs/common'
 import { config } from '@shared/config'
-import { FileEmailClient, SMTPEmailClient, EmailClient } from '@shared/services/email-client'
+import { EmailClient, FileEmailClient, SMTPEmailClient } from '@shared/services/email-client'
 
 export const emailClientProvider: FactoryProvider = {
   provide: EmailClient,

@@ -1,17 +1,19 @@
 package precisionfda
 
 import (
-	"dnanexus.com/precision-fda-cli/helpers"
+	"bufio"
 	"fmt"
-	"github.com/docker/go-units"
-	"github.com/gosuri/uilive"
-	"github.com/hashicorp/go-retryablehttp"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
-	"strings"
+	"regexp"
+
+	"dnanexus.com/precision-fda-cli/helpers"
+	"github.com/docker/go-units"
+	"github.com/gosuri/uilive"
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 // ProgressWriter counts the number of bytes written to it.
@@ -40,32 +42,8 @@ type Writer struct {
 	Writer *uilive.Writer
 }
 
-type Printer struct {
-	LinesToPrint int // max lines to print.
-	Lines        int
-	Writer       *uilive.Writer
-}
-
 func NewWriter(totalBytes int64, writer *uilive.Writer) *Writer {
 	return &Writer{totalBytes, writer}
-}
-
-func NewPrinter(lines int, writer *uilive.Writer) *Printer {
-	return &Printer{lines, 0, writer}
-}
-
-// Write implements the io.Writer interface.
-func (wc *Printer) Write(p []byte) (int, error) {
-	content := string(p[:])
-	lines := strings.Split(strings.ReplaceAll(content, "\r\n", "\n"), "\n")
-	for _, line := range lines {
-		if wc.Lines == wc.LinesToPrint {
-			return -1, fmt.Errorf("Line limit reached")
-		}
-		fmt.Println(line)
-		wc.Lines = wc.Lines + 1
-	}
-	return len(p), nil
 }
 
 // Write implements the io.Writer interface.
@@ -82,6 +60,9 @@ func (c *PFDAClient) DownloadFromUrl(fileURL string, outputFilePath string, file
 	defer out.Close()
 
 	req, err := retryablehttp.NewRequest("GET", fileURL, nil)
+	if err != nil {
+		return err
+	}
 	c.setPostHeaders(req)
 	resp, err := c.Client.Do(req)
 	if err != nil {
@@ -106,13 +87,11 @@ func (c *PFDAClient) DownloadFromUrl(fileURL string, outputFilePath string, file
 }
 
 func (c *PFDAClient) DownloadDirectly(downloadUrl string, outputFilePath string, overwrite string) error {
-	fileURL := downloadUrl
-	originalName := path.Base(fileURL)
+	originalName := path.Base(downloadUrl)
 	fileName, err := url.PathUnescape(originalName)
 	if err != nil {
 		fileName = originalName
 	}
-	// fileSize := resultJSON["file_size"].(float64)
 	if outputFilePath == "" {
 		// If output is not specified, use the original filename and current working directory
 		dir, err := os.Getwd()
@@ -132,7 +111,7 @@ func (c *PFDAClient) DownloadDirectly(downloadUrl string, outputFilePath string,
 		return nil
 	}
 
-	err = c.DownloadFromUrl(fileURL, outputFilePath, 0, false)
+	err = c.DownloadFromUrl(downloadUrl, outputFilePath, 0, false)
 	if err != nil {
 		helpers.PrintError(fmt.Errorf("Download of %s failed - %s.\n", fileName, err), c.JsonResponse)
 		return nil
@@ -150,12 +129,10 @@ func (c *PFDAClient) DownloadDirectly(downloadUrl string, outputFilePath string,
 }
 
 func (c *PFDAClient) HeadFile(fileURL string, lines int) error {
-	tmp, err := os.CreateTemp("", "head") // Create temp fake data destination
+	req, err := retryablehttp.NewRequest("GET", fileURL, nil)
 	if err != nil {
 		return err
 	}
-
-	req, err := retryablehttp.NewRequest("GET", fileURL, nil)
 	c.setPostHeaders(req)
 	resp, err := c.Client.Do(req)
 	if err != nil {
@@ -164,16 +141,24 @@ func (c *PFDAClient) HeadFile(fileURL string, lines int) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Error while getting file: %s", resp.Status)
+		return fmt.Errorf("error while getting file: %s", resp.Status)
 	}
 
-	writer := uilive.New()
-	writer.Start()
-	defer writer.Stop()
+	scanner := bufio.NewScanner(resp.Body)
+	scanner.Buffer(make([]byte, bufio.MaxScanTokenSize), 1024*1024) // allow lines up to 1MB
+	printed := 0
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+		printed++
+		if lines > 0 && printed >= lines {
+			break
+		}
+	}
+	return scanner.Err()
+}
 
-	body := io.TeeReader(resp.Body, NewPrinter(lines, writer))
-	_, err = io.Copy(tmp, body)
+var unsafeFileNameChars = regexp.MustCompile(`[<>:"/\\|?*]+`)
 
-	defer os.Remove(tmp.Name())
-	return nil
+func sanitizeFileName(name string) string {
+	return unsafeFileNameChars.ReplaceAllString(name, "_")
 }

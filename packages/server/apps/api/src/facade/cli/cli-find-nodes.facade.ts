@@ -1,13 +1,13 @@
-import { CliNodeSearchDTO } from '@shared/domain/cli/dto/cli-node-search.dto'
-import { CliNodeDTO } from '@shared/domain/cli/dto/cli-node.dto'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import { STATIC_SCOPE } from '@shared/enums'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { SCOPE } from '@shared/types/common'
 import { Injectable } from '@nestjs/common'
+import { CliNodeDTO } from '@shared/domain/cli/dto/cli-node.dto'
+import { CliNodeSearchDTO } from '@shared/domain/cli/dto/cli-node-search.dto'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { STATIC_SCOPE } from '@shared/enums'
+import { SCOPE } from '@shared/types/common'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
 export class CliFindNodesFacade {

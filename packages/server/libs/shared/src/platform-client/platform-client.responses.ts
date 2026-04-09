@@ -4,6 +4,7 @@ import { JOB_STATE } from '../domain/job/job.enum'
 import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
 import { AnyObject } from '../types'
 import { IOType } from '../types/common'
+
 export { DnanexusLink } from '../types/common'
 
 export type DbClusterDescribeResponse = {
@@ -88,7 +89,7 @@ export type FileRemoveResponse = {
 } & AnyObject
 
 export type FileDescribeResponse = {
-  id: string
+  id: DxId<'file'>
   name: string
   state: string
   size?: number
@@ -190,14 +191,12 @@ export type FindJobsResponse = {
 
 export type JobTerminateResponse = JobCreateResponse
 
-export type ClassIdResponse<
-  ENTITY extends DXEntityType | PlatformEntityType = DXEntityType | PlatformEntityType,
-> = {
+export type ClassIdResponse<ENTITY extends DXEntityType | PlatformEntityType = DXEntityType | PlatformEntityType> = {
   id: DxId<ENTITY>
 }
 
 export class AppDescribeResponse {
-  id: string
+  id: DxId<'app'>
   class: string
   billTo: string
   created: number
@@ -269,7 +268,7 @@ type Details = {
 }
 
 export class WorkflowDescribeResponse {
-  id: string
+  id: DxId<'workflow'>
   project: string
   class: string
   sponsored: boolean
@@ -329,7 +328,7 @@ export type JobOutput = {
 
 // just basic types we are interested in at the moment
 export type JobDescribeResponse = {
-  id: string
+  id: DxId<'job'>
   name: string
   state: JOB_STATE
   properties?: {

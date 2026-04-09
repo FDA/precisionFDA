@@ -3,30 +3,30 @@ import { expect } from 'chai'
 import { stub } from 'sinon'
 import { config } from '@shared/config'
 import { database } from '@shared/database'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceMembershipPlatformAccessProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access.provider'
 import { SpaceMembershipPlatformAccessToAdminProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-admin.provider'
 import { SpaceMembershipPlatformAccessToContributorProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-contributor.provider'
 import { SpaceMembershipPlatformAccessToInactiveProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-inactive.provider'
 import { SpaceMembershipPlatformAccessToViewerProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-viewer.provider'
-import { SpaceMembershipPlatformAccessProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access.provider'
-import { SpaceMembershipCountFilterProvider } from '@shared/domain/space-membership/service/space-membership-count-filter.provider'
-import { SpaceMembershipCountService } from '@shared/domain/space-membership/service/space-membership-count.service'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
+import { SpaceMembershipCountService } from '@shared/domain/space-membership/service/space-membership-count.service'
+import { SpaceMembershipCountFilterProvider } from '@shared/domain/space-membership/service/space-membership-count-filter.provider'
+import { SpaceMembershipUpdatePermissionHelper } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.helper'
+import { SpaceMembershipUpdatePermissionProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.provider'
 import { SpaceMembershipUpdatePermissionToActiveProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-active.provider'
 import { SpaceMembershipUpdatePermissionToAdminProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-admin.provider'
 import { SpaceMembershipUpdatePermissionToContributorProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-contributor.provider'
 import { SpaceMembershipUpdatePermissionToInactiveProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-inactive.provider'
 import { SpaceMembershipUpdatePermissionToLeadProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-lead.provider'
 import { SpaceMembershipUpdatePermissionToViewerProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission-to-viewer.provider'
-import { SpaceMembershipUpdatePermissionHelper } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.helper'
-import { SpaceMembershipUpdatePermissionProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.provider'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { SpaceMembershipPermission } from '@shared/domain/space-membership/space-membership.type'
-import { Space } from '@shared/domain/space/space.entity'
-import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ClientRequestError, InvalidStateError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { create, db } from '@shared/test'
@@ -96,8 +96,8 @@ describe('SpaceMembershipService', () => {
       [SPACE_MEMBERSHIP_ROLE.ADMIN]: adminAccesProvider,
       [SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]: contributorAccessProvider,
       [SPACE_MEMBERSHIP_ROLE.VIEWER]: viewerAccessProvider,
-      'disable': inactiveAccessProvider,
-      'enable': null,
+      disable: inactiveAccessProvider,
+      enable: null,
     }
     spaceMembershipUpdatePermissionHelper = new SpaceMembershipUpdatePermissionHelper(
       spaceMembershipToPlatformAccessProviderMap,
@@ -141,8 +141,8 @@ describe('SpaceMembershipService', () => {
       adminClient,
     )
     spaceMembershipUpdatePermissionProviderMap = {
-      'enable': spaceMembershipUpdatePermissionToActiveProvider,
-      'disable': spaceMembershipUpdatePermissionToInactiveProvider,
+      enable: spaceMembershipUpdatePermissionToActiveProvider,
+      disable: spaceMembershipUpdatePermissionToInactiveProvider,
       [SPACE_MEMBERSHIP_ROLE.VIEWER]: spaceMembershipUpdatePermissionToViewerProvider,
       [SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR]: spaceMembershipUpdatePermissionToContributorProvider,
       [SPACE_MEMBERSHIP_ROLE.ADMIN]: spaceMembershipUpdatePermissionToAdminProvider,

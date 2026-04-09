@@ -1,12 +1,12 @@
 import { Collection, Entity, Enum, ManyToOne, OneToMany, Property, Ref } from '@mikro-orm/core'
 import { ScopedEntity } from '@shared/database/scoped.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { User } from '@shared/domain/user/user.entity'
-import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 import { NodeTagging } from '@shared/domain/tagging/node-tagging.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
 
 @Entity({
   abstract: true,
@@ -59,9 +59,13 @@ export class Node extends ScopedEntity {
   })
   properties = new Collection<NodeProperty>(this)
 
-  @OneToMany(() => NodeTagging, (tagging) => tagging.node, {
-    orphanRemoval: true,
-  })
+  @OneToMany(
+    () => NodeTagging,
+    tagging => tagging.node,
+    {
+      orphanRemoval: true,
+    },
+  )
   taggings = new Collection<NodeTagging>(this)
 
   @Property()

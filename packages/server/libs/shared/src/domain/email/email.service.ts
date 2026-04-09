@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { TYPE_TO_HANDLER_PROVIDER_MAP } from '@shared/domain/email/type-to-handler-map.provider'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { TYPE_TO_HANDLER_PROVIDER_MAP } from '@shared/domain/email/type-to-handler-map.provider'
 
 @Injectable()
 export class EmailService {

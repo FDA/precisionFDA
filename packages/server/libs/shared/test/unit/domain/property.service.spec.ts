@@ -1,14 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-
+import { expect } from 'chai'
+import sinon, { stub } from 'sinon'
+import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { GeneralProperty } from '@shared/domain/property/property.entity'
+import { PropertyRepository } from '@shared/domain/property/property.repository'
 import { PropertyService } from '@shared/domain/property/services/property.service'
 import { User } from '@shared/domain/user/user.entity'
-
-import { expect } from 'chai'
-import { PropertyRepository } from '@shared/domain/property/property.repository'
-import sinon, { stub } from 'sinon'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NodeProperty } from '@shared/domain/property/node-property.entity'
 
 describe('property service tests', () => {
   let user: User
@@ -47,7 +45,7 @@ describe('property service tests', () => {
     createStub.reset()
     createStub.throws()
 
-    transactionalStub.callsFake(async (callback) => {
+    transactionalStub.callsFake(async callback => {
       return callback(em)
     })
   })

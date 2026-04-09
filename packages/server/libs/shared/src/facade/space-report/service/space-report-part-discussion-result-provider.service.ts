@@ -17,10 +17,7 @@ import { SpaceReportPartResultProvider } from './space-report-part-result.provid
 
 @Injectable()
 export class SpaceReportPartDiscussionResultProviderService extends SpaceReportPartResultProvider<'discussion'> {
-  private readonly ATTACHMENT_TYPE_TO_ENTITY_TYPE_MAP: Record<
-    DiscussionAttachmentDTO['type'],
-    AttachableEntityType
-  > = {
+  private readonly ATTACHMENT_TYPE_TO_ENTITY_TYPE_MAP: Record<DiscussionAttachmentDTO['type'], AttachableEntityType> = {
     App: 'app',
     UserFile: 'file',
     Folder: 'folder',
@@ -49,42 +46,36 @@ export class SpaceReportPartDiscussionResultProviderService extends SpaceReportP
       content: discussion.content,
       createdBy: this.mapCreatedBy(discussion.user),
       createdAt: discussion.createdAt,
-      answers: await Promise.all(discussion.answers.map((a) => this.mapAnswer(a))),
-      comments: await Promise.all(discussion.comments.map((c) => this.mapComment(c))),
-      attachments: attachments.map((a) => this.mapAttachment(a)),
+      answers: await Promise.all(discussion.answers.map(a => this.mapAnswer(a))),
+      comments: await Promise.all(discussion.comments.map(c => this.mapComment(c))),
+      attachments: attachments.map(a => this.mapAttachment(a)),
     }
   }
 
-  private async mapAnswer(
-    answer: DiscussionReplyDTO,
-  ): Promise<SpaceReportPartDiscussionResultAnswer> {
+  private async mapAnswer(answer: DiscussionReplyDTO): Promise<SpaceReportPartDiscussionResultAnswer> {
     const attachments = await this.attachmentRetrieveFacade.getAttachments(answer.noteId)
 
     return {
       content: answer.content,
       createdBy: this.mapCreatedBy(answer.user),
       createdAt: answer.createdAt,
-      comments: await Promise.all(answer.comments.map((c) => this.mapComment(c))),
-      attachments: attachments.map((a) => this.mapAttachment(a)),
+      comments: await Promise.all(answer.comments.map(c => this.mapComment(c))),
+      attachments: attachments.map(a => this.mapAttachment(a)),
     }
   }
 
-  private async mapComment(
-    comment: DiscussionReplyDTO,
-  ): Promise<SpaceReportPartDiscussionResultComment> {
+  private async mapComment(comment: DiscussionReplyDTO): Promise<SpaceReportPartDiscussionResultComment> {
     const attachments = await this.attachmentRetrieveFacade.getAttachments(comment.noteId)
 
     return {
       content: comment.content,
       createdAt: comment.createdAt,
       createdBy: this.mapCreatedBy(comment.user),
-      attachments: attachments.map((a) => this.mapAttachment(a)),
+      attachments: attachments.map(a => this.mapAttachment(a)),
     }
   }
 
-  private mapAttachment(
-    attachment: DiscussionAttachmentDTO,
-  ): SpaceReportPartDiscussionResultAttachment {
+  private mapAttachment(attachment: DiscussionAttachmentDTO): SpaceReportPartDiscussionResultAttachment {
     return {
       name: attachment.name,
       link: attachment.link,

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { FolderController } from './folder.controller'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
+import { FolderController } from './folder.controller'
 
 @Module({
   imports: [UserFileModule],

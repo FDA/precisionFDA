@@ -23,10 +23,7 @@ describe('AdminPlatformClientIntegration', () => {
   })
 
   it('should fail when non existing method provided', async () => {
-    const { body } = await supertest(testedApp.getHttpServer())
-      .post('/execute')
-      .send({ method: 'foo' })
-      .expect(400)
+    const { body } = await supertest(testedApp.getHttpServer()).post('/execute').send({ method: 'foo' }).expect(400)
 
     expect(body.message).to.eq('Invalid method')
   })
@@ -37,9 +34,7 @@ describe('AdminPlatformClientIntegration', () => {
       .send({ method: 'appCreate' })
       .expect(403)
 
-    expect(body.message).to.eq(
-      'Method "appCreate" is not allowed to be called on the admin platform client',
-    )
+    expect(body.message).to.eq('Method "appCreate" is not allowed to be called on the admin platform client')
   })
 
   it('should call platform api and return the result', async () => {

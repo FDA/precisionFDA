@@ -8,29 +8,22 @@ import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
-import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
+import { constructDxOrg, getHandle } from '@shared/domain/org/org.utils'
 import { Organization } from '@shared/domain/org/organization.entity'
 import { OrganizationRepository } from '@shared/domain/org/organization.repository'
-import { constructDxOrg, getHandle } from '@shared/domain/org/org.utils'
 import { Profile } from '@shared/domain/profile/profile.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import {
   CURRENT_SCHEMA_VERSION,
   DEFAULT_CLOUD_RESOURCE_SETTINGS,
   DEFAULT_USER_EXTRAS,
   User,
 } from '@shared/domain/user/user.entity'
-import {
-  constructOrgFromUsername,
-  constructUsername,
-  isGovEmail,
-} from '@shared/domain/user/user.helper'
+import { constructOrgFromUsername, constructUsername, isGovEmail } from '@shared/domain/user/user.helper'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
@@ -69,11 +62,7 @@ export class UserProvisionFacade {
    * @param spaceIds - The IDs of the spaces that should be provisioned to the user (gov users only).
    * @param invitationIds - The IDs of all invitations being processed.
    */
-  async provision(
-    invitationId: number,
-    spaceIds: number[],
-    invitationIds: number[],
-  ): Promise<void> {
+  async provision(invitationId: number, spaceIds: number[], invitationIds: number[]): Promise<void> {
     let invitation: Invitation
     try {
       invitation = await this.invitationRepo.findOneOrFail({
@@ -81,9 +70,7 @@ export class UserProvisionFacade {
         provisioningState: PROVISIONING_STATE.IN_PROGRESS,
       })
 
-      const username = await this.findUnusedUsername(
-        constructUsername(invitation.firstName, invitation.lastName),
-      )
+      const username = await this.findUnusedUsername(constructUsername(invitation.firstName, invitation.lastName))
       const { orgName, orgBaseHandle: proposedBaseHandle } = constructOrgFromUsername(username)
       const orgBaseHandle = await this.findUnusedOrgName(proposedBaseHandle)
       await this.provisionOrgOnPlatform(invitation, username, orgBaseHandle, orgName)
@@ -96,11 +83,8 @@ export class UserProvisionFacade {
       // if email is gov email, send provision email to user
       if (isGovEmail(invitation.email)) {
         // Fire and forget - don't await, errors should not affect the main flow
-        this.provideSpacesAccess(invitation, spaceIds).catch((error) => {
-          this.logger.error(
-            `Background space access provisioning failed for invitation ${invitationId}:`,
-            error,
-          )
+        this.provideSpacesAccess(invitation, spaceIds).catch(error => {
+          this.logger.error(`Background space access provisioning failed for invitation ${invitationId}:`, error)
         })
         await this.sendProvisionedEmail(invitation.firstName, invitation.email, username)
       }
@@ -127,9 +111,7 @@ export class UserProvisionFacade {
       const userToInvite = await this.userRepo.findOneOrFail({ id: invitation.user.id })
       this.logger.log(`Provisioning access for user: ${userToInvite.dxuser} to spaces: ${spaceIds}`)
       for (const spaceId of spaceIds) {
-        this.logger.log(
-          `Provisioning access to space with ID: ${spaceId} for user: ${userToInvite.dxuser}`,
-        )
+        this.logger.log(`Provisioning access to space with ID: ${spaceId} for user: ${userToInvite.dxuser}`)
         await this.spaceMembershipCreateFacade.createMembership(
           spaceId,
           userToInvite.id,
@@ -297,11 +279,7 @@ export class UserProvisionFacade {
     })
   }
 
-  private async sendProvisionedEmail(
-    firstName: string,
-    email: EmailAddress,
-    username: string,
-  ): Promise<void> {
+  private async sendProvisionedEmail(firstName: string, email: EmailAddress, username: string): Promise<void> {
     const emailInput: TypedEmailBodyDto<EMAIL_TYPES.userProvisioned> = {
       type: EMAIL_TYPES.userProvisioned,
       input: {
@@ -334,9 +312,7 @@ export class UserProvisionFacade {
     })
   }
 
-  private async getCompletedInvitations(
-    ids: number[],
-  ): Promise<Pick<Invitation, 'provisioningState'>[]> {
+  private async getCompletedInvitations(ids: number[]): Promise<Pick<Invitation, 'provisioningState'>[]> {
     return await this.invitationRepo.find(
       {
         id: { $in: ids },
@@ -353,7 +329,7 @@ export class UserProvisionFacade {
     completedInvitations: Pick<Invitation, 'provisioningState'>[],
   ): Promise<void> {
     const failedCount = completedInvitations.filter(
-      (invitation) => invitation.provisioningState === PROVISIONING_STATE.FAILED,
+      invitation => invitation.provisioningState === PROVISIONING_STATE.FAILED,
     ).length
     await this.notificationService.createNotification({
       message: `Completed provisioning for ${getPluralizedTerm(ids.length, 'user')}, ${getPluralizedTerm(failedCount, 'task')} failed`,

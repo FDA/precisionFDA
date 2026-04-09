@@ -1,5 +1,5 @@
-import { ConfigOverride, defaultConfig, parseBooleanFromProcess, parseIntFromProcess } from '..'
 import { parseIpv4Cidr } from '../../validation/parsers'
+import { ConfigOverride, defaultConfig, parseBooleanFromProcess, parseIntFromProcess } from '..'
 import { MAX_JOB_DURATION_SECONDS } from '../constants'
 
 export const config: ConfigOverride = () => ({
@@ -25,11 +25,9 @@ export const config: ConfigOverride = () => ({
   workerJobs: {
     syncJob: {
       repeatPattern: '*/2 * * * *', // Every 2 minutes
-      staleJobsEmailAfter:
-        parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
+      staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
       staleJobsTerminateAfter:
-        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ??
-        MAX_JOB_DURATION_SECONDS,
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? MAX_JOB_DURATION_SECONDS,
     },
     queues: {
       default: { name: 'https-apps-worker-queue-prod' },

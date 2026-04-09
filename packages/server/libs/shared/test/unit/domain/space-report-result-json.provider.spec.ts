@@ -1,10 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
-import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
-import { SpaceReportResultJsonProvider } from '@shared/domain/space-report/service/result/space-report-result-json.provider'
-import { Space } from '@shared/domain/space/space.entity'
 import { expect } from 'chai'
 import { SinonSpy, spy, stub } from 'sinon'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
+import { SpaceReportResultJsonProvider } from '@shared/domain/space-report/service/result/space-report-result-json.provider'
 
 describe('SpaceReportResultJsonProvider', () => {
   const REPORT_ID = 0

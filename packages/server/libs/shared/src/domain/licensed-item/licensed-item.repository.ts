@@ -20,6 +20,6 @@ export class LicensedItemRepository extends EntityRepository<LicensedItem> {
         populate: ['license'],
       },
     )
-    return items.map((item) => item.license.getEntity())
+    return items.map(item => item.license.getEntity())
   }
 }

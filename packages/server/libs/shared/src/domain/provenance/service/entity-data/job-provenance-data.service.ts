@@ -1,12 +1,12 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { Job } from '@shared/domain/job/job.entity'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
 import { EntityProvenanceDataService } from './entity-provenance-data.service'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EntityService } from '@shared/domain/entity/entity.service'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 
 @Injectable()
 export class JobProvenanceDataService extends EntityProvenanceDataService<'job'> {
@@ -27,7 +27,7 @@ export class JobProvenanceDataService extends EntityProvenanceDataService<'job'>
     const parents: EntityProvenanceSourceUnion[] = []
 
     const inputFiles = await job.inputFiles.loadItems()
-    inputFiles.forEach((file) => parents.push({ type: 'file', entity: file }))
+    inputFiles.forEach(file => parents.push({ type: 'file', entity: file }))
 
     const app = await job.app?.load()
 
@@ -46,6 +46,6 @@ export class JobProvenanceDataService extends EntityProvenanceDataService<'job'>
       parentType: PARENT_TYPE.JOB,
       parentId: job.id,
     })
-    return outputFiles.map((f) => ({ type: 'file', entity: f }))
+    return outputFiles.map(f => ({ type: 'file', entity: f }))
   }
 }

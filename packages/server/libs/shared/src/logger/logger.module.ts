@@ -1,7 +1,7 @@
 import { Global, Logger, Module } from '@nestjs/common'
+import { LoggerModule as PinoLoggerModule } from 'nestjs-pino'
 import { pinoConfig } from '@shared/logger/config/pino.config'
 import { getLogger } from '@shared/logger/index'
-import { LoggerModule as PinoLoggerModule } from 'nestjs-pino'
 
 @Global()
 @Module({

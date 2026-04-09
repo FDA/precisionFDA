@@ -27,10 +27,7 @@ export class EntityLinkService {
     inline: false,
   }
 
-  async getUiLink<T extends UiLinkableEntityType>(
-    entity: EntityInstance<T>,
-    suffix?: string,
-  ): Promise<string> {
+  async getUiLink<T extends UiLinkableEntityType>(entity: EntityInstance<T>, suffix?: string): Promise<string> {
     const entityType = EntityUtils.getEntityTypeForEntity(entity)
     const linkProvider = this.entityTypeToLinkProviderMap[entityType]
 
@@ -80,9 +77,7 @@ export class EntityLinkService {
     }
 
     // TODO(PFDA-5831) - v2 endpoint
-    return new URL(
-      `${config.api.railsHost}/api/files/${entity.uid}/${this.sanitizeFileName(fileName)}`,
-    )
+    return new URL(`${config.api.railsHost}/api/files/${entity.uid}/${this.sanitizeFileName(fileName)}`)
   }
 
   private sanitizeFileName(name: string): string {

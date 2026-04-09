@@ -1,12 +1,12 @@
-import { expect } from 'chai'
-import { EventHelper } from '@shared/domain/event/event.helper'
-import { EVENT_TYPES } from '@shared/domain/event/event.entity'
-import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
-import { stub } from 'sinon'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { Folder } from '@shared/domain/user-file/folder.entity'
 import { EntityManager } from '@mikro-orm/core'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { EventHelper } from '@shared/domain/event/event.helper'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 
 /**
  * Event helper is in transition from a bunch of functions to a class-based approach.
@@ -48,13 +48,7 @@ describe('EventHelper', () => {
       orgLoadStub.resolves(org)
       const eventHelper = getInstance()
 
-      const event = await eventHelper.createFileEvent(
-        EVENT_TYPES.FILE_DELETED,
-        file,
-        filePath,
-        user,
-        'param3',
-      )
+      const event = await eventHelper.createFileEvent(EVENT_TYPES.FILE_DELETED, file, filePath, user, 'param3')
 
       expect(event.type).to.equal(EVENT_TYPES.FILE_DELETED)
       expect(event.orgHandle).to.equal(org.handle)
@@ -79,12 +73,7 @@ describe('EventHelper', () => {
       orgLoadStub.resolves(org)
       const eventHelper = getInstance()
 
-      const event = await eventHelper.createFolderEvent(
-        EVENT_TYPES.FOLDER_CREATED,
-        folder,
-        folderPath,
-        user,
-      )
+      const event = await eventHelper.createFolderEvent(EVENT_TYPES.FOLDER_CREATED, folder, folderPath, user)
 
       expect(event.type).to.equal(EVENT_TYPES.FOLDER_CREATED)
       expect(event.orgHandle).to.equal(org.handle)

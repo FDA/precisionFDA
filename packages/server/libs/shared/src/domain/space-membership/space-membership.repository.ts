@@ -10,10 +10,7 @@ export class SpaceMembershipRepository extends PaginatedRepository<SpaceMembersh
     return this.findOne({ spaces: spaceId, user: userId, active: true })
   }
 
-  async findActiveMembershipAndSpace(
-    userId: number,
-    role: SPACE_MEMBERSHIP_ROLE,
-  ): Promise<SpaceMembership[]> {
+  async findActiveMembershipAndSpace(userId: number, role: SPACE_MEMBERSHIP_ROLE): Promise<SpaceMembership[]> {
     return await this.em.find(
       SpaceMembership,
       {
@@ -46,11 +43,7 @@ export class SpaceMembershipRepository extends PaginatedRepository<SpaceMembersh
     const changeableMemberships = await this.em.find(SpaceMembership, {
       id: membershipIds,
       spaces: { $in: [space.id] },
-      role: [
-        SPACE_MEMBERSHIP_ROLE.ADMIN,
-        SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-        SPACE_MEMBERSHIP_ROLE.VIEWER,
-      ],
+      role: [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, SPACE_MEMBERSHIP_ROLE.VIEWER],
       side,
       active,
     })
@@ -59,17 +52,13 @@ export class SpaceMembershipRepository extends PaginatedRepository<SpaceMembersh
       return changeableMemberships
     }
 
-    const userIds = changeableMemberships.map((m) => m.user.id)
+    const userIds = changeableMemberships.map(m => m.user.id)
     const confidentialMemberships = await this.em.find(SpaceMembership, {
       id: { $nin: membershipIds },
       spaces: { space: space.id, state: SPACE_STATE.ACTIVE },
       user: { id: { $in: userIds } },
       side,
-      role: [
-        SPACE_MEMBERSHIP_ROLE.ADMIN,
-        SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-        SPACE_MEMBERSHIP_ROLE.VIEWER,
-      ],
+      role: [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, SPACE_MEMBERSHIP_ROLE.VIEWER],
       active,
     })
     return [...changeableMemberships, ...confidentialMemberships]

@@ -1,11 +1,11 @@
 import { Collection, Entity, ManyToOne, OneToMany, OneToOne, Property, Ref } from '@mikro-orm/core'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { ChallengeResource } from './challenge-resource.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { CHALLENGE_STATUS } from './challenge.enum'
 import { ChallengeRepository } from './challenge.repository'
-import { ScopedEntity } from '@shared/database/scoped.entity'
+import { ChallengeResource } from './challenge-resource.entity'
 
 @Entity({ tableName: 'challenges', repository: () => ChallengeRepository })
 export class Challenge extends ScopedEntity {

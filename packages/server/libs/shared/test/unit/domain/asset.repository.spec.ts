@@ -1,12 +1,12 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { database } from '@shared/database'
-import { create, db } from '@shared/test'
+import { User } from '@shared/domain/user/user.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
-import { AssetRepository } from '@shared/domain/user-file/asset.repository'
+import { create, db } from '@shared/test'
 
 describe('AssetRepository', () => {
   let em: EntityManager<MySqlDriver>
@@ -78,12 +78,12 @@ describe('AssetRepository', () => {
 
     result = await repo.findUnclosedAssets(user1.id)
     expect(result).to.have.length(3)
-    let resultUids = result.map((x) => x.uid)
+    let resultUids = result.map(x => x.uid)
     expect(resultUids).to.deep.equal([assets[1].uid, assets[2].uid, assets[4].uid])
 
     result = await repo.findUnclosedAssets(user2.id)
     expect(result).to.have.length(1)
-    resultUids = result.map((x) => x.uid)
+    resultUids = result.map(x => x.uid)
     expect(resultUids).to.deep.equal([assets[5].uid])
   })
 
@@ -108,16 +108,16 @@ describe('AssetRepository', () => {
     await em.flush()
 
     // get ids for all assets (test filtering)
-    const uids = assets.map((asset) => asset.uid)
+    const uids = assets.map(asset => asset.uid)
     const repo = em.getRepository(Asset) as AssetRepository
     const result = await repo.findAccessibleByUser(user1.id, uids, [1])
 
     expect(result.length).to.equal(4)
-    const publicAsset = result.filter((asset) => asset.isPublic())[0]
+    const publicAsset = result.filter(asset => asset.isPublic())[0]
     expect(publicAsset.name).to.equal('user1_asset1')
-    const privateAssets = result.filter((asset) => asset.isPrivate())
+    const privateAssets = result.filter(asset => asset.isPrivate())
     expect(privateAssets.length).to.equal(2)
-    const spaceAsset = result.filter((asset) => asset.scope === 'space-1')[0]
+    const spaceAsset = result.filter(asset => asset.scope === 'space-1')[0]
     expect(spaceAsset.name).to.equal('user1_asset3')
   })
 })

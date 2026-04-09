@@ -1,23 +1,20 @@
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { Injectable } from '@nestjs/common'
-import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
-import { newDiscussionReplyTemplate } from '@shared/domain/email/templates/mjml/new-discussion-reply.template'
-import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EntityService } from '@shared/domain/entity/entity.service'
-import { EmailClient } from '@shared/services/email-client'
-import {
-  DiscussionContext,
-  EmailTypeToContextMap,
-} from '@shared/domain/email/dto/email-type-to-context.map'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
-import { Space } from '@shared/domain/space/space.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
+import { DiscussionContext, EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { newDiscussionReplyTemplate } from '@shared/domain/email/templates/mjml/new-discussion-reply.template'
+import { EntityService } from '@shared/domain/entity/entity.service'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { USER_STATE, User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
 export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscussionReply> {
@@ -68,8 +65,8 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
   private async getFollowers(discussion: Discussion): Promise<User[]> {
     const userIDs = discussion.follows
       .getItems()
-      .filter((follow) => follow.followerType === 'User')
-      .map((follow) => follow.followerId)
+      .filter(follow => follow.followerType === 'User')
+      .map(follow => follow.followerId)
 
     if (userIDs.length > 0) {
       return await this.userRepo.find({ id: { $in: userIDs }, userState: USER_STATE.ENABLED })
@@ -77,9 +74,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
     return []
   }
 
-  protected async determineReceivers(
-    context: EmailTypeToContextMap[EMAIL_TYPES.newDiscussionReply],
-  ): Promise<User[]> {
+  protected async determineReceivers(context: EmailTypeToContextMap[EMAIL_TYPES.newDiscussionReply]): Promise<User[]> {
     const users: User[] = await this.getFollowers(context.discussion)
 
     if (EntityScopeUtils.isSpaceScope(context.discussion.note.getEntity().scope)) {
@@ -90,7 +85,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
           { spaces: context.space.id, active: true },
           { populate: ['user'] },
         )
-        return spaceMemberships.map((spaceMembership) => spaceMembership.user.getEntity())
+        return spaceMemberships.map(spaceMembership => spaceMembership.user.getEntity())
       }
 
       if (context.input.notify === 'author') {
@@ -106,9 +101,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
       }
     }
 
-    return Array.from(new Set(users.map((user) => user.id))).map(
-      (id) => users.find((user) => user.id === id),
-    )
+    return Array.from(new Set(users.map(user => user.id))).map(id => users.find(user => user.id === id))
   }
 
   protected getTemplateInput(

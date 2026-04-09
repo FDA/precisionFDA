@@ -17,10 +17,7 @@ export class AuthService {
       user_id: this.user.id,
       username: this.user.dxuser,
       token: this.user.accessToken,
-      expiration: Math.min(
-        this.user.expiration,
-        Math.round(TimeUtils.milisecondsToSeconds(Date.now()) + duration),
-      ),
+      expiration: Math.min(this.user.expiration, Math.round(TimeUtils.milisecondsToSeconds(Date.now()) + duration)),
       org_id: user.organization.id,
     }
     return CliEncryptor.encrypt(session)

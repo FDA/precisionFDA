@@ -1,20 +1,16 @@
-import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeService } from '@shared/domain/user-file/node.service'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
-import { stub } from 'sinon'
-import { expect } from 'chai'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import {
-  FILE_STATE_DX,
-  FILE_STATE_PFDA,
-  FILE_STI_TYPE,
-} from '@shared/domain/user-file/user-file.types'
+import { FILE_STATE_DX, FILE_STATE_PFDA, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError } from '@shared/errors'
+import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
 
 describe('LockNodeFacade', () => {
   const file1 = {
@@ -83,9 +79,7 @@ describe('LockNodeFacade', () => {
 
   describe('#lockNodes', async () => {
     it('sync', async () => {
-      nodeServiceLoadNodesStub
-        .withArgs([file1.id, file2.id], { locked: false })
-        .resolves([file1, file2])
+      nodeServiceLoadNodesStub.withArgs([file1.id, file2.id], { locked: false }).resolves([file1, file2])
       nodeHelperFilterNodesByUserStub.withArgs([file1, file2]).resolves([file1, file2])
       nodeServiceLockFileStub.reset()
       const facade = getInstance()
@@ -98,9 +92,7 @@ describe('LockNodeFacade', () => {
     })
 
     it('async', async () => {
-      nodeServiceLoadNodesStub
-        .withArgs([file1.id, file2.id], { locked: false })
-        .resolves([file1, file2])
+      nodeServiceLoadNodesStub.withArgs([file1.id, file2.id], { locked: false }).resolves([file1, file2])
       nodeHelperFilterNodesByUserStub.withArgs([file1, file2]).resolves([file1, file2])
       nodeServiceLockFileStub.reset()
       notificationServiceCreateNotificationStub.reset()
@@ -122,9 +114,7 @@ describe('LockNodeFacade', () => {
     })
 
     it('unsupported node type', async () => {
-      nodeServiceLoadNodesStub
-        .withArgs([file1.id, asset.id], { locked: false })
-        .resolves([file1, asset])
+      nodeServiceLoadNodesStub.withArgs([file1.id, asset.id], { locked: false }).resolves([file1, asset])
       nodeHelperFilterNodesByUserStub.withArgs([file1, asset]).resolves([file1, asset])
       nodeServiceLockFileStub.reset()
       notificationServiceCreateNotificationStub.reset()

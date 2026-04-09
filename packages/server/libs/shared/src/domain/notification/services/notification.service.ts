@@ -1,13 +1,13 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger, Optional } from '@nestjs/common'
+import { createClient } from 'redis'
 import { Notification } from '@shared/domain/notification/notification.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
-import { createClient } from 'redis'
 import { NotificationInput } from '../notification.input'
 
 export type RedisClientType = ReturnType<typeof createClient>

@@ -279,7 +279,7 @@ export class WorkstationClient implements IWorkstationClient {
     err: any,
     customErrorThrower?: (statusCode: number, errorType: string, errorMessage: string) => void,
     // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
-    ): any {
+  ): any {
     if (err.response) {
       const statusCode = err.response.status
       const errorType = err.response.data?.error?.type || 'Server Error'

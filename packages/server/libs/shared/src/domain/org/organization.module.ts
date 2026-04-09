@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
-import { OrganizationService } from '@shared/domain/org/service/organization.service'
+import { Module } from '@nestjs/common'
 import { Organization } from '@shared/domain/org/organization.entity'
+import { OrganizationService } from '@shared/domain/org/service/organization.service'
 
 @Module({
   imports: [MikroOrmModule.forFeature([Organization])],

@@ -4,12 +4,12 @@ import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import {
-  spaceCreatedTemplate,
   SpaceCreatedTemplateInput,
+  spaceCreatedTemplate,
 } from '@shared/domain/email/templates/mjml/space/space-created.template'
 import { Space } from '@shared/domain/space/space.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 @Injectable()
 export class SpaceNotificationService {

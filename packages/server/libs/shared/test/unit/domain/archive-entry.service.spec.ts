@@ -1,8 +1,8 @@
-import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { ArchiveEntryRepository } from '@shared/domain/user-file/archive-entry.repository'
 import sinon, { stub } from 'sinon'
+import { ArchiveEntryRepository } from '@shared/domain/user-file/archive-entry.repository'
+import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
 
 describe('ArchiveEntryService', () => {
   const transactionalStub = sinon.stub()
@@ -19,7 +19,7 @@ describe('ArchiveEntryService', () => {
   } as unknown as ArchiveEntryRepository
 
   beforeEach(() => {
-    transactionalStub.callsFake(async (callback) => {
+    transactionalStub.callsFake(async callback => {
       return callback(em)
     })
 

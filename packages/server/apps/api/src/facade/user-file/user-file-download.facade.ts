@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { Uid } from '@shared/domain/entity/domain/uid'
 import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
-import { NotFoundError, PermissionError, ValidationError } from '@shared/errors'
-import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
-import { NodeService } from '@shared/domain/user-file/node.service'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityService } from '@shared/domain/entity/entity.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
+import { NotFoundError, PermissionError, ValidationError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class UserFileDownloadFacade {
@@ -57,9 +57,7 @@ export class UserFileDownloadFacade {
       })
       const downloadAllowed = await this.spaceService.canUserDownloadFrom(file.getSpaceId())
       if (!downloadAllowed) {
-        throw new PermissionError(
-          'You have no permissions to download this file as it is part of a protected space.',
-        )
+        throw new PermissionError('You have no permissions to download this file as it is part of a protected space.')
       }
     }
 

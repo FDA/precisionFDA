@@ -1,29 +1,18 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  UseGuards,
-  Query,
-} from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
-import { ChallengePaginationDto } from '@shared/domain/challenge/dto/challenge-pagination.dto'
-import { ProposeChallengeDTO } from '@shared/domain/challenge/dto/propose-challenge.dto'
-import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
-import { UpdateChallengeContentDTO } from '@shared/domain/challenge/dto/update-challenge-content.dto'
-import { ChallengeOrSiteAdminGuard } from '../admin/guards/challenge-or-site-admin.guard'
-import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
 import { AssignScoringAppDTO } from '@shared/domain/challenge/dto/assign-scoring-app.dto'
+import { ChallengeDTO } from '@shared/domain/challenge/dto/challenge.dto'
+import { ChallengePaginationDto } from '@shared/domain/challenge/dto/challenge-pagination.dto'
+import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
+import { CreateChallengeResourceDTO } from '@shared/domain/challenge/dto/create-challenge-resource.dto'
+import { ProposeChallengeDTO } from '@shared/domain/challenge/dto/propose-challenge.dto'
+import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
+import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
+import { UpdateChallengeContentDTO } from '@shared/domain/challenge/dto/update-challenge-content.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { ChallengeOrSiteAdminGuard } from '../admin/guards/challenge-or-site-admin.guard'
 import { ChallengeFacade } from '../facade/challenge/challenge.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { CreateChallengeResourceDTO } from '@shared/domain/challenge/dto/create-challenge-resource.dto'
-import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { ChallengeDTO } from '@shared/domain/challenge/dto/challenge.dto'
-import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
 
 @Controller('/challenges')
 export class ChallengeController {
@@ -83,30 +72,21 @@ export class ChallengeController {
   @UseGuards(ChallengeOrSiteAdminGuard)
   @HttpCode(204)
   @Put('/:id')
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateChallengeDTO,
-  ): Promise<void> {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateChallengeDTO): Promise<void> {
     return await this.challengeFacade.updateChallenge(id, body)
   }
 
   @UseGuards(ChallengeOrSiteAdminGuard)
   @HttpCode(204)
   @Put(':id/content')
-  async updateContent(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateChallengeContentDTO,
-  ): Promise<void> {
+  async updateContent(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateChallengeContentDTO): Promise<void> {
     await this.challengeService.updateContent(id, body)
   }
 
   @UseGuards(UserContextGuard)
   @HttpCode(204)
   @Put(':id/app')
-  async assignScoringApp(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: AssignScoringAppDTO,
-  ): Promise<void> {
+  async assignScoringApp(@Param('id', ParseIntPipe) id: number, @Body() body: AssignScoringAppDTO): Promise<void> {
     await this.challengeService.assignApp(id, body)
   }
 }

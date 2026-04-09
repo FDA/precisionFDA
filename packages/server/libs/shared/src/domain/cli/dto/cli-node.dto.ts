@@ -1,7 +1,7 @@
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 
 export class CliNodeDTO {
   id: number

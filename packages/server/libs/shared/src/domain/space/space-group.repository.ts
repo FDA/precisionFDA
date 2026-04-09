@@ -1,7 +1,7 @@
 import { FilterQuery } from '@mikro-orm/core'
 import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
-import { SpaceGroup } from '@shared/domain/space/space-group.entity'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
+import { SpaceGroup } from '@shared/domain/space/space-group.entity'
 
 export class SpaceGroupRepository extends AccessControlRepository<SpaceGroup> {
   protected async getAccessibleWhere(): Promise<FilterQuery<SpaceGroup>> {

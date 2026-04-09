@@ -1,8 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportResultProvider } from '@shared/domain/space-report/service/result/space-report-result.provider'
-import { Space } from '@shared/domain/space/space.entity'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
@@ -27,10 +27,7 @@ export class SpaceReportResultJsonProvider extends SpaceReportResultProvider<'JS
 
   private async getSpace(spaceReport: SpaceReport<'JSON'>) {
     if (EntityScopeUtils.isSpaceScope(spaceReport.scope)) {
-      const space = await this.em.findOneOrFail(
-        Space,
-        EntityScopeUtils.getSpaceIdFromScope(spaceReport.scope),
-      )
+      const space = await this.em.findOneOrFail(Space, EntityScopeUtils.getSpaceIdFromScope(spaceReport.scope))
 
       return {
         id: space.id,
@@ -50,7 +47,7 @@ export class SpaceReportResultJsonProvider extends SpaceReportResultProvider<'JS
     const parts = this.getReportPartsMap(spaceReport)
 
     return Object.entries(parts).reduce((acc, [sourceType, parts]) => {
-      acc[`${sourceType}s`] = parts.map((part) => part.result)
+      acc[`${sourceType}s`] = parts.map(part => part.result)
       return acc
     }, {})
   }

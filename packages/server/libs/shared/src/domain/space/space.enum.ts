@@ -1,9 +1,9 @@
-import { InvalidStateError } from '@shared/errors'
-import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
-import { ReviewSpaceCreationProcess } from '@shared/domain/space/create/review-space-creation.process'
-import { PrivateSpaceCreationProcess } from '@shared/domain/space/create/private-space-creation.process'
-import { GovernmentSpaceCreationProcess } from '@shared/domain/space/create/government-space-creation.process'
 import { AdministratorSpaceCreationProcess } from '@shared/domain/space/create/administrator-space-creation.process'
+import { GovernmentSpaceCreationProcess } from '@shared/domain/space/create/government-space-creation.process'
+import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
+import { PrivateSpaceCreationProcess } from '@shared/domain/space/create/private-space-creation.process'
+import { ReviewSpaceCreationProcess } from '@shared/domain/space/create/review-space-creation.process'
+import { InvalidStateError } from '@shared/errors'
 
 export enum SPACE_TYPE {
   GROUPS = 0,

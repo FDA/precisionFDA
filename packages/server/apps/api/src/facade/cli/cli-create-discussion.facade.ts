@@ -1,9 +1,9 @@
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
-import { CreateDiscussionFacade } from '../discussion/create-discussion.facade'
+import { Injectable } from '@nestjs/common'
 import { CliCreateDiscussionDTO } from '@shared/domain/cli/dto/cli-create-discussion.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { Injectable } from '@nestjs/common'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import { CreateDiscussionFacade } from '../discussion/create-discussion.facade'
 
 @Injectable()
 export class CliCreateDiscussionFacade {

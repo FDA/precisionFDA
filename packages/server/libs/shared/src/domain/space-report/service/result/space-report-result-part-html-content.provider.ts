@@ -1,11 +1,9 @@
+import { JSDOM } from 'jsdom'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReportPartResult } from '@shared/domain/space-report/model/space-report-part-result'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
-import { JSDOM } from 'jsdom'
 
-export abstract class SpaceReportResultPartHtmlContentProvider<
-  T extends SpaceReportPartSourceType,
-> {
+export abstract class SpaceReportResultPartHtmlContentProvider<T extends SpaceReportPartSourceType> {
   protected abstract addContent(
     result: SpaceReportPartResult<T, 'HTML'>,
     document: Document,

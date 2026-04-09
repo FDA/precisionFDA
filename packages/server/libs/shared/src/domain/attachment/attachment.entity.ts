@@ -1,6 +1,6 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
-import { Note } from '@shared/domain/note/note.entity'
 import { AttachmentRepository } from '@shared/domain/attachment/attachment.repository'
+import { Note } from '@shared/domain/note/note.entity'
 
 export type ItemType = 'Node' | 'Job' | 'App' | 'Workflow' | 'Comparison' | 'Asset' | 'UserFile'
 

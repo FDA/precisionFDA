@@ -4,7 +4,7 @@ import { config } from '@shared/config'
 // Debugging exception capturing and memory
 @Injectable()
 export class DebugErrorTestingRoutesGuard implements CanActivate {
-  canActivate() {
+  canActivate(): boolean {
     return config.api.allowErrorTestingRoutes
   }
 }

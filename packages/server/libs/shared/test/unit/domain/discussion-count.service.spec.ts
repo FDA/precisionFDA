@@ -1,11 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
-import { DiscussionCountService } from '@shared/domain/discussion/services/discussion-count.service'
+import { SinonStub, stub } from 'sinon'
+import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
 import { DiscussionScopeFilterProvider } from '@shared/domain/discussion/discussion-scope-filter.provider'
+import { DiscussionCountService } from '@shared/domain/discussion/services/discussion-count.service'
+import { User } from '@shared/domain/user/user.entity'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('DiscussionCountService', () => {
   const USER_ID = 1
@@ -122,9 +122,6 @@ describe('DiscussionCountService', () => {
   })
 
   function getInstance(): DiscussionCountService {
-    return new DiscussionCountService(
-      em as unknown as SqlEntityManager,
-      discussionScopeFilterProvider,
-    )
+    return new DiscussionCountService(em as unknown as SqlEntityManager, discussionScopeFilterProvider)
   }
 })

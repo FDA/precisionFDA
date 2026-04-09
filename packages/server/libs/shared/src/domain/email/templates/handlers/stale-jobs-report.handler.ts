@@ -39,9 +39,7 @@ export class StaleJobsReportHandler extends EmailHandler<EMAIL_TYPES.staleJobsRe
     }
   }
 
-  protected async getContextualData(
-    input: AdminStaleJobsReportDTO,
-  ): Promise<StaleJobsReportContext> {
+  protected async getContextualData(input: AdminStaleJobsReportDTO): Promise<StaleJobsReportContext> {
     return { input: input }
   }
 }

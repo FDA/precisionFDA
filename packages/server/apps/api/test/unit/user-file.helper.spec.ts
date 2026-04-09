@@ -1,5 +1,5 @@
-import { filterLeafPaths } from '@shared/domain/user-file/user-file.helper'
 import { expect } from 'chai'
+import { filterLeafPaths } from '@shared/domain/user-file/user-file.helper'
 
 describe('user-file.helper', () => {
   context('filterLeafPaths()', () => {

@@ -1,10 +1,10 @@
 import { HttpService } from '@nestjs/axios'
 import { Logger } from '@nestjs/common'
+import { firstValueFrom } from 'rxjs'
+import { WebSocket } from 'ws'
 import { config } from '@shared/config'
 import { ClientRequestError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
-import { firstValueFrom } from 'rxjs'
-import { WebSocket } from 'ws'
 
 const ADMIN_PLATFORM_CLIENT_URL = `${config.service.adminPlatformClient.url}/execute`
 const logger = new Logger('AdminPlatformClient')
@@ -14,7 +14,7 @@ const streamJobLogs = (jobDxId: string) => {
   ws.on('open', () => {
     ws.send(JSON.stringify({ event: 'getLog', data: { jobDxId: jobDxId } }))
   })
-  ws.on('error', (err) => {
+  ws.on('error', err => {
     logger.error(`Error in streamJobLogs: ${err}`)
     ws.terminate()
   })

@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
-import {
-  EmailTypeToContextMap,
-  InvitationContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToContextMap, InvitationContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 import { EmailAddress } from '@shared/domain/email/model/email-address'
@@ -26,9 +23,7 @@ export class InvitationHandler extends EmailHandler<EMAIL_TYPES.invitation> {
     super(emailClient)
   }
 
-  protected async getContextualData(
-    input: ObjectIdInputDTO,
-  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.invitation]> {
+  protected async getContextualData(input: ObjectIdInputDTO): Promise<EmailTypeToContextMap[EMAIL_TYPES.invitation]> {
     const invitation = await this.invitationRepo.findOneOrFail({
       id: input.id,
     })
@@ -46,9 +41,7 @@ export class InvitationHandler extends EmailHandler<EMAIL_TYPES.invitation> {
     return `New access request from ${context.invitation.firstName} ${context.invitation.lastName}`
   }
 
-  protected getTemplateInput(
-    context: InvitationContext,
-  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.invitation] {
+  protected getTemplateInput(context: InvitationContext): EmailTypeToTemplateInputMap[EMAIL_TYPES.invitation] {
     return {
       firstName: context.invitation.firstName,
       lastName: context.invitation.lastName,

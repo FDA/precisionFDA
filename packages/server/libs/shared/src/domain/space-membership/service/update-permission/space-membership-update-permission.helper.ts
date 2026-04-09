@@ -15,9 +15,7 @@ export class SpaceMembershipUpdatePermissionHelper {
     },
   ) {}
 
-  buildMembershipAccessPayload(
-    memberships: SpaceMembership[],
-  ): Record<DxId<'user'>, OrgMemberAccess> {
+  buildMembershipAccessPayload(memberships: SpaceMembership[]): Record<DxId<'user'>, OrgMemberAccess> {
     return memberships.reduce(
       (acc, membership) => {
         acc[membership.user.getEntity().dxid] = !membership.active

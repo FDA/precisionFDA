@@ -1,13 +1,18 @@
 import { FilterQuery } from '@mikro-orm/mysql'
-import { Space } from './space.entity'
-import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
-import { User } from '@shared/domain/user/user.entity'
 import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { CountStats } from '@shared/database/statistics.type'
+import { User } from '@shared/domain/user/user.entity'
+import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
+import { Space } from './space.entity'
 
 export class SpaceRepository extends AccessControlRepository<Space> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Space>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
+
+    const isSiteAdmin = await user.isSiteAdmin()
+    if (isSiteAdmin) {
+      return {}
+    }
 
     return {
       spaceMemberships: {
@@ -30,11 +35,7 @@ export class SpaceRepository extends AccessControlRepository<Space> {
         user: user.id,
         active: true,
         role: {
-          $in: [
-            SPACE_MEMBERSHIP_ROLE.ADMIN,
-            SPACE_MEMBERSHIP_ROLE.LEAD,
-            SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-          ],
+          $in: [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD, SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR],
         },
       },
     }

@@ -32,8 +32,7 @@ export const spaceChangedTemplate = (data: SpaceChangeTemplateInput): string => 
           The space ${data.content.space.name} was ${data.content.action}
         </mj-text>
         ${
-          (data.content.receiversSides[data.receiver.id] === 'GUEST' &&
-            data.content.action === 'locked') ||
+          (data.content.receiversSides[data.receiver.id] === 'GUEST' && data.content.action === 'locked') ||
           data.content.action === 'deleted'
             ? getMiddleSpacer()
             : getViewSpaceButton(data.content.space.id)

@@ -1,6 +1,6 @@
-import { LicenseService } from '@shared/domain/license/license.service'
-import { stub } from 'sinon'
 import { expect } from 'chai'
+import { stub } from 'sinon'
+import { LicenseService } from '@shared/domain/license/license.service'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 

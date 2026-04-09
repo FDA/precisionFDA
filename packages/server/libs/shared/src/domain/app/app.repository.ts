@@ -1,30 +1,26 @@
 import { FilterQuery } from '@mikro-orm/mysql'
-import { DxId } from '../entity/domain/dxid'
-import { App } from './app.entity'
-import { ENTITY_TYPE } from './app.enum'
 import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { DxId } from '../entity/domain/dxid'
+import { App } from './app.entity'
+import { ENTITY_TYPE } from './app.enum'
 
 export class AppRepository extends AccessControlRepository<App> {
   protected async getAccessibleWhere(): Promise<FilterQuery<App>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
     const accessibleSpaces = await user.accessibleSpaces()
-    const scopes = accessibleSpaces.map((space) => space.scope)
+    const scopes = accessibleSpaces.map(space => space.scope)
 
     return {
-      $or: [
-        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
-        { scope: STATIC_SCOPE.PUBLIC },
-        { scope: { $in: scopes } },
-      ],
+      $or: [{ user: user.id, scope: STATIC_SCOPE.PRIVATE }, { scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: scopes } }],
     }
   }
 
   protected async getEditableWhere(): Promise<FilterQuery<App>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
     const editableSpaces = await user.editableSpaces()
-    const scopes = editableSpaces.map((space) => space.scope)
+    const scopes = editableSpaces.map(space => space.scope)
 
     // TODO PFDA-6222: define rules for site-admins
 

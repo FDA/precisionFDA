@@ -8,10 +8,7 @@ import { UsersDbClustersSaltRepository } from './users-db-clusters-salt.reposito
 export class UsersDbClustersSaltService {
   constructor(private readonly saltRepo: UsersDbClustersSaltRepository) {}
 
-  async getUsersDbClustersSaltByDbClusterAndUser(
-    dbClusterId: number,
-    userId: number,
-  ): Promise<UsersDbClustersSalt> {
+  async getUsersDbClustersSaltByDbClusterAndUser(dbClusterId: number, userId: number): Promise<UsersDbClustersSalt> {
     return await this.saltRepo.findOne({ dbcluster: { id: dbClusterId }, user: { id: userId } })
   }
 

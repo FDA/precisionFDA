@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common'
-import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { PlatformClient } from '@shared/platform-client'
 import { AdminPlatformClientService } from '../../src/service/admin-platform-client.service'
 
 describe('AdminPlatformClientService', () => {
@@ -20,17 +20,11 @@ describe('AdminPlatformClientService', () => {
   })
 
   it('should throw error for non function key', async () => {
-    await expect(getInstance().execute(NON_METHOD_KEY, [])).to.be.rejectedWith(
-      BadRequestException,
-      'Invalid method',
-    )
+    await expect(getInstance().execute(NON_METHOD_KEY, [])).to.be.rejectedWith(BadRequestException, 'Invalid method')
   })
 
   it('should throw error for non existing key', async () => {
-    await expect(getInstance().execute('foo', [])).to.be.rejectedWith(
-      BadRequestException,
-      'Invalid method',
-    )
+    await expect(getInstance().execute('foo', [])).to.be.rejectedWith(BadRequestException, 'Invalid method')
   })
 
   it('should throw error for non allowed method', async () => {
@@ -69,7 +63,7 @@ describe('AdminPlatformClientService', () => {
     expect(allowedMethodStub.calledOnce).to.be.true()
   })
 
-  function getInstance() {
+  function getInstance(): AdminPlatformClientService {
     const platformClient = {
       [NON_METHOD_KEY]: true,
       [ALLOWED_METHOD]: allowedMethodStub,

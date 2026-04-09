@@ -1,23 +1,20 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Logger } from '@nestjs/common'
 import { config } from '@shared/config'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { getHandle } from '@shared/domain/org/org.utils'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { USER_STATE, User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
-import { Logger } from '@nestjs/common'
-import { getHandle } from '@shared/domain/org/org.utils'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
-import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
 /**
  * Abstract class representing the process of creating a space.
  *
@@ -85,7 +82,7 @@ export abstract class SpaceCreationProcess {
         await this.inviteChallengeBot(space)
       }
       await this.buildProjects(space, memberships)
-      users = memberships.map((m) => m.user.getEntity())
+      users = memberships.map(m => m.user.getEntity())
       return space.id
     })
     if (space && users.length > 0) {
@@ -94,7 +91,7 @@ export abstract class SpaceCreationProcess {
     return result
   }
 
-  protected abstract validateInput(input: CreateSpaceDTO)
+  protected abstract validateInput(input: CreateSpaceDTO): void
 
   protected async findLeads(input: CreateSpaceDTO): Promise<{ host: User; guest: User }> {
     let hostLead: User, guestLead: User
@@ -104,9 +101,7 @@ export abstract class SpaceCreationProcess {
       userState: { $ne: USER_STATE.DEACTIVATED },
     })
     if (!hostLead) {
-      throw new NotFoundError(
-        `Host lead user: ${input.hostLeadDxuser} was not found or is not active !`,
-      )
+      throw new NotFoundError(`Host lead user: ${input.hostLeadDxuser} was not found or is not active !`)
     }
 
     if (input.guestLeadDxuser) {
@@ -115,9 +110,7 @@ export abstract class SpaceCreationProcess {
         userState: { $ne: USER_STATE.DEACTIVATED },
       })
       if (!guestLead) {
-        throw new NotFoundError(
-          `Guest lead user: ${input.guestLeadDxuser} was not found or is not active !`,
-        )
+        throw new NotFoundError(`Guest lead user: ${input.guestLeadDxuser} was not found or is not active !`)
       }
     }
 
@@ -152,9 +145,7 @@ export abstract class SpaceCreationProcess {
     // invite challenge bot as admin by host lead - only applicable for challenge's group space.
     const challengeBot = await this.em.findOne(User, { dxuser: config.platform.challengeBotUser })
     if (!challengeBot) {
-      throw new NotFoundError(
-        `Challenge bot user: ${config.platform.challengeBotUser} was not found !`,
-      )
+      throw new NotFoundError(`Challenge bot user: ${config.platform.challengeBotUser} was not found !`)
     }
 
     await this.adminClient.inviteUserToOrganization({
@@ -175,28 +166,15 @@ export abstract class SpaceCreationProcess {
         suppressEmailNotification: true,
       },
     })
-    this.logger.log(
-      `invited challenge bot: ${challengeBot.dxuser} to guest org: ${space.guestDxOrg}`,
-    )
+    this.logger.log(`invited challenge bot: ${challengeBot.dxuser} to guest org: ${space.guestDxOrg}`)
 
-    const membership = new SpaceMembership(
-      challengeBot,
-      space,
-      SPACE_MEMBERSHIP_SIDE.HOST,
-      SPACE_MEMBERSHIP_ROLE.ADMIN,
-    )
+    const membership = new SpaceMembership(challengeBot, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN)
     this.em.persist(membership)
   }
 
   protected async handleTags(input: CreateSpaceDTO, space: Space): Promise<void> {
     if (input.protected) {
-      await this.taggingService.addTaggingForEntity(
-        'Protected',
-        'User',
-        this.user.id,
-        space.id,
-        TAGGABLE_TYPE.SPACE,
-      )
+      await this.taggingService.addTaggingForEntity('Protected', 'User', this.user.id, space.id, TAGGABLE_TYPE.SPACE)
     }
     if (input.restrictedReviewer) {
       await this.taggingService.addTaggingForEntity(

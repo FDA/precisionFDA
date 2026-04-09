@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -14,6 +15,10 @@ import (
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
+
+// UID pattern: {type}-{24 alphanumeric chars}-{version}
+// Examples: app-J1X7GzQ0KfZ1251bXB21pPjg-1, file-J1Y68j80Qpb0Xbzbgv4GzpGx-1
+var uidPattern = regexp.MustCompile(`^([a-z]+)-([A-Za-z0-9]{24})-(\d+)$`)
 
 func Min(a, b int) int {
 	if a < b {
@@ -29,8 +34,24 @@ func Max(a, b int) int {
 	return b
 }
 
-func IsFileId(arg string) bool {
-	return strings.HasPrefix(arg, "file-") && len(arg) >= 31
+func IsValidUID(arg string, expectedType string) bool {
+	matches := uidPattern.FindStringSubmatch(arg)
+	if matches == nil {
+		return false
+	}
+	return matches[1] == expectedType
+}
+
+func IsFileUid(arg string) bool {
+	return IsValidUID(arg, "file")
+}
+
+func IsAppUid(arg string) bool {
+	return IsValidUID(arg, "app")
+}
+
+func IsJobUid(arg string) bool {
+	return IsValidUID(arg, "job")
 }
 
 func IsFolderId(arg string) bool {
@@ -86,12 +107,6 @@ func ValidateID(id string, paramName string, params url.Values) error {
 	return nil
 }
 
-func CheckErr(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
 // PrintError prints the error to standard output. If asJSON is true, it prints in JSON format.
 func PrintError(err error, asJSON bool) {
 	if asJSON {
@@ -142,6 +157,14 @@ func PrettyPrint(data interface{}) {
 		jsonData, _ = json.MarshalIndent(data, "", "  ")
 	}
 	fmt.Println(string(jsonData))
+}
+
+// DerefOrDefault returns the dereferenced value of a pointer, or the fallback if nil.
+func DerefOrDefault(s *string, fallback string) string {
+	if s == nil {
+		return fallback
+	}
+	return *s
 }
 
 func PrintPrettyJSON(body []byte) error {

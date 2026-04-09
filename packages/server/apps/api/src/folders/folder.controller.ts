@@ -1,8 +1,8 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { Node } from '@shared/domain/user-file/node.entity'
-import { FetchChildrenDTO } from './model/fetch-children.dto'
 import { NodeService } from '@shared/domain/user-file/node.service'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { FetchChildrenDTO } from './model/fetch-children.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/folders')

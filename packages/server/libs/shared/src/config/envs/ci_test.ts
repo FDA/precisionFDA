@@ -11,8 +11,7 @@ export const config: ConfigOverride = () => ({
   database: {
     // different env var names are used here
     dbName: process.env.DATABASE_TEST_NAME ?? 'precisionfda-test',
-    clientUrl:
-      process.env.DATABASE_TEST_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
+    clientUrl: process.env.DATABASE_TEST_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
   },
   api: {
     fdaSubnet: {

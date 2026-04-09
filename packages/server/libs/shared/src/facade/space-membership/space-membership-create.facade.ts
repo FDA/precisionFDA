@@ -1,27 +1,24 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject } from '@nestjs/common'
+import { Logger } from 'nestjs-pino'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SpaceEventDTO } from '@shared/domain/space-event/dto/space-event.dto'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { Space } from '@shared/domain/space/space.entity'
-import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
-import { Logger } from 'nestjs-pino'
 
 export class SpaceMembershipCreateFacade {
   @ServiceLogger()
@@ -104,8 +101,7 @@ export class SpaceMembershipCreateFacade {
     side: SPACE_MEMBERSHIP_SIDE,
     role: SPACE_MEMBERSHIP_ROLE,
   ): Promise<void> {
-    const oppositeSide =
-      side === SPACE_MEMBERSHIP_SIDE.HOST ? SPACE_MEMBERSHIP_SIDE.GUEST : SPACE_MEMBERSHIP_SIDE.HOST
+    const oppositeSide = side === SPACE_MEMBERSHIP_SIDE.HOST ? SPACE_MEMBERSHIP_SIDE.GUEST : SPACE_MEMBERSHIP_SIDE.HOST
 
     switch (space.type) {
       case SPACE_TYPE.GROUPS:
@@ -154,9 +150,7 @@ export class SpaceMembershipCreateFacade {
     }
 
     if (space.type === SPACE_TYPE.VERIFICATION) {
-      throw new InvalidStateError(
-        'You cannot create new memberships for verification space - DEPRECATED',
-      )
+      throw new InvalidStateError('You cannot create new memberships for verification space - DEPRECATED')
     }
 
     if (space.type === SPACE_TYPE.GOVERNMENT) {
@@ -171,17 +165,11 @@ export class SpaceMembershipCreateFacade {
     })
 
     if (existingMembership) {
-      throw new InvalidStateError(
-        `User ${newMemberUser.dxuser} is already a member of space ${space.name}`,
-      )
+      throw new InvalidStateError(`User ${newMemberUser.dxuser} is already a member of space ${space.name}`)
     }
   }
 
-  private async inviteAsAdminOrLead(
-    user: User,
-    space: Space,
-    side: SPACE_MEMBERSHIP_SIDE,
-  ): Promise<void> {
+  private async inviteAsAdminOrLead(user: User, space: Space, side: SPACE_MEMBERSHIP_SIDE): Promise<void> {
     await this.adminClient.inviteUserToOrganization({
       orgDxId: side === SPACE_MEMBERSHIP_SIDE.HOST ? space.hostDxOrg : space.guestDxOrg,
       data: {
@@ -192,11 +180,7 @@ export class SpaceMembershipCreateFacade {
     })
   }
 
-  private async inviteAsContributor(
-    user: User,
-    space: Space,
-    side: SPACE_MEMBERSHIP_SIDE,
-  ): Promise<void> {
+  private async inviteAsContributor(user: User, space: Space, side: SPACE_MEMBERSHIP_SIDE): Promise<void> {
     await this.adminClient.inviteUserToOrganization({
       orgDxId: side === SPACE_MEMBERSHIP_SIDE.HOST ? space.hostDxOrg : space.guestDxOrg,
       data: {
@@ -210,11 +194,7 @@ export class SpaceMembershipCreateFacade {
     })
   }
 
-  private async inviteAsViewer(
-    user: User,
-    space: Space,
-    side: SPACE_MEMBERSHIP_SIDE,
-  ): Promise<void> {
+  private async inviteAsViewer(user: User, space: Space, side: SPACE_MEMBERSHIP_SIDE): Promise<void> {
     await this.adminClient.inviteUserToOrganization({
       orgDxId: side === SPACE_MEMBERSHIP_SIDE.HOST ? space.hostDxOrg : space.guestDxOrg,
       data: {

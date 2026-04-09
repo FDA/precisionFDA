@@ -80,7 +80,8 @@ export abstract class WorkerBaseOperation<Ctx extends OpsCtx, In, Out> extends B
           ...operationInfo,
           executionTime: Date.now() - startTime,
         },
-        'Worker operation finished')
+        'Worker operation finished',
+      )
       return res
     } catch (error) {
       this.ctx.log.error(

@@ -1,17 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
-import {
-  EmailTypeToContextMap,
-  SpaceActivationContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToContextMap, SpaceActivationContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { spaceActivationTemplate } from '@shared/domain/email/templates/mjml/space-activation.template'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { EmailClient } from '@shared/services/email-client'
 
@@ -55,8 +52,7 @@ export class SpaceActivationEmailHandler extends EmailHandler<EMAIL_TYPES.spaceA
     let activationRequestLead: string
     let leadsNames: string
     if (space.type === SPACE_TYPE.ADMINISTRATOR) {
-      activationRequestLead =
-        context.spaceMembership.side === SPACE_MEMBERSHIP_SIDE.HOST ? 'creator' : 'approver'
+      activationRequestLead = context.spaceMembership.side === SPACE_MEMBERSHIP_SIDE.HOST ? 'creator' : 'approver'
       leadsNames = 'creator and approver'
     } else {
       activationRequestLead = context.spaceMembership.getSpaceMembershipSideAlias()

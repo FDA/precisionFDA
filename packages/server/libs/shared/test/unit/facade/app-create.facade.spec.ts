@@ -1,8 +1,8 @@
 import { Reference } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { database } from '@shared/database'
-import { AppSeries } from '@shared/domain/app-series/app-series.entity'
-import { AppSeriesRepository } from '@shared/domain/app-series/app-series.repository'
 import { App } from '@shared/domain/app/app.entity'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import { constructDxName, getCLIKeyInputSpec } from '@shared/domain/app/app.helper'
@@ -10,11 +10,19 @@ import { AppInputSpecItem } from '@shared/domain/app/app.input'
 import { AppRepository } from '@shared/domain/app/app.repository'
 import { SaveAppDTO } from '@shared/domain/app/dto/save-app.dto'
 import { AppService } from '@shared/domain/app/services/app.service'
-import { Event, EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { AppSeriesRepository } from '@shared/domain/app-series/app-series.repository'
+import { AppSeriesCountService } from '@shared/domain/app-series/app-series-count.service'
+import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
+import { EVENT_TYPES, Event } from '@shared/domain/event/event.entity'
 import { allowedInstanceTypes } from '@shared/domain/job/job.enum'
 import { Organization } from '@shared/domain/org/organization.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -24,31 +32,17 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
+import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
+import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
-import { User } from '@shared/domain/user/user.entity'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PermissionError, ValidationError } from '@shared/errors'
 import { AppCreateFacade } from '@shared/facade/app/app-create.facade'
 import { PlatformClient } from '@shared/platform-client'
-import {
-  AppDescribeResponse,
-  ClassIdResponse,
-} from '@shared/platform-client/platform-client.responses'
+import { AppDescribeResponse, ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { random } from '@shared/test/generate'
 import { codeRemap } from '@shared/utils/app'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 import { create, db } from '../../../src/test'
-import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
-import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
-import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
-import { AppSeriesCountService } from '@shared/domain/app-series/app-series-count.service'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 
 // TODO (PFDA-6416): move to stubs
 describe('AppCreateFacade', () => {
@@ -134,12 +128,7 @@ describe('AppCreateFacade', () => {
     )
 
     appService = new AppService(appRepository)
-    appSeriesService = new AppSeriesService(
-      em,
-      userCtx,
-      appSeriesRepository,
-      {} as unknown as AppSeriesCountService,
-    )
+    appSeriesService = new AppSeriesService(em, userCtx, appSeriesRepository, {} as unknown as AppSeriesCountService)
 
     appletCreateStub.reset()
     appletCreateStub.throws()
@@ -227,9 +216,7 @@ describe('AppCreateFacade', () => {
 
       expect(appCreateStub.calledOnce).to.be.true()
       expect(appCreateStub.firstCall.args[0].applet).to.equal(appletId)
-      expect(appCreateStub.firstCall.args[0].name).to.equal(
-        constructDxName(user.dxuser, appInput.name, appInput.scope),
-      )
+      expect(appCreateStub.firstCall.args[0].name).to.equal(constructDxName(user.dxuser, appInput.name, appInput.scope))
       expect(appCreateStub.firstCall.args[0].title).to.equal(appInput.title)
       expect(appCreateStub.firstCall.args[0].summary).to.equal(' ')
       expect(appCreateStub.firstCall.args[0].description).to.equal(' ')
@@ -237,9 +224,7 @@ describe('AppCreateFacade', () => {
       expect(appCreateStub.firstCall.args[0].resources).to.be.empty()
       expect(appCreateStub.firstCall.args[0].details.ordered_assets).to.be.empty()
       expect(appCreateStub.firstCall.args[0].openSource).to.be.false()
-      expect(appCreateStub.firstCall.args[0].billTo).to.equal(
-        user.organization.getEntity().getDxOrg(),
-      )
+      expect(appCreateStub.firstCall.args[0].billTo).to.equal(user.organization.getEntity().getDxOrg())
       expect(JSON.stringify(appCreateStub.firstCall.args[0].access)).to.equal(JSON.stringify({}))
 
       // validate containerRemoveObjects
@@ -380,10 +365,10 @@ describe('AppCreateFacade', () => {
       expect(appSeries.latestRevisionAppId).to.equal(2)
       const apps = await em.find(App, { uid: [result1, result2] })
       expect(apps.length).to.equal(2)
-      const firstApp = apps.find((app) => app.id === 1)
+      const firstApp = apps.find(app => app.id === 1)
       expect(firstApp?.revision).to.equal(1)
       expect(firstApp?.uid).to.equal(result1)
-      const secondApp = apps.find((app) => app.id === 2)
+      const secondApp = apps.find(app => app.id === 2)
       expect(secondApp?.revision).to.equal(2)
       expect(secondApp?.uid).to.equal(result2)
     })
@@ -397,34 +382,10 @@ describe('AppCreateFacade', () => {
 
       const intSpec = getSpec('intName', 'int', 'intHelp', 'intLabel', false, 0, [])
       const floatSpec = getSpec('floatName', 'float', 'floatHelp', 'floatLabel', false, 0, [])
-      const stringSpec = getSpec(
-        'stringName',
-        'string',
-        'stringHelp',
-        'stringLabel',
-        false,
-        undefined,
-        [],
-      )
-      const booleanSpec = getSpec(
-        'booleanName',
-        'boolean',
-        'booleanHelp',
-        'booleanLabel',
-        false,
-        false,
-        [],
-      )
+      const stringSpec = getSpec('stringName', 'string', 'stringHelp', 'stringLabel', false, undefined, [])
+      const booleanSpec = getSpec('booleanName', 'boolean', 'booleanHelp', 'booleanLabel', false, false, [])
       const fileSpec = getSpec('fileName', 'file', 'fileHelp', 'fileLabel', false, undefined, [])
-      const arraySpec = getSpec(
-        'arrayName',
-        'array:string',
-        'arrayHelp',
-        'arrayLabel',
-        false,
-        undefined,
-        [],
-      )
+      const arraySpec = getSpec('arrayName', 'array:string', 'arrayHelp', 'arrayLabel', false, undefined, [])
 
       appInput1.input_spec = [intSpec, floatSpec, stringSpec, booleanSpec, fileSpec, arraySpec]
       appInput1.output_spec = [intSpec, floatSpec, stringSpec, booleanSpec, fileSpec, arraySpec]
@@ -503,10 +464,7 @@ describe('AppCreateFacade', () => {
       )
     })
 
-    const createAppWithNameAndFail = async (
-      name: string,
-      appCreateFacade: AppCreateFacade,
-    ): Promise<void> => {
+    const createAppWithNameAndFail = async (name: string, appCreateFacade: AppCreateFacade): Promise<void> => {
       const appInput = getDefaultApp()
       appInput.name = name
 
@@ -517,10 +475,7 @@ describe('AppCreateFacade', () => {
       )
     }
 
-    const createAppWithNameAndSucceed = async (
-      name: string,
-      appCreateFacade: AppCreateFacade,
-    ): Promise<void> => {
+    const createAppWithNameAndSucceed = async (name: string, appCreateFacade: AppCreateFacade): Promise<void> => {
       appCreateStub.resolves({
         id: `app-${random.dxstr()}`,
       })
@@ -735,13 +690,6 @@ describe('AppCreateFacade', () => {
   }
 
   function getInstance(userContext: UserContext = userCtx): AppCreateFacade {
-    return new AppCreateFacade(
-      em,
-      userContext,
-      platformClient,
-      nodeService,
-      appService,
-      appSeriesService,
-    )
+    return new AppCreateFacade(em, userContext, platformClient, nodeService, appService, appSeriesService)
   }
 })

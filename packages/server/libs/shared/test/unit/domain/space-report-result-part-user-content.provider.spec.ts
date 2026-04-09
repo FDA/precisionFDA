@@ -1,7 +1,7 @@
+import { expect } from 'chai'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReportResultPartUserHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-user-html-content.provider'
-import { expect } from 'chai'
 
 describe('SpaceReportResultPartUserContentProvider', () => {
   const TITLE = 'title'

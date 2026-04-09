@@ -20,8 +20,6 @@ export class SpaceOrSiteAdminGuard implements CanActivate {
       return true
     }
 
-    throw new UserInvalidPermissionsError(
-      'User requires Space or Site Admin permission to access this resource',
-    )
+    throw new UserInvalidPermissionsError('User requires Space or Site Admin permission to access this resource')
   }
 }

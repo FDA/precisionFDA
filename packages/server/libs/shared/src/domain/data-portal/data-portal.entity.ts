@@ -31,10 +31,17 @@ class DataPortal extends BaseEntity {
   @Property()
   sortOrder: number
 
-  @OneToOne(() => Space, (space: Space) => space.dataPortal, { owner: true })
+  @OneToOne(
+    () => Space,
+    (space: Space) => space.dataPortal,
+    { owner: true },
+  )
   space!: Ref<Space>
 
-  @OneToMany(() => Resource, (resource) => resource.dataPortal)
+  @OneToMany(
+    () => Resource,
+    resource => resource.dataPortal,
+  )
   resources = new Collection<Resource>(this)
   constructor(space: Space) {
     super()

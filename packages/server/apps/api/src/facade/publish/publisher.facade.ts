@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PublisherService } from '@shared/domain/discussion/services/publisher.service'
-import { NotFoundError } from '@shared/errors'
 import { NodeService } from '@shared/domain/user-file/node.service'
+import { NotFoundError } from '@shared/errors'
 
 @Injectable()
 export class PublisherFacade {

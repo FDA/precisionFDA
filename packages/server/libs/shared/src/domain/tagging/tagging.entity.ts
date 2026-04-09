@@ -1,8 +1,8 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
 import { Tag } from '@shared/domain/tag/tag.entity'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { User } from '@shared/domain/user/user.entity'
 import { TaggingRepository } from './tagging.repository'
-import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 
 @Entity({
   abstract: true,

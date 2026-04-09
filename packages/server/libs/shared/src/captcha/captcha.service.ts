@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { config } from '../config'
 import { CaptchaResponse } from './captcha.response'
 
@@ -8,11 +8,7 @@ export class CaptchaService {
   @ServiceLogger()
   private readonly logger: Logger
 
-  async verifyCaptchaAssessment(
-    token: string,
-    recaptchaAction: string,
-    minimalScore = 0.7,
-  ): Promise<boolean> {
+  async verifyCaptchaAssessment(token: string, recaptchaAction: string, minimalScore = 0.7): Promise<boolean> {
     if (!config.api.captchaEnabled) {
       this.logger.debug('Skipping captcha verification in development or test environment')
       return true
@@ -44,11 +40,7 @@ export class CaptchaService {
     }
   }
 
-  private evaluateRecaptchaResponse(
-    result: CaptchaResponse,
-    recaptchaAction: string,
-    minimalScore: number,
-  ): boolean {
+  private evaluateRecaptchaResponse(result: CaptchaResponse, recaptchaAction: string, minimalScore: number): boolean {
     const tokenValid = result.tokenProperties.valid
     const tokenInvalidReason = result.tokenProperties.invalidReason
     const actualAction = result.tokenProperties.action
@@ -61,9 +53,7 @@ export class CaptchaService {
     }
 
     if (actualAction !== recaptchaAction) {
-      this.logger.error(
-        `[RECAPTCHA] FAILED - Action mismatch. Expected: ${recaptchaAction}, Got: ${actualAction}`,
-      )
+      this.logger.error(`[RECAPTCHA] FAILED - Action mismatch. Expected: ${recaptchaAction}, Got: ${actualAction}`)
       return false
     }
 

@@ -1,4 +1,4 @@
-import { Expert, EXPERT_STATE } from '@shared/domain/expert/entity/expert.entity'
+import { EXPERT_STATE, Expert } from '@shared/domain/expert/entity/expert.entity'
 import { EntityScope } from '@shared/types/common'
 
 export class ExpertDTO {

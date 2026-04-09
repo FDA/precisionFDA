@@ -1,6 +1,6 @@
-import { Follow } from '@shared/domain/follow/follow.entity'
 import { Entity, ManyToOne, Ref, Reference } from '@mikro-orm/core'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { Follow } from '@shared/domain/follow/follow.entity'
 
 @Entity({ discriminatorValue: 'Discussion' })
 export class DiscussionFollow extends Follow {

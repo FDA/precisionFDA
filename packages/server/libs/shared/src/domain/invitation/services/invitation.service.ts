@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
@@ -7,7 +8,6 @@ import { ProvisionUsersDTO } from '@shared/domain/invitation/dto/provision-users
 import { InvalidStateError } from '@shared/errors'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { StringUtils } from '@shared/utils/string.utils'
-import { randomUUID } from 'node:crypto'
 import { InvitationPaginationDTO } from '../dto/invitation-pagination.dto'
 import { RequestAccessDTO } from '../dto/request-access.dto'
 import { Extras, Invitation } from '../invitation.entity'
@@ -64,7 +64,7 @@ export class InvitationService {
 
     const provisioningIds: number[] = []
     await this.em.transactional(async () => {
-      pendingInvitations.forEach((invitation) => {
+      pendingInvitations.forEach(invitation => {
         invitation.provisioningState = PROVISIONING_STATE.IN_PROGRESS
         this.em.persist(invitation)
         provisioningIds.push(invitation.id)

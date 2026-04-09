@@ -1,7 +1,7 @@
-import { ExpertQuestionRepository } from '@shared/domain/expert-question/repository/expert-question.repository'
-import { ExpertQuestionService } from '@shared/domain/expert-question/service/expert-question.service'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { ExpertQuestionRepository } from '@shared/domain/expert-question/repository/expert-question.repository'
+import { ExpertQuestionService } from '@shared/domain/expert-question/service/expert-question.service'
 
 describe('ExpertQuestionEntityLinkProvider', () => {
   const QUERY = 'QUERY'

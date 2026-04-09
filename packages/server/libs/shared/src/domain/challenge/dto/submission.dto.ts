@@ -1,8 +1,8 @@
 import { Submission } from '@shared/domain/challenge/submission.entity'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { EntityScope } from '@shared/types/common'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
+import { EntityScope } from '@shared/types/common'
 
 export class SubmissionDTO {
   id: number
@@ -37,7 +37,7 @@ export class SubmissionDTO {
         inputFiles: submission.job
           .getProperty('inputFiles')
           .getItems()
-          .map((file) => ({
+          .map(file => ({
             id: file.id,
             uid: file.uid,
             name: file.name,

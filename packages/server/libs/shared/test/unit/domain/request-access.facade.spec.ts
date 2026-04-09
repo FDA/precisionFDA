@@ -1,3 +1,5 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { CaptchaService } from '@shared/captcha/captcha.service'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
@@ -5,8 +7,6 @@ import { InvitationService } from '@shared/domain/invitation/services/invitation
 import { UserService } from '@shared/domain/user/service/user.service'
 import { InvalidCaptchaError, InvalidRequestError } from '@shared/errors'
 import { RequestAccessFacade } from '@shared/facade/request-access/request-access.facade'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('RequestAccessFacade', () => {
   const createInvitationStub = stub()
@@ -71,10 +71,7 @@ describe('RequestAccessFacade', () => {
       clinicalIntent: CLINICAL_INTENT,
       captchaValue: 'invalid-captcha',
     }
-    await expect(instance.requestAccess(requestData)).to.be.rejectedWith(
-      InvalidCaptchaError,
-      'Invalid captcha value',
-    )
+    await expect(instance.requestAccess(requestData)).to.be.rejectedWith(InvalidCaptchaError, 'Invalid captcha value')
     expect(verifyCaptchaAssessmentStub.calledOnce).to.be.true
     expect(verifyCaptchaAssessmentStub.firstCall.args[0]).to.equal('invalid-captcha')
     expect(verifyCaptchaAssessmentStub.firstCall.args[1]).to.equal('request_access')

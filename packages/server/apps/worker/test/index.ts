@@ -1,10 +1,10 @@
 import { INestApplicationContext } from '@nestjs/common'
-import { database } from '@shared/database'
-import { db } from '@shared/test'
-import { mocksRestore, mocksSetup } from '@shared/test/mocks'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
+import { database } from '@shared/database'
+import { db } from '@shared/test'
+import { mocksRestore, mocksSetup } from '@shared/test/mocks'
 import { bootstrap } from '../src/bootstrap'
 import { mocksRestore as localMocksRestore, mocksSetup as localMocksSetup } from './utils/mocks'
 

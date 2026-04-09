@@ -1,14 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
-import { AppSeriesCountService } from '@shared/domain/app-series/app-series-count.service'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { AppSeriesRepository } from '@shared/domain/app-series/app-series.repository'
-import { EntityScope } from '@shared/types/common'
-import { AppSeries } from '@shared/domain/app-series/app-series.entity'
-import { User } from '@shared/domain/user/user.entity'
+import { Injectable, Logger } from '@nestjs/common'
 import { constructDxid } from '@shared/domain/app/app.helper'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { AppSeriesRepository } from '@shared/domain/app-series/app-series.repository'
+import { AppSeriesCountService } from '@shared/domain/app-series/app-series-count.service'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { EntityScope } from '@shared/types/common'
 
 @Injectable()
 export class AppSeriesService {

@@ -1,4 +1,3 @@
-
 export const formatDuration = (duration: number): string => {
   const elapsedSeconds = Math.floor(duration / 1000)
   const days = Math.floor(elapsedSeconds / 86400)

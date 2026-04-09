@@ -1,12 +1,12 @@
-import { ErrorCodes, ServiceError } from '@shared/errors'
-import * as nodemailer from 'nodemailer'
-import { config } from '../config'
-import { getLogger } from '../logger'
-import SMTPTransport from 'nodemailer/lib/smtp-transport'
+import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
+import * as nodemailer from 'nodemailer'
+import SMTPTransport from 'nodemailer/lib/smtp-transport'
 import { EmailSendInput } from '@shared/domain/email/email.config'
-import { randomUUID } from 'node:crypto'
+import { ErrorCodes, ServiceError } from '@shared/errors'
+import { config } from '../config'
+import { getLogger } from '../logger'
 
 const log = getLogger('nodemailer-logger')
 

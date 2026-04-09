@@ -3,14 +3,5 @@ import { Extends } from '@shared/utils/types/extends'
 
 export type EntityWithProvenanceType = Extends<
   EntityType,
-  | 'app'
-  | 'job'
-  | 'file'
-  | 'dbcluster'
-  | 'user'
-  | 'workflow'
-  | 'note'
-  | 'comparison'
-  | 'asset'
-  | 'folder'
+  'app' | 'job' | 'file' | 'dbcluster' | 'user' | 'workflow' | 'note' | 'comparison' | 'asset' | 'folder'
 >

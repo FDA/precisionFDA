@@ -1,9 +1,9 @@
+import Bull from 'bull'
+import { RedisClientType } from 'redis'
+import sinon from 'sinon'
 import { PlatformClient } from '@shared/platform-client'
 import * as queue from '@shared/queue'
 import * as redis from '@shared/services/redis.service'
-import Bull from 'bull'
-import sinon from 'sinon'
-import { RedisClientType } from 'redis'
 import { FileCloseParams } from '../platform-client/platform-client.params'
 import * as generate from './generate'
 import { random } from './generate'
@@ -17,11 +17,19 @@ import {
 } from './mock-responses'
 import { createMockServiceFactory } from './mock-service-factory'
 
-const mockServiceFactory = createMockServiceFactory()
+const mockServiceFactory: ReturnType<typeof createMockServiceFactory> = createMockServiceFactory()
 
-const sandbox = sinon.createSandbox()
+const sandbox: sinon.SinonSandbox = sinon.createSandbox()
 
-const fakes = {
+const fakes: {
+  client: Record<string, sinon.SinonStub>
+  queue: Record<string, sinon.SinonStub | sinon.SinonSpy>
+  bull: Record<string, sinon.SinonStub | sinon.SinonSpy>
+  notificationService: ReturnType<typeof createMockServiceFactory>['notificationService']
+  platformAuthClient: ReturnType<typeof createMockServiceFactory>['platformAuthClient']
+  workstationClient: ReturnType<typeof createMockServiceFactory>['workstationClient']
+  emailService: ReturnType<typeof createMockServiceFactory>['emailService']
+} = {
   client: {
     jobDescribeFake: sinon.stub(),
     jobCreateFake: sinon.stub(),
@@ -53,6 +61,7 @@ const fakes = {
     appPublishFake: sinon.stub(),
     appDescribeFake: sinon.stub(),
     workflowDescribeFake: sinon.stub(),
+    fileDownloadLinkFake: sinon.stub(),
   },
   queue: {
     findRepeatableFake: sinon.stub(),
@@ -79,7 +88,7 @@ const fakes = {
 
 const mocksSetDefaultBehaviour = (): void => {
   // all the stubs should be listed here
-  fakes.client.jobDescribeFake.callsFake((jobDxId) =>
+  fakes.client.jobDescribeFake.callsFake(jobDxId =>
     Promise.resolve({
       id: jobDxId,
       name: `platform-${jobDxId}`,
@@ -134,7 +143,7 @@ const mocksSetDefaultBehaviour = (): void => {
   }))
   fakes.client.appAddAuthorizedUsersFake.callsFake(() => ({ id: generate.app.appId() }))
   fakes.client.appPublishFake.callsFake(() => ({ id: generate.app.appId() }))
-  fakes.client.appDescribeFake.callsFake((appDxId) => ({
+  fakes.client.appDescribeFake.callsFake(appDxId => ({
     id: appDxId,
     name: `app-name-${appDxId}`,
     inputSpec: [],
@@ -145,7 +154,13 @@ const mocksSetDefaultBehaviour = (): void => {
     openSource: false,
     version: 'r2-103448',
   }))
-  fakes.client.workflowDescribeFake.callsFake((workflowDxId) => ({
+  fakes.client.fileDownloadLinkFake.callsFake(() =>
+    Promise.resolve({
+      url: 'https://dl.example.com/file-download-url',
+      headers: [],
+    }),
+  )
+  fakes.client.workflowDescribeFake.callsFake(workflowDxId => ({
     id: workflowDxId.dxid,
     project: 'project-abc',
     class: 'workflow',
@@ -189,33 +204,18 @@ const mocksSetup = (): void => {
   sandbox.replace(PlatformClient.prototype, 'projectDescribe', fakes.client.projectDescribeFake)
   sandbox.replace(PlatformClient.prototype, 'projectCreate', fakes.client.projectCreateFake)
   sandbox.replace(PlatformClient.prototype, 'orgFindMembers', fakes.client.orgFindMembersFake)
-  sandbox.replace(
-    PlatformClient.prototype,
-    'projectAcceptTransfer',
-    fakes.client.projectAcceptTransferFake,
-  )
-  sandbox.replace(
-    PlatformClient.prototype,
-    'inviteUserToOrganization',
-    fakes.client.inviteUserToOrganizationFake,
-  )
-  sandbox.replace(
-    PlatformClient.prototype,
-    'removeUserFromOrganization',
-    fakes.client.removeUserFromOrganizationFake,
-  )
+  sandbox.replace(PlatformClient.prototype, 'projectAcceptTransfer', fakes.client.projectAcceptTransferFake)
+  sandbox.replace(PlatformClient.prototype, 'inviteUserToOrganization', fakes.client.inviteUserToOrganizationFake)
+  sandbox.replace(PlatformClient.prototype, 'removeUserFromOrganization', fakes.client.removeUserFromOrganizationFake)
   sandbox.replace(PlatformClient.prototype, 'folderRemove', fakes.client.folderRemoveFake)
   sandbox.replace(PlatformClient.prototype, 'fileRemove', fakes.client.fileRemoveFake)
   sandbox.replace(PlatformClient.prototype, 'userDescribe', fakes.client.userDescribeFake)
   sandbox.replace(PlatformClient.prototype, 'cloneObjects', fakes.client.cloneObjectFake)
-  sandbox.replace(
-    PlatformClient.prototype,
-    'appAddAuthorizedUsers',
-    fakes.client.appAddAuthorizedUsersFake,
-  )
+  sandbox.replace(PlatformClient.prototype, 'appAddAuthorizedUsers', fakes.client.appAddAuthorizedUsersFake)
   sandbox.replace(PlatformClient.prototype, 'appPublish', fakes.client.appPublishFake)
   sandbox.replace(PlatformClient.prototype, 'appDescribe', fakes.client.appDescribeFake)
   sandbox.replace(PlatformClient.prototype, 'workflowDescribe', fakes.client.workflowDescribeFake)
+  sandbox.replace(PlatformClient.prototype, 'fileDownloadLink', fakes.client.fileDownloadLinkFake)
 
   sandbox.replace(PlatformClient.prototype, 'dbClusterAction', fakes.client.dbClusterActionFake)
   sandbox.replace(PlatformClient.prototype, 'dbClusterCreate', fakes.client.dbClusterCreateFake)
@@ -241,9 +241,7 @@ const mocksSetup = (): void => {
     subscribe: async (): Promise<void> => undefined,
     quit: async (): Promise<string> => 'OK',
   }
-  sandbox
-    .stub(redis, 'createRedisClient')
-    .resolves(redisClientMock as unknown as RedisClientType)
+  sandbox.stub(redis, 'createRedisClient').resolves(redisClientMock as unknown as RedisClientType)
 }
 
 const mocksReset = (): void => {
@@ -272,6 +270,7 @@ const mocksReset = (): void => {
   fakes.client.removeUserFromOrganizationFake.reset()
   fakes.client.fileRemoveFake.reset()
   fakes.client.userDescribeFake.reset()
+  fakes.client.fileDownloadLinkFake.reset()
 
   fakes.queue.findRepeatableFake.reset()
 

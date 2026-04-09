@@ -1,5 +1,3 @@
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
-import { NotifyConstraint, NotifyType } from '@shared/domain/discussion/dto/notify.type'
 import { Type } from 'class-transformer'
 import {
   IsEnum,
@@ -11,6 +9,8 @@ import {
   Validate,
   ValidateNested,
 } from 'class-validator'
+import { NotifyConstraint, NotifyType } from '@shared/domain/discussion/dto/notify.type'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { AttachmentsDTO } from './attachments.dto'
 
 export class CreateReplyDTO {

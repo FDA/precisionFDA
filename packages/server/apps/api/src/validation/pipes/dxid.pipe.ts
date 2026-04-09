@@ -1,8 +1,8 @@
-import { PipeTransform, Injectable } from '@nestjs/common'
+import { Injectable, PipeTransform } from '@nestjs/common'
+import { DXEntityType, DxId } from '@shared/domain/entity/domain/dxid'
+import { PlatformEntityType } from '@shared/domain/entity/domain/platform.entity.type'
 import { ValidationError } from '@shared/errors'
 import { DxIdUtils } from '@shared/utils/dxid.utils'
-import { DxId, DXEntityType } from '@shared/domain/entity/domain/dxid'
-import { PlatformEntityType } from '@shared/domain/entity/domain/platform.entity.type'
 
 type DxidValidationPipeOptions = {
   entityType?: DXEntityType | PlatformEntityType
@@ -19,9 +19,8 @@ type DxidValidationPipeOptions = {
  * @Param('dxid', new DxidValidationPipe({ entityType: 'job' })) dxid: DxId<'job'>
  */
 @Injectable()
-export class DxidValidationPipe<
-  T extends DXEntityType | PlatformEntityType = DXEntityType | PlatformEntityType,
-> implements PipeTransform<string>
+export class DxidValidationPipe<T extends DXEntityType | PlatformEntityType = DXEntityType | PlatformEntityType>
+  implements PipeTransform<string>
 {
   private readonly entityType?: T
 

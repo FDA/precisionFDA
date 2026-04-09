@@ -1,25 +1,15 @@
-import {
-  Collection,
-  Entity,
-  Enum,
-  Filter,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  Property,
-} from '@mikro-orm/core'
+import { Collection, Entity, Enum, Filter, ManyToMany, ManyToOne, OneToMany, OneToOne, Property } from '@mikro-orm/core'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SpaceGroup } from '@shared/domain/space/space-group.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SpaceTagging } from '@shared/domain/tagging/space-tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { DxId } from '../entity/domain/dxid'
 import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { SpaceRepository } from './space.repository'
-import { SpaceTagging } from '@shared/domain/tagging/space-tagging.entity'
 
 type SpaceMeta = {
   cts: string
@@ -65,7 +55,10 @@ export class Space extends BaseEntity {
   @ManyToOne(() => Space, { nullable: true })
   space?: Space
 
-  @OneToMany(() => Space, (space) => space.space)
+  @OneToMany(
+    () => Space,
+    space => space.space,
+  )
   confidentialSpaces = new Collection<Space>(this)
 
   @Property()
@@ -86,13 +79,23 @@ export class Space extends BaseEntity {
   })
   spaceMemberships = new Collection<SpaceMembership>(this)
 
-  @ManyToMany(() => SpaceGroup, (spaceGroup) => spaceGroup.spaces)
+  @ManyToMany(
+    () => SpaceGroup,
+    spaceGroup => spaceGroup.spaces,
+  )
   spaceGroups = new Collection<SpaceGroup>(this)
 
-  @OneToMany(() => SpaceTagging, (tagging) => tagging.space, { orphanRemoval: true })
+  @OneToMany(
+    () => SpaceTagging,
+    tagging => tagging.space,
+    { orphanRemoval: true },
+  )
   taggings = new Collection<SpaceTagging>(this)
 
-  @OneToOne(() => DataPortal, (dataPortal: DataPortal) => dataPortal.space)
+  @OneToOne(
+    () => DataPortal,
+    (dataPortal: DataPortal) => dataPortal.space,
+  )
   dataPortal?: DataPortal
 
   @Property({ persist: false })
@@ -104,14 +107,14 @@ export class Space extends BaseEntity {
    * Returns the space that is the confidential reviewer space for this space.
    */
   get confidentialReviewerSpace(): Space | undefined {
-    return this.confidentialSpaces.getItems().find((x) => x.isConfidentialReviewerSpace())
+    return this.confidentialSpaces.getItems().find(x => x.isConfidentialReviewerSpace())
   }
 
   /**
    * Returns the space that is the confidential sponsor space for this space.
    */
   get confidentialSponsorSpace(): Space | undefined {
-    return this.confidentialSpaces.getItems().find((x) => x.isConfidentialSponsorSpace())
+    return this.confidentialSpaces.getItems().find(x => x.isConfidentialSponsorSpace())
   }
 
   isConfidential(): boolean {
@@ -141,7 +144,7 @@ export class Space extends BaseEntity {
 
   async findLeadBySide(side: SPACE_MEMBERSHIP_SIDE): Promise<User | undefined> {
     await this.spaceMemberships.init()
-    const result = this.spaceMemberships.getItems().find((x) => {
+    const result = this.spaceMemberships.getItems().find(x => {
       return x.isLead() && x.side === side
     })
     await result?.user.load()

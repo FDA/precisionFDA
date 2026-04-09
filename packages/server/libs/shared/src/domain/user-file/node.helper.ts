@@ -1,9 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import sanitize from 'sanitize-filename'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -13,7 +14,6 @@ import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
-import sanitize from 'sanitize-filename'
 
 interface FilesByFolder {
   [key: string]: Node[]
@@ -25,7 +25,6 @@ interface FilesByFolder {
  */
 @Injectable()
 export class NodeHelper {
-
   constructor(
     private readonly em: SqlEntityManager,
     private readonly userCtx: UserContext,
@@ -97,11 +96,7 @@ export class NodeHelper {
         })
         const leadMemberships = space.spaceMemberships
           .getItems()
-          .find(
-            (membership) =>
-              membership.role === SPACE_MEMBERSHIP_ROLE.LEAD &&
-              membership.user.id === this.userCtx.id,
-          )
+          .find(membership => membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === this.userCtx.id)
         if (leadMemberships) {
           return nodes
         }
@@ -109,7 +104,7 @@ export class NodeHelper {
           throw new Error(`You have no permissions to lock or unlock '${node.name}'.`)
         }
       } else {
-        return nodes.filter((innerNode) => innerNode.user.id === this.userCtx.id)
+        return nodes.filter(innerNode => innerNode.user.id === this.userCtx.id)
       }
     }
 
@@ -167,9 +162,7 @@ export class NodeHelper {
    * @param node
    */
   getParentFolder(node: Node): Node {
-    if (
-      [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)
-    ) {
+    if ([STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)) {
       return node.parentFolder
     }
     return node.scopedParentFolder
@@ -182,8 +175,8 @@ export class NodeHelper {
   getWarningsForUnclosedFiles(nodesToCheck: Node[]): string {
     // Collect names of unclosed files
     const unclosedFileNames = nodesToCheck
-      .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE && node.state !== 'closed')
-      .map((node) => `'${node.name}'`)
+      .filter(node => node.stiType === FILE_STI_TYPE.USERFILE && node.state !== 'closed')
+      .map(node => `'${node.name}'`)
 
     // Check if there are any unclosed files
     if (unclosedFileNames.length === 0) {
@@ -200,7 +193,7 @@ export class NodeHelper {
    * @param nodes
    */
   sanitizeNodeNames(nodes: (Asset | UserFile)[]): (Asset | UserFile)[] {
-    return nodes.map((node) => {
+    return nodes.map(node => {
       const sanitizedNode = { ...node } as Asset | UserFile
       sanitizedNode.name = sanitize(node.name)
       return sanitizedNode
@@ -237,10 +230,10 @@ export class NodeHelper {
     }, {})
 
     // Process each group to find and rename duplicates
-    Object.values(filesByFolder).forEach((group) => {
+    Object.values(filesByFolder).forEach(group => {
       const nameCounts: { [key: string]: number } = {}
 
-      group.forEach((node) => {
+      group.forEach(node => {
         let name = node.name
         if (nameCounts[name]) {
           // Duplicate found, rename it
@@ -249,8 +242,8 @@ export class NodeHelper {
             newName = this.renameFile(name, nameCounts[name])
             nameCounts[name] = nameCounts[name] + 1 || 1 // Increment the count for the original name
           } while (nameCounts[newName])
-            // Ensure the new name is also unique within the folder
-            name = newName
+          // Ensure the new name is also unique within the folder
+          name = newName
         }
         nameCounts[name] = (nameCounts[name] || 0) + 1 // Initialize or increment the count for the new/unique name
         node.name = name // Update the node's name

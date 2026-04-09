@@ -1,6 +1,4 @@
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { isString } from '@nestjs/common/utils/shared.utils'
-import { UidUtils } from '@shared/utils/uid.utils'
 import {
   registerDecorator,
   ValidationArguments,
@@ -8,11 +6,13 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator'
-import { DXEntityType, DXEntities } from '../domain/dxid'
+import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { UidUtils } from '@shared/utils/uid.utils'
+import { DXEntities, DXEntityType } from '../domain/dxid'
 
 @ValidatorConstraint({ async: true })
 class IsValidEntityIdentifierConstraint implements ValidatorConstraintInterface {
-  async validate(value: unknown, args: ValidationArguments) {
+  async validate(value: unknown, args: ValidationArguments): Promise<boolean> {
     if (!isString(value)) {
       return false
     }
@@ -27,7 +27,7 @@ class IsValidEntityIdentifierConstraint implements ValidatorConstraintInterface 
       : new RegExp(`^${entityType}-\\d+$`).test(value)
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     const [entityType] = args.constraints as [EntityType]
     const message = 'Provided value is not a valid entity identifier'
 
@@ -43,11 +43,8 @@ class IsValidEntityIdentifierConstraint implements ValidatorConstraintInterface 
   }
 }
 
-export function IsValidEntityIdentifier(
-  options?: EntityType,
-  validationOptions?: ValidationOptions,
-) {
-  return function (object: object, propertyName: string) {
+export function IsValidEntityIdentifier(options?: EntityType, validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string): void {
     registerDecorator({
       name: 'isValidEntityIdentifier',
       target: object.constructor,

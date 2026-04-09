@@ -1,16 +1,16 @@
 import { isPlainObject } from '@nestjs/common/utils/shared.utils'
-import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
-import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
-import { spaceReportFormatToOptionsDtoMap } from '@shared/domain/space-report/model/space-report-format-to-options.map'
 import { plainToClass } from 'class-transformer'
 import {
   registerDecorator,
-  validate,
   ValidationArguments,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
+  validate,
 } from 'class-validator'
+import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
+import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
+import { spaceReportFormatToOptionsDtoMap } from '@shared/domain/space-report/model/space-report-format-to-options.map'
 
 @ValidatorConstraint({ async: true })
 export class IsSpaceReportOptionsValidConstraint implements ValidatorConstraintInterface {

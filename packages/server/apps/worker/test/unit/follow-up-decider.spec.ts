@@ -1,10 +1,10 @@
 import { Logger } from '@nestjs/common'
-import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
-import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
-import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
-import { SpaceReportRepository } from '@shared/domain/space-report/repository/space-report.repository'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
+import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
+import { SpaceReportRepository } from '@shared/domain/space-report/repository/space-report.repository'
 import { FollowUpDecider } from '../../src/domain/user-file/follow-up-decider'
 
 describe('FollowUpDecider', () => {
@@ -30,13 +30,7 @@ describe('FollowUpDecider', () => {
   const spaceReportRepo = {
     findByResultFileUid: findReportByResultFileUidStub,
   } as unknown as SpaceReportRepository
-  const decider = new FollowUpDecider(
-    logger,
-    dataPortalRepo,
-    challengeResourceRepo,
-    challengeRepo,
-    spaceReportRepo,
-  )
+  const decider = new FollowUpDecider(logger, dataPortalRepo, challengeResourceRepo, challengeRepo, spaceReportRepo)
 
   beforeEach(() => {
     findResourcesStub.reset()

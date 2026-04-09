@@ -1,5 +1,5 @@
-import { schemas } from '@shared/utils/base-schemas'
 import { JSONSchema7 } from 'json-schema'
+import { schemas } from '@shared/utils/base-schemas'
 
 export const expertListQuerySchema: JSONSchema7 = {
   type: 'object',

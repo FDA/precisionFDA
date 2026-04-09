@@ -1,33 +1,30 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { database } from '@shared/database'
 import { Answer } from '@shared/domain/answer/answer.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
-import { DiscussionReplyComment } from '@shared/domain/discussion-reply/discussion-reply-comment.entity'
-import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
-import { DiscussionReplyRepository } from '@shared/domain/discussion-reply/discussion-reply.repository'
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
 import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
 import { CreateReplyDTO } from '@shared/domain/discussion/dto/create-reply.dto'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { UpdateReplyDTO } from '@shared/domain/discussion/dto/update-reply.dto'
-import { DiscussionCountService } from '@shared/domain/discussion/services/discussion-count.service'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { DiscussionCountService } from '@shared/domain/discussion/services/discussion-count.service'
+import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
+import { DiscussionReplyRepository } from '@shared/domain/discussion-reply/discussion-reply.repository'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
+import { DiscussionReplyComment } from '@shared/domain/discussion-reply/discussion-reply-comment.entity'
 import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 import { Note } from '@shared/domain/note/note.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError, ValidationError } from '@shared/errors'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 import { create, db, generate } from '../../../src/test'
 
 describe('DiscussionService tests', () => {
@@ -102,11 +99,7 @@ describe('DiscussionService tests', () => {
 
     const result = await discussionService.createDiscussion(createDiscussionInput)
 
-    const loadedDiscussion = await em.findOneOrFail(
-      Discussion,
-      { id: result.id },
-      { populate: ['note'] },
-    )
+    const loadedDiscussion = await em.findOneOrFail(Discussion, { id: result.id }, { populate: ['note'] })
     const note = loadedDiscussion.note.getEntity()
     expect(note.title).eq(createDiscussionInput.title)
     expect(note.content).eq(createDiscussionInput.content)
@@ -244,9 +237,7 @@ describe('DiscussionService tests', () => {
       await discussionService.createReply(discussion.id, createReplyDTO)
     } catch (error) {
       expect(error.name).to.equal('ValidationError')
-      expect(error.message).to.equal(
-        'Unable to create reply: user already has an answer for this discussion.',
-      )
+      expect(error.message).to.equal('Unable to create reply: user already has an answer for this discussion.')
     }
   })
 
@@ -267,11 +258,7 @@ describe('DiscussionService tests', () => {
     }
 
     const result = await discussionService.createReply(discussion.id, createReplyDTO)
-    const loadedComment = await em.findOneOrFail(
-      DiscussionReply,
-      { id: result.id },
-      { populate: ['note'] },
-    )
+    const loadedComment = await em.findOneOrFail(DiscussionReply, { id: result.id }, { populate: ['note'] })
     expect(loadedComment.note.getEntity().content).eq(createReplyDTO.content)
     expect(loadedComment.replyType).eq(DISCUSSION_REPLY_TYPE.COMMENT)
     expect(loadedComment.discussion.id).eq(discussion.id)
@@ -375,9 +362,7 @@ describe('DiscussionService tests', () => {
       expect.fail('Operation is expected to fail.')
     } catch (error) {
       expect(error.name).to.equal('NotFoundError')
-      expect(error.message).eq(
-        `Unable to delete discussion: not found or insufficient permissions.`,
-      )
+      expect(error.message).eq(`Unable to delete discussion: not found or insufficient permissions.`)
     }
   })
 
@@ -501,11 +486,7 @@ describe('DiscussionService tests', () => {
 
       const result = await discussionService.createReply(discussion.id, createReplyDTO)
 
-      const loadedComment = await em.findOneOrFail(
-        DiscussionReply,
-        { id: result.id },
-        { populate: ['note'] },
-      )
+      const loadedComment = await em.findOneOrFail(DiscussionReply, { id: result.id }, { populate: ['note'] })
       expect(loadedComment.discussion.id).eq(discussion.id)
       expect(loadedComment.replyType).eq(DISCUSSION_REPLY_TYPE.COMMENT)
       expect(loadedComment.note.getEntity().content).eq(createReplyDTO.content)
@@ -555,11 +536,7 @@ describe('DiscussionService tests', () => {
       }
       const result = await discussionService.createReply(discussion.id, createReplyDTO)
 
-      const loadedComment = await em.findOneOrFail(
-        DiscussionReply,
-        { id: result.id },
-        { populate: ['note'] },
-      )
+      const loadedComment = await em.findOneOrFail(DiscussionReply, { id: result.id }, { populate: ['note'] })
       expect(loadedComment.discussion.id).eq(discussion.id)
       expect(loadedComment.replyType).eq(DISCUSSION_REPLY_TYPE.COMMENT)
       expect(loadedComment.parent.id).eq(answer.id)
@@ -634,11 +611,7 @@ describe('DiscussionService tests', () => {
 
       const result = await discussionService.updateReply(comment.id, updateReplyDTO)
 
-      const loadedComment = await em.findOneOrFail(
-        DiscussionReply,
-        { id: result.id },
-        { populate: ['note'] },
-      )
+      const loadedComment = await em.findOneOrFail(DiscussionReply, { id: result.id }, { populate: ['note'] })
       expect(loadedComment.note.getEntity().content).eq(updateReplyDTO.content)
     })
   })
@@ -723,9 +696,7 @@ describe('DiscussionService tests', () => {
       expect(await em.count(DiscussionReply, { id: answer.id })).eq(0)
       expect(await em.count(DiscussionReply, { parent: answer.id })).eq(0)
       expect(await em.count(Note, { id: { $in: [answer.note.id, comment.note.id] } })).eq(0)
-      expect(
-        await em.count(Attachment, { note: { id: { $in: [answer.note.id, comment.note.id] } } }),
-      ).eq(0)
+      expect(await em.count(Attachment, { note: { id: { $in: [answer.note.id, comment.note.id] } } })).eq(0)
     })
   })
 
@@ -746,11 +717,7 @@ describe('DiscussionService tests', () => {
     const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 
     create.spacesHelper.addMember(em, { user, space })
-    create.spacesHelper.addMember(
-      em,
-      { user: guestLead, space },
-      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
-    )
+    create.spacesHelper.addMember(em, { user: guestLead, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
     create.spacesHelper.addMember(
       em,
       { user: hostLead, space },

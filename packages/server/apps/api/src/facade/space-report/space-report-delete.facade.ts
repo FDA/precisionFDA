@@ -5,8 +5,8 @@ import { SpaceReportState } from '@shared/domain/space-report/model/space-report
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
 export class SpaceReportDeleteFacade {
@@ -19,7 +19,7 @@ export class SpaceReportDeleteFacade {
     private readonly user: UserContext,
   ) {}
 
-  async deleteSpaceReports(ids: number[]) {
+  async deleteSpaceReports(ids: number[]): Promise<number[]> {
     return await this.em.transactional(async () => {
       const reports = await this.spaceReportService.getReports(ids)
 
@@ -27,7 +27,7 @@ export class SpaceReportDeleteFacade {
         throw new NotFoundError('Some space reports not found')
       }
 
-      if (reports.some((r) => !this.DELETABLE_STATES.includes(r.state))) {
+      if (reports.some(r => !this.DELETABLE_STATES.includes(r.state))) {
         throw new InvalidStateError('Cannot delete a report in non terminal state')
       }
 
@@ -35,7 +35,7 @@ export class SpaceReportDeleteFacade {
 
       const removedIds = await this.spaceReportService.deleteReports(reports)
 
-      const resultFilesIds = reports.map((r) => r.resultFile?.id).filter((id) => id != null)
+      const resultFilesIds = reports.map(r => r.resultFile?.id).filter(id => id != null)
 
       await this.removeNodesFacade.removeNodes(resultFilesIds, true)
 
@@ -43,10 +43,10 @@ export class SpaceReportDeleteFacade {
     })
   }
 
-  private async validateReportsAccess(reports: SpaceReport[]) {
+  private async validateReportsAccess(reports: SpaceReport[]): Promise<void> {
     const spaceIds = new Set<number>()
 
-    reports.forEach((report) => {
+    reports.forEach(report => {
       if (EntityScopeUtils.isSpaceScope(report.scope)) {
         spaceIds.add(EntityScopeUtils.getSpaceIdFromScope(report.scope))
         return

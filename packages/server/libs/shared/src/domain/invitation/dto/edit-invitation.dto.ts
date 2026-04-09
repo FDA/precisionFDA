@@ -1,5 +1,5 @@
-import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator'
+import { EmailAddress } from '@shared/domain/email/model/email-address'
 
 export class EditInvitationDTO {
   @IsString()

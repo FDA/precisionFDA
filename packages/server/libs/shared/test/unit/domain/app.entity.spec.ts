@@ -1,11 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { Job } from '@shared/domain/job/job.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { create, db, generate } from '../../../src/test'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { database } from '@shared/database'
 import { App, AppSpec, Internal } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { create, db, generate } from '../../../src/test'
 
 describe('app.entity tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -37,11 +37,7 @@ describe('app.entity tests', () => {
         internal: generate.app.ttydAppInternal(),
       },
     )
-    httpsJob = create.jobHelper.create(
-      em,
-      { user, app: httpsApp },
-      { scope: 'private', state: JOB_STATE.RUNNING },
-    )
+    httpsJob = create.jobHelper.create(em, { user, app: httpsApp }, { scope: 'private', state: JOB_STATE.RUNNING })
 
     httpsAppWithAPI = create.appHelper.createHTTPS(
       em,
@@ -51,11 +47,7 @@ describe('app.entity tests', () => {
         internal: generate.app.ttydAppInternalWithAPI('1.0.0'),
       },
     )
-    create.jobHelper.create(
-      em,
-      { user, app: httpsAppWithAPI },
-      { scope: 'private', state: JOB_STATE.RUNNING },
-    )
+    create.jobHelper.create(em, { user, app: httpsAppWithAPI }, { scope: 'private', state: JOB_STATE.RUNNING })
 
     await em.flush()
   })

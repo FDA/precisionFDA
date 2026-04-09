@@ -7,10 +7,10 @@ import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/produce
 import { SpaceReportPartService } from '@shared/domain/space-report/service/part/space-report-part.service'
 import { SpaceReportResultModule } from '@shared/domain/space-report/service/result/space-report-result.module'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
-import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
-import { TimeUtils } from '@shared/utils/time.utils'
 import { SpaceReportCountService } from '@shared/domain/space-report/service/space-report-count.service'
 import { SpaceReportScopeFilterProvider } from '@shared/domain/space-report/space-report-scope-filter.provider'
+import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
+import { TimeUtils } from '@shared/utils/time.utils'
 
 @Module({
   imports: [

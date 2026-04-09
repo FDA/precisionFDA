@@ -1,25 +1,22 @@
-import { expect } from 'chai'
-import { MemberChangedEmailHandler } from '@shared/domain/email/templates/handlers/member-change.handler'
+import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EmailClient } from '@shared/services/email-client'
+import { expect } from 'chai'
 import { stub } from 'sinon'
 import { MemberChangedDTO } from '@shared/domain/email/dto/member-changed.dto'
-import { NotFoundError } from '@shared/errors'
-import { Space } from '@shared/domain/space/space.entity'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { MemberChangedEmailHandler } from '@shared/domain/email/templates/handlers/member-change.handler'
 import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
-import { Reference } from '@mikro-orm/core'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { NotFoundError } from '@shared/errors'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('MemberChangedEmailHandler', () => {
   const SPACE_ID = 15
@@ -80,10 +77,7 @@ describe('MemberChangedEmailHandler', () => {
       input.initUserId = USER_ID
       input.updatedMembershipId = SPACE_MEMBERSHIP_ID
 
-      await expect(handler.sendEmail(input)).to.be.rejectedWith(
-        NotFoundError,
-        `Space id ${input.spaceId} not found`,
-      )
+      await expect(handler.sendEmail(input)).to.be.rejectedWith(NotFoundError, `Space id ${input.spaceId} not found`)
     })
 
     it('user in space not found', async () => {
@@ -98,10 +92,7 @@ describe('MemberChangedEmailHandler', () => {
       input.initUserId = USER_ID
       input.updatedMembershipId = SPACE_MEMBERSHIP_ID
 
-      await expect(handler.sendEmail(input)).to.be.rejectedWith(
-        NotFoundError,
-        `User id ${input.initUserId} not found`,
-      )
+      await expect(handler.sendEmail(input)).to.be.rejectedWith(NotFoundError, `User id ${input.initUserId} not found`)
     })
 
     it('membership not found', async () => {
@@ -131,15 +122,8 @@ describe('MemberChangedEmailHandler', () => {
       userRepoFindOneOrFailStub.withArgs({ id: USER_ID }).returns(user)
       const space = new Space()
       spaceRepoFindOneOrFailStub.withArgs({ id: SPACE_ID }).returns(space)
-      const spaceMembership = new SpaceMembership(
-        user,
-        space,
-        SPACE_MEMBERSHIP_SIDE.GUEST,
-        SPACE_MEMBERSHIP_ROLE.LEAD,
-      )
-      spaceMembershipRepoFindOneOrFailStub
-        .withArgs({ id: SPACE_MEMBERSHIP_ID })
-        .returns(spaceMembership)
+      const spaceMembership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.GUEST, SPACE_MEMBERSHIP_ROLE.LEAD)
+      spaceMembershipRepoFindOneOrFailStub.withArgs({ id: SPACE_MEMBERSHIP_ID }).returns(spaceMembership)
 
       const handler = getHandler()
       const input = new MemberChangedDTO()
@@ -177,21 +161,14 @@ describe('MemberChangedEmailHandler', () => {
       space.id = SPACE_ID
       space.type = SPACE_TYPE.GROUPS
       spaceRepoFindOneOrFailStub.withArgs({ id: SPACE_ID }).returns(space)
-      const spaceMembership = new SpaceMembership(
-        user,
-        space,
-        SPACE_MEMBERSHIP_SIDE.GUEST,
-        SPACE_MEMBERSHIP_ROLE.LEAD,
-      )
+      const spaceMembership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.GUEST, SPACE_MEMBERSHIP_ROLE.LEAD)
       const adminSpaceMembership = new SpaceMembership(
         adminUser,
         space,
         SPACE_MEMBERSHIP_SIDE.GUEST,
         SPACE_MEMBERSHIP_ROLE.LEAD,
       )
-      spaceMembershipRepoFindOneOrFailStub
-        .withArgs({ id: SPACE_MEMBERSHIP_ID })
-        .returns(spaceMembership)
+      spaceMembershipRepoFindOneOrFailStub.withArgs({ id: SPACE_MEMBERSHIP_ID }).returns(spaceMembership)
       spaceMembershipRepoFindStub
         .withArgs(
           {
@@ -213,22 +190,16 @@ describe('MemberChangedEmailHandler', () => {
       await handler.sendEmail(input)
 
       expect(emailClientSendEmailStub.calledOnce).to.eq(true)
-      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
-        EMAIL_TYPES.memberChangedAddedRemoved,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.memberChangedAddedRemoved)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(adminUser.email)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
         `${user.firstName} ${user.lastName} added a new member`,
       )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `Hello ${adminUser.firstName}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`Hello ${adminUser.firstName}`)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
         `Space member ${user.firstName} ${user.lastName} added a new member`,
       )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `name: ${user.firstName} ${user.lastName}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`name: ${user.firstName} ${user.lastName}`)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain('role: LEAD')
     })
   })

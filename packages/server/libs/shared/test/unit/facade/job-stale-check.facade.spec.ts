@@ -1,4 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
@@ -9,8 +11,6 @@ import { JobService } from '@shared/domain/job/job.service'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 import { User } from '@shared/domain/user/user.entity'
 import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('JobStaleCheckFacade', () => {
   const findAllRunningJobsStub = stub()
@@ -137,10 +137,7 @@ describe('JobStaleCheckFacade', () => {
 
       expect(findAllRunningJobsStub.calledOnce).to.be.true()
       expect(
-        populateStub.calledOnceWithExactly(
-          [RUNNING_JOB_1, RUNNING_JOB_2, RUNNING_JOB_3, RUNNING_JOB_4],
-          ['user'],
-        ),
+        populateStub.calledOnceWithExactly([RUNNING_JOB_1, RUNNING_JOB_2, RUNNING_JOB_3, RUNNING_JOB_4], ['user']),
       ).to.be.true()
 
       expect(getUiLinkStub.callCount).to.equal(4)

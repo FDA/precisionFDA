@@ -2,23 +2,28 @@
 #
 # N.B. run from packages/cli
 
-VERSION=2.11.2
+VERSION=2.12.0
 COMMITID=$(git rev-parse HEAD)
 SHORT_SHA=$(git rev-parse --short HEAD)
 
 if [ "$CI" = "true" ]; then
     export HOME=/go/src/dnanexus.com/precision-fda-cli
     export CGO_ENABLED=0
+    export GOMODCACHE_DIR="/go/src/dnanexus.com/precision-fda-cli/.go_cache/pkg/mod"
+    export GOCACHE_DIR="/go/src/dnanexus.com/precision-fda-cli/.go_cache/cache"
     USER_ARG="--user $(id -u):$(id -g)"
 fi
 BuildAndPackage() {
     PLATFORM=$1
     ARCH=$2
     BUILDTIME=$(date +%Y-%m-%d-%H%M%S)
+    JOB_EXECUTION_ENABLED="${JOB_EXECUTION_ENABLED:-false}"
     echo "Building pfda CLI (v$VERSION) for $PLATFORM $ARCH"
     docker run --rm $USER_ARG --mount type=bind,source="$(pwd)",target=/go/src/dnanexus.com/precision-fda-cli \
            -e GOOS="$PLATFORM" -e GOARCH="$ARCH" -e COMMITID="$COMMITID" \
-           -e VERSION="$VERSION" -e BUILDTIME="$BUILDTIME" -e HOME="$HOME" -e CGO_ENABLED="$CGO_ENABLED" precisionfda-cli
+           -e VERSION="$VERSION" -e BUILDTIME="$BUILDTIME" -e HOME="$HOME" -e CGO_ENABLED="$CGO_ENABLED" \
+           -e GOMODCACHE="$GOMODCACHE_DIR" -e GOCACHE="$GOCACHE_DIR" \
+           -e JOB_EXECUTION_ENABLED="$JOB_EXECUTION_ENABLED" precisionfda-cli
     cd ./dist
 
     OUT_FILE=pfda_${PLATFORM}_${ARCH}

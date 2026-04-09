@@ -1,12 +1,15 @@
+import { invertObj } from 'ramda'
 import { App } from '@shared/domain/app/app.entity'
 import { getCLIKeyInputSpec } from '@shared/domain/app/app.helper'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { Job } from '@shared/domain/job/job.entity'
+import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import {
   AppDescribeResponse,
@@ -16,7 +19,6 @@ import {
   WorkflowDescribeResponse,
 } from '@shared/platform-client/platform-client.responses'
 import { EntityScope } from '@shared/types/common'
-import { invertObj } from 'ramda'
 
 export class CliFileDescribeDTO {
   types: string[]
@@ -33,22 +35,19 @@ export class CliFileDescribeDTO {
   name: string
   modified: number
   location: EntityScope
-  id: string
+  id: Uid<'file'>
   state: string
   class: string
   properties: object
   content?: string[]
 
-  static async fromEntity(
-    describeFile: FileDescribeResponse,
-    file: Asset | UserFile,
-  ): Promise<CliFileDescribeDTO> {
+  static async fromEntity(describeFile: FileDescribeResponse, file: Asset | UserFile): Promise<CliFileDescribeDTO> {
     let response: CliFileDescribeDTO = {
       ...describeFile,
       id: file.uid,
       title: file.name,
       size: file.fileSize,
-      tags: file.taggings.map((t) => t.tag?.name),
+      tags: file.taggings.map(t => t.tag?.name),
       properties: file.properties.reduce((acc, p) => {
         acc[p.propertyName] = p.propertyValue
         return acc
@@ -64,7 +63,7 @@ export class CliFileDescribeDTO {
       await assetFile.archiveEntries.loadItems()
       response = {
         ...response,
-        content: assetFile.archiveEntries.getItems().map((e) => e.path),
+        content: assetFile.archiveEntries.getItems().map(e => e.path),
       }
     }
 
@@ -73,7 +72,8 @@ export class CliFileDescribeDTO {
 }
 
 export class CliWorkflowDescribeDTO extends WorkflowDescribeResponse {
-  dxid: string
+  id: Uid<'workflow'>
+  dxid: DxId<'workflow'>
   addedBy: string
   location: string
   revision: number
@@ -98,7 +98,8 @@ export class CliWorkflowDescribeDTO extends WorkflowDescribeResponse {
 }
 
 export class CliAppDescribeDTO extends AppDescribeResponse {
-  dxid: string
+  id: Uid<'app'>
+  dxid: DxId<'app'>
   createdAt: Date
   internetAccess: boolean
   addedBy: string
@@ -107,10 +108,7 @@ export class CliAppDescribeDTO extends AppDescribeResponse {
   revision: number
   updatedAt: Date
 
-  static async fromEntity(
-    platformAppData: AppDescribeResponse,
-    app: App,
-  ): Promise<CliAppDescribeDTO> {
+  static async fromEntity(platformAppData: AppDescribeResponse, app: App): Promise<CliAppDescribeDTO> {
     return {
       ...platformAppData,
       dxid: platformAppData.id,
@@ -128,19 +126,16 @@ export class CliAppDescribeDTO extends AppDescribeResponse {
 }
 
 export class CliExecutionDescribeDTO {
-  dxid: string
+  dxid: DxId<'job'>
   createdAt: Date
   addedBy: string
-  id: string
+  id: Uid<'job'>
   title: string
   updatedAt: Date
   location: string
 
-  static async fromEntity(
-    platformJobData: JobDescribeResponse,
-    execution: Job,
-  ): Promise<CliExecutionDescribeDTO> {
-    const ignoreInputKeys = getCLIKeyInputSpec().map((spec) => spec.name)
+  static async fromEntity(platformJobData: JobDescribeResponse, execution: Job): Promise<CliExecutionDescribeDTO> {
+    const ignoreInputKeys = getCLIKeyInputSpec().map(spec => spec.name)
     platformJobData.input = Object.fromEntries(
       Object.entries(platformJobData.input).filter(([key]) => !ignoreInputKeys.includes(key)),
     )
@@ -148,9 +143,7 @@ export class CliExecutionDescribeDTO {
       Object.entries(platformJobData.runInput).filter(([key]) => !ignoreInputKeys.includes(key)),
     )
     platformJobData.originalInput = Object.fromEntries(
-      Object.entries(platformJobData.originalInput).filter(
-        ([key]) => !ignoreInputKeys.includes(key),
-      ),
+      Object.entries(platformJobData.originalInput).filter(([key]) => !ignoreInputKeys.includes(key)),
     )
     return {
       ...platformJobData,
@@ -167,7 +160,7 @@ export class CliExecutionDescribeDTO {
 
 export class CliDbClusterDescribeDTO {
   id: number
-  dxid: string
+  dxid: DxId<'dbcluster'>
   name: string
   title: string
   status: string
@@ -185,10 +178,7 @@ export class CliDbClusterDescribeDTO {
   tags: string[]
   properties: object
 
-  static fromEntity(
-    platformDbClusterData: DbClusterDescribeResponse,
-    dbcluster: DbCluster,
-  ): CliDbClusterDescribeDTO {
+  static fromEntity(platformDbClusterData: DbClusterDescribeResponse, dbcluster: DbCluster): CliDbClusterDescribeDTO {
     return {
       ...platformDbClusterData,
       id: dbcluster.id,
@@ -207,7 +197,7 @@ export class CliDbClusterDescribeDTO {
       statusAsOf: dbcluster.statusAsOf,
       host: dbcluster.host,
       port: dbcluster.port,
-      tags: dbcluster.taggings.map((t) => t.tag.name),
+      tags: dbcluster.taggings.map(t => t.tag.name),
       properties: dbcluster.properties.reduce((acc, p) => {
         acc[p.propertyName] = p.propertyValue
         return acc
@@ -217,7 +207,7 @@ export class CliDbClusterDescribeDTO {
 }
 
 export class CliFolderDescribeDTO {
-  id: string
+  id: Uid<'file'>
   name: string
   location: string
   path: string
@@ -275,3 +265,12 @@ export class CliAnswerDTO {
   updatedAt: Date
   attachments: CliAttachmentDTO[]
 }
+
+export type CliDescribeEntityResponse =
+  | CliFileDescribeDTO
+  | CliWorkflowDescribeDTO
+  | CliAppDescribeDTO
+  | CliExecutionDescribeDTO
+  | CliDiscussionDescribeDTO
+  | CliFolderDescribeDTO
+  | CliDbClusterDescribeDTO

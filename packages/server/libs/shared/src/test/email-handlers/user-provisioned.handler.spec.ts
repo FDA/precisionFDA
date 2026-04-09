@@ -1,9 +1,9 @@
 import { expect } from 'chai'
-import { UserProvisionedHandler } from '@shared/domain/email/templates/handlers/user-provisioned.handler'
-import { UserProvisionedDTO } from '@shared/domain/email/dto/user-provisioned.dto'
-import { EmailClient } from '@shared/services/email-client'
 import { stub } from 'sinon'
+import { UserProvisionedDTO } from '@shared/domain/email/dto/user-provisioned.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { UserProvisionedHandler } from '@shared/domain/email/templates/handlers/user-provisioned.handler'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('UserProvisionedHandler', () => {
   const emailClientSendEmailStub = stub()
@@ -34,12 +34,8 @@ describe('UserProvisionedHandler', () => {
       await handler.sendEmail(input)
 
       expect(emailClientSendEmailStub.calledOnce).to.eq(true)
-      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
-        EMAIL_TYPES.userProvisioned,
-      )
-      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
-        `Welcome to precisionFDA, ${input.firstName}!`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.userProvisioned)
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(`Welcome to precisionFDA, ${input.firstName}!`)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(input.email)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
         `Welcome to precisionFDA, ${input.firstName}!`,

@@ -15,11 +15,8 @@ export class EntityProvenanceDataProviderService {
     },
   ) {}
 
-  private async getEntityProvenanceData(
-    source: EntityProvenanceSourceUnion,
-  ): Promise<EntityProvenance> {
-    const dataService: EntityProvenanceDataService<typeof source.type> =
-      this.ENTITY_PARENT_RESOLVER_MAP[source.type]
+  private async getEntityProvenanceData(source: EntityProvenanceSourceUnion): Promise<EntityProvenance> {
+    const dataService: EntityProvenanceDataService<typeof source.type> = this.ENTITY_PARENT_RESOLVER_MAP[source.type]
 
     const result: EntityProvenance = {
       data: await dataService.getData(source.entity),
@@ -27,24 +24,20 @@ export class EntityProvenanceDataProviderService {
 
     const parents = await dataService.getParents(source.entity)
     if (!ArrayUtils.isEmpty(parents)) {
-      result.parents = await Promise.all(parents.map((p) => this.getEntityProvenanceData(p)))
+      result.parents = await Promise.all(parents.map(p => this.getEntityProvenanceData(p)))
     }
 
     return result
   }
 
-  private async getEntityOutputData(
-    source: EntityProvenanceSourceUnion,
-  ): Promise<EntityProvenance[]> {
-    const dataService: EntityProvenanceDataService<typeof source.type> =
-      this.ENTITY_PARENT_RESOLVER_MAP[source.type]
+  private async getEntityOutputData(source: EntityProvenanceSourceUnion): Promise<EntityProvenance[]> {
+    const dataService: EntityProvenanceDataService<typeof source.type> = this.ENTITY_PARENT_RESOLVER_MAP[source.type]
 
     const children = await dataService.getChildren(source.entity)
     if (!ArrayUtils.isEmpty(children)) {
       return await Promise.all(
-        children.map(async (c) => {
-          const childDataService: EntityProvenanceDataService<typeof c.type> =
-            this.ENTITY_PARENT_RESOLVER_MAP[c.type]
+        children.map(async c => {
+          const childDataService: EntityProvenanceDataService<typeof c.type> = this.ENTITY_PARENT_RESOLVER_MAP[c.type]
           return { data: await childDataService.getData(c.entity) }
         }),
       )

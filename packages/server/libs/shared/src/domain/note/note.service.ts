@@ -7,9 +7,6 @@ export class NoteService {
   constructor(private readonly noteRepository: NoteRepository) {}
 
   async findAccessibleNotesAndAttachments(noteIds: number[]): Promise<Note[]> {
-    return await this.noteRepository.findAccessible(
-      { id: { $in: noteIds } },
-      { populate: ['attachments'] },
-    )
+    return await this.noteRepository.findAccessible({ id: { $in: noteIds } }, { populate: ['attachments'] })
   }
 }

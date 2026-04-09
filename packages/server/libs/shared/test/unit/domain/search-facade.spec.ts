@@ -1,10 +1,10 @@
-import { ChallengeService } from '@shared/domain/challenge/challenge.service'
-import { ExpertQuestionService } from '@shared/domain/expert-question/service/expert-question.service'
-import { ExpertService } from '@shared/domain/expert/services/expert.service'
-import { EntityTypeToSearchResultMapperMap } from '@shared/facade/search/domain/entity-type-to-search-result-mapper.map'
-import { SearchFacade } from '@shared/facade/search/search.facade'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { ChallengeService } from '@shared/domain/challenge/challenge.service'
+import { ExpertService } from '@shared/domain/expert/services/expert.service'
+import { ExpertQuestionService } from '@shared/domain/expert-question/service/expert-question.service'
+import { EntityTypeToSearchResultMapperMap } from '@shared/facade/search/domain/entity-type-to-search-result-mapper.map'
+import { SearchFacade } from '@shared/facade/search/search.facade'
 
 describe('SearchResultExpertQuestionMapper', () => {
   const CHALLENGE_QUERY = 'CHALLENGE_QUERY'
@@ -38,9 +38,7 @@ describe('SearchResultExpertQuestionMapper', () => {
 
     expertQuestionSearchStub.reset()
     expertQuestionSearchStub.throws()
-    expertQuestionSearchStub
-      .withArgs(EXPERT_QUESTION_QUERY)
-      .resolves([EXPERT_QUESTION_SEARCH_RESULT])
+    expertQuestionSearchStub.withArgs(EXPERT_QUESTION_QUERY).resolves([EXPERT_QUESTION_SEARCH_RESULT])
 
     challengeMapStub.reset()
     challengeMapStub.throws()
@@ -52,9 +50,7 @@ describe('SearchResultExpertQuestionMapper', () => {
 
     expertQuestionMapStub.reset()
     expertQuestionMapStub.throws()
-    expertQuestionMapStub
-      .withArgs(EXPERT_QUESTION_SEARCH_RESULT)
-      .returns(EXPERT_QUESTION_MAP_RESULT)
+    expertQuestionMapStub.withArgs(EXPERT_QUESTION_SEARCH_RESULT).returns(EXPERT_QUESTION_MAP_RESULT)
   })
 
   it('should provide correct result for challenges', async () => {
@@ -106,11 +102,6 @@ describe('SearchResultExpertQuestionMapper', () => {
       expertQuestion: expertQuestionMapper,
     } as unknown as EntityTypeToSearchResultMapperMap
 
-    return new SearchFacade(
-      challengeService,
-      expertService,
-      expertQuestionService,
-      entityTypeToResultMapperMap,
-    )
+    return new SearchFacade(challengeService, expertService, expertQuestionService, entityTypeToResultMapperMap)
   }
 })

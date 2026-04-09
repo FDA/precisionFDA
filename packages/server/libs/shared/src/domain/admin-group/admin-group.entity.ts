@@ -1,4 +1,4 @@
-import { Entity, Collection, OneToMany, Enum } from '@mikro-orm/core'
+import { Collection, Entity, Enum, OneToMany } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 

@@ -1,12 +1,12 @@
 import { FilterQuery } from '@mikro-orm/mysql'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { User } from '@shared/domain/user/user.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { FILE_STATE_DX } from './user-file.types'
-import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
-import { User } from '@shared/domain/user/user.entity'
 
 type FindByName = {
   scope: SCOPE
@@ -23,7 +23,7 @@ export class UserFileRepository extends AccessControlRepository<UserFile> {
       return null
     }
     const accessibleSpaces = await user.accessibleSpaces()
-    const spaceScopes = accessibleSpaces.map((space) => space.scope)
+    const spaceScopes = accessibleSpaces.map(space => space.scope)
 
     // TODO PFDA-6222: define rules for site-admins
 
@@ -43,7 +43,7 @@ export class UserFileRepository extends AccessControlRepository<UserFile> {
       return null
     }
     const editableSpaces = await user.editableSpaces()
-    const spaceScopes = editableSpaces.map((space) => space.scope)
+    const spaceScopes = editableSpaces.map(space => space.scope)
 
     // TODO PFDA-6222: define rules for site-admins
 
@@ -91,9 +91,6 @@ export class UserFileRepository extends AccessControlRepository<UserFile> {
           { name, [parentKey]: parentId, user: userId, scope },
           { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } },
         )
-      : this.find(
-          { name, [parentKey]: parentId, scope },
-          { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } },
-        )
+      : this.find({ name, [parentKey]: parentId, scope }, { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } })
   }
 }

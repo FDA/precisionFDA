@@ -10,22 +10,19 @@ export const parseNonEmptyString = (value: string | undefined) => {
   return value
 }
 
-export const parseEnumValueFromString = <T extends Exclude<string, ''>>(
-  allowedValues: T[],
-  defaultErrorFormatter?: (value: string | undefined) => string
-) => (
-  value: string | undefined,
-  errorFormatter?: (value: string) => string
-): T => {
-  const nonEmptyValue = parseNonEmptyString(value)
-  if (!allowedValues.includes(nonEmptyValue as T)) {
-    const errorMsg = errorFormatter?.(nonEmptyValue)
-      ?? defaultErrorFormatter?.(nonEmptyValue)
-      ?? `Enum value "${nonEmptyValue}" expected to be one of ${JSON.stringify(allowedValues)}`
-    throw new errors.ValidationError(errorMsg)
+export const parseEnumValueFromString =
+  <T extends Exclude<string, ''>>(allowedValues: T[], defaultErrorFormatter?: (value: string | undefined) => string) =>
+  (value: string | undefined, errorFormatter?: (value: string) => string): T => {
+    const nonEmptyValue = parseNonEmptyString(value)
+    if (!allowedValues.includes(nonEmptyValue as T)) {
+      const errorMsg =
+        errorFormatter?.(nonEmptyValue) ??
+        defaultErrorFormatter?.(nonEmptyValue) ??
+        `Enum value "${nonEmptyValue}" expected to be one of ${JSON.stringify(allowedValues)}`
+      throw new errors.ValidationError(errorMsg)
+    }
+    return nonEmptyValue as T
   }
-  return nonEmptyValue as T
-}
 
 export const parseNumberFromString = (value: string | undefined, errorFormatter?: (value: string) => string) => {
   const nonEmptyValue = parseNonEmptyString(value)
@@ -37,73 +34,61 @@ export const parseNumberFromString = (value: string | undefined, errorFormatter?
   return numericValue
 }
 
-export const parseBoundedNumberFromString = (
-  lowerBound: number,
-  upperBound: number,
-) => (
-  value: string | undefined,
-  errorFormatter?: (value: string) => string
-) => {
-  const numericValue = parseNumberFromString(value, errorFormatter)
-  if (numericValue < lowerBound) {
-    throw new errors.ValidationError(`Expected value greater than ${lowerBound}, got ${value}`)
+export const parseBoundedNumberFromString =
+  (lowerBound: number, upperBound: number) =>
+  (value: string | undefined, errorFormatter?: (value: string) => string) => {
+    const numericValue = parseNumberFromString(value, errorFormatter)
+    if (numericValue < lowerBound) {
+      throw new errors.ValidationError(`Expected value greater than ${lowerBound}, got ${value}`)
+    }
+    if (numericValue > upperBound) {
+      throw new errors.ValidationError(`Expected value lesser than ${upperBound}, got ${value}`)
+    }
+    return numericValue
   }
-  if (numericValue > upperBound) {
-    throw new errors.ValidationError(`Expected value lesser than ${upperBound}, got ${value}`)
-  }
-  return numericValue
-}
 
-export const wrapMaybeUndefined = <T>(wrappedParser: (value: string | undefined) => T) => (value: string | undefined) =>
-  value !== undefined ? wrappedParser(value) : null
+export const wrapMaybeUndefined =
+  <T>(wrappedParser: (value: string | undefined) => T) =>
+  (value: string | undefined) =>
+    value !== undefined ? wrappedParser(value) : null
 
-export const wrapMaybeEmpty = <T>(wrappedParser: (value: string | undefined) => T) => (value: string | undefined) =>
-  value ? wrappedParser(value) : null
+export const wrapMaybeEmpty =
+  <T>(wrappedParser: (value: string | undefined) => T) =>
+  (value: string | undefined) =>
+    value ? wrappedParser(value) : null
 
-export const wrapTuple = <
-  T,
-  TupleT extends T[],
-  Size extends number = TupleT['length']
->(
-  size: Size,
-  wrappedParser: (value: string | undefined) => T,
-  tupleDelimiter?: string,
-  errorFormatter?: (value: string) => string
-) => (value: string | undefined) => {
-  const nonEmptyString = parseNonEmptyString(value);
-  const arrayValues = nonEmptyString.split(tupleDelimiter ?? ',').map((v) => v.trim())
-  if (arrayValues.length !== size) {
-    const errorMsg = errorFormatter?.(nonEmptyString) ?? `Value expected to be tuple of length ${
-      size
-    }, got ${value}`
-    throw new errors.ValidationError(errorMsg)
-  }
-  const parsers = Array<ReturnType<typeof wrapMaybeUndefined>>(size).fill(wrappedParser)
-  const {
-    result,
-    errors: caughtErrors
-  } = aggregateSchemaErrors(
-    arrayValues.map((v, i) => () => {
-      return parsers[i](v)
-    }),
-  )
-  if (caughtErrors.length > 0) {
-
-    throw formatAggregatedError(
-      'Encountered multiple errors in array',
-      caughtErrors,
-      {
+export const wrapTuple =
+  <T, TupleT extends T[], Size extends number = TupleT['length']>(
+    size: Size,
+    wrappedParser: (value: string | undefined) => T,
+    tupleDelimiter?: string,
+    errorFormatter?: (value: string) => string,
+  ) =>
+  (value: string | undefined) => {
+    const nonEmptyString = parseNonEmptyString(value)
+    const arrayValues = nonEmptyString.split(tupleDelimiter ?? ',').map(v => v.trim())
+    if (arrayValues.length !== size) {
+      const errorMsg = errorFormatter?.(nonEmptyString) ?? `Value expected to be tuple of length ${size}, got ${value}`
+      throw new errors.ValidationError(errorMsg)
+    }
+    const parsers = Array<ReturnType<typeof wrapMaybeUndefined>>(size).fill(wrappedParser)
+    const { result, errors: caughtErrors } = aggregateSchemaErrors(
+      arrayValues.map((v, i) => () => {
+        return parsers[i](v)
+      }),
+    )
+    if (caughtErrors.length > 0) {
+      throw formatAggregatedError('Encountered multiple errors in array', caughtErrors, {
         clientResponse: 'Aggregate Error',
         clientStatusCode: 400,
         code: errors.ErrorCodes.VALIDATION,
-      },
-    )
+      })
+    }
+    return result as TupleT
   }
-  return result as TupleT
-}
 
 export const parseNumericRange = (value: string | undefined) => {
-  const [ $gte, $lte ] = wrapTuple(2, wrapMaybeEmpty(parseNumberFromString))(value)
+  const [$gte, $lte] = wrapTuple(2, wrapMaybeEmpty(parseNumberFromString))(value)
   const gtePresent = validateDefined($gte)
   const ltePresent = validateDefined($lte)
   // TODO(samuel) commented out, because website is stuck on infinite load when server respons with 400
@@ -116,8 +101,8 @@ export const parseNumericRange = (value: string | undefined) => {
     return null
   }
   return {
-    ...gtePresent ? {$gte} : {},
-    ...ltePresent ? {$lte} : {},
+    ...(gtePresent ? { $gte } : {}),
+    ...(ltePresent ? { $lte } : {}),
   }
 }
 
@@ -132,4 +117,3 @@ export const parseIpv4Cidr = (value: string | undefined) => {
     maskSize,
   }
 }
-

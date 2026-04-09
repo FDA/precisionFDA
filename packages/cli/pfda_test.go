@@ -40,7 +40,7 @@ type InputFlags struct {
 	Overwrite        *string
 	FlagWithProgress bool
 
-	// optional flags for ls, list-spaces, download, mkdir, head
+	// optional flags for ls, ls-spaces, download, mkdir, head
 	FlagRecursive     bool
 	FlagHelp          bool
 	FlagBrief         bool
@@ -56,8 +56,14 @@ type InputFlags struct {
 	FlagAdministrator bool
 	FlagGovernment    bool
 	FlagParents       bool
-	FlagPublic		  bool
+	FlagPublic        bool
+	FlagProtected     bool
 	FlagLines         int
+
+	// structured params for ls-spaces, ls-assets, ls-executions
+	State string
+	Types []string
+	Scope string
 }
 
 func (f *InputFlags) Reset() {
@@ -91,7 +97,11 @@ func (f *InputFlags) Reset() {
 	f.FlagGovernment = false
 	f.FlagParents = false
 	f.FlagPublic = false
+	f.FlagProtected = false
 	f.FlagLines = 10
+	f.State = ""
+	f.Types = nil
+	f.Scope = ""
 }
 
 func runMainInternal(surpressStdout bool) int {
@@ -362,7 +372,7 @@ func TestInvokeDownloadFile(t *testing.T) {
 	}
 
 	// Case: download with --cmd
-	os.Args = []string{"pfda", "download", "--file-id", "file-12345", "--key", "HELLO"}
+	os.Args = []string{"pfda", "download", "file-12345", "--key", "HELLO"}
 	returnCode := runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
@@ -370,7 +380,7 @@ func TestInvokeDownloadFile(t *testing.T) {
 	reset()
 
 	// Case: download without --cmd, with outputFilePath
-	os.Args = []string{"pfda", "download", "--file-id", "file-23456", "--key", "HELLO", "--output", "/tmp/canyoupleaseworksoicanbedonefortheday.argh"}
+	os.Args = []string{"pfda", "download", "file-23456", "--key", "HELLO", "--output", "/tmp/canyoupleaseworksoicanbedonefortheday.argh"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
@@ -378,7 +388,7 @@ func TestInvokeDownloadFile(t *testing.T) {
 	reset()
 
 	// Case: download without --cmd, with -overwrite flag
-	os.Args = []string{"pfda", "download", "--file-id", "file-23456", "--key", "HELLO", "--overwrite", "true"}
+	os.Args = []string{"pfda", "download", "file-23456", "--key", "HELLO", "--overwrite", "true"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
@@ -485,77 +495,52 @@ func TestInvokeLsSpaces(t *testing.T) {
 		input.Reset()
 	}
 
-	invokeLsSpaces = func(client precisionfda.IPFDAClient, flags map[string]bool) error {
+	invokeLsSpaces = func(client precisionfda.IPFDAClient, state string, types []string, protected bool) error {
 		funcWasCalled = true
-		input.FlagJson = flags["json"]
-		input.FlagLocked = flags["locked"]
-		input.FlagUnactivated = flags["unactivated"]
-		input.FlagReview = flags["review"]
-		input.FlagGroups = flags["groups"]
-		input.FlagPrivate = flags["private_type"]
-		input.FlagAdministrator = flags["administrator"]
-		input.FlagGovernment = flags["government"]
+		input.State = state
+		input.Types = types
+		input.FlagProtected = protected
 		return nil
 	}
 
-	// Case: list-spaces with no flags
-	os.Args = []string{"pfda", "list-spaces", "--key", "AUTH_KEY"}
+	// Case: ls-spaces with no flags
+	os.Args = []string{"pfda", "ls-spaces", "--key", "AUTH_KEY"}
 	returnCode := runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
-	test.Equals(t, false, input.FlagLocked)
-	test.Equals(t, false, input.FlagUnactivated)
-	test.Equals(t, false, input.FlagReview)
-	test.Equals(t, false, input.FlagGroups)
-	test.Equals(t, false, input.FlagPrivate)
-	test.Equals(t, false, input.FlagAdministrator)
-	test.Equals(t, false, input.FlagGovernment)
-	test.Equals(t, false, input.FlagJson)
+	test.Equals(t, "", input.State)
+	test.Equals(t, []string{}, input.Types)
+	test.Equals(t, false, input.FlagProtected)
 	reset()
 
-	// Case: list-spaces with help - only show help and do not call the func
-	os.Args = []string{"pfda", "list-spaces", "--help"}
+	// Case: ls-spaces with help - only show help and do not call the func
+	os.Args = []string{"pfda", "ls-spaces", "--help"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, false, funcWasCalled)
-	test.Equals(t, false, input.FlagLocked)
-	test.Equals(t, false, input.FlagUnactivated)
-	test.Equals(t, false, input.FlagReview)
-	test.Equals(t, false, input.FlagGroups)
-	test.Equals(t, false, input.FlagPrivate)
-	test.Equals(t, false, input.FlagAdministrator)
-	test.Equals(t, false, input.FlagGovernment)
-	test.Equals(t, false, input.FlagJson)
+	test.Equals(t, "", input.State)
+	test.Equals(t, []string(nil), input.Types)
+	test.Equals(t, false, input.FlagProtected)
 	reset()
 
-	// Case: list-spaces only locked and in json format
-	os.Args = []string{"pfda", "list-spaces", "--key", "AUTH_KEY", "--locked", "--json"}
+	// Case: ls-spaces only locked and in json format
+	os.Args = []string{"pfda", "ls-spaces", "--key", "AUTH_KEY", "--locked", "--json"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
-	test.Equals(t, true, input.FlagLocked)
-	test.Equals(t, false, input.FlagUnactivated)
-	test.Equals(t, false, input.FlagReview)
-	test.Equals(t, false, input.FlagGroups)
-	test.Equals(t, false, input.FlagPrivate)
-	test.Equals(t, false, input.FlagAdministrator)
-	test.Equals(t, false, input.FlagGovernment)
-	test.Equals(t, true, input.FlagJson)
+	test.Equals(t, "locked", input.State)
+	test.Equals(t, []string{}, input.Types)
+	test.Equals(t, false, input.FlagProtected)
 	reset()
 
-	// Case: list spaces - multi-type filter
-	os.Args = []string{"pfda", "list-spaces", "--key", "AUTH_KEY", "--groups", "--private", "--administrator", "--review", "--government"}
+	// Case: ls-spaces - multi-type filter
+	os.Args = []string{"pfda", "ls-spaces", "--key", "AUTH_KEY", "--groups", "--private", "--administrator", "--review", "--government"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
-	test.Equals(t, false, input.FlagLocked)
-	test.Equals(t, false, input.FlagUnactivated)
-	test.Equals(t, true, input.FlagReview)
-	test.Equals(t, true, input.FlagGroups)
-	test.Equals(t, true, input.FlagPrivate)
-	test.Equals(t, true, input.FlagAdministrator)
-	test.Equals(t, true, input.FlagGovernment)
-	test.Equals(t, false, input.FlagJson)
+	test.Equals(t, "", input.State)
+	test.Equals(t, []string{"0", "1", "3", "4", "5"}, input.Types)
+	test.Equals(t, false, input.FlagProtected)
 	reset()
 }
 
@@ -577,35 +562,19 @@ func TestInvokeDescribeEntity(t *testing.T) {
 	}
 
 	// Case: describe-app entity - old syntax
-	os.Args = []string{"pfda", "describe-app", "--app-id", "APP_ID", "--key", "AUTH_KEY"}
+	os.Args = []string{"pfda", "describe", "app-J5v9Gy00ZKxKZyXyxQPpZyx-1", "--key", "AUTH_KEY"}
 	returnCode := runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
-	test.Equals(t, "APP_ID", *input.EntityID)
-	reset()
-
-	// Case: describe-app entity - new syntax
-	os.Args = []string{"pfda", "describe-app", "APP_ID", "--key", "AUTH_KEY"}
-	returnCode = runMainInternal(false)
-	test.Equals(t, 0, returnCode)
-	test.Equals(t, true, funcWasCalled)
-	test.Equals(t, "APP_ID", *input.EntityID)
-	reset()
-
-	// Case: describe-workflow entity - old syntax
-	os.Args = []string{"pfda", "describe-workflow", "--workflow-id", "WORKFLOW_ID", "--key", "AUTH_KEY"}
-	returnCode = runMainInternal(false)
-	test.Equals(t, 0, returnCode)
-	test.Equals(t, true, funcWasCalled)
-	test.Equals(t, "WORKFLOW_ID", *input.EntityID)
+	test.Equals(t, "app-J5v9Gy00ZKxKZyXyxQPpZyx-1", *input.EntityID)
 	reset()
 
 	// Case: describe-workflow entity - new syntax
-	os.Args = []string{"pfda", "describe-workflow", "WORKFLOW_ID", "--key", "AUTH_KEY"}
+	os.Args = []string{"pfda", "describe", "workflow-J5v9Gy00ZKxKZyXyxQPpZyx-1", "--key", "AUTH_KEY"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
-	test.Equals(t, "WORKFLOW_ID", *input.EntityID)
+	test.Equals(t, "workflow-J5v9Gy00ZKxKZyXyxQPpZyx-1", *input.EntityID)
 	reset()
 }
 
@@ -638,11 +607,11 @@ func TestInvokeMkdir(t *testing.T) {
 	reset()
 
 	// Case: mkdir with multiple args
-	os.Args = []string{"pfda", "mkdir", "dir1","dir2", "dir3", "-folder-id","123", "-space-id","333", "--key", "AUTH_KEY"}
+	os.Args = []string{"pfda", "mkdir", "dir1", "dir2", "dir3", "-folder-id", "123", "-space-id", "333", "--key", "AUTH_KEY"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
-	test.Equals(t, []string{"dir1", "dir2","dir3"}, *input.Args)
+	test.Equals(t, []string{"dir1", "dir2", "dir3"}, *input.Args)
 	test.Equals(t, "123", *input.FolderID)
 	test.Equals(t, "333", *input.SpaceID)
 	test.Equals(t, false, input.FlagParents)
@@ -705,7 +674,7 @@ func TestInvokeRm(t *testing.T) {
 		input.Reset()
 	}
 
-	invokeRm = func(client precisionfda.IPFDAClient, args *[]string,folderID *string, spaceID *string) error {
+	invokeRm = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string) error {
 		funcWasCalled = true
 		input.Args = args
 		return nil

@@ -3,7 +3,7 @@ import { Job } from 'bull'
 
 export function ProcessWithTracingContext(
   jobName: string,
-  tracerName = 'bull-worker',
+  tracerName: string = 'bull-worker',
 ): (descriptor: PropertyDescriptor) => PropertyDescriptor {
   return (descriptor: PropertyDescriptor): PropertyDescriptor => {
     const originalMethod = descriptor.value as (job: Job) => Promise<unknown>
@@ -17,10 +17,7 @@ export function ProcessWithTracingContext(
         return original.apply(this, args)
       }
       const tracer = trace.getTracer(tracerName)
-      const extractedCtx = propagation.extract(
-        context.active(),
-        job.data?.__trace ?? {},
-      )
+      const extractedCtx = propagation.extract(context.active(), job.data?.__trace ?? {})
 
       return context.with(extractedCtx, async (): Promise<unknown> => {
         const span = tracer.startSpan(`bull:${jobName}`)

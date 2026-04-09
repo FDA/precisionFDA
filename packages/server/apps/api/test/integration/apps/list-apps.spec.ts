@@ -1,12 +1,12 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
-import { expect } from 'chai'
-import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData, stripEntityDates } from '../../utils/expect-helper'
 
@@ -29,10 +29,7 @@ describe.skip('GET /apps', () => {
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(testedApp.getHttpServer())
-      .get('/apps')
-      .set(getDefaultHeaderData(user))
-      .expect(200)
+    const { body } = await supertest(testedApp.getHttpServer()).get('/apps').set(getDefaultHeaderData(user)).expect(200)
     expect(body).to.be.an('array').with.lengthOf(1)
     expect(stripEntityDates(body[0])).to.deep.equal({
       id: app.id,

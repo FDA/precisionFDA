@@ -1,6 +1,6 @@
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 
 export class SpaceListItemDTO {
   id: number
@@ -28,13 +28,13 @@ export class SpaceListItemDTO {
       protected: space.protected,
       restrictedReviewer: space.meta?.restricted_reviewer === true,
       state: SPACE_STATE[space.state].toLowerCase(),
-      tags: space.taggings.map((tagging) => tagging.tag.name),
+      tags: space.taggings.map(tagging => tagging.tag.name),
       createdAt: space.createdAt,
       updatedAt: space.updatedAt,
       guestLead: (await space.findGuestLead())?.fullName,
       hostLead: (await space.findHostLead())?.fullName,
       currentUserMembership: space.spaceMemberships.find(
-        (spaceMembership) => spaceMembership.user.id === userId && spaceMembership.active,
+        spaceMembership => spaceMembership.user.id === userId && spaceMembership.active,
       ),
     }
   }

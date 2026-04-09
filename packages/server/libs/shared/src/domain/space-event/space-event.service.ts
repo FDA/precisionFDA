@@ -3,12 +3,12 @@ import { Injectable, Logger } from '@nestjs/common'
 import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SpaceEventDTO } from '@shared/domain/space-event/dto/space-event.dto'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { getEnumKeyByValue } from '@shared/utils/enum-utils'
@@ -94,9 +94,7 @@ export class SpaceEventService {
   }
 
   async sendNotificationForEvent(event: SpaceEvent): Promise<void> {
-    this.logger.log(
-      `Sending notification for space event id: ${event.id} activityType: ${event.activityType}`,
-    )
+    this.logger.log(`Sending notification for space event id: ${event.id} activityType: ${event.activityType}`)
     try {
       if (CONTENT_TYPES.includes(event.activityType)) {
         const input: TypedEmailBodyDto<EMAIL_TYPES.newContentAdded> = {
@@ -138,10 +136,7 @@ export class SpaceEventService {
         await this.emailService.sendEmail(input)
       }
     } catch (error) {
-      this.logger.error(
-        `Error sending membership change notification for space event id: ${event.id}`,
-        error,
-      )
+      this.logger.error(`Error sending membership change notification for space event id: ${event.id}`, error)
     }
   }
 }

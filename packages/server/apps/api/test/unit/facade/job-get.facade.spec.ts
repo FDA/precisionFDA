@@ -1,14 +1,14 @@
 import { EntityManager } from '@mikro-orm/core'
-import { JobService } from '@shared/domain/job/job.service'
-import { JobGetDTO } from '@shared/domain/job/dto/job-get.dto'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { DxId } from '@shared/domain/entity/domain/dxid'
-import { NotFoundError } from '@shared/errors'
 import { JobGetFacade } from 'apps/api/src/facade/job/get-facade/job-get.facade'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { JobGetDTO } from '@shared/domain/job/dto/job-get.dto'
+import { JobService } from '@shared/domain/job/job.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { NotFoundError } from '@shared/errors'
 
 describe('JobGetFacade', () => {
   const JOB_UID = 'job-abc123-1' as Uid<'job'>

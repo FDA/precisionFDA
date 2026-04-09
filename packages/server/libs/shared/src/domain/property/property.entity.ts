@@ -1,14 +1,7 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
 import { PropertyRepository } from '@shared/domain/property/property.repository'
 
-export const propertyTypes = [
-  'node',
-  'asset',
-  'workflowSeries',
-  'appSeries',
-  'job',
-  'dbCluster',
-] as const
+export const propertyTypes = ['node', 'asset', 'workflowSeries', 'appSeries', 'job', 'dbCluster'] as const
 export type PropertyType = (typeof propertyTypes)[number]
 
 @Entity({

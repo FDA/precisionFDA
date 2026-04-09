@@ -1,9 +1,9 @@
+import { expect } from 'chai'
+import { config } from '@shared/config'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { SpaceReportPartUserResultProvider } from '@shared/facade/space-report/service/space-report-part-user-result-provider.service'
-import { expect } from 'chai'
-import { config } from '@shared/config'
 
 describe('SpaceReportPartUserResultProvider', () => {
   const USER_ID = 0

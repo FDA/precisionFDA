@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common'
-import { SearchResultDTO } from '@shared/facade/search/domain/search-result-d-t.o'
 import { SearchDTO } from '@shared/facade/search/domain/search.dto'
+import { SearchResultDTO } from '@shared/facade/search/domain/search-result-d-t.o'
 import { SearchFacade } from '@shared/facade/search/search.facade'
 
 @Controller('search')

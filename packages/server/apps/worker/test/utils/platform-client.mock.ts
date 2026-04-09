@@ -1,6 +1,12 @@
 import { PlatformErrors } from '@shared/platform-client'
 
-export const createPlatformError = (statusCode: number, type: string, message: string) => {
+export const createPlatformError: (
+  statusCode: number,
+  type: string,
+  message: string,
+) => {
+  response: { status: number; headers: unknown[]; data: { error: { type: string; message: string } } }
+} = (statusCode: number, type: string, message: string) => {
   return {
     response: {
       status: statusCode,
@@ -9,14 +15,16 @@ export const createPlatformError = (statusCode: number, type: string, message: s
         error: {
           type: type,
           message: message,
-        }
-      }
-    }
+        },
+      },
+    },
   }
 }
 
 // An example of a regular platform error
-export const createPermissionsDeniedError = () => {
+export const createPermissionsDeniedError: () => {
+  response: { status: number; headers: unknown[]; data: { error: { type: string; message: string } } }
+} = () => {
   return createPlatformError(
     401,
     PlatformErrors.PermissionDenied,
@@ -25,22 +33,23 @@ export const createPermissionsDeniedError = () => {
 }
 
 // A 504 error we sometimes encounter
-export const createGatewayError = () => {
+export const createGatewayError: () => { response: { status: number; headers: unknown[]; data: string } } = () => {
   return {
     response: {
       status: 504,
       headers: [],
       data: '<html>\r\n<head><title>504 Gateway Time-out</title></head></html>\r\n',
-    }
+    },
   }
 }
 
 // ETIMEOUT error
-export const createETIMEOUTError = () => {
+export const createETIMEOUTError: () => { message: string; name: string; stack: string; code: string } = () => {
   return {
     message: 'connect ETIMEDOUT 192.168.119.135:443',
     name: 'Error',
-    stack: 'Error: connect ETIMEDOUT 192.168.119.135:443\n    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1144:16)',
+    stack:
+      'Error: connect ETIMEDOUT 192.168.119.135:443\n    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1144:16)',
     code: 'ETIMEDOUT',
   }
 }

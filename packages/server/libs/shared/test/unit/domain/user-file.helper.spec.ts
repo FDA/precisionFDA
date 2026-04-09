@@ -1,14 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { database } from '@shared/database'
+import { User } from '@shared/domain/user/user.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
+import { findFileOrAssetsWithDxid, findFileOrAssetWithUid } from '@shared/domain/user-file/user-file.helper'
 import { create, db } from '@shared/test'
-import { database } from '@shared/database'
-import {
-  findFileOrAssetWithUid,
-  findFileOrAssetsWithDxid,
-} from '@shared/domain/user-file/user-file.helper'
 
 // TODO: Migrate tests from user-file.helper.spec.ts in api and worker packages here
 

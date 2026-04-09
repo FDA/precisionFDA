@@ -1,10 +1,5 @@
-import {
-  footer,
-  getBottomSpacer,
-  getMiddleSpacer,
-  header,
-} from '@shared/domain/email/templates/mjml/common'
 import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
+import { footer, getBottomSpacer, getMiddleSpacer, header } from '@shared/domain/email/templates/mjml/common'
 
 export const alertMessageTemplate = (alertMessageInput: AlertMessageInputDTO): string => `
   ${header}

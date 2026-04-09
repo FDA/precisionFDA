@@ -2,10 +2,10 @@ import { FilterQuery } from '@mikro-orm/mysql'
 import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '../../enums'
 import { Asset } from './asset.entity'
 import { FILE_STATE_DX } from './user-file.types'
-import { User } from '@shared/domain/user/user.entity'
 
 export class AssetRepository extends AccessControlRepository<Asset> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Asset>> {
@@ -15,7 +15,7 @@ export class AssetRepository extends AccessControlRepository<Asset> {
       return null
     }
     const accessibleSpaces = await user.accessibleSpaces()
-    const spaceScopes = accessibleSpaces.map((space) => space.scope)
+    const spaceScopes = accessibleSpaces.map(space => space.scope)
 
     // TODO PFDA-6222: define rules for site-admins
 
@@ -35,7 +35,7 @@ export class AssetRepository extends AccessControlRepository<Asset> {
       return null
     }
     const editableSpaces = await user.editableSpaces()
-    const spaceScopes = editableSpaces.map((space) => space.scope)
+    const spaceScopes = editableSpaces.map(space => space.scope)
 
     // TODO PFDA-6222: define rules for site-admins
 
@@ -73,12 +73,8 @@ export class AssetRepository extends AccessControlRepository<Asset> {
    * @param uids
    * @param spaceIds
    */
-  async findAccessibleByUser(
-    userId: number,
-    uids: Uid<'file'>[],
-    spaceIds: number[],
-  ): Promise<Asset[]> {
-    const scopes = spaceIds.map((id) => `space-${id}`)
+  async findAccessibleByUser(userId: number, uids: Uid<'file'>[], spaceIds: number[]): Promise<Asset[]> {
+    const scopes = spaceIds.map(id => `space-${id}`)
     return await this.find(
       {
         $or: [

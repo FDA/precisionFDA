@@ -1,6 +1,6 @@
+import crypto from 'node:crypto'
 import { dump, load } from '@hyrious/marshal'
 import { config } from '@shared/config'
-import crypto from 'node:crypto'
 import { SecurityUtils } from '../security.utils'
 
 export type CliUserSession = {
@@ -21,13 +21,7 @@ export class CliEncryptor {
   private static readonly encryptedSignedCookieSalt = 'signed encrypted cookie'
 
   private static get derivedKey(): Buffer {
-    return crypto.pbkdf2Sync(
-      this.secretKeyBase,
-      this.encryptedCookieSalt,
-      this.iterations,
-      this.keySize,
-      this.digest,
-    )
+    return crypto.pbkdf2Sync(this.secretKeyBase, this.encryptedCookieSalt, this.iterations, this.keySize, this.digest)
   }
 
   private static get signedSecretKey(): Buffer {
@@ -77,11 +71,7 @@ export class CliEncryptor {
 
       const decodedToken = Buffer.from(data, 'base64').toString('utf8')
       const [encryptedValue, iv] = decodedToken.split('--')
-      const decipher = crypto.createDecipheriv(
-        this.algorithm,
-        this.derivedKey,
-        Buffer.from(iv, 'base64'),
-      )
+      const decipher = crypto.createDecipheriv(this.algorithm, this.derivedKey, Buffer.from(iv, 'base64'))
       let dec = decipher.update(encryptedValue, 'base64', 'hex')
       dec += decipher.final('hex')
 

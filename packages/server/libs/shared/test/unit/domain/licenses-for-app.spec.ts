@@ -1,17 +1,17 @@
 import { wrap } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
 import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { LicenseService } from '@shared/domain/license/license.service'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
+import { User } from '@shared/domain/user/user.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { App } from '@shared/domain/app/app.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { create, db } from '../../../src/test'
-import { expect } from 'chai'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { create, db } from '../../../src/test'
 
 describe("licenses for app's assets tests", () => {
   let em: EntityManager<MySqlDriver>
@@ -25,11 +25,7 @@ describe("licenses for app's assets tests", () => {
   })
 
   it('test get licenses for app via assets', async () => {
-    const app = create.appHelper.createRegular(
-      em,
-      { user },
-      { title: 'private-app', scope: 'private' },
-    )
+    const app = create.appHelper.createRegular(em, { user }, { title: 'private-app', scope: 'private' })
     await em.flush()
 
     const asset1 = create.assetHelper.create(em, { user }, { parentType: PARENT_TYPE.ASSET })
@@ -44,11 +40,7 @@ describe("licenses for app's assets tests", () => {
     asset2.apps.add(app)
     asset3.apps.add(app)
 
-    const licenseOnAssets = create.licenseHelper.create(
-      em,
-      { user },
-      { title: 'license for assets' },
-    )
+    const licenseOnAssets = create.licenseHelper.create(em, { user }, { title: 'license for assets' })
 
     const licensedItemForAsset1 = wrap(new LicensedItem(licenseOnAssets, asset1.id)).assign(
       { licenseableType: 'Node' },
@@ -71,7 +63,7 @@ describe("licenses for app's assets tests", () => {
 
     const freshApp = await freshEm.findOneOrFail(App, { uid: app.uid })
     await freshApp.assets.init()
-    const assetIds = freshApp.assets.getItems().map((asset) => asset.id)
+    const assetIds = freshApp.assets.getItems().map(asset => asset.id)
 
     const result = await freshLicenseService.findLicensesForNodeIds(assetIds)
 
@@ -91,11 +83,7 @@ describe("licenses for app's assets tests", () => {
   })
 
   it('user has app with no assets', async () => {
-    const app = create.appHelper.createRegular(
-      em,
-      { user },
-      { title: 'private-app', scope: 'private' },
-    )
+    const app = create.appHelper.createRegular(em, { user }, { title: 'private-app', scope: 'private' })
     await em.flush()
 
     const freshEm = database.orm().em.fork() as EntityManager<MySqlDriver>
@@ -106,7 +94,7 @@ describe("licenses for app's assets tests", () => {
 
     const freshApp = await freshEm.findOneOrFail(App, { uid: app.uid })
     await freshApp.assets.init()
-    const assetIds = freshApp.assets.getItems().map((asset) => asset.id)
+    const assetIds = freshApp.assets.getItems().map(asset => asset.id)
 
     const result = await freshLicenseService.findLicensesForNodeIds(assetIds)
 

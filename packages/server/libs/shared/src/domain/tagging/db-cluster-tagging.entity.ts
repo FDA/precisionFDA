@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, Ref } from '@mikro-orm/core'
-import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 
 @Entity({ discriminatorValue: TAGGABLE_TYPE.DB_CLUSTER })
 export class DbClusterTagging extends Tagging {

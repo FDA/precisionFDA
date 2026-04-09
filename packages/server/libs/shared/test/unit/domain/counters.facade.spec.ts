@@ -4,12 +4,12 @@ import { AppSeriesService } from '@shared/domain/app-series/service/app-series.s
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { JobService } from '@shared/domain/job/job.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
-import { SpaceService } from '@shared/domain/space/service/space.service'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeService } from '@shared/domain/user-file/node.service'
-import { User } from '@shared/domain/user/user.entity'
 import { WorkflowSeriesService } from '@shared/domain/workflow-series/service/workflow-series.service'
 import { HOME_SCOPE } from '@shared/enums'
 import { NotFoundError } from '@shared/errors'
@@ -43,7 +43,7 @@ describe('CountersFacade', () => {
   let spaceReportCountStub: SinonStub
   let spaceMembershipCountBySpaceStub: SinonStub
   let discussionCountStub: SinonStub
-  let getAccessibleSpaceStub: SinonStub
+  let getAccessibleByIdStub: SinonStub
 
   beforeEach(() => {
     accessibleSpacesStub.reset()
@@ -61,7 +61,7 @@ describe('CountersFacade', () => {
     spaceReportCountStub = stub().resolves(6)
     spaceMembershipCountBySpaceStub = stub().resolves(15)
     discussionCountStub = stub().resolves(7)
-    getAccessibleSpaceStub = stub().resolves({ id: SPACE_ID, scope: `space-${SPACE_ID}` })
+    getAccessibleByIdStub = stub().resolves({ id: SPACE_ID, scope: `space-${SPACE_ID}` })
   })
 
   describe('#getCounters', () => {
@@ -154,11 +154,11 @@ describe('CountersFacade', () => {
     it('should validate space access', async () => {
       await getInstance().getSpaceCounters(SPACE_ID)
 
-      expect(getAccessibleSpaceStub.calledOnceWith(SPACE_ID)).to.be.true()
+      expect(getAccessibleByIdStub.calledOnceWith(SPACE_ID)).to.be.true()
     })
 
     it('should throw NotFoundError if space is not accessible', async () => {
-      getAccessibleSpaceStub.resolves(null)
+      getAccessibleByIdStub.resolves(null)
 
       await expect(getInstance().getSpaceCounters(SPACE_ID)).to.be.rejectedWith(
         NotFoundError,
@@ -168,7 +168,7 @@ describe('CountersFacade', () => {
 
     it('should propagate error from getAccessibleSpace', async () => {
       const error = new Error('Space service error')
-      getAccessibleSpaceStub.rejects(error)
+      getAccessibleByIdStub.rejects(error)
 
       await expect(getInstance().getSpaceCounters(SPACE_ID)).to.be.rejectedWith(error)
     })
@@ -199,7 +199,7 @@ describe('CountersFacade', () => {
       countByScope: discussionCountStub,
     } as unknown as DiscussionService
     const spaceService = {
-      getAccessibleSpace: getAccessibleSpaceStub,
+      getAccessibleById: getAccessibleByIdStub,
     } as unknown as SpaceService
     const spaceMembershipService = {
       countBySpace: spaceMembershipCountBySpaceStub,

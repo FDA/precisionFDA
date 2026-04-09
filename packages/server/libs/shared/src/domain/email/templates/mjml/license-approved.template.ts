@@ -8,9 +8,7 @@ export type LicenseRequestApprovedTemplateInput = {
   itemsLicenseUrl: string
 }
 
-export const licenseRequestApprovedTemplate = (
-  data: LicenseRequestApprovedTemplateInput,
-): string => `
+export const licenseRequestApprovedTemplate = (data: LicenseRequestApprovedTemplateInput): string => `
   ${header}
 
     <mj-section css-class="hidden-email-preview">

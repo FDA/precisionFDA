@@ -6,8 +6,8 @@
 
 import { EntityManager } from '@mikro-orm/mysql'
 import { Logger } from '@nestjs/common'
-import { Uid } from '@shared/domain/entity/domain/uid'
 import { Job } from 'bull'
+import { Uid } from '@shared/domain/entity/domain/uid'
 
 declare type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>

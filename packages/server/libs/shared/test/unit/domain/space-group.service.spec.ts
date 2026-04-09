@@ -1,16 +1,16 @@
+import { Collection } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import sinon, { stub } from 'sinon'
-import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
-import { SpaceGroupRepository } from '@shared/domain/space/space-group.repository'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
-import { InvalidRequestError, NotFoundError } from '@shared/errors'
-import { SpaceGroup } from '@shared/domain/space/space-group.entity'
+import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
+import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { Collection } from '@mikro-orm/core'
-import { Space } from '@shared/domain/space/space.entity'
+import { SpaceGroup } from '@shared/domain/space/space-group.entity'
+import { SpaceGroupRepository } from '@shared/domain/space/space-group.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { InvalidRequestError, NotFoundError } from '@shared/errors'
 
 describe('SpaceGroupService', () => {
   const transactionalStub = sinon.stub()
@@ -70,7 +70,7 @@ describe('SpaceGroupService', () => {
   }
 
   beforeEach(() => {
-    transactionalStub.callsFake(async (callback) => {
+    transactionalStub.callsFake(async callback => {
       return callback(em)
     })
 
@@ -120,10 +120,7 @@ describe('SpaceGroupService', () => {
     it('not found', async () => {
       const service = getInstance(false, false)
 
-      await expect(service.getById(124)).to.be.rejectedWith(
-        NotFoundError,
-        'Space group with id 124 was not found',
-      )
+      await expect(service.getById(124)).to.be.rejectedWith(NotFoundError, 'Space group with id 124 was not found')
 
       expect(createStub.notCalled).to.be.true()
     })
@@ -318,10 +315,7 @@ describe('SpaceGroupService', () => {
     it('called by site admin, space group does not exist', async () => {
       const service = getInstance(true, false)
 
-      await expect(service.delete(124)).to.be.rejectedWith(
-        NotFoundError,
-        'Space group 124 not found',
-      )
+      await expect(service.delete(124)).to.be.rejectedWith(NotFoundError, 'Space group 124 not found')
 
       expect(findEditableOneStub.calledOnce).to.be.true()
       expect(findEditableOneStub.calledOnceWithExactly({ id: 124 })).to.be.true()
@@ -369,19 +363,14 @@ describe('SpaceGroupService', () => {
       spacesFindStub.resolves(null)
       findEditableOneStub.withArgs({ id: 123 }).resolves(testedSpaceGroup)
       spacesFindStub.withArgs({ id: { $in: [42, 43] } }).resolves([spaceRev, spaceGov])
-      spacesFindStub
-        .withArgs({ id: { $in: [42, 43, 44] } })
-        .resolves([spaceRev, spaceGov, spaceGroup])
+      spacesFindStub.withArgs({ id: { $in: [42, 43, 44] } }).resolves([spaceRev, spaceGov, spaceGroup])
       spacesFindStub.withArgs({ id: { $in: [42, 666] } }).resolves([spaceRev, spacePrivate])
     })
 
     it('called by site admin with no space ids', async () => {
       const service = getInstance(true, false)
 
-      await expect(service.addSpaces(1, [])).to.be.rejectedWith(
-        InvalidRequestError,
-        'No spaces specified',
-      )
+      await expect(service.addSpaces(1, [])).to.be.rejectedWith(InvalidRequestError, 'No spaces specified')
 
       expect(findEditableOneStub.notCalled).to.be.true()
     })
@@ -389,10 +378,7 @@ describe('SpaceGroupService', () => {
     it('called by site admin with incorrect space group id', async () => {
       const service = getInstance(true, false)
 
-      await expect(service.addSpaces(666, [12])).to.be.rejectedWith(
-        NotFoundError,
-        'Space group 666 not found',
-      )
+      await expect(service.addSpaces(666, [12])).to.be.rejectedWith(NotFoundError, 'Space group 666 not found')
 
       expect(findEditableOneStub.calledOnce).to.be.true()
     })
@@ -464,11 +450,7 @@ describe('SpaceGroupService', () => {
     testedSpaceGroup.description = createSpaceGroupDto.description
 
     beforeEach(() => {
-      testedSpaceGroup.spaces = new Collection<Space>(testedSpaceGroup, [
-        spaceGov,
-        spaceRev,
-        groupSpace,
-      ])
+      testedSpaceGroup.spaces = new Collection<Space>(testedSpaceGroup, [spaceGov, spaceRev, groupSpace])
       flushStub.reset()
       flushStub.resolves()
       findEditableOneStub.reset()
@@ -476,9 +458,7 @@ describe('SpaceGroupService', () => {
       spacesFindStub.reset()
       spacesFindStub.resolves(null)
       spacesFindStub.withArgs({ id: { $in: [42, 43] } }).resolves([spaceRev, spaceGov])
-      spacesFindStub
-        .withArgs({ id: { $in: [42, 43, 44] } })
-        .resolves([spaceRev, spaceGov, groupSpace])
+      spacesFindStub.withArgs({ id: { $in: [42, 43, 44] } }).resolves([spaceRev, spaceGov, groupSpace])
       spacesFindStub.withArgs({ id: { $in: [42, 666] } }).resolves([spaceRev, spacePrivate])
       spacesFindStub.withArgs({ id: { $in: [42] } }).resolves([spaceRev])
       spacesFindStub.withArgs({ id: { $in: [43] } }).resolves([spaceGov])
@@ -488,10 +468,7 @@ describe('SpaceGroupService', () => {
     it('called by site admin with incorrect space group id', async () => {
       const service = getInstance(true, false)
 
-      await expect(service.removeSpaces(666, [12])).to.be.rejectedWith(
-        NotFoundError,
-        'Space group 666 not found',
-      )
+      await expect(service.removeSpaces(666, [12])).to.be.rejectedWith(NotFoundError, 'Space group 666 not found')
 
       expect(findEditableOneStub.calledOnce).to.be.true()
     })
@@ -499,10 +476,7 @@ describe('SpaceGroupService', () => {
     it('called by site admin with non existing spaces', async () => {
       const service = getInstance(true, false)
 
-      await expect(service.removeSpaces(123, [404])).to.be.rejectedWith(
-        NotFoundError,
-        'None of the spaces was found',
-      )
+      await expect(service.removeSpaces(123, [404])).to.be.rejectedWith(NotFoundError, 'None of the spaces was found')
 
       expect(findEditableOneStub.calledOnce).to.be.true()
     })
@@ -547,11 +521,6 @@ describe('SpaceGroupService', () => {
   })
 
   function getInstance(isSiteAdmin: boolean, isSpaceAdmin: boolean): SpaceGroupService {
-    return new SpaceGroupService(
-      em,
-      getUserContext(isSiteAdmin, isSpaceAdmin),
-      spaceGroupRepo,
-      spaceRepo,
-    )
+    return new SpaceGroupService(em, getUserContext(isSiteAdmin, isSpaceAdmin), spaceGroupRepo, spaceRepo)
   }
 })

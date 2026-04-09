@@ -1,6 +1,6 @@
 import { mockHandler } from '@worker-test/utils/handler-mock'
-import sinon from 'sinon'
 import Bull, { Job } from 'bull'
+import sinon from 'sinon'
 
 const sandbox = sinon.createSandbox()
 
@@ -43,4 +43,4 @@ const mocksRestore = () => {
   sandbox.restore()
 }
 
-export { fakes, mocksSetup, mocksRestore, mocksReset }
+export { fakes, mocksReset, mocksRestore, mocksSetup }

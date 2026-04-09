@@ -1,6 +1,6 @@
+import { Type } from 'class-transformer'
 import { IsDate, IsEnum, IsNumber, IsString, IsUrl, MaxLength, ValidateIf } from 'class-validator'
 import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
-import { Type } from 'class-transformer'
 
 export class UpdateChallengeDTO {
   @IsString()
@@ -14,7 +14,7 @@ export class UpdateChallengeDTO {
   @MaxLength(50_000)
   description: string
 
-  @ValidateIf((o) => o.status === CHALLENGE_STATUS.PRE_REGISTRATION)
+  @ValidateIf(o => o.status === CHALLENGE_STATUS.PRE_REGISTRATION)
   @IsUrl()
   preRegistrationUrl?: string
 

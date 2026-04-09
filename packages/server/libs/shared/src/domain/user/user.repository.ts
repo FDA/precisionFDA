@@ -2,9 +2,7 @@ import { FindOptions, raw } from '@mikro-orm/core'
 import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
 import { CountStats } from '@shared/database/statistics.type'
 import { config } from '../../config'
-import { RESOURCE_TYPES, User } from './user.entity'
-
-type Resource = (typeof RESOURCE_TYPES)[number]
+import { RESOURCE_TYPES, Resource, User } from './user.entity'
 
 export class UserRepository extends PaginatedRepository<User> {
   findChallengeBot(): Promise<User> {
@@ -29,9 +27,7 @@ export class UserRepository extends PaginatedRepository<User> {
   async bulkUpdateSetTotalLimit(ids: number[], totalLimit: number): Promise<void> {
     await this.createQueryBuilder()
       .update({
-        cloudResourceSettings: raw(`JSON_SET(cloud_resource_settings, '$.total_limit', ?)`, [
-          totalLimit,
-        ]),
+        cloudResourceSettings: raw(`JSON_SET(cloud_resource_settings, '$.total_limit', ?)`, [totalLimit]),
         updatedAt: new Date(),
       })
       .where({
@@ -43,9 +39,7 @@ export class UserRepository extends PaginatedRepository<User> {
   async bulkUpdateSetJobLimit(ids: number[], jobLimit: number): Promise<void> {
     await this.createQueryBuilder()
       .update({
-        cloudResourceSettings: raw(`JSON_SET(cloud_resource_settings, '$.job_limit', ?)`, [
-          jobLimit,
-        ]),
+        cloudResourceSettings: raw(`JSON_SET(cloud_resource_settings, '$.job_limit', ?)`, [jobLimit]),
         updatedAt: new Date(),
       })
       .where({
@@ -57,9 +51,7 @@ export class UserRepository extends PaginatedRepository<User> {
   async bulkEnableResourceType(ids: number[], resource: Resource): Promise<void> {
     await this.createQueryBuilder()
       .update({
-        cloudResourceSettings: raw(`JSON_ARRAY_APPEND(cloud_resource_settings, '$.resources', ?)`, [
-          resource,
-        ]),
+        cloudResourceSettings: raw(`JSON_ARRAY_APPEND(cloud_resource_settings, '$.resources', ?)`, [resource]),
         updatedAt: new Date(),
       })
       .where({
@@ -76,10 +68,9 @@ export class UserRepository extends PaginatedRepository<User> {
 
     await this.createQueryBuilder()
       .update({
-        cloudResourceSettings: raw(
-          `JSON_SET(cloud_resource_settings, '$.resources', CAST(? AS JSON))`,
-          [resourcesJson],
-        ),
+        cloudResourceSettings: raw(`JSON_SET(cloud_resource_settings, '$.resources', CAST(? AS JSON))`, [
+          resourcesJson,
+        ]),
         updatedAt: new Date(),
       })
       .where({
@@ -97,10 +88,10 @@ export class UserRepository extends PaginatedRepository<User> {
       },
     })
 
-    users.forEach((user) => {
+    users.forEach(user => {
       if (user.cloudResourceSettings?.resources) {
         user.cloudResourceSettings.resources = user.cloudResourceSettings.resources.filter(
-          (userResource) => userResource !== resource,
+          userResource => userResource !== resource,
         )
       }
       this.em.persist(user)
@@ -112,9 +103,7 @@ export class UserRepository extends PaginatedRepository<User> {
   async bulkDisableAllResources(ids: number[]): Promise<void> {
     await this.createQueryBuilder()
       .update({
-        cloudResourceSettings: raw(
-          `JSON_SET(cloud_resource_settings, '$.resources', JSON_ARRAY())`,
-        ),
+        cloudResourceSettings: raw(`JSON_SET(cloud_resource_settings, '$.resources', JSON_ARRAY())`),
         updatedAt: new Date(),
       })
       .where({

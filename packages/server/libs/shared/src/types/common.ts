@@ -15,22 +15,6 @@ export type DnanexusLink = {
   $dnanexus_link: string
 }
 
-export type IOType =
-  | string[]
-  | number[]
-  | boolean[]
-  | Uid<'file'>
-  | string
-  | number
-  | boolean
-  | Uid<'file'>[]
+export type IOType = string[] | number[] | boolean[] | Uid<'file'> | string | number | boolean | Uid<'file'>[]
 
-export type PlatformIOType =
-  | string
-  | number
-  | boolean
-  | string[]
-  | number[]
-  | boolean[]
-  | DnanexusLink
-  | DnanexusLink[]
+export type PlatformIOType = string | number | boolean | string[] | number[] | boolean[] | DnanexusLink | DnanexusLink[]

@@ -1,27 +1,27 @@
+import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EventHelper } from '@shared/domain/event/event.helper'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { FILE_STATE_DX, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User } from '@shared/domain/user/user.entity'
-import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
-import { CopyNodesFacade } from '@shared/facade/node-copy/copy-nodes.facade'
-import { Reference } from '@mikro-orm/core'
-import { EntityScope } from '@shared/types/common'
-import { Folder } from '@shared/domain/user-file/folder.entity'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { EventHelper } from '@shared/domain/event/event.helper'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FILE_STATE_DX, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
+import { CopyNodesFacade } from '@shared/facade/node-copy/copy-nodes.facade'
+import { PlatformClient } from '@shared/platform-client'
+import { EntityScope } from '@shared/types/common'
 
 describe('CopyNodesFacade', () => {
   const USER_ID = 100
@@ -130,7 +130,7 @@ describe('CopyNodesFacade', () => {
     emPopulateStub.resolves()
 
     emTransactionalStub.reset()
-    emTransactionalStub.callsFake(async (callback) => {
+    emTransactionalStub.callsFake(async callback => {
       return callback(em)
     })
 
@@ -204,9 +204,7 @@ describe('CopyNodesFacade', () => {
         [SOURCE_FILE_DXID],
       ])
 
-      expect(
-        nodeServiceValidateProtectedSpacesStub.calledWith('copy', USER_ID, sourceFile),
-      ).to.be.true()
+      expect(nodeServiceValidateProtectedSpacesStub.calledWith('copy', USER_ID, sourceFile)).to.be.true()
 
       expect(emPersistStub.called).to.be.true()
       const savedNode = emPersistStub.firstCall.args[0]
@@ -293,10 +291,7 @@ describe('CopyNodesFacade', () => {
       await getInstance().copyNodes([SOURCE_FILE_ID], TARGET_SCOPE)
 
       expect(platformContainerRemoveObjectsStub.calledOnce).to.be.true()
-      expect(platformContainerRemoveObjectsStub.firstCall.args).to.deep.eq([
-        PRIVATE_PROJECT,
-        [SOURCE_FILE_DXID],
-      ])
+      expect(platformContainerRemoveObjectsStub.firstCall.args).to.deep.eq([PRIVATE_PROJECT, [SOURCE_FILE_DXID]])
 
       expect(notificationCreateStub.calledOnce).to.be.true()
       expect(notificationCreateStub.firstCall.args[0]).to.include({
@@ -384,9 +379,7 @@ describe('CopyNodesFacade', () => {
 
       expect(spaceEventCreateStub.called).to.be.true()
       expect(spaceEventCreateStub.firstCall.firstArg.spaceId).to.eq(spaceId)
-      expect(spaceEventCreateStub.firstCall.firstArg.activityType).to.eq(
-        SPACE_EVENT_ACTIVITY_TYPE.file_added,
-      )
+      expect(spaceEventCreateStub.firstCall.firstArg.activityType).to.eq(SPACE_EVENT_ACTIVITY_TYPE.file_added)
       expect(spaceEventCreateStub.firstCall.firstArg.userId).to.eq(USER.id)
       expect(spaceEventSendNotificationStub.called).to.be.true()
     })
@@ -424,16 +417,14 @@ describe('CopyNodesFacade', () => {
         properties: [],
       } as unknown as UserFile
 
-      nodeServiceLoadNodesStub
-        .withArgs([SOURCE_FOLDER_ID], {})
-        .resolves([sourceChildFile, sourceFolder])
+      nodeServiceLoadNodesStub.withArgs([SOURCE_FOLDER_ID], {}).resolves([sourceChildFile, sourceFolder])
 
       nodeServiceGetAccessibleEntityByIdStub.withArgs(SOURCE_FOLDER_ID).resolves(sourceFolder)
       nodeServiceGetAccessibleEntityByIdStub.withArgs(SOURCE_CHILD_ID).resolves(sourceChildFile)
       eventHelperCreateFolderEventStub.resolves({ type: EVENT_TYPES.FOLDER_CREATED })
       eventHelperCreateFileCopyEventStub.resolves({ type: EVENT_TYPES.FILE_COPIED })
 
-      emPersistStub.callsFake(async (entity) => {
+      emPersistStub.callsFake(async entity => {
         if (entity instanceof Folder) {
           entity.id = NEW_FOLDER_ID
         }

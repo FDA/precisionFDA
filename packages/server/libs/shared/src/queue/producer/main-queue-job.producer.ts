@@ -1,16 +1,13 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
+import { Job, JobOptions, Queue } from 'bull'
 import { config } from '@shared/config'
 import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import {
-  FileUidInput,
-  SyncFileJobInput,
-  UidAndFollowUpInput,
-} from '@shared/domain/user-file/user-file.input'
+import { FileUidInput, SyncFileJobInput, UidAndFollowUpInput } from '@shared/domain/user-file/user-file.input'
 import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import {
@@ -21,7 +18,6 @@ import {
   UiNotifyNewDiscussionReplyJob,
 } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
-import { Job, JobOptions, Queue } from 'bull'
 
 @Injectable()
 export class MainQueueJobProducer extends QueueJobProducer {
@@ -73,10 +69,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createRunFollowUpActionJobTask(
-    payload: UidAndFollowUpInput,
-    user?: UserCtx,
-  ): Promise<void> {
+  async createRunFollowUpActionJobTask(payload: UidAndFollowUpInput, user?: UserCtx): Promise<void> {
     const wrapped = {
       type: TASK_TYPE.FOLLOW_UP_ACTION as const,
       payload,
@@ -89,11 +82,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
     await this.addToQueue(wrapped, options)
   }
 
-  async createFileSynchronizeJobTask(
-    payload: SyncFileJobInput,
-    user?: UserCtx,
-    delayInMs?: number,
-  ): Promise<void> {
+  async createFileSynchronizeJobTask(payload: SyncFileJobInput, user?: UserCtx, delayInMs?: number): Promise<void> {
     const wrapped = {
       type: TASK_TYPE.SYNC_FILE_STATE as const,
       payload,
@@ -137,10 +126,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createDbClusterSyncJobOutputTask(
-    data: SyncDbClusterJobOutput['payload'],
-    user: UserCtx,
-  ): Promise<Job> {
+  async createDbClusterSyncJobOutputTask(data: SyncDbClusterJobOutput['payload'], user: UserCtx): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT as const,
       payload: data,
@@ -160,10 +146,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
    * @param discussionId
    * @param notify - list of usernames to notify OR 'all' to notify all users OR 'author' to notify the author only
    */
-  async createNewDiscussionNotificationTask(
-    discussionId: number,
-    notify: NotifyType,
-  ): Promise<Job> {
+  async createNewDiscussionNotificationTask(discussionId: number, notify: NotifyType): Promise<Job> {
     const wrapped = {
       type: TASK_TYPE.NOTIFY_NEW_DISCUSSION as const,
       payload: {

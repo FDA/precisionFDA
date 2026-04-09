@@ -1,7 +1,7 @@
+import { expect } from 'chai'
 import { config } from '@shared/config'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { ChallengeEntityLinkProvider } from '@shared/domain/entity/entity-link/challenge-entity-link.provider'
-import { expect } from 'chai'
 
 describe('ChallengeEntityLinkProvider', () => {
   const ID = 1

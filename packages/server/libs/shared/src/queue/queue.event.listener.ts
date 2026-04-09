@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { QueueProxy } from '@shared/queue/queue.proxy'
-import { TaskWithAuth } from '@shared/queue/task.input'
 import { Job, Queue } from 'bull'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { QueueProxy } from '@shared/queue/queue.proxy'
+import { TaskWithAuth } from '@shared/queue/task.input'
 
 @Injectable()
 export class QueueEventListener {
@@ -22,7 +22,7 @@ export class QueueEventListener {
   }
 
   private init() {
-    this.queues.forEach((queue) => {
+    this.queues.forEach(queue => {
       queue.on('failed', (job: Job, error: Error) => {
         try {
           this.logger.error({ job: this.getJobInfo(job), error }, 'Job failed')

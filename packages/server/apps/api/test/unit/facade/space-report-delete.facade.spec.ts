@@ -1,12 +1,12 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
-import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { expect } from 'chai'
 import type { SinonStub } from 'sinon'
 import { stub } from 'sinon'
-import { SpaceReportDeleteFacade } from '../../../src/facade/space-report/space-report-delete.facade'
+import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { SpaceReportDeleteFacade } from '../../../src/facade/space-report/space-report-delete.facade'
 
 describe('SpaceReportDeleteFacade', () => {
   const SPACE_REPORT_1_ID = 0
@@ -145,14 +145,14 @@ describe('SpaceReportDeleteFacade', () => {
     expect(await result).to.be.eq(SPACE_REPORT_IDS)
   })
 
-  async function expectReject(error: Error | ((...args: never) => unknown), message?: string, user?) {
+  async function expectReject(error: Error | ((...args: never) => unknown), message?: string, user?): Promise<void> {
     const result = getInstance(user).deleteSpaceReports(SPACE_REPORT_IDS)
 
     await expect(result).to.be.rejectedWith(error, message)
     await expect(transactionalStub.getCall(0).returnValue).to.be.rejected()
   }
 
-  function getInstance(user = { id: USER_1_ID }) {
+  function getInstance(user: { id: number } = { id: USER_1_ID }): SpaceReportDeleteFacade {
     const em = { transactional: transactionalStub } as unknown as SqlEntityManager
 
     const spaceReportService = {
@@ -165,11 +165,6 @@ describe('SpaceReportDeleteFacade', () => {
       removeNodes: nodesRemoveStub,
     } as unknown as RemoveNodesFacade
 
-    return new SpaceReportDeleteFacade(
-      em,
-      spaceReportService,
-      removeNodesService,
-      user as UserContext,
-    )
+    return new SpaceReportDeleteFacade(em, spaceReportService, removeNodesService, user as UserContext)
   }
 })

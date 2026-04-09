@@ -17,11 +17,7 @@ export class SpaceMembershipUpdateApiFacade {
   }
 
   async recoverLeadByAdmin(spaceId: number, dto: SpaceLeadRecoverDTO): Promise<void> {
-    await this.spaceMembershipUpdateFacade.recoverSpaceLead(
-      spaceId,
-      dto.currentLeadMembershipId,
-      dto.newLeadDxuser,
-    )
+    await this.spaceMembershipUpdateFacade.recoverSpaceLead(spaceId, dto.currentLeadMembershipId, dto.newLeadDxuser)
     await this.dbClusterSynchronizeFacade.synchronizeInSpace(spaceId)
   }
 }

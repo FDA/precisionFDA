@@ -15,34 +15,30 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common'
+import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger'
+import archiver from 'archiver'
+import axios from 'axios'
+import { Response } from 'express'
 import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
+import { ExistingFileSet, ResolvePath, SelectedNode } from '@shared/domain/user-file/user-file.types'
+import { GetUploadURLResponse } from '@shared/platform-client/platform-client.responses'
 import { createCloseFileJobTask } from '@shared/queue'
+import { TimeUtils } from '@shared/utils/time.utils'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
-import archiver from 'archiver'
-import axios from 'axios'
-import { Response } from 'express'
+import { UserFileBulkDownloadFacade } from '../facade/user-file/user-file-bulk-download.facade'
+import { UserFileDownloadFacade } from '../facade/user-file/user-file-download.facade'
 import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { DownloadLinkParamDto } from './model/download-link-param.dto'
-import { FilesValidateCopyingBodyDto } from './model/file-validate-copying-body.dto'
-import { UserFileDownloadFacade } from '../facade/user-file/user-file-download.facade'
-import {
-  ExistingFileSet,
-  ResolvePath,
-  SelectedNode,
-} from '@shared/domain/user-file/user-file.types'
-import { TimeUtils } from '@shared/utils/time.utils'
-import { UserFileBulkDownloadFacade } from '../facade/user-file/user-file-bulk-download.facade'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger'
-import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
-import { GetUploadURLResponse } from '@shared/platform-client/platform-client.responses'
-import { GetUploadUrlQueryDTO } from './model/get-upload-url-query.dto'
 import { FileUidParamDTO } from './model/file-uid-param.dto'
+import { FilesValidateCopyingBodyDto } from './model/file-validate-copying-body.dto'
+import { GetUploadUrlQueryDTO } from './model/get-upload-url-query.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/files')
@@ -119,10 +115,7 @@ export class FilesController {
     @Res() res: Response,
     @Query('folder_id', new ParseIntPipe({ optional: true })) folderId?: number,
   ): Promise<void> {
-    const filesToBeDownloaded = await this.userFileBulkDownloadFacade.composeFilesForBulkDownload(
-      ids,
-      folderId,
-    )
+    const filesToBeDownloaded = await this.userFileBulkDownloadFacade.composeFilesForBulkDownload(ids, folderId)
 
     const zip = archiver('zip', { zlib: { level: 9 } })
 
@@ -130,7 +123,7 @@ export class FilesController {
     zip.pipe(res)
 
     let archiverError: Error | undefined
-    zip.on('error', (err) => {
+    zip.on('error', err => {
       this.logger.error('archiver error', err)
       res.status(500).send(`Error creating zip: ${err?.message}`)
       archiverError = err
@@ -150,7 +143,7 @@ export class FilesController {
           response.data.on('end', () => {
             resolve(true)
           })
-          response.data.on('error', (error) => {
+          response.data.on('error', error => {
             reject(error)
           })
           zip.append(response.data, { name: file.path })
@@ -177,9 +170,7 @@ export class FilesController {
 
   @UseGuards(InternalRouteGuard)
   @Get('/path-resolver')
-  async resolvePath(
-    @Query(new CustomValidationPipe({ transform: true })) query: ResolvePathDTO,
-  ): Promise<ResolvePath> {
+  async resolvePath(@Query(new CustomValidationPipe({ transform: true })) query: ResolvePathDTO): Promise<ResolvePath> {
     return await this.userFileResolverFacade.resolvePath(query)
   }
 
@@ -196,10 +187,7 @@ export class FilesController {
   }
 
   @Get('/:uid/download-link')
-  getDownloadLink(
-    @Param() params: DownloadLinkParamDto,
-    @Query() options: DownloadLinkOptionsDto,
-  ): Promise<string> {
+  getDownloadLink(@Param() params: DownloadLinkParamDto, @Query() options: DownloadLinkOptionsDto): Promise<string> {
     return this.userFileDownloadFacade.getDownloadLink(params.uid, options)
   }
 

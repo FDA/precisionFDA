@@ -1,17 +1,17 @@
 import { LockMode, Ref, Reference } from '@mikro-orm/core'
 import type { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { restore, stub } from 'sinon'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
-import { Space } from '@shared/domain/space/space.entity'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { InvalidStateError } from '@shared/errors'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { SpaceReportResultGenerateFacade } from '@shared/facade/space-report/space-report-result-generate.facade'
-import { expect } from 'chai'
-import { restore, stub } from 'sinon'
 
 describe('SpaceReportResultGenerateFacade', () => {
   const REPORT_ID = 0
@@ -266,9 +266,7 @@ describe('SpaceReportResultGenerateFacade', () => {
   function stubForReport(report) {
     findOneStub.reset()
     findOneStub.throws()
-    findOneStub
-      .withArgs(SpaceReport, REPORT_ID, { lockMode: LockMode.PESSIMISTIC_WRITE })
-      .resolves(report)
+    findOneStub.withArgs(SpaceReport, REPORT_ID, { lockMode: LockMode.PESSIMISTIC_WRITE }).resolves(report)
 
     populateStub.reset()
     populateStub.throws()

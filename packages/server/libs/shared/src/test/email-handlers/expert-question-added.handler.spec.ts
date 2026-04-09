@@ -1,15 +1,15 @@
-import { stub } from 'sinon'
+import { Reference } from '@mikro-orm/core'
 import { expect } from 'chai'
-import { User } from '@shared/domain/user/user.entity'
+import { stub } from 'sinon'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { ExpertQuestionAddedHandler } from '@shared/domain/email/templates/handlers/expert-question-added.handler'
+import { Expert } from '@shared/domain/expert//entity/expert.entity'
 import { ExpertQuestion } from '@shared/domain/expert-question//entity/expert-question.entity'
 import { ExpertQuestionRepository } from '@shared/domain/expert-question//repository/expert-question.repository'
-import { EmailClient } from '@shared/services/email-client'
 import { Organization } from '@shared/domain/org/organization.entity'
-import { Reference } from '@mikro-orm/core'
-import { Expert } from '@shared/domain/expert//entity/expert.entity'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { User } from '@shared/domain/user/user.entity'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('ExpertQuestionAddedHandler', () => {
   const EXPERT_QUESTION_ID = 10
@@ -65,9 +65,7 @@ describe('ExpertQuestionAddedHandler', () => {
       await handler.sendEmail(input)
 
       expect(emailClientSendEmailStub.calledOnce).to.be.true()
-      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
-        EMAIL_TYPES.expertQuestionAdded,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.expertQuestionAdded)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(expertUser.email)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
         `A new question was submitted by ${authorUser.firstName} ${authorUser.lastName}`,

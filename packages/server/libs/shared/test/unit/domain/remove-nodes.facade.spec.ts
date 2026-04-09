@@ -1,28 +1,28 @@
-import { EventHelper } from '@shared/domain/event/event.helper'
-import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { ComparisonService } from '@shared/domain/comparison/comparison.service'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
-import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
-import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { ComparisonService } from '@shared/domain/comparison/comparison.service'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { EventHelper } from '@shared/domain/event/event.helper'
+import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
-import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
-import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
-import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
+import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { PlatformClient } from '@shared/platform-client'
 
 describe('RemoveNodesFacade', () => {
   const USER_ID = 1
@@ -228,15 +228,9 @@ describe('RemoveNodesFacade', () => {
       expect(nodeServiceLoadNodesStub.calledWith(ids, {})).to.be.true()
 
       expect(nodeServiceValidateProtectedSpacesStub.calledThrice).to.be.true()
-      expect(
-        nodeServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node1),
-      ).to.be.true()
-      expect(
-        nodeServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node2),
-      ).to.be.true()
-      expect(
-        nodeServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node3),
-      ).to.be.true()
+      expect(nodeServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node1)).to.be.true()
+      expect(nodeServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node2)).to.be.true()
+      expect(nodeServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node3)).to.be.true()
 
       expect(nodeServiceValidateEditableByStub.calledThrice).to.be.true()
       expect(nodeServiceValidateEditableByStub.calledWith(node1)).to.be.true()
@@ -329,20 +323,10 @@ describe('RemoveNodesFacade', () => {
 
       expect(eventHelperCreateFileEventStub.calledTwice).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(
-          EVENT_TYPES.FILE_DELETED,
-          node1,
-          '/path/to/node1',
-          userCtx,
-        ),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', userCtx),
       ).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(
-          EVENT_TYPES.FILE_DELETED,
-          node2,
-          '/path/to/node2',
-          userCtx,
-        ),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node2, '/path/to/node2', userCtx),
       ).to.be.true()
       expect(userClientFileRemoveStub.calledOnce).to.be.true()
       expect(
@@ -445,20 +429,10 @@ describe('RemoveNodesFacade', () => {
 
       expect(eventHelperCreateFileEventStub.calledTwice).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(
-          EVENT_TYPES.FILE_DELETED,
-          node1,
-          '/path/to/node1',
-          userCtx,
-        ),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', userCtx),
       ).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(
-          EVENT_TYPES.FILE_DELETED,
-          node2,
-          '/path/to/node2',
-          userCtx,
-        ),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node2, '/path/to/node2', userCtx),
       ).to.be.true()
 
       expect(userClientFileRemoveStub.calledOnce).to.be.true()
@@ -580,12 +554,7 @@ describe('RemoveNodesFacade', () => {
 
       expect(eventHelperCreateFileEventStub.calledOnce).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(
-          EVENT_TYPES.FILE_DELETED,
-          node1,
-          '/path/to/node1',
-          userCtx,
-        ),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', userCtx),
       ).to.be.true()
 
       expect(userClientFileRemoveStub.calledOnce).to.be.true()

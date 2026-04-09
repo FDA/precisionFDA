@@ -1,4 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { Job } from '@shared/domain/job/job.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
@@ -7,8 +9,6 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
-import { expect } from 'chai'
-import { SinonStub, stub } from 'sinon'
 
 describe('JobProvenanceDataService', () => {
   const NAME = 'name'

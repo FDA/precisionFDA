@@ -1,8 +1,5 @@
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 
 export class CliSpaceMemberDTO {
   id: number

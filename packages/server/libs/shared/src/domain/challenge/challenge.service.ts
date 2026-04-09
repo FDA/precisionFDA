@@ -4,25 +4,22 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { CaptchaService } from '@shared/captcha/captcha.service'
 import { config } from '@shared/config'
 import { App } from '@shared/domain/app/app.entity'
-import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
-import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
+import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { AssignScoringAppDTO } from '@shared/domain/challenge/dto/assign-scoring-app.dto'
-import {
-  ChallengePaginationDto,
-  FILTER_STATUS,
-} from '@shared/domain/challenge/dto/challenge-pagination.dto'
 import { ChallengeDTO } from '@shared/domain/challenge/dto/challenge.dto'
+import { ChallengePaginationDto, FILTER_STATUS } from '@shared/domain/challenge/dto/challenge-pagination.dto'
 import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
 import { ProposeChallengeDTO } from '@shared/domain/challenge/dto/propose-challenge.dto'
 import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
+import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
 import {
   CHALLENGE_CONTENT_TYPE,
   UpdateChallengeContentDTO,
 } from '@shared/domain/challenge/dto/update-challenge-content.dto'
-import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
 import { Submission } from '@shared/domain/challenge/submission.entity'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -30,8 +27,8 @@ import { ChallengeFollow } from '@shared/domain/follow/challenge-follow.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { USER_STATE, User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { NotFoundError, ValidationError } from '@shared/errors'
 import { Searchable } from '@shared/interface/searchable'
@@ -60,7 +57,7 @@ export class ChallengeService implements Searchable<Challenge> {
   async createChallenge(dto: CreateChallengeDTO, spaceId: number): Promise<Challenge> {
     this.logger.log(`Creating new challenge: ${dto.name}`)
 
-    return this.em.transactional(async (em) => {
+    return this.em.transactional(async em => {
       const challenge = dto.buildEntity()
 
       const appOwner = await em.findOne(User, {
@@ -84,10 +81,7 @@ export class ChallengeService implements Searchable<Challenge> {
   async updateChallenge(id: number, body: UpdateChallengeDTO): Promise<Challenge> {
     const challenge = await this.challengeRepo.findOneOrFail(id)
 
-    if (
-      ![CHALLENGE_STATUS.SETUP, CHALLENGE_STATUS.PRE_REGISTRATION].includes(body.status) &&
-      challenge.appId == null
-    ) {
+    if (![CHALLENGE_STATUS.SETUP, CHALLENGE_STATUS.PRE_REGISTRATION].includes(body.status) && challenge.appId == null) {
       throw new ValidationError('Scoring app must be assigned to the challenge!')
     }
 
@@ -207,10 +201,7 @@ export class ChallengeService implements Searchable<Challenge> {
     return bot
   }
 
-  async createChallengeResource(
-    challengeId: number,
-    userFileId: number,
-  ): Promise<ChallengeResource> {
+  async createChallengeResource(challengeId: number, userFileId: number): Promise<ChallengeResource> {
     const challengeResource = new ChallengeResource(this.user.id, challengeId, userFileId)
 
     await this.em.persistAndFlush(challengeResource)
@@ -263,8 +254,7 @@ export class ChallengeService implements Searchable<Challenge> {
    */
   async updateResourceUrl(fileUid: string): Promise<void> {
     this.logger.log(`Updating resource url for fileUid ${fileUid}`)
-    const challengeResources =
-      await this.challengeResourceRepo.findChallengeResourcesByFileUid(fileUid)
+    const challengeResources = await this.challengeResourceRepo.findChallengeResourcesByFileUid(fileUid)
 
     if (challengeResources.length === 0) {
       throw new NotFoundError(`Challenge resource for fileUid ${fileUid} was not found`)
@@ -307,10 +297,7 @@ export class ChallengeService implements Searchable<Challenge> {
     let canProposeChallenge = true
 
     if (!this.user.id || !this.user.accessToken || !this.user.sessionId) {
-      canProposeChallenge = await this.captchaService.verifyCaptchaAssessment(
-        body.captchaValue,
-        'propose',
-      )
+      canProposeChallenge = await this.captchaService.verifyCaptchaAssessment(body.captchaValue, 'propose')
     }
 
     if (canProposeChallenge) {
@@ -337,11 +324,7 @@ export class ChallengeService implements Searchable<Challenge> {
     }
 
     if (
-      [
-        CHALLENGE_STATUS.OPEN,
-        CHALLENGE_STATUS.ARCHIVED,
-        CHALLENGE_STATUS.RESULT_ANNOUNCED,
-      ].includes(challenge.status)
+      [CHALLENGE_STATUS.OPEN, CHALLENGE_STATUS.ARCHIVED, CHALLENGE_STATUS.RESULT_ANNOUNCED].includes(challenge.status)
     ) {
       throw new ValidationError('Cannot assign scoring app to challenge with this status!')
     }
@@ -377,7 +360,7 @@ export class ChallengeService implements Searchable<Challenge> {
       { populate: ['user', 'job', 'job.inputFiles'] },
     )
 
-    return mySubmissions.map((submission) => {
+    return mySubmissions.map(submission => {
       return SubmissionDTO.mapToDTO(submission)
     })
   }
@@ -399,7 +382,7 @@ export class ChallengeService implements Searchable<Challenge> {
       { populate: ['user', 'job', 'job.inputFiles'] },
     )
 
-    return visibleSubmissions.map((submission) => {
+    return visibleSubmissions.map(submission => {
       return SubmissionDTO.mapToDTO(submission)
     })
   }
@@ -428,7 +411,7 @@ export class ChallengeService implements Searchable<Challenge> {
     }
 
     const response = await this.challengeRepo.paginateAccessible(pagination, where)
-    const challenges = response.data.map((challenge) => ChallengeDTO.mapToDTO(challenge))
+    const challenges = response.data.map(challenge => ChallengeDTO.mapToDTO(challenge))
     return { ...response, data: challenges }
   }
 

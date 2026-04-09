@@ -1,14 +1,14 @@
 import { Inject, Logger } from '@nestjs/common'
-import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
-import { PlatformClient } from '@shared/platform-client'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { DNANEXUS_INVALID_EMAIL, ORG_EVERYONE } from '@shared/config/consts'
-import { Resource, User, USER_STATE } from '@shared/domain/user/user.entity'
-import { ValidationError } from '@shared/errors'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
+import { Resource, USER_STATE, User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ValidationError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { PlatformClient } from '@shared/platform-client'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 
 export class UserManagementService {
   @ServiceLogger()
@@ -85,21 +85,18 @@ export class UserManagementService {
         $in: ids,
       },
     })
-    const invalidUsers = users.filter((user) => user.userState !== USER_STATE.DEACTIVATED)
+    const invalidUsers = users.filter(user => user.userState !== USER_STATE.DEACTIVATED)
     if (invalidUsers.length > 0) {
       throw new ValidationError(
-        `Cannot activate other than deactivated users: ${invalidUsers.map((user) => user.dxuser).join(', ')}`,
+        `Cannot activate other than deactivated users: ${invalidUsers.map(user => user.dxuser).join(', ')}`,
       )
     }
 
     await this.userRepo.getEntityManager().transactional(() => {
-      users.forEach((user) => {
+      users.forEach(user => {
         user.disableMessage = null
         if (user.email) {
-          user.email = Buffer.from(
-            user.email.replace(DNANEXUS_INVALID_EMAIL, '\n'),
-            'base64',
-          ).toString('utf8')
+          user.email = Buffer.from(user.email.replace(DNANEXUS_INVALID_EMAIL, '\n'), 'base64').toString('utf8')
         }
         if (user.normalizedEmail) {
           user.normalizedEmail = Buffer.from(
@@ -122,10 +119,10 @@ export class UserManagementService {
     const users = await this.userRepo.find({
       id: { $in: ids },
     })
-    const invalidUsers = users.filter((user) => user.userState !== USER_STATE.ENABLED)
+    const invalidUsers = users.filter(user => user.userState !== USER_STATE.ENABLED)
     if (invalidUsers.length > 0) {
       throw new ValidationError(
-        `Cannot deactivate non-enabled users: ${invalidUsers.map((user) => user.dxuser).join(', ')}`,
+        `Cannot deactivate non-enabled users: ${invalidUsers.map(user => user.dxuser).join(', ')}`,
       )
     }
 
@@ -133,7 +130,7 @@ export class UserManagementService {
       Buffer.from(email, 'utf8').toString('base64').replace('\n', '') + DNANEXUS_INVALID_EMAIL
 
     await this.userRepo.getEntityManager().transactional(() => {
-      users.forEach((user) => {
+      users.forEach(user => {
         user.disableMessage = `Deactivated by admin: ${this.user.dxuser}`
         user.userState = USER_STATE.DEACTIVATED
 

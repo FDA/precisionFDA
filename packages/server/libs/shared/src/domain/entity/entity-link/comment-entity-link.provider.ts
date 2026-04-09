@@ -49,11 +49,7 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
     }
   }
 
-  private getDiscussionUrlSegment(
-    discussionID: number,
-    spaceID?: number,
-    answerID?: number,
-  ): string {
+  private getDiscussionUrlSegment(discussionID: number, spaceID?: number, answerID?: number): string {
     const spaceSegment = spaceID ? `spaces/${spaceID}/` : 'home/'
     const answerSegment = answerID ? `/answers/${answerID}` : ''
     return `${spaceSegment}discussions/${discussionID}${answerSegment}`

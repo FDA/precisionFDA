@@ -1,9 +1,9 @@
 import { INestApplication } from '@nestjs/common'
-import { database } from '@shared/database'
-import { db, mocks } from '@shared/test'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
+import { database } from '@shared/database'
+import { db, mocks } from '@shared/test'
 import { bootstrap } from '../src/bootstrap'
 
 chai.use(chaiAsPromised)

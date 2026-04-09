@@ -2,6 +2,7 @@
 package main
 
 import (
+	"crypto/fips140"
 	"crypto/tls"
 	"flag"
 	"fmt"
@@ -12,11 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	_ "crypto/tls/fipsonly"
-
 	"dnanexus.com/precision-fda-cli/helpers"
 	"dnanexus.com/precision-fda-cli/precisionfda"
-	"rsc.io/goversion/version"
 )
 
 // CONSTANTS
@@ -25,6 +23,10 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 
 func getUsageMessage() string {
+	jobCmds := ""
+	if jobExecutionEnabled == "true" {
+		jobCmds = "\n   pfda run\n   pfda terminate"
+	}
 	return fmt.Sprintf(
 		`********************************
 PFDA COMMAND LINE TOOL v%s
@@ -52,7 +54,7 @@ All available commands:
    pfda mkdir
    pfda rm
    pfda rmdir
-   pfda rotate-password
+   pfda rotate-password%s
    pfda set-properties
    pfda set-tags
    pfda upload-asset
@@ -66,7 +68,7 @@ Command specific help section with description, examples and available flags:
 To print version info and exit:
    pfda -version
 
-Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli`, Version)
+Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli`, Version, jobCmds)
 }
 
 //
@@ -89,10 +91,11 @@ var defaultURL = "precision.fda.gov"
 
 // these variables are populated by -ldflags -X command line options
 var (
-	commitID  string
-	Version   string
-	BuildTime string
-	OsArch    string
+	commitID            string
+	Version             string
+	BuildTime           string
+	OsArch              string
+	jobExecutionEnabled string
 )
 
 // ACTION FUNCTIONS
@@ -163,8 +166,8 @@ var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string) err
 	return client.DescribeEntity(*entityID)
 }
 
-var invokeLsSpaces = func(client precisionfda.IPFDAClient, flags map[string]bool) error {
-	return client.LsSpaces(flags)
+var invokeLsSpaces = func(client precisionfda.IPFDAClient, state string, types []string, protected bool) error {
+	return client.LsSpaces(state, types, protected)
 }
 
 var invokeListing = func(client precisionfda.IPFDAClient, folderID *string, spaceID *string, flags map[string]bool) error {
@@ -175,16 +178,16 @@ var invokeLsApps = func(client precisionfda.IPFDAClient, spaceID *string, flags 
 	return client.LsApps(*spaceID, flags)
 }
 
-var invokeLsAssets = func(client precisionfda.IPFDAClient, spaceID *string, flags map[string]bool) error {
-	return client.LsAssets(*spaceID, flags)
+var invokeLsAssets = func(client precisionfda.IPFDAClient, scope string) error {
+	return client.LsAssets(scope)
 }
 
 var invokeLsWorkflows = func(client precisionfda.IPFDAClient, spaceID *string, flags map[string]bool) error {
 	return client.LsWorkflows(*spaceID, flags)
 }
 
-var invokeLsExecutions = func(client precisionfda.IPFDAClient, spaceID *string, flags map[string]bool) error {
-	return client.LsExecutions(*spaceID, flags)
+var invokeLsExecutions = func(client precisionfda.IPFDAClient, scope string) error {
+	return client.LsExecutions(scope)
 }
 
 var invokeLsMembers = func(client precisionfda.IPFDAClient, spaceID *string) error {
@@ -192,7 +195,7 @@ var invokeLsMembers = func(client precisionfda.IPFDAClient, spaceID *string) err
 }
 
 var invokeLsDiscussions = func(client precisionfda.IPFDAClient, spaceID *string) error {
-	return client.LsDiscussions(*spaceID, map[string]bool{})
+	return client.LsDiscussions(*spaceID)
 }
 
 var invokeMkdir = func(client precisionfda.IPFDAClient, names *[]string, folderID *string, spaceID *string, parents bool) error {
@@ -252,6 +255,14 @@ var invokeRotateDbClusterPassword = func(client precisionfda.IPFDAClient, dbClus
 	return client.RotateDbClusterPassword(*dbClusterId)
 }
 
+var invokeRunApp = func(client precisionfda.IPFDAClient, appUID *string, jsonConfig *string) error {
+	return client.RunApp(*appUID, *jsonConfig)
+}
+
+var invokeTerminateJob = func(client precisionfda.IPFDAClient, jobUID *string) error {
+	return client.TerminateJob(*jobUID)
+}
+
 var invokeRefreshToken = func(client precisionfda.IPFDAClient, autoRefresh bool) (string, error) {
 	return client.RefreshToken(autoRefresh)
 }
@@ -277,8 +288,6 @@ func mainInternal() int {
 	fileName := flag.String("name", "", "Name of uploaded file.")
 	readmeFilePath := flag.String("readme", "", "Readme file for uploaded asset. Must end with '.txt' or '.md'.")
 	fileID := flag.String("file-id", "", "File ID of the file to be downloaded")
-	appID := flag.String("app-id", "", "App ID of the app to be described")
-	workflowID := flag.String("workflow-id", "", "Workflow ID of the workflow to be described")
 	folderID := flag.String("folder-id", "", "Folder ID of the target folder")
 	spaceID := flag.String("space-id", "", "Space ID of the target space")
 	portalID := flag.String("portal-id", "", "Slug or ID of the target portal")
@@ -464,10 +473,6 @@ func mainInternal() int {
 			return helpers.ErrorFromString("Path for upload is required - provide it as an argument or stdin", *flagJson)
 		}
 
-		if *fileName != "" && !*flagJson {
-			fmt.Println(">> Filename flag ignored for upload")
-		}
-
 		// uploading more than one file/folder
 		if len(args) > 1 {
 			err := invokeUploadMultipleFiles(pfdaclient, &args, folderID, spaceID, inputChunkSize, inputNumRoutines)
@@ -505,23 +510,19 @@ func mainInternal() int {
 			return helpers.PrintDownloadHelp()
 		}
 
-		if *fileID == "" && *folderID == "" && *spaceID == "" && len(args) == 0 {
-			return helpers.ErrorFromString("File ID or name of the file to be downloaded is required: [-file-id <FILE_ID>]\n  Or provide either of Space and/or Folder ID you want to bulk-download: [-folder-id <FOLDER_ID> -space-id <SPACE_ID>]", *flagJson)
+		// TODO: remove deprecated -file-id flag in V3.0.0
+		if *fileID != "" {
+			return helpers.ErrorFromString("The '-file-id' flag is deprecated. Please provide the file ID as a positional argument instead. Use -help flag to print help section.", *flagJson)
 		}
 
-		if *fileID != "" && *folderID != "" {
-			return helpers.ErrorFromString("Cannot combine file-id and folder-id flags", *flagJson)
+		if *folderID == "" && *spaceID == "" && len(args) == 0 {
+			return helpers.ErrorFromString("File ID or name of the file to be downloaded is required. Use -help flag to print help section.", *flagJson)
 		}
 
 		// we need tri-state as there is different behavior for -overwrite=false and completely omitted -overwrite flag
 		validOverwrite := map[string]bool{"": true, "true": true, "false": true}
 		if !validOverwrite[*flagOverwriteFile] {
 			return helpers.ErrorFromString("Invalid value for -overwrite flag - acceptable values are true, false, or omit it completely", *flagJson)
-		}
-
-		// Override args with -file-id if provided
-		if *fileID != "" {
-			args = []string{*fileID}
 		}
 
 		err := invokeDownload(pfdaclient, &args, folderID, spaceID, *flagPublic, recursive, outputFilePath, flagOverwriteFile)
@@ -538,33 +539,11 @@ func mainInternal() int {
 			return helpers.ErrorFromString("File ID is required", *flagJson)
 		}
 
-		if !helpers.IsFileId(args[0]) {
+		if !helpers.IsFileUid(args[0]) {
 			return helpers.ErrorFromString(fmt.Sprintf("File ID '%s' is invalid", args[0]), *flagJson)
 		}
 
 		err := invokeFileViewLink(pfdaclient, &args[0], *flagPreauthenticated, *flagDuration)
-		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
-		}
-
-	//	TODO: REMOVE IN V3.0.0
-	case "describe-app":
-
-		fmt.Println("\nWARNING! THIS COMMAND IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda describe <APP_ID>")
-
-		if help {
-			return helpers.PrintDescribeAppHelp()
-		}
-
-		if *appID != "" {
-			args = []string{*appID}
-		}
-
-		if len(args) == 0 {
-			return helpers.ErrorFromString("App ID is required", *flagJson)
-		}
-
-		err := invokeDescribe(pfdaclient, &args[0])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
@@ -581,7 +560,7 @@ func mainInternal() int {
 
 		entityType := helpers.ParseEntityType(args[0])
 		if entityType == "" {
-			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, worklfow.", args[0]), *flagJson)
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, workflow.", args[0]), *flagJson)
 		}
 
 		err := invokeDescribe(pfdaclient, &args[0])
@@ -607,28 +586,6 @@ func mainInternal() int {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
 
-	//	TODO: REMOVE IN V3.0.0
-	case "describe-workflow":
-
-		fmt.Println("\nWARNING! THIS COMMAND IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda describe <WORKFLOW_ID>")
-
-		if help {
-			return helpers.PrintDescribeWorkflowHelp()
-		}
-
-		if *workflowID != "" {
-			args = []string{*workflowID}
-		}
-
-		if len(args) == 0 {
-			return helpers.ErrorFromString("Workflow ID is required", *flagJson)
-		}
-
-		err := invokeDescribe(pfdaclient, &args[0])
-		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
-		}
-
 	case "ls-apps":
 		if help {
 			return helpers.PrintLsAppsHelp()
@@ -650,12 +607,14 @@ func mainInternal() int {
 			return helpers.PrintLsAssetsHelp()
 		}
 
-		flags := map[string]bool{}
+		scope := "private"
 		if *flagPublic {
-			flags["public_scope"] = true
+			scope = "public"
+		} else if *spaceID != "" {
+			scope = "space-" + *spaceID
 		}
 
-		err := invokeLsAssets(pfdaclient, spaceID, flags)
+		err := invokeLsAssets(pfdaclient, scope)
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
@@ -679,38 +638,50 @@ func mainInternal() int {
 			return helpers.PrintLsExecutionsHelp()
 		}
 
-		flags := map[string]bool{}
+		scope := "private"
 		if *flagPublic {
-			flags["public_scope"] = true
+			scope = "public"
+		} else if *spaceID != "" {
+			scope = "space-" + *spaceID
 		}
 
-		err := invokeLsExecutions(pfdaclient, spaceID, flags)
+		err := invokeLsExecutions(pfdaclient, scope)
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 
 		}
 
-		// REMOVE 'list-spaces' in V3.0.0
-	case "ls-spaces", "list-spaces":
+	case "ls-spaces":
 		if help {
 			return helpers.PrintLsSpacesHelp()
 		}
 
-		flags := map[string]bool{
-			// state of space, must be exclusive
-			"locked":      *flagLocked,
-			"unactivated": *flagUnactivated,
-			// types of space flag, multiple allowed
-			"protected":     *flagProtected,
-			"review":        *flagReview,
-			"groups":        *flagGroups,
-			"private_type":  *flagPrivate,
-			"administrator": *flagAdministrator,
-			"government":    *flagGovernment,
-			// present as JSON / pretty print
-			"json": *flagJson,
+		// Build state param (exclusive: locked > unactivated > active default)
+		state := ""
+		if *flagLocked {
+			state = "locked"
+		} else if *flagUnactivated {
+			state = "unactivated"
 		}
-		err := invokeLsSpaces(pfdaclient, flags)
+
+		// Build types param using numeric SPACE_TYPE enum values
+		typesList := []string{}
+		if *flagGroups {
+			typesList = append(typesList, "0")
+		}
+		if *flagReview {
+			typesList = append(typesList, "1")
+		}
+		if *flagPrivate {
+			typesList = append(typesList, "3")
+		}
+		if *flagGovernment {
+			typesList = append(typesList, "4")
+		}
+		if *flagAdministrator {
+			typesList = append(typesList, "5")
+		}
+		err := invokeLsSpaces(pfdaclient, state, typesList, *flagProtected)
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
@@ -886,7 +857,7 @@ func mainInternal() int {
 		}
 		entityType := helpers.ParseEntityType(args[0])
 		if entityType == "" {
-			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, worklfow.", args[0]), *flagJson)
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, workflow.", args[0]), *flagJson)
 		}
 
 		err := invokeSetTags(pfdaclient, args[0], args[1:])
@@ -902,7 +873,7 @@ func mainInternal() int {
 		}
 		entityType := helpers.ParseEntityType(args[0])
 		if entityType == "" {
-			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, worklfow.", args[0]), *flagJson)
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, workflow.", args[0]), *flagJson)
 		}
 
 		err := invokeSetProperties(pfdaclient, args[0], args[1])
@@ -949,6 +920,64 @@ func mainInternal() int {
 
 		}
 
+	case "run":
+
+		if jobExecutionEnabled != "true" {
+			return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found ! Please check all available commands via -help flag", command), *flagJson)
+		}
+
+		if help {
+			return helpers.PrintRunAppHelp()
+		}
+
+		if len(args) < 1 {
+			return helpers.ErrorFromString("App UID is required: pfda run <app_uid> <json_config>", *flagJson)
+		}
+
+		appUID := args[0]
+		jsonConfig := "{}"
+		if len(args) >= 2 {
+			jsonConfig = args[1]
+		}
+
+		if !helpers.IsAppUid(appUID) {
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid app UID format: '%s'", appUID), *flagJson)
+		}
+
+		if !helpers.IsValidJSONObject(jsonConfig) {
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid JSON config (must be a JSON object): '%s'", jsonConfig), *flagJson)
+		}
+
+		err := invokeRunApp(pfdaclient, &appUID, &jsonConfig)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "terminate":
+
+		if jobExecutionEnabled != "true" {
+			return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found ! Please check all available commands via -help flag", command), *flagJson)
+		}
+
+		if help {
+			return helpers.PrintTerminateHelp()
+		}
+
+		if len(args) < 1 {
+			return helpers.ErrorFromString("Job UID is required: pfda terminate <job_uid>", *flagJson)
+		}
+
+		jobUID := args[0]
+
+		if !helpers.IsJobUid(jobUID) {
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid job UID format: '%s'", jobUID), *flagJson)
+		}
+
+		err := invokeTerminateJob(pfdaclient, &jobUID)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
 	case "refresh-key":
 		// add option for auto-refresh later
 		newToken, err := invokeRefreshToken(pfdaclient, false)
@@ -957,7 +986,7 @@ func mainInternal() int {
 		}
 
 		if configErr != nil {
-			return helpers.ErrorFromString(fmt.Sprintf("Could not save authorization key in config file '%s': %s", helpers.ConfigPath, err.Error()), *flagJson)
+			return helpers.ErrorFromString(fmt.Sprintf("Could not save authorization key in config file '%s': %s", helpers.ConfigPath, configErr.Error()), *flagJson)
 		}
 
 		config.Key = newToken
@@ -1028,21 +1057,10 @@ func checkLatestVersion(pfdaclient *precisionfda.PFDAClient) {
 }
 
 func printCryptoInfo() {
-	executable, err := os.Executable()
-	if err != nil {
-		fmt.Println("Unable to retrieve executable path")
-	}
-
-	v, err := version.ReadExe(executable)
-	if err != nil {
-		fmt.Println("Unable to retrieve goversion info")
-	}
-
-	// TODO: find a new way to verify the build is FIPS 140-2 compliant.
-	if v.FIPSOnly {
-		fmt.Println("  FIPS        :    +crypto/tls/fipsonly verified")
+	if fips140.Enabled() {
+		fmt.Printf("  FIPS 140-3  :    enabled (module %s)\n", fips140.Version())
 	} else {
-		fmt.Println("  FIPS        :    warning FIPS mode not verified")
+		fmt.Println("  FIPS 140-3  :    warning: FIPS mode not active")
 	}
 }
 

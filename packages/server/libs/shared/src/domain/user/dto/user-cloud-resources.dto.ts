@@ -1,5 +1,5 @@
-import { CloudResourcesResponse } from '@shared/platform-client/platform-client.responses'
 import { User } from '@shared/domain/user/user.entity'
+import { CloudResourcesResponse } from '@shared/platform-client/platform-client.responses'
 
 export class UserCloudResourcesDTO {
   computeCharges: number

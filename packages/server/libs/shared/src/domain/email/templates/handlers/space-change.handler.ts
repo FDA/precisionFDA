@@ -1,16 +1,13 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import {
-  EmailTypeToContextMap,
-  SpaceChangedContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToContextMap, SpaceChangedContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { ErrorCodes, NotFoundError } from '@shared/errors'
@@ -34,9 +31,7 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
     super(emailClient)
   }
 
-  protected async getContextualData(
-    input: SpaceChangedDTO,
-  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.spaceChanged]> {
+  protected async getContextualData(input: SpaceChangedDTO): Promise<EmailTypeToContextMap[EMAIL_TYPES.spaceChanged]> {
     const space = await this.spaceRepo.findOneOrFail({
       id: input.spaceId,
     })
@@ -57,7 +52,7 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
       { populate: ['user.notificationPreference'] },
     )
 
-    const spaceMembership = spaceMemberships.find((membership) => membership.user.id === user.id)
+    const spaceMembership = spaceMemberships.find(membership => membership.user.id === user.id)
 
     let spaceMembershipSide = {}
     if (spaceMemberships[0]) {
@@ -80,9 +75,7 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
   protected async getNotificationSettingKeys(context: SpaceChangedContext): Promise<string[]> {
     const space = context.space
     await space.spaceMemberships.loadItems()
-    const spaceMembership = space.spaceMemberships
-      .getItems()
-      .filter((spaceMembership) => spaceMembership.active === true)
+    const spaceMembership = space.spaceMemberships.getItems().filter(spaceMembership => spaceMembership.active === true)
 
     if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
       return [getKeyForUserSpaceRole(spaceMembership[0], 'space_locked_unlocked_deleted', space)]
@@ -95,9 +88,7 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
       { populate: ['user.notificationPreference'] },
     )
 
-    return memberships
-      .map((membership) => membership.user.getEntity())
-      .filter((user) => context.user.id !== user.id)
+    return memberships.map(membership => membership.user.getEntity()).filter(user => context.user.id !== user.id)
   }
 
   private getAction(activityType: string): string {

@@ -1,17 +1,14 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { spaceActivatedTemplate } from '@shared/domain/email/templates/mjml/space-activated.template'
-import { User } from '@shared/domain/user/user.entity'
-import { config } from '@shared/config'
 import { Injectable } from '@nestjs/common'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EmailClient } from '@shared/services/email-client'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import {
-  EmailTypeToContextMap,
-  SpaceActivatedContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { config } from '@shared/config'
+import { EmailTypeToContextMap, SpaceActivatedContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { spaceActivatedTemplate } from '@shared/domain/email/templates/mjml/space-activated.template'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { EmailClient } from '@shared/services/email-client'
 
 @Injectable()
 export class SpaceActivatedHandler extends EmailHandler<EMAIL_TYPES.spaceActivated> {

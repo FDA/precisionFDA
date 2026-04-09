@@ -1,11 +1,11 @@
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { WorkflowProvenanceDataService } from '@shared/domain/provenance/service/entity-data/workflow-provenance-data.service'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
 import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
-import { expect } from 'chai'
-import { SinonStub, stub } from 'sinon'
 
 describe('WorkflowProvenanceDataService', () => {
   const TITLE = 'title'

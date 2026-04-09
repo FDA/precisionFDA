@@ -1,14 +1,14 @@
-import { database } from '@shared/database'
-import { App } from '@shared/domain/app/app.entity'
-import { Job } from '@shared/domain/job/job.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { ErrorCodes } from '@shared/errors'
+import { EntityManager } from '@mikro-orm/core'
 import { expect } from 'chai'
 import { DateTime } from 'luxon'
 import { repeat } from 'ramda'
-import { EntityManager } from '@mikro-orm/core'
-import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '@shared/domain/job/job.enum'
 import supertest from 'supertest'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '@shared/domain/job/job.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { create, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { testedApp } from '../../index'
@@ -58,9 +58,7 @@ describe.skip('GET /jobs/:id', () => {
     })
     // test timestamps separately, just to make sure timezones are ok
     expect(body).to.include.keys(['createdAt'])
-    expect(
-      DateTime.fromISO(body.createdAt).hasSame(DateTime.fromJSDate(job.createdAt), 'hour'),
-    ).to.be.true()
+    expect(DateTime.fromISO(body.createdAt).hasSame(DateTime.fromJSDate(job.createdAt), 'hour')).to.be.true()
     // todo: keep it or leave it out?
     // expect(body).to.include.keys(['createdAt', 'updatedAt'])
     // expect(

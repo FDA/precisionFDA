@@ -20,7 +20,7 @@ export class SiteSettingsController {
   ) {}
 
   @Get()
-  async getSiteSettings(@Headers() headers: Record<string, string>) {
+  async getSiteSettings(@Headers() headers: Record<string, string>): Promise<object> {
     let body: object
 
     // Request-specific logic
@@ -51,27 +51,24 @@ export class SiteSettingsController {
       const dataPortalsList = await this.dataPortalService.list(true)
       const dataPortals = {
         daaas: {
-          accessible: dataPortalsList.find((portal) => portal.urlSlug === 'daaas') !== undefined,
+          accessible: dataPortalsList.find(portal => portal.urlSlug === 'daaas') !== undefined,
           tooltipText: 'This is the DaaaS Data Portal; access is controlled by the FDA.',
           mailto: 'precisionFDA@fda.hhs.gov?subject=DaaaS Data Portal access request',
         },
         prism: {
-          accessible: dataPortalsList.find((portal) => portal.urlSlug === 'prism') !== undefined,
+          accessible: dataPortalsList.find(portal => portal.urlSlug === 'prism') !== undefined,
           tooltipText: 'This is the PRISM Data Portal; access is controlled by the FDA.',
-          mailto:
-            'sachin.shah@fda.hhs.gov?cc=precisionFDA@fda.hhs.gov&subject=PRISM Data Portal access request',
+          mailto: 'sachin.shah@fda.hhs.gov?cc=precisionFDA@fda.hhs.gov&subject=PRISM Data Portal access request',
         },
         tools: {
-          accessible: dataPortalsList.find((portal) => portal.urlSlug === 'tools') !== undefined,
-          tooltipText:
-            'This is the FDA Use Case Toolbox Data Portal; access is available for all FDA users.',
+          accessible: dataPortalsList.find(portal => portal.urlSlug === 'tools') !== undefined,
+          tooltipText: 'This is the FDA Use Case Toolbox Data Portal; access is available for all FDA users.',
           mailto: 'precisionFDA@fda.hhs.gov?subject=Toolbox Data Portal access request',
         },
         'precisionfda-system-administration-portal': {
           accessible:
-            dataPortalsList.find(
-              (portal) => portal.urlSlug === 'precisionfda-system-administration-portal',
-            ) !== undefined,
+            dataPortalsList.find(portal => portal.urlSlug === 'precisionfda-system-administration-portal') !==
+            undefined,
           tooltipText: 'This is the System Administration Portal; access is controlled by the FDA.',
           mailto: 'precisionFDA@fda.hhs.gov?subject=System Administration Portal access request',
         },

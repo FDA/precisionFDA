@@ -1,9 +1,9 @@
-import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { PlatformClient } from '@shared/platform-client'
 import axios from 'axios'
 import { expect } from 'chai'
 import { match, SinonStub, stub } from 'sinon'
+import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { PlatformClient } from '@shared/platform-client'
 
 describe('PlatformFileService', () => {
   describe('#createFile', () => {
@@ -109,9 +109,7 @@ describe('PlatformFileService', () => {
       const error = new Error('my error')
       clientGetFileUploadUrlStub = stub().throws(error)
 
-      await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(
-        error,
-      )
+      await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(error)
     })
 
     it('should not catch error from fetch', async () => {
@@ -119,9 +117,7 @@ describe('PlatformFileService', () => {
       axiosPutStub.resetBehavior()
       axiosPutStub.throws(error)
 
-      await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(
-        error,
-      )
+      await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(error)
     })
 
     it('should upload two parts', async () => {

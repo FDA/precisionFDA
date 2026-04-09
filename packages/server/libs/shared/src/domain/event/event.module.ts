@@ -1,5 +1,5 @@
-import { EventHelper } from '@shared/domain/event/event.helper'
 import { Module } from '@nestjs/common'
+import { EventHelper } from '@shared/domain/event/event.helper'
 
 @Module({
   imports: [],

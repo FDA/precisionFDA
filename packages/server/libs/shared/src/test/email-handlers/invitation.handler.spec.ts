@@ -1,12 +1,12 @@
-import { stub } from 'sinon'
 import { expect } from 'chai'
+import { stub } from 'sinon'
+import { config } from '@shared/config'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { InvitationHandler } from '@shared/domain/email/templates/handlers/invitation.handler'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
-import { config } from '@shared/config'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
 import { EmailClient } from '@shared/services/email-client'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 
 describe('InvitationHandler', () => {
   const INVITATION_ID = 30
@@ -79,15 +79,9 @@ describe('InvitationHandler', () => {
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(invitation.duns)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(invitation.duns)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(invitation.duns)
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        invitation.extras.req_reason,
-      )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        invitation.extras.req_data,
-      )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        invitation.extras.req_software,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(invitation.extras.req_reason)
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(invitation.extras.req_data)
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(invitation.extras.req_software)
     })
   })
 })

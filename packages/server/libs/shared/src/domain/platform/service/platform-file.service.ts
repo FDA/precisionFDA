@@ -1,13 +1,10 @@
+import { createHash } from 'node:crypto'
 import { Injectable } from '@nestjs/common'
+import axios from 'axios'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PlatformClient } from '@shared/platform-client'
 import { FileCreateParams } from '@shared/platform-client/platform-client.params'
-import {
-  ClassIdResponse,
-  GetUploadURLResponse,
-} from '@shared/platform-client/platform-client.responses'
-import axios from 'axios'
-import { createHash } from 'node:crypto'
+import { ClassIdResponse, GetUploadURLResponse } from '@shared/platform-client/platform-client.responses'
 
 @Injectable()
 export class PlatformFileService {
@@ -42,11 +39,7 @@ export class PlatformFileService {
     return chunkBuffers
   }
 
-  private async getUploadURL(
-    dxid: string,
-    content: Buffer,
-    index: number,
-  ): Promise<GetUploadURLResponse> {
+  private async getUploadURL(dxid: string, content: Buffer, index: number): Promise<GetUploadURLResponse> {
     const md5 = createHash('md5').update(content).digest('hex')
     const size = content.byteLength
 

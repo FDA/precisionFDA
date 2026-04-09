@@ -19,7 +19,7 @@ const renderJobsTable = (jobsInfo: SimpleJobDTO[]): string => {
       <th>Duration</th>
     </tr>
     ${jobsInfo.map(
-      (job) => `<tr>
+      job => `<tr>
       <td>${job.uid}</td>
       <td><a href="${job.link}" target="_blank" style="color: #1f70b7; text-decoration: none;">${job.name}</a></td>
       <td>${job.state}</td>
@@ -45,7 +45,7 @@ export const reportStaleJobsTemplate = (data: ReportStaleJobsTemplateInput): str
     <mj-section css-class="body-section">
       <mj-column>
         ${data.content.jobsInfo.map(
-          (userJobs) => `
+          userJobs => `
           <mj-text font-size="16px" font-weight="bold" padding-bottom="8px">
             User: ${userJobs.user.fullName} (${userJobs.user.dxuser})
           </mj-text>

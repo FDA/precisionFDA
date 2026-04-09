@@ -13,15 +13,15 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
-import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
+import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
 import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
+import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SpaceOrSiteAdminGuard } from '../admin/guards/space-or-site-admin.guard'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @UseGuards(UserContextGuard)
 @Controller('/space-groups')

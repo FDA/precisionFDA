@@ -1,8 +1,9 @@
 /* eslint-disable max-len */
-import { ClientRequestError } from '@shared/errors'
+
+import type { Logger } from '@nestjs/common'
 // just a bunch of api calls that will be easy to mock
 import { AxiosRequestConfig } from 'axios'
-import type { Logger } from '@nestjs/common'
+import { ClientRequestError } from '@shared/errors'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
 
@@ -17,10 +18,7 @@ class PlatformClientBase {
 
   protected logClientRequest(options: AxiosRequestConfig, url: string): void {
     const sanitized = maskAuthHeader(options.headers)
-    this.logger.log(
-      { requestOptions: { ...options, headers: sanitized }, url },
-      'Running DNANexus API request',
-    )
+    this.logger.log({ requestOptions: { ...options, headers: sanitized }, url }, 'Running DNANexus API request')
   }
 
   protected logClientFailed(options: AxiosRequestConfig): void {
@@ -62,13 +60,10 @@ class PlatformClientBase {
       if (customErrorThrower) {
         customErrorThrower(statusCode, errorType, errorMessage)
       }
-      throw new ClientRequestError(
-        `${errorType} (${statusCode}): ${errorMessage}`,
-        {
-          clientResponse: err.response.data,
-          clientStatusCode: statusCode,
-        },
-      )
+      throw new ClientRequestError(`${errorType} (${statusCode}): ${errorMessage}`, {
+        clientResponse: err.response.data,
+        clientStatusCode: statusCode,
+      })
     } else if (err.request) {
       // the request was made but no response was received
       this.logger.error({ err }, 'Failed platform request - no response received')
@@ -79,16 +74,11 @@ class PlatformClientBase {
     // TODO(2): Need to consider other error types and handle them with a descriptive message
     // e.g. See ETIMEOUT error in platform-client.mock.ts
     const errorMessage = err.stack || err.message || 'Unknown error - no platform response received'
-    throw new ClientRequestError(
-      errorMessage,
-      {
-        clientResponse: err.response?.data || 'No platform response',
-        clientStatusCode: err.response?.status || 408,
-      },
-    )
+    throw new ClientRequestError(errorMessage, {
+      clientResponse: err.response?.data || 'No platform response',
+      clientStatusCode: err.response?.status || 408,
+    })
   }
 }
 
-export {
-  PlatformClientBase,
-}
+export { PlatformClientBase }

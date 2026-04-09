@@ -1,22 +1,22 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { restore, stub } from 'sinon'
 import { App } from '@shared/domain/app/app.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Job } from '@shared/domain/job/job.entity'
-import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/producer/space-report-queue-job.producer'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
-import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { SpaceReportPartResultProvider } from '@shared/facade/space-report/service/space-report-part-result.provider'
 import { SpaceReportBatchResultGenerateFacade } from '@shared/facade/space-report/space-report-batch-result-generate.facade'
 import { UserCtx } from '@shared/types'
-import { expect } from 'chai'
-import { restore, stub } from 'sinon'
 
 describe('SpaceReportBatchResultGenerateFacade', () => {
   const SPACE_ID = 1000
@@ -295,7 +295,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     { type: 'workflow', repoFindStub: workflowFindStub, resultStub: workflowGetResultStub },
     { type: 'user', repoFindStub: userFindStub, resultStub: userGetResultStub },
     { type: 'discussion', repoFindStub: discussionFindStub, resultStub: discussionGetResultStub },
-  ].forEach((prop) => {
+  ].forEach(prop => {
     it(`should use the correct result meta provider and repo for source type ${prop.type}`, async () => {
       const ENTITY_ID = 1
       const ENTITY = { id: ENTITY_ID }

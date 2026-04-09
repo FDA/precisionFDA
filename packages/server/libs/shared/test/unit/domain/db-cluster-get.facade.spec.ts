@@ -1,20 +1,20 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { DbClusterGetFacade } from 'apps/api/src/facade/db-cluster/get-facade/db-cluster-get.facade'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DbClusterCountService } from '@shared/domain/db-cluster/service/db-cluster-count.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { LicenseService } from '@shared/domain/license/license.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError } from '@shared/errors'
-import { DbClusterGetFacade } from 'apps/api/src/facade/db-cluster/get-facade/db-cluster-get.facade'
-import { LicenseService } from '@shared/domain/license/license.service'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('DbClusterGetFacade', () => {
   const USER_ID = 1
@@ -191,12 +191,6 @@ describe('DbClusterGetFacade', () => {
       findLicenseRefByLicenseableId: findLicenseRefByLicenseableIdStub,
     } as unknown as LicenseService
 
-    return new DbClusterGetFacade(
-      dbClusterService,
-      userContext,
-      spaceService,
-      spaceMembershipService,
-      licenseService,
-    )
+    return new DbClusterGetFacade(dbClusterService, userContext, spaceService, spaceMembershipService, licenseService)
   }
 })

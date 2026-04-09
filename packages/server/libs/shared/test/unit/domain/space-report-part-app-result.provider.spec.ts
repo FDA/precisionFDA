@@ -1,8 +1,8 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { App } from '@shared/domain/app/app.entity'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { SpaceReportPartAppResultProvider } from '@shared/facade/space-report/service/space-report-part-app-result-provider.service'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SpaceReportPartAppResultProvider', () => {
   const TITLE = 'title'
@@ -75,12 +75,7 @@ describe('SpaceReportPartAppResultProvider', () => {
     })
   }
 
-  async function assertNoRevisionTitle(
-    reportFormat,
-    provenanceFormat,
-    provenanceOptions,
-    provenanceResult,
-  ) {
+  async function assertNoRevisionTitle(reportFormat, provenanceFormat, provenanceOptions, provenanceResult) {
     const APP_NO_REVISION = {
       title: TITLE,
       revision: null,

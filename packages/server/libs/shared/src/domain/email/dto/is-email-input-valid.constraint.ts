@@ -2,19 +2,19 @@ import { isPlainObject } from '@nestjs/common/utils/shared.utils'
 import { plainToClass } from 'class-transformer'
 import {
   registerDecorator,
-  validate,
   ValidationArguments,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
+  validate,
 } from 'class-validator'
-import { EmailInputFormat, TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
 import { emailTypeToInputDtoMap } from '@shared/domain/email/dto/email-type-to-input.map'
+import { EmailInputFormat, TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
 import { ValidationError } from '@shared/errors'
 
 @ValidatorConstraint({ async: true })
 export class IsEmailInputValidConstraint implements ValidatorConstraintInterface {
-  async validate(value: unknown, args: ValidationArguments) {
+  async validate(value: unknown, args: ValidationArguments): Promise<boolean> {
     const object = args.object as TypedEmailBodyDto
     const input: EmailInputFormat = object.type
     const expectedType = emailTypeToInputDtoMap[input]
@@ -35,9 +35,7 @@ export class IsEmailInputValidConstraint implements ValidatorConstraintInterface
     const errors = await validate(instance)
 
     if (errors.length > 0) {
-      const errorMessages = errors
-        .map((error) => Object.values(error.constraints ?? {}).join(', '))
-        .join('; ')
+      const errorMessages = errors.map(error => Object.values(error.constraints ?? {}).join(', ')).join('; ')
       throw new ValidationError(errorMessages)
     }
 
@@ -45,19 +43,17 @@ export class IsEmailInputValidConstraint implements ValidatorConstraintInterface
   }
 
   // biome-ignore-start lint/complexity/useLiteralKeys: Should be fixed
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     const object = args.object as TypedEmailBodyDto
     const type = object.type
-    const additionalErrors = object['validationErrors']
-      ? `: ${object['validationErrors'].join('; ')}`
-      : ''
+    const additionalErrors = object['validationErrors'] ? `: ${object['validationErrors'].join('; ')}` : ''
     return `Email Input does not satisfy constraints for the provided type "${type}"${additionalErrors}`
   }
   // biome-ignore-end lint/complexity/useLiteralKeys: Should be fixed
 }
 
 export function IsEmailInputValid(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
+  return function (object: object, propertyName: string): void {
     registerDecorator({
       name: 'isEmailInputValid',
       target: object.constructor,

@@ -1,27 +1,27 @@
 import { QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { restore, stub } from 'sinon'
 import { App } from '@shared/domain/app/app.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { BatchComplete } from '@shared/domain/space-report/model/batch-complete'
+import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
 import { SpaceReportPartService } from '@shared/domain/space-report/service/part/space-report-part.service'
 import { SpaceReportResultService } from '@shared/domain/space-report/service/result/space-report-result.service'
-import { SpaceReportCountService } from '@shared/domain/space-report/service/space-report-count.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
-import { Space } from '@shared/domain/space/space.entity'
+import { SpaceReportCountService } from '@shared/domain/space-report/service/space-report-count.service'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
-import { expect } from 'chai'
-import { restore, stub } from 'sinon'
-import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
 
 describe('SpaceReportService', () => {
   describe('#createReport', () => {
@@ -95,9 +95,7 @@ describe('SpaceReportService', () => {
 
       createQueryBuilderStub.reset()
       createQueryBuilderStub.throws()
-      createQueryBuilderStub
-        .withArgs(Space, 'space')
-        .returns({ joinAndSelect: joinAndSelectedMembershipStub })
+      createQueryBuilderStub.withArgs(Space, 'space').returns({ joinAndSelect: joinAndSelectedMembershipStub })
 
       findStub.reset()
       findStub.throws()
@@ -107,9 +105,7 @@ describe('SpaceReportService', () => {
       findStub.withArgs(Asset, { scope: SPACE_SCOPE }).resolves([])
       findStub.withArgs(Workflow, { scope: SPACE_SCOPE }).resolves([])
       findStub.withArgs(Discussion, { note: { scope: SPACE_SCOPE } }).resolves([])
-      findStub
-        .withArgs(User, { spaceMemberships: { spaces: { id: SPACE_ID }, active: true } })
-        .resolves([])
+      findStub.withArgs(User, { spaceMemberships: { spaces: { id: SPACE_ID }, active: true } }).resolves([])
 
       createPartsStub.reset()
       createPartsStub.throws()
@@ -129,9 +125,10 @@ describe('SpaceReportService', () => {
     })
 
     it('should reject if no scope id provided', async () => {
-      await expect(
-        getInstance().createReport({ format: 'HTML' } as SpaceReportCreateDto),
-      ).to.be.rejectedWith(InvalidStateError, 'Scope is required for creating a report')
+      await expect(getInstance().createReport({ format: 'HTML' } as SpaceReportCreateDto)).to.be.rejectedWith(
+        InvalidStateError,
+        'Scope is required for creating a report',
+      )
     })
 
     it('should run under transaction', async () => {
@@ -161,10 +158,7 @@ describe('SpaceReportService', () => {
           format: 'HTML',
           scope: SPACE_SCOPE,
         }),
-      ).to.be.rejectedWith(
-        InvalidStateError,
-        'Report not generated: No entities to report on in this space',
-      )
+      ).to.be.rejectedWith(InvalidStateError, 'Report not generated: No entities to report on in this space')
     })
 
     it('should not catch error from queryBuilder', async () => {
@@ -482,9 +476,7 @@ describe('SpaceReportService', () => {
 
       createQueryBuilderStub.reset()
       createQueryBuilderStub.throws()
-      createQueryBuilderStub
-        .withArgs(Space, 'space')
-        .returns({ joinAndSelect: joinAndSelectedMembershipStub })
+      createQueryBuilderStub.withArgs(Space, 'space').returns({ joinAndSelect: joinAndSelectedMembershipStub })
 
       findStub.reset()
       findStub.throws()
@@ -510,10 +502,7 @@ describe('SpaceReportService', () => {
       getResultStub.reset()
       getResultStub.resolves([])
 
-      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(
-        NotFoundError,
-        'Space not found',
-      )
+      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(NotFoundError, 'Space not found')
     })
 
     it('should not catch error from queryBuilder', async () => {
@@ -945,9 +934,7 @@ describe('SpaceReportService', () => {
 
       createQueryBuilderStub.reset()
       createQueryBuilderStub.throws()
-      createQueryBuilderStub
-        .withArgs(Space, 'space')
-        .returns({ joinAndSelect: joinAndSelectedMembershipStub })
+      createQueryBuilderStub.withArgs(Space, 'space').returns({ joinAndSelect: joinAndSelectedMembershipStub })
     })
 
     it('should not catch error from queryBuilder', async () => {

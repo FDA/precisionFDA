@@ -1,4 +1,4 @@
-import { Entity, Ref, ManyToOne } from '@mikro-orm/core'
+import { Entity, ManyToOne, Ref } from '@mikro-orm/core'
 import { GeneralProperty } from '@shared/domain/property/property.entity'
 import { Node } from '../user-file/node.entity'
 

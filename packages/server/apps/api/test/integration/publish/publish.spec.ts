@@ -1,12 +1,12 @@
 import type { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { create, db } from '@shared/test'
 import { expect } from 'chai'
 import supertest from 'supertest'
-import { testedApp } from '../../index'
-import { getDefaultHeaderData } from '../../utils/expect-helper'
+import { database } from '@shared/database'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { create, db } from '@shared/test'
+import { testedApp } from '../../index'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('Publish Controller', () => {
   let em: SqlEntityManager

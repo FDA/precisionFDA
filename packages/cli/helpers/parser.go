@@ -39,23 +39,21 @@ func ParseArgsUntilFlag(args []string) ([]string, int) {
 	return validArgs, len(args)
 }
 
-func ParseEntityType(entityType string) string {
+var validEntityTypes = map[string]bool{
+	"app":        true,
+	"job":        true,
+	"file":       true,
+	"folder":     true,
+	"workflow":   true,
+	"discussion": true,
+	"dbcluster":  true,
+}
 
-	validTypes := map[string]bool{
-		"app":        true,
-		"job":        true,
-		"file":       true,
-		"folder":     true,
-		"workflow":   true,
-		"discussion": true,
-		"dbcluster":  true,
-	}
-	parts := strings.SplitN(entityType, "-", 2)
-
-	if len(parts) > 0 && validTypes[parts[0]] {
+func ParseEntityType(uid string) string {
+	parts := strings.SplitN(uid, "-", 2)
+	if len(parts) > 0 && validEntityTypes[parts[0]] {
 		return parts[0]
 	}
-
 	return ""
 }
 
@@ -63,4 +61,10 @@ func IsValidJSON(str string) bool {
 	str = strings.TrimSpace(str)
 	var js json.RawMessage
 	return json.Unmarshal([]byte(str), &js) == nil
+}
+
+func IsValidJSONObject(str string) bool {
+	str = strings.TrimSpace(str)
+	var obj map[string]interface{}
+	return json.Unmarshal([]byte(str), &obj) == nil
 }

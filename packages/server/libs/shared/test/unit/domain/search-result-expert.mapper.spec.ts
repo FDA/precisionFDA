@@ -1,9 +1,9 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { SearchResultExpertMapper } from '@shared/facade/search/result-mapper/search-result-expert-mapper'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SearchResultExpertMapper', () => {
   const USER_FULLNAME = 'USER_FULLNAME'

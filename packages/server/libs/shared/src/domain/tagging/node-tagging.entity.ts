@@ -1,6 +1,6 @@
 import { Entity, ManyToOne, Ref } from '@mikro-orm/core'
-import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { Node } from '@shared/domain/user-file/node.entity'
 
 @Entity({ discriminatorValue: TAGGABLE_TYPE.NODE })

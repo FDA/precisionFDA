@@ -1,15 +1,15 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { difference, isNil } from 'ramda'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { User } from '@shared/domain/user/user.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { difference, isNil } from 'ramda'
+import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { Asset } from './asset.entity'
 import { AssetRepository } from './asset.repository'
 import { FolderRepository } from './folder.repository'
 import { UserFileRepository } from './user-file.repository'
-import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 
 // Split folder path into a list of folder names
 const splitFolderPath = (pathStr: string): string[] => pathStr.split('/').slice(1)
@@ -25,16 +25,12 @@ const parseFoldersFromClient = (paths: string[]): string[] => {
   return paths.filter((entry: string) => entry !== '/').sort((a, b) => a.localeCompare(b))
 }
 
-const childrenTraverse = async (
-  folder: Folder,
-  repo: FolderRepository,
-  acc: Folder[],
-): Promise<Folder[]> => {
+const childrenTraverse = async (folder: Folder, repo: FolderRepository, acc: Folder[]): Promise<Folder[]> => {
   // fixme: if there is a loop in folder ids, it will crash hard
   // could be easily prevented -> return if id already exists in acc
   acc.push(folder)
   const subfolders = await repo.findChildren({ parentFolderId: folder.id })
-  await Promise.all(subfolders.map((sf) => childrenTraverse(sf, repo, acc)))
+  await Promise.all(subfolders.map(sf => childrenTraverse(sf, repo, acc)))
   return acc
 }
 
@@ -54,7 +50,7 @@ const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): stri
     return acc
   }
   // fixme: be careful if parent is properly initialized -> so it has the id
-  const parent = folders.find((folder) => folder.id === current.parentFolder.id)
+  const parent = folders.find(folder => folder.id === current.parentFolder.id)
   if (parent && parent.id === current.id) {
     throw new Error('parent folder equals current, error in data')
   }
@@ -74,7 +70,7 @@ const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): stri
 const folderPathsFromFolders = (folders: Folder[]): string[] => {
   // todo: back to array for easier comparison?
   return folders
-    .map((folder) => {
+    .map(folder => {
       const chain = folderTraverse(folders, folder, [])
       return `/${chain.join('/')}`
     })
@@ -83,7 +79,7 @@ const folderPathsFromFolders = (folders: Folder[]): string[] => {
 
 const filterLeafPaths = (folderPaths: string[]): string[] => {
   // slice to remove the first "/"
-  const folderPathNames = folderPaths.map((folderPath) => folderPath.split('/').slice(1))
+  const folderPathNames = folderPaths.map(folderPath => folderPath.split('/').slice(1))
   return folderPathNames
     .filter((fp, idx) => {
       const isIncluded = folderPathNames.some((tp, innerIdx) => {
@@ -100,7 +96,7 @@ const filterLeafPaths = (folderPaths: string[]): string[] => {
       })
       return !isIncluded
     })
-    .map((fp) => `/${fp.join('/')}`)
+    .map(fp => `/${fp.join('/')}`)
 }
 
 const getFolderPath = (folders: Folder[], current: Folder): string => {
@@ -143,9 +139,7 @@ const createFoldersTraverse = (
     // todo: log or throw error
     console.log('parent is not yet persisted! Might not create subfolders properly', parent.name)
   }
-  const current = folders
-    .concat(result)
-    .find(createNameAndParentIdFilter(pathStr[currentIdx], parent))
+  const current = folders.concat(result).find(createNameAndParentIdFilter(pathStr[currentIdx], parent))
   if (current) {
     // The folder path at pathStr[currentIdx] corresponds with an existing or already created Folder
     createFoldersTraverse(folders, pathStr, user, current, currentIdx + 1, result)
@@ -223,10 +217,7 @@ const findFolderForPath = (
   return currentFolder
 }
 
-const findFileOrAssetWithUid = async (
-  em: EntityManager,
-  uid: Uid<'file'>,
-): Promise<FileOrAsset | null> => {
+const findFileOrAssetWithUid = async (em: EntityManager, uid: Uid<'file'>): Promise<FileOrAsset | null> => {
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const file = await userFileRepo.findFileWithUid(uid, ['user', 'challengeResources'])
   if (file) {
@@ -237,10 +228,7 @@ const findFileOrAssetWithUid = async (
   return (await assetRepo.findAssetWithUid(uid)) as FileOrAsset
 }
 
-const findFileOrAssetsWithDxid = async (
-  em: EntityManager,
-  dxid: DxId<'file'>,
-): Promise<FileOrAsset[]> => {
+const findFileOrAssetsWithDxid = async (em: EntityManager, dxid: DxId<'file'>): Promise<FileOrAsset[]> => {
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const res = await userFileRepo.findFilesWithDxid(dxid)
   if (res.length > 0) {
@@ -251,10 +239,7 @@ const findFileOrAssetsWithDxid = async (
   return (await assetRepo.findAllAssetsWithDxid(dxid)) as FileOrAsset[]
 }
 
-const findUnclosedFilesOrAssets = async (
-  em: EntityManager,
-  userId: number,
-): Promise<FileOrAsset[]> => {
+const findUnclosedFilesOrAssets = async (em: EntityManager, userId: number): Promise<FileOrAsset[]> => {
   let results: FileOrAsset[] = []
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const assetRepo = em.getRepository(Asset) as AssetRepository
@@ -276,10 +261,7 @@ const getSuccessMessage = (filesCount: number, foldersCount: number, message: st
   } else if (filesCount > 0 && foldersCount === 0) {
     return `${message} ${getPluralizedTerm(filesCount, 'file')}`
   }
-  return (
-    `${message} ${getPluralizedTerm(filesCount, 'file')} and ` +
-    `${getPluralizedTerm(foldersCount, 'folder')}`
-  )
+  return `${message} ${getPluralizedTerm(filesCount, 'file')} and ` + `${getPluralizedTerm(foldersCount, 'folder')}`
 }
 
 export {

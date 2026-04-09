@@ -3,13 +3,13 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { ExpertPaginationDTO } from '@shared/domain/expert/dto/expert-pagination.dto'
 import { ExpertDTO } from '@shared/domain/expert/dto/expert.dto'
+import { ExpertPaginationDTO } from '@shared/domain/expert/dto/expert-pagination.dto'
 import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError } from '@shared/errors'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
@@ -43,7 +43,7 @@ export class ExpertService implements Searchable<Expert> {
 
     const fileIdToRemove = expert.meta._image_id as Uid<'file'>
     const fileToRemove = await this.userFileRepository.findOne({ uid: fileIdToRemove })
-    await this.em.transactional(async (em) => {
+    await this.em.transactional(async em => {
       // this will remove all questions and answers associated with the expert in cascade delete
       await em.removeAndFlush(expert)
     })
@@ -51,9 +51,7 @@ export class ExpertService implements Searchable<Expert> {
     try {
       await this.removeNodesFacade.removeNodes([fileToRemove.id])
     } catch (e) {
-      this.logger.error(
-        `Failed to remove expert picture file with id: ${fileToRemove.id}: ${e.message}`,
-      )
+      this.logger.error(`Failed to remove expert picture file with id: ${fileToRemove.id}: ${e.message}`)
     }
   }
 
@@ -86,7 +84,7 @@ export class ExpertService implements Searchable<Expert> {
 
     const result = await this.expertRepository.paginate(pagination, where, { populate: ['user'] })
 
-    const experts = result.data.map((expert) => ExpertDTO.fromEntity(expert))
+    const experts = result.data.map(expert => ExpertDTO.fromEntity(expert))
     return {
       ...result,
       data: experts,
@@ -97,11 +95,9 @@ export class ExpertService implements Searchable<Expert> {
    * Get a list of years that have at least one expert
    */
   async getYears(): Promise<number[]> {
-    const result = await this.em.execute(
-      'SELECT distinct YEAR(created_at) as year FROM experts order by year desc',
-    )
+    const result = await this.em.execute('SELECT distinct YEAR(created_at) as year FROM experts order by year desc')
 
-    return result.map((y) => y.year)
+    return result.map(y => y.year)
   }
 
   async search(query: string): Promise<Expert[]> {

@@ -1,12 +1,12 @@
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { UserManagementService } from '@shared/domain/user/service/user-management.service'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { ORG_EVERYONE } from '@shared/config/consts'
-import { createRepositoryStub } from '../../factory/repository'
+import { UserManagementService } from '@shared/domain/user/service/user-management.service'
+import { USER_STATE, User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
 import { ValidationError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
+import { createRepositoryStub } from '../../factory/repository'
 
 describe('user-management service tests', () => {
   const userUnlockStub = stub()
@@ -56,10 +56,7 @@ describe('user-management service tests', () => {
     it('fails for themself', async () => {
       const instance = getInstance()
 
-      await expect(instance.deactivateUsers([1, 666])).to.be.rejectedWith(
-        ValidationError,
-        'Cannot deactivate self',
-      )
+      await expect(instance.deactivateUsers([1, 666])).to.be.rejectedWith(ValidationError, 'Cannot deactivate self')
     })
 
     it('fails for non-enabled users', async () => {
@@ -93,10 +90,7 @@ describe('user-management service tests', () => {
     it('fails for themself', async () => {
       const instance = getInstance()
 
-      await expect(instance.activateUsers([1, 666])).to.be.rejectedWith(
-        ValidationError,
-        'Cannot activate self',
-      )
+      await expect(instance.activateUsers([1, 666])).to.be.rejectedWith(ValidationError, 'Cannot activate self')
     })
 
     it('fails for non-deactivated users', async () => {

@@ -1,25 +1,19 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { ErrorCodes, ValidationError } from '@shared/errors'
-import { isNil } from 'ramda'
-import { getKeyForUserSpaceRole } from '../../email.helper'
-import {
-  SPACE_EVENT_ACTIVITY_TYPE,
-  SPACE_EVENT_OBJECT_TYPE,
-} from '../../../space-event/space-event.enum'
-import { newContentTemplate } from '../mjml/new-content.template'
-import { User } from '@shared/domain/user/user.entity'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { Injectable } from '@nestjs/common'
-import { EmailClient } from '@shared/services/email-client'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable } from '@nestjs/common'
+import { isNil } from 'ramda'
+import { ContentChangedContext, EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import {
-  ContentChangedContext,
-  EmailTypeToContextMap,
-} from '@shared/domain/email/dto/email-type-to-context.map'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
-import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes, ValidationError } from '@shared/errors'
+import { EmailClient } from '@shared/services/email-client'
+import { SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../../space-event/space-event.enum'
+import { getKeyForUserSpaceRole } from '../../email.helper'
+import { newContentTemplate } from '../mjml/new-content.template'
 
 @Injectable()
 export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newContentAdded> {
@@ -48,17 +42,11 @@ export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newCont
     return { input, spaceEvent }
   }
 
-  protected async getNotificationSettingKeys(
-    context: ContentChangedContext,
-    user: User,
-  ): Promise<string[]> {
+  protected async getNotificationSettingKeys(context: ContentChangedContext, user: User): Promise<string[]> {
     const space = context.spaceEvent.space.getEntity()
     const spaceMembership = space.spaceMemberships
       .getItems()
-      .filter(
-        (spaceMembership) =>
-          spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id,
-      )
+      .filter(spaceMembership => spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id)
 
     if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
       return [getKeyForUserSpaceRole(spaceMembership[0], 'content_added_or_deleted', space)]
@@ -72,8 +60,8 @@ export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newCont
     )
 
     return memberships
-      .map((membership) => membership.user.getEntity())
-      .filter((user) => context.spaceEvent.user.getEntity().id !== user.id)
+      .map(membership => membership.user.getEntity())
+      .filter(user => context.spaceEvent.user.getEntity().id !== user.id)
   }
 
   protected getSubject(): string {

@@ -1,7 +1,7 @@
 import { Collection, Entity, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core'
-import { BaseEntity } from '../../database/base.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceGroupRepository } from '@shared/domain/space/space-group.repository'
+import { BaseEntity } from '../../database/base.entity'
 
 @Entity({ tableName: 'space_groups', repository: () => SpaceGroupRepository })
 export class SpaceGroup extends BaseEntity {

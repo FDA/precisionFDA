@@ -1,13 +1,13 @@
+import mjml2html from 'mjml'
+import { nanoid } from 'nanoid'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { TASK_TYPE } from '@shared/queue/task.input'
-import mjml2html from 'mjml'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { NOTIFICATION_ROLE, NOTIFICATION_TYPES_BASE } from './email.config'
-import { nanoid } from 'nanoid'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { Space } from '@shared/domain/space/space.entity'
 
 // is not a regular user, but we still want to send some notifications to it
 // all templates uses only firstName
@@ -68,9 +68,4 @@ const getBullJobIdForEmailOperation = (emailType: EMAIL_TYPES, customSuffix?: st
   return `${prefix}.${suffix}`
 }
 
-export {
-  pfdaNoReplyUser,
-  getKeyForUserSpaceRole,
-  buildEmailTemplate,
-  getBullJobIdForEmailOperation,
-}
+export { buildEmailTemplate, getBullJobIdForEmailOperation, getKeyForUserSpaceRole, pfdaNoReplyUser }

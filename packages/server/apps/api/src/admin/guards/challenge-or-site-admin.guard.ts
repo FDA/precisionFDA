@@ -20,8 +20,6 @@ export class ChallengeOrSiteAdminGuard implements CanActivate {
       return true
     }
 
-    throw new UserInvalidPermissionsError(
-      'User requires Challenge or Site Admin permission to access this resource',
-    )
+    throw new UserInvalidPermissionsError('User requires Challenge or Site Admin permission to access this resource')
   }
 }

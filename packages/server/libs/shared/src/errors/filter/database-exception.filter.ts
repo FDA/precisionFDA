@@ -1,11 +1,8 @@
-import { Catch, HttpStatus } from '@nestjs/common'
-import { ErrorCodes } from '@shared/errors'
 import { DriverException } from '@mikro-orm/core'
-import {
-  AbstractExceptionFilter,
-  ErrorPayload,
-} from '@shared/errors/filter/abstract-exception.filter'
+import { Catch, HttpStatus } from '@nestjs/common'
 import { config } from '@shared/config'
+import { ErrorCodes } from '@shared/errors'
+import { AbstractExceptionFilter, ErrorPayload } from '@shared/errors/filter/abstract-exception.filter'
 
 @Catch(DriverException)
 export class DatabaseExceptionFilter extends AbstractExceptionFilter<DriverException> {

@@ -1,4 +1,7 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { DbClusterActionFacade } from 'apps/api/src/facade/db-cluster/action-facade/db-cluster-action.facade'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
@@ -9,9 +12,6 @@ import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { DbClusterStatusMismatchError, NotFoundError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
-import { DbClusterActionFacade } from 'apps/api/src/facade/db-cluster/action-facade/db-cluster-action.facade'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('DbClusterActionFacade', () => {
   const USER_ID = 0
@@ -78,9 +78,7 @@ describe('DbClusterActionFacade', () => {
       }
 
       findEditableOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
-      userDbClusterActionStub
-        .withArgs({ dxid: dbCluster.dxid }, 'start')
-        .resolves({ id: dbCluster.dxid })
+      userDbClusterActionStub.withArgs({ dxid: dbCluster.dxid }, 'start').resolves({ id: dbCluster.dxid })
       dbClusterDescribeStub
         .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
         .resolves({ id: dbCluster.dxid, status: 'starting' })
@@ -107,9 +105,7 @@ describe('DbClusterActionFacade', () => {
       findEditableOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
       getSpaceId.returns(1)
       getEditableByIdStub.withArgs(1).resolves({ type: SPACE_TYPE.GROUPS })
-      adminDbClusterActionStub
-        .withArgs({ dxid: dbCluster.dxid }, 'start')
-        .resolves({ id: dbCluster.dxid })
+      adminDbClusterActionStub.withArgs({ dxid: dbCluster.dxid }, 'start').resolves({ id: dbCluster.dxid })
       dbClusterDescribeStub
         .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
         .resolves({ id: dbCluster.dxid, status: 'starting' })
@@ -175,14 +171,9 @@ describe('DbClusterActionFacade', () => {
       }
 
       findEditableOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
-      userDbClusterActionStub
-        .withArgs({ dxid: dbCluster.dxid }, 'start')
-        .throws(new Error('Platform Error'))
+      userDbClusterActionStub.withArgs({ dxid: dbCluster.dxid }, 'start').throws(new Error('Platform Error'))
 
-      await expect(getInstance().startDbCluster(dbCluster.dxid)).to.be.rejectedWith(
-        Error,
-        `Platform Error`,
-      )
+      await expect(getInstance().startDbCluster(dbCluster.dxid)).to.be.rejectedWith(Error, `Platform Error`)
       expect(loadEntity.notCalled).to.be.true()
     })
   })
@@ -198,9 +189,7 @@ describe('DbClusterActionFacade', () => {
       }
 
       findEditableOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
-      userDbClusterActionStub
-        .withArgs({ dxid: dbCluster.dxid }, 'stop')
-        .resolves({ id: dbCluster.dxid })
+      userDbClusterActionStub.withArgs({ dxid: dbCluster.dxid }, 'stop').resolves({ id: dbCluster.dxid })
       dbClusterDescribeStub
         .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
         .resolves({ id: dbCluster.dxid, status: 'stopping' })
@@ -227,9 +216,7 @@ describe('DbClusterActionFacade', () => {
       findEditableOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
       getSpaceId.returns(1)
       getEditableByIdStub.withArgs(1).resolves({ type: SPACE_TYPE.GROUPS })
-      adminDbClusterActionStub
-        .withArgs({ dxid: dbCluster.dxid }, 'stop')
-        .resolves({ id: dbCluster.dxid })
+      adminDbClusterActionStub.withArgs({ dxid: dbCluster.dxid }, 'stop').resolves({ id: dbCluster.dxid })
       dbClusterDescribeStub
         .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
         .resolves({ id: dbCluster.dxid, status: 'stopping' })
@@ -295,14 +282,9 @@ describe('DbClusterActionFacade', () => {
       }
 
       findEditableOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
-      userDbClusterActionStub
-        .withArgs({ dxid: dbCluster.dxid }, 'stop')
-        .throws(new Error('Platform Error'))
+      userDbClusterActionStub.withArgs({ dxid: dbCluster.dxid }, 'stop').throws(new Error('Platform Error'))
 
-      await expect(getInstance().stopDbCluster(dbCluster.dxid)).to.be.rejectedWith(
-        Error,
-        `Platform Error`,
-      )
+      await expect(getInstance().stopDbCluster(dbCluster.dxid)).to.be.rejectedWith(Error, `Platform Error`)
       expect(loadEntity.notCalled).to.be.true()
     })
   })
@@ -318,9 +300,7 @@ describe('DbClusterActionFacade', () => {
       }
 
       findEditableOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
-      userDbClusterActionStub
-        .withArgs({ dxid: dbCluster.dxid }, 'terminate')
-        .resolves({ id: dbCluster.dxid })
+      userDbClusterActionStub.withArgs({ dxid: dbCluster.dxid }, 'terminate').resolves({ id: dbCluster.dxid })
       dbClusterDescribeStub
         .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
         .resolves({ id: dbCluster.dxid, status: 'terminating' })
@@ -347,9 +327,7 @@ describe('DbClusterActionFacade', () => {
       findEditableOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
       getSpaceId.returns(1)
       getEditableByIdStub.withArgs(1).resolves({ type: SPACE_TYPE.GROUPS })
-      adminDbClusterActionStub
-        .withArgs({ dxid: dbCluster.dxid }, 'terminate')
-        .resolves({ id: dbCluster.dxid })
+      adminDbClusterActionStub.withArgs({ dxid: dbCluster.dxid }, 'terminate').resolves({ id: dbCluster.dxid })
       dbClusterDescribeStub
         .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
         .resolves({ id: dbCluster.dxid, status: 'terminating' })
@@ -415,14 +393,9 @@ describe('DbClusterActionFacade', () => {
       }
 
       findEditableOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
-      userDbClusterActionStub
-        .withArgs({ dxid: dbCluster.dxid }, 'terminate')
-        .throws(new Error('Platform Error'))
+      userDbClusterActionStub.withArgs({ dxid: dbCluster.dxid }, 'terminate').throws(new Error('Platform Error'))
 
-      await expect(getInstance().terminateDbCluster(dbCluster.dxid)).to.be.rejectedWith(
-        Error,
-        `Platform Error`,
-      )
+      await expect(getInstance().terminateDbCluster(dbCluster.dxid)).to.be.rejectedWith(Error, `Platform Error`)
       expect(loadEntity.notCalled).to.be.true()
     })
   })
@@ -442,22 +415,10 @@ describe('DbClusterActionFacade', () => {
       findEditableOne: findEditableOneStub,
     } as unknown as DbClusterRepository
     const notificationService = {} as unknown as NotificationService
-    const dbClusterService = new DbClusterService(
-      em,
-      dbClusterRepo,
-      userContext,
-      notificationService,
-    )
+    const dbClusterService = new DbClusterService(em, dbClusterRepo, userContext, notificationService)
     const spaceService = {
       getEditableById: getEditableByIdStub,
     } as unknown as SpaceService
-    return new DbClusterActionFacade(
-      dbClusterService,
-      em,
-      userContext,
-      userClient,
-      adminClient,
-      spaceService,
-    )
+    return new DbClusterActionFacade(dbClusterService, em, userContext, userClient, adminClient, spaceService)
   }
 })

@@ -1,4 +1,6 @@
 import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { database } from '@shared/database'
 import { InvitationPaginationDTO } from '@shared/domain/invitation/dto/invitation-pagination.dto'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
@@ -8,8 +10,6 @@ import { InvitationService } from '@shared/domain/invitation/services/invitation
 import { InvalidStateError } from '@shared/errors'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { create, db } from '@shared/test'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('InvitationService', () => {
   let em: SqlEntityManager
@@ -93,10 +93,7 @@ describe('InvitationService', () => {
         spaceIds: [],
       })
       expect(createProvisionNewUsersTaskStub.callCount).to.equal(1)
-      expect(createProvisionNewUsersTaskStub.firstCall.args[0]).to.deep.equal([
-        invitation1.id,
-        invitation3.id,
-      ])
+      expect(createProvisionNewUsersTaskStub.firstCall.args[0]).to.deep.equal([invitation1.id, invitation3.id])
     })
   })
 

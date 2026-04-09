@@ -1,10 +1,10 @@
 import { Entity, ManyToOne, Property, Ref } from '@mikro-orm/core'
 import { BaseEntity } from '@shared/database/base.entity'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { PROVISIONING_STATE } from './invitation.enum'
-import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 export interface Extras {
   req_reason: string

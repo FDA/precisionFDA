@@ -116,7 +116,7 @@ export const ExecutionActionsRow = ({
         <Button
           data-variant="primary"
           data-tooltip-id="workstation-starting"
-          data-tooltip-content="The workstation is starting up and you can connect to it when it is ready"
+          data-tooltip-content="Workstation is still launching. You can connect once it is running."
           disabled={!openExternalAvailable}
           onClick={onOpenWorkstationClick}
         >
@@ -127,7 +127,7 @@ export const ExecutionActionsRow = ({
         <Button
           data-variant="primary"
           data-tooltip-id="workstation-starting"
-          data-tooltip-content="The workstation is starting up and you can create a snapshot when it is ready"
+          data-tooltip-content="Workstation is still launching. Snapshots are available once it is running."
           disabled={!openExternalAvailable}
           onClick={() => {
             const snapshotAction = actions.find(action => action.name === 'Snapshot')

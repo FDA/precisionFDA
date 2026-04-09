@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
-import {
-  EmailTypeToContextMap,
-  LicenseApprovalContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToContextMap, LicenseApprovalContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { LicenseApprovalRequestDTO } from '@shared/domain/email/dto/license-approval-request.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'

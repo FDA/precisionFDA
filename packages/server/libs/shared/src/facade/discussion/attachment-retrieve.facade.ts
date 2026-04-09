@@ -36,17 +36,15 @@ export class AttachmentRetrieveFacade {
     this.logger.log(`Getting attachments for note id: ${noteId}`)
     const notes = await this.noteService.findAccessibleNotesAndAttachments([noteId])
     if (!notes?.length) {
-      throw new NotFoundError(
-        'Unable to get attachments: note not found or insufficient permissions.',
-      )
+      throw new NotFoundError('Unable to get attachments: note not found or insufficient permissions.')
     }
 
     const note = notes[0]
     const attachments: DiscussionAttachmentDTO[] = []
     for (const attachment of note.attachments) {
-      const attachmentEntity = await this.sourceTypeToServiceMap[
-        attachment.itemType
-      ].getAccessibleEntityById(attachment.itemId)
+      const attachmentEntity = await this.sourceTypeToServiceMap[attachment.itemType].getAccessibleEntityById(
+        attachment.itemId,
+      )
       if (!attachmentEntity) {
         throw new NotFoundError('Unable to get attachments: attachment not found.')
       }
@@ -57,9 +55,7 @@ export class AttachmentRetrieveFacade {
     return attachments
   }
 
-  async getAttachmentsByNoteIds(
-    noteIds: number[],
-  ): Promise<Record<number, DiscussionAttachmentDTO[]>> {
+  async getAttachmentsByNoteIds(noteIds: number[]): Promise<Record<number, DiscussionAttachmentDTO[]>> {
     this.logger.log(`Getting attachments for discussion ids: ${noteIds.join(', ')}`)
     const notes = await this.noteService.findAccessibleNotesAndAttachments(noteIds)
 
@@ -67,9 +63,9 @@ export class AttachmentRetrieveFacade {
     for (const note of notes) {
       const attachments: DiscussionAttachmentDTO[] = []
       for (const attachment of note.attachments) {
-        const attachmentEntity = await this.sourceTypeToServiceMap[
-          attachment.itemType
-        ].getAccessibleEntityById(attachment.itemId)
+        const attachmentEntity = await this.sourceTypeToServiceMap[attachment.itemType].getAccessibleEntityById(
+          attachment.itemId,
+        )
         if (!attachmentEntity) {
           throw new NotFoundError('Unable to get attachments: attachment not found.')
         }

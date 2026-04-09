@@ -1,4 +1,4 @@
-import { IsInt, Min, IsString, IsOptional } from 'class-validator'
+import { IsInt, IsOptional, IsString, Min } from 'class-validator'
 
 export class SpaceChangedDTO {
   @IsInt()

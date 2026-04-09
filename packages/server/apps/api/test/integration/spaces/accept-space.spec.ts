@@ -1,18 +1,15 @@
 import type { EntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { database } from '@shared/database'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { create, db, generate } from '@shared/test'
 import { random } from '@shared/test/generate'
 import { PROJECT_DESCRIBE_RES } from '@shared/test/mock-responses'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { expect } from 'chai'
-import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -40,11 +37,7 @@ describe('PATCH /spaces/:id/accept', () => {
     create.sessionHelper.create(em, { user: hostLead })
 
     create.spacesHelper.addMember(em, { user, space: groupSpace })
-    create.spacesHelper.addMember(
-      em,
-      { user: guestLead, space: groupSpace },
-      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
-    )
+    create.spacesHelper.addMember(em, { user: guestLead, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
     create.spacesHelper.addMember(
       em,
       { user: hostLead, space: groupSpace },
@@ -55,11 +48,7 @@ describe('PATCH /spaces/:id/accept', () => {
     )
 
     create.spacesHelper.addMember(em, { user, space: reviewSpace })
-    create.spacesHelper.addMember(
-      em,
-      { user: guestLead, space: reviewSpace },
-      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
-    )
+    create.spacesHelper.addMember(em, { user: guestLead, space: reviewSpace }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
     create.spacesHelper.addMember(
       em,
       { user: hostLead, space: reviewSpace },

@@ -1,20 +1,17 @@
-import { stub } from 'sinon'
-import { SpaceActivationEmailHandler } from '@shared/domain/email/templates/handlers/space-activation.handler'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EmailClient } from '@shared/services/email-client'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { User } from '@shared/domain/user/user.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { expect } from 'chai'
-import { Space } from '@shared/domain/space/space.entity'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { stub } from 'sinon'
 import { config } from '@shared/config'
 import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { SpaceActivationEmailHandler } from '@shared/domain/email/templates/handlers/space-activation.handler'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('SpaceActivationHandler', () => {
   const SPACE_MEMBERSHIP_ID = 10
@@ -49,12 +46,7 @@ describe('SpaceActivationHandler', () => {
       space.name = 'space-name'
       space.type = SPACE_TYPE.ADMINISTRATOR
 
-      const spaceMembership = new SpaceMembership(
-        user,
-        space,
-        SPACE_MEMBERSHIP_SIDE.HOST,
-        SPACE_MEMBERSHIP_ROLE.ADMIN,
-      )
+      const spaceMembership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN)
       spaceMembership.id = SPACE_MEMBERSHIP_ID
 
       spaceMembershipRepoFindOneOrFail
@@ -69,9 +61,7 @@ describe('SpaceActivationHandler', () => {
       await handler.sendEmail(input)
 
       expect(emailClientSendEmailStub.calledOnce).to.eq(true)
-      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
-        EMAIL_TYPES.spaceActivation,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.spaceActivation)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
         `Action required to activate new space ${space.name}`,
@@ -79,9 +69,7 @@ describe('SpaceActivationHandler', () => {
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
         `Space activation request for ${space.name} as creator`,
       )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `${config.api.railsHost}/spaces/${SPACE_ID}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`${config.api.railsHost}/spaces/${SPACE_ID}`)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
         'To start adding data to this space, both creator and approver lead',
       )

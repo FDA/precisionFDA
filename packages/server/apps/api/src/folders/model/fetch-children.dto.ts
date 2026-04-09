@@ -1,8 +1,8 @@
-import { IsArray, IsEnum, IsInt, IsOptional } from 'class-validator'
 import { Type } from 'class-transformer'
+import { IsArray, IsEnum, IsInt, IsOptional } from 'class-validator'
+import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
 import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { SCOPE } from '@shared/types/common'
-import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
 
 export class FetchChildrenDTO {
   @IsArray()

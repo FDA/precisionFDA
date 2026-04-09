@@ -1,16 +1,7 @@
-import {
-  IsDate,
-  IsEnum,
-  IsNumber,
-  IsString,
-  IsUrl,
-  MaxLength,
-  MinDate,
-  ValidateIf,
-} from 'class-validator'
-import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
-import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { Type } from 'class-transformer'
+import { IsDate, IsEnum, IsNumber, IsString, IsUrl, MaxLength, MinDate, ValidateIf } from 'class-validator'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
 import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
 import { EntityScope } from '@shared/types/common'
 
@@ -32,7 +23,7 @@ export class CreateChallengeDTO {
   @IsString()
   hostLeadDxuser: string
 
-  @ValidateIf((o) => o.status === CHALLENGE_STATUS.PRE_REGISTRATION)
+  @ValidateIf(o => o.status === CHALLENGE_STATUS.PRE_REGISTRATION)
   @IsUrl()
   preRegistrationUrl: string
 

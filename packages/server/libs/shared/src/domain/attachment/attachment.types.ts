@@ -11,6 +11,4 @@ export const discussionAttachmentTypeMap = {
 }
 export type DiscussionAttachmentTypeName = keyof typeof discussionAttachmentTypeMap
 
-export type DiscussionAttachmentType = InstanceType<
-  (typeof discussionAttachmentTypeMap)[DiscussionAttachmentTypeName]
->
+export type DiscussionAttachmentType = InstanceType<(typeof discussionAttachmentTypeMap)[DiscussionAttachmentTypeName]>

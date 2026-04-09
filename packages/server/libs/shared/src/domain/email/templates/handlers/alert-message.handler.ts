@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
+import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { alertMessageTemplate } from '@shared/domain/email/templates/mjml/alert-message.template'
 import { User } from '@shared/domain/user/user.entity'
-import { EmailClient } from '@shared/services/email-client'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
-import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailClient } from '@shared/services/email-client'
 
 @Injectable()
 export class AlertMessageHandler extends EmailHandler<EMAIL_TYPES.alertMessage> {
@@ -32,9 +32,7 @@ export class AlertMessageHandler extends EmailHandler<EMAIL_TYPES.alertMessage> 
     return input.subject
   }
 
-  protected getTemplateInput(
-    input: AlertMessageInputDTO,
-  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.alertMessage] {
+  protected getTemplateInput(input: AlertMessageInputDTO): EmailTypeToTemplateInputMap[EMAIL_TYPES.alertMessage] {
     return input
   }
 

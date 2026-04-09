@@ -13,7 +13,7 @@ export type ReportRunningJobsTemplateInput = {
 const createJobsList = (jobsInfo: SimpleJobDTO[]): string => {
   return jobsInfo
     .map(
-      (job) => `
+      job => `
       <mj-text padding-bottom="16px">
         <div style="border-left: 3px solid #1f70b7; padding-left: 12px; margin-bottom: 12px;">
           <div style="margin-bottom: 4px;">

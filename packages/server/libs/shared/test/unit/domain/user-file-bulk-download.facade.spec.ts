@@ -1,19 +1,19 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFileBulkDownloadFacade } from 'apps/api/src/facade/user-file/user-file-bulk-download.facade'
-import { PlatformClient } from '@shared/platform-client'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { EventHelper } from '@shared/domain/event/event.helper'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { User } from '@shared/domain/user/user.entity'
-import { stub } from 'sinon'
-import { expect } from 'chai'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
-import { EventHelper } from '@shared/domain/event/event.helper'
+import { PlatformClient } from '@shared/platform-client'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 
 describe('UserFileBulkDownloadFacade', () => {
   const USER_ID = 4
@@ -27,7 +27,7 @@ describe('UserFileBulkDownloadFacade', () => {
       return callback(em as SqlEntityManager)
     },
   } as unknown as SqlEntityManager
-  em.transactional = stub(em, 'transactional').callsFake(async (callback) => {
+  em.transactional = stub(em, 'transactional').callsFake(async callback => {
     return await callback(em)
   }) as SqlEntityManager['transactional']
 
@@ -142,7 +142,7 @@ describe('UserFileBulkDownloadFacade', () => {
       nodeHelperSanitizeNodeNamesStub.withArgs(files).returns(files)
       nodeHelperRenameDuplicateFilesStub.withArgs(files).returns(files)
       nodeHelperGetFolderPathStub.withArgs(folderId).resolves(folderPath)
-      files.forEach((file) => {
+      files.forEach(file => {
         nodeHelperGetNodePathStub.withArgs(file).resolves(`${folderPath}/${file.name}`)
         userClientFileDownloadLinkStub
           .withArgs({
@@ -210,7 +210,7 @@ describe('UserFileBulkDownloadFacade', () => {
       nodeHelperSanitizeNodeNamesStub.withArgs(closedFiles).returns(closedFiles)
       nodeHelperRenameDuplicateFilesStub.withArgs(closedFiles).returns(closedFiles)
       nodeHelperGetFolderPathStub.withArgs(folderId).resolves(folderPath)
-      closedFiles.forEach((file) => {
+      closedFiles.forEach(file => {
         nodeHelperGetNodePathStub.withArgs(file).resolves(`${folderPath}/${file.name}`)
         userClientFileDownloadLinkStub
           .withArgs({

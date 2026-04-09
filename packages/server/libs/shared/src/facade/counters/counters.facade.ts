@@ -9,9 +9,9 @@ import {
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { JobService } from '@shared/domain/job/job.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
-import { SpaceService } from '@shared/domain/space/service/space.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { WorkflowSeriesService } from '@shared/domain/workflow-series/service/workflow-series.service'
@@ -79,7 +79,7 @@ export class CountersFacade {
   async getSpaceCounters(spaceId: number): Promise<SpaceCountersResponse> {
     this.logger.log(`Getting counters for space: ${spaceId}`)
 
-    const space = await this.spaceService.getAccessibleSpace(spaceId)
+    const space = await this.spaceService.getAccessibleById(spaceId)
     if (!space) {
       throw new NotFoundError('Space does not exist or is not accessible')
     }

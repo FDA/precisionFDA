@@ -18,7 +18,7 @@ export class LicensesForAppFacade {
       throw new NotFoundError(`App not found ({ uid: '${uid}' })`)
     }
     await app.assets.init()
-    const assetIds = app.assets.getItems().map((asset) => asset.id)
+    const assetIds = app.assets.getItems().map(asset => asset.id)
     return this.licenseService.findLicensesForNodeIds(assetIds)
   }
 }

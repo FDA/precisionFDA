@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import {
-  EmailTypeToContextMap,
-  ExpertAddedContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToContextMap, ExpertAddedContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
@@ -26,9 +23,7 @@ export class ExpertAddedHandler extends EmailHandler<EMAIL_TYPES.expertAdded> {
     super(emailClient)
   }
 
-  protected async getContextualData(
-    input: ObjectIdInputDTO,
-  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.expertAdded]> {
+  protected async getContextualData(input: ObjectIdInputDTO): Promise<EmailTypeToContextMap[EMAIL_TYPES.expertAdded]> {
     const expert = await this.expertRepo.findOneOrFail(
       {
         id: input.id,
@@ -47,9 +42,7 @@ export class ExpertAddedHandler extends EmailHandler<EMAIL_TYPES.expertAdded> {
     return `A new Expert Q&A Session was created for ${name}`
   }
 
-  protected getTemplateInput(
-    context: ExpertAddedContext,
-  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.expertAdded] {
+  protected getTemplateInput(context: ExpertAddedContext): EmailTypeToTemplateInputMap[EMAIL_TYPES.expertAdded] {
     const name = getUserTitle(context.expert.user.getEntity())
     return {
       content: {

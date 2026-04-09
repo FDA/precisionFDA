@@ -11,15 +11,11 @@ import { DbCluster } from './db-cluster.entity'
  */
 @Injectable()
 export class DbClusterScopeFilterProvider extends AbstractScopeFilterProvider<DbCluster> {
-  protected override buildFeaturedCondition(
-    _context: ScopeFilterContext,
-  ): FilterQuery<DbCluster> | null {
+  protected override buildFeaturedCondition(_context: ScopeFilterContext): FilterQuery<DbCluster> | null {
     return null
   }
 
-  protected override buildEverybodyCondition(
-    _context: ScopeFilterContext,
-  ): FilterQuery<DbCluster> | null {
+  protected override buildEverybodyCondition(_context: ScopeFilterContext): FilterQuery<DbCluster> | null {
     return null
   }
 }

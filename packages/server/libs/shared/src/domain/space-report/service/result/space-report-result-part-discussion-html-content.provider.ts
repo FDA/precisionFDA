@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import DOMPurify from 'isomorphic-dompurify'
+import { marked } from 'marked'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import {
   SpaceReportPartDiscussionResult,
@@ -9,8 +11,6 @@ import {
 } from '@shared/domain/space-report/model/space-report-part-discussion-result'
 import { SpaceReportResultPartHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-html-content.provider'
 import { ArrayUtils } from '@shared/utils/array.utils'
-import DOMPurify from 'isomorphic-dompurify'
-import { marked } from 'marked'
 
 @Injectable()
 export class SpaceReportResultPartDiscussionHtmlContentProvider extends SpaceReportResultPartHtmlContentProvider<'discussion'> {
@@ -23,9 +23,7 @@ export class SpaceReportResultPartDiscussionHtmlContentProvider extends SpaceRep
     document: Document,
     container: HTMLDivElement,
   ): Promise<void> {
-    container.appendChild(
-      await this.getItemContainer(result, document, 'started the discussion on'),
-    )
+    container.appendChild(await this.getItemContainer(result, document, 'started the discussion on'))
 
     for (const answer of result.answers) {
       container.appendChild(await this.getAnswer(answer, document))
@@ -36,10 +34,7 @@ export class SpaceReportResultPartDiscussionHtmlContentProvider extends SpaceRep
     }
   }
 
-  private async getAnswer(
-    answer: SpaceReportPartDiscussionResultAnswer,
-    document: Document,
-  ): Promise<HTMLDivElement> {
+  private async getAnswer(answer: SpaceReportPartDiscussionResultAnswer, document: Document): Promise<HTMLDivElement> {
     const container = await this.getItemContainer(answer, document, 'answered on')
     container.classList.add('answer')
 

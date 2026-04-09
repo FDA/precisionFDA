@@ -1,11 +1,11 @@
+import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { UpdateDiscussionFacade } from 'apps/api/src/facade/discussion/update-discussion.facade'
+import { expect } from 'chai'
 import { stub } from 'sinon'
+import { database } from '@shared/database'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
-import { expect } from 'chai'
-import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
-import { UpdateDiscussionFacade } from 'apps/api/src/facade/discussion/update-discussion.facade'
-import { database } from '@shared/database'
-import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 
 describe('UpdateDiscussionFacade', () => {
   let updateDiscussionFacade: UpdateDiscussionFacade

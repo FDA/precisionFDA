@@ -1,6 +1,6 @@
 import { FilterQuery } from '@mikro-orm/core'
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { ScopeFilterContext, ScopeFilterProvider } from '@shared/domain/counters/counters.types'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 /**
  * Abstract base class for scope filter providers.
@@ -9,9 +9,7 @@ import { ScopeFilterContext, ScopeFilterProvider } from '@shared/domain/counters
  * Subclasses can override individual scope methods to customize behavior
  * or return null if a scope is not supported for the entity type.
  */
-export abstract class AbstractScopeFilterProvider<T extends object>
-  implements ScopeFilterProvider<T>
-{
+export abstract class AbstractScopeFilterProvider<T extends object> implements ScopeFilterProvider<T> {
   buildWhereCondition(context: ScopeFilterContext): FilterQuery<T> | null {
     const { scope } = context
 

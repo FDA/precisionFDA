@@ -1,15 +1,21 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
-import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { App } from '@shared/domain/app/app.entity'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Job } from '@shared/domain/job/job.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
 import { User } from '@shared/domain/user/user.entity'
-import * as errors from '../../../errors'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { PlatformClient } from '@shared/platform-client'
 import { EntityScope } from '@shared/types/common'
-import { Comparison, COMPARISON_STATE } from '../../comparison/comparison.entity'
+import * as errors from '../../../errors'
+import { COMPARISON_STATE, Comparison } from '../../comparison/comparison.entity'
 import { createAppPublished } from '../../event/event.helper'
 import {
   FILE_STATE_DX,
@@ -18,12 +24,6 @@ import {
   FileOrAsset,
   PARENT_TYPE,
 } from '../../user-file/user-file.types'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { STATIC_SCOPE } from '@shared/enums'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 /**
  Publisher service is responsible for publishing entities to the public scope.
@@ -82,9 +82,7 @@ export class PublisherService {
 
   async publishComparisons(comparisons: Comparison[], scope: EntityScope): Promise<number> {
     if (scope !== STATIC_SCOPE.PUBLIC) {
-      throw new errors.InvalidStateError(
-        `Unable to publish comparisons: scope ${scope} is not supported.`,
-      )
+      throw new errors.InvalidStateError(`Unable to publish comparisons: scope ${scope} is not supported.`)
     }
     const user = await this.userContext.loadEntity()
     let count = 0
@@ -130,7 +128,7 @@ export class PublisherService {
       if (files.length === 0) {
         continue
       }
-      const filesDxids: string[] = files.map((file) => file.dxid)
+      const filesDxids: string[] = files.map(file => file.dxid)
       await this.client.cloneObjects({
         sourceProject: project,
         destinationProject,
@@ -158,7 +156,7 @@ export class PublisherService {
     }
 
     for (const [project, files] of Object.entries(projects)) {
-      const filesDxids: string[] = files.map((file) => file.dxid)
+      const filesDxids: string[] = files.map(file => file.dxid)
       await this.client.fileRemove({ projectId: project, ids: filesDxids })
     }
 
@@ -191,7 +189,7 @@ export class PublisherService {
     const fileDxids: DxId<'file'>[] = []
     const allNodesToProcess: Node[] = []
 
-    nodes.forEach((node) => (node.parentFolder = null))
+    nodes.forEach(node => (node.parentFolder = null))
 
     // make a copy to avoid side effects
     const nodesToProcess = [...nodes]
@@ -205,9 +203,7 @@ export class PublisherService {
 
         // Validate folder can be published
         if (folder.scope !== STATIC_SCOPE.PRIVATE) {
-          throw new errors.InvalidStateError(
-            `Unable to publish folder ${folder.uid}: must be your private folder.`,
-          )
+          throw new errors.InvalidStateError(`Unable to publish folder ${folder.uid}: must be your private folder.`)
         }
 
         // Add all children to processing queue
@@ -218,15 +214,11 @@ export class PublisherService {
         const file = node as UserFile | Asset
         // Validate file can be published
         if (file.state !== FILE_STATE_DX.CLOSED) {
-          throw new errors.InvalidStateError(
-            `Unable to publish file ${file.uid}: file is not closed.`,
-          )
+          throw new errors.InvalidStateError(`Unable to publish file ${file.uid}: file is not closed.`)
         }
 
         if (file.scope !== STATIC_SCOPE.PRIVATE) {
-          throw new errors.InvalidStateError(
-            `Unable to publish file ${file.uid}: must be your private file.`,
-          )
+          throw new errors.InvalidStateError(`Unable to publish file ${file.uid}: must be your private file.`)
         }
 
         if (destinationProject === file.project || file.project == null) {
@@ -252,10 +244,8 @@ export class PublisherService {
       await this.client.fileRemove({ projectId: sourceProject, ids: fileDxids })
     }
 
-    const nodeIds = allNodesToProcess.map((node) => node.id)
-    const fileIds = allNodesToProcess
-      .filter((node) => node.stiType !== FILE_STI_TYPE.FOLDER)
-      .map((node) => node.id)
+    const nodeIds = allNodesToProcess.map(node => node.id)
+    const fileIds = allNodesToProcess.filter(node => node.stiType !== FILE_STI_TYPE.FOLDER).map(node => node.id)
 
     await this.em.nativeUpdate(Node, { id: { $in: nodeIds } }, { scope: STATIC_SCOPE.PUBLIC })
     if (fileIds.length > 0) {
@@ -269,9 +259,7 @@ export class PublisherService {
     // Handle private scope nodes
     if (node.scope === STATIC_SCOPE.PRIVATE) {
       const expectedProject =
-        node.parentType === PARENT_TYPE.COMPARISON
-          ? user.privateComparisonsProject
-          : user.privateFilesProject
+        node.parentType === PARENT_TYPE.COMPARISON ? user.privateComparisonsProject : user.privateFilesProject
       return node.project === expectedProject
     }
 
@@ -281,9 +269,7 @@ export class PublisherService {
     }
 
     // Handle nodes with other scopes - check state restrictions
-    return (
-      node.state != null && ![FILE_STATE_DX.CLOSED, FILE_STATE_PFDA.COPYING].includes(node.state)
-    )
+    return node.state != null && ![FILE_STATE_DX.CLOSED, FILE_STATE_PFDA.COPYING].includes(node.state)
   }
 
   private async getAuthorizedUsers(): Promise<string[]> {

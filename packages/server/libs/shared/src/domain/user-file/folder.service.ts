@@ -1,19 +1,19 @@
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { FolderNotFoundError, ValidationError } from '@shared/errors'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EventHelper } from '../event/event.helper'
-import { EntityScope, SCOPE } from '../../types/common'
-import { PARENT_TYPE } from './user-file.types'
-import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { STATIC_SCOPE } from '@shared/enums'
 import { FilterQuery } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
-import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { FolderNotFoundError, ValidationError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { EntityScope, SCOPE } from '../../types/common'
+import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
+import { EventHelper } from '../event/event.helper'
+import { PARENT_TYPE } from './user-file.types'
 
 @Injectable()
 /**
@@ -70,18 +70,12 @@ export class FolderService {
       throw new ValidationError('Path must not be empty')
     }
     const user = await this.em.getRepository(User).findOneOrFail({ id: userId })
-    const folderNames = path.split('/').filter((folder) => folder !== '')
+    const folderNames = path.split('/').filter(folder => folder !== '')
 
     const createdFolders: Folder[] = []
     let parentFolder: Folder | undefined
     for (const folderName of folderNames) {
-      const folder: Folder = await this.createFolderInternal(
-        folderName,
-        scope,
-        user,
-        parent,
-        parentFolder?.id,
-      )
+      const folder: Folder = await this.createFolderInternal(folderName, scope, user, parent, parentFolder?.id)
       createdFolders.push(folder)
       parentFolder = folder
     }
@@ -99,10 +93,7 @@ export class FolderService {
     parent?: InputEntityUnion,
     parentFolderId?: number,
   ): Promise<Folder> {
-    this.logger.log(
-      `Creating folder ` +
-        (parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''),
-    )
+    this.logger.log(`Creating folder ${parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''}`)
     const user = await this.em.getRepository(User).findOneOrFail({ id: userId })
 
     try {
@@ -156,11 +147,7 @@ export class FolderService {
     return folder
   }
 
-  private async findFolder(
-    name: string,
-    scope: EntityScope,
-    parentFolderId?: number,
-  ): Promise<Folder> {
+  private async findFolder(name: string, scope: EntityScope, parentFolderId?: number): Promise<Folder> {
     const whereClause: FilterQuery<NoInfer<Folder>> = {
       name,
       scope,
@@ -175,23 +162,14 @@ export class FolderService {
     return await this.em.findOne(Folder, whereClause)
   }
 
-  private async createEventForFolder(
-    folder: Folder,
-    eventType: EVENT_TYPES,
-    user: User,
-  ): Promise<void> {
+  private async createEventForFolder(folder: Folder, eventType: EVENT_TYPES, user: User): Promise<void> {
     const loadedFolder = await this.em
       .getRepository(Folder)
       .findOneOrFail({ id: folder.id }, { populate: ['parentFolder', 'scopedParentFolder'] })
 
     const folderPath = await this.nodeHelper.getNodePath(loadedFolder)
 
-    const folderEvent = await this.eventHelper.createFolderEvent(
-      eventType,
-      loadedFolder,
-      folderPath,
-      user,
-    )
+    const folderEvent = await this.eventHelper.createFolderEvent(eventType, loadedFolder, folderPath, user)
 
     this.em.persist(folderEvent)
   }

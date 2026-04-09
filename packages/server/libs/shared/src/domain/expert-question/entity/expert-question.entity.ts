@@ -1,17 +1,8 @@
-import {
-  Cascade,
-  Collection,
-  Entity,
-  Enum,
-  ManyToOne,
-  OneToMany,
-  Property,
-  Ref,
-} from '@mikro-orm/core'
+import { Cascade, Collection, Entity, Enum, ManyToOne, OneToMany, Property, Ref } from '@mikro-orm/core'
 import { BaseEntity } from '@shared/database/base.entity'
 import { ExpertQuestionComment } from '@shared/domain/comment/expert-question-comment.entity'
-import { ExpertQuestionRepository } from '@shared/domain/expert-question/repository/expert-question.repository'
 import { Expert } from '@shared/domain/expert/entity/expert.entity'
+import { ExpertQuestionRepository } from '@shared/domain/expert-question/repository/expert-question.repository'
 import { User } from '@shared/domain/user/user.entity'
 
 export enum ExpertQuestionState {
@@ -44,7 +35,7 @@ export class ExpertQuestion extends BaseEntity {
 
   @OneToMany({
     entity: () => ExpertQuestionComment,
-    mappedBy: (dc) => dc.commentableId,
+    mappedBy: dc => dc.commentableId,
     cascade: [Cascade.REMOVE],
   })
   comments = new Collection<ExpertQuestionComment>(this)

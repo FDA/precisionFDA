@@ -1,8 +1,7 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { JobCountService } from '@shared/domain/job/services/job-count.service'
 import { Queue } from 'bull'
 import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
+import { SinonStub, stub } from 'sinon'
 import { database } from '@shared/database'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
@@ -16,22 +15,19 @@ import { JobSynchronizationService } from '@shared/domain/job/services/job-synch
 import { JobWorkstationService } from '@shared/domain/job/services/job-workstation.service'
 import { Notification } from '@shared/domain/notification/notification.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
 import { InvalidStateError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { FileStatesParams, JobFindParams } from '@shared/platform-client/platform-client.params'
-import {
-  FileStateResult,
-  FindJobsResponse,
-} from '@shared/platform-client/platform-client.responses'
+import { FileStateResult, FindJobsResponse } from '@shared/platform-client/platform-client.responses'
 import * as queueDomain from '@shared/queue'
 import { create, db } from '@shared/test'
 
@@ -192,9 +188,11 @@ describe('Job service tests', () => {
           },
         }
 
-        return JSON.parse(JSON.stringify({
-          results: [mockedResult],
-        })) as FindJobsResponse
+        return JSON.parse(
+          JSON.stringify({
+            results: [mockedResult],
+          }),
+        ) as FindJobsResponse
       },
       fileStates: async (params: FileStatesParams): Promise<FileStateResult[]> => {
         expect(params.fileDxids.length).eq(3)
@@ -569,7 +567,6 @@ describe('Job service tests', () => {
       expect(snapshotStub.calledOnceWithExactly(job.uid, authCode, key, name, terminate)).to.be.true()
     })
   })
-
 
   const getJobServiceInstance = (platformClient: PlatformClient): JobService => {
     const jobCountService = {

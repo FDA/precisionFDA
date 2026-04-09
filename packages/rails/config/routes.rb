@@ -352,7 +352,6 @@ Rails.application.routes.draw do
         get :open_external, on: :member
         patch :refresh_api_key, on: :member
         get :describe, on: :member, to: "jobs#describe"
-        get :scope, on: :member, to: "jobs#get_job_scope" # used by CLI, id is actually dxid
         patch :snapshot, on: :member
 
         collection do
@@ -439,7 +438,6 @@ Rails.application.routes.draw do
       post "set_tags"
       post "assign_app"
       get "list_licenses"
-      get "cli_latest_version"
       get "list_licenses_for_files"
       get "tracks/provenance", action: :track_provenance, as: "track_provenance"
       post "publish"

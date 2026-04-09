@@ -15,7 +15,7 @@ export class Tag {
 
   @OneToMany({
     entity: () => Tagging,
-    mappedBy: (t) => t.tag,
+    mappedBy: t => t.tag,
   })
   taggings = new Collection<Tagging>(this)
 }

@@ -1,5 +1,7 @@
 import { Processor } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
+import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
+import { Job } from 'bull'
 import { config } from '@shared/config'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
@@ -10,9 +12,7 @@ import { SpaceReportService } from '@shared/domain/space-report/service/space-re
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
-import {
-  SpaceMemberNotificationFacade,
-} from '@shared/facade/space-member-notification/space-member-notification.facade'
+import { SpaceMemberNotificationFacade } from '@shared/facade/space-member-notification/space-member-notification.facade'
 import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { createRunFollowUpActionJobTask } from '@shared/queue'
@@ -22,10 +22,6 @@ import {
   TASK_TYPE,
   UiNotifyNewDiscussionReplyJob,
 } from '@shared/queue/task.input'
-import {
-  DbClusterSynchronizeFacade,
-} from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
-import { Job } from 'bull'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
 import { ProcessWithContext } from '../decorator/process-with-context'
 
@@ -75,9 +71,7 @@ export class MainQueueProcessor {
     this.logger.log(`synchronizeFile result: ${result}`)
 
     if (!result) {
-      throw new Error(
-        `File ${input.fileUid} not ready for synchronizing, trigger repeat of the job by throwing error`,
-      )
+      throw new Error(`File ${input.fileUid} not ready for synchronizing, trigger repeat of the job by throwing error`)
     } else {
       const followUpAction = await this.followUpDecider.decideNextAction(input.fileUid)
       if (followUpAction) {

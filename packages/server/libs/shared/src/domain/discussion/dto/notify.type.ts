@@ -7,17 +7,17 @@ export type NotifyType = 'all' | 'author' | string[]
 
 @ValidatorConstraint({ name: 'isValidNotify', async: false })
 export class NotifyConstraint implements ValidatorConstraintInterface {
-  validate(value: string | string[]) {
+  validate(value: string | string[]): boolean {
     if (typeof value === 'string') {
       return value === 'all' || value === 'author'
     }
     if (Array.isArray(value)) {
-      return value.every((item) => typeof item === 'string')
+      return value.every(item => typeof item === 'string')
     }
     return false
   }
 
-  defaultMessage() {
+  defaultMessage(): string {
     return `The 'notify' property must be either 'all', 'author', or a string array of usernames.`
   }
 }

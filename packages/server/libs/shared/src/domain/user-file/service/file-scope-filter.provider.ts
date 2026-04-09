@@ -2,11 +2,7 @@ import { FilterQuery } from '@mikro-orm/core'
 import { Injectable } from '@nestjs/common'
 import { AbstractScopeFilterProvider } from '@shared/domain/counters/abstract-scope-filter.provider'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import {
-  FILE_STATE_PFDA,
-  FILE_STI_TYPE,
-  PARENT_TYPE,
-} from '@shared/domain/user-file/user-file.types'
+import { FILE_STATE_PFDA, FILE_STI_TYPE, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 
 /**
  * Scope filter provider for UserFile entities.

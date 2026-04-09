@@ -1,14 +1,14 @@
 import { FindOneOptions, FindOptions } from '@mikro-orm/core'
 import { FilterQuery, Loaded } from '@mikro-orm/mysql'
+import { Logger } from '@nestjs/common'
 import { BaseEntity } from '@shared/database/base.entity'
+import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
-import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { createUserContextManager } from '@shared/domain/user-context/storage/user-context-storage.manager'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
+import { createUserContextManager } from '@shared/domain/user-context/storage/user-context-storage.manager'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Logger } from '@nestjs/common'
 
 const EMPTY_PAGEABLE_RESULT = {
   data: [],
@@ -22,18 +22,12 @@ const EMPTY_PAGEABLE_RESULT = {
 const EMPTY_FIND_RESULT = []
 const EMPTY_FIND_ONE_RESULT = null
 
-export abstract class AccessControlRepository<
-  Entity extends BaseEntity,
-> extends PaginatedRepository<Entity> {
+export abstract class AccessControlRepository<Entity extends BaseEntity> extends PaginatedRepository<Entity> {
   protected readonly user: UserContext = createUserContextManager(userContextStorage)
   @ServiceLogger()
   private readonly logger: Logger
 
-  async paginateAccessible<
-    Hint extends string = never,
-    Fields extends string = '*',
-    Excludes extends string = never,
-  >(
+  async paginateAccessible<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
     pagination: PaginationDTO<Entity>,
     where: FilterQuery<Entity> = {},
     options?: Omit<FindOptions<Entity, Hint, Fields, Excludes>, 'limit' | 'offset'>,
@@ -49,11 +43,7 @@ export abstract class AccessControlRepository<
     return this.paginate(pagination, mergedWhere, options)
   }
 
-  async paginateEditable<
-    Hint extends string = never,
-    Fields extends string = '*',
-    Excludes extends string = never,
-  >(
+  async paginateEditable<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
     pagination: PaginationDTO<Entity>,
     where: FilterQuery<Entity> = {},
     options?: Omit<FindOptions<Entity, Hint, Fields, Excludes>, 'limit' | 'offset'>,
@@ -68,11 +58,7 @@ export abstract class AccessControlRepository<
     return this.paginate(pagination, mergedWhere, options)
   }
 
-  async findAccessible<
-    Hint extends string = never,
-    Fields extends string = '*',
-    Excludes extends string = never,
-  >(
+  async findAccessible<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
     where: FilterQuery<Entity> = {},
     options?: Omit<FindOptions<Entity, Hint, Fields, Excludes>, 'limit' | 'offset'>,
   ): Promise<Loaded<Entity, Hint, Fields, Excludes>[]> {
@@ -86,11 +72,7 @@ export abstract class AccessControlRepository<
     return this.find(mergedWhere, options)
   }
 
-  async findEditable<
-    Hint extends string = never,
-    Fields extends string = '*',
-    Excludes extends string = never,
-  >(
+  async findEditable<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
     where: FilterQuery<Entity> = {},
     options?: Omit<FindOptions<Entity, Hint, Fields, Excludes>, 'limit' | 'offset'>,
   ): Promise<Loaded<Entity, Hint, Fields, Excludes>[]> {
@@ -105,11 +87,7 @@ export abstract class AccessControlRepository<
     return this.find(mergedWhere, options)
   }
 
-  async findAccessibleOne<
-    Hint extends string = never,
-    Fields extends string = '*',
-    Excludes extends string = never,
-  >(
+  async findAccessibleOne<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
     where: FilterQuery<Entity> = {},
     options?: FindOneOptions<Entity, Hint, Fields, Excludes>,
   ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
@@ -122,11 +100,7 @@ export abstract class AccessControlRepository<
     return this.findOne(mergedWhere, options)
   }
 
-  async findEditableOne<
-    Hint extends string = never,
-    Fields extends string = '*',
-    Excludes extends string = never,
-  >(
+  async findEditableOne<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
     where: FilterQuery<Entity> = {},
     options?: FindOneOptions<Entity, Hint, Fields, Excludes>,
   ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
@@ -155,10 +129,7 @@ export abstract class AccessControlRepository<
    */
   protected abstract getEditableWhere(): Promise<FilterQuery<Entity>>
 
-  private getMergedWhere(
-    baseWhere: FilterQuery<Entity>,
-    additionalWhere: FilterQuery<Entity>,
-  ): FilterQuery<Entity> {
+  private getMergedWhere(baseWhere: FilterQuery<Entity>, additionalWhere: FilterQuery<Entity>): FilterQuery<Entity> {
     if (Object.keys(baseWhere).length === 0) {
       return additionalWhere
     }

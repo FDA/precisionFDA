@@ -9,8 +9,6 @@ export class CliListMembersFacade {
   async listSpaceMembers(spaceId: number): Promise<CliSpaceMemberDTO[]> {
     const memberships = await this.spaceService.getSpaceMembers(spaceId)
 
-    return await Promise.all(
-      memberships.map((membership) => CliSpaceMemberDTO.fromEntity(membership)),
-    )
+    return await Promise.all(memberships.map(membership => CliSpaceMemberDTO.fromEntity(membership)))
   }
 }

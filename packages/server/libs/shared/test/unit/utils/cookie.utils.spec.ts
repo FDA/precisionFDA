@@ -1,5 +1,5 @@
-import { CookieUtils } from '@shared/utils/cookie.utils'
 import { expect } from 'chai'
+import { CookieUtils } from '@shared/utils/cookie.utils'
 
 describe('CookieUtils', () => {
   it('parseCookies', async () => {

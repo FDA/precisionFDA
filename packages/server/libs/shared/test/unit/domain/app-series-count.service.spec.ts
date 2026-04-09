@@ -1,11 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
+import { SinonStub, stub } from 'sinon'
 import { AppSeriesCountService } from '@shared/domain/app-series/app-series-count.service'
 import { AppSeriesScopeFilterProvider } from '@shared/domain/app-series/app-series-scope-filter.provider'
+import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
+import { User } from '@shared/domain/user/user.entity'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('AppSeriesCountService', () => {
   const USER_ID = 1
@@ -130,9 +130,6 @@ describe('AppSeriesCountService', () => {
   })
 
   function getInstance(): AppSeriesCountService {
-    return new AppSeriesCountService(
-      em as unknown as SqlEntityManager,
-      appSeriesScopeFilterProvider,
-    )
+    return new AppSeriesCountService(em as unknown as SqlEntityManager, appSeriesScopeFilterProvider)
   }
 })

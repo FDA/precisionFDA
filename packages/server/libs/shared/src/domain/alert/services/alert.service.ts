@@ -1,10 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { Alert } from '@shared/domain/alert/entity/alert.entity'
+import { plainToInstance } from 'class-transformer'
 import { AlertDTO } from '@shared/domain/alert/dto/AlertDTO'
 import { CreateAlertDTO } from '@shared/domain/alert/dto/CreateAlertDTO'
+import { Alert } from '@shared/domain/alert/entity/alert.entity'
 import { NotFoundError } from '@shared/errors'
-import { plainToInstance } from 'class-transformer'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
@@ -61,7 +61,7 @@ export class AlertService {
     }
 
     const alerts = await this.em.find(Alert, conditions)
-    return alerts.map((alert) => plainToInstance(AlertDTO, alert))
+    return alerts.map(alert => plainToInstance(AlertDTO, alert))
   }
 
   private mapToEntity(alertEntity: Alert, alert: CreateAlertDTO): void {

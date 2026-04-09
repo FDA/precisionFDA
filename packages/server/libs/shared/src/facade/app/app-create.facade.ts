@@ -1,9 +1,8 @@
+import * as crypto from 'node:crypto'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { UBUNTU_20, UBUNTU_RELEASES, VALID_IO_CLASSES } from '@shared/config/consts'
 import { validUbuntuPackages } from '@shared/config/ubuntu_packages'
-import { AppSeries } from '@shared/domain/app-series/app-series.entity'
-import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
 import { App, AppSpec, Internal } from '@shared/domain/app/app.entity'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import {
@@ -17,34 +16,25 @@ import {
 import { AppSpecItem } from '@shared/domain/app/app.input'
 import { SaveAppDTO } from '@shared/domain/app/dto/save-app.dto'
 import { AppService } from '@shared/domain/app/services/app.service'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { createAppCreated } from '@shared/domain/event/event.helper'
 import { allowedInstanceTypes } from '@shared/domain/job/job.enum'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import {
-  ErrorCodes,
-  InvalidRequestError,
-  NotFoundError,
-  PermissionError,
-  ValidationError,
-} from '@shared/errors'
+import { ErrorCodes, InvalidRequestError, NotFoundError, PermissionError, ValidationError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
-import {
-  AppCreateParams,
-  AppletCreateParams,
-  PackageMapping,
-} from '@shared/platform-client/platform-client.params'
+import { AppCreateParams, AppletCreateParams, PackageMapping } from '@shared/platform-client/platform-client.params'
 import { EntityScope } from '@shared/types/common'
 import { codeRemap } from '@shared/utils/app'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import * as crypto from 'node:crypto'
 
 @Injectable()
 export class AppCreateFacade {
@@ -66,15 +56,12 @@ export class AppCreateFacade {
    * @return uid of newly created app
    */
   async create(appInput: SaveAppDTO): Promise<Uid<'app'>> {
-    this.logger.log(
-      `Creating app for user: ${this.user.dxuser}, createAppSeries ${appInput.createAppSeries}`,
-    )
+    this.logger.log(`Creating app for user: ${this.user.dxuser}, createAppSeries ${appInput.createAppSeries}`)
     const user = await this.user.loadEntity()
     await this.em.populate(user, ['organization'])
-    const assets = (await this.nodeService.getAccessibleEntitiesByUids(
-      appInput.ordered_assets ?? [],
-      [FILE_STI_TYPE.ASSET],
-    )) as Asset[]
+    const assets = (await this.nodeService.getAccessibleEntitiesByUids(appInput.ordered_assets ?? [], [
+      FILE_STI_TYPE.ASSET,
+    ])) as Asset[]
 
     await this.validateAppInput(appInput, assets)
     await this.validateScopeAndUser(user, appInput.scope)
@@ -84,14 +71,10 @@ export class AppCreateFacade {
     this.validateAppSeriesCreation(appSeries, appInput.createAppSeries)
     this.validateAppRevisionCreation(appSeries, appInput.createAppRevision)
 
-    const previousVersionAppDxid = appSeries
-      ? (await this.getLatestRevisionApp(appSeries)).dxid
-      : null
+    const previousVersionAppDxid = appSeries ? (await this.getLatestRevisionApp(appSeries)).dxid : null
     if (!appSeries && appInput.createAppSeries) {
       appSeries = await this.appSeriesService.createAppSeries(appInput.name, user, appInput.scope)
-      this.logger.log(
-        `App series for dxid ${appSeries.dxid} did not exist and user requested its creation`,
-      )
+      this.logger.log(`App series for dxid ${appSeries.dxid} did not exist and user requested its creation`)
     }
 
     // - get release
@@ -119,25 +102,13 @@ export class AppCreateFacade {
     }
 
     if (EntityScopeUtils.isSpaceScope(appInput.scope)) {
-      await this.publishAppInSpace(
-        user,
-        EntityScopeUtils.getSpaceIdFromScope(appInput.scope),
-        platformAppId,
-      )
+      await this.publishAppInSpace(user, EntityScopeUtils.getSpaceIdFromScope(appInput.scope), platformAppId)
     }
 
     await this.em.begin()
     try {
       // - store app in a database
-      const app = await this.saveAppInDB(
-        user,
-        platformAppId,
-        revision,
-        release,
-        assets,
-        appInput,
-        appSeries.id,
-      )
+      const app = await this.saveAppInDB(user, platformAppId, revision, release, assets, appInput, appSeries.id)
 
       // - update app series (version, revision, deleted - why?)
       await this.updateAppSeries(appSeries, appInput, app)
@@ -156,7 +127,7 @@ export class AppCreateFacade {
   }
 
   private async publishAppInSpace(user: User, spaceId: number, appDxid): Promise<void> {
-    const space = (await user.editableSpaces()).find((space) => space.id === spaceId)
+    const space = (await user.editableSpaces()).find(space => space.id === spaceId)
 
     if (!space) {
       // this should never happen due to prior validation
@@ -180,11 +151,7 @@ export class AppCreateFacade {
     await this.em.persist(createAppEvent).flush()
   }
 
-  private async updateAppSeries(
-    appSeries: AppSeries,
-    appInput: SaveAppDTO,
-    app: App,
-  ): Promise<void> {
+  private async updateAppSeries(appSeries: AppSeries, appInput: SaveAppDTO, app: App): Promise<void> {
     this.logger.log(`Updating app series ${appSeries.dxid}`)
     appSeries.latestRevisionAppId = app.id
     if (appInput.scope && appInput.scope !== STATIC_SCOPE.PRIVATE) {
@@ -226,12 +193,12 @@ export class AppCreateFacade {
       instance_type: appInput.instance_type,
     } as AppSpec
     app.internal = {
-      ...(assets.length > 0 && { ordered_assets: assets.map((asset) => asset.uid) }),
+      ...(assets.length > 0 && { ordered_assets: assets.map(asset => asset.uid) }),
       packages: appInput.packages,
       code: appInput.code,
     } as Internal
 
-    assets.forEach((asset) => app.assets.add(asset))
+    assets.forEach(asset => app.assets.add(asset))
     app.release = release
     await this.em.persist(app).flush()
     return app
@@ -249,7 +216,7 @@ export class AppCreateFacade {
 
     const appDxName = constructDxName(user.dxuser, appInput.name, appInput.scope)
     const currentBillTo = user.organization.getEntity().getDxOrg()
-    const assetDxids = assets.map((asset) => asset.dxid)
+    const assetDxids = assets.map(asset => asset.dxid)
 
     // It is not possible on the PLATFORM to change billTo while creating a new version of an app.
     // It has to be changed independently with an update after the new version is created.
@@ -288,11 +255,7 @@ export class AppCreateFacade {
    * @param appInput
    * @param release
    */
-  private async createApplet(
-    user: User,
-    appInput: SaveAppDTO,
-    release: string,
-  ): Promise<DxId<'applet'>> {
+  private async createApplet(user: User, appInput: SaveAppDTO, release: string): Promise<DxId<'applet'>> {
     this.logger.log('Creating applet in platform')
     const appletCreateParams: AppletCreateParams = {
       project: user.privateFilesProject,
@@ -309,7 +272,7 @@ export class AppCreateFacade {
         distribution: 'Ubuntu',
         version: '0',
         release,
-        execDepends: appInput.packages.map((pckg) => {
+        execDepends: appInput.packages.map(pckg => {
           return { name: pckg } as PackageMapping
         }),
       },
@@ -336,23 +299,17 @@ export class AppCreateFacade {
 
   private validateAppRevisionCreation(appSeries?: AppSeries, createAppRevision?: boolean): void {
     if (appSeries && !createAppRevision) {
-      throw new ValidationError(
-        'This would create a new app revision and client did not request its creation.',
-        {
-          code: ErrorCodes.APP_REVISION_CREATION_NOT_REQUESTED,
-        },
-      )
+      throw new ValidationError('This would create a new app revision and client did not request its creation.', {
+        code: ErrorCodes.APP_REVISION_CREATION_NOT_REQUESTED,
+      })
     }
   }
 
   private validateAppSeriesCreation(appSeries?: AppSeries, createAppSeries?: boolean): void {
     if (!appSeries && !createAppSeries) {
-      throw new ValidationError(
-        'This would create a new app series and client did not request its creation.',
-        {
-          code: ErrorCodes.APP_SERIES_CREATION_NOT_REQUESTED,
-        },
-      )
+      throw new ValidationError('This would create a new app series and client did not request its creation.', {
+        code: ErrorCodes.APP_SERIES_CREATION_NOT_REQUESTED,
+      })
     }
   }
 
@@ -376,10 +333,8 @@ export class AppCreateFacade {
     }
     if (EntityScopeUtils.isSpaceScope(scope)) {
       const editableSpaces = await user.editableSpaces()
-      if (!editableSpaces.map((space) => space.scope).includes(scope)) {
-        throw new PermissionError(
-          `User ${user.dxuser} does not have permission to create app in space ${scope}.`,
-        )
+      if (!editableSpaces.map(space => space.scope).includes(scope)) {
+        throw new PermissionError(`User ${user.dxuser} does not have permission to create app in space ${scope}.`)
       }
     }
   }
@@ -399,12 +354,10 @@ export class AppCreateFacade {
     }
 
     if (!Object.keys(allowedInstanceTypes).includes(appInput.instance_type)) {
-      this.throwValidationError(
-        `The app 'instance type' must be one of: ${Object.keys(allowedInstanceTypes)}`,
-      )
+      this.throwValidationError(`The app 'instance type' must be one of: ${Object.keys(allowedInstanceTypes)}`)
     }
 
-    appInput.packages.forEach((packageName) => {
+    appInput.packages.forEach(packageName => {
       if (!validUbuntuPackages.includes(packageName)) {
         this.throwValidationError(`The package '${packageName}' is not a valid Ubuntu package.`)
       }
@@ -412,19 +365,18 @@ export class AppCreateFacade {
 
     if (appInput.ordered_assets) {
       let inaccessible = [...appInput.ordered_assets]
-      assets.forEach((asset) => (inaccessible = inaccessible.filter((item) => item !== asset.uid)))
+      assets.forEach(asset => (inaccessible = inaccessible.filter(item => item !== asset.uid)))
       if (inaccessible.length > 0) {
         this.throwValidationError(
-          `The app assets with uids '${JSON.stringify(inaccessible)}' do ` +
-            'not exist or are not accessible by you.',
+          `The app assets with uids '${JSON.stringify(inaccessible)}' do not exist or are not accessible by you.`,
         )
       }
     }
 
     const alreadySeenInputs: string[] = []
-    appInput.input_spec.forEach((spec) => this.validateSpec(spec, 'input', alreadySeenInputs))
+    appInput.input_spec.forEach(spec => this.validateSpec(spec, 'input', alreadySeenInputs))
     const alreadySeenOutputs: string[] = []
-    appInput.output_spec.forEach((spec) => this.validateSpec(spec, 'output', alreadySeenOutputs))
+    appInput.output_spec.forEach(spec => this.validateSpec(spec, 'output', alreadySeenOutputs))
 
     this.logger.log('App validations finished successfully')
   }

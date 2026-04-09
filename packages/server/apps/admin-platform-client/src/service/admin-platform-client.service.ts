@@ -34,9 +34,7 @@ export class AdminPlatformClientService {
     }
 
     if (!(this.ALLOWED_METHODS as string[]).includes(method)) {
-      throw new ForbiddenException(
-        `Method "${method}" is not allowed to be called on the admin platform client`,
-      )
+      throw new ForbiddenException(`Method "${method}" is not allowed to be called on the admin platform client`)
     }
 
     return await this.platformClient[method](...params)

@@ -1,18 +1,18 @@
 import { FilterQuery } from '@mikro-orm/core'
 import { Injectable, Logger } from '@nestjs/common'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
-import { DbClusterPaginationDTO } from '@shared/domain/db-cluster/dto/db-cluster-pagination.dto'
 import { DbClusterDTO } from '@shared/domain/db-cluster/dto/db-cluster.dto'
+import { DbClusterPaginationDTO } from '@shared/domain/db-cluster/dto/db-cluster-pagination.dto'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
+import { LicenseService } from '@shared/domain/license/license.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { getIdFromScopeName } from '@shared/domain/space/space.helper'
+import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { LicenseService } from '@shared/domain/license/license.service'
 
 @Injectable()
 export class DbClusterListFacade {
@@ -34,7 +34,7 @@ export class DbClusterListFacade {
 
     if (pagination.scope === HOME_SCOPE.SPACES) {
       const spaces = await user.accessibleSpaces()
-      const scopes = spaces.map((s) => {
+      const scopes = spaces.map(s => {
         return `space-${s.id}`
       })
       where.scope = { $in: scopes as (RegExp | `space-${number}`)[] }
@@ -71,11 +71,11 @@ export class DbClusterListFacade {
     const response = await this.dbClusterService.paginate(pagination, where)
     const licensesByDbClusterId = await this.licenseService.findLicenseRefsByLicenseableIds(
       'DbCluster',
-      response.data.map((cluster) => cluster.id),
+      response.data.map(cluster => cluster.id),
     )
 
     const dbclusters = await Promise.all(
-      response.data.map(async (dbcluster) => {
+      response.data.map(async dbcluster => {
         const fileLicense = licensesByDbClusterId.get(dbcluster.id)
         if (dbcluster.isInSpace()) {
           const membership = await this.spaceMembershipService.getCurrentMembership(

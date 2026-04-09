@@ -1,4 +1,4 @@
-import { header, footer, getBottomSpacer, getMiddleSpacer } from './common'
+import { footer, getBottomSpacer, getMiddleSpacer, header } from './common'
 
 export type GuestAccessTemplateInput = {
   firstName: string
