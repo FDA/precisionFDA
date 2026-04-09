@@ -1,6 +1,6 @@
-import { IsSpaceReportOptionsValidConstraint } from '@shared/domain/space-report/constraint/is-space-report-options-valid.constraint'
 import { expect } from 'chai'
 import { ValidationArguments } from 'class-validator'
+import { IsSpaceReportOptionsValidConstraint } from '@shared/domain/space-report/constraint/is-space-report-options-valid.constraint'
 
 describe('IsSpaceReportOptionsValidConstraint', () => {
   describe('#validate', () => {

@@ -1,15 +1,15 @@
-import { stub } from 'sinon'
 import { expect } from 'chai'
-import { LicenseApprovalRequestHandler } from '@shared/domain/email/templates/handlers/license-approval-request.handler'
-import { EmailClient } from '@shared/services/email-client'
-import { LicenseRepository } from '@shared/domain/license/license.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { License } from '@shared/domain/license/license.entity'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { User } from '@shared/domain/user/user.entity'
+import { stub } from 'sinon'
+import { config } from '@shared/config'
 import { LicenseApprovalRequestDTO } from '@shared/domain/email/dto/license-approval-request.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { config } from '@shared/config'
+import { LicenseApprovalRequestHandler } from '@shared/domain/email/templates/handlers/license-approval-request.handler'
+import { License } from '@shared/domain/license/license.entity'
+import { LicenseRepository } from '@shared/domain/license/license.repository'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('LicenseApprovalRequestHandler', () => {
   const USER_ID = 33
@@ -57,12 +57,8 @@ describe('LicenseApprovalRequestHandler', () => {
       license.id = LICENSE_ID
 
       emailClientSendEmailStub.reset()
-      licenseRepoFindOneOrFailStub
-        .withArgs({ id: LICENSE_ID }, { populate: ['user'] })
-        .resolves(license)
-      userRepoFindOneOrFailStub
-        .withArgs({ id: USER_ID }, { populate: ['organization'] })
-        .resolves(user)
+      licenseRepoFindOneOrFailStub.withArgs({ id: LICENSE_ID }, { populate: ['user'] }).resolves(license)
+      userRepoFindOneOrFailStub.withArgs({ id: USER_ID }, { populate: ['organization'] }).resolves(user)
 
       const input = new LicenseApprovalRequestDTO()
       input.license_id = LICENSE_ID
@@ -73,9 +69,7 @@ describe('LicenseApprovalRequestHandler', () => {
       await handler.sendEmail(input)
 
       expect(emailClientSendEmailStub.calledOnce).to.eq(true)
-      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
-        EMAIL_TYPES.licenseApprovalRequest,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.licenseApprovalRequest)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
         `${user.firstName} ${user.lastName} requested approval for license: ${license.title}`,

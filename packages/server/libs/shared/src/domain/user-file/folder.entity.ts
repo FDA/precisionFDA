@@ -1,12 +1,4 @@
-import {
-  Collection,
-  Entity,
-  EntityDTO,
-  Filter,
-  OneToMany,
-  Property,
-  Reference,
-} from '@mikro-orm/core'
+import { Collection, Entity, EntityDTO, Filter, OneToMany, Property, Reference } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
@@ -26,7 +18,7 @@ export class Folder extends Node {
    */
   @OneToMany({
     entity: () => Node,
-    mappedBy: (n) => n.parentFolder,
+    mappedBy: n => n.parentFolder,
     hidden: true,
   })
   nonScopedChildren = new Collection<Node>(this)
@@ -37,7 +29,7 @@ export class Folder extends Node {
    */
   @OneToMany({
     entity: () => Node,
-    mappedBy: (n) => n.scopedParentFolder,
+    mappedBy: n => n.scopedParentFolder,
     hidden: true,
   })
   scopedChildren = new Collection<Node>(this)

@@ -1,12 +1,12 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
+import { JobOptions, Queue } from 'bull'
 import { config } from '@shared/config'
+import { getBullJobIdForEmailOperation } from '@shared/domain/email/email.helper'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { SendEmailJob, TASK_TYPE } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { JobOptions, Queue } from 'bull'
-import { getBullJobIdForEmailOperation } from '@shared/domain/email/email.helper'
 
 @Injectable()
 export class EmailQueueJobProducer extends QueueJobProducer {
@@ -19,11 +19,7 @@ export class EmailQueueJobProducer extends QueueJobProducer {
 
   // Specifying a taskId will prevent multiple emails of that
   // type and id to be sent
-  async createSendEmailTask(
-    data: SendEmailJob['payload'],
-    user: UserCtx | undefined,
-    taskId?: string,
-  ) {
+  async createSendEmailTask(data: SendEmailJob['payload'], user: UserCtx | undefined, taskId?: string) {
     const wrapped = {
       type: TASK_TYPE.SEND_EMAIL as const,
       payload: data,

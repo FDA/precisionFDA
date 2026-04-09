@@ -1,11 +1,11 @@
 import { Collection, Entity, ManyToMany, OneToMany, Property } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
-import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { User } from '@shared/domain/user/user.entity'
+import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { AssetRepository } from './asset.repository'
 import { FILE_STATE_DX, FILE_STI_TYPE } from './user-file.types'
-import { DxId } from '@shared/domain/entity/domain/dxid'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 @Entity({
   tableName: 'nodes',
@@ -17,10 +17,17 @@ class Asset extends UserFile {
   @Property()
   dxid: DxId<'file'>
 
-  @OneToMany(() => ArchiveEntry, (archiveEntry) => archiveEntry.asset, { orphanRemoval: true })
+  @OneToMany(
+    () => ArchiveEntry,
+    archiveEntry => archiveEntry.asset,
+    { orphanRemoval: true },
+  )
   archiveEntries = new Collection<ArchiveEntry>(this)
 
-  @ManyToMany(() => App, (app) => app.assets)
+  @ManyToMany(
+    () => App,
+    app => app.assets,
+  )
   apps = new Collection<App>(this)
 
   constructor(user: User) {

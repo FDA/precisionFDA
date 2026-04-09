@@ -62,11 +62,9 @@ type IDType = string | number
 const generateObjectCommentsLink = (tableName: IDType, objectUid: IDType): string =>
   `${config.api.railsHost}/${tableName}/${objectUid}/comments`
 
-const generateSpaceLink = (spaceId: IDType): string =>
-  `${config.api.railsHost}/spaces/${spaceId.toString()}`
+const generateSpaceLink = (spaceId: IDType): string => `${config.api.railsHost}/spaces/${spaceId.toString()}`
 
-const generateJobDetailLink = (jobUid: IDType): string =>
-  `${config.api.railsHost}/home/jobs/${jobUid}`
+const generateJobDetailLink = (jobUid: IDType): string => `${config.api.railsHost}/home/jobs/${jobUid}`
 
 const generateExpertQuestionLink = (expertId: IDType, questionId: IDType): string =>
   `${config.api.railsHost}/experts/${expertId}/dashboard/expert_questions/${questionId}`
@@ -80,7 +78,8 @@ const generateChallengeDetailLink = (challengeId: IDType): string =>
 const generateChallengePreregPageLink = (challengeId: IDType): string =>
   `${config.api.railsHost}/challenges/${challengeId.toString()}`
 
-const ctoButton = (text: string, generateLinkFn: (spaceId: IDType) => string) => (id: IDType) => `
+const ctoButton = (text: string, generateLinkFn: (spaceId: IDType) => string) => (id: IDType) =>
+  `
   <mj-button
     background-color="#1F70B5"
     line-weight="30px"
@@ -94,35 +93,35 @@ const ctoButton = (text: string, generateLinkFn: (spaceId: IDType) => string) =>
   </mj-button>
 `
 
-const getUserTitle = (user?: User) => {
+const getUserTitle: (user?: User) => string = (user?: User) => {
   return user ? `${user?.firstName} ${user?.lastName}` : 'Anonymous'
 }
 
-const getViewSpaceButton = ctoButton('View space', generateSpaceLink)
-const getChallengeCtoButton = ctoButton('Join challenge', generateChallengeDetailLink)
-const getExpertCtoButton = ctoButton('Expert dashboard', generateExpertDashboardLink)
-const viewChallengePreregPageCtoButton = ctoButton(
+const getViewSpaceButton: (id: IDType) => string = ctoButton('View space', generateSpaceLink)
+const getChallengeCtoButton: (id: IDType) => string = ctoButton('Join challenge', generateChallengeDetailLink)
+const getExpertCtoButton: (id: IDType) => string = ctoButton('Expert dashboard', generateExpertDashboardLink)
+const viewChallengePreregPageCtoButton: (id: IDType) => string = ctoButton(
   'Join challenge',
   generateChallengePreregPageLink,
 )
-const getExecutionDetailButton = ctoButton('Execution detail', generateJobDetailLink)
+const getExecutionDetailButton: (id: IDType) => string = ctoButton('Execution detail', generateJobDetailLink)
 
 const getBottomSpacer = (): string => '<mj-spacer height="16px" />'
 const getMiddleSpacer = (): string => '<mj-spacer height="10px" />'
 
 export {
   footer,
+  generateExpertDashboardLink,
+  generateExpertQuestionLink,
   generateJobDetailLink,
   generateObjectCommentsLink,
-  generateExpertQuestionLink,
-  generateExpertDashboardLink,
   generateSpaceLink,
   getBottomSpacer,
-  getUserTitle,
   getChallengeCtoButton,
   getExecutionDetailButton,
   getExpertCtoButton,
   getMiddleSpacer,
+  getUserTitle,
   getViewSpaceButton,
   header,
   viewChallengePreregPageCtoButton,

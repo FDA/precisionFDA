@@ -1,9 +1,9 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { CreateReplyDTO } from '@shared/domain/discussion/dto/create-reply.dto'
 import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
@@ -24,20 +24,14 @@ export class CreateDiscussionReplyFacade {
       return result
     })
 
-    await this.mainQueueJobProducer.createNewReplyNotificationTask(
-      newReply.discussionId,
-      dto.notify,
-    )
+    await this.mainQueueJobProducer.createNewReplyNotificationTask(newReply.discussionId, dto.notify)
 
     await this.notifySpaceMembers(newReply, dto.type)
 
     return newReply
   }
 
-  private async notifySpaceMembers(
-    reply: DiscussionReplyDTO,
-    type: DISCUSSION_REPLY_TYPE,
-  ): Promise<void> {
+  private async notifySpaceMembers(reply: DiscussionReplyDTO, type: DISCUSSION_REPLY_TYPE): Promise<void> {
     const scope = reply.scope
     if (!EntityScopeUtils.isSpaceScope(scope)) {
       return

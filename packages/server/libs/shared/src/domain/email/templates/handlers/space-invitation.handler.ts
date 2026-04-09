@@ -1,18 +1,15 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { spaceInvitationTemplate } from '@shared/domain/email/templates/mjml/space-invitation.template'
-import { User } from '@shared/domain/user/user.entity'
-import { config } from '@shared/config'
-import { InvitationToSpaceDTO } from '@shared/domain/email/dto/invitation-to-space.dto'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EmailClient } from '@shared/services/email-client'
 import { Injectable } from '@nestjs/common'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import {
-  EmailTypeToContextMap,
-  SpaceInvitationContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { config } from '@shared/config'
+import { EmailTypeToContextMap, SpaceInvitationContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { InvitationToSpaceDTO } from '@shared/domain/email/dto/invitation-to-space.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { spaceInvitationTemplate } from '@shared/domain/email/templates/mjml/space-invitation.template'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
 
 @Injectable()
 export class SpaceInvitationHandler extends EmailHandler<EMAIL_TYPES.spaceInvitation> {

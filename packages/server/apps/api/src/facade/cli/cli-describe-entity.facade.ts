@@ -6,6 +6,7 @@ import {
   CliAppDescribeDTO,
   CliCommentDTO,
   CliDbClusterDescribeDTO,
+  CliDescribeEntityResponse,
   CliDiscussionDescribeDTO,
   CliExecutionDescribeDTO,
   CliFileDescribeDTO,
@@ -48,17 +49,7 @@ export class CliDescribeEntityFacade {
    * Consolidating both pFDA and platform data for the response.
    * @param uid - UID of the entity to describe
    */
-  async describeEntity(
-    uid: string,
-  ): Promise<
-    | CliFileDescribeDTO
-    | CliDiscussionDescribeDTO
-    | CliFolderDescribeDTO
-    | CliWorkflowDescribeDTO
-    | CliAppDescribeDTO
-    | CliExecutionDescribeDTO
-    | CliDbClusterDescribeDTO
-  > {
+  async describeEntity(uid: string): Promise<CliDescribeEntityResponse> {
     switch (uid.split('-')[0]) {
       case 'file':
         return await this.describeFile(uid as Uid<'file'>)
@@ -88,7 +79,7 @@ export class CliDescribeEntityFacade {
 
     // If not found, try as asset
     if (!file) {
-      file = await this.assetRepository.findOne({ uid: entityId }, { populate: ['taggings.tag'] })
+      file = await this.assetRepository.findAccessibleOne({ uid: entityId }, { populate: ['taggings.tag'] })
     }
 
     if (!file) {
@@ -149,14 +140,12 @@ export class CliDescribeEntityFacade {
       throw new NotFoundError('Execution not found or not accessible')
     }
 
-    const platformExecutionData = await this.platformClient
-      .jobDescribe({ jobDxId: execution.dxid })
-      .catch((err) => {
-        if (err.props.clientStatusCode === 401) {
-          return execution.describe
-        }
-        throw err
-      })
+    const platformExecutionData = await this.platformClient.jobDescribe({ jobDxId: execution.dxid }).catch(err => {
+      if (err.props.clientStatusCode === 401) {
+        return execution.describe
+      }
+      throw err
+    })
     return CliExecutionDescribeDTO.fromEntity(platformExecutionData, execution)
   }
 
@@ -180,7 +169,11 @@ export class CliDescribeEntityFacade {
   }
 
   async describeDbCluster(dbClusterUid: Uid<'dbcluster'>): Promise<CliDbClusterDescribeDTO> {
-    const dbCluster = await this.dbclusterRepository.findAccessibleOne({ uid: dbClusterUid })
+    const dbCluster = await this.dbclusterRepository.findAccessibleOne(
+      { uid: dbClusterUid },
+      { populate: ['taggings.tag', 'properties'] },
+    )
+
     if (!dbCluster) {
       throw new NotFoundError('Database cluster not found or not accessible')
     }
@@ -209,7 +202,7 @@ export class CliDescribeEntityFacade {
   }
 
   private mapComments(comments: DiscussionReplyDTO[]): CliCommentDTO[] {
-    return comments.map((comment) => ({
+    return comments.map(comment => ({
       id: comment.id,
       user: comment.user,
       content: comment.content,
@@ -220,7 +213,7 @@ export class CliDescribeEntityFacade {
 
   private async mapAnswers(answers: DiscussionReplyDTO[]): Promise<CliAnswerDTO[]> {
     return Promise.all(
-      answers.map(async (answer) => ({
+      answers.map(async answer => ({
         id: answer.id,
         user: answer.user,
         content: answer.content,

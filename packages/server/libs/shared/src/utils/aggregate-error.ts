@@ -5,10 +5,7 @@ import { JsonPath } from './path'
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AggregateError/AggregateError
 // or polyfill with core-js
 export class CustomAggregateError extends BaseError {
-  private static appendNestedMessages(
-    topMessage: string,
-    nestedErrors: Array<{ error: BaseError; message: string }>,
-  ) {
+  private static appendNestedMessages(topMessage: string, nestedErrors: Array<{ error: BaseError; message: string }>) {
     return [
       topMessage,
       ...nestedErrors.map(({ message, error: { stack } }) => `${message}\n${stack}`),
@@ -16,11 +13,7 @@ export class CustomAggregateError extends BaseError {
     ].join('\n')
   }
 
-  constructor(
-    message: string,
-    nestedErrors: Array<{ error: BaseError; message: string }>,
-    props: ClientErrorProps,
-  ) {
+  constructor(message: string, nestedErrors: Array<{ error: BaseError; message: string }>, props: ClientErrorProps) {
     super(CustomAggregateError.appendNestedMessages(message, nestedErrors), {
       code: ErrorCodes.AGGREGATE_ERROR,
       ...props,
@@ -52,9 +45,7 @@ const resolveSchemaEffectsVisitor = <SchemaT>(
     return null
   }
   if (Array.isArray(schema)) {
-    return schema.map((entry, index) =>
-      resolveSchemaEffectsVisitor(entry, caughtErrors, [...path, index]),
-    )
+    return schema.map((entry, index) => resolveSchemaEffectsVisitor(entry, caughtErrors, [...path, index]))
   }
   if (typeof schema === 'object') {
     return Object.fromEntries(

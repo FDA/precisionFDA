@@ -1,6 +1,5 @@
 import { Collection, Entity, ManyToOne, OneToMany, Property, Ref } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
-
 import { BaseEntity } from '../../database/base.entity'
 import { DxId } from '../entity/domain/dxid'
 import { OrganizationRepository } from './organization.repository'

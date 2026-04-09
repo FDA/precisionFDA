@@ -1,11 +1,11 @@
+import { expect } from 'chai'
+import { JSDOM } from 'jsdom'
+import { stub } from 'sinon'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { EntityProvenance } from '@shared/domain/provenance/model/entity-provenance'
 import { EntityProvenanceSvgOptions } from '@shared/domain/provenance/model/entity-provenance-svg-options'
 import { EntityProvenanceSvgResultTransformerService } from '@shared/domain/provenance/service/result-transform/entity-provenance-svg-result-transformer.service'
 import { ArrayUtils } from '@shared/utils/array.utils'
-import { expect } from 'chai'
-import { JSDOM } from 'jsdom'
-import { stub } from 'sinon'
 
 describe('EntityProvenanceSvgResultTransformerService', () => {
   const APP_TITLE = 'app title'
@@ -152,11 +152,7 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
     assertNodeRecursive(svg, PROVENANCE)
   })
 
-  function assertNodeRecursive(
-    svg: SVGSVGElement,
-    node: EntityProvenance,
-    parentYCoordinate?: number,
-  ) {
+  function assertNodeRecursive(svg: SVGSVGElement, node: EntityProvenance, parentYCoordinate?: number) {
     const nodeElements = svg.querySelectorAll(`a[href="${node.data.url}"]`)
     // there is exactly one link with the provided url
     expect(nodeElements).to.have.length(1)
@@ -185,7 +181,7 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
       return
     }
 
-    parents.forEach((p) => assertNodeRecursive(svg, p, YCoord))
+    parents.forEach(p => assertNodeRecursive(svg, p, YCoord))
   }
 
   function findClosest(el: Element, tagName: string): Element {
@@ -203,9 +199,7 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
   }
 
   async function getResultSvg(options?: EntityProvenanceSvgOptions) {
-    return new JSDOM(
-      await getInstance().transform(PROVENANCE, options),
-    ).window.document.querySelector('svg')
+    return new JSDOM(await getInstance().transform(PROVENANCE, options)).window.document.querySelector('svg')
   }
 
   function getInstance() {

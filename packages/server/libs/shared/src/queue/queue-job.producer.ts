@@ -1,9 +1,9 @@
 import { Logger } from '@nestjs/common'
+import { context, propagation } from '@opentelemetry/api'
+import { Job, JobOptions, Queue } from 'bull'
 import { InvalidStateError } from '@shared/errors'
 import { getJobStatusMessageWithElapsedTime } from '@shared/queue/queue.utils'
 import { Task, TaskWithAuth } from '@shared/queue/task.input'
-import { Job, JobOptions, Queue } from 'bull'
-import { context, propagation } from '@opentelemetry/api'
 
 export abstract class QueueJobProducer {
   protected readonly logger = new Logger('QueueJobProducer')
@@ -17,10 +17,7 @@ export abstract class QueueJobProducer {
   ): Promise<Job<T>> {
     this.validateQueue()
 
-    this.logger.log(
-      { task: this.getTaskInfo(task, payloadFn), job: { id: options?.jobId } },
-      'adding a task to queue',
-    )
+    this.logger.log({ task: this.getTaskInfo(task, payloadFn), job: { id: options?.jobId } }, 'adding a task to queue')
 
     const taskWithTrace = this.injectTrace(task)
     return await this.queue.add(task.type, taskWithTrace, options)
@@ -29,12 +26,9 @@ export abstract class QueueJobProducer {
   protected async addBulkToQueue<T extends Task>(tasks: Parameters<Queue<T>['addBulk']>[0]) {
     this.validateQueue()
 
-    this.logger.log(
-      { tasks: tasks.map((t) => this.getTaskInfo(t.data)) },
-      'adding a bulk of task to queue',
-    )
+    this.logger.log({ tasks: tasks.map(t => this.getTaskInfo(t.data)) }, 'adding a bulk of task to queue')
 
-    return await this.queue.addBulk(tasks.map((t) => ({ name: t.data.type, data: t.data })))
+    return await this.queue.addBulk(tasks.map(t => ({ name: t.data.type, data: t.data })))
   }
 
   removeJobs(pattern: string) {
@@ -66,7 +60,7 @@ export abstract class QueueJobProducer {
   }
 
   private getTaskInfo(task: Task, payloadFn?: (payload: unknown) => unknown) {
-    const whitelistPayloadFn = payloadFn ?? ((payload) => payload)
+    const whitelistPayloadFn = payloadFn ?? (payload => payload)
 
     return {
       type: task.type,

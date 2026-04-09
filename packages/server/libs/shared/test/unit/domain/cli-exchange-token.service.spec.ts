@@ -1,4 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { useFakeTimers } from 'sinon'
 import { database } from '@shared/database'
 import { CliExchangeToken } from '@shared/domain/cli-exchange-token/cli-exchange-token.entity'
 import { CliExchangeTokenRepository } from '@shared/domain/cli-exchange-token/cli-exchange-token.repository'
@@ -7,8 +9,6 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError } from '@shared/errors'
 import { db } from '@shared/test'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { expect } from 'chai'
-import { useFakeTimers } from 'sinon'
 
 describe('CliExchangeTokenService', () => {
   let em: SqlEntityManager

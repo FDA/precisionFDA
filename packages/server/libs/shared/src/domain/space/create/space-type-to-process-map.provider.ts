@@ -1,10 +1,10 @@
 import { Provider } from '@nestjs/common'
+import { ReviewSpaceCreationProcess } from '@shared/domain/space/create/review-space-creation.process'
 import { SPACE_TYPE, SpaceProcessTypeMap } from '@shared/domain/space/space.enum'
-import { GroupsSpaceCreationProcess } from './groups-space-creation.process'
-import { PrivateSpaceCreationProcess } from './private-space-creation.process'
 import { AdministratorSpaceCreationProcess } from './administrator-space-creation.process'
 import { GovernmentSpaceCreationProcess } from './government-space-creation.process'
-import { ReviewSpaceCreationProcess } from '@shared/domain/space/create/review-space-creation.process'
+import { GroupsSpaceCreationProcess } from './groups-space-creation.process'
+import { PrivateSpaceCreationProcess } from './private-space-creation.process'
 
 const SPACE_TYPE_TO_PROCESS_PROVIDER_MAP = 'SPACE_TYPE_TO_CREATOR_PROVIDER_MAP'
 
@@ -35,4 +35,4 @@ const SpaceTypeToProcessMapProvider: Provider = {
   },
 }
 
-export { SpaceTypeToProcessMapProvider, SPACE_TYPE_TO_PROCESS_PROVIDER_MAP }
+export { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP, SpaceTypeToProcessMapProvider }

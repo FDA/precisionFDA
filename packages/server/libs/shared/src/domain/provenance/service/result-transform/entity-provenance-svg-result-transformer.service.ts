@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common'
-import { EntityService } from '@shared/domain/entity/entity.service'
 import fs from 'node:fs/promises'
+import path from 'node:path'
+import { Injectable } from '@nestjs/common'
 import DOMPurify from 'isomorphic-dompurify'
 import { JSDOM } from 'jsdom'
-import path from 'node:path'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { EntityProvenance } from '../../model/entity-provenance'
 import { EntityProvenanceSvgOptions } from '../../model/entity-provenance-svg-options'
 import { EntityProvenanceResultTransformerService } from './entity-provenance-result-transformer.service'
@@ -15,22 +15,14 @@ import { EntityProvenanceResultTransformerService } from './entity-provenance-re
 const d3 = import('d3')
 
 // TODO(PFDA-4835) - use import after introducing bundler with nestjs
-const assetsPath = path.join(
-  __dirname,
-  '../../../../../../../../../../libs/shared/src/domain/provenance/assets',
-)
+const assetsPath = path.join(__dirname, '../../../../../../../../../../libs/shared/src/domain/provenance/assets')
 const css = fs.readFile(path.join(assetsPath, 'main.css'), 'utf8').catch(() => '')
 
 @Injectable()
-export class EntityProvenanceSvgResultTransformerService
-  implements EntityProvenanceResultTransformerService<'svg'>
-{
+export class EntityProvenanceSvgResultTransformerService implements EntityProvenanceResultTransformerService<'svg'> {
   constructor(private readonly entityService: EntityService) {}
 
-  async transform(
-    provenance: EntityProvenance,
-    options?: EntityProvenanceSvgOptions,
-  ): Promise<string> {
+  async transform(provenance: EntityProvenance, options?: EntityProvenanceSvgOptions): Promise<string> {
     const { hierarchy, linkVertical, select, tree } = await d3
 
     const nodeSize = {
@@ -49,12 +41,12 @@ export class EntityProvenanceSvgResultTransformerService
       .nodeSize([nodeSize.width, -nodeHeightWithSpacing])
       .separation((a, b) => (a.parent === b.parent ? 1.1 : 1.3))
 
-    const root = hierarchy(provenance, (d) => d.parents)
-    const childRoot = hierarchy(provenance, (d) => d.children)
+    const root = hierarchy(provenance, d => d.parents)
+    const childRoot = hierarchy(provenance, d => d.children)
     const links = [...treeLayout(root).links(), ...childTreeLayout(childRoot).links()]
 
     const nodes = await Promise.all(
-      root.descendants().map(async (node) => ({
+      root.descendants().map(async node => ({
         ...node,
         icon: await this.entityService.getEntityIcon(node.data.data.type),
       })),
@@ -63,8 +55,8 @@ export class EntityProvenanceSvgResultTransformerService
     const outputNodes = await Promise.all(
       childRoot
         .descendants()
-        .filter((node) => node.depth !== 0)
-        .map(async (node) => ({
+        .filter(node => node.depth !== 0)
+        .map(async node => ({
           ...node,
           icon: await this.entityService.getEntityIcon(node.data.data.type),
         })),
@@ -98,15 +90,10 @@ export class EntityProvenanceSvgResultTransformerService
       .attr('transform', `translate(${Math.abs(minX)}, ${Math.abs(minY)})`)
 
     const linkPathGenerator = linkVertical<unknown, { x: number; y: number }>()
-      .x((d) => d.x + nodeSize.width / 2)
-      .y((d) => d.y + nodeSize.height / 2)
+      .x(d => d.x + nodeSize.width / 2)
+      .y(d => d.y + nodeSize.height / 2)
 
-    g.selectAll('path')
-      .data(links)
-      .enter()
-      .append('path')
-      .classed('node-path', true)
-      .attr('d', linkPathGenerator)
+    g.selectAll('path').data(links).enter().append('path').classed('node-path', true).attr('d', linkPathGenerator)
 
     g.selectAll('foreignObject')
       .data(nodes)
@@ -115,19 +102,19 @@ export class EntityProvenanceSvgResultTransformerService
       .classed('node', true)
       .attr('width', nodeSize.width)
       .attr('height', nodeSize.height)
-      .attr('x', (d) => (d as unknown as { x: number }).x)
-      .attr('y', (d) => (d as unknown as { y: number }).y)
+      .attr('x', d => (d as unknown as { x: number }).x)
+      .attr('y', d => (d as unknown as { y: number }).y)
       .append('div')
       .attr('xmlns', 'http://www.w3.org/1999/xhtml')
       .append('div')
       .classed('content', true)
       .append('a')
-      .attr('data-depth', (d) => d.depth)
-      .attr('href', (d) => d.data.data.url)
+      .attr('data-depth', d => d.depth)
+      .attr('href', d => d.data.data.url)
       .attr('target', '_blank')
-      .html((d) => d.icon)
+      .html(d => d.icon)
       .append('span')
-      .text((d) => `${d.data.data.title}`)
+      .text(d => `${d.data.data.title}`)
 
     if (options?.pixelated) {
       g.selectAll('foreignObject.node').classed('pixelated', true)
@@ -136,7 +123,7 @@ export class EntityProvenanceSvgResultTransformerService
     return DOMPurify.sanitize(dom.window.document.querySelector('svg.canvas').outerHTML, {
       ADD_TAGS: ['foreignObject'],
       ADD_ATTR: ['target'],
-      HTML_INTEGRATION_POINTS: {'foreignobject': true},
+      HTML_INTEGRATION_POINTS: { foreignobject: true },
     })
   }
 
@@ -152,7 +139,7 @@ export class EntityProvenanceSvgResultTransformerService
   } {
     const result = {} as { minY: number; minX: number; maxY: number; maxX: number }
 
-    nodes.forEach((node) => {
+    nodes.forEach(node => {
       if (result.minY == null || result.minY > node.y) {
         result.minY = node.y
       }

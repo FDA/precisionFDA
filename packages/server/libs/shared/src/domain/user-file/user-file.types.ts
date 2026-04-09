@@ -1,8 +1,8 @@
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { EntityScope, SCOPE } from '../../types/common'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { EntityScope, SCOPE } from '../../types/common'
 
 // File state from the platform
 export enum FILE_STATE_DX {

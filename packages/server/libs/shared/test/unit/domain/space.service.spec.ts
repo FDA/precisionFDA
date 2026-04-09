@@ -1,31 +1,23 @@
+import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
-import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { Node } from '@shared/domain/user-file/node.entity'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
-import {
-  NotFoundError,
-  PermissionError,
-  SpaceNotFoundError,
-  UserNotFoundError,
-} from '@shared/errors'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import {
-  SPACE_EVENT_ACTIVITY_TYPE,
-  SPACE_EVENT_OBJECT_TYPE,
-} from '@shared/domain/space-event/space-event.enum'
-import { Reference } from '@mikro-orm/core'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
 import { EventHelper } from '@shared/domain/event/event.helper'
+import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
+import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NotFoundError, PermissionError, SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
 
 describe('SpaceService', () => {
   const USER_ID = 1
@@ -46,7 +38,7 @@ describe('SpaceService', () => {
   const spaceRepoFindStub = stub()
   const spaceRepoFindSpacesByIdAndUserStub = stub()
   const userRepoFindOneStub = stub()
-  const emTransactionalStub = stub(em, 'transactional').callsFake(async (callback) => {
+  const emTransactionalStub = stub(em, 'transactional').callsFake(async callback => {
     return await callback(em)
   }) as SqlEntityManager['transactional']
   const spaceMembershipRepoFindOneStub = stub()
@@ -395,16 +387,11 @@ describe('SpaceService', () => {
       referenceStub.withArgs(space).returns(space)
 
       userRepoFindOneStub
-        .withArgs(
-          { id: USER_ID },
-          { populate: ['adminMemberships', 'adminMemberships.adminGroup'] },
-        )
+        .withArgs({ id: USER_ID }, { populate: ['adminMemberships', 'adminMemberships.adminGroup'] })
         .resolves(user)
       spaceRepoFindOneStub.withArgs({ id: SPACE_ID }).resolves(space)
       spaceRepoFindStub.withArgs({ spaceId: SPACE_ID }).resolves([{ id: CONF_SPACE_ID }])
-      spaceMembershipRepoFindOneStub
-        .withArgs({ spaces: SPACE_ID })
-        .resolves({ side: 'side', role: 'role' })
+      spaceMembershipRepoFindOneStub.withArgs({ spaces: SPACE_ID }).resolves({ side: 'side', role: 'role' })
       temPersistAndFlushStub.reset()
 
       const spaceService = createSpaceService()
@@ -421,17 +408,11 @@ describe('SpaceService', () => {
       expect(temPersistAndFlushStub.firstCall.args[0].user).to.equal(user)
       expect(temPersistAndFlushStub.firstCall.args[0].entityId).to.equal(SPACE_ID)
       expect(temPersistAndFlushStub.firstCall.args[0].entityType).to.equal('Space')
-      expect(temPersistAndFlushStub.firstCall.args[0].activityType).to.equal(
-        SPACE_EVENT_ACTIVITY_TYPE.space_locked,
-      )
-      expect(temPersistAndFlushStub.firstCall.args[0].objectType).to.equal(
-        SPACE_EVENT_OBJECT_TYPE.SPACE,
-      )
+      expect(temPersistAndFlushStub.firstCall.args[0].activityType).to.equal(SPACE_EVENT_ACTIVITY_TYPE.space_locked)
+      expect(temPersistAndFlushStub.firstCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.SPACE)
       expect(temPersistAndFlushStub.firstCall.args[0].side).to.equal('side')
       expect(temPersistAndFlushStub.firstCall.args[0].role).to.equal('role')
-      expect(temPersistAndFlushStub.firstCall.args[0].data).to.equal(
-        JSON.stringify({ name: undefined }),
-      )
+      expect(temPersistAndFlushStub.firstCall.args[0].data).to.equal(JSON.stringify({ name: undefined }))
     })
 
     it('space not found', async () => {
@@ -479,16 +460,11 @@ describe('SpaceService', () => {
       referenceStub.withArgs(space).returns(space)
 
       userRepoFindOneStub
-        .withArgs(
-          { id: USER_ID },
-          { populate: ['adminMemberships', 'adminMemberships.adminGroup'] },
-        )
+        .withArgs({ id: USER_ID }, { populate: ['adminMemberships', 'adminMemberships.adminGroup'] })
         .resolves(user)
       spaceRepoFindOneStub.withArgs({ id: SPACE_ID }).resolves(space)
       spaceRepoFindStub.withArgs({ spaceId: SPACE_ID }).resolves([{ id: CONF_SPACE_ID }])
-      spaceMembershipRepoFindOneStub
-        .withArgs({ spaces: SPACE_ID })
-        .resolves({ side: 'side', role: 'role' })
+      spaceMembershipRepoFindOneStub.withArgs({ spaces: SPACE_ID }).resolves({ side: 'side', role: 'role' })
       temPersistAndFlushStub.reset()
 
       const spaceService = createSpaceService()
@@ -505,17 +481,11 @@ describe('SpaceService', () => {
       expect(temPersistAndFlushStub.firstCall.args[0].user).to.equal(user)
       expect(temPersistAndFlushStub.firstCall.args[0].entityId).to.equal(SPACE_ID)
       expect(temPersistAndFlushStub.firstCall.args[0].entityType).to.equal('Space')
-      expect(temPersistAndFlushStub.firstCall.args[0].activityType).to.equal(
-        SPACE_EVENT_ACTIVITY_TYPE.space_unlocked,
-      )
-      expect(temPersistAndFlushStub.firstCall.args[0].objectType).to.equal(
-        SPACE_EVENT_OBJECT_TYPE.SPACE,
-      )
+      expect(temPersistAndFlushStub.firstCall.args[0].activityType).to.equal(SPACE_EVENT_ACTIVITY_TYPE.space_unlocked)
+      expect(temPersistAndFlushStub.firstCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.SPACE)
       expect(temPersistAndFlushStub.firstCall.args[0].side).to.equal('side')
       expect(temPersistAndFlushStub.firstCall.args[0].role).to.equal('role')
-      expect(temPersistAndFlushStub.firstCall.args[0].data).to.equal(
-        JSON.stringify({ name: undefined }),
-      )
+      expect(temPersistAndFlushStub.firstCall.args[0].data).to.equal(JSON.stringify({ name: undefined }))
     })
 
     it('space not found', async () => {
@@ -553,9 +523,7 @@ describe('SpaceService', () => {
     it('basic', async () => {
       spaceRepoFindOneOrFailStub.withArgs({ id: 1 }).resolves({ id: 1 })
       spaceRepoFindStub.withArgs({ spaceId: 1 }).resolves([{ id: 2 }, { id: 3 }])
-      spaceRepoFindSpacesByIdAndUserStub
-        .withArgs([2, 3, 1], userContext.id)
-        .resolves([{ id: 2 }, { id: 3 }])
+      spaceRepoFindSpacesByIdAndUserStub.withArgs([2, 3, 1], userContext.id).resolves([{ id: 2 }, { id: 3 }])
 
       const spaceService = createSpaceService()
       const result = await spaceService.getSelectableSpaces(1)
@@ -602,8 +570,7 @@ describe('SpaceService', () => {
 
       await expect(spaceService.validateVerificationSpace(node)).to.be.rejectedWith(
         Error,
-        `You have no permissions to remove ${node.name} as` +
-          ' it is part of Locked Verification space.',
+        `You have no permissions to remove ${node.name} as it is part of Locked Verification space.`,
       )
     })
   })

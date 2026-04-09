@@ -1,4 +1,4 @@
-import { Entity, Ref, ManyToOne } from '@mikro-orm/core'
+import { Entity, ManyToOne, Ref } from '@mikro-orm/core'
 import { Job } from '@shared/domain/job/job.entity'
 import { GeneralProperty } from '@shared/domain/property/property.entity'
 

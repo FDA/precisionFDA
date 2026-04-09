@@ -1,6 +1,7 @@
 import * as crypto from 'node:crypto'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
+import { compareVersions } from 'compare-versions'
 import { config } from '@shared/config'
 import { App } from '@shared/domain/app/app.entity'
 import { APP_CLI_CODE, APP_SERVER_URL } from '@shared/domain/app/app.helper'
@@ -35,7 +36,6 @@ import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.prod
 import { SCOPE } from '@shared/types/common'
 import { getPluralizedTerm } from '@shared/utils/format'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { compareVersions } from 'compare-versions'
 
 @Injectable()
 export class AppRunFacade {
@@ -67,7 +67,7 @@ export class AppRunFacade {
     const projectDxId = await this.getRunProjectFromScope(runAppInput.scope, user)
     const inputFiles = await this.getInputFiles(runAppInput, app.spec.input_spec)
 
-    const processedInput = await this.buildJobInput(runAppInput, app, inputFiles)
+    const processedInput = this.buildJobInput(runAppInput, app, inputFiles)
 
     let exchangeToken: CliExchangeToken
     if (app.spec.internet_access && app.version && compareVersions(app.version, '1.3.0') >= 0 && !app.isHTTPS()) {
@@ -152,7 +152,7 @@ export class AppRunFacade {
     return { id: job.uid }
   }
 
-  private async buildJobInput(input: RunAppDTO, app: App, inputFiles: UserFile[]): Promise<JobInput> {
+  private buildJobInput(input: RunAppDTO, app: App, inputFiles: UserFile[]): JobInput {
     this.logger.log(`Building job input for app run: ${app.uid}`)
     const appInputs = input.inputs
     const runInput = {}
@@ -222,14 +222,12 @@ export class AppRunFacade {
       }
 
       const fileUids: Uid<'file'>[] = []
-      if (spec.name in appInputs) {
-        if (spec.class === 'file') {
-          fileUids.push(appInputs[spec.name] as Uid<'file'>)
-        } else if (spec.class === 'array:file') {
-          fileUids.push(...(appInputs[spec.name] as Uid<'file'>[]))
-        } else {
-          continue
-        }
+      if (spec.class === 'file') {
+        fileUids.push(appInputs[spec.name] as Uid<'file'>)
+      } else if (spec.class === 'array:file') {
+        fileUids.push(...(appInputs[spec.name] as Uid<'file'>[]))
+      } else {
+        continue
       }
 
       const foundFiles = await this.nodeService.getAccessibleEntitiesByUids(fileUids)
@@ -258,8 +256,7 @@ export class AppRunFacade {
     if (input.jobLimit > user.cloudResourceSettings.job_limit) {
       throw new InvalidRequestError('Job limit exceeds maximum user setting')
     }
-    // casting resources to string[] for type compatibility
-    if (!(user.cloudResourceSettings.resources as string[]).includes(input.instanceType)) {
+    if (!user.cloudResourceSettings.resources.includes(input.instanceType)) {
       throw new InvalidStateError('Instance type not allowed for user')
     }
   }

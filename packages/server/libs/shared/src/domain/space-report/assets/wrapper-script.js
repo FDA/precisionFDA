@@ -54,10 +54,7 @@ ready(function () {
     debounce(function (event) {
       if (resizeData.tracking) {
         const cursorScreenXDelta = event.screenX - resizeData.startCursorScreenX
-        const newWidth = Math.min(
-          resizeData.startWidth + cursorScreenXDelta,
-          resizeData.maxWidth,
-        )
+        const newWidth = Math.min(resizeData.startWidth + cursorScreenXDelta, resizeData.maxWidth)
 
         resizeData.resizeTarget.style.width = `${newWidth}px`
         resizer.classList.add('resizing')

@@ -1,13 +1,13 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { App } from '@shared/domain/app/app.entity'
-import { Job } from '@shared/domain/job/job.entity'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
-import { create, db } from '@shared/test'
 import { expect } from 'chai'
 import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { create, db } from '@shared/test'
 
 describe('FolderRepository tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -80,7 +80,7 @@ describe('FolderRepository tests', () => {
     const results = await repo.findAllPFDAOnlyFolders()
     expect(results[0].isPFDAOnly()).to.be.true()
     expect(results[1].isPFDAOnly()).to.be.true()
-    const names = results.map((x) => x.name)
+    const names = results.map(x => x.name)
     expect(names).to.deep.equal(['user1_folder2', 'user2_folder1'])
   })
 
@@ -88,7 +88,7 @@ describe('FolderRepository tests', () => {
     const repo: FolderRepository = em.getRepository(Folder)
     const results = await repo.findPFDAOnlyFoldersForUser({ userId: user1.id })
     expect(results[0].isPFDAOnly()).to.be.true()
-    const names = results.map((x) => x.name)
+    const names = results.map(x => x.name)
     expect(names).to.deep.equal(['user1_folder2'])
   })
 })

@@ -1,12 +1,8 @@
+import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator'
 import { config } from '@shared/config'
-import {
-  allowedEngines,
-  allowedEngineVersions,
-  allowedInstanceTypes,
-} from '@shared/domain/db-cluster/db-cluster.enum'
+import { allowedEngines, allowedEngineVersions, allowedInstanceTypes } from '@shared/domain/db-cluster/db-cluster.enum'
 import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
 import { EntityScope } from '@shared/types/common'
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator'
 
 export class CreateDbClusterDTO {
   @IsString()

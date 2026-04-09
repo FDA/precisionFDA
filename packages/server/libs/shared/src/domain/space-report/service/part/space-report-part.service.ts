@@ -10,7 +10,7 @@ export class SpaceReportPartService {
   constructor(private readonly em: SqlEntityManager) {}
 
   createReportParts(sources: SpaceReportPartSource[]) {
-    return sources?.map((f) => this.createReportPart(f))
+    return sources?.map(f => this.createReportPart(f))
   }
 
   async completeBatch(batches: BatchComplete[]) {
@@ -26,10 +26,10 @@ export class SpaceReportPartService {
     return await this.em.transactional(async () => {
       const reportParts = await this.em.find(
         SpaceReportPart,
-        batches.map((b) => b.id),
+        batches.map(b => b.id),
       )
 
-      reportParts.forEach((rp) => {
+      reportParts.forEach(rp => {
         rp.result = batchLookup[rp.id].result
         rp.state = 'DONE'
       })

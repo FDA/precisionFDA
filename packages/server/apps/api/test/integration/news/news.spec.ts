@@ -1,11 +1,11 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { database } from '@shared/database'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { create, db, generate } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
-import { expect } from 'chai'
-import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -29,12 +29,7 @@ describe('/news', () => {
 
     // Create a series of news, some are publications and some are not published
     news = []
-    const createMockNewsItem = (
-      u: User,
-      date: Date,
-      isPublication: boolean,
-      published: boolean,
-    ): void => {
+    const createMockNewsItem = (u: User, date: Date, isPublication: boolean, published: boolean): void => {
       news.push(
         create.newsHelper.create(
           em,
@@ -48,8 +43,7 @@ describe('/news', () => {
         ),
       )
     }
-    const getUTCDate = (year: number, month: number, day: number): Date =>
-      new Date(Date.UTC(year, month, day))
+    const getUTCDate = (year: number, month: number, day: number): Date => new Date(Date.UTC(year, month, day))
 
     // 2023
     createMockNewsItem(user1, getUTCDate(2023, 3, 1), false, true)
@@ -99,10 +93,7 @@ describe('/news', () => {
   })
 
   it('GET /news public access with pagination', async () => {
-    const { body } = await supertest(testedApp.getHttpServer())
-      .get(`/news`)
-      .query({ page: 2 })
-      .expect(200)
+    const { body } = await supertest(testedApp.getHttpServer()).get(`/news`).query({ page: 2 }).expect(200)
 
     const newsItems = body.data
     expect(newsItems).to.have.length(2)
@@ -111,10 +102,7 @@ describe('/news', () => {
   })
 
   it('GET /news public access with publication filter', async () => {
-    const { body } = await supertest(testedApp.getHttpServer())
-      .get(`/news`)
-      .query({ type: 'publication' })
-      .expect(200)
+    const { body } = await supertest(testedApp.getHttpServer()).get(`/news`).query({ type: 'publication' }).expect(200)
 
     const newsItems = body.data
     const expectedResults = news.filter((item: NewsItem) => {
@@ -139,10 +127,7 @@ describe('/news', () => {
     })
     expect(response.body.data).to.have.length(expectedResults.length)
 
-    response = await supertest(testedApp.getHttpServer())
-      .get(`/news`)
-      .query({ year: 2020 })
-      .expect(200)
+    response = await supertest(testedApp.getHttpServer()).get(`/news`).query({ year: 2020 }).expect(200)
 
     expectedResults = news.filter((item: NewsItem) => {
       return item.published && item.year === 2020
@@ -207,10 +192,6 @@ describe('/news', () => {
 
   it("POST /news doesn't work if not site admin", async () => {
     const data = generate.news.create()
-    await supertest(testedApp.getHttpServer())
-      .post(`/news`)
-      .set(getDefaultHeaderData(user1))
-      .send(data)
-      .expect(403)
+    await supertest(testedApp.getHttpServer()).post(`/news`).set(getDefaultHeaderData(user1)).send(data).expect(403)
   })
 })

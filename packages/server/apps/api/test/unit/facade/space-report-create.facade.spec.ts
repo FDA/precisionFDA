@@ -1,7 +1,7 @@
-import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/producer/space-report-queue-job.producer'
-import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
+import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/producer/space-report-queue-job.producer'
+import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { SpaceReportCreateFacade } from '../../../src/facade/space-report/space-report-create.facade'
 
 describe('SpaceReportCreateFacade', () => {
@@ -62,16 +62,7 @@ describe('SpaceReportCreateFacade', () => {
   })
 
   it('should create task with 3 batches for 8 report parts with batch size 3', async () => {
-    setCreateReportStub([
-      { id: 1 },
-      { id: 2 },
-      { id: 3 },
-      { id: 4 },
-      { id: 5 },
-      { id: 6 },
-      { id: 7 },
-      { id: 8 },
-    ])
+    setCreateReportStub([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }, { id: 7 }, { id: 8 }])
     createBatchTasksStub.reset()
     createBatchTasksStub.throws()
     createBatchTasksStub
@@ -87,17 +78,17 @@ describe('SpaceReportCreateFacade', () => {
     expect(createBatchTasksStub.calledOnce).to.be.true()
   })
 
-  function setCreateReportStub(reportParts: unknown[]) {
+  function setCreateReportStub(reportParts: unknown[]): void {
     createReportStub.withArgs(SPACE_ID).resolves({
       reportParts: {
-        getItems() {
+        getItems(): unknown[] {
           return reportParts
         },
       },
     })
   }
 
-  function getInstance() {
+  function getInstance(): SpaceReportCreateFacade {
     const user = {
       id: USER_ID,
       accessToken: 'access-token',

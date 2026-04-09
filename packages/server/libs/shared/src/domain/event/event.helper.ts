@@ -1,15 +1,15 @@
 import { EntityManager, wrap } from '@mikro-orm/core'
+import { Injectable, Logger } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import { Event, EVENT_TYPES } from './event.entity'
-import { DbCluster } from '../db-cluster/db-cluster.entity'
-import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
+import { DbCluster } from '../db-cluster/db-cluster.entity'
+import { EVENT_TYPES, Event } from './event.entity'
 
 @Injectable()
 export class EventHelper {
@@ -90,12 +90,7 @@ export class EventHelper {
     return event
   }
 
-  async createFolderEvent(
-    eventType: EVENT_TYPES,
-    folder: Folder,
-    folderPath: string,
-    user: User,
-  ): Promise<Event> {
+  async createFolderEvent(eventType: EVENT_TYPES, folder: Folder, folderPath: string, user: User): Promise<Event> {
     const event = new Event()
     const organization = await user.organization.load()
     const data = JSON.stringify({
@@ -156,17 +151,9 @@ const createDbClusterPasswordRotated = async (user: User, dbCluster: DbCluster):
   return event
 }
 
-const createJobClosed = async (
-  user: User,
-  job: Job,
-  platformJobData: JobDescribeResponse,
-): Promise<Event> => {
+const createJobClosed = async (user: User, job: Job, platformJobData: JobDescribeResponse): Promise<Event> => {
   const event = new Event()
-  const app = job.app
-    ? job.app.isInitialized()
-      ? job.app.getEntity()
-      : await job.app.load()
-    : undefined
+  const app = job.app ? (job.app.isInitialized() ? job.app.getEntity() : await job.app.load()) : undefined
   const organization = await user.organization.load()
   wrap(event).assign({
     type: EVENT_TYPES.JOB_CLOSED,
@@ -179,4 +166,4 @@ const createJobClosed = async (
   return event
 }
 
-export { createJobClosed, createAppCreated, createAppPublished, createDbClusterPasswordRotated }
+export { createAppCreated, createAppPublished, createDbClusterPasswordRotated, createJobClosed }

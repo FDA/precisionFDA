@@ -19,10 +19,7 @@ export class SpaceMembershipUpdatePermissionToActiveProvider extends SpaceMember
     super(em, platformClient, spaceMembershipRepository, null)
   }
 
-  protected permittedUpdaterRoles: SPACE_MEMBERSHIP_ROLE[] = [
-    SPACE_MEMBERSHIP_ROLE.LEAD,
-    SPACE_MEMBERSHIP_ROLE.ADMIN,
-  ]
+  protected permittedUpdaterRoles: SPACE_MEMBERSHIP_ROLE[] = [SPACE_MEMBERSHIP_ROLE.LEAD, SPACE_MEMBERSHIP_ROLE.ADMIN]
 
   protected updateMembership(membership: SpaceMembership): void {
     membership.active = true
@@ -30,8 +27,7 @@ export class SpaceMembershipUpdatePermissionToActiveProvider extends SpaceMember
 
   protected async updateOrgAccess(org: DxId<'org'>, memberships: SpaceMembership[]): Promise<void> {
     await this.em.populate(memberships, ['user'])
-    const payload =
-      this.spaceMembershipUpdatePermissionHelper.buildMembershipAccessPayload(memberships)
+    const payload = this.spaceMembershipUpdatePermissionHelper.buildMembershipAccessPayload(memberships)
     await this.platformClient.orgSetMemberAccess({
       orgDxId: org,
       data: payload,

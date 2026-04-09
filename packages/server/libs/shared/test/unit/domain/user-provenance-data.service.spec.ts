@@ -1,9 +1,9 @@
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { UserProvenanceDataService } from '@shared/domain/provenance/service/entity-data/user-provenance-data.service'
 import { User } from '@shared/domain/user/user.entity'
 import { EntityUtils } from '@shared/utils/entity.utils'
-import { expect } from 'chai'
-import { SinonStub, stub } from 'sinon'
 
 describe('UserProvenanceDataService', () => {
   const FULL_NAME = 'full name'

@@ -1,26 +1,23 @@
-import { PlatformClient } from '@shared/platform-client'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { EmailService } from '@shared/domain/email/email.service'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
-import { InvalidStateError } from '@shared/errors'
-import { expect } from 'chai'
-import { SinonStub, stub } from 'sinon'
-import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
 import { Collection, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { InvalidStateError } from '@shared/errors'
+import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
+import { PlatformClient } from '@shared/platform-client'
 
 describe('SpaceMembershipCreateFacade', () => {
   const USER_ID = 1
@@ -404,12 +401,7 @@ describe('SpaceMembershipCreateFacade', () => {
       const facade = createSpaceMembershipCreateFacade()
 
       await expect(
-        facade.createMembership(
-          SPACE_ID,
-          NEW_MEMBER_USER_ID,
-          SPACE_MEMBERSHIP_SIDE.HOST,
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
+        facade.createMembership(SPACE_ID, NEW_MEMBER_USER_ID, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN),
       ).to.be.rejectedWith(InvalidStateError, 'Target space was not found or is not accessible')
     })
 
@@ -427,12 +419,7 @@ describe('SpaceMembershipCreateFacade', () => {
       const facade = createSpaceMembershipCreateFacade()
 
       await expect(
-        facade.createMembership(
-          SPACE_ID,
-          NEW_MEMBER_USER_ID,
-          SPACE_MEMBERSHIP_SIDE.HOST,
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
+        facade.createMembership(SPACE_ID, NEW_MEMBER_USER_ID, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN),
       ).to.be.rejectedWith(InvalidStateError, 'You cannot create membership for non-active space')
     })
 
@@ -450,12 +437,7 @@ describe('SpaceMembershipCreateFacade', () => {
       const facade = createSpaceMembershipCreateFacade()
 
       await expect(
-        facade.createMembership(
-          SPACE_ID,
-          NEW_MEMBER_USER_ID,
-          SPACE_MEMBERSHIP_SIDE.HOST,
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
+        facade.createMembership(SPACE_ID, NEW_MEMBER_USER_ID, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN),
       ).to.be.rejectedWith(InvalidStateError, 'You cannot create new memberships for private space')
     })
 
@@ -473,12 +455,7 @@ describe('SpaceMembershipCreateFacade', () => {
       const facade = createSpaceMembershipCreateFacade()
 
       await expect(
-        facade.createMembership(
-          SPACE_ID,
-          NEW_MEMBER_USER_ID,
-          SPACE_MEMBERSHIP_SIDE.HOST,
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
+        facade.createMembership(SPACE_ID, NEW_MEMBER_USER_ID, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN),
       ).to.be.rejectedWith(
         InvalidStateError,
         'You cannot create new memberships for administrator space, access is managed automatically',
@@ -499,16 +476,8 @@ describe('SpaceMembershipCreateFacade', () => {
       const facade = createSpaceMembershipCreateFacade()
 
       await expect(
-        facade.createMembership(
-          SPACE_ID,
-          NEW_MEMBER_USER_ID,
-          SPACE_MEMBERSHIP_SIDE.HOST,
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
-      ).to.be.rejectedWith(
-        InvalidStateError,
-        'You cannot create new memberships for verification space - DEPRECATED',
-      )
+        facade.createMembership(SPACE_ID, NEW_MEMBER_USER_ID, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN),
+      ).to.be.rejectedWith(InvalidStateError, 'You cannot create new memberships for verification space - DEPRECATED')
     })
 
     it('throws error when space is review type', async () => {
@@ -525,16 +494,8 @@ describe('SpaceMembershipCreateFacade', () => {
       const facade = createSpaceMembershipCreateFacade()
 
       await expect(
-        facade.createMembership(
-          SPACE_ID,
-          NEW_MEMBER_USER_ID,
-          SPACE_MEMBERSHIP_SIDE.HOST,
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
-      ).to.be.rejectedWith(
-        InvalidStateError,
-        'Creating memberships for review spaces is not supported yet',
-      )
+        facade.createMembership(SPACE_ID, NEW_MEMBER_USER_ID, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN),
+      ).to.be.rejectedWith(InvalidStateError, 'Creating memberships for review spaces is not supported yet')
     })
 
     it('throws error when user is already a member', async () => {
@@ -563,16 +524,8 @@ describe('SpaceMembershipCreateFacade', () => {
       const facade = createSpaceMembershipCreateFacade()
 
       await expect(
-        facade.createMembership(
-          SPACE_ID,
-          NEW_MEMBER_USER_ID,
-          SPACE_MEMBERSHIP_SIDE.HOST,
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
-      ).to.be.rejectedWith(
-        InvalidStateError,
-        'User testuser is already a member of space Test Space',
-      )
+        facade.createMembership(SPACE_ID, NEW_MEMBER_USER_ID, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN),
+      ).to.be.rejectedWith(InvalidStateError, 'User testuser is already a member of space Test Space')
     })
 
     it('throws error for unsupported space type in inviteUserToPlatformSpaceOrganizations', async () => {
@@ -597,16 +550,8 @@ describe('SpaceMembershipCreateFacade', () => {
       const facade = createSpaceMembershipCreateFacade()
 
       await expect(
-        facade.createMembership(
-          SPACE_ID,
-          NEW_MEMBER_USER_ID,
-          SPACE_MEMBERSHIP_SIDE.HOST,
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
-      ).to.be.rejectedWith(
-        InvalidStateError,
-        'You cannot create new memberships for verification space - DEPRECATED',
-      )
+        facade.createMembership(SPACE_ID, NEW_MEMBER_USER_ID, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN),
+      ).to.be.rejectedWith(InvalidStateError, 'You cannot create new memberships for verification space - DEPRECATED')
     })
   })
 
@@ -719,10 +664,7 @@ describe('SpaceMembershipCreateFacade', () => {
           SPACE_MEMBERSHIP_SIDE.HOST,
           SPACE_MEMBERSHIP_ROLE.ADMIN,
         ),
-      ).to.be.rejectedWith(
-        InvalidStateError,
-        'Creating memberships for review spaces is not supported yet',
-      )
+      ).to.be.rejectedWith(InvalidStateError, 'Creating memberships for review spaces is not supported yet')
     })
   })
 })

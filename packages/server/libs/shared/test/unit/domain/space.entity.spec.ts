@@ -1,13 +1,10 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { database } from '@shared/database'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '@shared/test'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 
 describe('space entity tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -50,18 +47,10 @@ describe('space entity tests', () => {
   it('data portals are present', async () => {
     expect(space.dataPortal).to.undefined()
 
-    const portal = create.dataPortalsHelper.create(
-      em,
-      { space },
-      { name: 'portal1', urlSlug: 'portal1' },
-    )
+    const portal = create.dataPortalsHelper.create(em, { space }, { name: 'portal1', urlSlug: 'portal1' })
     await em.flush()
 
-    const loadedSpace = await em.findOneOrFail(
-      Space,
-      { id: space.id },
-      { populate: ['dataPortal'] },
-    )
+    const loadedSpace = await em.findOneOrFail(Space, { id: space.id }, { populate: ['dataPortal'] })
 
     expect(loadedSpace.dataPortal.id).to.equal(portal.id)
   })

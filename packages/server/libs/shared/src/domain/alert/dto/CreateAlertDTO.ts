@@ -1,6 +1,6 @@
-import { AlertType, alertTypes } from '@shared/domain/alert/entity/alert.entity'
 import { Type } from 'class-transformer'
-import { IsNotEmpty, IsString, IsIn, IsDate } from 'class-validator'
+import { IsDate, IsIn, IsNotEmpty, IsString } from 'class-validator'
+import { AlertType, alertTypes } from '@shared/domain/alert/entity/alert.entity'
 
 export class CreateAlertDTO {
   @IsString()

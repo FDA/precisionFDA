@@ -1,6 +1,6 @@
-import { CSRFUtils } from '@shared/utils/csrf.utils'
-import { expect } from 'chai'
 import crypto from 'node:crypto'
+import { expect } from 'chai'
+import { CSRFUtils } from '@shared/utils/csrf.utils'
 
 describe('CSRFUtils', () => {
   const csrfToken = crypto.randomBytes(32).toString('base64')

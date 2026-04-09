@@ -1,24 +1,21 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { config } from '@shared/config'
 import { database } from '@shared/database'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { UserSpaceInconsistencyFixService } from '@shared/facade/user/service/user-space-inconsistency-fix.service'
 import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
 import { InconsistentFix } from '@shared/facade/user/user-facade.types'
 import { PlatformClient } from '@shared/platform-client'
 import { create, db } from '@shared/test'
-import { expect } from 'chai'
-import { stub } from 'sinon'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 describe('UserDataConsistencyReportFacade', () => {
   let em: EntityManager

@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common'
+import { AppRepository } from '@shared/domain/app/app.repository'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 import { EntityIdentifier } from '@shared/domain/entity/domain/entity-identifier'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { NoteRepository } from '@shared/domain/note/note.repository'
 import { EntityProvenance } from '@shared/domain/provenance/model/entity-provenance'
 import { EntityProvenanceSourceUnion } from '@shared/domain/provenance/model/entity-provenance-source-union'
 import { EntityWithProvenanceType } from '@shared/domain/provenance/model/entity-with-provenance.type'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
-import { InvalidStateError, NotFoundError } from '@shared/errors'
-import { AppRepository } from '@shared/domain/app/app.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { NoteRepository } from '@shared/domain/note/note.repository'
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
 
 @Injectable()
 export class PublishApiFacade {
@@ -66,10 +66,7 @@ export class PublishApiFacade {
     }
 
     const entityProvenanceSource = { type, entity } as EntityProvenanceSourceUnion
-    const treeRoot = await this.entityProvenanceService.getEntityProvenance(
-      entityProvenanceSource,
-      'raw',
-    )
+    const treeRoot = await this.entityProvenanceService.getEntityProvenance(entityProvenanceSource, 'raw')
 
     return this.processPublishedTreeRoot(treeRoot)
   }

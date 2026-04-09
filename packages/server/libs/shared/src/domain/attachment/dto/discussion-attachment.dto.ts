@@ -12,10 +12,7 @@ export class DiscussionAttachmentDTO {
   name: string
   link: string
 
-  static fromEntity(
-    attachmentEntity: DiscussionAttachmentType,
-    link: string,
-  ): DiscussionAttachmentDTO {
+  static fromEntity(attachmentEntity: DiscussionAttachmentType, link: string): DiscussionAttachmentDTO {
     if (attachmentEntity instanceof Node) {
       return this.fromNode(attachmentEntity, link)
     } else if (attachmentEntity instanceof Job) {
@@ -49,10 +46,7 @@ export class DiscussionAttachmentDTO {
     return dto
   }
 
-  private static fromComparison(
-    attachmentEntity: Comparison,
-    link: string,
-  ): DiscussionAttachmentDTO {
+  private static fromComparison(attachmentEntity: Comparison, link: string): DiscussionAttachmentDTO {
     const dto = new DiscussionAttachmentDTO()
     dto.id = attachmentEntity.id
     dto.type = 'Comparison'

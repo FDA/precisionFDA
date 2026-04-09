@@ -1,9 +1,9 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
-import { Challenge } from '@shared/domain/challenge/challenge.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { database } from '@shared/database'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { create, db, generate } from '../../../src/test'
 
 describe('ChallengeResource tests', () => {
@@ -21,17 +21,9 @@ describe('ChallengeResource tests', () => {
   })
 
   it('ChallengeResource with user, challenge and file', async () => {
-    const file = create.filesHelper.create(
-      em,
-      { user },
-      { name: 'file1', description: 'I describe' },
-    )
+    const file = create.filesHelper.create(em, { user }, { name: 'file1', description: 'I describe' })
     await em.flush()
-    const challengeResource = create.challengeResourceHelper.create(
-      em,
-      { user, challenge, file },
-      { id: 5 },
-    )
+    const challengeResource = create.challengeResourceHelper.create(em, { user, challenge, file }, { id: 5 })
     await em.flush()
 
     const result = await em.findOne(ChallengeResource, { id: challengeResource.id })

@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common'
 import { AlertDTO } from '@shared/domain/alert/dto/AlertDTO'
 import { CreateAlertDTO } from '@shared/domain/alert/dto/CreateAlertDTO'
 import { AlertService } from '@shared/domain/alert/services/alert.service'
@@ -27,10 +16,7 @@ export class AlertsController {
   }
 
   @Put('/:id')
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() alert: CreateAlertDTO,
-  ): Promise<AlertDTO> {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() alert: CreateAlertDTO): Promise<AlertDTO> {
     return await this.alertService.update(id, alert)
   }
 

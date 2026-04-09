@@ -1,16 +1,16 @@
 import { EntityManager } from '@mikro-orm/mysql'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Space } from '@shared/domain/space/space.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
-import { BaseOperation } from '@shared/utils/base-operation'
 import { UserOpsCtx } from '@shared/types'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '../../space-membership/space-membership.enum'
-import { SPACE_TYPE } from '../space.enum'
+import { BaseOperation } from '@shared/utils/base-operation'
+import { NotificationService } from '../../notification/services/notification.service'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
 import { spaceActionPolicy } from '../space.action-policy'
+import { SPACE_TYPE } from '../space.enum'
 import {
   getOppositeOrgDxid,
   getOrgDxid,
@@ -19,9 +19,6 @@ import {
   setOrgDxid,
   setProjectDxid,
 } from '../space.helper'
-import { NotificationService } from '../../notification/services/notification.service'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 type SpaceAcceptInput = { spaceId: number }
 
@@ -34,10 +31,7 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
   private em: EntityManager
 
   async run(input: SpaceAcceptInput): Promise<void> {
-    this.platformClient = new PlatformClient(
-      { accessToken: this.ctx.user.accessToken },
-      this.ctx.log,
-    )
+    this.platformClient = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
     this.em = this.ctx.em
 
     const userId = this.ctx.user.id
@@ -45,22 +39,13 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     let space = await spaceRepo.findOneOrFail(
       { id: input.spaceId },
       {
-        populate: [
-          'spaceMemberships',
-          'spaceMemberships.user',
-          'spaceMemberships.user.organization',
-        ],
+        populate: ['spaceMemberships', 'spaceMemberships.user', 'spaceMemberships.user.organization'],
       },
     )
 
-    let confidentialSpaces = await spaceRepo.find(
-      { spaceId: input.spaceId },
-      { populate: ['spaceMemberships'] },
-    )
+    let confidentialSpaces = await spaceRepo.find({ spaceId: input.spaceId }, { populate: ['spaceMemberships'] })
 
-    const currentLead = space.spaceMemberships
-      .getItems()
-      .find((sm) => sm.user.getEntity().id === userId)
+    const currentLead = space.spaceMemberships.getItems().find(sm => sm.user.getEntity().id === userId)
     if (!currentLead) {
       throw new InvalidStateError('You cannot accept space you are not member of.')
     }
@@ -72,17 +57,10 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     space = await spaceRepo.findOneOrFail(
       { id: input.spaceId },
       {
-        populate: [
-          'spaceMemberships',
-          'spaceMemberships.user',
-          'spaceMemberships.user.organization',
-        ],
+        populate: ['spaceMemberships', 'spaceMemberships.user', 'spaceMemberships.user.organization'],
       },
     )
-    confidentialSpaces = await spaceRepo.find(
-      { spaceId: input.spaceId },
-      { populate: ['spaceMemberships'] },
-    )
+    confidentialSpaces = await spaceRepo.find({ spaceId: input.spaceId }, { populate: ['spaceMemberships'] })
 
     if (this.isAccepted(space, confidentialSpaces)) {
       await this.activate(space, confidentialSpaces)
@@ -92,21 +70,14 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
   isAccepted = (space: Space, confidentialSpaces: Space[]): boolean => {
     const isExlusive =
       (space.spaceId !== null && space.spaceId === space.id) ||
-      [SPACE_TYPE.PRIVATE_TYPE, SPACE_TYPE.GOVERNMENT, SPACE_TYPE.ADMINISTRATOR].includes(
-        space.type,
-      )
+      [SPACE_TYPE.PRIVATE_TYPE, SPACE_TYPE.GOVERNMENT, SPACE_TYPE.ADMINISTRATOR].includes(space.type)
 
     if (isExlusive) {
       return true
     }
 
-    const leads = space.spaceMemberships
-      .getItems()
-      .filter((sm) => sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)
-    return (
-      isAcceptedBy(space, confidentialSpaces, leads[0]) &&
-      isAcceptedBy(space, confidentialSpaces, leads[1])
-    )
+    const leads = space.spaceMemberships.getItems().filter(sm => sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)
+    return isAcceptedBy(space, confidentialSpaces, leads[0]) && isAcceptedBy(space, confidentialSpaces, leads[1])
   }
 
   async activate(space: Space, confidentialSpaces: Space[]): Promise<void> {
@@ -117,12 +88,10 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     await this.em.flush()
 
     const notificationService = new NotificationService(this.em)
-    const leads = space.spaceMemberships
-      .getItems()
-      .filter((sm) => sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)
+    const leads = space.spaceMemberships.getItems().filter(sm => sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)
 
     // send notification to all leads
-    leads.forEach((lead) => {
+    leads.forEach(lead => {
       notificationService.createNotification({
         message: `Space ${space.name} has been activated`,
         severity: SEVERITY.INFO,
@@ -133,20 +102,12 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     // TODO: notification email still on ruby side, missing template in node
   }
 
-  async acceptSpace(
-    space: Space,
-    confidentialSpaces: Space[],
-    admin: SpaceMembership,
-  ): Promise<void> {
+  async acceptSpace(space: Space, confidentialSpaces: Space[], admin: SpaceMembership): Promise<void> {
     await this.acceptSpaceByType(space, confidentialSpaces, admin)
     await this.em.flush()
   }
 
-  async acceptSpaceByType(
-    space: Space,
-    confidentialSpaces: Space[],
-    admin: SpaceMembership,
-  ): Promise<void> {
+  async acceptSpaceByType(space: Space, confidentialSpaces: Space[], admin: SpaceMembership): Promise<void> {
     switch (space.type) {
       case SPACE_TYPE.REVIEW:
         await this.handleReviewSpaceAccept(space, confidentialSpaces, admin)
@@ -163,11 +124,7 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     }
   }
 
-  async handleReviewSpaceAccept(
-    space: Space,
-    confidentialSpaces: Space[],
-    admin: SpaceMembership,
-  ): Promise<void> {
+  async handleReviewSpaceAccept(space: Space, confidentialSpaces: Space[], admin: SpaceMembership): Promise<void> {
     if (admin.side === SPACE_MEMBERSHIP_SIDE.HOST) {
       await this.handleHostProjectAcceptTransfer(space, admin)
 
@@ -212,10 +169,7 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     newSpace.spaceMemberships.add(admin)
   }
 
-  private async handleHostProjectAcceptTransfer(
-    space: Space,
-    admin: SpaceMembership,
-  ): Promise<void> {
+  private async handleHostProjectAcceptTransfer(space: Space, admin: SpaceMembership): Promise<void> {
     const project = await this.platformClient.projectDescribe(space.hostProject, {
       fields: { pendingTransfer: true },
     })

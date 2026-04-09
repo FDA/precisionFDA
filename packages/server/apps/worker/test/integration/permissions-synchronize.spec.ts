@@ -1,19 +1,18 @@
-/* eslint-disable no-undefined */
-import { EntityManager } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { JobOptions } from 'bull'
+import { expect } from 'chai'
 import { database } from '@shared/database'
 import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { getMaintenanceQueue } from '@shared/queue'
 import { TASK_TYPE } from '@shared/queue/task.input'
-import { expect } from 'chai'
 import { create, db } from '@shared/test'
-import { UserCtx } from '@shared/types'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
-import { JobOptions } from 'bull'
+import { UserCtx } from '@shared/types'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 
-const createSyncSpacesPermissionsTask = async (user: UserCtx) => {
+const createSyncSpacesPermissionsTask: (user: UserCtx) => Promise<void> = async (user: UserCtx) => {
   const defaultQueue = getMaintenanceQueue()
   const options: JobOptions = { jobId: `${TASK_TYPE.SYNC_SPACES_PERMISSIONS}` }
 
@@ -28,7 +27,7 @@ const createSyncSpacesPermissionsTask = async (user: UserCtx) => {
 }
 
 describe('TASK: permissions-synchronize', () => {
-  let em: EntityManager
+  let em: SqlEntityManager
   let user1: User
   let user2: User
   let user3: User

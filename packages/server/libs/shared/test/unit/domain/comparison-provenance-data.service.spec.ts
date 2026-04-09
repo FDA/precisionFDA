@@ -1,4 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { COMPARISON_STATE, Comparison } from '@shared/domain/comparison/comparison.entity'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { ComparisonProvenanceDataService } from '@shared/domain/provenance/service/entity-data/comparison-provenance-data.service'
@@ -6,8 +8,6 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
-import { expect } from 'chai'
-import { SinonStub, stub } from 'sinon'
 
 describe('ComparisonProvenanceDataService', () => {
   const ID = 1
@@ -49,9 +49,7 @@ describe('ComparisonProvenanceDataService', () => {
     getEntityUiLinkStub.withArgs(COMPARISON).resolves(LINK)
     nodeFindStub.reset()
     nodeFindStub.throws()
-    nodeFindStub
-      .withArgs({ parentType: PARENT_TYPE.COMPARISON, parentId: COMPARISON.id })
-      .resolves([OUTPUT_FILE])
+    nodeFindStub.withArgs({ parentType: PARENT_TYPE.COMPARISON, parentId: COMPARISON.id }).resolves([OUTPUT_FILE])
 
     getRepositoryStub.reset()
     getRepositoryStub.throws()

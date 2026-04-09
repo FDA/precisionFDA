@@ -1,16 +1,16 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
+import { expect } from 'chai'
+import { match, SinonStub, stub } from 'sinon'
+import { config } from '@shared/config'
 import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
-import { expect } from 'chai'
-import { match, stub, SinonStub } from 'sinon'
-import * as queue from '@shared/queue'
-import { config } from '@shared/config'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import * as queue from '@shared/queue'
 
 describe('DbClusterCheckNonTerminatedFacade', () => {
   const USER_ID = 0
@@ -114,19 +114,17 @@ describe('DbClusterCheckNonTerminatedFacade', () => {
 
     expect(result.length).to.eq(3)
     expect(createSendEmailTaskStub.callCount).to.equal(1)
-    expect(createSendEmailTaskStub.getCall(0).args[0].emailType).to.equal(
-      EMAIL_TYPES.nonTerminatedDbClusters,
-    )
+    expect(createSendEmailTaskStub.getCall(0).args[0].emailType).to.equal(EMAIL_TYPES.nonTerminatedDbClusters)
     expect(createSendEmailTaskStub.getCall(0).args[0].to).to.equal(config.emails.report)
     expect(createSendEmailTaskStub.getCall(0).args[0].subject).to.equal('Non-terminated dbclusters')
 
     const nonTerminatedIndexes = [0, 1, 2]
-    nonTerminatedIndexes.forEach((index) => {
-      expect(result.find((r) => r.dxid === dbClusters[index].dxid)).to.not.be.undefined()
+    nonTerminatedIndexes.forEach(index => {
+      expect(result.find(r => r.dxid === dbClusters[index].dxid)).to.not.be.undefined()
     })
 
     // check first and second call to createSendEmailTask
-    nonTerminatedIndexes.forEach((index) => {
+    nonTerminatedIndexes.forEach(index => {
       expect(createSendEmailTaskStub.getCall(0).args[0].body).to.contain(dbClusters[index].dxid)
     })
   })
@@ -137,12 +135,7 @@ describe('DbClusterCheckNonTerminatedFacade', () => {
       find: findStub,
     } as unknown as DbClusterRepository
     const notificationService = {} as unknown as NotificationService
-    const dbClusterService = new DbClusterService(
-      em,
-      dbClusterRepo,
-      userContext,
-      notificationService,
-    )
+    const dbClusterService = new DbClusterService(em, dbClusterRepo, userContext, notificationService)
     const emailsJobProducer = {
       createSendEmailTask: createSendEmailTaskStub,
     } as unknown as EmailQueueJobProducer

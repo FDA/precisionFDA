@@ -1,6 +1,5 @@
-import { Module } from '@nestjs/common'
-
 import { MikroOrmModule } from '@mikro-orm/nestjs'
+import { Module } from '@nestjs/common'
 import { Invitation } from './invitation.entity'
 import { InvitationService } from './services/invitation.service'
 

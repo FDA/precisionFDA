@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { EntityProvenanceDataService } from './entity-provenance-data.service'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
+import { EntityProvenanceDataService } from './entity-provenance-data.service'
 
 @Injectable()
 export class DBClusterProvenanceDataService extends EntityProvenanceDataService<'dbcluster'> {

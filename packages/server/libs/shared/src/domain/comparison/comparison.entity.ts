@@ -1,22 +1,12 @@
-import {
-  Collection,
-  Entity,
-  Filter,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  Property,
-  Ref,
-  Reference,
-} from '@mikro-orm/core'
+import { Collection, Entity, Filter, ManyToMany, ManyToOne, OneToMany, Property, Ref, Reference } from '@mikro-orm/core'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { ComparisonTagging } from '@shared/domain/tagging/comparison-tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { DxId } from '../entity/domain/dxid'
-import { ComparisonTagging } from '@shared/domain/tagging/comparison-tagging.entity'
 
 enum COMPARISON_STATE {
   DONE = 'done',
@@ -27,11 +17,8 @@ enum COMPARISON_STATE {
 @Entity({ tableName: 'comparisons', repository: () => ComparisonRepository })
 @Filter({
   name: 'accessibleBy',
-  cond: (args) => ({
-    $or: [
-      { user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE },
-      { scope: { $in: args.spaceScopes } },
-    ],
+  cond: args => ({
+    $or: [{ user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE }, { scope: { $in: args.spaceScopes } }],
   }),
 })
 class Comparison extends ScopedEntity {
@@ -70,7 +57,11 @@ class Comparison extends ScopedEntity {
   @ManyToOne({ entity: () => User, fieldName: 'user_id', nullable: false })
   user: Ref<User>
 
-  @OneToMany(() => ComparisonTagging, (tagging) => tagging.comparison, { orphanRemoval: true })
+  @OneToMany(
+    () => ComparisonTagging,
+    tagging => tagging.comparison,
+    { orphanRemoval: true },
+  )
   taggings = new Collection<ComparisonTagging>(this)
 
   isPublishable(): boolean {
@@ -84,4 +75,4 @@ class Comparison extends ScopedEntity {
   }
 }
 
-export { Comparison, COMPARISON_STATE }
+export { COMPARISON_STATE, Comparison }

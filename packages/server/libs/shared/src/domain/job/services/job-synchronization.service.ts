@@ -1,6 +1,7 @@
 import { wrap } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
+import { Job as BullJob } from 'bull'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import {
   JobFinishedInputTemplate,
@@ -10,10 +11,10 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { NodeTagging } from '@shared/domain/tagging/node-tagging.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { CHALLENGE_BOT_USER_CONTEXT } from '@shared/domain/user-context/provider/challenge-bot-user-context.provider'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import * as errors from '@shared/errors'
 import { ClientRequestError } from '@shared/errors'
@@ -31,23 +32,14 @@ import {
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Maybe } from '@shared/types'
 import { EntityScope } from '@shared/types/common'
-import { Job as BullJob } from 'bull'
 import { EmailSendInput } from '../../email/email.config'
 import { buildEmailTemplate, getBullJobIdForEmailOperation } from '../../email/email.helper'
-import {
-  JobStaleInputTemplate,
-  jobStaleTemplate,
-} from '../../email/templates/mjml/job-stale.handler'
+import { JobStaleInputTemplate, jobStaleTemplate } from '../../email/templates/mjml/job-stale.handler'
 import { createJobClosed } from '../../event/event.helper'
 import { Job } from '../job.entity'
 import { JOB_STATE } from '../job.enum'
-import {
-  buildIsOverMaxDuration,
-  isStateActive,
-  isStateTerminal,
-  sendJobFailedEmails,
-  shouldSyncStatus,
-} from '../job.helper'
+import { buildIsOverMaxDuration, isStateActive, isStateTerminal, shouldSyncStatus } from '../job.helper'
+import { sendJobFailedEmails } from '../job-failed-email.helper'
 
 /**
  * JobSynchronizationService is responsible for synchronizing the job status with the platform.
@@ -91,9 +83,7 @@ export class JobSynchronizationService {
 
     if (jobs.length > 0) {
       await this.em.transactional(async () => {
-        this.logger.log(
-          `Found ${jobs.length} non-terminal jobs for challenge bot user, syncing state`,
-        )
+        this.logger.log(`Found ${jobs.length} non-terminal jobs for challenge bot user, syncing state`)
         for (const job of jobs) {
           await this.synchronizeChallengeJob(job)
         }
@@ -114,19 +104,13 @@ export class JobSynchronizationService {
         jobDxId: job.dxid,
       })
     } catch (err) {
-      this.logger.error(
-        { error: err, jobId: job.dxid },
-        'Error fetching challenge job from platform',
-      )
+      this.logger.error({ error: err, jobId: job.dxid }, 'Error fetching challenge job from platform')
       return
     }
 
     const isOverTerminateMaxDuration = buildIsOverMaxDuration('terminate')
     if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
-      this.logger.log(
-        { jobId: job.id, jobUid: job.uid },
-        'Job marked as stale, trying to terminate',
-      )
+      this.logger.log({ jobId: job.id, jobUid: job.uid }, 'Job marked as stale, trying to terminate')
 
       await this.requestTerminateChallengeJob(job.dxid)
       return
@@ -220,10 +204,7 @@ export class JobSynchronizationService {
       this.em.persist(job)
     }
     if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
-      this.logger.log(
-        { jobId: job.id, jobUid: job.uid },
-        'Job marked as stale, trying to terminate',
-      )
+      this.logger.log({ jobId: job.id, jobUid: job.uid }, 'Job marked as stale, trying to terminate')
 
       await this.requestTerminateJob(job.dxid)
     }
@@ -244,10 +225,7 @@ export class JobSynchronizationService {
     }
 
     if (isStateTerminal(remoteState)) {
-      this.logger.debug(
-        { remoteState },
-        'Remote job state is terminal, will sync folders and files',
-      )
+      this.logger.debug({ remoteState }, 'Remote job state is terminal, will sync folders and files')
       // create jobClosed event
       // TODO: this is worth refactoring, because job.describe (that is used for event) is updated
       // with data from platformJobData later in createSyncOutputsTask
@@ -357,10 +335,7 @@ export class JobSynchronizationService {
     }
 
     if (isStateTerminal(job.state) || job.state === JOB_STATE.TERMINATING) {
-      this.logger.log(
-        { jobId: job.id, jobDxid: job.dxid },
-        'Job is already terminating or terminated',
-      )
+      this.logger.log({ jobId: job.id, jobDxid: job.dxid }, 'Job is already terminating or terminated')
       throw new errors.InvalidStateError('Job is already terminating or terminated')
     }
 
@@ -372,10 +347,7 @@ export class JobSynchronizationService {
     return job
   }
 
-  private async sendTerminationEmail(
-    user: User,
-    checkStatusJob: CheckStatusJob['payload'],
-  ): Promise<void> {
+  private async sendTerminationEmail(user: User, checkStatusJob: CheckStatusJob['payload']): Promise<void> {
     // send email to job owner
     const body = buildEmailTemplate<JobStaleInputTemplate>(jobStaleTemplate, {
       firstName: user?.firstName,
@@ -390,10 +362,7 @@ export class JobSynchronizationService {
       subject: `Job ${checkStatusJob.name} will terminate in 24 hours`,
       body,
     }
-    const jobId = getBullJobIdForEmailOperation(
-      EMAIL_TYPES.jobTerminationWarning,
-      checkStatusJob.dxid,
-    )
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.jobTerminationWarning, checkStatusJob.dxid)
     this.logger.log(
       {
         jobId: checkStatusJob.id,
@@ -439,23 +408,19 @@ export class JobSynchronizationService {
     removeFromEmailQueue(jobId)
   }
 
-  private async releaseFilesLockedByJob(
-    em: SqlEntityManager,
-    jobDxid: string,
-    scope: EntityScope,
-  ): Promise<void> {
+  private async releaseFilesLockedByJob(em: SqlEntityManager, jobDxid: string, scope: EntityScope): Promise<void> {
     // release files if they are locked by this job
     // e.g locked by jupyterlab
     const lockedKey = `notebook-locked-by-${jobDxid}`
     const fileRepo = em.getRepository(UserFile)
-    await em.transactional(async (tem) => {
+    await em.transactional(async tem => {
       const files = await fileRepo.find(
         { scope, taggings: { tag: { name: lockedKey } } },
         { populate: ['taggings.tag'] },
       )
 
-      files.forEach((file) => {
-        const tagging = file.taggings.getItems().find((t) => t.tag.name === lockedKey) as NodeTagging
+      files.forEach(file => {
+        const tagging = file.taggings.getItems().find(t => t.tag.name === lockedKey) as NodeTagging
         file.taggings.remove(tagging)
       })
 
@@ -490,50 +455,26 @@ export class JobSynchronizationService {
   /**
    * Checks job status if notifications should be triggered.
    */
-  private async checkJobStatusForNotifications(
-    job: Job,
-    remoteJob: JobDescribeResponse,
-  ): Promise<void> {
+  private async checkJobStatusForNotifications(job: Job, remoteJob: JobDescribeResponse): Promise<void> {
     const remoteState = remoteJob.state
     const isJobRunning = job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING
     const httpsAppRunning =
-      remoteState === JOB_STATE.RUNNING &&
-      remoteJob?.properties?.httpsAppState === JOB_STATE.RUNNING
+      remoteState === JOB_STATE.RUNNING && remoteJob?.properties?.httpsAppState === JOB_STATE.RUNNING
 
     if (isJobRunning && job.hasHttpsAppState() && !httpsAppRunning) {
-      await this.sendNotification(
-        job,
-        `Initializing ${job.name}`,
-        SEVERITY.INFO,
-        NOTIFICATION_ACTION.JOB_INITIALIZING,
-      )
+      await this.sendNotification(job, `Initializing ${job.name}`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_INITIALIZING)
     }
 
     if ((isJobRunning && !job.hasHttpsAppState()) || httpsAppRunning) {
-      await this.sendNotification(
-        job,
-        `${job.name} is running`,
-        SEVERITY.INFO,
-        NOTIFICATION_ACTION.JOB_RUNNING,
-      )
+      await this.sendNotification(job, `${job.name} is running`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_RUNNING)
     }
 
     if (job.state !== JOB_STATE.RUNNABLE && remoteState === JOB_STATE.RUNNABLE) {
-      await this.sendNotification(
-        job,
-        `Job ${job.name} is runnable`,
-        SEVERITY.INFO,
-        NOTIFICATION_ACTION.JOB_RUNNABLE,
-      )
+      await this.sendNotification(job, `Job ${job.name} is runnable`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_RUNNABLE)
     }
 
     if (job.state !== JOB_STATE.DONE && remoteState === JOB_STATE.DONE) {
-      await this.sendNotification(
-        job,
-        `Job ${job.name} has finished`,
-        SEVERITY.INFO,
-        NOTIFICATION_ACTION.JOB_DONE,
-      )
+      await this.sendNotification(job, `Job ${job.name} has finished`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_DONE)
     }
 
     if (job.state !== JOB_STATE.TERMINATED && remoteState === JOB_STATE.TERMINATED) {
@@ -546,12 +487,7 @@ export class JobSynchronizationService {
     }
 
     if (remoteState === JOB_STATE.FAILED) {
-      await this.sendNotification(
-        job,
-        `Job ${job.name} has failed`,
-        SEVERITY.ERROR,
-        NOTIFICATION_ACTION.JOB_FAILED,
-      )
+      await this.sendNotification(job, `Job ${job.name} has failed`, SEVERITY.ERROR, NOTIFICATION_ACTION.JOB_FAILED)
     }
   }
 }

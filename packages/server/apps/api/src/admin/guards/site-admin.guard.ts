@@ -19,8 +19,6 @@ export class SiteAdminGuard implements CanActivate {
       return true
     }
 
-    throw new UserInvalidPermissionsError(
-      'User requires Site Admin permission to access this resource',
-    )
+    throw new UserInvalidPermissionsError('User requires Site Admin permission to access this resource')
   }
 }

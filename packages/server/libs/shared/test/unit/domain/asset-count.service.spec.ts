@@ -1,12 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
 import { User } from '@shared/domain/user/user.entity'
-import { FILE_STATE_PFDA, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
-import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
 import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
 import { AssetScopeFilterProvider } from '@shared/domain/user-file/service/asset-scope-filter.provider'
+import { FILE_STATE_PFDA, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('AssetCountService', () => {
   const USER_ID = 1

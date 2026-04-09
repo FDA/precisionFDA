@@ -1,9 +1,9 @@
-
 // todo: should have added message about this is a worker
+import { Logger } from '@nestjs/common'
 import { getLogger } from '@shared/logger'
 
-const log = getLogger()
+const log: Logger = getLogger()
 
-const getChildLogger = (requestId: string) => getLogger(requestId)
+const getChildLogger: (requestId: string) => Logger = (requestId: string) => getLogger(requestId)
 
-export { log, getChildLogger }
+export { getChildLogger, log }

@@ -1,12 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Logger } from '@nestjs/common'
+import { WebSocket } from 'ws'
 import { config } from '@shared/config'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { PfdaWebSocket, WEBSOCKET_EVENTS } from '@shared/websocket/model/pfda-web-socket'
-import { WebSocket } from 'ws'
 import { Job } from '../job.entity'
 
 export class JobLogService {
@@ -23,11 +23,9 @@ export class JobLogService {
   async streamJobLogs(job: Job, client: PfdaWebSocket): Promise<void> {
     const jobDxId = job.dxid
     const isAccessible = await this.isJobAccessible(jobDxId)
-    const ws = isAccessible
-      ? this.userClient.streamJobLogs(jobDxId)
-      : await this.askAdminForJobLogs(jobDxId, client)
+    const ws = isAccessible ? this.userClient.streamJobLogs(jobDxId) : await this.askAdminForJobLogs(jobDxId, client)
 
-    ws.on('message', async (data) => {
+    ws.on('message', async data => {
       try {
         const logStr = data.toString()
         const log = JSON.parse(logStr)
@@ -63,28 +61,19 @@ export class JobLogService {
     }
   }
 
-  private async askAdminForJobLogs(
-    jobDxId: DxId<'job'>,
-    client: PfdaWebSocket,
-  ): Promise<WebSocket> {
+  private async askAdminForJobLogs(jobDxId: DxId<'job'>, client: PfdaWebSocket): Promise<WebSocket> {
     try {
-      const jobDescribe = await this.adminClient
-        .jobDescribe({ jobDxId: jobDxId })
-        .catch(async (err) => {
-          if (err.props.clientStatusCode !== 401) {
-            throw err
-          }
-          return null
-        })
+      const jobDescribe = await this.adminClient.jobDescribe({ jobDxId: jobDxId }).catch(async err => {
+        if (err.props.clientStatusCode !== 401) {
+          throw err
+        }
+        return null
+      })
       let originalProject = ''
       if (!jobDescribe) {
         const job = await this.em.findOne(Job, { dxid: jobDxId }, { orderBy: { createdAt: 'ASC' } })
         originalProject = job.project
-        await this.adminClient.projectInvite(
-          originalProject,
-          `user-${config.platform.adminUser}`,
-          'VIEW',
-        )
+        await this.adminClient.projectInvite(originalProject, `user-${config.platform.adminUser}`, 'VIEW')
       }
       const ws = this.adminClient.streamJobLogs(jobDxId)
       ws.on('close', async () => {

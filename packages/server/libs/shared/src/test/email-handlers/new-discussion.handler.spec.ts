@@ -1,24 +1,21 @@
-import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EntityService } from '@shared/domain/entity/entity.service'
-import { EmailClient } from '@shared/services/email-client'
-import { NewDiscussionHandler } from '@shared/domain/email/templates/handlers/new-discussion.handler'
-import { stub } from 'sinon'
 import { expect } from 'chai'
-import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
+import { stub } from 'sinon'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { Note } from '@shared/domain/note/note.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { NewDiscussionHandler } from '@shared/domain/email/templates/handlers/new-discussion.handler'
+import { EntityService } from '@shared/domain/entity/entity.service'
+import { Note } from '@shared/domain/note/note.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('NewDiscussionHandler', () => {
   const discussionRepoFindOneStub = stub()
@@ -101,9 +98,7 @@ describe('NewDiscussionHandler', () => {
         SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
       )
 
-      discussionRepoFindOneStub
-        .withArgs(discussion.id, { populate: ['note', 'user'] })
-        .resolves(discussion)
+      discussionRepoFindOneStub.withArgs(discussion.id, { populate: ['note', 'user'] }).resolves(discussion)
 
       entityServiceGetEntityUiLinkStub.withArgs(discussion).resolves(entityLink)
       spaceRepoFindOneStub.withArgs(space.id).resolves(space)
@@ -148,9 +143,7 @@ describe('NewDiscussionHandler', () => {
       const discussion = new Discussion(note, user)
       discussion.id = 1
 
-      discussionRepoFindOneStub
-        .withArgs(discussion.id, { populate: ['note', 'user'] })
-        .resolves(discussion)
+      discussionRepoFindOneStub.withArgs(discussion.id, { populate: ['note', 'user'] }).resolves(discussion)
 
       entityServiceGetEntityUiLinkStub.withArgs(discussion).resolves(entityLink)
       spaceRepoFindOneStub.withArgs(space.id).resolves(space)
@@ -192,9 +185,7 @@ describe('NewDiscussionHandler', () => {
       const discussion = new Discussion(note, user)
       discussion.id = 1
 
-      discussionRepoFindOneStub
-        .withArgs(discussion.id, { populate: ['note', 'user'] })
-        .resolves(discussion)
+      discussionRepoFindOneStub.withArgs(discussion.id, { populate: ['note', 'user'] }).resolves(discussion)
 
       entityServiceGetEntityUiLinkStub.withArgs(discussion).resolves(entityLink)
       spaceRepoFindOneStub.withArgs(space.id).resolves(space)
@@ -224,9 +215,7 @@ describe('NewDiscussionHandler', () => {
       expect(emailClientSendEmailStub.secondCall.args[0].subject).to.eq(
         `[precisionFDA] New Discussion notification: ${space.name}`,
       )
-      expect(emailClientSendEmailStub.secondCall.args[0].body).to.contain(
-        '<a href="link_to_entity"',
-      )
+      expect(emailClientSendEmailStub.secondCall.args[0].body).to.contain('<a href="link_to_entity"')
     })
   })
 })

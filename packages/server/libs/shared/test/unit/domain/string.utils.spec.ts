@@ -1,5 +1,5 @@
-import { StringUtils } from '@shared/utils/string.utils'
 import { expect } from 'chai'
+import { StringUtils } from '@shared/utils/string.utils'
 
 describe('StringUtils', () => {
   describe('isEmpty', () => {

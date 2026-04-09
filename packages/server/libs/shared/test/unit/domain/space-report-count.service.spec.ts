@@ -1,11 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
+import { SinonStub, stub } from 'sinon'
+import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
 import { SpaceReportCountService } from '@shared/domain/space-report/service/space-report-count.service'
 import { SpaceReportScopeFilterProvider } from '@shared/domain/space-report/space-report-scope-filter.provider'
+import { User } from '@shared/domain/user/user.entity'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('SpaceReportCountService', () => {
   const USER_ID = 1
@@ -122,9 +122,6 @@ describe('SpaceReportCountService', () => {
   })
 
   function getInstance(): SpaceReportCountService {
-    return new SpaceReportCountService(
-      em as unknown as SqlEntityManager,
-      spaceReportScopeFilterProvider,
-    )
+    return new SpaceReportCountService(em as unknown as SqlEntityManager, spaceReportScopeFilterProvider)
   }
 })

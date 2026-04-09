@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/update-db-cluster.dto'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError } from '@shared/errors'
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/update-db-cluster.dto'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class DbClusterUpdateFacade {
@@ -28,10 +28,6 @@ export class DbClusterUpdateFacade {
       throw new NotFoundError('DbCluster not found or not editable')
     }
 
-    return await this.dbClusterService.updateDbClusterProperties(
-      dbCluster,
-      body.name,
-      body.description,
-    )
+    return await this.dbClusterService.updateDbClusterProperties(dbCluster, body.name, body.description)
   }
 }

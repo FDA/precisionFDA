@@ -1,4 +1,7 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { DbClusterUpdateFacade } from 'apps/api/src/facade/db-cluster/update-facade/db-cluster-update.facade'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
@@ -7,9 +10,6 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError } from '@shared/errors'
-import { DbClusterUpdateFacade } from 'apps/api/src/facade/db-cluster/update-facade/db-cluster-update.facade'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('DbClusterUpdateFacade', () => {
   const USER_ID = 0
@@ -116,12 +116,7 @@ describe('DbClusterUpdateFacade', () => {
       findEditableOne: findEditableOneStub,
     } as unknown as DbClusterRepository
     const notificationService = {} as unknown as NotificationService
-    const dbClusterService = new DbClusterService(
-      em,
-      dbClusterRepo,
-      userContext,
-      notificationService,
-    )
+    const dbClusterService = new DbClusterService(em, dbClusterRepo, userContext, notificationService)
 
     return new DbClusterUpdateFacade(dbClusterService, userContext)
   }

@@ -24,7 +24,7 @@ export class AppProvenanceDataService extends EntityProvenanceDataService<'app'>
   async getParents(app: App): Promise<EntityProvenanceSourceUnion[]> {
     const assets = await app.assets.loadItems()
 
-    return assets.map((asset) => ({
+    return assets.map(asset => ({
       type: 'asset',
       entity: asset,
     }))

@@ -1,5 +1,3 @@
-import { IOType } from '@shared/types/common'
-
 export type AppSpecItem = {
   name: string
   class:
@@ -38,8 +36,3 @@ export type SystemRequirements = {
 }
 
 export type PlatformSpec = AppSpecItem
-
-export type AppRunInput = {
-  __pfda_cli_configs: string
-  [key: string]: IOType
-}

@@ -14,10 +14,7 @@ export const isRequestFromFdaSubnet = (logger: Logger, ipv4Header: string): bool
   const { ipv4Quadruple: cidrIpv4Quadruple, maskSize } = config.api.fdaSubnet.allowedIpCidrBlock
   const cidrMaskPrefix = ipv4QuadrupleToBooleanArray(cidrIpv4Quadruple).slice(0, maskSize)
 
-  logger.debug(
-    { ipv4Header },
-    `Processing nginx header ${config.api.nginxIpHeader} with value "${ipv4Header}"`,
-  )
+  logger.debug({ ipv4Header }, `Processing nginx header ${config.api.nginxIpHeader} with value "${ipv4Header}"`)
   // Client IP should be 1st value in provided list
   const ipv4String = ipv4Header.split(',')[0]
   logger.debug({ ip: ipv4String }, 'Processing IP address')
@@ -34,9 +31,7 @@ export const isRequestFromFdaSubnet = (logger: Logger, ipv4Header: string): bool
   const actualMaskPrefix = incomingIpv4Bits.slice(0, maskSize)
   if (!cidrMaskPrefix.every((bit, index) => bit === actualMaskPrefix[index])) {
     const cidrBlockString = `${cidrIpv4Quadruple.join('.')}/${maskSize}`
-    const msg =
-      'Invalid IP address, expected IP to be in CIDR ' +
-      `block ${cidrBlockString}, got ${ipv4String}`
+    const msg = `Invalid IP address, expected IP to be in CIDR block ${cidrBlockString}, got ${ipv4String}`
     logger.error({ ip: ipv4String }, msg)
     return false
   }

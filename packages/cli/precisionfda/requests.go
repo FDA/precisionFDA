@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/hashicorp/go-retryablehttp"
 )
@@ -45,7 +46,9 @@ func (c *PFDAClient) makeRequestWithHeaders(requestType string, url string, head
 		c.setPostHeaders(req)
 	} else {
 		for key, value := range headers {
-			req.Header.Set(key, value.(string))
+			if strVal, ok := value.(string); ok {
+				req.Header.Set(key, strVal)
+			}
 		}
 	}
 
@@ -73,4 +76,43 @@ func (c *PFDAClient) makeRequestWithHeaders(requestType string, url string, head
  */
 func (c *PFDAClient) makeRequest(requestType string, url string, data []byte) ([]byte, error) {
 	return c.makeRequestWithHeaders(requestType, url, nil, data)
+}
+
+// makeGetJSON performs a GET request and unmarshal the JSON response body into dest.
+func (c *PFDAClient) makeGetJSON(url string, dest interface{}) error {
+	body, err := c.makeRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(body, dest)
+}
+
+// Deprecated: This method is not handling errors correctly, use makeRequest instead.
+func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte) (status string, body []byte, err error) {
+	req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
+	if err != nil {
+		return "", nil, fmt.Errorf("request failed: %w", err)
+	}
+	c.setPostHeaders(req)
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return "", nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	status = resp.Status
+	body, _ = io.ReadAll(resp.Body)
+
+	if !strings.HasPrefix(status, "2") {
+		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n", requestType, url, status)
+	}
+	return status, body, err
+}
+
+func (c *PFDAClient) setPostHeaders(req *retryablehttp.Request) {
+	req.Header.Set("User-Agent", c.UserAgent)
+	if c.AuthKey != "" {
+		req.Header.Set("Authorization", "Key "+c.AuthKey)
+	}
+	req.Header.Set("Content-Type", "application/json")
 }

@@ -1,8 +1,8 @@
+import sinon from 'sinon'
 import { IPlatformAuthClient } from '@shared/platform-client/platform-auth-client'
 import { IWorkstationClient } from '@shared/workstation-client/workstation-client'
-import sinon from 'sinon'
-import { ServiceFactory, setServiceFactory } from '../services/service-factory'
 import { EmailClient } from '../services/email-client'
+import { ServiceFactory, setServiceFactory } from '../services/service-factory'
 
 class MockServiceFactory extends ServiceFactory {
   emailService = {

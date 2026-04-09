@@ -1,16 +1,16 @@
+import { wrap } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { InvalidRequestError, NotFoundError } from '@shared/errors'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { Logger } from 'nestjs-pino'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
 import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
-import { SpaceGroup } from '@shared/domain/space/space-group.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { wrap } from '@mikro-orm/core'
-import { SpaceGroupRepository } from '@shared/domain/space/space-group.repository'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceGroup } from '@shared/domain/space/space-group.entity'
+import { SpaceGroupRepository } from '@shared/domain/space/space-group.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { InvalidRequestError, NotFoundError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class SpaceGroupService {
@@ -69,10 +69,7 @@ export class SpaceGroupService {
     }
     const uniqueSpaceIds = [...new Set(spaceIds)]
 
-    const spaceGroup = await this.spaceGroupRepo.findEditableOne(
-      { id: spaceGroupId },
-      { populate: ['spaces'] },
-    )
+    const spaceGroup = await this.spaceGroupRepo.findEditableOne({ id: spaceGroupId }, { populate: ['spaces'] })
     if (!spaceGroup) {
       throw new NotFoundError(`Space group ${spaceGroupId} not found`)
     }
@@ -83,14 +80,11 @@ export class SpaceGroupService {
     }
 
     const invalidSpaceType = !!spaces.find(
-      (space) =>
-        ![SPACE_TYPE.GROUPS, SPACE_TYPE.REVIEW, SPACE_TYPE.GOVERNMENT].includes(space.type),
+      space => ![SPACE_TYPE.GROUPS, SPACE_TYPE.REVIEW, SPACE_TYPE.GOVERNMENT].includes(space.type),
     )
 
     if (invalidSpaceType) {
-      throw new InvalidRequestError(
-        'Only group, review and government spaces can be added to a space group',
-      )
+      throw new InvalidRequestError('Only group, review and government spaces can be added to a space group')
     }
 
     spaceGroup.spaces.add(spaces)
@@ -99,10 +93,7 @@ export class SpaceGroupService {
 
   // Any site admin or space admin can remove any space from any space group
   async removeSpaces(spaceGroupId: number, spaceIds: number[]): Promise<void> {
-    const spaceGroup = await this.spaceGroupRepo.findEditableOne(
-      { id: spaceGroupId },
-      { populate: ['spaces'] },
-    )
+    const spaceGroup = await this.spaceGroupRepo.findEditableOne({ id: spaceGroupId }, { populate: ['spaces'] })
     if (!spaceGroup) {
       throw new NotFoundError(`Space group ${spaceGroupId} not found`)
     }
@@ -144,8 +135,6 @@ export class SpaceGroupService {
       },
     )
 
-    return spaceGroups.map((spaceGroup: SpaceGroup) =>
-      SpaceGroupDTO.fromEntity(spaceGroup, this.user.id),
-    )
+    return spaceGroups.map((spaceGroup: SpaceGroup) => SpaceGroupDTO.fromEntity(spaceGroup, this.user.id))
   }
 }

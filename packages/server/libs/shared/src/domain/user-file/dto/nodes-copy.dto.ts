@@ -1,7 +1,7 @@
+import { Type } from 'class-transformer'
 import { ArrayNotEmpty, IsArray, IsInt, IsOptional } from 'class-validator'
 import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
 import { EntityScope } from '@shared/types/common'
-import { Type } from 'class-transformer'
 
 export class NodesCopyDTO {
   @IsArray()

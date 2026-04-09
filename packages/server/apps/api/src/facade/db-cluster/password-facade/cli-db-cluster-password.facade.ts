@@ -1,5 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
+import { invertObj } from 'ramda'
 import { DbClusterAccessControlEncryptor } from '@shared/domain/db-cluster/access-control/db-cluster-access-control-encryptor'
 import { UsersDbClustersSalt } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.entity'
 import { UsersDbClustersSaltService } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.service'
@@ -10,11 +11,10 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { invertObj } from 'ramda'
 import { DbClusterSynchronizeFacade } from '../synchronize-facade/db-cluster-synchronize.facade'
 
 @Injectable()
-export class DbClusterPasswordFacade {
+export class CliDbClusterPasswordFacade {
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -58,7 +58,7 @@ export class DbClusterPasswordFacade {
     const dbCluster = await this.dbClusterService.getAccessibleByUid(uid)
     if (!dbCluster) {
       this.logger.warn(
-        { userId: this.userContext.id, dbClusterUidd: uid },
+        { userId: this.userContext.id, dbClusterUid: uid },
         `DbCluster does not exist or is not accessible by user.`,
       )
       throw new NotFoundError('DbCluster not found or not accessible')

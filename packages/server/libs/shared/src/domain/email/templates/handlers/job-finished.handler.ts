@@ -1,9 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import {
-  EmailTypeToContextMap,
-  JobFinishedContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToContextMap, JobFinishedContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
@@ -29,9 +26,7 @@ export class JobFinishedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFinishe
     super(emailClient)
   }
 
-  protected async getContextualData(
-    input: JobEventDTO,
-  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.jobFinished]> {
+  protected async getContextualData(input: JobEventDTO): Promise<EmailTypeToContextMap[EMAIL_TYPES.jobFinished]> {
     const job = await this.jobRepo.findOneOrFail({ id: input.jobId })
     return {
       input,

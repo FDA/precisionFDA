@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
+import { User } from '@shared/domain/user/user.entity'
 import { FileScopeFilterProvider } from '@shared/domain/user-file/service/file-scope-filter.provider'
 import { FILE_STATE_PFDA, FILE_STI_TYPE, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('FileScopeFilterProvider', () => {

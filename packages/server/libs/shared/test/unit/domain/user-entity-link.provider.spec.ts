@@ -1,7 +1,7 @@
-import { UserEntityLinkProvider } from '@shared/domain/entity/entity-link/user-entity-link.provider'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { config } from '@shared/config'
+import { UserEntityLinkProvider } from '@shared/domain/entity/entity-link/user-entity-link.provider'
+import { User } from '@shared/domain/user/user.entity'
 
 describe('UserEntityLinkProvider', () => {
   const DX_USER = 'DX_USER'

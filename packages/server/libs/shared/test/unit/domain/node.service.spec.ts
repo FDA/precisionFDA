@@ -1,33 +1,30 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderService } from '@shared/domain/user-file/folder.service'
 import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
 import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { nodeQueryFilter } from '@shared/domain/user-file/user-file.input'
-import {
-  FILE_STATE_DX,
-  FILE_STATE_PFDA,
-  FILE_STI_TYPE,
-} from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
-import { UserRepository } from '@shared/domain/user/user.repository'
+import { FILE_STATE_DX, FILE_STATE_PFDA, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
-import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
 import { SCOPE } from '@shared/types/common'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
-import { FolderService } from '@shared/domain/user-file/folder.service'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 describe('NodeService', () => {
   const emFlushStub = stub()
@@ -68,6 +65,8 @@ describe('NodeService', () => {
     const assetCountService = {
       count: stub().resolves(0),
     } as unknown as AssetCountService
+    const assetRepository = {} as unknown as AssetRepository
+
     return new NodeService(
       em,
       userCtx,
@@ -79,6 +78,7 @@ describe('NodeService', () => {
       nodeHelper,
       fileCountService,
       assetCountService,
+      assetRepository,
     )
   }
 
@@ -187,10 +187,7 @@ describe('NodeService', () => {
       const currentUser = { id: 2, isSiteAdmin: () => true } as unknown as User
       const nodeService = createNodeService(currentUser)
 
-      await expect(nodeService.validateEditableBy(node)).to.be.rejectedWith(
-        Error,
-        'Locked items cannot be removed.',
-      )
+      await expect(nodeService.validateEditableBy(node)).to.be.rejectedWith(Error, 'Locked items cannot be removed.')
     })
 
     it('space', async () => {
@@ -446,9 +443,9 @@ describe('NodeService', () => {
       expect(emPopulateStub.calledOnce).to.be.true()
       expect(emPopulateStub.firstCall.firstArg).to.deep.equal(nodes)
 
-      const processedFolder1 = result.find((n) => n.id === folder1.id)
+      const processedFolder1 = result.find(n => n.id === folder1.id)
       expect(processedFolder1.folderPath).to.eq('/')
-      const processedFolder2 = result.find((n) => n.id === folder2.id)
+      const processedFolder2 = result.find(n => n.id === folder2.id)
       expect(processedFolder2.folderPath).to.eq(`/${folder1.name}/`)
 
       expect(result[0].id).to.eq(node3.id)

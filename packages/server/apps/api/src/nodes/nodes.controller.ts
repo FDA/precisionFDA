@@ -1,12 +1,12 @@
 import { Body, Controller, Delete, HttpCode, Post, UseGuards } from '@nestjs/common'
-import { NodesInputDTO } from '@shared/domain/user-file/dto/nodes-input.dto'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
-import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
-import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
 import { NodesCopyDTO } from '@shared/domain/user-file/dto/nodes-copy.dto'
+import { NodesInputDTO } from '@shared/domain/user-file/dto/nodes-input.dto'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
+import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @UseGuards(UserContextGuard)
 @Controller('/nodes')

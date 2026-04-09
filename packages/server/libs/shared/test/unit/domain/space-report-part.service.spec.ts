@@ -1,10 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { BatchComplete } from '@shared/domain/space-report/model/batch-complete'
 import { SpaceReportPartSource } from '@shared/domain/space-report/model/space-report-part-source'
 import { SpaceReportPartService } from '@shared/domain/space-report/service/part/space-report-part.service'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SpaceReportPartService', () => {
   const transactionalStub = stub()
@@ -75,15 +75,11 @@ describe('SpaceReportPartService', () => {
     const PART_3_RESULT = 'PART_3_RESULT'
     const PART_3_COMPLETE = { id: PART_3_ID, result: PART_3_RESULT }
 
-    const PART_COMPLETES = [
-      PART_1_COMPLETE,
-      PART_2_COMPLETE,
-      PART_3_COMPLETE,
-    ] as unknown as BatchComplete[]
+    const PART_COMPLETES = [PART_1_COMPLETE, PART_2_COMPLETE, PART_3_COMPLETE] as unknown as BatchComplete[]
 
-    let PART_1: { id: number, state: string }
-    let PART_2: { id: number, state: string }
-    let PART_3: { id: number, state: string }
+    let PART_1: { id: number; state: string }
+    let PART_2: { id: number; state: string }
+    let PART_3: { id: number; state: string }
 
     beforeEach(() => {
       transactionalStub.reset()
@@ -92,9 +88,7 @@ describe('SpaceReportPartService', () => {
       PART_1 = { id: PART_1_ID, state: 'CREATED' }
       PART_2 = { id: PART_2_ID, state: 'CREATED' }
       PART_3 = { id: PART_3_ID, state: 'CREATED' }
-      findStub
-        .withArgs(SpaceReportPart, [PART_1_ID, PART_2_ID, PART_3_ID])
-        .resolves([PART_1, PART_2, PART_3])
+      findStub.withArgs(SpaceReportPart, [PART_1_ID, PART_2_ID, PART_3_ID]).resolves([PART_1, PART_2, PART_3])
     })
 
     it('should return empty result for empty input', async () => {

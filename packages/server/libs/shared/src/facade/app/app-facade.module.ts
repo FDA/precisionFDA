@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { AppSeriesModule } from '@shared/domain/app-series/app-series.module'
 import { AppModule } from '@shared/domain/app/app.module'
+import { AppSeriesModule } from '@shared/domain/app-series/app-series.module'
 import { AuthModule } from '@shared/domain/auth/auth.module'
 import { CliExchangeTokenModule } from '@shared/domain/cli-exchange-token/cli-exchange-token.module'
 import { JobModule } from '@shared/domain/job/job.module'

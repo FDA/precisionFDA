@@ -1,7 +1,7 @@
+import { expect } from 'chai'
 import { config } from '@shared/config'
 import { ExpertEntityLinkProvider } from '@shared/domain/entity/entity-link/expert-entity-link.provider'
 import { Expert } from '@shared/domain/expert/entity/expert.entity'
-import { expect } from 'chai'
 
 describe('ExpertEntityLinkProvider', () => {
   const EXPERT_ID = 1

@@ -1,4 +1,4 @@
-import { Entity, Ref, ManyToOne } from '@mikro-orm/core'
+import { Entity, ManyToOne, Ref } from '@mikro-orm/core'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { GeneralProperty } from './property.entity'
 

@@ -1,4 +1,6 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
@@ -14,8 +16,6 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { ErrorCodes } from '@shared/errors'
 import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { expect } from 'chai'
-import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -47,7 +47,7 @@ describe('POST /apps/:id/run', () => {
     const jobInDb = await em.findOne(Job, { uid: body.id })
     expect(jobInDb.describe).to.equal(null)
     expect(jobInDb.app.id).to.equal(app.id)
-    var provenance = jobInDb?.provenance
+    const provenance = jobInDb?.provenance
     expect(provenance).to.deep.equal({
       [generate.job.jobId()]: {
         app_dxid: app.dxid,
@@ -112,11 +112,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('accepts params for ttyd app', async () => {
-    const ttydApp = create.appHelper.createHTTPS(
-      em,
-      { user },
-      { spec: generate.app.ttydAppSpecData() },
-    )
+    const ttydApp = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.ttydAppSpecData() })
     await em.flush()
     const ttydAppInput = {
       ...generate.app.runTtydAppInput(),
@@ -143,11 +139,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('accepts snapshot file dxid', async () => {
-    const ttydApp = create.appHelper.createHTTPS(
-      em,
-      { user },
-      { spec: generate.app.ttydAppSpecData() },
-    )
+    const ttydApp = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.ttydAppSpecData() })
     const snapshotFile = create.filesHelper.create(em, { user })
     await em.flush()
     const ttydAppInput = {
@@ -166,7 +158,7 @@ describe('POST /apps/:id/run', () => {
       .expect(201)
 
     const jobInDb = await em.findOneOrFail(Job, { uid: body.id })
-    var provenanceInDb = jobInDb?.provenance
+    const provenanceInDb = jobInDb?.provenance
     expect(provenanceInDb).to.be.deep.equal({
       [generate.job.jobId()]: {
         app_dxid: ttydApp.dxid,
@@ -211,7 +203,7 @@ describe('POST /apps/:id/run', () => {
       })
     const jobInDb = await em.findOneOrFail(Job, { uid: body.id })
     expect(jobInDb).to.have.property('provenance')
-    var provenanceInDb = jobInDb?.provenance
+    const provenanceInDb = jobInDb?.provenance
     expect(provenanceInDb).to.be.deep.equal({
       [generate.job.jobId()]: {
         app_dxid: rshinyApp.dxid,

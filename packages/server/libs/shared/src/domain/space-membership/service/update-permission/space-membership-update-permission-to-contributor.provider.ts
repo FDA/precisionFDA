@@ -15,18 +15,10 @@ export class SpaceMembershipUpdatePermissionToContributorProvider extends SpaceM
     protected readonly spaceMembershipRepository: SpaceMembershipRepository,
     protected readonly spaceMembershipPlatformAccessToContributorProvider: SpaceMembershipPlatformAccessToContributorProvider,
   ) {
-    super(
-      em,
-      platformClient,
-      spaceMembershipRepository,
-      spaceMembershipPlatformAccessToContributorProvider,
-    )
+    super(em, platformClient, spaceMembershipRepository, spaceMembershipPlatformAccessToContributorProvider)
   }
 
-  protected permittedUpdaterRoles: SPACE_MEMBERSHIP_ROLE[] = [
-    SPACE_MEMBERSHIP_ROLE.LEAD,
-    SPACE_MEMBERSHIP_ROLE.ADMIN,
-  ]
+  protected permittedUpdaterRoles: SPACE_MEMBERSHIP_ROLE[] = [SPACE_MEMBERSHIP_ROLE.LEAD, SPACE_MEMBERSHIP_ROLE.ADMIN]
 
   protected updateMembership(membership: SpaceMembership): void {
     membership.role = SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR

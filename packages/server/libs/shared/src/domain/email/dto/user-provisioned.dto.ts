@@ -1,5 +1,5 @@
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator'
 import { EmailAddress } from '@shared/domain/email/model/email-address'
-import { IsString, IsNotEmpty, IsEmail } from 'class-validator'
 
 export class UserProvisionedDTO {
   @IsString()

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
 import { getIdFromScopeName } from '@shared/domain/space/space.helper'
 import { EntityUtils } from '@shared/utils/entity.utils'

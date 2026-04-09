@@ -32,9 +32,7 @@ class SQLQueryLogger extends DefaultLogger {
   }
 
   private formatQuery(context: LogContext): string {
-    const queryText = this.printValues
-      ? this.fillParams(context.query, [...(context.params ?? [])])
-      : context.query
+    const queryText = this.printValues ? this.fillParams(context.query, [...(context.params ?? [])]) : context.query
 
     const parts = [`[QUERY${context.id !== undefined ? ` ${context.id}` : ''}]`, queryText]
 
@@ -67,8 +65,7 @@ class SQLQueryLogger extends DefaultLogger {
 export function getMikroOrmConfig(opts: MikroOrmConfigOptions): MikroOrmModuleSyncOptions {
   return {
     clientUrl: config.database.clientUrl,
-    loggerFactory: (options) =>
-      new SQLQueryLogger(config.database.printDBQueryValuesInLog, options),
+    loggerFactory: options => new SQLQueryLogger(config.database.printDBQueryValuesInLog, options),
     metadataProvider: TsMorphMetadataProvider,
     entities: [getEntityGlob(opts.distPath, 'js')],
     entitiesTs: [

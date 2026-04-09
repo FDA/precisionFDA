@@ -1,12 +1,12 @@
 import { Injectable, Logger, NestMiddleware } from '@nestjs/common'
+import { NextFunction, Request, Response } from 'express'
 import { config } from '@shared/config'
 import { COOKIE_SESSION_KEY, USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
 import { PermissionError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { CookieUtils } from '@shared/utils/cookie.utils'
 import { CSRFUtils } from '@shared/utils/csrf.utils'
 import { Encryptor } from '@shared/utils/encryptors/encryptor'
-import { NextFunction, Request, Response } from 'express'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class CSRFVerificationMiddleware implements NestMiddleware {

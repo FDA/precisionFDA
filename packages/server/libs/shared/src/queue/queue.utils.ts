@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common'
-import { Job, JobInformation, Queue, JobStatusClean, JobStatus } from 'bull'
-import { removeRepeatableJob } from '.'
+import { Job, JobInformation, JobStatus, JobStatusClean, Queue } from 'bull'
 import { formatDuration } from '../utils/format'
+import { removeRepeatableJob } from '.'
 
 const getJobStatusMessage = async (job: Job, jobLabel?: string): Promise<string> => {
   const prefix = jobLabel ?? 'Job'
@@ -58,8 +58,7 @@ const clearJobs = async (q: Queue, state: JobStatusClean & JobStatus, log: Logge
     log.log({ jobs }, `Removing ${state} jobs from ${q.name}`)
     q.clean(0, state)
     log.log({ count }, `Removed ${count} ${state} jobs from ${q.name}`)
-  }
-  else {
+  } else {
     log.log(`No ${state} jobs in ${q.name}`)
   }
   return jobs
@@ -70,10 +69,10 @@ const clearFailedJobs = async (q: Queue, log: Logger): Promise<Job[]> => {
 }
 
 export {
+  clearFailedJobs,
+  clearJobs,
+  clearOrphanedRepeatableJobs,
   getJobStatusMessage,
   getJobStatusMessageWithElapsedTime,
   isJobOrphaned,
-  clearOrphanedRepeatableJobs,
-  clearJobs,
-  clearFailedJobs,
 }

@@ -1,10 +1,10 @@
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { App } from '@shared/domain/app/app.entity'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { AppProvenanceDataService } from '@shared/domain/provenance/service/entity-data/app-provenance-data.service'
 import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
-import { expect } from 'chai'
-import { SinonStub, stub } from 'sinon'
 
 describe('AppProvenanceDataService', () => {
   const TITLE = 'title'

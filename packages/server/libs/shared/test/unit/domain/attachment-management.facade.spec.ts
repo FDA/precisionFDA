@@ -1,26 +1,26 @@
-import { App } from '@shared/domain/app/app.entity'
-import { Comparison } from '@shared/domain/comparison/comparison.entity'
-import { Job } from '@shared/domain/job/job.entity'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { stub } from 'sinon'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
+import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { NoteRepository } from '@shared/domain/note/note.repository'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { stub } from 'sinon'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
 import { AppRepository } from '@shared/domain/app/app.repository'
 import { AttachmentRepository } from '@shared/domain/attachment/attachment.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
-import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { create, db } from '@shared/test'
-import { User } from '@shared/domain/user/user.entity'
-import { Note } from '@shared/domain/note/note.entity'
-import { STATIC_SCOPE } from '@shared/enums'
 import { CliAttachmentsDTO } from '@shared/domain/cli/dto/cli-attachments.dto'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { Note } from '@shared/domain/note/note.entity'
+import { NoteRepository } from '@shared/domain/note/note.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { STATIC_SCOPE } from '@shared/enums'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
+import { create, db } from '@shared/test'
 
 describe('AttachmentManagementFacade', () => {
   let attachmentManagementFacade: AttachmentManagementFacade
@@ -151,9 +151,7 @@ describe('AttachmentManagementFacade', () => {
 
     findAccessibleOneNodeStub.withArgs({ id: file.id }).resolves(file)
     findAccessibleOneNodeStub.withArgs({ id: asset.id }).resolves(asset)
-    findAccessibleOneNodeStub
-      .withArgs({ id: folder.id, scope: [STATIC_SCOPE.PUBLIC, SPACE_SCOPE] })
-      .resolves(folder)
+    findAccessibleOneNodeStub.withArgs({ id: folder.id, scope: [STATIC_SCOPE.PUBLIC, SPACE_SCOPE] }).resolves(folder)
 
     findEditableOneNoteStub.withArgs({ id: note.id }).resolves(note)
     findAccessibleOneNoteStub.withArgs({ id: note.id }).resolves(note)

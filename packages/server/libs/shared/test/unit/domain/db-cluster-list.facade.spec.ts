@@ -1,20 +1,20 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { DbClusterListFacade } from 'apps/api/src/facade/db-cluster/list-facade/db-cluster-list.facade'
+import { expect } from 'chai'
+import { match, stub } from 'sinon'
 import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DbClusterCountService } from '@shared/domain/db-cluster/service/db-cluster-count.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { LicenseService } from '@shared/domain/license/license.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
-import { DbClusterListFacade } from 'apps/api/src/facade/db-cluster/list-facade/db-cluster-list.facade'
-import { LicenseService } from '@shared/domain/license/license.service'
-import { expect } from 'chai'
-import { match, stub } from 'sinon'
 
 describe('DbClusterListFacade', () => {
   const USER_ID = 0
@@ -109,8 +109,8 @@ describe('DbClusterListFacade', () => {
     const result = await getInstance().listDbClusters({ scope: 'private' })
 
     expect(result.data).to.have.length(2)
-    expect(result.data.map((c) => c.name)).to.include.members([dbCluster1.name, dbCluster2.name])
-    expect(result.data.every((c) => c.scope === STATIC_SCOPE.PRIVATE)).to.be.true()
+    expect(result.data.map(c => c.name)).to.include.members([dbCluster1.name, dbCluster2.name])
+    expect(result.data.every(c => c.scope === STATIC_SCOPE.PRIVATE)).to.be.true()
     expect(result.data[0].dxid).eq('dbcluster-xxx1')
     expect(result.data[1].dxid).eq('dbcluster-xxx2')
   })
@@ -156,8 +156,8 @@ describe('DbClusterListFacade', () => {
     const result = await getInstance().listDbClusters({ scope: 'space-1' })
 
     expect(result.data).to.have.length(2)
-    expect(result.data.map((c) => c.name)).to.include.members([dbCluster1.name, dbCluster2.name])
-    expect(result.data.every((c) => c.scope === 'space-1')).to.be.true()
+    expect(result.data.map(c => c.name)).to.include.members([dbCluster1.name, dbCluster2.name])
+    expect(result.data.every(c => c.scope === 'space-1')).to.be.true()
     expect(result.data[0].dxid).eq('dbcluster-xxx1')
     expect(result.data[1].dxid).eq('dbcluster-xxx2')
   })
@@ -178,9 +178,7 @@ describe('DbClusterListFacade', () => {
     }
 
     loadEntity.resolves(USER)
-    paginateStub
-      .withArgs(match({ scope: 'private', filters: { name: 'db' } }))
-      .resolves({ data: [dbCluster] })
+    paginateStub.withArgs(match({ scope: 'private', filters: { name: 'db' } })).resolves({ data: [dbCluster] })
     getProperty.withArgs('dxuser').returns(USER.dxuser)
     getProperty.withArgs('fullName').returns(USER.fullName)
     getItems.returns([])
@@ -255,8 +253,8 @@ describe('DbClusterListFacade', () => {
     const result = await getInstance().listDbClusters({ scope: 'spaces' })
 
     expect(result.data).to.have.length(2)
-    expect(result.data.map((c) => c.name)).to.include.members([dbCluster1.name, dbCluster2.name])
-    expect(result.data.every((c) => ['space-1', 'space-2'].includes(c.scope))).to.be.true()
+    expect(result.data.map(c => c.name)).to.include.members([dbCluster1.name, dbCluster2.name])
+    expect(result.data.every(c => ['space-1', 'space-2'].includes(c.scope))).to.be.true()
   })
 
   it('returns empty array when user has no space membership', async () => {
@@ -293,12 +291,6 @@ describe('DbClusterListFacade', () => {
       findLicenseRefsByLicenseableIds: findLicenseRefsByLicenseableIdsStub,
     } as unknown as LicenseService
 
-    return new DbClusterListFacade(
-      dbClusterService,
-      userContext,
-      spaceService,
-      spaceMembershipService,
-      licenseService,
-    )
+    return new DbClusterListFacade(dbClusterService, userContext, spaceService, spaceMembershipService, licenseService)
   }
 })

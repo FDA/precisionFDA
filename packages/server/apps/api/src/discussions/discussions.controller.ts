@@ -13,16 +13,16 @@ import {
 } from '@nestjs/common'
 import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
 import { CreateReplyDTO } from '@shared/domain/discussion/dto/create-reply.dto'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
 import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
-import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { SimpleDiscussionDTO } from '@shared/domain/discussion/dto/simple-discussion.dto'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { UpdateReplyDTO } from '@shared/domain/discussion/dto/update-reply.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { CreateDiscussionReplyFacade } from '../facade/discussion/create-discussion-reply.facade'
 import { CreateDiscussionFacade } from '../facade/discussion/create-discussion.facade'
+import { CreateDiscussionReplyFacade } from '../facade/discussion/create-discussion-reply.facade'
 import { UpdateDiscussionFacade } from '../facade/discussion/update-discussion.facade'
 import { UpdateDiscussionReplyFacade } from '../facade/discussion/update-reply.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
@@ -39,9 +39,7 @@ export class DiscussionsController {
   ) {}
 
   @Get()
-  async listDiscussions(
-    @Query() query: DiscussionPaginationDTO,
-  ): Promise<PaginatedResult<SimpleDiscussionDTO>> {
+  async listDiscussions(@Query() query: DiscussionPaginationDTO): Promise<PaginatedResult<SimpleDiscussionDTO>> {
     return await this.discussionService.listDiscussions(query)
   }
 
@@ -76,10 +74,7 @@ export class DiscussionsController {
 
   @HttpCode(204)
   @Patch('/:id')
-  async updateDiscussion(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateDiscussionDTO,
-  ): Promise<void> {
+  async updateDiscussion(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateDiscussionDTO): Promise<void> {
     await this.updateDiscussionFacade.updateDiscussion(id, body)
   }
 
@@ -112,9 +107,7 @@ export class DiscussionsController {
 
   @HttpCode(204)
   @Post('/:discussionId/unfollow')
-  async unfollowDiscussion(
-    @Param('discussionId', ParseIntPipe) discussionId: number,
-  ): Promise<void> {
+  async unfollowDiscussion(@Param('discussionId', ParseIntPipe) discussionId: number): Promise<void> {
     return await this.discussionService.unfollowDiscussion(discussionId)
   }
 }

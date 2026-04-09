@@ -1,5 +1,6 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
+import { Job, JobOptions, Queue } from 'bull'
 import { config } from '@shared/config'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
@@ -10,7 +11,6 @@ import {
   SyncSpacesPermissionsJob,
   TASK_TYPE,
 } from '@shared/queue/task.input'
-import { Job, JobOptions, Queue } from 'bull'
 
 @Injectable()
 export class MaintenanceQueueJobProducer extends QueueJobProducer {
@@ -108,10 +108,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createSyncSpaceMemberAccessTask(
-    spaceId: number,
-    memberIds: number[],
-  ): Promise<Job<SyncSpaceMemberAccessJob>> {
+  async createSyncSpaceMemberAccessTask(spaceId: number, memberIds: number[]): Promise<Job<SyncSpaceMemberAccessJob>> {
     const wrapped = {
       type: TASK_TYPE.SYNC_SPACE_MEMBER_ACCESS as const,
       payload: { spaceId, memberIds },

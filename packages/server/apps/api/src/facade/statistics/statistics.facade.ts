@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { UserService } from '@shared/domain/user/service/user.service'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { OrganizationService } from '@shared/domain/org/service/organization.service'
 import { CountStats } from '@shared/database/statistics.type'
+import { OrganizationService } from '@shared/domain/org/service/organization.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { UserService } from '@shared/domain/user/service/user.service'
 import { NodeService } from '@shared/domain/user-file/node.service'
 
 @Injectable()

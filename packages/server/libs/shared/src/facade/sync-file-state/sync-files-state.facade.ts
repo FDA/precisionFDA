@@ -1,22 +1,19 @@
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Injectable, Logger } from '@nestjs/common'
-import { PlatformClient } from '@shared/platform-client'
-import { TASK_TYPE } from '@shared/queue/task.input'
-import { FILE_STATE_DX, FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { FileStatesParams } from '@shared/platform-client/platform-client.params'
-import { difference, groupBy } from 'ramda'
-import {
-  findFileOrAssetsWithDxid,
-  findFileOrAssetWithUid,
-} from '@shared/domain/user-file/user-file.helper'
-import { ChallengeService } from '@shared/domain/challenge/challenge.service'
-import { ClientRequestError } from '@shared/errors'
-import { Job } from 'bull'
-import { removeRepeatable } from '@shared/queue'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
+import { Job } from 'bull'
+import { difference, groupBy } from 'ramda'
+import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { findFileOrAssetsWithDxid, findFileOrAssetWithUid } from '@shared/domain/user-file/user-file.helper'
+import { FILE_STATE_DX, FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { ClientRequestError } from '@shared/errors'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { PlatformClient } from '@shared/platform-client'
+import { FileStatesParams } from '@shared/platform-client/platform-client.params'
+import { removeRepeatable } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 
 @Injectable()
 export class SyncFilesStateFacade {
@@ -48,11 +45,7 @@ export class SyncFilesStateFacade {
     const oldOpenFiles = await this.nodeHelper.findOldOpenFilesAndAssets()
 
     if (recentClosingFiles.length > 0) {
-      const recentClosingResult = await this.resolveRecentClosingFiles(
-        recentClosingFiles,
-        dxuser,
-        job,
-      )
+      const recentClosingResult = await this.resolveRecentClosingFiles(recentClosingFiles, dxuser, job)
       if (recentClosingResult === false) {
         return
       }
@@ -73,7 +66,7 @@ export class SyncFilesStateFacade {
     this.logger.log(
       {
         numberOfOldOpenFiles: oldOpenFiles.length,
-        oldOpenFiles: oldOpenFiles.map((f) => f.dxid),
+        oldOpenFiles: oldOpenFiles.map(f => f.dxid),
       },
       'Resolving old open files',
     )
@@ -88,7 +81,7 @@ export class SyncFilesStateFacade {
     this.logger.error(
       {
         numberOfOldClosingFiles: oldClosingFiles.length,
-        oldClosingFiles: oldClosingFiles.map((f) => f.dxid),
+        oldClosingFiles: oldClosingFiles.map(f => f.dxid),
       },
       'Resolving old closing files',
     )
@@ -123,7 +116,7 @@ export class SyncFilesStateFacade {
       {
         dxuser,
         numberOfOpenFiles: recentClosingFiles.length,
-        openFiles: recentClosingFiles.map((f) => f.dxid),
+        openFiles: recentClosingFiles.map(f => f.dxid),
       },
       `Starting files state sync for ${dxuser}`,
     )
@@ -139,7 +132,7 @@ export class SyncFilesStateFacade {
           this.logger.log(
             {
               projectDxid,
-              openFiles: openFilesInProject.map((f) => ({
+              openFiles: openFilesInProject.map(f => ({
                 name: f.name,
                 dxid: f.dxid,
                 uid: f.uid,
@@ -169,7 +162,7 @@ export class SyncFilesStateFacade {
   }
 
   private async syncFilesInProject(projectDxid: string, files: FileOrAsset[]): Promise<void> {
-    const fileDxids = files.map((x) => x.dxid)
+    const fileDxids = files.map(x => x.dxid)
 
     // This call can be particularly time-consuming, so log the times so we can later analyze
     this.logger.log('Starting platform findDataObjects call')
@@ -184,7 +177,7 @@ export class SyncFilesStateFacade {
     // If there are files missing in the platform response it means
     // the file upload was abandoned and platform subsequently deleted it
     // in this case we remove the file record on our side
-    const responseFileDxids = response.map((x) => x.id)
+    const responseFileDxids = response.map(x => x.id)
     const abandonedFileDxids = difference(fileDxids, responseFileDxids)
     if (abandonedFileDxids.length > 0) {
       this.logger.log({ abandonedFileDxids }, 'Deleting files removed by platform')
@@ -192,10 +185,7 @@ export class SyncFilesStateFacade {
     for (const dxid of abandonedFileDxids) {
       const fileOrAssets = await findFileOrAssetsWithDxid(this.em, dxid)
       if (!fileOrAssets) {
-        this.logger.log(
-          { dxid, fileOrAssets },
-          'Error removing abandoned file. File with dxid not found',
-        )
+        this.logger.log({ dxid, fileOrAssets }, 'Error removing abandoned file. File with dxid not found')
         continue
       }
 
@@ -206,7 +196,7 @@ export class SyncFilesStateFacade {
 
     // For every file info we receive from platform, update its state on pFDA
     for (const fileInfo of response) {
-      const file = files.find((f) => f.dxid === fileInfo.id)
+      const file = files.find(f => f.dxid === fileInfo.id)
       if (file && fileInfo.describe) {
         const fileOrAsset = await findFileOrAssetWithUid(this.em, file.uid)
         if (!fileOrAsset) {
@@ -226,10 +216,7 @@ export class SyncFilesStateFacade {
           try {
             await this.challengeService.updateCardImageUrl(fileOrAsset.uid)
           } catch (error) {
-            this.logger.error(
-              { fileUid: fileOrAsset.uid, error },
-              'Error updating challenge card image URL',
-            )
+            this.logger.error({ fileUid: fileOrAsset.uid, error }, 'Error updating challenge card image URL')
           }
         }
       } else {
@@ -249,7 +236,7 @@ export class SyncFilesStateFacade {
       this.logger.log(
         {
           dxuser: this.userCtx.dxuser,
-          openFiles: recentClosingFiles.map((f) => ({
+          openFiles: recentClosingFiles.map(f => ({
             name: f.name,
             dxid: f.dxid,
             uid: f.uid,

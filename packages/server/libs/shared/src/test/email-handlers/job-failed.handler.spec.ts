@@ -1,15 +1,15 @@
-import { Job } from '@shared/domain/job/job.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
 import { stub } from 'sinon'
-import { EmailClient } from '@shared/services/email-client'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('JobFailedEmailHandler', () => {
   const JOB_ID = 10
@@ -73,15 +73,11 @@ describe('JobFailedEmailHandler', () => {
       expect(emailClientSendEmailStub.calledOnce).to.eq(true)
       expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.jobFailed)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
-      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
-        `Execution "${job.name}" failed`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(`Execution "${job.name}" failed`)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
         `There was an error running execution ${job.uid}`,
       )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        'due to a limit being reached',
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain('due to a limit being reached')
     })
 
     it('job failed', async () => {
@@ -108,12 +104,8 @@ describe('JobFailedEmailHandler', () => {
       expect(emailClientSendEmailStub.calledOnce).to.eq(true)
       expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.equal(EMAIL_TYPES.jobFailed)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
-      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.equal(
-        `Execution "${job.name}" failed`,
-      )
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        job.describe.failureReason,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.equal(`Execution "${job.name}" failed`)
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(job.describe.failureReason)
     })
   })
 })

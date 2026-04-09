@@ -22,6 +22,6 @@ export class ExpertQuestionRepository extends PaginatedRepository<ExpertQuestion
     `
 
     const results = await this.em.execute(sql, [query, query])
-    return results.map((row) => this.em.map(ExpertQuestion, row))
+    return results.map(row => this.em.map(ExpertQuestion, row))
   }
 }

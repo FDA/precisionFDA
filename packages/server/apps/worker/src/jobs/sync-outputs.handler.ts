@@ -1,9 +1,9 @@
+import { EntityManager } from '@mikro-orm/core'
+import { Job as BullJob } from 'bull'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobService } from '@shared/domain/job/job.service'
-import { Job as BullJob } from 'bull'
 import { CheckStatusJob } from '@shared/queue/task.input'
 import { JobHandler } from './job.handler'
-import { EntityManager } from '@mikro-orm/core'
 
 class SyncOutputsHandler implements JobHandler<CheckStatusJob> {
   private readonly em: EntityManager

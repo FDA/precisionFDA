@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
 import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { EntityIconService } from '@shared/domain/entity/entity-icon/entity-icon.service'
-import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
+import { EntityWithIconType } from '@shared/domain/entity/entity-icon/entity-with-icon.type'
 import { DownloadableEntityType } from '@shared/domain/entity/entity-link/domain/downloadable-entity.type'
 import { UiLinkableEntityType } from '@shared/domain/entity/entity-link/domain/ui-linkable-entity.type'
-import { EntityWithIconType } from '@shared/domain/entity/entity-icon/entity-with-icon.type'
+import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
 
 @Injectable()
 export class EntityService {

@@ -1,28 +1,25 @@
 import { LoadedReference } from '@mikro-orm/core'
-import { App } from '@shared/domain/app/app.entity'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { Job } from '@shared/domain/job/job.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { commentAddedTemplate } from '../mjml/comment-added.template'
-import { Injectable } from '@nestjs/common'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EmailClient } from '@shared/services/email-client'
-import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
-import { CommentRepository } from '@shared/domain/comment/comment.repository'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { Injectable } from '@nestjs/common'
+import { App } from '@shared/domain/app/app.entity'
 import { AppRepository } from '@shared/domain/app/app.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { getKeyForUserSpaceRole } from '../../email.helper'
-import { generateObjectCommentsLink } from '@shared/domain/email/templates/mjml/common'
-import {
-  CommentAddedContext,
-  EmailTypeToContextMap,
-} from '@shared/domain/email/dto/email-type-to-context.map'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { CommentRepository } from '@shared/domain/comment/comment.repository'
+import { CommentAddedContext, EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { generateObjectCommentsLink } from '@shared/domain/email/templates/mjml/common'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { getKeyForUserSpaceRole } from '../../email.helper'
+import { commentAddedTemplate } from '../mjml/comment-added.template'
 
 @Injectable()
 export class CommentAddedEmailHandler extends EmailHandler<EMAIL_TYPES.commentAdded> {
@@ -43,18 +40,10 @@ export class CommentAddedEmailHandler extends EmailHandler<EMAIL_TYPES.commentAd
     super(emailClient)
   }
 
-  protected async getContextualData(
-    input: ObjectIdInputDTO,
-  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.commentAdded]> {
-    const spaceEvent = await this.spaceEventRepo.findOneOrFail(
-      { id: input.id },
-      { populate: ['space'] },
-    )
+  protected async getContextualData(input: ObjectIdInputDTO): Promise<EmailTypeToContextMap[EMAIL_TYPES.commentAdded]> {
+    const spaceEvent = await this.spaceEventRepo.findOneOrFail({ id: input.id }, { populate: ['space'] })
 
-    const comment = await this.commentRepo.findOneOrFail(
-      { id: spaceEvent.entityId },
-      { populate: ['user'] },
-    )
+    const comment = await this.commentRepo.findOneOrFail({ id: spaceEvent.entityId }, { populate: ['user'] })
 
     let userFile: (UserFile & { user: LoadedReference<User> }) | undefined
     let app: (App & { user: LoadedReference<User> }) | undefined
@@ -63,24 +52,15 @@ export class CommentAddedEmailHandler extends EmailHandler<EMAIL_TYPES.commentAd
 
     switch (comment.contentObjectType) {
       case 'Node':
-        userFile = await this.userFileRepo.findOneOrFail(
-          { id: comment.contentObjectId },
-          { populate: ['user'] },
-        )
+        userFile = await this.userFileRepo.findOneOrFail({ id: comment.contentObjectId }, { populate: ['user'] })
         objectCommentsLink = generateObjectCommentsLink('files', userFile.uid)
         break
       case 'App':
-        app = await this.appRepo.findOneOrFail(
-          { id: comment.contentObjectId },
-          { populate: ['user'] },
-        )
+        app = await this.appRepo.findOneOrFail({ id: comment.contentObjectId }, { populate: ['user'] })
         objectCommentsLink = generateObjectCommentsLink('apps', app.uid)
         break
       case 'Job':
-        job = await this.jobRepo.findOneOrFail(
-          { id: comment.contentObjectId },
-          { populate: ['user'] },
-        )
+        job = await this.jobRepo.findOneOrFail({ id: comment.contentObjectId }, { populate: ['user'] })
         objectCommentsLink = generateObjectCommentsLink('jobs', job.uid)
         break
     }
@@ -104,10 +84,7 @@ export class CommentAddedEmailHandler extends EmailHandler<EMAIL_TYPES.commentAd
     await space.spaceMemberships.loadItems()
     const spaceMembership = space.spaceMemberships
       .getItems()
-      .filter(
-        (spaceMembership) =>
-          spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id,
-      )
+      .filter(spaceMembership => spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id)
 
     if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
       return [getKeyForUserSpaceRole(spaceMembership[0], 'comment_activity', space)]
@@ -120,9 +97,7 @@ export class CommentAddedEmailHandler extends EmailHandler<EMAIL_TYPES.commentAd
       { populate: ['user.notificationPreference'] },
     )
     const spaceEventCreatorId = context.spaceEvent.user.id
-    return memberships
-      .map((membership) => membership.user.getEntity())
-      .filter((user) => user.id !== spaceEventCreatorId)
+    return memberships.map(membership => membership.user.getEntity()).filter(user => user.id !== spaceEventCreatorId)
   }
 
   protected getSubject(context: CommentAddedContext): string {

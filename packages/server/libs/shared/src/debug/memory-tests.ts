@@ -1,12 +1,12 @@
 //
 // Allocate a certain size to test if it can be done.
 //
-function alloc(size: number) {
+function alloc(size: number): number[] {
   const numbers = size / 8
   const arr: number[] = []
   arr.length = numbers
   for (let i = 0; i < numbers; i++) {
-      arr[i] = i
+    arr[i] = i
   }
   return arr
 }
@@ -19,8 +19,8 @@ const allocations: unknown[] = []
 //
 // Allocate memory until hitting the heap limit.
 //
-export const testHeapMemoryAllocationError = () => {
-  console.log("Start testHeapMemoryAllocationError")
+export const testHeapMemoryAllocationError: () => void = () => {
+  console.log('Start testHeapMemoryAllocationError')
 
   const mu = process.memoryUsage()
   console.log(mu)

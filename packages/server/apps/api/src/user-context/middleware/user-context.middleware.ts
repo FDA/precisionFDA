@@ -1,5 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger, NestMiddleware } from '@nestjs/common'
+import { NextFunction, Request, Response } from 'express'
 import { config } from '@shared/config'
 import { COOKIE_SESSION_KEY, USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
 import { Session } from '@shared/domain/session/session.entity'
@@ -13,7 +14,6 @@ import { CliEncryptor, CliUserSession } from '@shared/utils/encryptors/cli-encry
 import { Encryptor, UserSession } from '@shared/utils/encryptors/encryptor'
 import { HashUtils } from '@shared/utils/hash.utils'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { NextFunction, Request, Response } from 'express'
 
 @Injectable()
 export class UserContextMiddleware implements NestMiddleware {

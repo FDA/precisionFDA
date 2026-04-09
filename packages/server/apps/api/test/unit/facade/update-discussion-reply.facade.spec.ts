@@ -1,13 +1,13 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
-import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
-import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { UpdateDiscussionReplyFacade } from 'apps/api/src/facade/discussion/update-reply.facade'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { database } from '@shared/database'
+import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
+import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 
 describe('UpdateDiscussionReplyFacade', () => {
   let updateDiscussionReplyFacade: UpdateDiscussionReplyFacade
@@ -35,11 +35,7 @@ describe('UpdateDiscussionReplyFacade', () => {
   beforeEach(() => {
     const em = database.orm().em.fork({ useContext: true }) as EntityManager<MySqlDriver>
 
-    updateDiscussionReplyFacade = new UpdateDiscussionReplyFacade(
-      em,
-      discussionService,
-      attachmentFacade,
-    )
+    updateDiscussionReplyFacade = new UpdateDiscussionReplyFacade(em, discussionService, attachmentFacade)
 
     updateReplyStub.reset()
     getDiscussionStub.reset()

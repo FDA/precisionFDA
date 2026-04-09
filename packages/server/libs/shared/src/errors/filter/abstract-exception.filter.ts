@@ -1,6 +1,6 @@
 import { ArgumentsHost, ExceptionFilter, Logger } from '@nestjs/common'
-import { ErrorCodes, UnauthorizedRequestError, ValidationError } from '@shared/errors'
 import { Response } from 'express'
+import { ErrorCodes, UnauthorizedRequestError, ValidationError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 export type ErrorPayload = {
@@ -25,7 +25,7 @@ export abstract class AbstractExceptionFilter<T> implements ExceptionFilter {
 
   catch(exception: T, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>()
-    const shouldSuppress = this.suppressedErrors.some((err) => exception instanceof err)
+    const shouldSuppress = this.suppressedErrors.some(err => exception instanceof err)
 
     if (shouldSuppress) {
       this.logger.log(exception)

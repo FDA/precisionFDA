@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common'
+import { Observable } from 'rxjs'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
 import { PfdaWebSocket } from '@shared/websocket/model/pfda-web-socket'
-import { Observable } from 'rxjs'
 
 export class UserContextTokenInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<void> {

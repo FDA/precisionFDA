@@ -4,10 +4,7 @@ import { DxIdUtils } from '@shared/utils/dxid.utils'
 import { StringUtils } from '@shared/utils/string.utils'
 
 export class UidUtils {
-  static isValidUId<T extends DXEntityType = DXEntityType>(
-    value: unknown,
-    entityType?: T,
-  ): value is Uid<T> {
+  static isValidUId<T extends DXEntityType = DXEntityType>(value: unknown, entityType?: T): value is Uid<T> {
     if (typeof value !== 'string') {
       return false
     }

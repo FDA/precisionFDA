@@ -1,4 +1,8 @@
+import crypto from 'node:crypto'
 import { EntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { useFakeTimers } from 'sinon'
+import supertest from 'supertest'
 import { config } from '@shared/config'
 import { COOKIE_SESSION_KEY, USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
 import { database } from '@shared/database'
@@ -7,10 +11,6 @@ import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
 import { CSRFUtils } from '@shared/utils/csrf.utils'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { expect } from 'chai'
-import crypto from 'node:crypto'
-import { useFakeTimers } from 'sinon'
-import supertest from 'supertest'
 import { testedApp } from '..'
 import { getCookieTokenString, getDefaultHeaderData } from '../utils/expect-helper'
 
@@ -30,10 +30,7 @@ describe('Send request', () => {
     })
 
     it('should return 200 if sending a valid unauthorized cookie', async () => {
-      await supertest(testedApp.getHttpServer())
-        .get('/experts')
-        .set(getDefaultHeaderData())
-        .expect(200)
+      await supertest(testedApp.getHttpServer()).get('/experts').set(getDefaultHeaderData()).expect(200)
     })
 
     it('should return 200 if sending a valid authorized cookie', async () => {
@@ -52,9 +49,7 @@ describe('Send request', () => {
 
   context('to a guarded route', () => {
     it('should return 401 if sending empty header', async () => {
-      const { body } = await supertest(testedApp.getHttpServer())
-        .get('/reports?scope=private')
-        .expect(401)
+      const { body } = await supertest(testedApp.getHttpServer()).get('/reports?scope=private').expect(401)
       expect(body.error).to.have.property('code', ErrorCodes.UNAUTHORIZED_REQUEST)
     })
 
@@ -87,12 +82,12 @@ describe('Send request', () => {
           cookie: getCookieTokenString(user),
         })
         .expect(200)
-        .expect((res) => {
+        .expect(res => {
           const cookies = Array.from(res.headers['set-cookie'])
           if (!cookies) throw new Error('No Set-Cookie header found')
 
-          expect(cookies.find((s) => s.includes('sessionExpiredAt'))).to.be.a('string')
-          expect(cookies.find((s) => s.includes(COOKIE_SESSION_KEY))).to.be.a('string')
+          expect(cookies.find(s => s.includes('sessionExpiredAt'))).to.be.a('string')
+          expect(cookies.find(s => s.includes(COOKIE_SESSION_KEY))).to.be.a('string')
         })
     })
 

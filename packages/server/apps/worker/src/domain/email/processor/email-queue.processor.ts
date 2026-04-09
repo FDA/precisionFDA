@@ -1,9 +1,9 @@
 import { Processor } from '@nestjs/bull'
-import { config } from '@shared/config'
-import { TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
-import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
+import { config } from '@shared/config'
 import { EmailSendService } from '@shared/domain/email/email-send.service'
+import { TASK_TYPE } from '@shared/queue/task.input'
+import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 
 @Processor(config.workerJobs.queues.emails.name)
 export class EmailQueueProcessor {

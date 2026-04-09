@@ -1,15 +1,15 @@
+import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { CreateDiscussionFacade } from 'apps/api/src/facade/discussion/create-discussion.facade'
+import { expect } from 'chai'
 import { stub } from 'sinon'
+import { database } from '@shared/database'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { EntityScope } from '@shared/types/common'
-import { expect } from 'chai'
-import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { database } from '@shared/database'
-import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 
 describe('CreateDiscussionFacade', () => {
   let createDiscussionFacade: CreateDiscussionFacade
@@ -26,7 +26,7 @@ describe('CreateDiscussionFacade', () => {
   const createDiscussionStub = stub()
   const getDiscussionStub = stub()
   const createAttachmentsStub = stub()
-  const getAccessibleSpaceStub = stub()
+  const getAccessibleByIdStub = stub()
   const createNewDiscussionNotificationTaskStub = stub()
 
   const discussionService = {
@@ -37,7 +37,7 @@ describe('CreateDiscussionFacade', () => {
     createAttachments: createAttachmentsStub,
   } as unknown as AttachmentManagementFacade
   const spaceService = {
-    getAccessibleSpace: getAccessibleSpaceStub,
+    getAccessibleById: getAccessibleByIdStub,
   } as unknown as SpaceService
   const mainQueueJobProducer = {
     createNewDiscussionNotificationTask: createNewDiscussionNotificationTaskStub,
@@ -57,7 +57,7 @@ describe('CreateDiscussionFacade', () => {
     createDiscussionStub.reset()
     getDiscussionStub.reset()
     createAttachmentsStub.reset()
-    getAccessibleSpaceStub.reset()
+    getAccessibleByIdStub.reset()
     createNewDiscussionNotificationTaskStub.reset()
   })
 
@@ -108,7 +108,7 @@ describe('CreateDiscussionFacade', () => {
       noteId: 1,
     } as unknown as DiscussionDTO
 
-    getAccessibleSpaceStub.returns({
+    getAccessibleByIdStub.returns({
       id: 1,
       type: SPACE_TYPE.GROUPS,
     })
@@ -135,15 +135,13 @@ describe('CreateDiscussionFacade', () => {
       notify: [],
     }
 
-    getAccessibleSpaceStub.returns(null)
+    getAccessibleByIdStub.returns(null)
 
     try {
       await createDiscussionFacade.createDiscussion(dto)
     } catch (error) {
       expect(error).to.be.instanceOf(Error)
-      expect(error.message).to.equal(
-        'Unable to create discussion: insufficient permissions to access the space.',
-      )
+      expect(error.message).to.equal('Unable to create discussion: insufficient permissions to access the space.')
     }
   })
 
@@ -156,7 +154,7 @@ describe('CreateDiscussionFacade', () => {
       notify: [],
     }
 
-    getAccessibleSpaceStub.returns({
+    getAccessibleByIdStub.returns({
       id: 1,
       type: SPACE_TYPE.REVIEW,
       meta: { restricted_discussions: true },
@@ -166,9 +164,7 @@ describe('CreateDiscussionFacade', () => {
       await createDiscussionFacade.createDiscussion(dto)
     } catch (error) {
       expect(error).to.be.instanceOf(Error)
-      expect(error.message).to.equal(
-        'Unable to create discussion: the space has restricted discussions.',
-      )
+      expect(error.message).to.equal('Unable to create discussion: the space has restricted discussions.')
     }
   })
 
@@ -181,7 +177,7 @@ describe('CreateDiscussionFacade', () => {
       notify: [],
     }
 
-    getAccessibleSpaceStub.returns({
+    getAccessibleByIdStub.returns({
       id: 1,
       type: SPACE_TYPE.PRIVATE_TYPE,
     })
@@ -190,9 +186,7 @@ describe('CreateDiscussionFacade', () => {
       await createDiscussionFacade.createDiscussion(dto)
     } catch (error) {
       expect(error).to.be.instanceOf(Error)
-      expect(error.message).to.equal(
-        'Unable to create discussion: the space has restricted discussions.',
-      )
+      expect(error.message).to.equal('Unable to create discussion: the space has restricted discussions.')
     }
   })
 })

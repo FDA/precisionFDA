@@ -1,17 +1,17 @@
 import { Reference } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { createClient } from 'redis'
+import sinon from 'sinon'
 import { database } from '@shared/database'
 import { Notification } from '@shared/domain/notification/notification.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
 import { NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
 import { create, db } from '@shared/test'
-import { expect } from 'chai'
-import { createClient } from 'redis'
-import sinon from 'sinon'
 
 describe('Notification service tests', () => {
   let em: EntityManager<MySqlDriver>

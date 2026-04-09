@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { InvalidStateError } from '@shared/errors'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { AttachmentRetrieveFacade } from '@shared/facade/discussion/attachment-retrieve.facade'
@@ -27,11 +27,7 @@ export class CliUpdateDiscussionReplyFacade {
     return await this.handleReplyUpdate(replyId, dto, type)
   }
 
-  private async handleReplyUpdate(
-    replyId: number,
-    dto: CliEditReplyDTO,
-    type: DISCUSSION_REPLY_TYPE,
-  ): Promise<string> {
+  private async handleReplyUpdate(replyId: number, dto: CliEditReplyDTO, type: DISCUSSION_REPLY_TYPE): Promise<string> {
     const reply = await this.discussionService.getDiscussionReply(replyId)
 
     let attachments: AttachmentsDTO = {
@@ -46,12 +42,12 @@ export class CliUpdateDiscussionReplyFacade {
       const newAttachments = await this.attachmentFacade.transformCliAttachments(dto.attachments)
       const existingAttachments = await this.attachmentRetrieveFacade.getAttachments(reply.noteId)
       attachments = {
-        files: existingAttachments.filter((a) => a.type === 'UserFile').map((a) => a.id),
-        folders: existingAttachments.filter((a) => a.type === 'Folder').map((a) => a.id),
-        assets: existingAttachments.filter((a) => a.type === 'Asset').map((a) => a.id),
-        apps: existingAttachments.filter((a) => a.type === 'App').map((a) => a.id),
-        jobs: existingAttachments.filter((a) => a.type === 'Job').map((a) => a.id),
-        comparisons: existingAttachments.filter((a) => a.type === 'Comparison').map((a) => a.id),
+        files: existingAttachments.filter(a => a.type === 'UserFile').map(a => a.id),
+        folders: existingAttachments.filter(a => a.type === 'Folder').map(a => a.id),
+        assets: existingAttachments.filter(a => a.type === 'Asset').map(a => a.id),
+        apps: existingAttachments.filter(a => a.type === 'App').map(a => a.id),
+        jobs: existingAttachments.filter(a => a.type === 'Job').map(a => a.id),
+        comparisons: existingAttachments.filter(a => a.type === 'Comparison').map(a => a.id),
       }
 
       attachments.files.push(...newAttachments.files)

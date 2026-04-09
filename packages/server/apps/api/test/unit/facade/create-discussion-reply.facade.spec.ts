@@ -1,14 +1,14 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
-import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
-import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
-import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { CreateDiscussionReplyFacade } from 'apps/api/src/facade/discussion/create-discussion-reply.facade'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { database } from '@shared/database'
+import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
+import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
+import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 
 describe('CreateDiscussionReplyFacade', () => {
   let createDiscussionReplyFacade: CreateDiscussionReplyFacade

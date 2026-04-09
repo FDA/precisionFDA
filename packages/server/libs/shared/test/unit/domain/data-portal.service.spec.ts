@@ -1,5 +1,7 @@
 import { UniqueConstraintViolationException } from '@mikro-orm/core'
 import type { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { database } from '@shared/database'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { DATA_PORTAL_MEMBER_ROLE } from '@shared/domain/data-portal/data-portal.enum'
@@ -11,23 +13,15 @@ import { FileParam } from '@shared/domain/data-portal/service/data-portal.types'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { DataPortalUrlSlugFormatError, NotFoundError, PermissionError } from '@shared/errors'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import type { PlatformClient } from '@shared/platform-client'
-import type {
-  ClassIdResponse,
-  FileDownloadLinkResponse,
-} from '@shared/platform-client/platform-client.responses'
-import { expect } from 'chai'
-import { stub } from 'sinon'
+import type { ClassIdResponse, FileDownloadLinkResponse } from '@shared/platform-client/platform-client.responses'
 import { create, db } from '../../../src/test'
 import * as generate from '../../../src/test/generate'
 
@@ -133,18 +127,14 @@ describe('DataPortalService', () => {
     urlSlug: string,
     role: SPACE_MEMBERSHIP_ROLE,
     isSiteAdminUser: boolean = false,
-  ): Promise<{ userId: number, portalId: number }> => {
+  ): Promise<{ userId: number; portalId: number }> => {
     const space = create.spacesHelper.create(em, { name: portalName })
     const internalUser = isSiteAdminUser
       ? create.userHelper.createSiteAdmin(em)
       : create.userHelper.create(em, { dxuser: generate.random.chance.name() })
     await em.flush()
 
-    const portal = create.dataPortalsHelper.create(
-      em,
-      { space },
-      { name: portalName, urlSlug: urlSlug },
-    )
+    const portal = create.dataPortalsHelper.create(em, { space }, { name: portalName, urlSlug: urlSlug })
     await em.flush()
     create.spacesHelper.addMember(
       em,
@@ -219,11 +209,7 @@ describe('DataPortalService', () => {
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
     create.spacesHelper.addMember(em, { user, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
-    const dataPortal = create.dataPortalsHelper.create(
-      em,
-      { space },
-      { name: 'portal-name', urlSlug: 'portalname' },
-    )
+    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name', urlSlug: 'portalname' })
     await em.flush()
 
     await dataPortalService.createResource(
@@ -234,11 +220,7 @@ describe('DataPortalService', () => {
       dataPortal.id.toString(),
     )
     em.clear()
-    return await em.findOneOrFail(
-      DataPortal,
-      { id: dataPortal.id },
-      { populate: ['space', 'resources.userFile'] },
-    )
+    return await em.findOneOrFail(DataPortal, { id: dataPortal.id }, { populate: ['space', 'resources.userFile'] })
   }
 
   describe('#create', () => {
@@ -261,11 +243,7 @@ describe('DataPortalService', () => {
       const portal = await dataPortalService.create(input, space.id)
       em.clear()
 
-      const loadedDataPortal = await em.findOneOrFail(
-        DataPortal,
-        { id: portal.id },
-        { populate: ['space'] },
-      )
+      const loadedDataPortal = await em.findOneOrFail(DataPortal, { id: portal.id }, { populate: ['space'] })
       expect(loadedDataPortal.name).eq('test-data-portal')
       expect(loadedDataPortal.description).eq('description')
       expect(loadedDataPortal.sortOrder).eq(1)
@@ -341,42 +319,26 @@ describe('DataPortalService', () => {
       } as CreateDataPortalDTO
 
       // Null url slug
-      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(
-        DataPortalUrlSlugFormatError,
-      )
+      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
 
       // Digits only url slug
       input.urlSlug = '42'
-      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(
-        DataPortalUrlSlugFormatError,
-      )
+      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
 
       // Special chars in url slug
       input.urlSlug = 'abc$'
-      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(
-        DataPortalUrlSlugFormatError,
-      )
+      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
 
       // Uppercase chars in url slug
       input.urlSlug = 'abc-D'
-      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(
-        DataPortalUrlSlugFormatError,
-      )
+      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
     })
 
     it('duplicate url slug', async () => {
       const spaceA = create.spacesHelper.create(em, { name: 'SpaceA' })
       const spaceB = create.spacesHelper.create(em, { name: 'SpaceB' })
-      create.dataPortalsHelper.create(
-        em,
-        { space: spaceA },
-        { name: 'Portal A', urlSlug: 'same_url_slug' },
-      )
-      create.dataPortalsHelper.create(
-        em,
-        { space: spaceB },
-        { name: 'Portal B', urlSlug: 'same_url_slug' },
-      )
+      create.dataPortalsHelper.create(em, { space: spaceA }, { name: 'Portal A', urlSlug: 'same_url_slug' })
+      create.dataPortalsHelper.create(em, { space: spaceB }, { name: 'Portal B', urlSlug: 'same_url_slug' })
       await expect(em.flush()).to.be.rejectedWith(UniqueConstraintViolationException)
     })
 
@@ -385,19 +347,11 @@ describe('DataPortalService', () => {
       const urlSlug = 'portal-url-slug'
 
       // THE portal
-      const { userId, portalId } = await createPortalAndAddMember(
-        portalName,
-        urlSlug,
-        SPACE_MEMBERSHIP_ROLE.VIEWER,
-      )
+      const { userId, portalId } = await createPortalAndAddMember(portalName, urlSlug, SPACE_MEMBERSHIP_ROLE.VIEWER)
 
       // Some random portals to fill the DB
       for (let i = 0; i < 10; i++) {
-        await createPortalAndAddMember(
-          `portal-${randomSuffix()}-${i}`,
-          `slug_${i}`,
-          SPACE_MEMBERSHIP_ROLE.VIEWER,
-        )
+        await createPortalAndAddMember(`portal-${randomSuffix()}-${i}`, `slug_${i}`, SPACE_MEMBERSHIP_ROLE.VIEWER)
       }
 
       dataPortalService = createDataPortalService(userId)
@@ -626,8 +580,8 @@ describe('DataPortalService', () => {
       portal.space
         .getEntity()
         .spaceMemberships.getItems()
-        .filter((membership) => membership.user.id == user.id)
-        .forEach((membership) => (membership.active = false))
+        .filter(membership => membership.user.id == user.id)
+        .forEach(membership => (membership.active = false))
       await em.flush()
 
       await expect(dataPortalService.get(portal.id)).to.be.rejectedWith(
@@ -638,21 +592,13 @@ describe('DataPortalService', () => {
 
     it('fail with lack of privileges', async () => {
       const uniq = Math.floor(Math.random() * 1_000_000_000)
-      const viewer = await createPortalAndAddMember(
-        'portal1',
-        `portal1-${uniq}`,
-        SPACE_MEMBERSHIP_ROLE.VIEWER,
-      )
+      const viewer = await createPortalAndAddMember('portal1', `portal1-${uniq}`, SPACE_MEMBERSHIP_ROLE.VIEWER)
       const contributor = await createPortalAndAddMember(
         'portal2',
         `portal2-${uniq}`,
         SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
       )
-      const admin = await createPortalAndAddMember(
-        'portal3',
-        `portal3-${uniq}`,
-        SPACE_MEMBERSHIP_ROLE.ADMIN,
-      )
+      const admin = await createPortalAndAddMember('portal3', `portal3-${uniq}`, SPACE_MEMBERSHIP_ROLE.ADMIN)
       const lead = await createPortalAndAddMember('portal4', `portal4-${uniq}`, SPACE_MEMBERSHIP_ROLE.LEAD)
 
       // following should be fine
@@ -672,9 +618,7 @@ describe('DataPortalService', () => {
       } catch (error: unknown) {
         if (error instanceof Error) {
           expect(error.name).to.equal('PermissionError')
-          expect(error.message).to.equal(
-            'Only members of the corresponding space can access this portal',
-          )
+          expect(error.message).to.equal('Only members of the corresponding space can access this portal')
         } else {
           expect.fail('Unexpected error type')
         }
@@ -725,28 +669,15 @@ describe('DataPortalService', () => {
 
     it('filter by user roles', async () => {
       const uniq = Math.floor(Math.random() * 1_000_000_000)
-      const viewer = await createPortalAndAddMember(
-        'portal1',
-        `portal1-${uniq}`,
-        SPACE_MEMBERSHIP_ROLE.VIEWER,
-      )
+      const viewer = await createPortalAndAddMember('portal1', `portal1-${uniq}`, SPACE_MEMBERSHIP_ROLE.VIEWER)
       const contributor = await createPortalAndAddMember(
         'portal2',
         `portal2-${uniq}`,
         SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
       )
-      const admin = await createPortalAndAddMember(
-        'portal3',
-        `portal3-${uniq}`,
-        SPACE_MEMBERSHIP_ROLE.ADMIN,
-      )
+      const admin = await createPortalAndAddMember('portal3', `portal3-${uniq}`, SPACE_MEMBERSHIP_ROLE.ADMIN)
       const lead = await createPortalAndAddMember('portal4', `portal4-${uniq}`, SPACE_MEMBERSHIP_ROLE.LEAD)
-      const siteAdmin = await createPortalAndAddMember(
-        'portal5',
-        `portal5-${uniq}`,
-        SPACE_MEMBERSHIP_ROLE.ADMIN,
-        true,
-      )
+      const siteAdmin = await createPortalAndAddMember('portal5', `portal5-${uniq}`, SPACE_MEMBERSHIP_ROLE.ADMIN, true)
       const nocoiner = create.userHelper.create(em, { dxuser: 'has nothing' })
 
       dataPortalService = createDataPortalService(viewer.userId)
@@ -818,18 +749,11 @@ describe('DataPortalService', () => {
     it('fail with lack of privileges', async () => {
       const space = create.spacesHelper.create(em, { name: 'space-name' })
       await em.flush()
-      const dataPortal = create.dataPortalsHelper.create(
-        em,
-        { space },
-        { name: 'portal-name', urlSlug: 'portalname' },
-      )
+      const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name', urlSlug: 'portalname' })
       await em.flush()
 
       try {
-        await dataPortalService.createResource(
-          { name: 'test' } as FileParam,
-          dataPortal.id.toString(),
-        )
+        await dataPortalService.createResource({ name: 'test' } as FileParam, dataPortal.id.toString())
         expect.fail('Operation is expected to fail')
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -887,11 +811,7 @@ describe('DataPortalService', () => {
       const space = create.spacesHelper.create(em, { name: 'space-name' })
       await em.flush()
       create.spacesHelper.addMember(em, { user, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
-      const dataPortal = create.dataPortalsHelper.create(
-        em,
-        { space },
-        { name: 'portal-name', urlSlug: 'portalname' },
-      )
+      const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name', urlSlug: 'portalname' })
       await em.flush()
       create.dataPortalsHelper.addResource(em, { user, dataPortal }, 'name1', 'dxid1')
       create.dataPortalsHelper.addResource(em, { user, dataPortal }, 'name2', 'dxid2')

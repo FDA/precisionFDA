@@ -1,16 +1,16 @@
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Injectable, Logger } from '@nestjs/common'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Node } from '@shared/domain/user-file/node.entity'
-import { FILE_STATE_DX, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
-import { PermissionError } from '@shared/errors'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
+import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
+import { FILE_STATE_DX, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { PermissionError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class UnlockNodeFacade {
@@ -74,7 +74,7 @@ export class UnlockNodeFacade {
 
   private async rollbackUnlockingState(nodes: Node[]): Promise<void> {
     this.logger.error(`Rolling back unlocking state for ${nodes.length} nodes`)
-    nodes.forEach((node) => {
+    nodes.forEach(node => {
       node.locked = true
       node.state = FILE_STATE_DX.CLOSED
     })

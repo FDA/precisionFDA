@@ -1,12 +1,12 @@
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { PlatformClient } from '@shared/platform-client'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { PlatformClient } from '@shared/platform-client'
 import { GetUploadURLResponse } from '@shared/platform-client/platform-client.responses'
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 @Injectable()
 export class UrlFetchService {
@@ -20,15 +20,8 @@ export class UrlFetchService {
     private readonly challengeBotPlatformClient: PlatformClient,
   ) {}
 
-  async getUploadUrl(
-    fileUid: Uid<'file'>,
-    index: number,
-    md5: string,
-    size: number,
-  ): Promise<GetUploadURLResponse> {
-    this.logger.log(
-      `Generating upload URL for fileUid: ${fileUid}, index: ${index}, md5: ${md5}, size: ${size}`,
-    )
+  async getUploadUrl(fileUid: Uid<'file'>, index: number, md5: string, size: number): Promise<GetUploadURLResponse> {
+    this.logger.log(`Generating upload URL for fileUid: ${fileUid}, index: ${index}, md5: ${md5}, size: ${size}`)
     const targetClient = await this.getTargetClient(fileUid)
 
     const fileDxid = fileUid.replace(/-(\d+)$/, '')
@@ -38,9 +31,7 @@ export class UrlFetchService {
       md5,
       size,
     })
-    this.logger.log(
-      `Generated upload URL for fileDxId: ${fileDxid}${JSON.stringify(uploadUrlResponse)}`,
-    )
+    this.logger.log(`Generated upload URL for fileDxId: ${fileDxid}${JSON.stringify(uploadUrlResponse)}`)
     return uploadUrlResponse
   }
 

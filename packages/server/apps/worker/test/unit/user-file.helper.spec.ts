@@ -1,14 +1,16 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { create, db } from '@shared/test'
+import { database } from '@shared/database'
+import { User } from '@shared/domain/user/user.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
 import {
-  splitFolderPath,
   detectIntersectedTraverse,
-  findFolderForPath, folderPathsFromFolders, parseFoldersFromClient,
+  findFolderForPath,
+  folderPathsFromFolders,
+  parseFoldersFromClient,
+  splitFolderPath,
 } from '@shared/domain/user-file/user-file.helper'
+import { create, db } from '@shared/test'
 
 describe('user-file.helper', () => {
   context('parseFoldersFromClient()', () => {
@@ -16,11 +18,7 @@ describe('user-file.helper', () => {
       const input = ['/', '/platform-folder', '/.Notebook_snapshots', '/platform-folder/subfolder']
       const result = parseFoldersFromClient(input)
       expect(result).to.be.an('array').with.lengthOf(3)
-      expect(result).to.have.ordered.members([
-        '/.Notebook_snapshots',
-        '/platform-folder',
-        '/platform-folder/subfolder',
-      ])
+      expect(result).to.have.ordered.members(['/.Notebook_snapshots', '/platform-folder', '/platform-folder/subfolder'])
     })
 
     it('should sort folders structure correctly', () => {
@@ -146,47 +144,23 @@ describe('user-file.helper', () => {
 
       const fooFolder = create.filesHelper.createFolder(em, { user }, { name: 'foo' })
       await em.flush()
-      const barFolder = create.filesHelper.createFolder(
-        em,
-        { user, parentFolder: fooFolder },
-        { name: 'bar' },
-      )
+      const barFolder = create.filesHelper.createFolder(em, { user, parentFolder: fooFolder }, { name: 'bar' })
       await em.flush()
-      const stuFolder = create.filesHelper.createFolder(
-        em,
-        { user, parentFolder: barFolder },
-        { name: 'stu' },
-      )
+      const stuFolder = create.filesHelper.createFolder(em, { user, parentFolder: barFolder }, { name: 'stu' })
       await em.flush()
       const parentFolder = create.filesHelper.createFolder(em, { user }, { name: 'parent-folder' })
       await em.flush()
-      const subfolder = create.filesHelper.createFolder(
-        em,
-        { user, parentFolder },
-        { name: 'sub-folder' },
-      )
+      const subfolder = create.filesHelper.createFolder(em, { user, parentFolder }, { name: 'sub-folder' })
       await em.flush()
       const subsubfolder = create.filesHelper.createFolder(
         em,
         { user, parentFolder: subfolder },
         { name: 'sub-sub-folder' },
       )
-      const subfolder2 = create.filesHelper.createFolder(
-        em,
-        { user, parentFolder },
-        { name: 'sub-folder2' },
-      )
+      const subfolder2 = create.filesHelper.createFolder(em, { user, parentFolder }, { name: 'sub-folder2' })
       await em.flush()
 
-      const folders = [
-        fooFolder,
-        barFolder,
-        stuFolder,
-        parentFolder,
-        subfolder,
-        subsubfolder,
-        subfolder2,
-      ]
+      const folders = [fooFolder, barFolder, stuFolder, parentFolder, subfolder, subsubfolder, subfolder2]
 
       folderPaths.forEach((folderPath: string) => {
         const folderPathComponents = splitFolderPath(folderPath)
@@ -220,22 +194,14 @@ describe('user-file.helper', () => {
     it('should return a list of existing folders to keep', async () => {
       const parentFolder = create.filesHelper.createFolder(em, { user }, { name: 'parent-folder' })
       await em.flush()
-      const subfolder = create.filesHelper.createFolder(
-        em,
-        { user, parentFolder },
-        { name: 'sub-folder' },
-      )
+      const subfolder = create.filesHelper.createFolder(em, { user, parentFolder }, { name: 'sub-folder' })
       await em.flush()
       const subsubfolder = create.filesHelper.createFolder(
         em,
         { user, parentFolder: subfolder },
         { name: 'sub-sub-folder' },
       )
-      create.filesHelper.createFolder(
-        em,
-        { user, parentFolder },
-        { name: 'sub-folder2' },
-      )
+      create.filesHelper.createFolder(em, { user, parentFolder }, { name: 'sub-folder2' })
       await em.flush()
 
       const folders = [parentFolder, subfolder, subsubfolder]

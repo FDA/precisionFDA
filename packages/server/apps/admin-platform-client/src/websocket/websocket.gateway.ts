@@ -7,10 +7,10 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets'
+import WebSocket from 'ws'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
-import WebSocket from 'ws'
 
 @WebSocketGateway()
 export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayConnection {
@@ -19,7 +19,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayConnectio
 
   constructor(private readonly platformClient: PlatformClient) {}
 
-  async handleConnection(client: WebSocket) {
+  async handleConnection(client: WebSocket): Promise<void> {
     try {
       this.logger.log(`Client connected to admin-platform-client: ${client}`)
     } catch (e) {
@@ -29,7 +29,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayConnectio
     }
   }
 
-  handleDisconnect(client: WebSocket) {
+  handleDisconnect(client: WebSocket): void {
     try {
       this.logger.log(`Client disconnected to admin-platform-client: ${client}`)
       client.close()
@@ -39,15 +39,12 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayConnectio
   }
 
   @SubscribeMessage('getLog')
-  async fetchJobLog(
-    @ConnectedSocket() client: WebSocket,
-    @MessageBody() data: { jobDxId: Uid<'job'> },
-  ) {
+  async fetchJobLog(@ConnectedSocket() client: WebSocket, @MessageBody() data: { jobDxId: Uid<'job'> }): Promise<void> {
     try {
       const jobDxId = data.jobDxId
 
       const ws = this.platformClient.streamJobLogs(jobDxId)
-      ws.on('message', (data) => {
+      ws.on('message', data => {
         client.send(data)
       })
       ws.on('close', () => {

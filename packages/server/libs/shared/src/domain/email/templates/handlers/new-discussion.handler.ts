@@ -1,17 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
 import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
-import {
-  DiscussionContext,
-  EmailTypeToContextMap,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { DiscussionContext, EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { newDiscussionTemplate } from '@shared/domain/email/templates/mjml/new-discussion.template'
 import { EntityService } from '@shared/domain/entity/entity.service'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { EmailClient } from '@shared/services/email-client'
@@ -73,15 +70,13 @@ export class NewDiscussionHandler extends EmailHandler<EMAIL_TYPES.newDiscussion
     }
   }
 
-  protected async determineReceivers(
-    context: EmailTypeToContextMap[EMAIL_TYPES.newDiscussion],
-  ): Promise<User[]> {
+  protected async determineReceivers(context: EmailTypeToContextMap[EMAIL_TYPES.newDiscussion]): Promise<User[]> {
     if (context.input.notify === 'all') {
       const spaceMemberships = await this.spaceMembershipRepo.find(
         { spaces: context.space.id, active: true },
         { populate: ['user'] },
       )
-      return spaceMemberships.map((spaceMembership) => spaceMembership.user.getEntity())
+      return spaceMemberships.map(spaceMembership => spaceMembership.user.getEntity())
     }
 
     if (context.input.notify === 'author') {

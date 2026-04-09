@@ -1,8 +1,8 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { SearchResultChallengeMapper } from '@shared/facade/search/result-mapper/search-result-challenge-mapper'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SearchResultChallengeMapper', () => {
   const NAME = 'NAME'

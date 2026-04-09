@@ -1,14 +1,16 @@
+import crypto from 'node:crypto'
+import { JobInformation } from 'bull'
+import Chance from 'chance'
+import { DateTime } from 'luxon'
+import { customAlphabet } from 'nanoid'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { Comment } from '@shared/domain/comment/comment.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import {
-  ExpertQuestion,
-  ExpertQuestionState,
-} from '@shared/domain/expert-question/entity/expert-question.entity'
-import { Expert, EXPERT_STATE } from '@shared/domain/expert/entity/expert.entity'
+import { EXPERT_STATE, Expert } from '@shared/domain/expert/entity/expert.entity'
+import { ExpertQuestion, ExpertQuestionState } from '@shared/domain/expert-question/entity/expert-question.entity'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { Job } from '@shared/domain/job/job.entity'
@@ -16,29 +18,24 @@ import { JobRunData } from '@shared/domain/job/job.types'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { Note } from '@shared/domain/note/note.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Space } from '@shared/domain/space/space.entity'
 import { Tag } from '@shared/domain/tag/tag.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { UserExtras } from '@shared/domain/user/user-extras'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { UserExtras } from '@shared/domain/user/user-extras'
-import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import { JobInformation } from 'bull'
-import Chance from 'chance'
-import crypto from 'node:crypto'
-import { DateTime } from 'luxon'
-import { customAlphabet } from 'nanoid'
 import { App, AppSpec, Internal } from '../domain/app/app.entity'
 import { ENTITY_TYPE } from '../domain/app/app.enum'
 import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
-import { Comparison, COMPARISON_STATE } from '../domain/comparison/comparison.entity'
+import { COMPARISON_STATE, Comparison } from '../domain/comparison/comparison.entity'
 import {
   ENGINE as DB_CLUSTER_ENGINE,
   STATUS as DB_CLUSTER_STATUS,
@@ -51,21 +48,27 @@ import {
   ENTITY_TYPE as SPACE_EVENT_ENTITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '../domain/space-event/space-event.enum'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '../domain/space-membership/space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import { PRICING_MAP, USER_STATE, User } from '../domain/user/user.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE, PARENT_TYPE } from '../domain/user-file/user-file.types'
-import { PRICING_MAP, User, USER_STATE } from '../domain/user/user.entity'
 import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
 
-const chance = new Chance()
+const chance: Chance.Chance = new Chance()
 
-const nanoidDxstr = customAlphabet('abcdefghijklmnopqrstuvwxyz', 10)
+const nanoidDxstr: (size?: number) => string = customAlphabet('abcdefghijklmnopqrstuvwxyz', 10)
 
-const random = {
+const random: {
+  firstName: () => string
+  lastName: () => string
+  email: () => string
+  password: () => string
+  dxstr: () => string
+  word: () => string
+  description: () => string
+  chance: Chance.Chance
+} = {
   firstName: (): string => chance.first(),
   lastName: (): string => chance.last(),
   email: (): string => chance.email(),
@@ -126,8 +129,7 @@ const alert = {
     endTime.setDate(now.getDate() + 2)
     return {
       title: 'Planned Downtime',
-      content:
-        'Our application will soon be offline for upgrades. Please ensure your work is saved. Thank you.',
+      content: 'Our application will soon be offline for upgrades. Please ensure your work is saved. Thank you.',
       type: 'danger' as 'danger' | 'info' | 'warning',
       startTime: startTime,
       endTime: endTime,
@@ -168,8 +170,7 @@ const alert = {
     endTime.setDate(now.getDate() + 4)
     return {
       title: 'System Update',
-      content:
-        'An exciting system update is on the way, bringing new features. Minimal downtime expected.',
+      content: 'An exciting system update is on the way, bringing new features. Minimal downtime expected.',
       type: 'info' as 'danger' | 'info' | 'warning',
       startTime: startTime,
       endTime: endTime,
@@ -531,10 +532,7 @@ const userFile = {
       stiType: FILE_STI_TYPE.USERFILE,
     }
   },
-  simpleComparisonOutput: (
-    comparisonId: number,
-    customDxid?: string,
-  ): Partial<InstanceType<typeof UserFile>> => {
+  simpleComparisonOutput: (comparisonId: number, customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
     const dxid = (customDxid ?? `file-${random.dxstr()}`) as DxId<'file'>
     return {
       dxid,
@@ -850,7 +848,7 @@ const bullQueueRepeatable = {
   }),
   // In orphaned cases the 'next' timestamp (in milliseconds) has passed and
   // they sit idle in BullQueue
-  syncJobStatusOrphaned: (jobDxid): JobInformation => ({
+  syncJobStatusOrphaned: (jobDxid: string): JobInformation => ({
     key: `__default__:${JobSynchronizationService.getBullJobId(jobDxid)}:::*/2 * * * *`,
     name: '__default__',
     id: JobSynchronizationService.getBullJobId(jobDxid),

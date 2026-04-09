@@ -5,7 +5,7 @@ import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { UserService } from '@shared/domain/user/service/user.service'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
+import { USER_STATE, User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { PlatformClient } from '@shared/platform-client'
 

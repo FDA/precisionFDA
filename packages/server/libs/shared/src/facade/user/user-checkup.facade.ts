@@ -1,11 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
+import { Job } from 'bull'
 import { config } from '@shared/config'
 import { CheckUserDbClustersOperation } from '@shared/domain/db-cluster/ops/check-user-dbs'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { findUnclosedFilesOrAssets } from '@shared/domain/user-file/user-file.helper'
-import { User } from '@shared/domain/user/user.entity'
 import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { findRepeatable, getMainQueue, removeRepeatableJob } from '@shared/queue'
@@ -13,7 +14,6 @@ import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.prod
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 import { isJobOrphaned } from '@shared/queue/queue.utils'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
-import { Job } from 'bull'
 
 // Check jobs for a given user, to be run when user logs in to clean up
 // old states that are stuck because sync jobs are missing.

@@ -1,7 +1,7 @@
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator'
 import { AppInputSpecItem, AppSpecItem } from '@shared/domain/app/app.input'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityScope } from '@shared/types/common'
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator'
 
 export class SaveAppDTO {
   @IsBoolean()

@@ -2,11 +2,11 @@ import { MikroORM } from '@mikro-orm/core'
 import { MySqlDriver } from '@mikro-orm/mysql'
 import { INestApplication, INestApplicationContext } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { Logger } from 'nestjs-pino'
 import { database } from '@shared/database'
 import { createQueues } from '@shared/queue'
 import { QueueModule } from '@shared/queue/queue.module'
 import { QueueProxy } from '@shared/queue/queue.proxy'
-import { Logger } from 'nestjs-pino'
 
 export async function setupNestApp(app: INestApplicationContext) {
   app.enableShutdownHooks()

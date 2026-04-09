@@ -1,19 +1,16 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { database } from '@shared/database'
 import { Answer } from '@shared/domain/answer/answer.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { create, db, generate } from '@shared/test'
-import { expect } from 'chai'
-import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -352,11 +349,7 @@ describe('/discussions', async () => {
 
   it('should get the list of discussions in the space', async () => {
     const groupSpace = create.spacesHelper.create(em, generate.space.group())
-    create.spacesHelper.addMember(
-      em,
-      { user, space: groupSpace },
-      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
-    )
+    create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
     await em.flush()
     const discussion1 = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
     await em.flush()
@@ -370,7 +363,7 @@ describe('/discussions', async () => {
       .expect(200)
 
     expect(body.data).to.be.an('array').of.length(2)
-    expect(body.data.map((d) => d.id)).to.have.members([discussion1.id, discussion2.id])
+    expect(body.data.map(d => d.id)).to.have.members([discussion1.id, discussion2.id])
   })
 
   it('should get the list of public discussions', async () => {
@@ -389,6 +382,6 @@ describe('/discussions', async () => {
       .expect(200)
 
     expect(body.data).to.be.an('array').of.length(2)
-    expect(body.data.map((d) => d.id)).to.have.members([discussion1.id, discussion2.id])
+    expect(body.data.map(d => d.id)).to.have.members([discussion1.id, discussion2.id])
   })
 })

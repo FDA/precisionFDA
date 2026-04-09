@@ -1,5 +1,4 @@
 import { isString } from '@nestjs/common/utils/shared.utils'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import {
   registerDecorator,
   ValidationArguments,
@@ -7,6 +6,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 type ConstraintOptions = {
   allowPrivate: boolean
@@ -40,15 +40,9 @@ class IsValidScopeConstraint implements ValidatorConstraintInterface {
     }
 
     if (options.allowHomeScope) {
-      if (
-        typeof options.allowHomeScope === 'boolean' &&
-        ['me', 'featured', 'everybody', 'spaces'].includes(scope)
-      ) {
+      if (typeof options.allowHomeScope === 'boolean' && ['me', 'featured', 'everybody', 'spaces'].includes(scope)) {
         return true
-      } else if (
-        typeof options.allowHomeScope === 'object' &&
-        options.allowHomeScope[scope] === true
-      ) {
+      } else if (typeof options.allowHomeScope === 'object' && options.allowHomeScope[scope] === true) {
         return true
       }
     }
@@ -75,10 +69,7 @@ class IsValidScopeConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function IsValidScope(
-  options?: Partial<ConstraintOptions>,
-  validationOptions?: ValidationOptions,
-) {
+export function IsValidScope(options?: Partial<ConstraintOptions>, validationOptions?: ValidationOptions) {
   const defaultOptions: ConstraintOptions = {
     allowPrivate: true,
     allowPublic: true,

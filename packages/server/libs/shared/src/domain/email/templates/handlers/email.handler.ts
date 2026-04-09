@@ -1,19 +1,19 @@
 import { Logger, Type } from '@nestjs/common'
+import { plainToInstance } from 'class-transformer'
+import { ValidationArguments } from 'class-validator'
+import mjml2html from 'mjml'
 import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToInputMap } from '@shared/domain/email/dto/email-type-to-input.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { IsEmailInputValidConstraint } from '@shared/domain/email/dto/is-email-input-valid.constraint'
 import { EmailSendInput } from '@shared/domain/email/email.config'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailAddress } from '@shared/domain/email/model/email-address'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EmailClient } from '@shared/services/email-client'
 import { ArrayUtils } from '@shared/utils/array.utils'
-import { plainToInstance } from 'class-transformer'
-import { ValidationArguments } from 'class-validator'
-import mjml2html from 'mjml'
 
 export abstract class EmailHandler<T extends EMAIL_TYPES> {
   @ServiceLogger()
@@ -31,31 +31,22 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
       object: validationObject,
     } as ValidationArguments)
     if (!isValid) {
-      throw new ValidationError(
-        constraint.defaultMessage({ object: validationObject } as ValidationArguments),
-      )
+      throw new ValidationError(constraint.defaultMessage({ object: validationObject } as ValidationArguments))
     }
   }
 
-  protected abstract getContextualData(
-    input: EmailTypeToInputMap[T],
-  ): Promise<EmailTypeToContextMap[T]>
+  protected abstract getContextualData(input: EmailTypeToInputMap[T]): Promise<EmailTypeToContextMap[T]>
 
   protected abstract getSubject(contextObject: EmailTypeToContextMap[T], receiver?: User): string
 
-  protected abstract getBody(
-    input: EmailTypeToTemplateInputMap[T],
-    contextObject: EmailTypeToContextMap[T],
-  ): string
+  protected abstract getBody(input: EmailTypeToTemplateInputMap[T], contextObject: EmailTypeToContextMap[T]): string
 
   protected abstract getTemplateInput(
     contextObject: EmailTypeToContextMap[T],
     receiver?: User,
   ): EmailTypeToTemplateInputMap[T]
 
-  protected abstract determineReceivers(
-    _contextObject: EmailTypeToContextMap[T],
-  ): Promise<(User | EmailAddress)[]>
+  protected abstract determineReceivers(_contextObject: EmailTypeToContextMap[T]): Promise<(User | EmailAddress)[]>
 
   protected getBcc(_contextObject: EmailTypeToContextMap[T], _receiver: User): string {
     return null
@@ -65,10 +56,7 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     return null
   }
 
-  protected async getNotificationSettingKeys(
-    _contextObject: EmailTypeToContextMap[T],
-    _user: User,
-  ): Promise<string[]> {
+  protected async getNotificationSettingKeys(_contextObject: EmailTypeToContextMap[T], _user: User): Promise<string[]> {
     return []
   }
 
@@ -84,11 +72,7 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     const emailInputs: EmailSendInput[] = []
 
     for (const receiver of filteredUsers) {
-      const emailSendInput = await this.createEmailSendInput(
-        contextObject,
-        receiver.email,
-        receiver,
-      )
+      const emailSendInput = await this.createEmailSendInput(contextObject, receiver.email, receiver)
 
       emailInputs.push(emailSendInput)
     }
@@ -117,7 +101,7 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     const users: User[] = []
     const emailAddresses: EmailAddress[] = []
 
-    receivers.forEach((r) => {
+    receivers.forEach(r => {
       if (typeof r === 'string') {
         emailAddresses.push(r)
       } else {
@@ -158,7 +142,7 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
       }
 
       const preferences = receiver.notificationPreference?.getEntity().data
-      if (preferences && notificationKeys.some((key) => preferences[key])) {
+      if (preferences && notificationKeys.some(key => preferences[key])) {
         result.push(receiver)
       }
     }

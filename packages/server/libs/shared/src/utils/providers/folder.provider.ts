@@ -1,6 +1,6 @@
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { EntityDataProvider } from './entity-data.provider'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../domain/space-event/space-event.enum'
+import { EntityDataProvider } from './entity-data.provider'
 
 export class FolderEntityDataProvider extends EntityDataProvider<'folder'> {
   public readonly entityType: ENTITY_TYPE = ENTITY_TYPE.NODE

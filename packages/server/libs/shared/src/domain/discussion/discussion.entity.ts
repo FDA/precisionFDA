@@ -29,7 +29,11 @@ export class Discussion extends BaseEntity {
   })
   follows = new Collection<DiscussionFollow>(this)
 
-  @OneToMany(() => DiscussionTagging, tagging => tagging.discussion, { orphanRemoval: true })
+  @OneToMany(
+    () => DiscussionTagging,
+    tagging => tagging.discussion,
+    { orphanRemoval: true },
+  )
   taggings = new Collection<Discussion>(this)
 
   constructor(note: Note, user: User) {

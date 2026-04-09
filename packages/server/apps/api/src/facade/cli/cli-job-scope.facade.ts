@@ -1,6 +1,6 @@
-import { JobService } from '@shared/domain/job/job.service'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Injectable } from '@nestjs/common'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { JobService } from '@shared/domain/job/job.service'
 import { EntityScope } from '@shared/types/common'
 
 @Injectable()

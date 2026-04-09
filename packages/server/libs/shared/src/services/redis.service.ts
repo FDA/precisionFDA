@@ -1,5 +1,5 @@
-import { RedisClientType } from '@shared/domain/notification/services/notification.service'
 import { createClient } from 'redis'
+import { RedisClientType } from '@shared/domain/notification/services/notification.service'
 import { config } from '../config'
 import { getLogger } from '../logger'
 

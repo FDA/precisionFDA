@@ -1,17 +1,6 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common'
-import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/create-data-portal.dto'
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common'
 import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFileParamDTO'
+import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/create-data-portal.dto'
 import { DataPortalDTO } from '@shared/domain/data-portal/dto/data-portal.dto'
 import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
@@ -84,9 +73,7 @@ export class DataPortalsController {
    * Returns list of resources that belong to given portal
    */
   @Get('/:identifier/resources')
-  async listResources(
-    @Param('identifier') identifier: string,
-  ): Promise<{ id: number; name: string; url: string }[]> {
+  async listResources(@Param('identifier') identifier: string): Promise<{ id: number; name: string; url: string }[]> {
     return await this.dataPortalService.listResources(identifier)
   }
 }

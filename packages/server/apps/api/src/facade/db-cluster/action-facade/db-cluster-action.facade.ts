@@ -1,18 +1,18 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
-import { STATIC_SCOPE } from '@shared/enums'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { DbClusterAction, PlatformClient } from '@shared/platform-client'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { DbClusterStatusMismatchError, NotFoundError, PermissionError } from '@shared/errors'
-import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
-import { invertObj } from 'ramda'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { ActionConfig, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import { invertObj } from 'ramda'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { ActionConfig, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { STATIC_SCOPE } from '@shared/enums'
+import { DbClusterStatusMismatchError, NotFoundError, PermissionError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { DbClusterAction, PlatformClient } from '@shared/platform-client'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 
 @Injectable()
 export class DbClusterActionFacade {
@@ -29,10 +29,7 @@ export class DbClusterActionFacade {
     private readonly spaceService: SpaceService,
   ) {}
 
-  private async executeDbClusterAction(
-    dxid: DxId<'dbcluster'>,
-    action: DbClusterAction,
-  ): Promise<DbCluster> {
+  private async executeDbClusterAction(dxid: DxId<'dbcluster'>, action: DbClusterAction): Promise<DbCluster> {
     this.logger.log({ dxid }, `${action.charAt(0).toUpperCase() + action.slice(1)}ing DbCluster.`)
     const dbCluster = await this.dbClusterService.getEditableByDxId(dxid)
 
@@ -115,18 +112,15 @@ export class DbClusterActionFacade {
   private readonly actionConfigs: Record<DbClusterAction, ActionConfig> = {
     start: {
       requiredStatus: STATUS.STOPPED,
-      errorMessage:
-        'Start action can only be called when the DbCluster is in the "stopped" status.',
+      errorMessage: 'Start action can only be called when the DbCluster is in the "stopped" status.',
     },
     stop: {
       requiredStatus: STATUS.AVAILABLE,
-      errorMessage:
-        'Stop action can only be called when the DbCluster is in the "available" status.',
+      errorMessage: 'Stop action can only be called when the DbCluster is in the "available" status.',
     },
     terminate: {
       requiredStatus: STATUS.AVAILABLE,
-      errorMessage:
-        'Terminate action can only be called when the DbCluster is in the "available" status.',
+      errorMessage: 'Terminate action can only be called when the DbCluster is in the "available" status.',
     },
   }
 }

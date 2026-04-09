@@ -1,5 +1,5 @@
-import { IsString, ValidateNested, MinLength, IsOptional } from 'class-validator'
 import { Type } from 'class-transformer'
+import { IsOptional, IsString, MinLength, ValidateNested } from 'class-validator'
 import { AttachmentsDTO } from './attachments.dto'
 
 export class UpdateDiscussionDTO {

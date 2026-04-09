@@ -1,12 +1,4 @@
-import {
-  Collection,
-  Entity,
-  Filter,
-  OneToMany,
-  OneToOne,
-  Property,
-  Reference,
-} from '@mikro-orm/core'
+import { Collection, Entity, Filter, OneToMany, OneToOne, Property, Reference } from '@mikro-orm/core'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -29,11 +21,8 @@ import { FILE_STATE_DX, FILE_STATE_PFDA, FILE_STI_TYPE } from './user-file.types
 })
 @Filter({
   name: 'accessibleBy',
-  cond: (args) => ({
-    $or: [
-      { user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE },
-      { scope: { $in: args.spaceScopes } },
-    ],
+  cond: args => ({
+    $or: [{ user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE }, { scope: { $in: args.spaceScopes } }],
   }),
 })
 @Entity({
@@ -49,7 +38,11 @@ class UserFile extends Node {
   @OneToMany({ entity: () => ChallengeResource, mappedBy: 'userFile', orphanRemoval: true })
   challengeResources = new Collection<ChallengeResource>(this)
 
-  @OneToOne(() => Resource, (resource) => resource.userFile, { orphanRemoval: true })
+  @OneToOne(
+    () => Resource,
+    resource => resource.userFile,
+    { orphanRemoval: true },
+  )
   resource!: Resource
 
   constructor(user: User) {

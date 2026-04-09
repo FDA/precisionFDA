@@ -19,12 +19,10 @@ export class LicensesForWorkflowFacade {
     }
 
     const licenseArrays = await Promise.all(
-      workflow.spec.input_spec.stages.map((stage) =>
-        this.licensesForAppFacade.findLicensesForApp(stage.app_uid),
-      ),
+      workflow.spec.input_spec.stages.map(stage => this.licensesForAppFacade.findLicensesForApp(stage.app_uid)),
     )
 
     const licenses = licenseArrays.flat()
-    return [...new Map(licenses.map((item) => [item.id, item])).values()]
+    return [...new Map(licenses.map(item => [item.id, item])).values()]
   }
 }

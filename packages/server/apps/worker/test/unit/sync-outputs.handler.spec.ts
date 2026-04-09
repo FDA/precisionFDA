@@ -1,14 +1,14 @@
 import { EntityManager } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Job as BullJob } from 'bull'
+import { expect } from 'chai'
 import { database } from '@shared/database'
 import { JobService } from '@shared/domain/job/job.service'
 import { User } from '@shared/domain/user/user.entity'
-import { SyncOutputsHandler } from '../../src/jobs/sync-outputs.handler'
-import { db, create } from '@shared/test'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { expect } from 'chai'
-import { UserCtx } from '@shared/types'
-import { Job as BullJob } from 'bull'
 import { CheckStatusJob } from '@shared/queue/task.input'
+import { create, db } from '@shared/test'
+import { UserCtx } from '@shared/types'
+import { SyncOutputsHandler } from '../../src/jobs/sync-outputs.handler'
 
 describe('SyncOutputsHandler tests', () => {
   let em: EntityManager

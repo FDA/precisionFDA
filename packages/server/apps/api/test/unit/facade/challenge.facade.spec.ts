@@ -1,18 +1,18 @@
-import { SinonStub, stub } from 'sinon'
 import { expect } from 'chai'
-import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
-import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
-import { ChallengeFacade } from '../../../src/facade/challenge/challenge.facade'
-import { ChallengeService } from '@shared/domain/challenge/challenge.service'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { EmailService } from '@shared/domain/email/email.service'
+import { SinonStub, stub } from 'sinon'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
+import { ChallengeService } from '@shared/domain/challenge/challenge.service'
+import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
 import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { NodeService } from '@shared/domain/user-file/node.service'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PlatformClient } from '@shared/platform-client'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { NodeService } from '@shared/domain/user-file/node.service'
+import { ChallengeFacade } from '../../../src/facade/challenge/challenge.facade'
 
 describe('ChallengeFacade', () => {
   const CREATE_CHALLENGE_DTO = {
@@ -183,12 +183,6 @@ describe('ChallengeFacade', () => {
       createFile: nodeServiceCreateFileStub,
     } as unknown as NodeService
 
-    return new ChallengeFacade(
-      challengeService,
-      challengeBotClient,
-      nodeService,
-      spaceService,
-      emailService,
-    )
+    return new ChallengeFacade(challengeService, challengeBotClient, nodeService, spaceService, emailService)
   }
 })

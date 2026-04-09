@@ -1,19 +1,15 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import {
-  FileOrAssetOrFolder,
-  NodeResponse,
-  ResolvePath,
-} from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { FileOrAssetOrFolder, NodeResponse, ResolvePath } from '@shared/domain/user-file/user-file.types'
 import { PermissionError } from '@shared/errors'
 import { SCOPE } from '@shared/types/common'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 
 @Injectable()
 export class UserFileResolverFacade {
@@ -33,11 +29,9 @@ export class UserFileResolverFacade {
     const viewableSpaces = []
     user.spaceMemberships
       .getItems()
-      .filter((m) => m.active)
-      .forEach((spaceMembership) => {
-        spaceMembership.spaces
-          .getItems()
-          .forEach((space) => viewableSpaces.push(`space-${space.id}`))
+      .filter(m => m.active)
+      .forEach(spaceMembership => {
+        spaceMembership.spaces.getItems().forEach(space => viewableSpaces.push(`space-${space.id}`))
       })
     if (scope.startsWith('space') && !viewableSpaces.includes(scope)) {
       throw new PermissionError('User is not a member of the scope')
@@ -108,7 +102,7 @@ export class UserFileResolverFacade {
     parentId: number | null,
     type: 'Folder' | 'UserFile' | 'Asset',
   ): NodeResponse[] {
-    return nodes.map((node) => ({
+    return nodes.map(node => ({
       id: node.id,
       name: node.name,
       type: type,
@@ -119,7 +113,7 @@ export class UserFileResolverFacade {
       created_at: node.createdAt,
       updated_at: node.updatedAt,
       locked: node.locked,
-      tags: node.taggings.getItems().map((t) => t.tag.name),
+      tags: node.taggings.getItems().map(t => t.tag.name),
       parent_folder_id: parentId,
     }))
   }

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
-import { ExpertQuestionService } from '@shared/domain/expert-question/service/expert-question.service'
 import { ExpertService } from '@shared/domain/expert/services/expert.service'
+import { ExpertQuestionService } from '@shared/domain/expert-question/service/expert-question.service'
 import { EntityTypeToSearchResultMapperMap } from '@shared/facade/search/domain/entity-type-to-search-result-mapper.map'
 import { SearchResultDTO } from '@shared/facade/search/domain/search-result-d-t.o'
 import { SearchableEntityType } from '@shared/facade/search/domain/searchable-entity.type'
@@ -29,10 +29,7 @@ export class SearchFacade {
     }
   }
 
-  async search<T extends SearchableEntityType>(
-    query: string,
-    entityType: T,
-  ): Promise<SearchResultDTO[]> {
+  async search<T extends SearchableEntityType>(query: string, entityType: T): Promise<SearchResultDTO[]> {
     const searchable = this.entityTypeToSearchableMap[entityType]
     if (!searchable) {
       throw new Error(`No searchable found for type: ${entityType}`)
@@ -40,8 +37,6 @@ export class SearchFacade {
 
     const searchResult = await searchable.search(query)
 
-    return Promise.all(
-      searchResult.map((sr) => this.entityTypeToResultMapperMap[entityType].map(sr)),
-    )
+    return Promise.all(searchResult.map(sr => this.entityTypeToResultMapperMap[entityType].map(sr)))
   }
 }

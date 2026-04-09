@@ -1,14 +1,14 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { InternalError } from '@shared/errors'
-import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
+import { InternalError } from '@shared/errors'
 import { FileCreate } from '@shared/facade/file-create/model/file-create'
 import { FileCreateWithContent } from '@shared/facade/file-create/model/file-create-with-content'
+import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { UserCtx } from '@shared/types'
 
 describe('UserFileCreateFacade', () => {
@@ -43,9 +43,7 @@ describe('UserFileCreateFacade', () => {
   beforeEach(() => {
     platformCreateFileStub.reset()
     platformCreateFileStub.throws()
-    platformCreateFileStub
-      .withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION })
-      .returns({ id: DXID })
+    platformCreateFileStub.withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION }).returns({ id: DXID })
 
     serviceCreateFileStub.reset()
     serviceCreateFileStub.throws()
@@ -89,9 +87,7 @@ describe('UserFileCreateFacade', () => {
     })
 
     it('should reject if platform returns a null dxid', async () => {
-      platformCreateFileStub
-        .withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION })
-        .returns({ id: null })
+      platformCreateFileStub.withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION }).returns({ id: null })
 
       await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(
         InternalError,
@@ -100,9 +96,7 @@ describe('UserFileCreateFacade', () => {
     })
 
     it('should reject if platform returns an empty response', async () => {
-      platformCreateFileStub
-        .withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION })
-        .returns(undefined)
+      platformCreateFileStub.withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION }).returns(undefined)
 
       await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(
         InternalError,
@@ -133,9 +127,7 @@ describe('UserFileCreateFacade', () => {
       uploadFileContentStub.reset()
       uploadFileContentStub.throws(error)
 
-      await expect(
-        getInstance().createFileWithContent(FILE_CREATE_WITH_CONTENT),
-      ).to.be.rejectedWith(error)
+      await expect(getInstance().createFileWithContent(FILE_CREATE_WITH_CONTENT)).to.be.rejectedWith(error)
     })
 
     it('should return response from the service', async () => {

@@ -1,20 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { SpaceService } from '@shared/domain/space/service/space.service'
+import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
+import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
+import { CreateChallengeResourceDTO } from '@shared/domain/challenge/dto/create-challenge-resource.dto'
 import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
 import { EmailService } from '@shared/domain/email/email.service'
-import { STATIC_SCOPE } from '@shared/enums'
-import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { ChallengeService } from '@shared/domain/challenge/challenge.service'
-import { CreateChallengeResourceDTO } from '@shared/domain/challenge/dto/create-challenge-resource.dto'
-import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
-import { PlatformClient } from '@shared/platform-client'
-import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { NodeService } from '@shared/domain/user-file/node.service'
+import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { STATIC_SCOPE } from '@shared/enums'
+import { PlatformClient } from '@shared/platform-client'
+import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
 export class ChallengeFacade {
@@ -56,10 +56,8 @@ export class ChallengeFacade {
   async updateChallenge(challengeId: number, dto: UpdateChallengeDTO): Promise<void> {
     const challenge = await this.challengeService.getChallenge(challengeId)
     const sendPreRegEmail =
-      dto.status === CHALLENGE_STATUS.PRE_REGISTRATION &&
-      challenge.status === CHALLENGE_STATUS.SETUP
-    const sendOpenEmail =
-      dto.status === CHALLENGE_STATUS.OPEN && challenge.status !== CHALLENGE_STATUS.OPEN
+      dto.status === CHALLENGE_STATUS.PRE_REGISTRATION && challenge.status === CHALLENGE_STATUS.SETUP
+    const sendOpenEmail = dto.status === CHALLENGE_STATUS.OPEN && challenge.status !== CHALLENGE_STATUS.OPEN
 
     // if the update fails it will throw an error and the emails will not be sent
     await this.challengeService.updateChallenge(challengeId, dto)

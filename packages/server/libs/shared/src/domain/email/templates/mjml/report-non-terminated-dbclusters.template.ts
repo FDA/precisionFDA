@@ -1,4 +1,4 @@
-import { header, footer } from './common'
+import { footer, header } from './common'
 
 interface ReportDbClusterInfo {
   uid: string
@@ -28,7 +28,7 @@ const createDbClustersTable = (dbclustersInfo: ReportDbClusterInfo[]): string =>
     </tr>
     ${dbclustersInfo
       .map(
-        (dbcluster) => `<tr>
+        dbcluster => `<tr>
       <td>${dbcluster.uid}</td>
       <td>${dbcluster.name}</td>
       <td>${dbcluster.dxuser}</td>
@@ -45,9 +45,7 @@ const createDbClustersTable = (dbclustersInfo: ReportDbClusterInfo[]): string =>
 /**
  * Report non-terminated db clusters to admins.
  */
-export const reportNonTerminatedDbClustersTemplate = (
-  data: ReportNonTerminatedDbClustersTemplateInput,
-): string => `
+export const reportNonTerminatedDbClustersTemplate = (data: ReportNonTerminatedDbClustersTemplateInput): string => `
   ${header}
     <mj-section css-class="header-title">
       <mj-column>

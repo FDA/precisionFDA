@@ -1,29 +1,26 @@
-import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { ContentChangedEmailHandler } from '@shared/domain/email/templates/handlers/content-change.handler'
+import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EmailClient } from '@shared/services/email-client'
-import { stub } from 'sinon'
 import { expect } from 'chai'
+import { stub } from 'sinon'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { ContentChangedEmailHandler } from '@shared/domain/email/templates/handlers/content-change.handler'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { Organization } from '@shared/domain/org/organization.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import {
   ENTITY_TYPE,
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '@shared/domain/space-event/space-event.enum'
+import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
-import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
-import { Reference } from '@mikro-orm/core'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('ContentChangedEmailHandler', () => {
   const SPACE_EVENT_ID = 10
@@ -83,12 +80,7 @@ describe('ContentChangedEmailHandler', () => {
       spaceEvent.objectType = SPACE_EVENT_OBJECT_TYPE.APP
       spaceEvent.entityType = ENTITY_TYPE.APP
       spaceEvent.activityType = SPACE_EVENT_ACTIVITY_TYPE.app_added
-      const spaceMembership = new SpaceMembership(
-        user,
-        space,
-        SPACE_MEMBERSHIP_SIDE.GUEST,
-        SPACE_MEMBERSHIP_ROLE.LEAD,
-      )
+      const spaceMembership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.GUEST, SPACE_MEMBERSHIP_ROLE.LEAD)
 
       spaceEventRepoFindOneOrFailStub
         .withArgs(
@@ -113,9 +105,7 @@ describe('ContentChangedEmailHandler', () => {
       await handler.sendEmail(input)
 
       expect(emailClientSendEmailStub.calledOnce).to.eq(true)
-      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(
-        EMAIL_TYPES.newContentAdded,
-      )
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(EMAIL_TYPES.newContentAdded)
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.args[0].subject).to.eq('Content changed')
       expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain(

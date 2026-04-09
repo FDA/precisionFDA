@@ -57,14 +57,14 @@ export class LicenseService {
   async findLicensedItemsByNodeUids(nodeUids: Uid<'file'>[]): Promise<License[]> {
     const nodes = await this.nodeRepo.find({ uid: { $in: nodeUids } })
 
-    const nodeIds = nodes.map((node) => node.id)
+    const nodeIds = nodes.map(node => node.id)
 
     const licensedItems = await this.licensedItemRepo.find(
       { licenseableId: { $in: nodeIds } },
       { populate: ['license'] },
     )
 
-    return licensedItems.map((item) => item.license.getEntity())
+    return licensedItems.map(item => item.license.getEntity())
   }
 
   async findLicensesForNodeIds(nodeIds: number[]): Promise<License[]> {
@@ -77,7 +77,7 @@ export class LicenseService {
       { populate: ['license'] },
     )
 
-    const licenses = licensedItems.map((item) => item.license.getEntity())
-    return [...new Map(licenses.map((item) => [item.id, item])).values()]
+    const licenses = licensedItems.map(item => item.license.getEntity())
+    return [...new Map(licenses.map(item => [item.id, item])).values()]
   }
 }

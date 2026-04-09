@@ -1,4 +1,5 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { AppRepository } from '@shared/domain/app/app.repository'
@@ -7,7 +8,6 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
 import { ErrorCodes, InvalidStateError, NotFoundError } from '@shared/errors'
-import { expect } from 'chai'
 import { create, db } from '../../../src/test'
 
 describe('AppService', () => {

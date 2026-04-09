@@ -1,19 +1,19 @@
-import { Job } from '@shared/domain/job/job.entity'
-import { User } from '@shared/domain/user/user.entity'
+import { Reference } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { JobFinishedEmailHandler } from '@shared/domain/email/templates/handlers/job-finished.handler'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { EmailClient } from '@shared/services/email-client'
 import { stub } from 'sinon'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { STATIC_SCOPE } from '@shared/enums'
+import { config } from '@shared/config'
 import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { config } from '@shared/config'
-import { Reference } from '@mikro-orm/core'
+import { JobFinishedEmailHandler } from '@shared/domain/email/templates/handlers/job-finished.handler'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobRepository } from '@shared/domain/job/job.repository'
 import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { STATIC_SCOPE } from '@shared/enums'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('JobFinishedEmailHandler', () => {
   const JOB_ID = 12
@@ -82,9 +82,7 @@ describe('JobFinishedEmailHandler', () => {
       expect(emailClientSendEmailStub.calledOnce).to.be.true()
       expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.jobFinished)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
-      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
-        `Execution ${job.name} finished`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(`Execution ${job.name} finished`)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`Hello ${user.firstName}`)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
         'An execution on precisionFDA has finished successfully.',

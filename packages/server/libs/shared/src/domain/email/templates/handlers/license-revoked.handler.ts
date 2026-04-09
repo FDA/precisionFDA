@@ -1,18 +1,15 @@
+import { Injectable } from '@nestjs/common'
+import { config } from '@shared/config'
+import { AcceptedLicenseRepository } from '@shared/domain/accepted-license/accepted-license.repository'
+import { EmailTypeToContextMap, LicenseRevokedContext } from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { IdWithReceiversInputDTO } from '@shared/domain/email/dto/id-with-receivers-input.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { licenseRevokedTemplate } from '@shared/domain/email/templates/mjml/license-revoked.template'
 import { User } from '@shared/domain/user/user.entity'
-import { config } from '@shared/config'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { Injectable } from '@nestjs/common'
-import { EmailClient } from '@shared/services/email-client'
-import { IdWithReceiversInputDTO } from '@shared/domain/email/dto/id-with-receivers-input.dto'
-import { AcceptedLicenseRepository } from '@shared/domain/accepted-license/accepted-license.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import {
-  EmailTypeToContextMap,
-  LicenseRevokedContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
-import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { EmailClient } from '@shared/services/email-client'
 
 @Injectable()
 export class LicenseRevokedHandler extends EmailHandler<EMAIL_TYPES.licenseRevoked> {

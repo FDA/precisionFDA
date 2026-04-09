@@ -1,28 +1,22 @@
 import { Reference, SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import {
-  SPACE_EVENT_ACTIVITY_TYPE,
-  SPACE_EVENT_OBJECT_TYPE,
-} from '@shared/domain/space-event/space-event.enum'
-import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { Space } from '@shared/domain/space/space.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserService } from '@shared/domain/user/service/user.service'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError } from '@shared/errors'
 import { SpaceMembershipUpdateFacade } from '@shared/facade/space-membership/space-membership-update.facade'
 import { PlatformClient } from '@shared/platform-client'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SpaceMembershipUpdateFacade', () => {
   let referenceStub: sinon.SinonStub
@@ -69,8 +63,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       getItems: () => [space],
     },
     user: {
-      getEntity: (): User =>
-        ({ id: 9, fullName: 'Lead User', billTo: () => 'org-pfda..lead.user' }) as unknown as User,
+      getEntity: (): User => ({ id: 9, fullName: 'Lead User', billTo: () => 'org-pfda..lead.user' }) as unknown as User,
     },
   } as unknown as SpaceMembership
 
@@ -151,7 +144,7 @@ describe('SpaceMembershipUpdateFacade', () => {
     populateStub.throws()
     populateStub.resolves()
     transactionalStub.reset()
-    transactionalStub.callsFake(async (callback) => {
+    transactionalStub.callsFake(async callback => {
       return await callback(em)
     })
     persistStub.reset()
@@ -239,11 +232,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       })
       expect(result).to.deep.equal([])
       expect(updateRoleStub.calledOnce).to.be.true()
-      expect(updateRoleStub.firstCall.args).to.deep.equal([
-        space,
-        MEMBER_IDS,
-        SPACE_MEMBERSHIP_ROLE.VIEWER,
-      ])
+      expect(updateRoleStub.firstCall.args).to.deep.equal([space, MEMBER_IDS, SPACE_MEMBERSHIP_ROLE.VIEWER])
       updateRoleStub.restore()
     })
   })
@@ -259,9 +248,7 @@ describe('SpaceMembershipUpdateFacade', () => {
         'Current user is not a member of the space or invalid space',
       )
       expect(getCurrentUserMembershipInSharedSpaceStub.calledOnce).to.be.true()
-      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([
-        GROUP_SPACE_ID,
-      ])
+      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID])
     })
 
     it('should deactivate memberships if enabled is false', async () => {
@@ -270,9 +257,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       const facade = getInstance()
       await facade.updateState(space, MEMBER_IDS, false)
       expect(getCurrentUserMembershipInSharedSpaceStub.calledOnce).to.be.true()
-      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([
-        GROUP_SPACE_ID,
-      ])
+      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID])
       expect(transactionalStub.calledOnce).to.be.true()
       expect(populateStub.callCount).to.equal(1)
       expect(populateStub.firstCall.args).to.deep.equal([changeableMemberships, ['spaces']])
@@ -280,9 +265,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       expect(persistStub.callCount).to.equal(2)
       expect(persistStub.firstCall.args[0].entityId).to.equal(changeableMemberships[0].id)
       expect(persistStub.firstCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP)
-      expect(persistStub.firstCall.args[0].activityType).to.equal(
-        SPACE_EVENT_ACTIVITY_TYPE.membership_disabled,
-      )
+      expect(persistStub.firstCall.args[0].activityType).to.equal(SPACE_EVENT_ACTIVITY_TYPE.membership_disabled)
       expect(persistStub.firstCall.args[0].role).to.equal(changeableMemberships[0].role)
       expect(persistStub.firstCall.args[0].side).to.equal(changeableMemberships[0].side)
       expect(persistStub.firstCall.args[0].data).to.equal(
@@ -293,9 +276,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       )
       expect(persistStub.secondCall.args[0].entityId).to.equal(changeableMemberships[1].id)
       expect(persistStub.secondCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP)
-      expect(persistStub.secondCall.args[0].activityType).to.equal(
-        SPACE_EVENT_ACTIVITY_TYPE.membership_disabled,
-      )
+      expect(persistStub.secondCall.args[0].activityType).to.equal(SPACE_EVENT_ACTIVITY_TYPE.membership_disabled)
       expect(persistStub.secondCall.args[0].role).to.equal(changeableMemberships[1].role)
       expect(persistStub.secondCall.args[0].side).to.equal(changeableMemberships[1].side)
       expect(persistStub.secondCall.args[0].data).to.equal(
@@ -334,9 +315,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       const facade = getInstance()
       await facade.updateState(space, MEMBER_IDS, true)
       expect(getCurrentUserMembershipInSharedSpaceStub.calledOnce).to.be.true()
-      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([
-        GROUP_SPACE_ID,
-      ])
+      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID])
       expect(transactionalStub.calledOnce).to.be.true()
       expect(populateStub.callCount).to.equal(1)
       expect(populateStub.firstCall.args).to.deep.equal([changeableMemberships, ['spaces']])
@@ -344,9 +323,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       expect(persistStub.callCount).to.equal(2)
       expect(persistStub.firstCall.args[0].entityId).to.equal(changeableMemberships[0].id)
       expect(persistStub.firstCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP)
-      expect(persistStub.firstCall.args[0].activityType).to.equal(
-        SPACE_EVENT_ACTIVITY_TYPE.membership_enabled,
-      )
+      expect(persistStub.firstCall.args[0].activityType).to.equal(SPACE_EVENT_ACTIVITY_TYPE.membership_enabled)
       expect(persistStub.firstCall.args[0].role).to.equal(changeableMemberships[0].role)
       expect(persistStub.firstCall.args[0].side).to.equal(changeableMemberships[0].side)
       expect(persistStub.firstCall.args[0].data).to.equal(
@@ -357,9 +334,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       )
       expect(persistStub.secondCall.args[0].entityId).to.equal(changeableMemberships[1].id)
       expect(persistStub.secondCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP)
-      expect(persistStub.secondCall.args[0].activityType).to.equal(
-        SPACE_EVENT_ACTIVITY_TYPE.membership_enabled,
-      )
+      expect(persistStub.secondCall.args[0].activityType).to.equal(SPACE_EVENT_ACTIVITY_TYPE.membership_enabled)
       expect(persistStub.secondCall.args[0].role).to.equal(changeableMemberships[1].role)
       expect(persistStub.secondCall.args[0].side).to.equal(changeableMemberships[1].side)
       expect(persistStub.secondCall.args[0].data).to.equal(
@@ -397,15 +372,9 @@ describe('SpaceMembershipUpdateFacade', () => {
       flushStub.rejects(new Error('Test error'))
 
       const facade = getInstance()
-      await expect(facade.updateState(space, MEMBER_IDS, false)).to.be.rejectedWith(
-        Error,
-        'Test error',
-      )
+      await expect(facade.updateState(space, MEMBER_IDS, false)).to.be.rejectedWith(Error, 'Test error')
       expect(createSyncSpaceMemberAccessTaskStub.calledOnce).to.be.true()
-      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([
-        GROUP_SPACE_ID,
-        MEMBER_IDS,
-      ])
+      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID, MEMBER_IDS])
     })
   })
 
@@ -415,16 +384,12 @@ describe('SpaceMembershipUpdateFacade', () => {
       getCurrentUserMembershipInSharedSpaceStub.resolves(null)
 
       const facade = getInstance()
-      await expect(
-        facade.updateRole(space, MEMBER_IDS, SPACE_MEMBERSHIP_ROLE.VIEWER),
-      ).to.be.rejectedWith(
+      await expect(facade.updateRole(space, MEMBER_IDS, SPACE_MEMBERSHIP_ROLE.VIEWER)).to.be.rejectedWith(
         InvalidStateError,
         'Current user is not a member of the space or invalid space',
       )
       expect(getCurrentUserMembershipInSharedSpaceStub.calledOnce).to.be.true()
-      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([
-        GROUP_SPACE_ID,
-      ])
+      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID])
     })
 
     it('should update role for memberships', async () => {
@@ -432,9 +397,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       const facade = getInstance()
       await facade.updateRole(space, MEMBER_IDS, SPACE_MEMBERSHIP_ROLE.VIEWER)
       expect(getCurrentUserMembershipInSharedSpaceStub.calledOnce).to.be.true()
-      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([
-        GROUP_SPACE_ID,
-      ])
+      expect(getCurrentUserMembershipInSharedSpaceStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID])
       expect(transactionalStub.calledOnce).to.be.true()
       expect(populateStub.callCount).to.equal(1)
       expect(populateStub.firstCall.args).to.deep.equal([changeableMemberships, ['spaces']])
@@ -448,9 +411,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       expect(persistStub.callCount).to.equal(2)
       expect(persistStub.firstCall.args[0].entityId).to.equal(changeableMemberships[0].id)
       expect(persistStub.firstCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP)
-      expect(persistStub.firstCall.args[0].activityType).to.equal(
-        SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
-      )
+      expect(persistStub.firstCall.args[0].activityType).to.equal(SPACE_EVENT_ACTIVITY_TYPE.membership_changed)
       expect(persistStub.firstCall.args[0].role).to.equal(changeableMemberships[0].role)
       expect(persistStub.firstCall.args[0].side).to.equal(changeableMemberships[0].side)
       expect(persistStub.firstCall.args[0].data).to.equal(
@@ -461,9 +422,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       )
       expect(persistStub.secondCall.args[0].entityId).to.equal(changeableMemberships[1].id)
       expect(persistStub.secondCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP)
-      expect(persistStub.secondCall.args[0].activityType).to.equal(
-        SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
-      )
+      expect(persistStub.secondCall.args[0].activityType).to.equal(SPACE_EVENT_ACTIVITY_TYPE.membership_changed)
       expect(persistStub.secondCall.args[0].role).to.equal(changeableMemberships[1].role)
       expect(persistStub.secondCall.args[0].side).to.equal(changeableMemberships[1].side)
       expect(persistStub.secondCall.args[0].data).to.equal(
@@ -501,14 +460,12 @@ describe('SpaceMembershipUpdateFacade', () => {
       flushStub.rejects(new Error('Test error'))
 
       const facade = getInstance()
-      await expect(
-        facade.updateRole(space, MEMBER_IDS, SPACE_MEMBERSHIP_ROLE.VIEWER),
-      ).to.be.rejectedWith(Error, 'Test error')
+      await expect(facade.updateRole(space, MEMBER_IDS, SPACE_MEMBERSHIP_ROLE.VIEWER)).to.be.rejectedWith(
+        Error,
+        'Test error',
+      )
       expect(createSyncSpaceMemberAccessTaskStub.calledOnce).to.be.true()
-      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([
-        GROUP_SPACE_ID,
-        MEMBER_IDS,
-      ])
+      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID, MEMBER_IDS])
     })
 
     it('should rollback billTo changes if update failed', async () => {
@@ -516,14 +473,12 @@ describe('SpaceMembershipUpdateFacade', () => {
       flushStub.rejects(new Error('Test error'))
 
       const facade = getInstance()
-      await expect(
-        facade.updateRole(space, [MEMBER_IDS[0]], SPACE_MEMBERSHIP_ROLE.LEAD),
-      ).to.be.rejectedWith(Error, 'Test error')
+      await expect(facade.updateRole(space, [MEMBER_IDS[0]], SPACE_MEMBERSHIP_ROLE.LEAD)).to.be.rejectedWith(
+        Error,
+        'Test error',
+      )
       expect(createSyncSpaceMemberAccessTaskStub.calledOnce).to.be.true()
-      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([
-        GROUP_SPACE_ID,
-        [MEMBER_IDS[0]],
-      ])
+      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID, [MEMBER_IDS[0]]])
       expect(createSyncSpaceLeadBillToTaskStub.calledOnce).to.be.true()
       expect(createSyncSpaceLeadBillToTaskStub.firstCall.args).to.deep.equal([membership.id])
     })
@@ -557,32 +512,36 @@ describe('SpaceMembershipUpdateFacade', () => {
     it('should throw if new lead user not found', async () => {
       const newLeadDxuser = 'new_lead_user'
       const facade = getInstance()
-      await expect(
-        facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, newLeadDxuser),
-      ).to.be.rejectedWith(InvalidStateError, `User ${newLeadDxuser} not found`)
+      await expect(facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, newLeadDxuser)).to.be.rejectedWith(
+        InvalidStateError,
+        `User ${newLeadDxuser} not found`,
+      )
     })
 
     it('should throw if space not found', async () => {
       const invalidSpaceId = 9999
       const facade = getInstance()
-      await expect(
-        facade.recoverSpaceLead(invalidSpaceId, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER),
-      ).to.be.rejectedWith(InvalidStateError, `Shared space with id ${invalidSpaceId} not found`)
+      await expect(facade.recoverSpaceLead(invalidSpaceId, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER)).to.be.rejectedWith(
+        InvalidStateError,
+        `Shared space with id ${invalidSpaceId} not found`,
+      )
     })
 
     it('should throw if current lead membership not found', async () => {
       const invalidMembershipId = 9999
       const facade = getInstance()
-      await expect(
-        facade.recoverSpaceLead(GROUP_SPACE_ID, invalidMembershipId, NEW_LEAD_DXUSER),
-      ).to.be.rejectedWith(InvalidStateError, 'Current lead not found')
+      await expect(facade.recoverSpaceLead(GROUP_SPACE_ID, invalidMembershipId, NEW_LEAD_DXUSER)).to.be.rejectedWith(
+        InvalidStateError,
+        'Current lead not found',
+      )
     })
 
     it('should throw if current member is not a lead in the space', async () => {
       const facade = getInstance()
-      await expect(
-        facade.recoverSpaceLead(GROUP_SPACE_ID, spaceAdmin.id, NEW_LEAD_DXUSER),
-      ).to.be.rejectedWith(InvalidStateError, 'Current member is not a lead in the space')
+      await expect(facade.recoverSpaceLead(GROUP_SPACE_ID, spaceAdmin.id, NEW_LEAD_DXUSER)).to.be.rejectedWith(
+        InvalidStateError,
+        'Current member is not a lead in the space',
+      )
     })
 
     it('should throw if current lead is not active', async () => {
@@ -594,9 +553,7 @@ describe('SpaceMembershipUpdateFacade', () => {
           getItems: (): Space[] => [space],
         },
       } as unknown as SpaceMembership
-      getMembershipInSpaceStub
-        .withArgs(GROUP_SPACE_ID, inactiveLeadMembership.id)
-        .resolves(inactiveLeadMembership)
+      getMembershipInSpaceStub.withArgs(GROUP_SPACE_ID, inactiveLeadMembership.id).resolves(inactiveLeadMembership)
 
       const facade = getInstance()
       await expect(
@@ -627,9 +584,7 @@ describe('SpaceMembershipUpdateFacade', () => {
         .resolves({})
 
       const facade = getInstance()
-      await expect(
-        facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER),
-      ).to.be.rejectedWith(
+      await expect(facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER)).to.be.rejectedWith(
         InvalidStateError,
         `Pre-validation failed: Admin user not found in org ${space.guestDxOrg}; Admin user not found in org ${membership.user.getEntity().billTo()}`,
       )
@@ -657,9 +612,7 @@ describe('SpaceMembershipUpdateFacade', () => {
       expect(persistStub.calledOnce).to.be.true()
       expect(persistStub.firstCall.args[0].entityId).to.equal(newLeadMembership.id)
       expect(persistStub.firstCall.args[0].objectType).to.equal(SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP)
-      expect(persistStub.firstCall.args[0].activityType).to.equal(
-        SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
-      )
+      expect(persistStub.firstCall.args[0].activityType).to.equal(SPACE_EVENT_ACTIVITY_TYPE.membership_changed)
       expect(persistStub.firstCall.args[0].role).to.equal(membership.role)
       expect(persistStub.firstCall.args[0].side).to.equal(membership.side)
       expect(persistStub.firstCall.args[0].data).to.equal(
@@ -686,9 +639,10 @@ describe('SpaceMembershipUpdateFacade', () => {
       transactionalStub.throws(new Error('Test error'))
 
       const facade = getInstance()
-      await expect(
-        facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER),
-      ).to.be.rejectedWith(Error, 'Test error')
+      await expect(facade.recoverSpaceLead(GROUP_SPACE_ID, CURRENT_MEMBERSHIP_ID, NEW_LEAD_DXUSER)).to.be.rejectedWith(
+        Error,
+        'Test error',
+      )
       expect(createSyncSpaceLeadBillToTaskStub.calledOnce).to.be.true()
       expect(createSyncSpaceLeadBillToTaskStub.firstCall.args).to.deep.equal([membership.id])
     })

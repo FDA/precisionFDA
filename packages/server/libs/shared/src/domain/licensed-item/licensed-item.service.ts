@@ -18,7 +18,7 @@ export class LicensedItemService {
     this.logger.log(`Removing licensed item for entity with id: ${licenseableId} and type`)
     return await this.em.transactional(async () => {
       const licensedItems = await this.licensedItemRepository.getLicenseItemsForNode(licenseableId)
-      licensedItems.forEach((licensedItem) => {
+      licensedItems.forEach(licensedItem => {
         this.em.remove(licensedItem)
       })
     })

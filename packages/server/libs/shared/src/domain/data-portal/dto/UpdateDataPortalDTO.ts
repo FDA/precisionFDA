@@ -1,5 +1,5 @@
-import { Uid } from '@shared/domain/entity/domain/uid'
 import { IsNumber, IsOptional, IsString } from 'class-validator'
+import { Uid } from '@shared/domain/entity/domain/uid'
 
 export class UpdateDataPortalDTO {
   @IsNumber()

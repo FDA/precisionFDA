@@ -1,15 +1,11 @@
+import Bull, { Job, JobInformation, Queue } from 'bull'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 import { QueueProxy } from '@shared/queue/queue.proxy'
-import Bull, { Job, JobInformation, Queue } from 'bull'
 import { config } from '../config'
-import {
-  FileUidInput,
-  SyncFileJobInput,
-  UidAndFollowUpInput,
-} from '../domain/user-file/user-file.input'
+import { FileUidInput, SyncFileJobInput, UidAndFollowUpInput } from '../domain/user-file/user-file.input'
 import { defaultLogger as log } from '../logger'
 import { UserCtx } from '../types'
 import { clearOrphanedRepeatableJobs as utilsClearOrphanedRepeatableJobs } from './queue.utils'
@@ -30,13 +26,7 @@ const getFileSyncQueue = (): Bull.Queue => fileSyncQueue
 const getEmailsQueue = (): Bull.Queue => emailsQueue
 const getMaintenanceQueue = (): Bull.Queue => maintenanceQueue
 
-const getQueues = (): Bull.Queue[] => [
-  mainQueue,
-  fileSyncQueue,
-  spaceReportQueue,
-  emailsQueue,
-  maintenanceQueue,
-]
+const getQueues = (): Bull.Queue[] => [mainQueue, fileSyncQueue, spaceReportQueue, emailsQueue, maintenanceQueue]
 
 const clearOrphanedRepeatableJobs = async (q: Queue): Promise<Bull.JobInformation[]> => {
   return await utilsClearOrphanedRepeatableJobs(q)
@@ -70,7 +60,7 @@ const createQueues = async (provider: QueueProxy): Promise<void> => {
 
 const logQueueStatus = async (): Promise<void> => {
   await Promise.all(
-    getQueues().map(async (q) => {
+    getQueues().map(async q => {
       log.log(
         {
           queueStatus: q.client.status,
@@ -126,7 +116,7 @@ const removeRepeatableJob = async (job: JobInformation, queue: Queue): Promise<v
 
 const findRepeatable = async (bullJobId: string): Promise<Bull.JobInformation> => {
   const repeatableJobs = await mainQueue.getRepeatableJobs()
-  return repeatableJobs.find((j) => j.id === bullJobId)
+  return repeatableJobs.find(j => j.id === bullJobId)
 }
 
 // TASK PRODUCERS
@@ -139,10 +129,8 @@ const createSyncJobStatusTask = async (data: CheckStatusJob['payload']): Promise
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createSyncOutputsTask = async (
-  data: CheckStatusJob['payload'],
-  user: UserCtx,
-): Promise<void> => fileSyncJobProducer.createSyncOutputsTask(data, user)
+const createSyncOutputsTask = async (data: CheckStatusJob['payload'], user: UserCtx): Promise<void> =>
+  fileSyncJobProducer.createSyncOutputsTask(data, user)
 
 // Specifying a taskId will prevent multiple emails of that
 // type and id to be sent
@@ -169,10 +157,8 @@ const createRemoveNodesJobTask = async (ids: number[], user: UserCtx): Promise<J
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createRunFollowUpActionJobTask = async (
-  payload: UidAndFollowUpInput,
-  user?: UserCtx,
-): Promise<void> => mainJobProducer.createRunFollowUpActionJobTask(payload, user)
+const createRunFollowUpActionJobTask = async (payload: UidAndFollowUpInput, user?: UserCtx): Promise<void> =>
+  mainJobProducer.createRunFollowUpActionJobTask(payload, user)
 
 /**
  * @deprecated Use the job producer directly within the DI
@@ -204,16 +190,13 @@ const createUnlockNodesJobTask = async (ids: number[], user: UserCtx): Promise<J
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createDbClusterSyncTask = async (
-  data: SyncDbClusterJob['payload'],
-  user: UserCtx,
-): Promise<Job> => mainJobProducer.createDbClusterSyncTask(data, user)
+const createDbClusterSyncTask = async (data: SyncDbClusterJob['payload'], user: UserCtx): Promise<Job> =>
+  mainJobProducer.createDbClusterSyncTask(data, user)
 
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createTestMaxMemoryTask = async (): Promise<Job> =>
-  maintenanceJobProducer.createTestMaxMemoryTask()
+const createTestMaxMemoryTask = async (): Promise<Job> => maintenanceJobProducer.createTestMaxMemoryTask()
 
 // Queue adding helpers
 /**
@@ -224,10 +207,8 @@ const addToFileSyncQueueEnsureUnique = async <T extends Task>(
   jobId: string | undefined,
 ): Promise<Bull.Job<T>> => fileSyncJobProducer.addToQueueEnsureUnique(task, jobId)
 
-export * as debug from './queue.debug'
-
 export { CleanupWorkerQueueOperation } from './ops/cleanup-worker-queue'
-
+export * as debug from './queue.debug'
 export {
   addToFileSyncQueueEnsureUnique,
   clearOrphanedRepeatableJobs,

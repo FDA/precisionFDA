@@ -1,11 +1,11 @@
 import { Entity, ManyToOne, Property, Ref, Reference } from '@mikro-orm/core'
+import { BaseEntity } from '@shared/database/base.entity'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '@shared/database/base.entity'
-import { WorkflowSpec } from '../model/workflow-spec'
 import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
-import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
+import { WorkflowSpec } from '../model/workflow-spec'
 
 @Entity({ tableName: 'workflows', repository: () => WorkflowRepository })
 export class Workflow extends BaseEntity {

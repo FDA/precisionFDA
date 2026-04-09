@@ -1,14 +1,14 @@
 import { EntityManager } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { Expert, EXPERT_STATE } from '@shared/domain/expert/entity/expert.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { create, db } from '@shared/test'
-import { mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
 import supertest from 'supertest'
+import { database } from '@shared/database'
+import { EXPERT_STATE, Expert } from '@shared/domain/expert/entity/expert.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { create, db } from '@shared/test'
+import { mocksReset } from '@shared/test/mocks'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
-import { STATIC_SCOPE } from '@shared/enums'
 
 describe('/experts', () => {
   let em: EntityManager
@@ -33,54 +33,18 @@ describe('/experts', () => {
     // 2023
     const date2023 = new Date(2023, 1)
     experts = []
-    experts.push(
-      create.expertHelper.create(
-        em,
-        { user: expertUser1 },
-        { createdAt: date2023, updatedAt: date2023 },
-      ),
-    )
-    experts.push(
-      create.expertHelper.create(
-        em,
-        { user: expertUser2 },
-        { createdAt: date2023, updatedAt: date2023 },
-      ),
-    )
-    experts.push(
-      create.expertHelper.create(
-        em,
-        { user: expertUser3 },
-        { createdAt: date2023, updatedAt: date2023 },
-      ),
-    )
+    experts.push(create.expertHelper.create(em, { user: expertUser1 }, { createdAt: date2023, updatedAt: date2023 }))
+    experts.push(create.expertHelper.create(em, { user: expertUser2 }, { createdAt: date2023, updatedAt: date2023 }))
+    experts.push(create.expertHelper.create(em, { user: expertUser3 }, { createdAt: date2023, updatedAt: date2023 }))
 
     // 2022
     const date2022 = new Date(2022, 1)
-    experts.push(
-      create.expertHelper.create(
-        em,
-        { user: expertUser4 },
-        { createdAt: date2022, updatedAt: date2022 },
-      ),
-    )
-    experts.push(
-      create.expertHelper.create(
-        em,
-        { user: expertUser5 },
-        { createdAt: date2022, updatedAt: date2022 },
-      ),
-    )
+    experts.push(create.expertHelper.create(em, { user: expertUser4 }, { createdAt: date2022, updatedAt: date2022 }))
+    experts.push(create.expertHelper.create(em, { user: expertUser5 }, { createdAt: date2022, updatedAt: date2022 }))
 
     // 2021
     const date2019 = new Date(2019, 1)
-    experts.push(
-      create.expertHelper.create(
-        em,
-        { user: expertUser6 },
-        { createdAt: date2019, updatedAt: date2019 },
-      ),
-    )
+    experts.push(create.expertHelper.create(em, { user: expertUser6 }, { createdAt: date2019, updatedAt: date2019 }))
 
     await em.flush()
     mocksReset()

@@ -15,18 +15,10 @@ export class SpaceMembershipUpdatePermissionToAdminProvider extends SpaceMembers
     protected readonly spaceMembershipRepository: SpaceMembershipRepository,
     protected readonly spaceMembershipPlatformAccessToAdminProvider: SpaceMembershipPlatformAccessToAdminProvider,
   ) {
-    super(
-      em,
-      platformClient,
-      spaceMembershipRepository,
-      spaceMembershipPlatformAccessToAdminProvider,
-    )
+    super(em, platformClient, spaceMembershipRepository, spaceMembershipPlatformAccessToAdminProvider)
   }
 
-  protected permittedUpdaterRoles: SPACE_MEMBERSHIP_ROLE[] = [
-    SPACE_MEMBERSHIP_ROLE.LEAD,
-    SPACE_MEMBERSHIP_ROLE.ADMIN,
-  ]
+  protected permittedUpdaterRoles: SPACE_MEMBERSHIP_ROLE[] = [SPACE_MEMBERSHIP_ROLE.LEAD, SPACE_MEMBERSHIP_ROLE.ADMIN]
 
   protected updateMembership(membership: SpaceMembership): void {
     membership.role = SPACE_MEMBERSHIP_ROLE.ADMIN

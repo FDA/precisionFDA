@@ -1,4 +1,7 @@
 import { Reference } from '@mikro-orm/core'
+import { MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
@@ -9,12 +12,9 @@ import { HOME_SCOPE } from '@shared/enums'
 import { ErrorCodes } from '@shared/errors'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
-import { expect } from 'chai'
-import supertest from 'supertest'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import { MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
 
 // N.B. These tests are still work in progress as the API needs to be finalised
 //      and the tests themselves need work, thus skipping
@@ -54,7 +54,7 @@ describe.skip('GET /jobs', () => {
       else return HOME_SCOPE.ME
     }
 
-    Object.keys(jobsCount).forEach((key) => {
+    Object.keys(jobsCount).forEach(key => {
       const count = jobsCount[key]
       for (let i = 0; i < count; i++) {
         const user = i % 2 ? user1 : user2

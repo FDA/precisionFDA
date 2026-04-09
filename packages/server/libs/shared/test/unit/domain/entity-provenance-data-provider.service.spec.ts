@@ -1,15 +1,15 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { App } from '@shared/domain/app/app.entity'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Job } from '@shared/domain/job/job.entity'
-import { EntityProvenanceDataProviderService } from '@shared/domain/provenance/service/entity-data/entity-provenance-data-provider.service'
 import { EntityProvenanceDataService } from '@shared/domain/provenance/service/entity-data/entity-provenance-data.service'
-import { Asset } from '@shared/domain/user-file/asset.entity'
+import { EntityProvenanceDataProviderService } from '@shared/domain/provenance/service/entity-data/entity-provenance-data-provider.service'
 import { User } from '@shared/domain/user/user.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('EntityProvenanceDataProviderService', () => {
   const APP_ID = 0
@@ -140,7 +140,7 @@ describe('EntityProvenanceDataProviderService', () => {
       dataStub: discussionGetDataStub,
       parentsStub: discussionGetParentsStub,
     },
-  ].forEach((prop) => {
+  ].forEach(prop => {
     it(`should use the correct data provider for source type ${prop.type}`, async () => {
       const DATA = 'DATA'
       const PARENTS = []
@@ -164,9 +164,7 @@ describe('EntityProvenanceDataProviderService', () => {
     appGetDataStub.reset()
     appGetDataStub.throws(error)
 
-    await expect(
-      getInstance().getEntityProvenanceData({ type: 'app', entity: APP }),
-    ).to.be.rejectedWith(error)
+    await expect(getInstance().getEntityProvenanceData({ type: 'app', entity: APP })).to.be.rejectedWith(error)
   })
 
   it('should not catch error from data provider getParents', async () => {
@@ -176,9 +174,7 @@ describe('EntityProvenanceDataProviderService', () => {
     appGetParentsStub.reset()
     appGetParentsStub.throws(error)
 
-    await expect(
-      getInstance().getEntityProvenanceData({ type: 'app', entity: APP }),
-    ).to.be.rejectedWith(error)
+    await expect(getInstance().getEntityProvenanceData({ type: 'app', entity: APP })).to.be.rejectedWith(error)
   })
 
   it('should recursively find all parents', async () => {

@@ -1,11 +1,6 @@
-import { PlatformClient } from '@shared/platform-client'
-import {
-  createPermissionsDeniedError,
-  createGatewayError,
-  createETIMEOUTError,
-} from '../utils/platform-client.mock'
 import { expect } from 'chai'
-
+import { PlatformClient } from '@shared/platform-client'
+import { createETIMEOUTError, createGatewayError, createPermissionsDeniedError } from '../utils/platform-client.mock'
 
 describe('platform-client', () => {
   it('handles normal platform errors', async () => {
@@ -13,8 +8,9 @@ describe('platform-client', () => {
     try {
       platformClient.handleFailed(createPermissionsDeniedError())
     } catch (error) {
-      const expectedMessage = 'PermissionDenied (401): BillTo for this job\'s project must have ' +
-                              'the "httpsApp" feature enabled to run this executable'
+      const expectedMessage =
+        "PermissionDenied (401): BillTo for this job's project must have " +
+        'the "httpsApp" feature enabled to run this executable'
       expect(error.message).to.equal(expectedMessage)
       expect(error.props.clientStatusCode).to.equal(401)
     }
@@ -25,8 +21,8 @@ describe('platform-client', () => {
     try {
       platformClient.handleFailed(createGatewayError())
     } catch (error) {
-      const expectedMessage = 'Server Error (504): <html>\r\n<head><title>504 Gateway Time-out' +
-                              '</title></head></html>\r\n'
+      const expectedMessage =
+        'Server Error (504): <html>\r\n<head><title>504 Gateway Time-out' + '</title></head></html>\r\n'
       expect(error.message).to.equal(expectedMessage)
       expect(error.props.clientStatusCode).to.equal(504)
     }
@@ -37,8 +33,9 @@ describe('platform-client', () => {
       const platformClient = new PlatformClient()
       platformClient.handleFailed(createETIMEOUTError())
     } catch (error) {
-      const expectedMessage = 'Error: connect ETIMEDOUT 192.168.119.135:443\n    at ' +
-                              'TCPConnectWrap.afterConnect [as oncomplete] (net.js:1144:16)'
+      const expectedMessage =
+        'Error: connect ETIMEDOUT 192.168.119.135:443\n    at ' +
+        'TCPConnectWrap.afterConnect [as oncomplete] (net.js:1144:16)'
       expect(error.message).to.equal(expectedMessage)
     }
   })

@@ -1,7 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { SpaceMemberDTO } from '@shared/domain/space-membership/dto/space-member.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SpaceMemberDTO } from '@shared/domain/space-membership/dto/space-member.dto'
 
 @Injectable()
 export class SpaceMembershipListApiFacade {
@@ -14,6 +14,6 @@ export class SpaceMembershipListApiFacade {
     const memberships = await this.spaceService.getSpaceMembers(spaceId)
 
     await this.em.populate(memberships, ['user'])
-    return memberships.map((membership) => SpaceMemberDTO.fromEntity(membership))
+    return memberships.map(membership => SpaceMemberDTO.fromEntity(membership))
   }
 }

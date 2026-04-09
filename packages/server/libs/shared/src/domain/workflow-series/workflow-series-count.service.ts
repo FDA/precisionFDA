@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common'
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { EntityManager, EntityName } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable } from '@nestjs/common'
 import { AbstractCountService } from '@shared/domain/counters/abstract-count.service'
 import { ScopeFilterProvider } from '@shared/domain/counters/counters.types'
 import { WorkflowSeries } from './workflow-series.entity'
@@ -12,10 +12,7 @@ export class WorkflowSeriesCountService extends AbstractCountService<WorkflowSer
   protected readonly scopeFilterProvider: ScopeFilterProvider<WorkflowSeries>
   protected readonly entityClass: EntityName<WorkflowSeries> = WorkflowSeries
 
-  constructor(
-    em: SqlEntityManager,
-    workflowSeriesScopeFilterProvider: WorkflowSeriesScopeFilterProvider,
-  ) {
+  constructor(em: SqlEntityManager, workflowSeriesScopeFilterProvider: WorkflowSeriesScopeFilterProvider) {
     super()
     this.em = em
     this.scopeFilterProvider = workflowSeriesScopeFilterProvider

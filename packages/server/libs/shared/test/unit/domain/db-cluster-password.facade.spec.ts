@@ -1,4 +1,8 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { CliDbClusterPasswordFacade } from 'apps/api/src/facade/db-cluster/password-facade/cli-db-cluster-password.facade'
+import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { DbClusterAccessControlEncryptor } from '@shared/domain/db-cluster/access-control/db-cluster-access-control-encryptor'
 import { UsersDbClustersSaltService } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.service'
 import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
@@ -9,10 +13,6 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
-import { DbClusterPasswordFacade } from 'apps/api/src/facade/db-cluster/password-facade/db-cluster-password.facade'
-import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
-import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
 
 describe('DbClusterPasswordFacade', () => {
   const USER_ID = 0
@@ -82,16 +82,12 @@ describe('DbClusterPasswordFacade', () => {
       loadEntity.resolves(USER)
 
       findAccessibleOneStub.withArgs({ uid: dbCluster.uid }).resolves(dbCluster)
-      getUsersDbClustersSaltByDbClusterAndUserStub
-        .withArgs(dbCluster.id, USER_ID)
-        .resolves({ salt: '123abc' })
+      getUsersDbClustersSaltByDbClusterAndUserStub.withArgs(dbCluster.id, USER_ID).resolves({ salt: '123abc' })
 
       const psw = await getInstance().getPassword(dbCluster.uid)
 
       expect(psw).to.be.a('string')
-      expect(psw).to.equal(
-        DbClusterAccessControlEncryptor.generatePassword(userContext.dxuser, '123abc'),
-      )
+      expect(psw).to.equal(DbClusterAccessControlEncryptor.generatePassword(userContext.dxuser, '123abc'))
     })
 
     it('throws PermissionError when user is not owner of the private db cluster', async () => {
@@ -147,16 +143,12 @@ describe('DbClusterPasswordFacade', () => {
       loadEntity.resolves(USER)
 
       findAccessibleOneStub.withArgs({ uid: dbCluster.uid }).resolves(dbCluster)
-      getUsersDbClustersSaltByDbClusterAndUserStub
-        .withArgs(dbCluster.id, USER_ID)
-        .resolves({ salt: '123abc' })
+      getUsersDbClustersSaltByDbClusterAndUserStub.withArgs(dbCluster.id, USER_ID).resolves({ salt: '123abc' })
 
       const psw = await getInstance().getPassword(dbCluster.uid)
 
       expect(psw).to.be.a('string')
-      expect(psw).to.equal(
-        DbClusterAccessControlEncryptor.generatePassword(userContext.dxuser, '123abc'),
-      )
+      expect(psw).to.equal(DbClusterAccessControlEncryptor.generatePassword(userContext.dxuser, '123abc'))
     })
 
     it('throws NotFoundError when user is not member of space', async () => {
@@ -215,11 +207,9 @@ describe('DbClusterPasswordFacade', () => {
       loadEntity.resolves(USER)
 
       findAccessibleOneStub.withArgs({ uid: dbCluster.uid }).resolves(dbCluster)
-      getUsersDbClustersSaltByDbClusterAndUserStub
-        .withArgs(dbCluster.id, USER_ID)
-        .resolves({ salt: '123abc' })
+      getUsersDbClustersSaltByDbClusterAndUserStub.withArgs(dbCluster.id, USER_ID).resolves({ salt: '123abc' })
       syncDbClusterStub.withArgs(dbCluster, USER).resolves({})
-      transactionalStub.callsFake(async (fn) => {
+      transactionalStub.callsFake(async fn => {
         return fn(em)
       })
 
@@ -228,9 +218,7 @@ describe('DbClusterPasswordFacade', () => {
       const psw = await getInstance().rotatePassword(dbCluster.uid)
 
       expect(psw).to.be.a('string')
-      expect(psw).to.not.equal(
-        DbClusterAccessControlEncryptor.generatePassword(userContext.dxuser, '123abc'),
-      )
+      expect(psw).to.not.equal(DbClusterAccessControlEncryptor.generatePassword(userContext.dxuser, '123abc'))
       expect(syncDbClusterStub.callCount).to.equal(1)
       expect(createPasswordRotatedEventStub.callCount).to.equal(1)
     })
@@ -290,11 +278,9 @@ describe('DbClusterPasswordFacade', () => {
       loadEntity.resolves(USER)
 
       findAccessibleOneStub.withArgs({ uid: dbCluster.uid }).resolves(dbCluster)
-      getUsersDbClustersSaltByDbClusterAndUserStub
-        .withArgs(dbCluster.id, USER_ID)
-        .resolves({ salt: '123abc' })
+      getUsersDbClustersSaltByDbClusterAndUserStub.withArgs(dbCluster.id, USER_ID).resolves({ salt: '123abc' })
       syncDbClusterStub.withArgs(dbCluster, USER).resolves({})
-      transactionalStub.callsFake(async (fn) => {
+      transactionalStub.callsFake(async fn => {
         return fn(em)
       })
 
@@ -303,9 +289,7 @@ describe('DbClusterPasswordFacade', () => {
       const psw = await getInstance().rotatePassword(dbCluster.uid)
 
       expect(psw).to.be.a('string')
-      expect(psw).to.not.equal(
-        DbClusterAccessControlEncryptor.generatePassword(userContext.dxuser, '123abc'),
-      )
+      expect(psw).to.not.equal(DbClusterAccessControlEncryptor.generatePassword(userContext.dxuser, '123abc'))
       expect(psw).to.not.be.undefined
       expect(syncDbClusterStub.callCount).to.equal(0)
       expect(createPasswordRotatedEventStub.callCount).to.equal(1)
@@ -356,14 +340,14 @@ describe('DbClusterPasswordFacade', () => {
     })
   })
 
-  function getInstance(): DbClusterPasswordFacade {
+  function getInstance(): CliDbClusterPasswordFacade {
     const usersDbClustersSaltService = {
       getUsersDbClustersSaltByDbClusterAndUser: getUsersDbClustersSaltByDbClusterAndUserStub,
     } as unknown as UsersDbClustersSaltService
     const dbClusterSynchronizeFacade = {
       syncDbCluster: syncDbClusterStub,
     } as unknown as DbClusterSynchronizeFacade
-    return new DbClusterPasswordFacade(
+    return new CliDbClusterPasswordFacade(
       dbClusterService,
       em,
       userContext,

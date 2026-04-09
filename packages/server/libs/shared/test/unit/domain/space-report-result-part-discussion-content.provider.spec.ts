@@ -1,8 +1,8 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReportResultPartDiscussionHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-discussion-html-content.provider'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SpaceReportResultPartDiscussionHtmlContentProvider', () => {
   const TITLE_ID = 'TITLE_ID'
@@ -122,9 +122,7 @@ describe('SpaceReportResultPartDiscussionHtmlContentProvider', () => {
   it('should include conversation starter text', async () => {
     const res = await getInstance().provide(REPORT_PART, TITLE_ID)
 
-    expect(res.textContent).to.include(
-      `${CREATED_BY} started the discussion on ${CREATED_AT.toLocaleString()}`,
-    )
+    expect(res.textContent).to.include(`${CREATED_BY} started the discussion on ${CREATED_AT.toLocaleString()}`)
   })
 
   it('should include content', async () => {
@@ -151,9 +149,7 @@ describe('SpaceReportResultPartDiscussionHtmlContentProvider', () => {
 
   it('should include answered text', async () => {
     const res = await getInstance().provide(REPORT_PART, TITLE_ID)
-    expect(res.textContent).to.include(
-      `${ANSWER_CREATED_BY} answered on ${ANSWER_CREATED_AT.toLocaleString()}`,
-    )
+    expect(res.textContent).to.include(`${ANSWER_CREATED_BY} answered on ${ANSWER_CREATED_AT.toLocaleString()}`)
   })
 
   it('should include answer content', async () => {
@@ -186,9 +182,7 @@ describe('SpaceReportResultPartDiscussionHtmlContentProvider', () => {
   it('should include first commented text', async () => {
     const res = await getInstance().provide(REPORT_PART, TITLE_ID)
 
-    expect(res.textContent).to.include(
-      `${COMMENT_1_CREATED_BY} commented on ${COMMENT_1_CREATED_AT.toLocaleString()}`,
-    )
+    expect(res.textContent).to.include(`${COMMENT_1_CREATED_BY} commented on ${COMMENT_1_CREATED_AT.toLocaleString()}`)
   })
 
   it('should include first comment content', async () => {
@@ -200,9 +194,7 @@ describe('SpaceReportResultPartDiscussionHtmlContentProvider', () => {
   it('should include second commented text', async () => {
     const res = await getInstance().provide(REPORT_PART, TITLE_ID)
 
-    expect(res.textContent).to.include(
-      `${COMMENT_2_CREATED_BY} commented on ${COMMENT_2_CREATED_AT.toLocaleString()}`,
-    )
+    expect(res.textContent).to.include(`${COMMENT_2_CREATED_BY} commented on ${COMMENT_2_CREATED_AT.toLocaleString()}`)
   })
 
   it('should include second comment content', async () => {

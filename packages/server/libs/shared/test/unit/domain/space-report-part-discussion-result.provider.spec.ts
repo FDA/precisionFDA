@@ -1,11 +1,11 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { AttachmentRetrieveFacade } from '@shared/facade/discussion/attachment-retrieve.facade'
 import { SpaceReportPartDiscussionResultProviderService } from '@shared/facade/space-report/service/space-report-part-discussion-result-provider.service'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SpaceReportPartDiscussionResultProviderService', () => {
   const ID = 1
@@ -362,9 +362,7 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
       getDiscussionStub.reset()
       getDiscussionStub.throws(error)
 
-      await expect(getInstance().getResult(DISCUSSION_ENTITY, null, format)).to.be.rejectedWith(
-        error,
-      )
+      await expect(getInstance().getResult(DISCUSSION_ENTITY, null, format)).to.be.rejectedWith(error)
     })
 
     it('should not catch error from getAttachments', async () => {
@@ -372,9 +370,7 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
       getAttachmentsStub.reset()
       getAttachmentsStub.throws(error)
 
-      await expect(getInstance().getResult(DISCUSSION_ENTITY, null, format)).to.be.rejectedWith(
-        error,
-      )
+      await expect(getInstance().getResult(DISCUSSION_ENTITY, null, format)).to.be.rejectedWith(error)
     })
   }
 
@@ -387,9 +383,6 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
       getAttachments: getAttachmentsStub,
     } as unknown as AttachmentRetrieveFacade
 
-    return new SpaceReportPartDiscussionResultProviderService(
-      discussionService,
-      attachmentRetrieveFacade,
-    )
+    return new SpaceReportPartDiscussionResultProviderService(discussionService, attachmentRetrieveFacade)
   }
 })

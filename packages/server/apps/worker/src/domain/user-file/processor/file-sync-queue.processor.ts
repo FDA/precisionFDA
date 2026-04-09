@@ -1,5 +1,6 @@
 import { Processor } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
+import { Job } from 'bull'
 import { config } from '@shared/config'
 import { JobService } from '@shared/domain/job/job.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
@@ -15,7 +16,6 @@ import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-c
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { CheckStatusJob, CopyNodesJob, TASK_TYPE, WorkstationSnapshotJob } from '@shared/queue/task.input'
 import { TypeUtils } from '@shared/utils/type-utils'
-import { Job } from 'bull'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 
 @Processor(config.workerJobs.queues.fileSync.name)

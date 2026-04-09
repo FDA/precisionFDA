@@ -70,10 +70,7 @@ export class TimeUtils {
       (elapsed - this.daysToSeconds(days) - this.hoursToSeconds(hours)) / this.minutesToSeconds(1),
     )
     const seconds = Math.floor(
-      (elapsed -
-        this.daysToSeconds(days) -
-        this.hoursToSeconds(hours) -
-        this.minutesToSeconds(minutes)) /
+      (elapsed - this.daysToSeconds(days) - this.hoursToSeconds(hours) - this.minutesToSeconds(minutes)) /
         this.SECONDS_IN_MINUTE,
     )
     return `${days}d ${hours}h ${minutes}m ${seconds}s`
@@ -116,7 +113,10 @@ export class TimeUtils {
 
   /** Format a Date as "YYYY-MM-DD HH:MM:SS UTC". */
   static formatDateTimeUTC(date: Date): string {
-    return date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC')
+    return date
+      .toISOString()
+      .replace('T', ' ')
+      .replace(/\.\d{3}Z$/, ' UTC')
   }
 
   /** Convert a number of seconds into a human-readable string like "2 days 3 hours 15 minutes 4 seconds". */

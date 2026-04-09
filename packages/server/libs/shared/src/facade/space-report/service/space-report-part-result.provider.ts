@@ -1,19 +1,13 @@
 import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
 import { SpaceReportPartResult } from '@shared/domain/space-report/model/space-report-part-result'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
-import { Space } from '@shared/domain/space/space.entity'
 
 export abstract class SpaceReportPartResultProvider<T extends SpaceReportPartSourceType> {
-  protected abstract getJsonResult(
-    entity: EntityInstance<T>,
-    space: Space,
-  ): Promise<SpaceReportPartResult<T, 'JSON'>>
+  protected abstract getJsonResult(entity: EntityInstance<T>, space: Space): Promise<SpaceReportPartResult<T, 'JSON'>>
 
-  protected abstract getHtmlResult(
-    entity: EntityInstance<T>,
-    space: Space,
-  ): Promise<SpaceReportPartResult<T, 'HTML'>>
+  protected abstract getHtmlResult(entity: EntityInstance<T>, space: Space): Promise<SpaceReportPartResult<T, 'HTML'>>
 
   getResult<F extends SpaceReportFormat>(
     entity: EntityInstance<T>,
@@ -24,10 +18,7 @@ export abstract class SpaceReportPartResultProvider<T extends SpaceReportPartSou
   }
 
   private formatFunctionMap: {
-    [F in SpaceReportFormat]: (
-      entity: EntityInstance<T>,
-      space: Space,
-    ) => Promise<SpaceReportPartResult<T, F>>
+    [F in SpaceReportFormat]: (entity: EntityInstance<T>, space: Space) => Promise<SpaceReportPartResult<T, F>>
   } = {
     JSON: (e, s) => this.getJsonResult(e, s),
     HTML: (e, s) => this.getHtmlResult(e, s),

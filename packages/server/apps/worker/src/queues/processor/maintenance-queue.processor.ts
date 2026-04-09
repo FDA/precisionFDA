@@ -1,4 +1,6 @@
 import { Processor } from '@nestjs/bull'
+import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
+import { Job } from 'bull'
 import { config } from '@shared/config'
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
@@ -9,10 +11,6 @@ import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
 import { JobSyncTaskCheckFacade } from '@shared/facade/job/job-sync-task-check.facade'
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
 import { SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
-import {
-  DbClusterCheckNonTerminatedFacade,
-} from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
-import { Job } from 'bull'
 import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 

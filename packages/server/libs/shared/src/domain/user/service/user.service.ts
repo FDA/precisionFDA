@@ -13,19 +13,18 @@ import {
   userInactivityAlertTemplate,
 } from '@shared/domain/email/templates/mjml/user-inactivity-alert.template'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserCloudResourcesDTO } from '@shared/domain/user/dto/user-cloud-resources.dto'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { HeaderItem } from '@shared/domain/user/header-item'
-import { UserExtras } from '@shared/domain/user/user-extras'
-import { CloudResourceSettings, User, USER_STATE } from '@shared/domain/user/user.entity'
+import { CloudResourceSettings, USER_STATE, User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserExtras } from '@shared/domain/user/user-extras'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ClientRequestError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { StringUtils } from '@shared/utils/string.utils'
-
 
 @Injectable()
 export class UserService {

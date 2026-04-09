@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { SpaceGroupsController } from './space-groups.controller'
 import { SpaceModule } from '@shared/domain/space/space.module'
+import { SpaceGroupsController } from './space-groups.controller'
 
 @Module({
   imports: [SpaceModule],

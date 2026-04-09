@@ -1,28 +1,24 @@
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { spaceMembershipSideToNameMap } from '@shared/domain/space-membership/space-membership-side-to-name.map'
 import { spaceMembershipTypeToNameMap } from '@shared/domain/space-membership/space-membership-type-to-name.map'
 import {
   SpaceReportPartUserTileHtmlResult,
   SpaceReportPartUserTileJsonResult,
 } from '@shared/domain/space-report/model/space-report-part-user-tile-result'
-import { Space } from '@shared/domain/space/space.entity'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { SpaceReportPartResultProvider } from './space-report-part-result.provider'
 
-interface SpaceReportResultJsonUser
-  extends Omit<SpaceReportPartUserTileHtmlResult, 'role' | 'side'> {
+interface SpaceReportResultJsonUser extends Omit<SpaceReportPartUserTileHtmlResult, 'role' | 'side'> {
   role: string
   side?: string
 }
 
 @Injectable()
 export class SpaceReportPartUserResultProvider extends SpaceReportPartResultProvider<'user'> {
-  protected async getJsonResult(
-    entity: User,
-    space: Space,
-  ): Promise<SpaceReportPartUserTileJsonResult> {
+  protected async getJsonResult(entity: User, space: Space): Promise<SpaceReportPartUserTileJsonResult> {
     const htmlResult = await this.getHtmlResult(entity, space)
 
     const result: SpaceReportResultJsonUser = {
@@ -41,7 +37,7 @@ export class SpaceReportPartUserResultProvider extends SpaceReportPartResultProv
   }
 
   protected getHtmlResult(entity: User, space?: Space): Promise<SpaceReportPartUserTileHtmlResult> {
-    const membership = space?.spaceMemberships?.find((sm) => sm.user.id === entity.id && sm.active)
+    const membership = space?.spaceMemberships?.find(sm => sm.user.id === entity.id && sm.active)
 
     const result: SpaceReportPartUserTileHtmlResult = {
       role: membership?.role,

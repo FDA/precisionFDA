@@ -1,3 +1,5 @@
+import crypto from 'node:crypto'
+import { omit } from 'ramda'
 import { config } from '@shared/config'
 import { COOKIE_SESSION_KEY, USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
 import { BaseEntity } from '@shared/database/base.entity'
@@ -5,8 +7,6 @@ import { User } from '@shared/domain/user/user.entity'
 import { CSRFUtils } from '@shared/utils/csrf.utils'
 import { Encryptor } from '@shared/utils/encryptors/encryptor'
 import { TimeUtils } from '@shared/utils/time.utils'
-import crypto from 'node:crypto'
-import { omit } from 'ramda'
 
 const stripEntityDates = (entity: BaseEntity): Omit<BaseEntity, 'createdAt' | 'updatedAt'> => {
   return omit(['createdAt', 'updatedAt'], entity)
@@ -26,9 +26,7 @@ const generateCookieToken = (user?: User, expiration?: number): string => {
 
   const tokenExpiration =
     expiration ||
-    TimeUtils.floorMilisecondsToSeconds(
-      Date.now() + TimeUtils.minutesToMilliseconds(config.maxInactivityMinutes),
-    )
+    TimeUtils.floorMilisecondsToSeconds(Date.now() + TimeUtils.minutesToMilliseconds(config.maxInactivityMinutes))
 
   return Encryptor.encrypt({
     user_id: user.id,
@@ -41,10 +39,7 @@ const generateCookieToken = (user?: User, expiration?: number): string => {
   })
 }
 
-const getCookieTokenString = (
-  user?: User,
-  expiration?: number,
-): `_precision-fda_session=${string}` =>
+const getCookieTokenString = (user?: User, expiration?: number): `_precision-fda_session=${string}` =>
   `${COOKIE_SESSION_KEY}=${generateCookieToken(user, expiration)}`
 
 const getDefaultHeaderData = (user?: User): { cookie: `_precision-fda_session=${string}` } => ({

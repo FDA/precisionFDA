@@ -1,14 +1,14 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
 import { database } from '@shared/database'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { AppSeriesRepository } from '@shared/domain/app-series/app-series.repository'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { create, db } from '../../../src/test'
-import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
 import { AppSeriesCountService } from '@shared/domain/app-series/app-series-count.service'
 import { AppSeriesScopeFilterProvider } from '@shared/domain/app-series/app-series-scope-filter.provider'
+import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { create, db } from '../../../src/test'
 
 describe('AppSeriesService', () => {
   let em: EntityManager<MySqlDriver>
@@ -39,11 +39,7 @@ describe('AppSeriesService', () => {
     it('should return app series by name, scope and user', async () => {
       const newUser = create.userHelper.create(em)
       const appSeries = create.appSeriesHelper.create(em, { user }, {})
-      create.appSeriesHelper.create(
-        em,
-        { user: newUser },
-        { name: appSeries.name, scope: appSeries.scope },
-      )
+      create.appSeriesHelper.create(em, { user: newUser }, { name: appSeries.name, scope: appSeries.scope })
       create.appSeriesHelper.create(em, { user }, { scope: 'public', name: appSeries.name })
       await em.flush()
 

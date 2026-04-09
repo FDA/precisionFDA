@@ -14,8 +14,7 @@ export class NotesController {
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
-    description:
-      'Fetch attachments for given note IDs - Object with note IDs as keys and attachment arrays as values',
+    description: 'Fetch attachments for given note IDs - Object with note IDs as keys and attachment arrays as values',
     schema: {
       type: 'object',
       additionalProperties: {
@@ -44,9 +43,7 @@ export class NotesController {
       },
     },
   })
-  async fetchNotesAttachments(
-    @Body() body: NoteQueryParamsDTO,
-  ): Promise<Record<number, DiscussionAttachmentDTO[]>> {
+  async fetchNotesAttachments(@Body() body: NoteQueryParamsDTO): Promise<Record<number, DiscussionAttachmentDTO[]>> {
     return await this.attachmentRetrieveFacade.getAttachmentsByNoteIds(body.ids)
   }
 }

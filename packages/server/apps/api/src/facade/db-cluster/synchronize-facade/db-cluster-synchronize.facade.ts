@@ -1,5 +1,7 @@
 import { Collection, SqlEntityManager, wrap } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
+import { Job } from 'bull'
+import { invertObj } from 'ramda'
 import { config } from '@shared/config'
 import {
   DbClusterAccessControlEncryptor,
@@ -11,29 +13,24 @@ import { DB_SYNC_STATUS, STATUS, STATUSES } from '@shared/domain/db-cluster/db-c
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { isStateTerminal } from '@shared/domain/job/job.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { getIdFromScopeName } from '@shared/domain/space/space.helper'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User } from '@shared/domain/user/user.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserService } from '@shared/domain/user/service/user.service'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { ClientRequestError, ErrorCodes, NotFoundError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { JobCreateParams } from '@shared/platform-client/platform-client.params'
-import {
-  DbClusterDescribeResponse,
-  JobDescribeResponse,
-} from '@shared/platform-client/platform-client.responses'
+import { DbClusterDescribeResponse, JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { removeRepeatable } from '@shared/queue'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { SyncDbClusterJob, SyncDbClusterJobOutput } from '@shared/queue/task.input'
-import { Job } from 'bull'
-import { invertObj } from 'ramda'
 
 @Injectable()
 export class DbClusterSynchronizeFacade {
@@ -63,20 +60,14 @@ export class DbClusterSynchronizeFacade {
 
     const dbClusters = await this.dbClusterService.getAllFromSpace(spaceId)
 
-    this.logger.log(
-      { dbClusters: dbClusters, userId: this.userContext.id },
-      'DbClusters to synchronize.',
-    )
-    for (const dbc1 of dbClusters.filter((dbc) => dbc.status === STATUS.AVAILABLE)) {
+    this.logger.log({ dbClusters: dbClusters, userId: this.userContext.id }, 'DbClusters to synchronize.')
+    for (const dbc1 of dbClusters.filter(dbc => dbc.status === STATUS.AVAILABLE)) {
       await this.syncDbCluster(dbc1, user)
     }
   }
 
   private async getSalt(userId: number, dbClusterId: number): Promise<string> {
-    const saltEntity = await this.saltService.getUsersDbClustersSaltByDbClusterAndUser(
-      dbClusterId,
-      userId,
-    )
+    const saltEntity = await this.saltService.getUsersDbClustersSaltByDbClusterAndUser(dbClusterId, userId)
 
     if (!saltEntity) {
       const user = await this.userService.getUserById(userId)
@@ -112,8 +103,8 @@ export class DbClusterSynchronizeFacade {
   ): Promise<UserMapping[]> {
     return await Promise.all(
       membershipCollection
-        .filter((membership) => membership.active)
-        .map(async (membership) => {
+        .filter(membership => membership.active)
+        .map(async membership => {
           const username = (await membership.user.load()).dxuser
           const salt = await this.getSalt(membership.user.id, dbCluster.id)
           const password = DbClusterAccessControlEncryptor.generatePassword(username, salt)
@@ -127,10 +118,7 @@ export class DbClusterSynchronizeFacade {
     )
   }
 
-  private async terminatePreviousDbSyncJobs(
-    projectId: string,
-    dbCluster: DbCluster,
-  ): Promise<{ id: string }[]> {
+  private async terminatePreviousDbSyncJobs(projectId: string, dbCluster: DbCluster): Promise<{ id: string }[]> {
     // In order to terminate other user's sync job ADMIN privileges are required
     let platformClient = this.userClient
     if (dbCluster.isInSpace()) {
@@ -154,21 +142,13 @@ export class DbClusterSynchronizeFacade {
     const searchInput = {
       project: projectId,
       name: `DbCluster Synchronization - ${dbCluster.dxid}`,
-      state: [
-        'idle',
-        'waiting_on_input',
-        'runnable',
-        'running',
-        'waiting_on_output',
-        'restarted',
-        'restartable',
-      ],
+      state: ['idle', 'waiting_on_input', 'runnable', 'running', 'waiting_on_output', 'restarted', 'restartable'],
       describe: false,
     }
     const ids = await platformClient.jobFind(searchInput)
 
-    ids.results.forEach(async (r) => await platformClient.jobTerminate({ jobId: r.id }))
-    return ids.results.map((j) => {
+    ids.results.forEach(async r => await platformClient.jobTerminate({ jobId: r.id }))
+    return ids.results.map(j => {
       return { id: j.id }
     })
   }
@@ -189,10 +169,7 @@ export class DbClusterSynchronizeFacade {
       let platformClient = this.userClient
       if (dbCluster.isPrivate()) {
         if (user.id != dbCluster.user.id) {
-          this.logger.error(
-            { userId: user.id, dbClusterId: dbCluster.id },
-            'User cannot synchronize DbCluster.',
-          )
+          this.logger.error({ userId: user.id, dbClusterId: dbCluster.id }, 'User cannot synchronize DbCluster.')
           throw new PermissionError('Unable to synchronize DbCluster in selected context.', {
             statusCode: 403,
           })
@@ -222,11 +199,10 @@ export class DbClusterSynchronizeFacade {
           })
         }
         const spaceMemberships = await space.spaceMemberships.init()
-        const membership = spaceMemberships.getItems().find((m) => m.user.id === user.id)
+        const membership = spaceMemberships.getItems().find(m => m.user.id === user.id)
 
         // When user has only viewer role, adminClient needs to be used to run sync job on DbCluster
-        platformClient =
-          membership.role === SPACE_MEMBERSHIP_ROLE.VIEWER ? this.adminClient : platformClient
+        platformClient = membership.role === SPACE_MEMBERSHIP_ROLE.VIEWER ? this.adminClient : platformClient
         projectId = space.hostProject
         usersMap = await this.mapUsers(spaceMemberships, dbCluster)
       }
@@ -356,10 +332,7 @@ export class DbClusterSynchronizeFacade {
       return
     }
 
-    this.logger.log(
-      { data: describeDbClusterRes },
-      'Received DbCluster describe response from platform',
-    )
+    this.logger.log({ data: describeDbClusterRes }, 'Received DbCluster describe response from platform')
 
     const currentStatus: string = STATUSES[invertObj(STATUS)[dbCluster.status]].toString()
 
@@ -368,10 +341,7 @@ export class DbClusterSynchronizeFacade {
       dbCluster.host === describeDbClusterRes.endpoint &&
       dbCluster.port === describeDbClusterRes.port?.toString()
     ) {
-      this.logger.log(
-        { dxid: dbCluster.dxid },
-        'Status, endpoint or port have not been changed, no updates',
-      )
+      this.logger.log({ dxid: dbCluster.dxid }, 'Status, endpoint or port have not been changed, no updates')
       return
     }
 
@@ -450,10 +420,7 @@ export class DbClusterSynchronizeFacade {
     }
 
     delete platformJobData.sshHostKey
-    this.logger.log(
-      { platformJobData: platformJobData },
-      'Received DbCluster sync job/describe from platform',
-    )
+    this.logger.log({ platformJobData: platformJobData }, 'Received DbCluster sync job/describe from platform')
 
     const remoteState = platformJobData.state
 
@@ -471,7 +438,7 @@ export class DbClusterSynchronizeFacade {
         ws.terminate()
       }, WS_TIMEOUT_MS)
 
-      ws.on('message', async (data) => {
+      ws.on('message', async data => {
         try {
           const logStr = data.toString()
           const log = JSON.parse(logStr)

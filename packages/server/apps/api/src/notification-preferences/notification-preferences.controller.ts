@@ -1,8 +1,8 @@
 import { Body, Controller, Get, HttpCode, Put, UseGuards } from '@nestjs/common'
 import { ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import {
-  NotificationPreferenceService,
   GroupedPreferences,
+  NotificationPreferenceService,
   PreferenceKey,
 } from '@shared/domain/notification-preference/notification-preference.service'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
@@ -12,13 +12,11 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 @UseGuards(UserContextGuard)
 @Controller('/notification-preferences')
 export class NotificationPreferencesController {
-  constructor(
-    private readonly notificationPreferenceService: NotificationPreferenceService,
-  ) {}
+  constructor(private readonly notificationPreferenceService: NotificationPreferenceService) {}
 
   @ApiOperation({
     summary: 'Get notification preferences',
-    description: 'Returns the current user\'s notification preferences grouped by role/scope.',
+    description: "Returns the current user's notification preferences grouped by role/scope.",
   })
   @ApiResponse({ status: 200, description: 'Grouped notification preferences' })
   @ApiResponse({ status: 401, description: 'Unauthorized – missing or invalid session' })
@@ -30,15 +28,13 @@ export class NotificationPreferencesController {
 
   @ApiOperation({
     summary: 'Update notification preferences',
-    description: 'Creates or updates the current user\'s notification preferences.',
+    description: "Creates or updates the current user's notification preferences.",
   })
   @ApiResponse({ status: 204, description: 'Preferences updated successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized – missing or invalid session' })
   @Put()
   @HttpCode(204)
-  async change(
-    @Body() body: Partial<Record<PreferenceKey, boolean>>,
-  ): Promise<void> {
+  async change(@Body() body: Partial<Record<PreferenceKey, boolean>>): Promise<void> {
     await this.notificationPreferenceService.updatePreferences(body)
   }
 }

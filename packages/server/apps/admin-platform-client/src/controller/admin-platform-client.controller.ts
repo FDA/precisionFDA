@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common'
 import { isFunction } from '@nestjs/common/utils/shared.utils'
-import { ClientRequestError } from '@shared/errors'
 import { Response } from 'express'
+import { ClientRequestError } from '@shared/errors'
 import { ExecuteBodyDto } from '../model/execute-body.dto'
 import { AdminPlatformClientService } from '../service/admin-platform-client.service'
 

@@ -32,4 +32,4 @@ const initDeleteProcedure = async (connection: Connection): Promise<void> => {
 const dropData = (connection: Connection): Promise<void> =>
   connection.execute(`CALL  \`${config.database.dbName}\`.droptest();`)
 
-export { initDeleteProcedure, dropData }
+export { dropData, initDeleteProcedure }

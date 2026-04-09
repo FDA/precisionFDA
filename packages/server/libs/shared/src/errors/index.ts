@@ -132,10 +132,7 @@ export class IncompatibleVersionError extends BaseError {
 }
 
 export class InvalidStateError extends BaseError {
-  constructor(
-    message = 'Error: Entity is in invalid state for the operation',
-    props: MaybeBaseErrorProps = {},
-  ) {
+  constructor(message = 'Error: Entity is in invalid state for the operation', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.INVALID_STATE,
       statusCode: 422,
@@ -185,10 +182,7 @@ export class UnauthorizedRequestError extends BaseError {
 }
 
 export class PermissionError extends BaseError {
-  constructor(
-    message = 'Error: You do not have permissions to access this entity',
-    props: MaybeBaseErrorProps = {},
-  ) {
+  constructor(message = 'Error: You do not have permissions to access this entity', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.NOT_PERMITTED,
       statusCode: 403,
@@ -293,10 +287,7 @@ export class ServiceError extends BaseError {
 }
 
 export class MfaAlreadyResetError extends BaseError {
-  constructor(
-    message = 'MFA is already reset or not yet configured',
-    props: MaybeBaseErrorProps = {},
-  ) {
+  constructor(message = 'MFA is already reset or not yet configured', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.MFA_ALREADY_RESET,
       statusCode: 400,
@@ -306,10 +297,7 @@ export class MfaAlreadyResetError extends BaseError {
 }
 
 export class OrgMembershipError extends BaseError {
-  constructor(
-    message = 'Permission denied, must be a user of the org.',
-    props: MaybeBaseErrorProps = {},
-  ) {
+  constructor(message = 'Permission denied, must be a user of the org.', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.ORG_MEMBERSHIP_ERROR,
       statusCode: 400,
@@ -355,12 +343,9 @@ export class DataPortalUrlSlugFormatError extends BaseError {
 
 export class DataPortalUrlSlugNotUniqueError extends BaseError {
   constructor(urlSlug: string) {
-    super(
-      `Cannot create Data portal. Another data portal with URL slug '${urlSlug}' already exists`,
-      {
-        code: ErrorCodes.DATA_PORTAL_CREATE_ERROR,
-        statusCode: 400,
-      },
-    )
+    super(`Cannot create Data portal. Another data portal with URL slug '${urlSlug}' already exists`, {
+      code: ErrorCodes.DATA_PORTAL_CREATE_ERROR,
+      statusCode: 400,
+    })
   }
 }

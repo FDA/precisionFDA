@@ -1,6 +1,6 @@
-import { USER_STATE } from '@shared/domain/user/user.entity'
-import { IsEnum, IsOptional } from 'class-validator'
 import { Type } from 'class-transformer'
+import { IsEnum, IsOptional } from 'class-validator'
+import { USER_STATE } from '@shared/domain/user/user.entity'
 
 export class UserPaginationFilter {
   @IsOptional()

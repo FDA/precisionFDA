@@ -21,6 +21,27 @@ type apiConfig struct {
 }
 
 // better name needed
+type jsonSpaceResponse struct {
+	Id        int     `json:"id"`
+	Title     string  `json:"title"`
+	Role      *string `json:"role"` // null when caller has no membership (e.g. site admin)
+	Side      *string `json:"side"` // null when caller has no membership (e.g. site admin)
+	Type      string  `json:"type"`
+	State     string  `json:"state"`
+	Protected bool    `json:"protected"`
+}
+
+type jsonMembersResponse struct {
+	Id        int    `json:"id"`
+	Active    bool   `json:"active"`
+	CreatedAt string `json:"createdAt"`
+	Role      string `json:"role"`
+	Side      string `json:"side"`
+	Name      string `json:"name"`
+	Username  string `json:"username"`
+}
+
+// better name needed
 type jsonFileResponse struct {
 	Id        int    `json:"id"`
 	Uid       string `json:"uid"`
@@ -84,39 +105,94 @@ func (c *PFDAClient) LsApps(spaceID string, flags map[string]bool) error {
 	return c.lsResource(apiConfig{Path: "apps", Endpoint: "apps", SpaceID: spaceID, Flags: flags})
 }
 
-func (c *PFDAClient) LsAssets(spaceID string, flags map[string]bool) error {
-	return c.lsResource(apiConfig{Path: "assets", Endpoint: "assets", SpaceID: spaceID, Flags: flags})
+func (c *PFDAClient) LsAssets(scope string) error {
+	apiURL := fmt.Sprintf("%s/api/v2/cli/assets", c.BaseURL)
+
+	params := url.Values{}
+	if scope != "" {
+		params.Set("scope", scope)
+	}
+
+	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
+	body, err := c.makeRequest("GET", fullURL, nil)
+	if err != nil {
+		return err
+	}
+
+	var result []map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+
+	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
+	fmt.Printf("%s\n", string(prettyJSON))
+	return nil
 }
 
 func (c *PFDAClient) LsWorkflows(spaceID string, flags map[string]bool) error {
 	return c.lsResource(apiConfig{Path: "workflows", Endpoint: "workflows", SpaceID: spaceID, Flags: flags})
 }
 
-func (c *PFDAClient) LsExecutions(spaceID string, flags map[string]bool) error {
-	return c.lsResource(apiConfig{Path: "jobs", Endpoint: "jobs", SpaceID: spaceID, Flags: flags})
-}
-
-func (c *PFDAClient) LsDiscussions(spaceID string, flags map[string]bool) error {
-	return c.lsResource(apiConfig{Path: "spaces/" + spaceID, Endpoint: "discussions", SpaceID: "", Flags: flags})
-}
-
-func (c *PFDAClient) LsSpaces(flags map[string]bool) error {
-	apiURL := fmt.Sprintf("%s/api/spaces/cli", c.BaseURL)
+func (c *PFDAClient) LsExecutions(scope string) error {
+	apiURL := fmt.Sprintf("%s/api/v2/cli/jobs", c.BaseURL)
 
 	params := url.Values{}
-	for flag, value := range flags {
-		if value {
-			params.Add(flag, strconv.FormatBool(value))
-		}
+	if scope != "" {
+		params.Set("scope", scope)
 	}
+
 	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
-	status, body, err := c.makeRequestFail("GET", fullURL, nil)
+	body, err := c.makeRequest("GET", fullURL, nil)
 	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("Something went wrong")
-		} else {
-			return err
-		}
+		return err
+	}
+
+	var result []map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+
+	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
+	fmt.Printf("%s\n", string(prettyJSON))
+	return nil
+}
+
+func (c *PFDAClient) LsDiscussions(spaceID string) error {
+	apiURL := fmt.Sprintf("%s/api/v2/cli/spaces/%s/discussions", c.BaseURL, spaceID)
+
+	body, err := c.makeRequest("GET", apiURL, nil)
+	if err != nil {
+		return err
+	}
+
+	var result []map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+
+	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
+	fmt.Printf("%s\n", string(prettyJSON))
+	return nil
+}
+
+func (c *PFDAClient) LsSpaces(state string, types []string, protected bool) error {
+	apiURL := fmt.Sprintf("%s/api/v2/cli/spaces", c.BaseURL)
+
+	params := url.Values{}
+	if state != "" {
+		params.Set("state", state)
+	}
+	for _, t := range types {
+		params.Add("types[]", t)
+	}
+	if protected {
+		params.Set("protected", "true")
+	}
+
+	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
+	body, err := c.makeRequest("GET", fullURL, nil)
+	if err != nil {
+		return err
 	}
 
 	var spaces []jsonSpaceResponse
@@ -124,7 +200,7 @@ func (c *PFDAClient) LsSpaces(flags map[string]bool) error {
 		return err
 	}
 
-	printListSpacesResponse(spaces, flags["json"])
+	printListSpacesResponse(spaces, c.JsonResponse)
 	return nil
 }
 
@@ -231,4 +307,52 @@ func getFileSize(file jsonFileResponse) string {
 		return helpers.HumanReadableSize(file.Size)
 	}
 	return ""
+}
+
+func printListSpacesResponse(spaces []jsonSpaceResponse, asJSON bool) {
+	if asJSON {
+		prettyJSON, _ := json.MarshalIndent(spaces, "", "    ")
+		fmt.Println(string(prettyJSON))
+	} else if len(spaces) > 0 {
+		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+
+		// Function to join and print a line
+		printLine := func(columns []string) {
+			fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
+		}
+
+		headers := []string{"ID", "Type", "Status", "Role", "Side", "Name"}
+		printLine(headers)
+
+		for _, space := range spaces {
+			role := helpers.DerefOrDefault(space.Role, "-")
+			side := helpers.DerefOrDefault(space.Side, "-")
+			columns := []string{strconv.Itoa(space.Id), space.Type, helpers.FormatValue(space.Protected, "Protected"), role, side, space.Title}
+			printLine(columns)
+		}
+		writer.Flush()
+	}
+}
+
+func printSpaceMembersResponse(members []jsonMembersResponse, asJSON bool) {
+	if asJSON {
+		prettyJSON, _ := json.MarshalIndent(members, "", "    ")
+		fmt.Println(string(prettyJSON))
+	} else if len(members) > 0 {
+		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+
+		// Function to join and print a line
+		printLine := func(columns []string) {
+			fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
+		}
+
+		headers := []string{"ID", "Name", "Role", "Side", "Active", "Added at"}
+		printLine(headers)
+
+		for _, member := range members {
+			columns := []string{strconv.Itoa(member.Id), member.Name, member.Role, member.Side, strconv.FormatBool(member.Active), member.CreatedAt}
+			printLine(columns)
+		}
+		writer.Flush()
+	}
 }

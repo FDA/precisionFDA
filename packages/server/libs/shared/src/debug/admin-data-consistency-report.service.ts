@@ -1,17 +1,17 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
-import {
-  buildEmailTemplate,
-  getBullJobIdForEmailOperation,
-} from '@shared/domain/email/email.helper'
+import { buildEmailTemplate, getBullJobIdForEmailOperation } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { Job } from '@shared/domain/job/job.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
@@ -20,14 +20,12 @@ import { EntityScope } from '@shared/types/common'
 import { TimeUtils } from '@shared/utils/time.utils'
 import { EmailSendInput } from '../domain/email/email.config'
 import {
-  adminDataConsistencyReportTemplate,
   AdminDataConsistencyReportTemplateInput,
+  adminDataConsistencyReportTemplate,
 } from '../domain/email/templates/mjml/admin-data-consistency-report.template'
 import { JobRepository } from '../domain/job/job.repository'
-import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from '../domain/space/space.enum'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 
 // biome-ignore-start lint/suspicious/noExplicitAny: Should be fixed
 export type AdminDataConsistencyReportOutput = {
@@ -173,7 +171,7 @@ export class AdminDataConsistencyReportService {
       populate: ['spaceMemberships', 'spaceMemberships.user'],
     })
     const leadMapping = (lead: SpaceMembership) => {
-      const user = lead.user.getEntity()
+      const user: User = lead.user.getEntity()
       return {
         id: lead.id,
         side: lead.side,
@@ -194,22 +192,18 @@ export class AdminDataConsistencyReportService {
       const errors: string[] = []
 
       // There should not be more than one lead on either side
-      const allHostLeads = space.spaceMemberships.getItems().filter((x) => {
+      const allHostLeads = space.spaceMemberships.getItems().filter(x => {
         return x.isLead() && x.side === SPACE_MEMBERSHIP_SIDE.HOST
       })
       if (allHostLeads.length > 1) {
-        errors.push(
-          `Error: more than one host lead - ${JSON.stringify(allHostLeads.map(leadMapping))}`,
-        )
+        errors.push(`Error: more than one host lead - ${JSON.stringify(allHostLeads.map(leadMapping))}`)
       }
 
-      const allGuestLeads = space.spaceMemberships.getItems().filter((x) => {
+      const allGuestLeads = space.spaceMemberships.getItems().filter(x => {
         return x.isLead() && x.side === SPACE_MEMBERSHIP_SIDE.GUEST
       })
       if (allGuestLeads.length > 1) {
-        errors.push(
-          `Error: more than one guest lead - ${JSON.stringify(allGuestLeads.map(leadMapping))}`,
-        )
+        errors.push(`Error: more than one guest lead - ${JSON.stringify(allGuestLeads.map(leadMapping))}`)
       }
 
       if (errors.length > 0) {
@@ -278,12 +272,9 @@ export class AdminDataConsistencyReportService {
   }
 
   private async sendReportEmail(output: AdminDataConsistencyReportOutput): Promise<void> {
-    const body = buildEmailTemplate<AdminDataConsistencyReportTemplateInput>(
-      adminDataConsistencyReportTemplate,
-      {
-        content: output,
-      },
-    )
+    const body = buildEmailTemplate<AdminDataConsistencyReportTemplateInput>(adminDataConsistencyReportTemplate, {
+      content: output,
+    })
     const email: EmailSendInput = {
       emailType: EMAIL_TYPES.adminDataConsistencyReport,
       to: config.emails.report,

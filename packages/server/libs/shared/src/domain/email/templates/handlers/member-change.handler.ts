@@ -1,18 +1,15 @@
 import { LoadedReference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import {
-  EmailTypeToContextMap,
-  MemberChangedContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToContextMap, MemberChangedContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { MemberChangedDTO } from '@shared/domain/email/dto/member-changed.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { ErrorCodes, NotFoundError } from '@shared/errors'
@@ -117,27 +114,15 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     return actionValue
   }
 
-  protected async getNotificationSettingKeys(
-    context: MemberChangedContext,
-    user: User,
-  ): Promise<string[]> {
+  protected async getNotificationSettingKeys(context: MemberChangedContext, user: User): Promise<string[]> {
     const space = context.space
     await space.spaceMemberships.loadItems()
     const spaceMembership = space.spaceMemberships
       .getItems()
-      .filter(
-        (spaceMembership) =>
-          spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id,
-      )
+      .filter(spaceMembership => spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id)
 
     if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
-      return [
-        getKeyForUserSpaceRole(
-          spaceMembership[0],
-          this.getNotificationKey(context.input.activityType),
-          space,
-        ),
-      ]
+      return [getKeyForUserSpaceRole(spaceMembership[0], this.getNotificationKey(context.input.activityType), space)]
     }
   }
 
@@ -154,12 +139,11 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     // filter out membership that was added
     const receivers = memberships
       .filter(
-        (membership) =>
-          (context.input.activityType === 'membership_added' &&
-            membership.id !== context.updatedMembership.id) ||
+        membership =>
+          (context.input.activityType === 'membership_added' && membership.id !== context.updatedMembership.id) ||
           context.input.activityType === 'membership_changed',
       )
-      .map((membership) => membership.user.getEntity())
+      .map(membership => membership.user.getEntity())
 
     // filter out user who initiated it
     return receivers.filter((user: User) => user.id !== context.input.initUserId)
@@ -183,10 +167,9 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
   }> {
     const membership = updatedMembership
     if (!membership || !membership.user.unwrap()) {
-      throw new NotFoundError(
-        `New space member id ${input.updatedMembershipId.toString()} not found`,
-        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
-      )
+      throw new NotFoundError(`New space member id ${input.updatedMembershipId.toString()} not found`, {
+        code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND,
+      })
     }
 
     const action = this.getActionStr(input)

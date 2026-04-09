@@ -5,15 +5,19 @@ import { database } from '@shared/database'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { SetPropertiesDTO } from '@shared/domain/property/dto/set-properties.dto'
+import { SPACE_STATE } from '@shared/domain/space/space.enum'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { User } from '@shared/domain/user/user.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
+import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { ErrorCodes } from '@shared/errors'
 import { create, db, generate } from '@shared/test'
+import { fakes, mocksReset } from '@shared/test/mocks'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -40,7 +44,7 @@ describe('/cli', async () => {
     expect(body).to.be.an('object')
     expect(body).to.have.property('version')
     expect(body.version).to.be.a('string')
-    expect(body.version).to.equal('2.11.2')
+    expect(body.version).to.equal('2.12.0')
   })
 
   describe('cli describe', () => {
@@ -242,12 +246,12 @@ describe('/cli', async () => {
   })
 
   describe('cli job scope', () => {
-    it('GET job/:uid/scope returns correct private job scope', async () => {
+    it('GET jobs/:dxid/scope returns correct private job scope', async () => {
       const job = create.jobHelper.create(em, { user }, { scope: 'private' })
       await em.flush()
 
       const { body } = await supertest(testedApp.getHttpServer())
-        .get(`/cli/job/${job.dxid}/scope`)
+        .get(`/cli/jobs/${job.dxid}/scope`)
         .set('Accept', 'application/json')
         .set(getDefaultHeaderData(user))
         .expect(200)
@@ -256,13 +260,13 @@ describe('/cli', async () => {
       expect(body).to.have.property('scope').that.is.a('string').that.equals('private')
     })
 
-    it('GET job/:uid/scope returns 404 error for different user private job', async () => {
+    it('GET jobs/:dxid/scope returns 404 error for different user private job', async () => {
       const user2 = create.userHelper.create(em)
       const job = create.jobHelper.create(em, { user: user2 }, { scope: 'private' })
       await em.flush()
 
       const { body } = await supertest(testedApp.getHttpServer())
-        .get(`/cli/job/${job.dxid}/scope`)
+        .get(`/cli/jobs/${job.dxid}/scope`)
         .set('Accept', 'application/json')
         .set(getDefaultHeaderData(user))
         .expect(404)
@@ -275,7 +279,7 @@ describe('/cli', async () => {
       expect(body).to.have.property('stack').that.is.a('string')
     })
 
-    it('GET job/:uid/scope returns correct space job scope', async () => {
+    it('GET jobs/:dxid/scope returns correct space job scope', async () => {
       const user2 = create.userHelper.create(em)
       const groupSpace = create.spacesHelper.create(em, generate.space.group())
       await em.flush()
@@ -286,7 +290,7 @@ describe('/cli', async () => {
       await em.flush()
 
       const { body } = await supertest(testedApp.getHttpServer())
-        .get(`/cli/job/${job.dxid}/scope`)
+        .get(`/cli/jobs/${job.dxid}/scope`)
         .set('Accept', 'application/json')
         .set(getDefaultHeaderData(user))
         .expect(200)
@@ -901,6 +905,725 @@ describe('/cli', async () => {
       expect(fileProp[0].propertyValue).to.equal('value2-new')
       expect(fileProp[1].propertyName).to.equal('prop5')
       expect(fileProp[1].propertyValue).to.equal('value5')
+    })
+  })
+
+  describe('cli remove nodes', () => {
+    it('DELETE /nodes removes files by uids', async () => {
+      const file1 = create.filesHelper.createUploaded(em, { user })
+      const file2 = create.filesHelper.createUploaded(em, { user })
+      await em.flush()
+
+      const { text } = await supertest(testedApp.getHttpServer())
+        .delete('/cli/nodes')
+        .send({
+          uids: [file1.uid, file2.uid],
+        })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(parseInt(text, 10)).to.equal(2)
+    })
+
+    it('DELETE /nodes removes folders by ids', async () => {
+      const folder1 = create.filesHelper.createFolder(em, { user })
+      const folder2 = create.filesHelper.createFolder(em, { user })
+      await em.flush()
+
+      const { text } = await supertest(testedApp.getHttpServer())
+        .delete('/cli/nodes')
+        .send({
+          ids: [folder1.id, folder2.id],
+        })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(parseInt(text, 10)).to.equal(2)
+    })
+
+    it('DELETE /nodes returns 0 for non-existing files', async () => {
+      const { text } = await supertest(testedApp.getHttpServer())
+        .delete('/cli/nodes')
+        .send({
+          uids: ['file-nonexisting-1'],
+        })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(parseInt(text, 10)).to.equal(0)
+    })
+  })
+
+  describe('cli terminate job', () => {
+    beforeEach(() => {
+      mocksReset()
+    })
+
+    it('PATCH /jobs/:uid/terminate terminates a job', async () => {
+      const app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+      const job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
+      await em.flush()
+
+      await supertest(testedApp.getHttpServer())
+        .patch(`/cli/jobs/${job.uid}/terminate`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(fakes.client.jobTerminateFake.calledOnce).to.be.true()
+    })
+
+    it('PATCH /jobs/:uid/terminate returns 404 for non-existing job', async () => {
+      const { body } = await supertest(testedApp.getHttpServer())
+        .patch('/cli/jobs/job-nonexisting-1/terminate')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(404)
+
+      expect(body).to.be.an('object')
+      expect(body).to.have.property('error')
+    })
+
+    it('PATCH /jobs/:uid/terminate returns 404 for job owned by another user', async () => {
+      const user2 = create.userHelper.create(em)
+      const app = create.appHelper.createHTTPS(em, { user: user2 }, { spec: generate.app.jupyterAppSpecData() })
+      const job = create.jobHelper.create(em, { user: user2, app }, { scope: 'private', state: JOB_STATE.IDLE })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .patch(`/cli/jobs/${job.uid}/terminate`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(404)
+
+      expect(body).to.be.an('object')
+      expect(body).to.have.property('error')
+    })
+
+    it('PATCH /jobs/:uid/terminate returns 422 for an already terminated job', async () => {
+      const app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+      const job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.TERMINATED })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .patch(`/cli/jobs/${job.uid}/terminate`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(422)
+
+      expect(body).to.have.property('error')
+      expect(body.error).to.have.property('code', ErrorCodes.INVALID_STATE)
+    })
+
+    it('PATCH /jobs/:uid/terminate returns 422 for a terminating job', async () => {
+      const app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+      const job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.TERMINATING })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .patch(`/cli/jobs/${job.uid}/terminate`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(422)
+
+      expect(body).to.have.property('error')
+      expect(body.error).to.have.property('code', ErrorCodes.INVALID_STATE)
+    })
+  })
+
+  describe('cli run app', () => {
+    beforeEach(() => {
+      mocksReset()
+    })
+
+    it('POST /apps/:uid/run runs an HTTPS app', async () => {
+      const app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+      await em.flush()
+
+      const runData = {
+        scope: 'private',
+        jobLimit: 10,
+        input: {},
+      }
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post(`/cli/apps/${app.uid}/run`)
+        .send(runData)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(201)
+
+      expect(body).to.be.an('object')
+      expect(body).to.have.property('jobUid').that.is.a('string')
+      expect(fakes.client.jobCreateFake.calledOnce).to.be.true()
+    })
+
+    it('POST /apps/:uid/run returns 404 for non-existing app', async () => {
+      const runData = {
+        scope: 'private',
+        jobLimit: 10,
+        input: {},
+      }
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post('/cli/apps/app-nonexisting-1/run')
+        .send(runData)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(404)
+
+      expect(body).to.have.property('error')
+      expect(body.error).to.have.property('code').that.equals(ErrorCodes.APP_NOT_FOUND)
+    })
+
+    it('POST /apps/:uid/run with custom name and instance type', async () => {
+      const app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+      await em.flush()
+
+      const runData = {
+        scope: 'private',
+        name: 'my-custom-job',
+        instanceType: 'baseline-2',
+        jobLimit: 5,
+        inputs: {},
+      }
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post(`/cli/apps/${app.uid}/run`)
+        .send(runData)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(201)
+
+      expect(body).to.be.an('object')
+      expect(body).to.have.property('jobUid').that.is.a('string')
+    })
+
+    it('POST /apps/:uid/run applies CLI defaults when body fields are omitted', async () => {
+      const app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post(`/cli/apps/${app.uid}/run`)
+        .send({ inputs: {} })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(201)
+
+      expect(body).to.have.property('jobUid')
+      const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+      expect(platformCall).to.have.property('name', `${app.title}-cli`)
+    })
+
+    it('POST /apps/:uid/run returns 404 for private app owned by another user', async () => {
+      const user2 = create.userHelper.create(em)
+      await em.flush()
+      const app = create.appHelper.createHTTPS(
+        em,
+        { user: user2 },
+        { scope: 'private', spec: generate.app.jupyterAppSpecData() },
+      )
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post(`/cli/apps/${app.uid}/run`)
+        .send(generate.app.runAppInput())
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(404)
+
+      expect(body).to.have.property('error')
+      expect(body.error).to.have.property('code').that.equals(ErrorCodes.APP_NOT_FOUND)
+    })
+
+    it('POST /apps/:uid/run returns 422 for a regular app', async () => {
+      const regularApp = create.appHelper.createRegular(em, { user })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post(`/cli/apps/${regularApp.uid}/run`)
+        .send(generate.app.runAppInput())
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(422)
+
+      expect(body.error).to.have.property('code', ErrorCodes.INVALID_STATE)
+    })
+
+    it('POST /apps/:uid/run runs an HTTPS app in a space scope', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
+      const app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post(`/cli/apps/${app.uid}/run`)
+        .send({ scope: groupSpace.scope, inputs: {} })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(201)
+
+      expect(body).to.have.property('jobUid').that.is.a('string')
+      expect(fakes.client.jobCreateFake.calledOnce).to.be.true()
+    })
+  })
+
+  describe('cli list spaces', () => {
+    it('GET /spaces returns active spaces for user by default', async () => {
+      const space1 = create.spacesHelper.create(em, generate.space.group())
+      const space2 = create.spacesHelper.create(em, generate.space.group())
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: space1 }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      create.spacesHelper.addMember(em, { user, space: space2 }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/spaces')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(2)
+      const ids = body.map((s: { id: number }) => s.id)
+      expect(ids).to.include(space1.id)
+      expect(ids).to.include(space2.id)
+    })
+
+    it('GET /spaces?state=locked returns only locked spaces', async () => {
+      const activeSpace = create.spacesHelper.create(em, { ...generate.space.group(), state: SPACE_STATE.ACTIVE })
+      const lockedSpace = create.spacesHelper.create(em, { ...generate.space.group(), state: SPACE_STATE.LOCKED })
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: activeSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      create.spacesHelper.addMember(em, { user, space: lockedSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/spaces?state=locked')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('id', lockedSpace.id)
+      expect(body[0]).to.have.property('state', 'locked')
+    })
+
+    it('GET /spaces?state=unactivated returns only unactivated spaces', async () => {
+      const activeSpace = create.spacesHelper.create(em, { ...generate.space.group(), state: SPACE_STATE.ACTIVE })
+      const unactivatedSpace = create.spacesHelper.create(em, {
+        ...generate.space.group(),
+        state: SPACE_STATE.UNACTIVATED,
+      })
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: activeSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      create.spacesHelper.addMember(em, { user, space: unactivatedSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/spaces?state=unactivated')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('id', unactivatedSpace.id)
+      expect(body[0]).to.have.property('state', 'unactivated')
+    })
+
+    it('GET /spaces?types[]=0 returns only group type spaces', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      const reviewSpace = create.spacesHelper.create(em, generate.space.simple())
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      create.spacesHelper.addMember(em, { user, space: reviewSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/spaces?types[]=0')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('id', groupSpace.id)
+      expect(body[0]).to.have.property('type', 'groups')
+    })
+
+    it('GET /spaces?types[]=0&types[]=1 returns multiple types', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      const reviewSpace = create.spacesHelper.create(em, generate.space.simple())
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      create.spacesHelper.addMember(em, { user, space: reviewSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/spaces?types[]=0&types[]=1')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(2)
+      const types = body.map((s: { type: string }) => s.type)
+      expect(types).to.include('groups')
+      expect(types).to.include('review')
+    })
+
+    it('GET /spaces?protected=true returns only protected spaces', async () => {
+      const protectedSpace = create.spacesHelper.create(em, { ...generate.space.group(), protected: true })
+      const unprotectedSpace = create.spacesHelper.create(em, { ...generate.space.group(), protected: false })
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: protectedSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      create.spacesHelper.addMember(em, { user, space: unprotectedSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/spaces?protected=true')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('id', protectedSpace.id)
+      expect(body[0]).to.have.property('protected', true)
+    })
+
+    it('GET /spaces does not return spaces where user is not a member', async () => {
+      const memberSpace = create.spacesHelper.create(em, generate.space.group())
+      create.spacesHelper.create(em, generate.space.group()) // no membership
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: memberSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/spaces')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('id', memberSpace.id)
+    })
+
+    it('GET /spaces returns correct response shape', async () => {
+      const space = create.spacesHelper.create(em, generate.space.group())
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/spaces')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('id')
+      expect(body[0]).to.have.property('title')
+      expect(body[0]).to.have.property('type')
+      expect(body[0]).to.have.property('state')
+      expect(body[0]).to.have.property('protected')
+      expect(body[0]).to.have.property('role')
+      expect(body[0]).to.have.property('side')
+    })
+  })
+
+  describe('cli list assets', () => {
+    it('GET /assets returns private assets by default (no scope param)', async () => {
+      const asset = create.assetHelper.create(em, { user }, { scope: 'private' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/assets')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('uid', asset.uid)
+    })
+
+    it("GET /assets?scope=private returns user's private assets", async () => {
+      const asset = create.assetHelper.create(em, { user }, { scope: 'private' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/assets?scope=private')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('uid', asset.uid)
+    })
+
+    it('GET /assets?scope=public returns public assets', async () => {
+      const asset = create.assetHelper.create(em, { user }, { scope: 'public' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/assets?scope=public')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('uid', asset.uid)
+    })
+
+    it('GET /assets?scope=public does not return private assets', async () => {
+      create.assetHelper.create(em, { user }, { scope: 'private' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/assets?scope=public')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(0)
+    })
+
+    it("GET /assets (private) does not return other user's private assets", async () => {
+      const user2 = create.userHelper.create(em)
+      create.assetHelper.create(em, { user: user2 }, { scope: 'private' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/assets')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(0)
+    })
+
+    it('GET /assets returns correct response shape', async () => {
+      create.assetHelper.create(em, { user }, { scope: 'private' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/assets')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('id')
+      expect(body[0]).to.have.property('uid')
+      expect(body[0]).to.have.property('name')
+      expect(body[0]).to.have.property('type')
+      expect(body[0]).to.have.property('state')
+      expect(body[0]).to.have.property('scope')
+      expect(body[0]).to.have.property('createdAt')
+    })
+
+    it('GET /assets?scope=space-{id} returns assets in a space', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      const asset = create.assetHelper.create(em, { user }, { scope: groupSpace.scope })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get(`/cli/assets?scope=space-${groupSpace.id}`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('uid', asset.uid)
+      expect(body[0]).to.have.property('scope', groupSpace.scope)
+    })
+
+    it('GET /assets?scope=space-{id} returns 404 for inaccessible space', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      await em.flush()
+      // Do NOT add user as member
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get(`/cli/assets?scope=space-${groupSpace.id}`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(404)
+
+      expect(body).to.have.property('error')
+      expect(body.error).to.have.property('code', ErrorCodes.NOT_FOUND)
+    })
+  })
+
+  describe('cli list jobs', () => {
+    it('GET /jobs returns private jobs by default (no scope param)', async () => {
+      const job = create.jobHelper.create(em, { user }, { scope: 'private' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/jobs')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('uid', job.uid)
+    })
+
+    it('GET /jobs?scope=public returns public jobs', async () => {
+      const job = create.jobHelper.create(em, { user }, { scope: 'public' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/jobs?scope=public')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('uid', job.uid)
+    })
+
+    it('GET /jobs?scope=space-{id} returns jobs in a space', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      await em.flush()
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      const job = create.jobHelper.create(em, { user }, { scope: groupSpace.scope })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get(`/cli/jobs?scope=space-${groupSpace.id}`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('uid', job.uid)
+      expect(body[0]).to.have.property('scope', groupSpace.scope)
+    })
+
+    it('GET /jobs?scope=space-{id} returns 404 for inaccessible space', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      await em.flush()
+      // Do NOT add user as member
+      create.jobHelper.create(em, { user }, { scope: groupSpace.scope })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get(`/cli/jobs?scope=space-${groupSpace.id}`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(404)
+
+      expect(body).to.be.an('object')
+      expect(body).to.have.property('error').that.is.an('object')
+      expect(body.error).to.have.property('code').that.equals(ErrorCodes.NOT_FOUND)
+    })
+
+    it("GET /jobs (private) does not return other user's private jobs", async () => {
+      const user2 = create.userHelper.create(em)
+      create.jobHelper.create(em, { user: user2 }, { scope: 'private' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/jobs')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(0)
+    })
+
+    it('GET /jobs returns correct response shape', async () => {
+      create.jobHelper.create(em, { user }, { scope: 'private' })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/jobs')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('array').of.length(1)
+      expect(body[0]).to.have.property('id')
+      expect(body[0]).to.have.property('uid')
+      expect(body[0]).to.have.property('dxid')
+      expect(body[0]).to.have.property('state')
+      expect(body[0]).to.have.property('name')
+      expect(body[0]).to.have.property('scope')
+      expect(body[0]).to.have.property('createdAt')
+    })
+
+    it('GET /jobs?scope=invalid returns 400 validation error', async () => {
+      await supertest(testedApp.getHttpServer())
+        .get('/cli/jobs?scope=invalid')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(400)
+    })
+  })
+
+  describe('cli file download', () => {
+    beforeEach(() => {
+      mocksReset()
+    })
+
+    it('GET /files/:uid/download returns download link for a closed file', async () => {
+      const file = create.filesHelper.createUploaded(em, { user })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get(`/cli/files/${file.uid}/download`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.be.an('object')
+      expect(body).to.have.property('fileUrl').that.is.a('string').and.includes(file.uid)
+      expect(body).to.have.property('fileSize').that.is.a('number')
+      expect(fakes.client.fileDownloadLinkFake.calledOnce).to.be.false()
+    })
+
+    it('GET /files/:uid/download returns 404 for non-existing file', async () => {
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get('/cli/files/file-nonexisting-1/download')
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(404)
+
+      expect(body).to.be.an('object')
+      expect(body).to.have.property('error')
+    })
+
+    it('GET /files/:uid/download returns 404 for file owned by another user', async () => {
+      const user2 = create.userHelper.create(em)
+      await em.flush()
+      const file = create.filesHelper.createUploaded(em, { user: user2 })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get(`/cli/files/${file.uid}/download`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(404)
+
+      expect(body).to.be.an('object')
+      expect(body).to.have.property('error')
+    })
+
+    it('GET /files/:uid/download returns 400 for non-closed file', async () => {
+      const file = create.filesHelper.createUploaded(em, { user }, { state: FILE_STATE_DX.OPEN })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .get(`/cli/files/${file.uid}/download`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(400)
+
+      expect(body).to.be.an('object')
+      expect(body).to.have.property('error')
     })
   })
 })

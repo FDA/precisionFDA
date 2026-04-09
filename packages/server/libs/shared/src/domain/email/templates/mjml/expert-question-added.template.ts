@@ -1,10 +1,4 @@
-import {
-  footer,
-  generateExpertQuestionLink,
-  getBottomSpacer,
-  getMiddleSpacer,
-  header,
-} from './common'
+import { footer, generateExpertQuestionLink, getBottomSpacer, getMiddleSpacer, header } from './common'
 
 export type ExpertQuestionTemplateInput = {
   content: {

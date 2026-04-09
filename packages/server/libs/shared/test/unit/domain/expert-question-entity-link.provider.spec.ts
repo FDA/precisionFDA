@@ -1,7 +1,7 @@
+import { expect } from 'chai'
 import { config } from '@shared/config'
 import { ExpertQuestionEntityLinkProvider } from '@shared/domain/entity/entity-link/expert-question-entity-link.provider'
 import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
-import { expect } from 'chai'
 
 describe('ExpertQuestionEntityLinkProvider', () => {
   const EXPERT_ID = 1
@@ -14,9 +14,7 @@ describe('ExpertQuestionEntityLinkProvider', () => {
   it('should provide correct absolute link', async () => {
     const res = await getInstance().getLink(EXPERT_QUESTION)
 
-    expect(res).to.equal(
-      `${config.api.railsHost}/experts/${EXPERT_ID}/expert_questions/${EXPERT_QUESTION_ID}`,
-    )
+    expect(res).to.equal(`${config.api.railsHost}/experts/${EXPERT_ID}/expert_questions/${EXPERT_QUESTION_ID}`)
   })
 
   it('should provide correct relative link', async () => {

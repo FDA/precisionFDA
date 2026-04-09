@@ -1,11 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
-import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
-import { DbClusterCountService } from '@shared/domain/db-cluster/service/db-cluster-count.service'
+import { SinonStub, stub } from 'sinon'
+import { ScopeFilterContext, SpaceScope } from '@shared/domain/counters/counters.types'
 import { DbClusterScopeFilterProvider } from '@shared/domain/db-cluster/db-cluster-scope-filter.provider'
+import { DbClusterCountService } from '@shared/domain/db-cluster/service/db-cluster-count.service'
+import { User } from '@shared/domain/user/user.entity'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 
 describe('DbClusterCountService', () => {
   const USER_ID = 1
@@ -121,9 +121,6 @@ describe('DbClusterCountService', () => {
   })
 
   function getInstance(): DbClusterCountService {
-    return new DbClusterCountService(
-      em as unknown as SqlEntityManager,
-      dbClusterScopeFilterProvider,
-    )
+    return new DbClusterCountService(em as unknown as SqlEntityManager, dbClusterScopeFilterProvider)
   }
 })

@@ -1,19 +1,19 @@
-import { expect } from 'chai'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { db, create } from '@shared/test'
-import { User } from '@shared/domain/user/user.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { mocksReset } from '@shared/test/mocks'
 import { mocksReset as localMocksReset } from '@worker-test/utils/mocks'
-import { STATIC_SCOPE } from '@shared/enums'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { spaceMembership } from '@shared/test/generate'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFileResolverFacade } from 'apps/api/src/facade/user-file/user-file-resolver.facade'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { expect } from 'chai'
+import { database } from '@shared/database'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { STATIC_SCOPE } from '@shared/enums'
+import { create, db } from '@shared/test'
+import { spaceMembership } from '@shared/test/generate'
+import { mocksReset } from '@shared/test/mocks'
 
 describe('UserFileResolverFacade', () => {
   let em: SqlEntityManager
@@ -66,17 +66,9 @@ describe('UserFileResolverFacade', () => {
   })
 
   it('test invalid path', async () => {
-    const folder = await create.filesHelper.createFolder(
-      em,
-      { user: user1 },
-      { name: 'invalid_folder' },
-    )
+    const folder = await create.filesHelper.createFolder(em, { user: user1 }, { name: 'invalid_folder' })
     await em.flush()
-    const file = await create.filesHelper.create(
-      em,
-      { user: user1, parentFolder: folder },
-      { name: 'invalid_file' },
-    )
+    const file = await create.filesHelper.create(em, { user: user1, parentFolder: folder }, { name: 'invalid_file' })
     await em.flush()
 
     const res = await getInstance(user1).resolvePath({
@@ -98,23 +90,11 @@ describe('UserFileResolverFacade', () => {
   context('in private scope', () => {
     it('test querying file(s) and folder(s)', async () => {
       const folder1 = create.filesHelper.createFolder(em, { user: user1 }, { name: 'folder1' })
-      const folder2 = create.filesHelper.createFolder(
-        em,
-        { user: user1, parentFolder: folder1 },
-        { name: 'folder2' },
-      )
+      const folder2 = create.filesHelper.createFolder(em, { user: user1, parentFolder: folder1 }, { name: 'folder2' })
       await em.flush()
       const rootFile = create.filesHelper.create(em, { user: user1 }, { name: 'rootFile' })
-      const file1 = create.filesHelper.create(
-        em,
-        { user: user1, parentFolder: folder1 },
-        { name: 'file1' },
-      )
-      const file2 = create.filesHelper.create(
-        em,
-        { user: user1, parentFolder: folder2 },
-        { name: 'file2' },
-      )
+      const file1 = create.filesHelper.create(em, { user: user1, parentFolder: folder1 }, { name: 'file1' })
+      const file2 = create.filesHelper.create(em, { user: user1, parentFolder: folder2 }, { name: 'file2' })
       await em.flush()
       const folder1User2 = create.filesHelper.createFolder(em, { user: user2 }, { name: 'folder1' })
       const folder2User2 = create.filesHelper.createFolder(
@@ -123,11 +103,7 @@ describe('UserFileResolverFacade', () => {
         { name: 'folder2' },
       )
       await em.flush()
-      const file1User2 = create.filesHelper.create(
-        em,
-        { user: user2, parentFolder: folder1User2 },
-        { name: 'file1' },
-      )
+      const file1User2 = create.filesHelper.create(em, { user: user2, parentFolder: folder1User2 }, { name: 'file1' })
       const fileUser2 = create.filesHelper.create(em, { user: user2 }, { name: 'fileeeeee' })
       await em.flush()
 
@@ -196,11 +172,7 @@ describe('UserFileResolverFacade', () => {
     })
 
     it('test querying file(s) and folder(s) in the same path', async () => {
-      const folder = create.filesHelper.createFolder(
-        em,
-        { user: user1 },
-        { name: 'test_conflicting_path' },
-      )
+      const folder = create.filesHelper.createFolder(em, { user: user1 }, { name: 'test_conflicting_path' })
       await em.flush()
       const file = create.filesHelper.create(em, { user: user1 }, { name: 'test_conflicting_path' })
       await em.flush()

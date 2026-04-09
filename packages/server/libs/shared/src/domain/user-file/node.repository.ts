@@ -1,10 +1,10 @@
 import { FilterQuery } from '@mikro-orm/mysql'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
+import { CountStats } from '@shared/database/statistics.type'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '../../enums'
 import { Node } from './node.entity'
-import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { CountStats } from '@shared/database/statistics.type'
 
 export class NodeRepository extends AccessControlRepository<Node> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Node>> {
@@ -15,7 +15,7 @@ export class NodeRepository extends AccessControlRepository<Node> {
     }
 
     const accessibleSpaces = await user.accessibleSpaces()
-    const spaceScopes = accessibleSpaces.map((space) => space.scope)
+    const spaceScopes = accessibleSpaces.map(space => space.scope)
 
     // TODO PFDA-6222: define rules for site-admins
     return {
@@ -35,7 +35,7 @@ export class NodeRepository extends AccessControlRepository<Node> {
     }
 
     const editableSpaces = await user.editableSpaces()
-    const spaceScopes = editableSpaces.map((space) => space.scope)
+    const spaceScopes = editableSpaces.map(space => space.scope)
 
     // TODO PFDA-6222: define rules for site-admins
 
@@ -57,7 +57,7 @@ export class NodeRepository extends AccessControlRepository<Node> {
    * @param spaceIds
    */
   async loadIfAccessibleByUser(user: User, uid: Uid<'file'>, spaceIds: number[]): Promise<Node> {
-    const scopes = spaceIds.map((id) => `space-${id}`)
+    const scopes = spaceIds.map(id => `space-${id}`)
 
     return await this.findOne(
       {

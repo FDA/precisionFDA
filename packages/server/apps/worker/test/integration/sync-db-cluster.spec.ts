@@ -1,23 +1,23 @@
-import { expect } from 'chai'
-import { Job } from 'bull'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
-import { SyncDbClusterJob, TASK_TYPE } from '@shared/queue/task.input'
-import sinon, { match, stub } from 'sinon'
 import { EntityManager } from '@mikro-orm/mysql'
-import { PlatformClient } from '@shared/platform-client'
-import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
-import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
 import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
-import { UserService } from '@shared/domain/user/service/user.service'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { UsersDbClustersSaltService } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.service'
-import { create, db } from '@shared/test'
+import { Job } from 'bull'
+import { expect } from 'chai'
+import sinon, { match, stub } from 'sinon'
 import { database } from '@shared/database'
+import { UsersDbClustersSaltService } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.service'
+import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
+import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { UserService } from '@shared/domain/user/service/user.service'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { NOTIFICATION_ACTION } from '@shared/enums'
+import { PlatformClient } from '@shared/platform-client'
+import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
+import { SyncDbClusterJob, TASK_TYPE } from '@shared/queue/task.input'
+import { create, db } from '@shared/test'
 
 describe('DbClusterService', () => {
   let removeRepeatableStub: sinon.SinonStub
@@ -106,13 +106,11 @@ describe('DbClusterService', () => {
       getUserByIdStub.withArgs(user.id).resolves(user)
       findAccessibleOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
 
-      dbClusterDescribeStub
-        .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
-        .resolves({
-          status: 'available',
-          endpoint: dbCluster.host,
-          port: dbCluster.port,
-        })
+      dbClusterDescribeStub.withArgs({ dxid: dbCluster.dxid, project: dbCluster.project }).resolves({
+        status: 'available',
+        endpoint: dbCluster.host,
+        port: dbCluster.port,
+      })
 
       const service = getInstance()
       // Replace the logger's log method
@@ -144,13 +142,11 @@ describe('DbClusterService', () => {
       getUserByIdStub.withArgs(user.id).resolves(user)
       findAccessibleOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
 
-      dbClusterDescribeStub
-        .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
-        .resolves({
-          status: 'terminated',
-          endpoint: dbCluster.host,
-          port: 1111,
-        })
+      dbClusterDescribeStub.withArgs({ dxid: dbCluster.dxid, project: dbCluster.project }).resolves({
+        status: 'terminated',
+        endpoint: dbCluster.host,
+        port: 1111,
+      })
 
       createNotificationStub
         .withArgs(
@@ -215,12 +211,7 @@ describe('DbClusterService', () => {
     const notificationService = {
       createNotification: createNotificationStub,
     } as unknown as NotificationService
-    const dbClusterService = new DbClusterService(
-      em,
-      dbClusterRepo,
-      userContext,
-      notificationService,
-    )
+    const dbClusterService = new DbClusterService(em, dbClusterRepo, userContext, notificationService)
     const userClient = {
       dbClusterDescribe: dbClusterDescribeStub,
     } as unknown as PlatformClient

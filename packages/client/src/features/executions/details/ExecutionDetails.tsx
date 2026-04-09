@@ -1,16 +1,16 @@
-import { useEffect, useEffectEvent, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { type JSX, useEffect, useEffectEvent, useState } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router'
 import { HomeLabel } from '@/components/HomeLabel'
 import { BoltIcon } from '@/components/icons/BoltIcon'
 import { StyledTab, StyledTabList, StyledTabPanel } from '@/components/Tabs'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
 import { useLastWSNotification } from '@/hooks/useLastWSNotification'
-import { COMPUTE_RESOURCE_LABELS, ComputeResourceKey, ComputeResourcePricingMap } from '@/types/user'
+import { COMPUTE_RESOURCE_LABELS, type ComputeResourceKey, ComputeResourcePricingMap } from '@/types/user'
 import { pluralize } from '@/utils/formatting'
 import { getBackPathNext } from '@/utils/getBackPath'
+import { defaultHomeContext, type HomeScopeContextValue } from '../../home/HomeScopeContext'
 import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
-import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
 import {
   HeaderLeft,
   HeaderRight,
@@ -29,12 +29,94 @@ import { NOTIFICATION_ACTION } from '../../home/types'
 import { getBasePath } from '../../home/utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
 import { fetchExecution } from '../executions.api'
-import { IExecution } from '../executions.types'
+import type { IExecution } from '../executions.types'
 import { getUserLink } from '../executions.util'
 import { InputsAndOutputs } from '../InputsAndOutputs'
 import { Logs } from '../Log'
 import { StateCell } from '../StateCell'
 import { FailureMessage, TitleLeft } from './styles'
+
+const calculateCost = (durationInSeconds: number, instanceType: string): string => {
+  const runtimeHours = durationInSeconds / 3600
+  const perHourCost =
+    instanceType in ComputeResourcePricingMap
+      ? ComputeResourcePricingMap[instanceType as ComputeResourceKey]
+      : undefined
+  if (!perHourCost) return 'N/A'
+  return `$${parseFloat((runtimeHours * perHourCost).toFixed(2))}`
+}
+
+const useLiveMetrics = (job: IExecution | undefined): { cost: string; duration: string } => {
+  const [liveMetrics, setLiveMetrics] = useState({
+    cost: '$0',
+    duration: '0s',
+  })
+
+  const updateCostAndDuration = useEffectEvent(() => {
+    if (!job?.startedRunning) return
+    const now = Date.now()
+    const durationInSeconds = Math.floor((now - job.startedRunning) / 1000)
+
+    const days = Math.floor(durationInSeconds / (24 * 3600))
+    const hours = Math.floor((durationInSeconds % (24 * 3600)) / 3600)
+    const minutes = Math.floor((durationInSeconds % 3600) / 60)
+    const seconds = durationInSeconds % 60
+
+    const parts = [
+      days > 0 ? `${days} ${pluralize('day', days)}` : '',
+      hours > 0 ? `${hours} ${pluralize('hour', hours)}` : '',
+      minutes > 0 ? `${minutes} ${pluralize('minute', minutes)}` : '',
+      `${seconds} ${pluralize('second', seconds)}`,
+    ].filter(Boolean)
+    const duration = parts.join(' ')
+    const cost = calculateCost(durationInSeconds, job.instanceType)
+    setLiveMetrics({ cost, duration })
+  })
+
+  useEffect(() => {
+    if (job && (job.state === 'running' || job.state === 'terminating')) {
+      updateCostAndDuration()
+      const interval = setInterval(updateCostAndDuration, 1000)
+      return (): void => clearInterval(interval)
+    }
+  }, [job])
+
+  return liveMetrics
+}
+
+/**
+ * Determines the duration and cost to display for an execution.
+ *
+ * - Running/terminating jobs use live-computed metrics that update every second.
+ * - Completed jobs use the server-provided duration and cost.
+ * - For completed jobs where the backend returns 'N/A' for energy_consumption,
+ *   we fall back to a client-side cost calculation based on duration and instance type.
+ */
+const getDisplayMetrics = (
+  execution: IExecution,
+  liveMetrics: { cost: string; duration: string },
+): { isActiveState: boolean; duration: string; cost: string } => {
+  const isActiveState = execution.state === 'running' || execution.state === 'terminating'
+
+  if (isActiveState) {
+    // While the job is still running or being terminated, show real-time metrics
+    return {
+      isActiveState,
+      duration: liveMetrics.duration,
+      cost: liveMetrics.cost,
+    }
+  }
+
+  // For completed jobs, use the server-reported cost when available.
+  // The backend may return 'N/A' for energy_consumption if it wasn't tracked,
+  // in which case we compute cost client-side from duration and instance pricing.
+  const cost =
+    execution.energyConsumption === 'N/A'
+      ? calculateCost(execution.durationInSeconds, execution.instanceType)
+      : execution.energyConsumption
+
+  return { isActiveState, duration: execution.duration, cost }
+}
 
 export const ExecutionDetails = ({
   executionUid,
@@ -44,24 +126,19 @@ export const ExecutionDetails = ({
   executionUid: string
   homeContext?: HomeScopeContextValue
   spaceId?: number
-}) => {
+}): JSX.Element => {
   const { homeScope, isHome, setDisplayScope } = homeContext
   const location = useLocation()
 
-  const calculateCost = (durationInSeconds: number, instanceType: string): string => {
-    const runtimeHours = durationInSeconds / 3600
-    const perHourCost =
-      instanceType in ComputeResourcePricingMap
-        ? ComputeResourcePricingMap[instanceType as ComputeResourceKey]
-        : undefined
-    if (!perHourCost) return 'N/A'
-    return `$${parseFloat((runtimeHours * perHourCost).toFixed(2))}`
-  }
-
-  const { data: execution, isLoading, refetch, isFetching } = useQuery({
+  const {
+    data: execution,
+    isLoading,
+    refetch,
+    isFetching,
+  } = useQuery({
     queryKey: ['execution', executionUid],
     queryFn: () =>
-      fetchExecution(executionUid!).then(d => {
+      fetchExecution(executionUid).then(d => {
         if (isHome) {
           setDisplayScope(d.scope, d.featured)
         }
@@ -89,67 +166,10 @@ export const ExecutionDetails = ({
     })
   }, [lastJsonMessage, queryCache, executionUid])
 
-  const [liveMetrics, setLiveMetrics] = useState({ cost: '$0', duration: '0s' })
-
-  const updateCostAndDuration = useEffectEvent(() => {
-    if (!execution?.startedRunning) {
-      return
-    }
-    const now = Date.now()
-
-    const durationInSeconds = Math.floor((now - execution.startedRunning) / 1000)
-
-    const days = Math.floor(durationInSeconds / (24 * 3600))
-    const hours = Math.floor((durationInSeconds % (24 * 3600)) / 3600)
-    const minutes = Math.floor((durationInSeconds % 3600) / 60)
-    const seconds = durationInSeconds % 60
-
-    const duration = `${days > 0 ? `${days} ${pluralize('day', days)}` : ''}${
-      hours > 0 ? `${hours} ${pluralize('hour', hours)} ` : ''
-    }${minutes > 0 ? `${minutes} ${pluralize('minute', minutes)} ` : ''}${seconds} ${pluralize('second', seconds)}`
-
-    const cost = calculateCost(durationInSeconds, execution.instanceType)
-
-    setLiveMetrics({ cost, duration })
-  })
-
-  useEffect(() => {
-    if (execution && (execution.state === 'running' || execution.state === 'terminating')) {
-      updateCostAndDuration()
-      const interval = setInterval(updateCostAndDuration, 1000)
-      return () => clearInterval(interval)
-    }
-    return undefined
-  }, [execution?.state, execution?.startedRunning])
+  const liveMetrics = useLiveMetrics(execution)
 
   const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
   const basePath = getBasePath(spaceId)
-
-  const getDuration = (e: IExecution) => {
-    if (e.state === 'running' || e.state === 'terminating') {
-      return liveMetrics.duration
-    }
-    return e.duration
-  }
-
-  const getCostMetadataItem = (e: IExecution) => {
-    const isActiveState = e.state === 'running' || e.state === 'terminating'
-    const calculatedCost = calculateCost(e.durationInSeconds, e.instanceType)
-
-    let finalCost: string
-    if (!isActiveState) {
-      finalCost = e.energyConsumption === 'N/A' ? calculatedCost : e.energyConsumption
-    } else {
-      finalCost = liveMetrics.cost
-    }
-
-    return (
-      <MetadataItem>
-        <MetadataKey>{isActiveState ? 'Estimated Cost' : 'Cost'}</MetadataKey>
-        <MetadataVal data-testid="execution-cost">{finalCost}</MetadataVal>
-      </MetadataItem>
-    )
-  }
 
   if (isLoading) {
     return <HomeLoader />
@@ -163,10 +183,17 @@ export const ExecutionDetails = ({
       </NotFound>
     )
 
+  const { isActiveState, duration: displayDuration, cost: displayCost } = getDisplayMetrics(execution, liveMetrics)
+
   return (
     <>
       <StyledBackLink
-        linkTo={getBackPathNext({ spaceId, location, resourceLocation: 'executions', homeScope })}
+        linkTo={getBackPathNext({
+          spaceId,
+          location,
+          resourceLocation: 'executions',
+          homeScope,
+        })}
         data-testid="execution-back-link"
       >
         Back to Executions
@@ -268,9 +295,12 @@ export const ExecutionDetails = ({
           <MetadataRow>
             <MetadataItem>
               <MetadataKey>Duration</MetadataKey>
-              <MetadataVal data-testid="execution-duration">{getDuration(execution)}</MetadataVal>
+              <MetadataVal data-testid="execution-duration">{displayDuration}</MetadataVal>
             </MetadataItem>
-            {getCostMetadataItem(execution)}
+            <MetadataItem>
+              <MetadataKey>{isActiveState ? 'Estimated Cost' : 'Cost'}</MetadataKey>
+              <MetadataVal data-testid="execution-cost">{displayCost}</MetadataVal>
+            </MetadataItem>
             <MetadataItem>
               <MetadataKey>App Revision</MetadataKey>
               <MetadataVal data-testid="execution-app-revision">{execution.appRevision}</MetadataVal>
@@ -318,13 +348,19 @@ export const ExecutionDetails = ({
         <StyledTab
           activeClassName="active"
           end
-          to={{ pathname: `${basePath}/executions/${execution.uid}`, state: location.state }}
+          to={{
+            pathname: `${basePath}/executions/${execution.uid}`,
+            state: location.state,
+          }}
         >
           Inputs & Outputs
         </StyledTab>
         <StyledTab
           activeClassName="active"
-          to={{ pathname: `${basePath}/executions/${execution.uid}/logs`, state: location.state }}
+          to={{
+            pathname: `${basePath}/executions/${execution.uid}/logs`,
+            state: location.state,
+          }}
         >
           Logs
         </StyledTab>

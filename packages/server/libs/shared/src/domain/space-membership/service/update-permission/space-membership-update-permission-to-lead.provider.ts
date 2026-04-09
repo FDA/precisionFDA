@@ -1,14 +1,14 @@
 import { SqlEntityManager, TransactionPropagation } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
 import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { getProjectDxid } from '@shared/domain/space/space.helper'
 import { SpaceMembershipPlatformAccessToAdminProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access-to-admin.provider'
 import { SpaceMembershipUpdatePermissionProvider } from '@shared/domain/space-membership/service/update-permission/space-membership-update-permission.provider'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { Space } from '@shared/domain/space/space.entity'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { getProjectDxid } from '@shared/domain/space/space.helper'
 import { PlatformClient } from '@shared/platform-client'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
@@ -23,12 +23,7 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
     @Inject(ADMIN_PLATFORM_CLIENT)
     private readonly adminClient: PlatformClient,
   ) {
-    super(
-      em,
-      platformClient,
-      spaceMembershipRepository,
-      spaceMembershipPlatformAccessToAdminProvider,
-    )
+    super(em, platformClient, spaceMembershipRepository, spaceMembershipPlatformAccessToAdminProvider)
   }
 
   protected permittedUpdaterRoles: SPACE_MEMBERSHIP_ROLE[] = [SPACE_MEMBERSHIP_ROLE.LEAD]
@@ -42,10 +37,7 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
     currentLeadMembership: SpaceMembership,
     changeableMemberships: SpaceMembership[],
   ): Promise<SpaceMembership[]> {
-    if (
-      changeableMemberships.length !== 1 &&
-      new Set(changeableMemberships.map((m) => m.user.id)).size !== 1
-    ) {
+    if (changeableMemberships.length !== 1 && new Set(changeableMemberships.map(m => m.user.id)).size !== 1) {
       throw new Error('Cannot update multiple memberships to lead role at once')
     }
 
@@ -71,19 +63,18 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
     return await this.em.transactional(
       async () => {
         currentLeadMembership.role = SPACE_MEMBERSHIP_ROLE.ADMIN
-        changeableMemberships.forEach((m) => {
+        changeableMemberships.forEach(m => {
           m.role = SPACE_MEMBERSHIP_ROLE.LEAD
           if (m.side !== currentLeadMembership.side) {
             m.side = currentLeadMembership.side
           }
         })
         if (space.type === SPACE_TYPE.REVIEW) {
-          const cfDemotedLead =
-            await this.spaceMembershipRepository.findConfidentialMembershipByUser(
-              space.id,
-              currentLeadMembership.user.id,
-              currentLeadMembership.side,
-            )
+          const cfDemotedLead = await this.spaceMembershipRepository.findConfidentialMembershipByUser(
+            space.id,
+            currentLeadMembership.user.id,
+            currentLeadMembership.side,
+          )
           if (cfDemotedLead && cfDemotedLead.id !== currentLeadMembership.id) {
             cfDemotedLead.role = SPACE_MEMBERSHIP_ROLE.ADMIN
           }
@@ -103,7 +94,7 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
     changeableMemberships: SpaceMembership[],
   ): Promise<void> {
     const orgs = space.getMembershipOrg(membership)
-    const promises = orgs.map((org) => {
+    const promises = orgs.map(org => {
       return this.adminClient.orgSetMemberAccess({
         orgDxId: org,
         data: {
@@ -115,10 +106,7 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
     await Promise.all(promises)
   }
 
-  private async updateSpaceBillTo(
-    projectDxid: DxId<'project'>,
-    billTo: DxId<'org'>,
-  ): Promise<ClassIdResponse> {
+  private async updateSpaceBillTo(projectDxid: DxId<'project'>, billTo: DxId<'org'>): Promise<ClassIdResponse> {
     const projectDescribe = await this.adminClient.projectDescribe(projectDxid)
     if (projectDescribe.billTo === billTo) {
       return {

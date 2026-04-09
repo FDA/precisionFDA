@@ -45,9 +45,7 @@ export class AttachmentManagementFacade {
         note: note.id,
       })
       if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach file ${res.uid}: file attachment already exists.`,
-        )
+        throw new errors.InvalidStateError(`Unable to attach file ${res.uid}: file attachment already exists.`)
       }
       this.attachmentRepository.persist(new Attachment(id, 'Node', note))
     }
@@ -57,9 +55,7 @@ export class AttachmentManagementFacade {
         scope: [STATIC_SCOPE.PUBLIC, note.scope],
       })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
-        throw new errors.NotFoundError(
-          `Unable to attach folder ${id}: folder not found or is in a wrong scope.`,
-        )
+        throw new errors.NotFoundError(`Unable to attach folder ${id}: folder not found or is in a wrong scope.`)
       }
       const exists = await this.attachmentRepository.findOne({
         itemId: id,
@@ -67,9 +63,7 @@ export class AttachmentManagementFacade {
         note: note.id,
       })
       if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach folder ${id}: folder attachment already exists.`,
-        )
+        throw new errors.InvalidStateError(`Unable to attach folder ${id}: folder attachment already exists.`)
       }
       this.attachmentRepository.persist(new Attachment(id, 'Node', note))
     }
@@ -86,9 +80,7 @@ export class AttachmentManagementFacade {
         note: note.id,
       })
       if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach ${res.uid}: asset attachment already exists.`,
-        )
+        throw new errors.InvalidStateError(`Unable to attach ${res.uid}: asset attachment already exists.`)
       }
       this.attachmentRepository.persist(new Attachment(id, 'Node', note))
     }
@@ -105,9 +97,7 @@ export class AttachmentManagementFacade {
         note: note.id,
       })
       if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach ${res.uid}: app attachment already exists.`,
-        )
+        throw new errors.InvalidStateError(`Unable to attach ${res.uid}: app attachment already exists.`)
       }
       this.attachmentRepository.persist(new Attachment(id, 'App', note))
     }
@@ -124,9 +114,7 @@ export class AttachmentManagementFacade {
         note: note.id,
       })
       if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach ${res.uid}: job attachment already exists.`,
-        )
+        throw new errors.InvalidStateError(`Unable to attach ${res.uid}: job attachment already exists.`)
       }
       this.attachmentRepository.persist(new Attachment(id, 'Job', note))
     }
@@ -143,9 +131,7 @@ export class AttachmentManagementFacade {
         note: note.id,
       })
       if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach comparison ${id}: comparison attachment already exists.`,
-        )
+        throw new errors.InvalidStateError(`Unable to attach comparison ${id}: comparison attachment already exists.`)
       }
       this.attachmentRepository.persist(new Attachment(id, 'Comparison', note))
     }
@@ -154,7 +140,7 @@ export class AttachmentManagementFacade {
 
   async updateAttachments(noteId: number, attachments: AttachmentsDTO): Promise<void> {
     const oldAttachments = await this.attachmentRepository.find({ note: noteId })
-    this.logger.log(`Deleting old attachments: ${oldAttachments.map((a) => a.id)}`)
+    this.logger.log(`Deleting old attachments: ${oldAttachments.map(a => a.id)}`)
     await this.attachmentRepository.removeAndFlush(oldAttachments)
     this.logger.log(`Creating new attachments: ${JSON.stringify(attachments)}`)
     await this.createAttachments(noteId, attachments)

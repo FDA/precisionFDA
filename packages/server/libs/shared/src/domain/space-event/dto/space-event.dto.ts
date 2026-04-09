@@ -1,8 +1,8 @@
+import { Type } from 'class-transformer'
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, ValidateNested } from 'class-validator'
 import { EntityTypeWithValueDTO } from '@shared/domain/space-event/dto/entity-type-with-value-dto'
 import { SpaceMembershipDTO } from '@shared/domain/space-event/dto/space-membership.dto'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
-import { Type } from 'class-transformer'
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, ValidateNested } from 'class-validator'
 
 export class SpaceEventDTO {
   @IsNumber()

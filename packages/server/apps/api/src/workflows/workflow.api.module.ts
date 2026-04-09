@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { WorkflowController } from './workflow.controller'
 import { LicenseApiFacadeModule } from '../facade/license/license-api-facade.module'
+import { WorkflowController } from './workflow.controller'
 
 @Module({
   imports: [LicenseApiFacadeModule],

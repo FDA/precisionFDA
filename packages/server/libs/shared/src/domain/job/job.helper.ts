@@ -1,25 +1,15 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { emailClientProvider } from '@shared/domain/email/email-client.provider'
-import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { User } from '@shared/domain/user/user.entity'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { DateTime, Duration, Interval } from 'luxon'
 import { config } from '../../config'
 import { Job } from './job.entity'
 import { ACTIVE_STATES, JOB_STATE, TERMINAL_STATES } from './job.enum'
 
-export const isStateTerminal = (state: string): boolean =>
-  Object.values(TERMINAL_STATES).includes(state as JOB_STATE)
+export const isStateTerminal = (state: string): boolean => Object.values(TERMINAL_STATES).includes(state as JOB_STATE)
 
 export const shouldSyncStatus = (job: Job): boolean => !isStateTerminal(job.state)
 
-export const isStateActive = (state: string): boolean =>
-  Object.values(ACTIVE_STATES).includes(state as JOB_STATE)
+export const isStateActive = (state: string): boolean => Object.values(ACTIVE_STATES).includes(state as JOB_STATE)
 
-export const buildIsOverMaxDuration = (
-  terminateOrNotify: 'terminate' | 'notify',
-): ((job: Job) => boolean) => {
+export const buildIsOverMaxDuration = (terminateOrNotify: 'terminate' | 'notify'): ((job: Job) => boolean) => {
   // which config setting to use
   const seconds =
     terminateOrNotify === 'terminate'
@@ -34,13 +24,4 @@ export const buildIsOverMaxDuration = (
     const currentJobInterval = Interval.fromDateTimes(createdAt, current)
     return currentJobInterval.toDuration() >= maxDuration
   }
-}
-
-export const sendJobFailedEmails = async (jobId: number, em: SqlEntityManager): Promise<void> => {
-  const emailClient = emailClientProvider.useFactory()
-  const userRepo = em.getRepository(User) as UserRepository
-  const jobRepo: JobRepository = em.getRepository(Job)
-  const handler = new JobFailedEmailHandler(userRepo, jobRepo, emailClient)
-  const inputDto = { jobId }
-  await handler.sendEmail(inputDto)
 }

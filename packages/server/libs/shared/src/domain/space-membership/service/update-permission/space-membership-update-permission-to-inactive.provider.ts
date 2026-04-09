@@ -15,18 +15,10 @@ export class SpaceMembershipUpdatePermissionToInactiveProvider extends SpaceMemb
     protected readonly spaceMembershipRepository: SpaceMembershipRepository,
     protected readonly spaceMembershipPlatformAccessToInactiveProvider: SpaceMembershipPlatformAccessToInactiveProvider,
   ) {
-    super(
-      em,
-      platformClient,
-      spaceMembershipRepository,
-      spaceMembershipPlatformAccessToInactiveProvider,
-    )
+    super(em, platformClient, spaceMembershipRepository, spaceMembershipPlatformAccessToInactiveProvider)
   }
 
-  protected permittedUpdaterRoles: SPACE_MEMBERSHIP_ROLE[] = [
-    SPACE_MEMBERSHIP_ROLE.LEAD,
-    SPACE_MEMBERSHIP_ROLE.ADMIN,
-  ]
+  protected permittedUpdaterRoles: SPACE_MEMBERSHIP_ROLE[] = [SPACE_MEMBERSHIP_ROLE.LEAD, SPACE_MEMBERSHIP_ROLE.ADMIN]
 
   protected updateMembership(membership: SpaceMembership): void {
     membership.active = false

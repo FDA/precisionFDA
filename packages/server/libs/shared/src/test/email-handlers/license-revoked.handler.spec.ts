@@ -1,16 +1,16 @@
-import { stub } from 'sinon'
 import { expect } from 'chai'
-import { LicenseRevokedHandler } from '@shared/domain/email/templates/handlers/license-revoked.handler'
-import { User } from '@shared/domain/user/user.entity'
+import { stub } from 'sinon'
+import { config } from '@shared/config'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { AcceptedLicenseRepository } from '@shared/domain/accepted-license/accepted-license.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { EmailClient } from '@shared/services/email-client'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { License } from '@shared/domain/license/license.entity'
 import { IdWithReceiversInputDTO } from '@shared/domain/email/dto/id-with-receivers-input.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { config } from '@shared/config'
+import { LicenseRevokedHandler } from '@shared/domain/email/templates/handlers/license-revoked.handler'
+import { License } from '@shared/domain/license/license.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('LicenseRevokedHandler', () => {
   const LICENSE_ID = 55
@@ -74,16 +74,12 @@ describe('LicenseRevokedHandler', () => {
       await handler.sendEmail(input)
 
       expect(emailClientSendEmailStub.calledOnce).to.be.true()
-      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
-        EMAIL_TYPES.licenseRevoked,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.licenseRevoked)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
         `Your license for ${license.title} has been revoked`,
       )
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
-      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
-        `License revoked for ${license.title}`,
-      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`License revoked for ${license.title}`)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
         'We regret to inform you that your license for',
       )

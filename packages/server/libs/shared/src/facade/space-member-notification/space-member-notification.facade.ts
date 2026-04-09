@@ -13,15 +13,11 @@ export class SpaceMemberNotificationFacade {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async notifyNewDiscussionReply(
-    spaceId: number,
-    type: DISCUSSION_REPLY_TYPE,
-    replyUrl: string,
-  ): Promise<void> {
+  async notifyNewDiscussionReply(spaceId: number, type: DISCUSSION_REPLY_TYPE, replyUrl: string): Promise<void> {
     const spaceMemberships = await this.spaceService.getSpaceMembers(spaceId)
     const notifiedUsers = spaceMemberships
-      .map((membership) => membership.user.id)
-      .filter((id) => id !== this.userContext.id)
+      .map(membership => membership.user.id)
+      .filter(id => id !== this.userContext.id)
 
     for (const userId of notifiedUsers) {
       await this.notificationService.createNotification({

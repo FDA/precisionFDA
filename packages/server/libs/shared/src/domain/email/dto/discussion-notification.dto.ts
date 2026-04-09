@@ -1,5 +1,5 @@
-import { NotifyConstraint, NotifyType } from '@shared/domain/discussion/dto/notify.type'
 import { IsInt, Min, Validate } from 'class-validator'
+import { NotifyConstraint, NotifyType } from '@shared/domain/discussion/dto/notify.type'
 
 export class DiscussionNotificationDTO {
   @IsInt()

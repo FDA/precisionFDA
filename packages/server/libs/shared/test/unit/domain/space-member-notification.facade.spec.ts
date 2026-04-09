@@ -1,11 +1,11 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { SpaceMemberNotificationFacade } from '@shared/facade/space-member-notification/space-member-notification.facade'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SpaceMemberNotificationFacade', () => {
   const getSpaceMembersStub = stub()

@@ -1,3 +1,4 @@
+import { IncomingMessage } from 'node:http'
 import { RequestContext } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Logger, UseInterceptors } from '@nestjs/common'
@@ -11,6 +12,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets'
+import { Server } from 'ws'
 import { COOKIE_SESSION_KEY } from '@shared/config/consts'
 import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.interceptor'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -20,13 +22,11 @@ import { Session } from '@shared/domain/session/session.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { NOTIFICATIONS_QUEUE, createRedisClient } from '@shared/services/redis.service'
+import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
 import { CookieUtils } from '@shared/utils/cookie.utils'
 import { Encryptor } from '@shared/utils/encryptors/encryptor'
 import { HashUtils } from '@shared/utils/hash.utils'
 import { PfdaWebSocket, WEBSOCKET_EVENTS } from '@shared/websocket/model/pfda-web-socket'
-import { IncomingMessage } from 'node:http'
-import { Server } from 'ws'
 import { UserContextTokenInterceptor } from '../user-context/interceptor/user-context-token.interceptor'
 
 @UseInterceptors(UserContextTokenInterceptor, OrmContextInterceptor)
@@ -47,7 +47,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   ) {}
 
   afterInit(): void {
-    this.setupRedisSubscriber().catch((err) =>
+    this.setupRedisSubscriber().catch(err =>
       this.logger.error({ message: 'Failed to setup Redis subscriber', error: err.message }),
     )
   }
@@ -196,7 +196,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   }
 
   private sendNotification(userId: number, notification: string, sessionId?: string): void {
-    this.clientConnections.get(userId)?.forEach((connection) => {
+    this.clientConnections.get(userId)?.forEach(connection => {
       if (sessionId && connection.pfdaUserContext.sessionId !== sessionId) {
         // PFDA-5816: if sessionId is provided, only send to the connection with the same sessionId
         return

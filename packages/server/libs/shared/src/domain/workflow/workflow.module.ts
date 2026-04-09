@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common'
-import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
+import { Module } from '@nestjs/common'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 
 @Module({

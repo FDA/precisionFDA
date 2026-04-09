@@ -1,7 +1,7 @@
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { ErrorCodes, NotFoundError } from '../../errors'
 import { ORG_HANDLE_MAX_LENGTH, PFDA_PREFIX } from '../org/org.utils'
 import { User } from './user.entity'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 // right now, we run everything under user private project
 const getProjectToRunApp = (user: User): DxId<'project'> => {
@@ -21,10 +21,8 @@ const constructUsername = (first: string, last: string) => {
 const constructOrgFromUsername = (username: string) => {
   const RESERVED_SIZE = 4 // 3 digits plus 1 dot
   return {
-    orgName: username.replace(/\./g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()),
-    orgBaseHandle: username
-      .replace(/\./, '')
-      .substring(0, ORG_HANDLE_MAX_LENGTH - PFDA_PREFIX.length - RESERVED_SIZE),
+    orgName: username.replace(/\./g, ' ').replace(/\b\w/g, char => char.toUpperCase()),
+    orgBaseHandle: username.replace(/\./, '').substring(0, ORG_HANDLE_MAX_LENGTH - PFDA_PREFIX.length - RESERVED_SIZE),
   }
 }
 

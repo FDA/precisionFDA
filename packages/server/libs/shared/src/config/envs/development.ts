@@ -32,8 +32,7 @@ export const config: ConfigOverride = () => ({
     syncJob: {
       repeatPattern: '*/1 * * * *', // Every 1 minute
       staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 2, // 2 minutes
-      staleJobsTerminateAfter:
-        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 24 * 60 * 60 * 10, // 10 days
+      staleJobsTerminateAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 24 * 60 * 60 * 10, // 10 days
       nonTerminatedDbClusters: {
         repeatPattern: process.env.NODE_NON_TERMINATED_DB_CLUSTERS_CRON ?? '0 6 * * *',
       },

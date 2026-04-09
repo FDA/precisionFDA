@@ -1,9 +1,4 @@
-import {
-  AppAccess,
-  AppInputSpecItem,
-  AppSpecItem,
-  SystemRequirements,
-} from '@shared/domain/app/app.input'
+import { AppAccess, AppInputSpecItem, AppSpecItem, SystemRequirements } from '@shared/domain/app/app.input'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { AnyObject } from '../types'
 

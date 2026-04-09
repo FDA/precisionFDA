@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { CliCreateReplyDTO } from '@shared/domain/cli/dto/cli-create-reply.dto'
-import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { InvalidStateError } from '@shared/errors'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { CreateDiscussionReplyFacade } from '../discussion/create-discussion-reply.facade'

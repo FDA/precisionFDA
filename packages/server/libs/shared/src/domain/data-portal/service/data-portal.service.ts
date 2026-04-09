@@ -2,8 +2,8 @@ import { FindOneOptions, QueryOrder, Reference, wrap } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
-import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/create-data-portal.dto'
 import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFileParamDTO'
+import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/create-data-portal.dto'
 import { DataPortalDTO } from '@shared/domain/data-portal/dto/data-portal.dto'
 import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
 import { DxId } from '@shared/domain/entity/domain/dxid'
@@ -11,9 +11,9 @@ import { EntityService } from '@shared/domain/entity/entity.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import {
   DataPortalUrlSlugFormatError,
@@ -59,9 +59,7 @@ export class DataPortalService {
     private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
-  listResources = async (
-    dataPortalIdentifier: string,
-  ): Promise<{ id: number; name: string; url: string }[]> => {
+  listResources = async (dataPortalIdentifier: string): Promise<{ id: number; name: string; url: string }[]> => {
     this.logger.log(`Listing resources for portal identifier: ${dataPortalIdentifier}`)
 
     const dataPortal = await this.findPortalBySlugOrId(dataPortalIdentifier, {
@@ -73,17 +71,13 @@ export class DataPortalService {
         dataPortal.resources
           .getItems()
           .sort((a, b) => a.name.localeCompare(b.name))
-          .map(async (r) => {
+          .map(async r => {
             return {
               id: r.id,
               name: r.userFile.getEntity().name,
-              url: await this.entityService.getEntityDownloadLink(
-                r.userFile.getEntity(),
-                r.userFile.getEntity().name,
-                {
-                  inline: true,
-                },
-              ),
+              url: await this.entityService.getEntityDownloadLink(r.userFile.getEntity(), r.userFile.getEntity().name, {
+                inline: true,
+              }),
             }
           }),
       )
@@ -92,16 +86,9 @@ export class DataPortalService {
     }
   }
 
-  createResource = async (
-    input: CreateFileParamDTO,
-    dataPortalIdentifier: string,
-  ): Promise<CreateResourceResponse> => {
+  createResource = async (input: CreateFileParamDTO, dataPortalIdentifier: string): Promise<CreateResourceResponse> => {
     this.logger.log(`Creating resource for portal identifier: ${dataPortalIdentifier}`, input)
-    const user = await this.em.findOneOrFail(
-      User,
-      { id: this.user.id },
-      { populate: ['organization'] },
-    )
+    const user = await this.em.findOneOrFail(User, { id: this.user.id }, { populate: ['organization'] })
     const dataPortal = await this.findPortalBySlugOrId(dataPortalIdentifier, {
       populate: ['space.spaceMemberships.user', 'space'],
     })
@@ -134,9 +121,7 @@ export class DataPortalService {
       throw new PermissionError(`Only roles ${this.editRolesText} can remove resources`)
     }
 
-    this.logger.log(
-      `Deleting resource with id: ${resource.id}, userFile.uid: ${resource.userFile.getEntity().uid}`,
-    )
+    this.logger.log(`Deleting resource with id: ${resource.id}, userFile.uid: ${resource.userFile.getEntity().uid}`)
 
     await this.em.transactional(async () => {
       await this.em.remove(resource).flush()
@@ -230,11 +215,7 @@ export class DataPortalService {
     if (!(await this.hasSiteAdminRole(this.user.id))) {
       throw new PermissionError('Only site admins can create Data Portals')
     }
-    const space = await this.em.findOneOrFail(
-      Space,
-      { id: spaceId },
-      { populate: ['spaceMemberships.user'] },
-    )
+    const space = await this.em.findOneOrFail(Space, { id: spaceId }, { populate: ['spaceMemberships.user'] })
 
     await this.validateUrlSlug(input.urlSlug)
 
@@ -249,11 +230,7 @@ export class DataPortalService {
 
     this.logger.log('Creating card image', input)
 
-    const loadedUser = await this.em.findOneOrFail(
-      User,
-      { id: this.user.id },
-      { populate: ['organization'] },
-    )
+    const loadedUser = await this.em.findOneOrFail(User, { id: this.user.id }, { populate: ['organization'] })
     // TODO propagate filename through input
     if (input.cardImageFileName) {
       const userFile = await this.createFile(
@@ -302,9 +279,7 @@ export class DataPortalService {
 
     if (!(await this.hasSiteAdminRole(this.user.id))) {
       if (input.content) {
-        if (
-          !((await portal.isPortalAdmin(this.user.id)) || (await portal.isPortalLead(this.user.id)))
-        ) {
+        if (!((await portal.isPortalAdmin(this.user.id)) || (await portal.isPortalLead(this.user.id)))) {
           throw new PermissionError('Only portal admins and leads can update portal content')
         }
       } else {
@@ -314,15 +289,7 @@ export class DataPortalService {
       }
     }
 
-    const propertiesToUpdate = [
-      'name',
-      'description',
-      'status',
-      'sortOrder',
-      'content',
-      'editorState',
-      'default',
-    ]
+    const propertiesToUpdate = ['name', 'description', 'status', 'sortOrder', 'content', 'editorState', 'default']
 
     for (const property of propertiesToUpdate) {
       // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
@@ -423,11 +390,7 @@ export class DataPortalService {
   get = async (id: number): Promise<DataPortalDTO> => {
     this.logger.log('Get data portal detail', id, this.user.id)
 
-    const portal = await this.em.findOne(
-      DataPortal,
-      { id },
-      { populate: ['space.spaceMemberships.user', 'cardImage'] },
-    )
+    const portal = await this.em.findOne(DataPortal, { id }, { populate: ['space.spaceMemberships.user', 'cardImage'] })
     if (portal) {
       if (!(await portal.isPortalMember(this.user.id))) {
         throw new PermissionError('Only members of the corresponding space can access this portal')

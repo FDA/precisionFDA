@@ -1,21 +1,14 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { User } from '@shared/domain/user/user.entity'
-import {
-  jobFailedTemplate,
-  jobCostLimitExceededTemplate,
-  JobFailedInputTemplate,
-} from '../mjml/job-failed.template'
-import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
 import { Injectable } from '@nestjs/common'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EmailClient } from '@shared/services/email-client'
+import { EmailTypeToContextMap, JobFailedContext } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { JobRepository } from '@shared/domain/job/job.repository'
+import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import {
-  EmailTypeToContextMap,
-  JobFailedContext,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailClient } from '@shared/services/email-client'
+import { JobFailedInputTemplate, jobCostLimitExceededTemplate, jobFailedTemplate } from '../mjml/job-failed.template'
 
 @Injectable()
 export class JobFailedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFailed> {
@@ -30,14 +23,9 @@ export class JobFailedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFailed> {
     super(emailClient)
   }
 
-  protected async getContextualData(
-    input: JobEventDTO,
-  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.jobFailed]> {
+  protected async getContextualData(input: JobEventDTO): Promise<EmailTypeToContextMap[EMAIL_TYPES.jobFailed]> {
     const job = await this.jobRepo.findOneOrFail({ id: input.jobId })
-    const body =
-      job.describe?.failureReason === 'CostLimitExceeded'
-        ? jobCostLimitExceededTemplate
-        : jobFailedTemplate
+    const body = job.describe?.failureReason === 'CostLimitExceeded' ? jobCostLimitExceededTemplate : jobFailedTemplate
     return {
       input,
       job,

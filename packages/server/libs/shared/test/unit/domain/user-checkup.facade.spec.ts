@@ -1,11 +1,14 @@
 import type { EntityManager } from '@mikro-orm/mysql'
+import { Job } from 'bull'
+import { expect } from 'chai'
+import { stub, useFakeTimers } from 'sinon'
 import { config } from '@shared/config'
 import { database } from '@shared/database'
 import { STATUS as DB_CLUSTER_STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
@@ -13,9 +16,6 @@ import { TASK_TYPE } from '@shared/queue/task.input'
 import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import type { UserCtx } from '@shared/types'
-import { Job } from 'bull'
-import { expect } from 'chai'
-import { stub, useFakeTimers } from 'sinon'
 
 describe('UserCheckupFacade', () => {
   let em: EntityManager
@@ -101,9 +101,7 @@ describe('UserCheckupFacade', () => {
     create.filesHelper.create(em, { user }, { name: 'file1', ...params })
     await em.flush()
 
-    fakes.queue.findRepeatableFake.callsFake(() =>
-      generate.bullQueueRepeatable.syncFilesState(user.dxuser),
-    )
+    fakes.queue.findRepeatableFake.callsFake(() => generate.bullQueueRepeatable.syncFilesState(user.dxuser))
 
     await getInstance().runCheckup(job)
 
@@ -120,7 +118,7 @@ describe('UserCheckupFacade', () => {
 
   it('queues UserDataConsistencyReportTask and BillToAdjustmentTask if last checkup is over the limit', async () => {
     const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
-    user.lastDataCheckup = new Date(Date.now()- (repeat + 1) * 1000)
+    user.lastDataCheckup = new Date(Date.now() - (repeat + 1) * 1000)
     await em.flush()
 
     await getInstance().runCheckup(job)
@@ -142,16 +140,8 @@ describe('UserCheckupFacade', () => {
   })
 
   it('adds db sync tasks to the queue', async () => {
-    const dbCluster1 = create.dbClusterHelper.create(
-      em,
-      { user },
-      { status: DB_CLUSTER_STATUS.AVAILABLE },
-    )
-    const dbCluster2 = create.dbClusterHelper.create(
-      em,
-      { user },
-      { status: DB_CLUSTER_STATUS.STOPPED },
-    )
+    const dbCluster1 = create.dbClusterHelper.create(em, { user }, { status: DB_CLUSTER_STATUS.AVAILABLE })
+    const dbCluster2 = create.dbClusterHelper.create(em, { user }, { status: DB_CLUSTER_STATUS.STOPPED })
     await em.flush()
 
     await getInstance().runCheckup(job)

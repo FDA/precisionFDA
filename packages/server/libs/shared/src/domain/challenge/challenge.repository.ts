@@ -41,9 +41,7 @@ class ChallengeRepository extends AccessControlRepository<Challenge> {
     return this.executeAndMapQuery(this.PRE_REGISTRATION_SQL, query)
   }
 
-  async searchOpenPausedArchivedByNameAndDescriptionAndContents(
-    query: string,
-  ): Promise<Challenge[]> {
+  async searchOpenPausedArchivedByNameAndDescriptionAndContents(query: string): Promise<Challenge[]> {
     return this.executeAndMapQuery(this.OPEN_PAUSED_ARCHIVED_SQL, query)
   }
 
@@ -53,7 +51,7 @@ class ChallengeRepository extends AccessControlRepository<Challenge> {
 
   private async executeAndMapQuery(sql: string, query: string): Promise<Challenge[]> {
     const results = await this.em.execute(sql, [query, query])
-    return results.map((row) => this.em.map(Challenge, row))
+    return results.map(row => this.em.map(Challenge, row))
   }
 
   protected async getAccessibleWhere(): Promise<FilterQuery<Challenge>> {
@@ -68,7 +66,7 @@ class ChallengeRepository extends AccessControlRepository<Challenge> {
 
     if (!(await user.isSiteOrChallengeAdmin())) {
       const accessibleSpaces = await user.accessibleSpaces()
-      const spaceScopes = accessibleSpaces.map((space) => space.scope)
+      const spaceScopes = accessibleSpaces.map(space => space.scope)
       return {
         status: { $ne: CHALLENGE_STATUS.SETUP },
         scope: { $in: [STATIC_SCOPE.PUBLIC, ...spaceScopes] },

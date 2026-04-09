@@ -1,3 +1,4 @@
+import { invertObj } from 'ramda'
 import {
   DB_SYNC_STATUS,
   DB_SYNC_STATUSES,
@@ -9,15 +10,14 @@ import {
   STATUSES,
 } from '@shared/domain/db-cluster/db-cluster.enum'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { spaceMembershipTypeToNameMap } from '@shared/domain/space-membership/space-membership-type-to-name.map'
+import { Space } from '@shared/domain/space/space.entity'
+import { resolveSpaceLocation } from '@shared/domain/space/space.helper'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
-import { Space } from '@shared/domain/space/space.entity'
+import { spaceMembershipTypeToNameMap } from '@shared/domain/space-membership/space-membership-type-to-name.map'
 import { EntityScope } from '@shared/types/common'
-import { DbCluster } from '../db-cluster.entity'
-import { invertObj } from 'ramda'
-import { resolveSpaceLocation } from '@shared/domain/space/space.helper'
 import { StringUtils } from '@shared/utils/string.utils'
+import { DbCluster } from '../db-cluster.entity'
 
 export class DbClusterDTO {
   id: number

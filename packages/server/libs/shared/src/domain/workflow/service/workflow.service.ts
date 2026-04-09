@@ -1,11 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
-import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
-import { ArrayUtils } from '@shared/utils/array.utils'
-import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
+import { ArrayUtils } from '@shared/utils/array.utils'
 
 @Injectable()
 export class WorkflowService implements SearchableByUid<'workflow'> {
@@ -28,6 +28,6 @@ export class WorkflowService implements SearchableByUid<'workflow'> {
       return []
     }
 
-    return await this.em.find(App, { uid: inputStages.map((s) => s.app_uid) })
+    return await this.em.find(App, { uid: inputStages.map(s => s.app_uid) })
   }
 }

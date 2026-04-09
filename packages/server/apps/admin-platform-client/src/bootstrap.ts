@@ -1,10 +1,11 @@
+import { INestApplication } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
+import { Logger } from 'nestjs-pino'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import { WebsocketAdapter } from '@shared/websocket/adapter/websocket.adapter'
-import { Logger } from 'nestjs-pino'
 import { AdminPlatformClientModule } from './admin-platform-client.module'
 
-export async function bootstrap() {
+export async function bootstrap(): Promise<INestApplication> {
   const app = await NestFactory.create(AdminPlatformClientModule)
   app.enableShutdownHooks()
   app.useLogger(app.get(Logger))

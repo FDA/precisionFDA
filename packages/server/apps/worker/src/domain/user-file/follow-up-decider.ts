@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { SpaceReportRepository } from '@shared/domain/space-report/repository/space-report.repository'
+import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
 
 /**
  * Component that decides whether there will be another action
@@ -19,7 +20,7 @@ export class FollowUpDecider {
     private readonly spaceReportRepo: SpaceReportRepository,
   ) {}
 
-  async decideNextAction(fileUid: Uid<'file'>) {
+  async decideNextAction(fileUid: Uid<'file'>): Promise<FOLLOW_UP_ACTION> {
     this.logger.log(`Deciding about follow up action after a close of file with uid ${fileUid}`)
     try {
       if (await this.isDataPortalCardImage(fileUid)) {
@@ -42,26 +43,25 @@ export class FollowUpDecider {
     return null
   }
 
-  private async isDataPortalCardImage(fileUid: string) {
+  private async isDataPortalCardImage(fileUid: string): Promise<boolean> {
     this.logger.log(`Is file with uid ${fileUid} a data portal card image`)
     const dataPortals = await this.dataPortalRepo.findDataPortalsByCardImageUid(fileUid)
     return dataPortals.length > 0
   }
 
-  private async isChallengeResource(fileUid: string) {
+  private async isChallengeResource(fileUid: string): Promise<boolean> {
     this.logger.log(`Is file with uid ${fileUid} a challenge resource`)
-    const challengeResources =
-      await this.challengeResourceRepo.findChallengeResourcesByFileUid(fileUid)
+    const challengeResources = await this.challengeResourceRepo.findChallengeResourcesByFileUid(fileUid)
     return challengeResources.length > 0
   }
 
-  private async isChallengeCardImage(fileUid: Uid<'file'>) {
+  private async isChallengeCardImage(fileUid: Uid<'file'>): Promise<boolean> {
     this.logger.log(`Is file with uid ${fileUid} a challenge card image`)
     const challenges = await this.challengeRepo.findChallengesByCardImageFileUid(fileUid)
     return challenges.length > 0
   }
 
-  private async isSpaceReportResult(fileUid: Uid<'file'>) {
+  private async isSpaceReportResult(fileUid: Uid<'file'>): Promise<boolean> {
     this.logger.log(`Is file with uid ${fileUid} a space report result`)
     const spaceReports = await this.spaceReportRepo.findByResultFileUid(fileUid)
     return spaceReports != null

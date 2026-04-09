@@ -1,8 +1,8 @@
-import { IsEnum, IsOptional } from 'class-validator'
 import { Type } from 'class-transformer'
+import { IsEnum, IsOptional } from 'class-validator'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { TransformEnumKey } from '@shared/utils/transformers/transform-enum-key.decorator'
 import { TransformAndValidateBoolean } from '@shared/utils/transformers/is-valid-boolean'
+import { TransformEnumKey } from '@shared/utils/transformers/transform-enum-key.decorator'
 
 export class SpacePaginationFilter {
   @IsOptional()

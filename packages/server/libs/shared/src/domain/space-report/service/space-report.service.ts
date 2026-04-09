@@ -2,21 +2,23 @@ import { QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
+import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { Job } from '@shared/domain/job/job.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
 import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
 import { SpaceReportFormatToResultOptionsMap } from '@shared/domain/space-report/model/space-report-format-to-result-options.map'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { SpaceReportResultService } from '@shared/domain/space-report/service/result/space-report-result.service'
-import { Space } from '@shared/domain/space/space.entity'
+import { SpaceReportCountService } from '@shared/domain/space-report/service/space-report-count.service'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
@@ -24,13 +26,11 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EntityScope, SpaceScope } from '@shared/types/common'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { SpaceReport } from '../entity/space-report.entity'
+import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { BatchComplete } from '../model/batch-complete'
 import { SpaceReportPartSource } from '../model/space-report-part-source'
 import { SpaceReportPartService } from './part/space-report-part.service'
-import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
-import { SpaceReportCountService } from '@shared/domain/space-report/service/space-report-count.service'
 
 @Injectable()
 export class SpaceReportService {
@@ -53,7 +53,7 @@ export class SpaceReportService {
     return this.spaceReportCountService.count(context)
   }
 
-  async createReport({ format, options, scope }: SpaceReportCreateDto) {
+  async createReport({ format, options, scope }: SpaceReportCreateDto): Promise<SpaceReport> {
     if (scope == null) {
       throw new InvalidStateError('Scope is required for creating a report')
     }
@@ -79,7 +79,7 @@ export class SpaceReportService {
     })
   }
 
-  async getReports(ids: number[]) {
+  async getReports(ids: number[]): Promise<SpaceReport[]> {
     return await this.em.find(SpaceReport, ids, { populate: ['createdBy'] })
   }
 
@@ -98,7 +98,7 @@ export class SpaceReportService {
         populate: ['resultFile'],
       })
 
-      return reports.map((r) => ({
+      return reports.map(r => ({
         id: r.id,
         createdAt: r.createdAt,
         state: r.state,
@@ -108,17 +108,17 @@ export class SpaceReportService {
     })
   }
 
-  async deleteReports(reports: SpaceReport[]) {
+  async deleteReports(reports: SpaceReport[]): Promise<number[]> {
     if (ArrayUtils.isEmpty(reports)) {
       return []
     }
 
     await this.em.transactional(async () => {
-      this.logger.log(`Deleting reports with ids: ${reports.map((report) => report.id)}`)
+      this.logger.log(`Deleting reports with ids: ${reports.map(report => report.id)}`)
       this.em.remove(reports)
     })
 
-    return reports.map((r) => r.id)
+    return reports.map(r => r.id)
   }
 
   async completePartsBatch(batches: BatchComplete[]) {
@@ -128,11 +128,11 @@ export class SpaceReportService {
   async generateResult<T extends SpaceReportFormat>(
     report: SpaceReport<T>,
     opts?: SpaceReportFormatToResultOptionsMap[T],
-  ) {
+  ): Promise<string> {
     return await this.spaceReportResultService.generateResult(report, opts)
   }
 
-  async hasAllBatchesDone(reportId: number) {
+  async hasAllBatchesDone(reportId: number): Promise<boolean> {
     const notDoneTask = await this.em.findOne(SpaceReportPart, {
       spaceReport: reportId,
       state: { $ne: 'DONE' },
@@ -141,7 +141,7 @@ export class SpaceReportService {
     return !notDoneTask
   }
 
-  async completeReportForResultFile(resultFileUid: Uid<'file'>) {
+  async completeReportForResultFile(resultFileUid: Uid<'file'>): Promise<void> {
     const report = await this.em.transactional(async () => {
       const report = await this.em.findOneOrFail(SpaceReport, {
         resultFile: { uid: resultFileUid },
@@ -166,7 +166,7 @@ export class SpaceReportService {
     })
   }
 
-  private async getNotificationMessageAndLink(report: SpaceReport) {
+  private async getNotificationMessageAndLink(report: SpaceReport): Promise<{ message: string; link: string }> {
     if (EntityScopeUtils.isSpaceScope(report.scope)) {
       const spaceId = EntityScopeUtils.getSpaceIdFromScope(report.scope)
       const space = await this.getSpaceForUserValidated(spaceId)
@@ -183,7 +183,7 @@ export class SpaceReportService {
     }
   }
 
-  private async getSpaceForUserValidated(spaceId: number) {
+  private async getSpaceForUserValidated(spaceId: number): Promise<Space> {
     const spaces = await this.getSpacesForUser([spaceId])
 
     if (ArrayUtils.isEmpty(spaces)) {
@@ -193,7 +193,7 @@ export class SpaceReportService {
     return spaces[0]
   }
 
-  async getSpacesForUser(spaceIds: number[]) {
+  async getSpacesForUser(spaceIds: number[]): Promise<Space[]> {
     return await this.em
       .createQueryBuilder(Space, 'space')
       .joinAndSelect('space.spaceMemberships', 'membership')
@@ -206,13 +206,13 @@ export class SpaceReportService {
     const entities = await this.getEntities(scope)
 
     const reportPartSources: SpaceReportPartSource[] = [
-      ...entities.file.map((f) => ({ type: 'file' as const, id: f.id })),
-      ...entities.app.map((a) => ({ type: 'app' as const, id: a.id })),
-      ...entities.job.map((j) => ({ type: 'job' as const, id: j.id })),
-      ...entities.asset.map((a) => ({ type: 'asset' as const, id: a.id })),
-      ...entities.workflow.map((w) => ({ type: 'workflow' as const, id: w.id })),
-      ...entities.user.map((u) => ({ type: 'user' as const, id: u.id })),
-      ...entities.discussion.map((d) => ({ type: 'discussion' as const, id: d.id })),
+      ...entities.file.map(f => ({ type: 'file' as const, id: f.id })),
+      ...entities.app.map(a => ({ type: 'app' as const, id: a.id })),
+      ...entities.job.map(j => ({ type: 'job' as const, id: j.id })),
+      ...entities.asset.map(a => ({ type: 'asset' as const, id: a.id })),
+      ...entities.workflow.map(w => ({ type: 'workflow' as const, id: w.id })),
+      ...entities.user.map(u => ({ type: 'user' as const, id: u.id })),
+      ...entities.discussion.map(d => ({ type: 'discussion' as const, id: d.id })),
     ]
 
     return this.spaceReportPartService.createReportParts(reportPartSources)
@@ -241,21 +241,9 @@ export class SpaceReportService {
         { scope: 'private', user: this.user.id },
         { orderBy: { name: QueryOrder.ASC } },
       ),
-      app: await this.em.find(
-        App,
-        { scope: 'private', user: this.user.id },
-        { orderBy: { title: QueryOrder.ASC } },
-      ),
-      job: await this.em.find(
-        Job,
-        { scope: 'private', user: this.user.id },
-        { orderBy: { name: QueryOrder.ASC } },
-      ),
-      asset: await this.em.find(
-        Asset,
-        { scope: 'private', user: this.user.id },
-        { orderBy: { name: QueryOrder.ASC } },
-      ),
+      app: await this.em.find(App, { scope: 'private', user: this.user.id }, { orderBy: { title: QueryOrder.ASC } }),
+      job: await this.em.find(Job, { scope: 'private', user: this.user.id }, { orderBy: { name: QueryOrder.ASC } }),
+      asset: await this.em.find(Asset, { scope: 'private', user: this.user.id }, { orderBy: { name: QueryOrder.ASC } }),
       workflow: await this.em.find(
         Workflow,
         { scope: 'private', user: this.user.id },
@@ -285,11 +273,7 @@ export class SpaceReportService {
         },
         { orderBy: { lastName: QueryOrder.ASC } },
       ),
-      discussion: await this.em.find(
-        Discussion,
-        { note: { scope } },
-        { orderBy: { note: { title: QueryOrder.ASC } } },
-      ),
+      discussion: await this.em.find(Discussion, { note: { scope } }, { orderBy: { note: { title: QueryOrder.ASC } } }),
     }
   }
 }

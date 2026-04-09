@@ -1,26 +1,23 @@
-import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EntityService } from '@shared/domain/entity/entity.service'
-import { EmailClient } from '@shared/services/email-client'
-import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handlers/new-discussion-reply.handler'
-import { stub } from 'sinon'
-import { expect } from 'chai'
-import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
-import { Organization } from '@shared/domain/org/organization.entity'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { Note } from '@shared/domain/note/note.entity'
-import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Collection, Reference } from '@mikro-orm/core'
-import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handlers/new-discussion-reply.handler'
+import { EntityService } from '@shared/domain/entity/entity.service'
+import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
+import { Note } from '@shared/domain/note/note.entity'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { USER_STATE, User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailClient } from '@shared/services/email-client'
 
 describe('NewDiscussionReplyHandler', () => {
   const discussionRepoFindOneStub = stub()
@@ -125,9 +122,7 @@ describe('NewDiscussionReplyHandler', () => {
       await newDiscussionHandler.sendEmail(inputDto)
 
       expect(emailClientSendEmailStub.calledOnce).to.be.true()
-      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(
-        EMAIL_TYPES.newDiscussionReply,
-      )
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(EMAIL_TYPES.newDiscussionReply)
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.eq(user2.email)
       expect(emailClientSendEmailStub.firstCall.args[0].subject).to.eq(
         `[precisionFDA] New Discussion reply notification: ${space.name}`,
@@ -167,9 +162,7 @@ describe('NewDiscussionReplyHandler', () => {
       await newDiscussionHandler.sendEmail(inputDto)
 
       expect(emailClientSendEmailStub.calledOnce).to.be.true()
-      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(
-        EMAIL_TYPES.newDiscussionReply,
-      )
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(EMAIL_TYPES.newDiscussionReply)
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.args[0].subject).to.eq(
         `[precisionFDA] New Discussion reply notification: ${space.name}`,
@@ -232,24 +225,18 @@ describe('NewDiscussionReplyHandler', () => {
       await newDiscussionHandler.sendEmail(inputDto)
 
       expect(emailClientSendEmailStub.calledTwice).to.be.true()
-      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(
-        EMAIL_TYPES.newDiscussionReply,
-      )
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(EMAIL_TYPES.newDiscussionReply)
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.eq(follower.email)
       expect(emailClientSendEmailStub.firstCall.args[0].subject).to.eq(
         `[precisionFDA] New Discussion reply notification: ${space.name}`,
       )
       expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('<a href="link_to_entity"')
-      expect(emailClientSendEmailStub.secondCall.args[0].emailType).to.eq(
-        EMAIL_TYPES.newDiscussionReply,
-      )
+      expect(emailClientSendEmailStub.secondCall.args[0].emailType).to.eq(EMAIL_TYPES.newDiscussionReply)
       expect(emailClientSendEmailStub.secondCall.args[0].to).to.eq(user2.email)
       expect(emailClientSendEmailStub.secondCall.args[0].subject).to.eq(
         `[precisionFDA] New Discussion reply notification: ${space.name}`,
       )
-      expect(emailClientSendEmailStub.secondCall.args[0].body).to.contain(
-        '<a href="link_to_entity"',
-      )
+      expect(emailClientSendEmailStub.secondCall.args[0].body).to.contain('<a href="link_to_entity"')
     })
 
     it('public discussion', async () => {
@@ -294,9 +281,7 @@ describe('NewDiscussionReplyHandler', () => {
       await newDiscussionHandler.sendEmail(inputDto)
 
       expect(emailClientSendEmailStub.calledOnce).to.be.true()
-      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(
-        EMAIL_TYPES.newDiscussionReply,
-      )
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(EMAIL_TYPES.newDiscussionReply)
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.eq(follower.email)
       expect(emailClientSendEmailStub.firstCall.args[0].subject).to.eq(
         '[precisionFDA] New Public Discussion notification',

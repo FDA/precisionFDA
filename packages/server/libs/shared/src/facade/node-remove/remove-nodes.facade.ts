@@ -1,28 +1,28 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { ComparisonService } from '@shared/domain/comparison/comparison.service'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
-import { EventHelper } from '@shared/domain/event/event.helper'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
-import { PlatformClient } from '@shared/platform-client'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
-import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { Injectable, Logger } from '@nestjs/common'
+import { ComparisonService } from '@shared/domain/comparison/comparison.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { EventHelper } from '@shared/domain/event/event.helper'
+import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
+import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { PlatformClient } from '@shared/platform-client'
 
 @Injectable()
 export class RemoveNodesFacade {
@@ -92,10 +92,7 @@ export class RemoveNodesFacade {
         nodes[i] = null as unknown as Node
       }
 
-      this.logger.log(
-        { foldersCount: removedFoldersCount, filesCount: removedFilesCount },
-        'Removed total objects',
-      )
+      this.logger.log({ foldersCount: removedFoldersCount, filesCount: removedFilesCount }, 'Removed total objects')
     } catch (error) {
       const undeletedNodes = nodes.filter((node): node is Node => node !== null)
       await this.nodeService.rollbackRemovingState(undeletedNodes)
@@ -109,7 +106,7 @@ export class RemoveNodesFacade {
     this.logger.log(`Asynchronously removing nodes ${ids}`)
     // load all nested ids (even those not explicitly mentioned)
     const nodes: Node[] = await this.nodeService.loadNodes(ids, {})
-    const loadedIds = nodes.map((node) => node.id)
+    const loadedIds = nodes.map(node => node.id)
     await this.validateNodes(nodes)
 
     await this.em.transactional(async () => {
@@ -134,10 +131,7 @@ export class RemoveNodesFacade {
     }
   }
 
-  public async removeFile(
-    fileToRemove: FileOrAsset,
-    skipCreateSpaceEvent?: boolean,
-  ): Promise<number> {
+  public async removeFile(fileToRemove: FileOrAsset, skipCreateSpaceEvent?: boolean): Promise<number> {
     this.logger.log(`Removing file with uid: ${fileToRemove.uid}`)
 
     const lastNode = (await this.userFileRepository.count({ dxid: fileToRemove.dxid })) === 1
@@ -152,12 +146,7 @@ export class RemoveNodesFacade {
         await this.archiveEntryService.removeArchiveEntriesForNode(fileToRemove.id)
       }
 
-      const fileEvent = await this.eventHelper.createFileEvent(
-        EVENT_TYPES.FILE_DELETED,
-        fileToRemove,
-        filePath,
-        user,
-      )
+      const fileEvent = await this.eventHelper.createFileEvent(EVENT_TYPES.FILE_DELETED, fileToRemove, filePath, user)
       this.em.persist(fileEvent)
 
       if (lastNode) {
@@ -170,9 +159,7 @@ export class RemoveNodesFacade {
           })
         } catch (error) {
           if (error.props?.clientStatusCode === 404) {
-            this.logger.log(
-              `File with dxid ${fileToRemove.dxid} already does not exist on platform`,
-            )
+            this.logger.log(`File with dxid ${fileToRemove.dxid} already does not exist on platform`)
           } else {
             throw error
           }

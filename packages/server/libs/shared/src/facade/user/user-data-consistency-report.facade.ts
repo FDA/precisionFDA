@@ -2,26 +2,25 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { EmailSendInput } from '@shared/domain/email/email.config'
-import {
-  buildEmailTemplate,
-  getBullJobIdForEmailOperation,
-} from '@shared/domain/email/email.helper'
+import { buildEmailTemplate, getBullJobIdForEmailOperation } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import {
-  userDataConsistencyReportTemplate,
   UserDataConsistencyReportTemplateInput,
+  userDataConsistencyReportTemplate,
 } from '@shared/domain/email/templates/mjml/user-data-consistency-report.template'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { findUnclosedFilesOrAssets } from '@shared/domain/user-file/user-file.helper'
-import { User } from '@shared/domain/user/user.entity'
+import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { NotFoundError } from '@shared/errors'
 import { UserSpaceInconsistencyFixService } from '@shared/facade/user/service/user-space-inconsistency-fix.service'
 import {
@@ -35,11 +34,6 @@ import {
 } from '@shared/facade/user/user-facade.types'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 // UserDataConsistencyReportOperation uses a user token to inspect the user's
 // data integrity in the database and detects inconsistencies between pFDA and platform
@@ -138,10 +132,7 @@ export class UserDataConsistencyReportFacade {
         if (!isAdminInOrg) {
           output.billableOrg.errors.push('Admin user not found in billable org')
           output.billableOrgErrorsCount = 1
-          inconsistentFixes.push([
-            this.userSpaceInconsistencyFixService.inviteAdminUserToOrg.name,
-            [billToOrg],
-          ])
+          inconsistentFixes.push([this.userSpaceInconsistencyFixService.inviteAdminUserToOrg.name, [billToOrg]])
         }
       } catch (error) {
         // Handle any errors that occur during the admin check
@@ -150,9 +141,7 @@ export class UserDataConsistencyReportFacade {
 
       // Check user's private projects' billTo
       const privateProjects: PrivateProject = {}
-      const generateProjectInfo = async (
-        projectDxid?: DxId<'project'>,
-      ): Promise<ProjectInfo | string> => {
+      const generateProjectInfo = async (projectDxid?: DxId<'project'>): Promise<ProjectInfo | string> => {
         if (!projectDxid) return 'Does not exist'
 
         try {
@@ -165,10 +154,7 @@ export class UserDataConsistencyReportFacade {
 
           return { status, projectDescribe }
         } catch (error) {
-          this.logger.error(
-            { error },
-            `Error describing project ${projectDxid} for user data consistency report`,
-          )
+          this.logger.error({ error }, `Error describing project ${projectDxid} for user data consistency report`)
           return {
             status: `Error: Platform error while describing project ${projectDxid}`,
             projectDescribe: null,
@@ -176,18 +162,10 @@ export class UserDataConsistencyReportFacade {
         }
       }
 
-      privateProjects['user.privateFilesProject'] = await generateProjectInfo(
-        user.privateFilesProject,
-      )
-      privateProjects['user.publicFilesProject'] = await generateProjectInfo(
-        user.publicFilesProject,
-      )
-      privateProjects['user.privateComparisonsProject'] = await generateProjectInfo(
-        user.privateComparisonsProject,
-      )
-      privateProjects['user.publicComparisonsProject'] = await generateProjectInfo(
-        user.publicComparisonsProject,
-      )
+      privateProjects['user.privateFilesProject'] = await generateProjectInfo(user.privateFilesProject)
+      privateProjects['user.publicFilesProject'] = await generateProjectInfo(user.publicFilesProject)
+      privateProjects['user.privateComparisonsProject'] = await generateProjectInfo(user.privateComparisonsProject)
+      privateProjects['user.publicComparisonsProject'] = await generateProjectInfo(user.publicComparisonsProject)
       output.privateProjects = privateProjects
       output.privateProjectsCount = Object.keys(privateProjects).length
 
@@ -223,9 +201,7 @@ export class UserDataConsistencyReportFacade {
         if (node.isFolder && node.project) {
           // If node.project is set for a folder, it is https folder
           // Check if files in https folder are missing on pFDA
-          const parentKey = node.scope.startsWith('space')
-            ? 'scopedParentFolderId'
-            : 'parentFolderId'
+          const parentKey = node.scope.startsWith('space') ? 'scopedParentFolderId' : 'parentFolderId'
           const nodePath = await this.nodeHelper.getNodePath(node)
           const httpsFiles = await this.platformClient.filesList({
             project: node.project,
@@ -290,10 +266,7 @@ export class UserDataConsistencyReportFacade {
       try {
         await this.userSpaceInconsistencyFixService[funcName](...params)
       } catch (error) {
-        this.logger.error(
-          { error },
-          `Error executing fix function ${funcName} with params: ${params}`,
-        )
+        this.logger.error({ error }, `Error executing fix function ${funcName} with params: ${params}`)
       }
     })
     await Promise.all(fixPromises)
@@ -309,10 +282,7 @@ export class UserDataConsistencyReportFacade {
   }
 
   // Check the billTo of any Spaces to which the user is a lead
-  private async checkSpaces(
-    user: User,
-    inconsistentFixes: InconsistentFix[],
-  ): Promise<SpaceInfo[]> {
+  private async checkSpaces(user: User, inconsistentFixes: InconsistentFix[]): Promise<SpaceInfo[]> {
     const spaceInfo: SpaceInfo[] = []
     const leadMemberships = await this.spaceMembershipRepository.findActiveMembershipAndSpace(
       this.user.id,
@@ -339,10 +309,7 @@ export class UserDataConsistencyReportFacade {
           errors.push(
             `[space-${space.id} (type: ${SPACE_TYPE[space.type]})] Admin user not found in space org ${spaceOrg}`,
           )
-          inconsistentFixes.push([
-            this.userSpaceInconsistencyFixService.inviteAdminUserToOrg.name,
-            [spaceOrg],
-          ])
+          inconsistentFixes.push([this.userSpaceInconsistencyFixService.inviteAdminUserToOrg.name, [spaceOrg]])
         }
         if (errors.length) {
           spaceInfo.push({
@@ -365,12 +332,9 @@ export class UserDataConsistencyReportFacade {
   }
 
   private async sendReportEmail(output: UserDataConsistencyReportOutput): Promise<void> {
-    const body = buildEmailTemplate<UserDataConsistencyReportTemplateInput>(
-      userDataConsistencyReportTemplate,
-      {
-        content: output,
-      },
-    )
+    const body = buildEmailTemplate<UserDataConsistencyReportTemplateInput>(userDataConsistencyReportTemplate, {
+      content: output,
+    })
     const email: EmailSendInput = {
       emailType: EMAIL_TYPES.userDataConsistencyReport,
       to: config.emails.report,

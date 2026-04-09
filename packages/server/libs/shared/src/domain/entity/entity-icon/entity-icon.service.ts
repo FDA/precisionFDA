@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { Injectable, Logger } from '@nestjs/common'
 import { EntityWithIconType } from '@shared/domain/entity/entity-icon/entity-with-icon.type'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class EntityIconService {

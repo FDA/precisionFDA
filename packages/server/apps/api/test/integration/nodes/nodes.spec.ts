@@ -1,16 +1,13 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { User } from '@shared/domain/user/user.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { FILE_STATE_PFDA } from '@shared/domain/user-file/user-file.types'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { create, db, generate } from '@shared/test'
+import { expect } from 'chai'
 import supertest from 'supertest'
 import { database } from '@shared/database'
-import { expect } from 'chai'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FILE_STATE_PFDA } from '@shared/domain/user-file/user-file.types'
+import { create, db, generate } from '@shared/test'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -318,11 +315,7 @@ describe('/nodes', async () => {
         { role: SPACE_MEMBERSHIP_ROLE.VIEWER, side: SPACE_MEMBERSHIP_SIDE.HOST },
       )
 
-      const file = create.filesHelper.createUploaded(
-        em,
-        { user: adminUser },
-        { scope: space.scope },
-      )
+      const file = create.filesHelper.createUploaded(em, { user: adminUser }, { scope: space.scope })
       await em.flush()
 
       await supertest(testedApp.getHttpServer())

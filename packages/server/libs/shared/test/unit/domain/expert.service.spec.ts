@@ -1,17 +1,17 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { Expert } from '@shared/domain/expert/entity/expert.entity'
-import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
-import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { create, db } from '../../../src/test'
-import { ExpertService } from '@shared/domain/expert/services/expert.service'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { database } from '@shared/database'
 import { ExpertPaginationDTO } from '@shared/domain/expert/dto/expert-pagination.dto'
-import { STATIC_SCOPE } from '@shared/enums'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
+import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
+import { ExpertService } from '@shared/domain/expert/services/expert.service'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { STATIC_SCOPE } from '@shared/enums'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { create, db } from '../../../src/test'
 
 describe('ExpertService tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -44,9 +44,7 @@ describe('ExpertService tests', () => {
   })
 
   it('should get all experts as site admin', async () => {
-    paginateStub
-      .withArgs({ page: 1, pageSize: 10 })
-      .resolves({ data: [exp1, exp2, exp3], meta: {} })
+    paginateStub.withArgs({ page: 1, pageSize: 10 }).resolves({ data: [exp1, exp2, exp3], meta: {} })
 
     expertService = getInstance(userCtx)
 
@@ -63,10 +61,7 @@ describe('ExpertService tests', () => {
     expertService = getInstance({ id: user1.id, dxuser: user1.dxuser, accessToken: 'foo' })
 
     paginateStub
-      .withArgs(
-        { page: 1, pageSize: 10 },
-        { $or: [{ user: { id: user1.id } }, { scope: STATIC_SCOPE.PUBLIC }] },
-      )
+      .withArgs({ page: 1, pageSize: 10 }, { $or: [{ user: { id: user1.id } }, { scope: STATIC_SCOPE.PUBLIC }] })
       .resolves({ data: [exp1, exp2], meta: {} })
 
     const experts = await expertService.listExperts({

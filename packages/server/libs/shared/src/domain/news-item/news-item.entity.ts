@@ -1,4 +1,4 @@
-import { Entity, Ref, ManyToOne, Property, Reference } from '@mikro-orm/core'
+import { Entity, ManyToOne, Property, Ref, Reference } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { NewsRepository } from './news-item.repository'

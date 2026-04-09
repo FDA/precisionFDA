@@ -1,3 +1,6 @@
+import { expect } from 'chai'
+import { match, SinonStub, stub } from 'sinon'
+import { config } from '@shared/config'
 import { App } from '@shared/domain/app/app.entity'
 import { UIdScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/u-id-scoped-entity-link-provider'
 import { Job } from '@shared/domain/job/job.entity'
@@ -7,9 +10,6 @@ import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { EntityUtils } from '@shared/utils/entity.utils'
-import { expect } from 'chai'
-import { match, SinonStub, stub } from 'sinon'
-import { config } from '@shared/config'
 
 describe('UIdScopedEntityLinkProvider', () => {
   const UID = 'UID'
@@ -52,9 +52,7 @@ describe('UIdScopedEntityLinkProvider', () => {
       for (const { entity, urlSegment } of cases) {
         const res = await getInstance().getLink(entity)
 
-        expect(res).to.equal(
-          `${config.api.railsHost}/spaces/${SPACE_ID}/${urlSegment}/${entity.uid}`,
-        )
+        expect(res).to.equal(`${config.api.railsHost}/spaces/${SPACE_ID}/${urlSegment}/${entity.uid}`)
       }
     })
   })

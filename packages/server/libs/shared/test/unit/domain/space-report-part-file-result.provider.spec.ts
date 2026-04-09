@@ -1,8 +1,8 @@
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { SpaceReportPartFileResultProvider } from '@shared/facade/space-report/service/space-report-part-file-result-provider.service'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('SpaceReportPartFileResultProvider', () => {
   const NAME = 'name'

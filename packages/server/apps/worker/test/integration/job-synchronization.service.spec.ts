@@ -1,19 +1,19 @@
-import { expect } from 'chai'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
-import { stub } from 'sinon'
-import * as eventHelper from '@shared/domain/event/event.helper'
-import * as queueHelper from '@shared/queue'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { PlatformClient } from '@shared/platform-client'
+import { Job as BullJob } from 'bull'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import * as eventHelper from '@shared/domain/event/event.helper'
 import { Job } from '@shared/domain/job/job.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { DxId } from '@shared/domain/entity/domain/dxid'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { PlatformClient } from '@shared/platform-client'
+import * as queueHelper from '@shared/queue'
 import { fakes } from '@shared/test/mocks'
-import { Job as BullJob } from 'bull'
 
 describe('JobSynchronizationService', () => {
   const user = {
@@ -288,9 +288,7 @@ describe('JobSynchronizationService', () => {
 
       const bullJob = {} as BullJob
 
-      jobRepoFindOneStub
-        .withArgs({ dxid: job.dxid as DxId<'job'> }, { populate: ['app'] })
-        .resolves(undefined)
+      jobRepoFindOneStub.withArgs({ dxid: job.dxid as DxId<'job'> }, { populate: ['app'] }).resolves(undefined)
       await instance.synchronizeJob(job.dxid, bullJob)
 
       expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true
@@ -304,9 +302,7 @@ describe('JobSynchronizationService', () => {
       const instance = getInstance()
 
       const bullJob = {} as BullJob
-      jobRepoFindOneStub
-        .withArgs({ dxid: job.dxid as DxId<'job'> }, { populate: ['app'] })
-        .resolves(job)
+      jobRepoFindOneStub.withArgs({ dxid: job.dxid as DxId<'job'> }, { populate: ['app'] }).resolves(job)
       await instance.synchronizeJob(job.dxid, bullJob)
       expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true
     })
@@ -322,12 +318,8 @@ describe('JobSynchronizationService', () => {
       const instance = getInstance()
 
       const bullJob = {} as BullJob
-      jobRepoFindOneStub
-        .withArgs({ dxid: job.dxid as DxId<'job'> }, { populate: ['app'] })
-        .resolves(job)
-      platformClientJobDescribeStub
-        .withArgs({ jobDxId: job.dxid })
-        .resolves({ state: JOB_STATE.RUNNING })
+      jobRepoFindOneStub.withArgs({ dxid: job.dxid as DxId<'job'> }, { populate: ['app'] }).resolves(job)
+      platformClientJobDescribeStub.withArgs({ jobDxId: job.dxid }).resolves({ state: JOB_STATE.RUNNING })
       await instance.synchronizeJob(job.dxid, bullJob)
       expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true
     })

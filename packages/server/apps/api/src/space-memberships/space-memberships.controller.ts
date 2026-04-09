@@ -1,19 +1,9 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common'
 import { ApiOperation } from '@nestjs/swagger'
+import { SpaceMembershipListApiFacade } from 'apps/api/src/facade/space-membership/space-membership-list-api.facade'
 import { SpaceLeadRecoverDTO } from '@shared/domain/space-membership/dto/space-lead-recover.dto'
 import { SpaceMemberDTO } from '@shared/domain/space-membership/dto/space-member.dto'
 import { UpdateSpaceMembershipDTO } from '@shared/domain/space-membership/dto/update-space-membership.dto'
-import { SpaceMembershipListApiFacade } from 'apps/api/src/facade/space-membership/space-membership-list-api.facade'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { SpaceMembershipUpdateApiFacade } from '../facade/space-membership/space-membership-update-api.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
@@ -35,10 +25,7 @@ export class SpaceMembershipsController {
   @UseGuards(SiteAdminGuard)
   @HttpCode(204)
   @Post('/recover-lead')
-  async recoverLead(
-    @Param('spaceId', ParseIntPipe) spaceId: number,
-    @Body() body: SpaceLeadRecoverDTO,
-  ): Promise<void> {
+  async recoverLead(@Param('spaceId', ParseIntPipe) spaceId: number, @Body() body: SpaceLeadRecoverDTO): Promise<void> {
     await this.spaceMembershipUpdateApiFacade.recoverLeadByAdmin(spaceId, body)
   }
 

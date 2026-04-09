@@ -1,8 +1,8 @@
-import { Collection, Entity, Ref, ManyToOne, OneToMany, Property, Reference } from '@mikro-orm/core'
-import { WorkflowSeriesProperty } from '@shared/domain/property/workflow-series-property.entity'
-import { User } from '@shared/domain/user/user.entity'
+import { Collection, Entity, ManyToOne, OneToMany, Property, Ref, Reference } from '@mikro-orm/core'
 import { ScopedEntity } from '@shared/database/scoped.entity'
+import { WorkflowSeriesProperty } from '@shared/domain/property/workflow-series-property.entity'
 import { WorkflowSeriesTagging } from '@shared/domain/tagging/workflow-series-tagging.entity'
+import { User } from '@shared/domain/user/user.entity'
 
 @Entity({ tableName: 'workflow_series' })
 export class WorkflowSeries extends ScopedEntity {
@@ -31,9 +31,13 @@ export class WorkflowSeries extends ScopedEntity {
   })
   properties = new Collection<WorkflowSeriesProperty>(this)
 
-  @OneToMany(() => WorkflowSeriesTagging, (tagging) => tagging.workflowSeries, {
-    orphanRemoval: true,
-  })
+  @OneToMany(
+    () => WorkflowSeriesTagging,
+    tagging => tagging.workflowSeries,
+    {
+      orphanRemoval: true,
+    },
+  )
   taggings = new Collection<WorkflowSeriesTagging>(this)
 
   constructor(user: User) {

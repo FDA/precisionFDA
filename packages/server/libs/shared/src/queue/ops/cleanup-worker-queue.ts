@@ -1,13 +1,13 @@
 import { Logger } from '@nestjs/common'
-import { getEmailsQueue, getFileSyncQueue, getMainQueue } from '@shared/queue'
 import { isNil } from 'ramda'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { getEmailsQueue, getFileSyncQueue, getMainQueue } from '@shared/queue'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Job } from '../../domain/job/job.entity'
 import { isStateTerminal } from '../../domain/job/job.helper'
 import { OpsCtx } from '../../types'
-import { BaseOperation } from '@shared/utils/base-operation'
 import { clearFailedJobs } from '../queue.utils'
 import { TASK_TYPE } from '../task.input'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 // Clean up the bull queue
 // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
@@ -36,24 +36,29 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
       log.log({ jobDxid, job }, 'Considering job sync task')
       const jobFromDb: Job = await jobRepo.findOne({ dxid: jobDxid })
       if (isNil(jobFromDb)) {
-        log.log({
-          jobDxid,
-          hoursSinceNext,
-        }, 'Removing job sync task because job does not exist in the db')
+        log.log(
+          {
+            jobDxid,
+            hoursSinceNext,
+          },
+          'Removing job sync task because job does not exist in the db',
+        )
         removedRepeatableJobs.push({
           id: job.id,
           key: job.key,
           hoursSinceNext,
         })
         mainQueue.removeRepeatableByKey(job.key)
-      }
-      else if (isStateTerminal(jobFromDb.state)) {
+      } else if (isStateTerminal(jobFromDb.state)) {
         // Removing job sync if the job has terminated
-        log.log({
-          jobDxid,
-          jobState: jobFromDb.state,
-          hoursSinceNext,
-        }, 'Removing job sync task because job has terminated')
+        log.log(
+          {
+            jobDxid,
+            jobState: jobFromDb.state,
+            hoursSinceNext,
+          },
+          'Removing job sync task because job has terminated',
+        )
         removedRepeatableJobs.push({
           id: job.id,
           key: job.key,
@@ -61,8 +66,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
         })
         mainQueue.removeRepeatableByKey(job.key)
       }
-    }
-    else {
+    } else {
       log.log({ job, hoursSinceNext }, 'Inspecting unhandled repeatable job')
     }
 
@@ -114,11 +118,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
 // For use in the worker
 // TODO - insert this into the maintanence queue on startup just like
 //        checking db clusters status
-export class CleanupWorkerQueueOperation extends BaseOperation<
-  OpsCtx,
-  undefined,
-  boolean
-> {
+export class CleanupWorkerQueueOperation extends BaseOperation<OpsCtx, undefined, boolean> {
   async run() {
     return await cleanupWorkerQueue(this.ctx.em, this.ctx.log)
   }

@@ -3,10 +3,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { ChallengeCreatedDTO } from '@shared/domain/email/dto/challenge-created.dto'
-import {
-  ChallengePreregContext,
-  EmailTypeToContextMap,
-} from '@shared/domain/email/dto/email-type-to-context.map'
+import { ChallengePreregContext, EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
@@ -62,9 +59,7 @@ export class ChallengePreregEmailHandler extends EmailHandler<EMAIL_TYPES.challe
         { populate: ['user.notificationPreference'] },
       )
       // todo: should filter out active users as well .. probably redundant (if they can be added to space)
-      users = memberships.map(
-        (m: SpaceMembership & { user: LoadedReference<User> }): User => m.user.unwrap(),
-      )
+      users = memberships.map((m: SpaceMembership & { user: LoadedReference<User> }): User => m.user.unwrap())
     } else {
       throw new InternalError(`Scope name ${context.input.scope} is not processable`)
     }

@@ -1,12 +1,12 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
 import { database } from '@shared/database'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { AcceptedLicenseRepository } from '@shared/domain/accepted-license/accepted-license.repository'
 import { AcceptedLicenseService } from '@shared/domain/accepted-license/accepted-license.service'
 import { License } from '@shared/domain/license/license.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { create, db } from '../../../src/test'
 
 describe('AcceptedLicenseService', () => {
@@ -38,18 +38,14 @@ describe('AcceptedLicenseService', () => {
     it('should return accepted licenses for the user', async () => {
       const acceptedLicense1 = create.acceptedLicenseHelper.create(em, { user, license }, {})
       const anotherUser = create.userHelper.create(em)
-      const acceptedLicense2 = create.acceptedLicenseHelper.create(
-        em,
-        { user: anotherUser, license },
-        {},
-      )
+      const acceptedLicense2 = create.acceptedLicenseHelper.create(em, { user: anotherUser, license }, {})
       await em.flush()
 
       const acceptedLicenseService = getInstance()
       const result = await acceptedLicenseService.acceptLicenseForUser()
 
       expect(result.length).to.equal(1)
-      const acceptedLicenseIds = result.map((al) => al.id)
+      const acceptedLicenseIds = result.map(al => al.id)
       expect(acceptedLicenseIds).to.include.members([acceptedLicense1.id])
       expect(acceptedLicenseIds).to.not.include(acceptedLicense2.id)
     })

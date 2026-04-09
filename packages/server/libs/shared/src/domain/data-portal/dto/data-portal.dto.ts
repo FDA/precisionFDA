@@ -46,16 +46,13 @@ export class DataPortalDTO {
         dto.editorState = null
       }
 
-      dto.members = portal.space
-        .getEntity()
-        .spaceMemberships.getItems()
-        .map(DataPortalMemberDTO.fromEntity)
+      dto.members = portal.space.getEntity().spaceMemberships.getItems().map(DataPortalMemberDTO.fromEntity)
     }
 
     portal.space
       .getEntity()
       .spaceMemberships.getItems()
-      .forEach((sm) => {
+      .forEach(sm => {
         if (sm.isGuest() && sm.isLead()) {
           dto.guestLeadDxuser = sm.user.getEntity().dxuser
         }

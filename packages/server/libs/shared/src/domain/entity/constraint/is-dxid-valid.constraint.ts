@@ -1,5 +1,4 @@
 import { isString } from '@nestjs/common/utils/shared.utils'
-import { DxIdUtils } from '@shared/utils/dxid.utils'
 import {
   registerDecorator,
   ValidationArguments,
@@ -7,6 +6,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator'
+import { DxIdUtils } from '@shared/utils/dxid.utils'
 import { DXEntityType } from '../domain/dxid'
 
 type ConstraintOptions = {

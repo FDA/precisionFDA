@@ -1,17 +1,14 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
@@ -111,10 +108,7 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
     await super.createOrgForSpace(sharedSpace.id, sharedSpace.guestDxOrg)
   }
 
-  protected async inviteMembers(
-    space: Space,
-    leads: { host: User; guest: User },
-  ): Promise<SpaceMembership[]> {
+  protected async inviteMembers(space: Space, leads: { host: User; guest: User }): Promise<SpaceMembership[]> {
     const hostLead = leads.host
     const guestLead = leads.guest
     // invite host lead as admin on platform host org
@@ -169,17 +163,13 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
       `precisionfda-${sharedSpace.scope}-HOST`,
       hostLead.user.getEntity().billTo(),
     )
-    this.logger.log(
-      `created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`,
-    )
+    this.logger.log(`created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`)
 
     const guestProject = await this.adminClient.projectCreate(
       `precisionfda-${sharedSpace.scope}-GUEST`,
       guestLead.user.getEntity().billTo(),
     )
-    this.logger.log(
-      `created guest project: ${guestProject.id} with lead: ${guestLead.user.getProperty('dxuser')}`,
-    )
+    this.logger.log(`created guest project: ${guestProject.id} with lead: ${guestLead.user.getProperty('dxuser')}`)
 
     const hostPrivateProject = await this.adminClient.projectCreate(
       `precisionfda-${sharedSpace.scope}-REVIEWER-PRIVATE`,
@@ -199,33 +189,19 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
     this.logger.log(`invited host org: ${sharedSpace.hostDxOrg} to host project: ${hostProject.id}`)
 
     await this.adminClient.projectInvite(hostProject.id, sharedSpace.guestDxOrg, 'CONTRIBUTE')
-    this.logger.log(
-      `invited guest org: ${sharedSpace.guestDxOrg} to host project: ${hostProject.id}`,
-    )
+    this.logger.log(`invited guest org: ${sharedSpace.guestDxOrg} to host project: ${hostProject.id}`)
 
     await this.adminClient.projectInvite(guestProject.id, sharedSpace.hostDxOrg, 'CONTRIBUTE')
-    this.logger.log(
-      `invited host org: ${sharedSpace.hostDxOrg} to guest project: ${guestProject.id}`,
-    )
+    this.logger.log(`invited host org: ${sharedSpace.hostDxOrg} to guest project: ${guestProject.id}`)
 
     await this.adminClient.projectInvite(guestProject.id, sharedSpace.guestDxOrg, 'CONTRIBUTE')
-    this.logger.log(
-      `invited guest org: ${sharedSpace.guestDxOrg} to guest project: ${guestProject.id}`,
-    )
+    this.logger.log(`invited guest org: ${sharedSpace.guestDxOrg} to guest project: ${guestProject.id}`)
 
     await this.adminClient.projectInvite(hostPrivateProject.id, sharedSpace.hostDxOrg, 'CONTRIBUTE')
-    this.logger.log(
-      `invited host org: ${sharedSpace.hostDxOrg} to host private project: ${hostPrivateProject.id}`,
-    )
+    this.logger.log(`invited host org: ${sharedSpace.hostDxOrg} to host private project: ${hostPrivateProject.id}`)
 
-    await this.adminClient.projectInvite(
-      guestPrivateProject.id,
-      sharedSpace.guestDxOrg,
-      'CONTRIBUTE',
-    )
-    this.logger.log(
-      `invited guest org: ${sharedSpace.guestDxOrg} to guest private project: ${guestPrivateProject.id}`,
-    )
+    await this.adminClient.projectInvite(guestPrivateProject.id, sharedSpace.guestDxOrg, 'CONTRIBUTE')
+    this.logger.log(`invited guest org: ${sharedSpace.guestDxOrg} to guest private project: ${guestPrivateProject.id}`)
 
     const guestPrivateSpace = sharedSpace.confidentialSponsorSpace
     const hostPrivateSpace = sharedSpace.confidentialReviewerSpace

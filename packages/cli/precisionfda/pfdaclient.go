@@ -2,7 +2,6 @@ package precisionfda
 
 import (
 	"bufio"
-	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
@@ -21,7 +20,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"text/tabwriter"
 	"time"
 
 	"dnanexus.com/precision-fda-cli/helpers"
@@ -61,14 +59,14 @@ type IPFDAClient interface {
 	FileViewLink(arg string, preauthenticated bool, ttl int64) error
 	UploadResources(args []string, portalID string) error
 	DescribeEntity(entityID string) error
-	LsSpaces(flags map[string]bool) error
+	LsSpaces(state string, types []string, protected bool) error
 	LsApps(spaceID string, flags map[string]bool) error
-	LsAssets(spaceID string, flags map[string]bool) error
+	LsAssets(scope string) error
 	LsWorkflows(spaceID string, flags map[string]bool) error
-	LsExecutions(spaceID string, flags map[string]bool) error
+	LsExecutions(scope string) error
 	Ls(folderID string, spaceID string, flags map[string]bool) error
 	LsMembers(spaceID string) error
-	LsDiscussions(spaceID string, flags map[string]bool) error // might refactor to be able present public discussions as well.
+	LsDiscussions(spaceID string) error
 	Mkdir(names []string, folderID string, spaceID string, parents bool) error
 	Rmdir(args []string) error
 	Rm(args []string, folderID string, spaceID string) error
@@ -84,6 +82,8 @@ type IPFDAClient interface {
 	RotateDbClusterPassword(dbClusterID string) error
 	RefreshToken(autoRefresh bool) (string, error)
 	GetLatestVersion() (string, error)
+	RunApp(appUID string, jsonConfig string) error
+	TerminateJob(jobUID string) error
 	SetChunkSize(chunkSize int) error
 	SetNumRoutines(numRoutines int) error
 }
@@ -171,35 +171,9 @@ type jsonRmPayload struct {
 	Type     string `json:"type,omitempty"`
 }
 
-type jsonFileDownloadPayload struct {
-	FileURL  string `json:"file_url"`
-	FileSize int64  `json:"file_size"`
-}
-
 type uploadChunk struct {
 	index int
 	data  []byte // slice/ptr
-}
-
-// better name needed
-type jsonSpaceResponse struct {
-	Id        int    `json:"id"`
-	Title     string `json:"title"`
-	Role      string `json:"role"`
-	Side      string `json:"side"`
-	Type      string `json:"type"`
-	State     string `json:"state"`
-	Protected bool   `json:"protected"`
-}
-
-type jsonMembersResponse struct {
-	Id        int    `json:"id"`
-	Active    bool   `json:"active"`
-	CreatedAt string `json:"createdAt"`
-	Role      string `json:"role"`
-	Side      string `json:"side"`
-	Name      string `json:"name"`
-	Username  string `json:"username"`
 }
 
 type jsonCreateFolderResponse struct {
@@ -208,12 +182,6 @@ type jsonCreateFolderResponse struct {
 	Message struct {
 		Type string `json:"type"`
 	} `json:"message"`
-}
-
-type JsonResource struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	URL  string `json:"url"`
 }
 
 // Below were migrated from pfda.go:
@@ -583,29 +551,19 @@ func (c *PFDAClient) UploadMultipleFiles(paths []string, folderID string, spaceI
 
 func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite string) error {
 
-	apiURL := fmt.Sprintf("%s/api/files/%s/download?format=json", c.BaseURL, arg)
+	apiURL := fmt.Sprintf("%s/api/v2/cli/files/%s/download", c.BaseURL, arg)
 	if !c.JsonResponse {
 		fmt.Println(">> Preparing to download")
 	}
-	status, body, err := c.makeRequestFail("GET", apiURL, nil)
-	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("%s not found. Please check that this file exists and you have access to it", arg)
-		} else {
-			return err
-		}
-	}
-
 	var resultJSON map[string]interface{}
-	err = json.Unmarshal(body, &resultJSON)
-	if err != nil {
+	if err := c.makeGetJSON(apiURL, &resultJSON); err != nil {
 		return err
 	}
 
-	if resultJSON["file_url"] == nil {
-		return fmt.Errorf("No file_url in response!\n\nResponse: %s", string(body))
+	fileURL, ok := resultJSON["fileUrl"].(string)
+	if !ok {
+		return fmt.Errorf("no fileUrl in response")
 	}
-	fileURL := resultJSON["file_url"].(string)
 
 	originalName := path.Base(fileURL)
 	fileName, err := url.PathUnescape(originalName)
@@ -614,7 +572,10 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 	}
 	fileName = sanitizeFileName(fileName)
 
-	fileSize := resultJSON["file_size"].(float64)
+	fileSize, ok := resultJSON["fileSize"].(float64)
+	if !ok {
+		return fmt.Errorf("no fileSize in response")
+	}
 	if !c.JsonResponse {
 		fmt.Printf("   Downloading :  %s\n", fileName)
 		fmt.Printf("     File Size :  %s\n", units.BytesSize(fileSize))
@@ -629,7 +590,7 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 		outputFilePath = filepath.Join(dir, fileName)
 	} else {
 		if fileInfo, err := os.Stat(outputFilePath); err == nil && fileInfo.IsDir() {
-			// If outputFilePath exists and it is a directory then the file should be downloaded
+			// If outputFilePath exists, and it is a directory then the file should be downloaded
 			// to that directory while retaining its original name
 			// fmt.Printf(">> Specified outputFilePath %s is an existing directory\n", outputFilePath)
 			outputFilePath = filepath.Join(outputFilePath, fileName)
@@ -686,7 +647,7 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, pu
 	// prepare lists of files to downloads defined by name or id.
 	for _, arg := range args {
 		arg = strings.TrimSpace(arg)
-		if helpers.IsFileId(arg) {
+		if helpers.IsFileUid(arg) {
 			fileIDs = append(fileIDs, arg)
 		} else {
 			fileNames = append(fileNames, arg)
@@ -820,16 +781,10 @@ func (c *PFDAClient) GetScope() error {
 		return fmt.Errorf("No space detected")
 	}
 
-	apiURL := fmt.Sprintf("%s/api/v2/cli/job/%s/scope", c.BaseURL, dxJobId)
-
-	body, err := c.makeRequest("GET", apiURL, nil)
-	if err != nil {
-		return err
-	}
+	apiURL := fmt.Sprintf("%s/api/v2/cli/jobs/%s/scope", c.BaseURL, dxJobId)
 
 	var resultJSON map[string]interface{}
-	err = json.Unmarshal(body, &resultJSON)
-	if err != nil {
+	if err := c.makeGetJSON(apiURL, &resultJSON); err != nil {
 		return err
 	}
 
@@ -982,7 +937,7 @@ func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 	c.ContinueOnError = len(args) > 1
 	for _, arg := range args {
 
-		if helpers.IsFileId(arg) {
+		if helpers.IsFileUid(arg) {
 			err := c.RemoveFile([]string{arg})
 			c.HandleError(err)
 			continue
@@ -1073,18 +1028,14 @@ func (c *PFDAClient) RefreshToken(autoRefresh bool) (string, error) {
 func (c *PFDAClient) GetLatestVersion() (string, error) {
 	apiURL := fmt.Sprintf("%s/api/v2/cli/version/latest", c.BaseURL)
 
-	body, err := c.makeRequest("GET", apiURL, nil)
-	if err != nil {
+	var result struct {
+		Version string `json:"version"`
+	}
+	if err := c.makeGetJSON(apiURL, &result); err != nil {
 		return "", err
 	}
 
-	var resultJSON map[string]interface{}
-	err = json.Unmarshal(body, &resultJSON) // do this just to ensure the json is valid
-	if err != nil {
-		return "", err
-	}
-
-	return resultJSON["version"].(string), nil
+	return result.Version, nil
 }
 
 func (c *PFDAClient) SetChunkSize(chunkSize int) error {
@@ -1162,30 +1113,25 @@ func (c *PFDAClient) createNewFolder(name string, parentFolderID string, spaceID
 
 func (c *PFDAClient) Head(arg string, lines int) error {
 
-	if !helpers.IsFileId(arg) {
+	if !helpers.IsFileUid(arg) {
 		return fmt.Errorf("invalid file-id provided: %s", arg)
 	}
 
-	apiURL := fmt.Sprintf("%s/api/files/%s/download?format=json", c.BaseURL, arg)
-	status, body, err := c.makeRequestFail("GET", apiURL, nil)
-	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("%s not found. Please check that this file exists and you have access to it", arg)
-		}
-		return err
-	}
+	apiURL := fmt.Sprintf("%s/api/v2/cli/files/%s/download", c.BaseURL, arg)
 
 	var resultJSON map[string]interface{}
-	if err := json.Unmarshal(body, &resultJSON); err != nil {
+	if err := c.makeGetJSON(apiURL, &resultJSON); err != nil {
 		return err
 	}
 
-	if resultJSON["file_url"] == nil {
-		return fmt.Errorf("no file_url in response!\n\nResponse: %s", string(body))
+	fileURL, ok := resultJSON["fileUrl"].(string)
+	if !ok {
+		return fmt.Errorf("no fileUrl in response")
 	}
-	fileURL := resultJSON["file_url"].(string)
-
-	fileSize := resultJSON["file_size"].(float64)
+	fileSize, ok := resultJSON["fileSize"].(float64)
+	if !ok {
+		return fmt.Errorf("no fileSize in response")
+	}
 	// user wants print whole file, check size first.
 	if lines == -1 && fileSize > 10_000_000 {
 		agree := yesNo("The size of the file is over 10Mb - are you sure you want to display the whole content?")
@@ -1194,12 +1140,7 @@ func (c *PFDAClient) Head(arg string, lines int) error {
 		}
 	}
 
-	err = c.HeadFile(fileURL, lines)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return c.HeadFile(fileURL, lines)
 }
 
 func (c *PFDAClient) downloadByChunks(uidsChunk []string, outputFilePath string, overwrite string) {
@@ -1309,28 +1250,6 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 	return
 }
 
-// Deprecated: This method is not handling errors correctly, use makeRequest instead.
-func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte) (status string, body []byte, err error) {
-	req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
-	if err != nil {
-		return "", nil, fmt.Errorf("request failed: %w", err)
-	}
-	c.setPostHeaders(req)
-
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return "", nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-	status = resp.Status
-	body, _ = io.ReadAll(resp.Body)
-
-	if !strings.HasPrefix(status, "2") {
-		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n", requestType, url, status)
-	}
-	return status, body, err
-}
-
 func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *int64) {
 	// dynamically adjust chunkSize
 	chunkIndex := 1
@@ -1374,26 +1293,16 @@ func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
 	params.Add("md5", hex.EncodeToString(md5Sum[:]))
 
 	fullURL := fmt.Sprintf("%s?%s", uploadURL, params.Encode())
-	body, err := c.makeRequest("GET", fullURL, nil)
 
 	var resultJSON map[string]interface{}
-	err = json.Unmarshal(body, &resultJSON)
-	if err != nil {
+	if err := c.makeGetJSON(fullURL, &resultJSON); err != nil {
 		return err
 	}
 	if resultJSON["url"] == "" {
 		panic("No url in response!")
 	}
-	_, err = c.makeRequestWithHeaders("PUT", resultJSON["url"].(string), resultJSON["headers"].(map[string]interface{}), chunk.data)
+	_, err := c.makeRequestWithHeaders("PUT", resultJSON["url"].(string), resultJSON["headers"].(map[string]interface{}), chunk.data)
 	return err
-}
-
-func (c *PFDAClient) setPostHeaders(req *retryablehttp.Request) {
-	req.Header.Set("User-Agent", c.UserAgent)
-	if c.AuthKey != "" {
-		req.Header.Set("Authorization", "Key "+c.AuthKey)
-	}
-	req.Header.Set("Content-Type", "application/json")
 }
 
 func yesNo(label string) bool {
@@ -1429,55 +1338,4 @@ func pickFile(files []jsonFileResponse, label string) string {
 		log.Fatalf("Prompt failed %v\n", err)
 	}
 	return ids[index]
-}
-
-func printListSpacesResponse(spaces []jsonSpaceResponse, asJSON bool) {
-	if asJSON {
-		prettyJSON, _ := json.MarshalIndent(spaces, "", "    ")
-		fmt.Println(string(prettyJSON))
-	} else if len(spaces) > 0 {
-		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-
-		// Function to join and print a line
-		printLine := func(columns []string) {
-			fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
-		}
-
-		headers := []string{"ID", "Type", "Status", "Role", "Side", "Name"}
-		printLine(headers)
-
-		for _, space := range spaces {
-			columns := []string{strconv.Itoa(space.Id), space.Type, helpers.FormatValue(space.Protected, "Protected"), space.Role, space.Side, space.Title}
-			printLine(columns)
-		}
-		writer.Flush()
-	}
-}
-
-func printSpaceMembersResponse(members []jsonMembersResponse, asJSON bool) {
-	if asJSON {
-		prettyJSON, _ := json.MarshalIndent(members, "", "    ")
-		fmt.Println(string(prettyJSON))
-	} else if len(members) > 0 {
-		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-
-		// Function to join and print a line
-		printLine := func(columns []string) {
-			fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
-		}
-
-		headers := []string{"ID", "Name", "Role", "Side", "Active", "Added at"}
-		printLine(headers)
-
-		for _, member := range members {
-			columns := []string{strconv.Itoa(member.Id), member.Name, member.Role, member.Side, strconv.FormatBool(member.Active), member.CreatedAt}
-			printLine(columns)
-		}
-		writer.Flush()
-	}
-}
-
-func sanitizeFileName(name string) string {
-	re := regexp.MustCompile(`[<>:"/\\|?*]+`)
-	return re.ReplaceAllString(name, "_")
 }

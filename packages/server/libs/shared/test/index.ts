@@ -1,13 +1,13 @@
 import { INestApplicationContext } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
+import chai from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+import dirtyChai from 'dirty-chai'
+import { after, before } from 'mocha'
 import { exposeOrm } from '@shared/app-initialization'
 import { database } from '@shared/database'
 import { DatabaseModule } from '@shared/database/database.module'
 import { getLogger } from '@shared/logger'
-import chai from 'chai'
-import { after, before } from 'mocha'
-import chaiAsPromised from 'chai-as-promised'
-import dirtyChai from 'dirty-chai'
 import { db } from '../src/test'
 import { mocksRestore, mocksSetup } from '../src/test/mocks'
 
@@ -18,7 +18,7 @@ const log = getLogger()
 // See https://github.com/mochajs/mocha/issues/1128#issuecomment-975324465
 //     https://github.com/modernweb-dev/web/issues/1730
 //     https://github.com/mochajs/mocha/issues/2640
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   log.log('nodejs worker test: uncaughtException', err.stack)
   throw err
 })

@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common'
-import { PropertyService } from '@shared/domain/property/services/property.service'
 import { AppService } from '@shared/domain/app/services/app.service'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { JobService } from '@shared/domain/job/job.service'
-import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
-import { NodeService } from '@shared/domain/user-file/node.service'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { UidUtils } from '@shared/utils/uid.utils'
-import { PermissionError } from '@shared/errors'
 import { SetPropertiesDTO } from '@shared/domain/property/dto/set-properties.dto'
 import { PropertyType } from '@shared/domain/property/property.entity'
+import { PropertyService } from '@shared/domain/property/services/property.service'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
+import { PermissionError } from '@shared/errors'
+import { UidUtils } from '@shared/utils/uid.utils'
 
 @Injectable()
 export class SetPropertiesFacade {
@@ -61,9 +61,7 @@ export class SetPropertiesFacade {
       }
     }
     if (this.isFolderId(body.targetId)) {
-      const result = await this.nodeService.getEditableEntityById(
-        Number(body.targetId.split('-')[1]),
-      )
+      const result = await this.nodeService.getEditableEntityById(Number(body.targetId.split('-')[1]))
       if (result) {
         targetId = result.id
         targetType = 'node'

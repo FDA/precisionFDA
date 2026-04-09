@@ -1,11 +1,17 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Delete, Get, Inject, Logger, Param, UseGuards } from '@nestjs/common'
-import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
-import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
-import { CleanupWorkerQueueOperation, createTestMaxMemoryTask } from '@shared/queue'
-import { debugQueueJobs, removeRepeatableDebug, debugQueueJob, removeJobs } from '@shared/queue/queue.debug'
-import { OpsCtx } from '@shared/types'
 import { JSONSchema7 } from 'json-schema'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
+import { CleanupWorkerQueueOperation, createTestMaxMemoryTask } from '@shared/queue'
+import {
+  DebugQueueJobResult,
+  debugQueueJob,
+  debugQueueJobs,
+  removeJobs,
+  removeRepeatableDebug,
+} from '@shared/queue/queue.debug'
+import { OpsCtx } from '@shared/types'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import { DebugErrorTestingRoutesGuard } from './guards/debug-error-testing-routes.guard'
 import { DebugUserContextGuard } from './guards/debug-user-context.guard'
@@ -31,12 +37,19 @@ export class DebugController {
 
   // Debugging bull queue
   @Get('/queue')
-  async getQueueJobs() {
+  async getQueueJobs(): Promise<
+    Awaited<{
+      name: unknown
+      jobs: Array<unknown>
+      jobCounts: unknown
+      repeatableJobs: Array<unknown>
+    }>[]
+  > {
     return await debugQueueJobs()
   }
 
   @Get('/queue/cleanup')
-  async cleanupWorkerQueue() {
+  async cleanupWorkerQueue(): Promise<boolean> {
     const opsCtx: OpsCtx = {
       log: this.logger,
       em: this.em,
@@ -46,38 +59,38 @@ export class DebugController {
   }
 
   @Get('/queue/job/:bullJobId')
-  async debugQueueJob(@Param('bullJobId') bullJobId: string) {
+  async debugQueueJob(@Param('bullJobId') bullJobId: string): Promise<DebugQueueJobResult[]> {
     return await debugQueueJob(bullJobId)
   }
 
   @Delete('/queue/removeJobs/:pattern')
-  async removeJobs(@Param('pattern') pattern: string) {
+  async removeJobs(@Param('pattern') pattern: string): Promise<string> {
     return await removeJobs(pattern)
   }
 
   @Delete('/queue/removeRepeatable')
   async removeRepeatableJobs(
     @Body(new JsonSchemaPipe(removeRepeatableSchema)) body: IRemoveRepeatableParams,
-  ) {
+  ): Promise<string> {
     return await removeRepeatableDebug(body.key)
   }
 
   @UseGuards(DebugErrorTestingRoutesGuard)
   @Get('/errors/throwApiException')
-  throwApiException() {
+  throwApiException(): void {
     throw new Error('This is a test error')
   }
 
   @UseGuards(DebugErrorTestingRoutesGuard)
   @Get('/errors/testApiMemoryAllocationError')
-  testHeapMemoryAllocationError() {
+  testHeapMemoryAllocationError(): { result: string } {
     testHeapMemoryAllocationError()
     return { result: 'Test api heap memory allocation test finished - did not crash?' }
   }
 
   @UseGuards(DebugErrorTestingRoutesGuard)
   @Get('/errors/testWorkerMemoryAllocationError')
-  createTestMaxMemoryTask() {
+  createTestMaxMemoryTask(): { result: string } {
     createTestMaxMemoryTask()
     return { result: 'Test worker heap memory allocation test queued' }
   }

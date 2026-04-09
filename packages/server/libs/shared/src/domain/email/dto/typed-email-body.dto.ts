@@ -1,7 +1,7 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional } from 'class-validator'
 import { EmailTypeToInputMap } from '@shared/domain/email/dto/email-type-to-input.map'
 import { IsEmailInputValid } from '@shared/domain/email/dto/is-email-input-valid.constraint'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 export type EmailInputFormat = keyof EmailTypeToInputMap
 

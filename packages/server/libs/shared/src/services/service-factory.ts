@@ -1,5 +1,5 @@
-import { AxiosInstance } from 'axios'
 import type { Logger } from '@nestjs/common'
+import { AxiosInstance } from 'axios'
 import { IPlatformAuthClient, PlatformAuthClient } from '../platform-client/platform-auth-client'
 import { IWorkstationClient, WorkstationClient } from '../workstation-client/workstation-client'
 
@@ -11,32 +11,16 @@ import { IWorkstationClient, WorkstationClient } from '../workstation-client/wor
  *      It is to be replaced by a proper IOC container.
  */
 interface IServiceFactory {
-  getPlatformAuthClient(
-    accessToken: string,
-    logger?: Logger,
-    axiosInstance?: AxiosInstance,
-  ): IPlatformAuthClient
-  getWorkstationClient: (
-    url: string,
-    axiosInstance?: AxiosInstance,
-    logger?: Logger,
-  ) => IWorkstationClient
+  getPlatformAuthClient(accessToken: string, logger?: Logger, axiosInstance?: AxiosInstance): IPlatformAuthClient
+  getWorkstationClient: (url: string, axiosInstance?: AxiosInstance, logger?: Logger) => IWorkstationClient
 }
 
 export class ServiceFactory implements IServiceFactory {
-  getPlatformAuthClient(
-    accessToken: string,
-    logger?: Logger,
-    axiosInstance?: AxiosInstance,
-  ): IPlatformAuthClient {
+  getPlatformAuthClient(accessToken: string, logger?: Logger, axiosInstance?: AxiosInstance): IPlatformAuthClient {
     return new PlatformAuthClient(accessToken, logger, axiosInstance)
   }
 
-  getWorkstationClient(
-    url: string,
-    axiosInstance?: AxiosInstance,
-    logger?: Logger,
-  ): IWorkstationClient {
+  getWorkstationClient(url: string, axiosInstance?: AxiosInstance, logger?: Logger): IWorkstationClient {
     return new WorkstationClient(url, axiosInstance, logger)
   }
 }

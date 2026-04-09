@@ -1,8 +1,8 @@
 import { FilterQuery } from '@mikro-orm/core'
-import { Comparison } from '@shared/domain/comparison/comparison.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 
 export class ComparisonRepository extends AccessControlRepository<Comparison> {

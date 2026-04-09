@@ -1,27 +1,27 @@
-import { Challenge } from '@shared/domain/challenge/challenge.entity'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { EmptyEmailInputDTO } from '@shared/domain/email/dto/empty-email-input.dto'
-import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
-import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal.dto'
-import { NodeCopyInputDTO } from '@shared/domain/email/dto/node-copy-input.dto'
-import { EmailTypeToInputMap } from '@shared/domain/email/dto/email-type-to-input.map'
-import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
-import { Expert } from '@shared/domain/expert/entity/expert.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { MemberChangeTemplateInput } from '@shared/domain/email/templates/mjml/member-change.template'
 import { LoadedReference } from '@mikro-orm/core'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
-import { License } from '@shared/domain/license/license.entity'
-import { Job } from '@shared/domain/job/job.entity'
-import { JobFailedInputTemplate } from '@shared/domain/email/templates/mjml/job-failed.template'
-import { Invitation } from '@shared/domain/invitation/invitation.entity'
-import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
-import { Comment } from '@shared/domain/comment/comment.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { App } from '@shared/domain/app/app.entity'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { Comment } from '@shared/domain/comment/comment.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
+import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal.dto'
+import { EmailTypeToInputMap } from '@shared/domain/email/dto/email-type-to-input.map'
+import { EmptyEmailInputDTO } from '@shared/domain/email/dto/empty-email-input.dto'
+import { NodeCopyInputDTO } from '@shared/domain/email/dto/node-copy-input.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { JobFailedInputTemplate } from '@shared/domain/email/templates/mjml/job-failed.template'
+import { MemberChangeTemplateInput } from '@shared/domain/email/templates/mjml/member-change.template'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
+import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
+import { Invitation } from '@shared/domain/invitation/invitation.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { License } from '@shared/domain/license/license.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 export type ChallengeOpenedContext = {
   challenge: Challenge
@@ -135,9 +135,7 @@ export type DiscussionContext = {
   discussion: Discussion
   space?: Space
   discussionLink: string
-  input:
-    | EmailTypeToInputMap[EMAIL_TYPES.newDiscussion]
-    | EmailTypeToInputMap[EMAIL_TYPES.newDiscussionReply]
+  input: EmailTypeToInputMap[EMAIL_TYPES.newDiscussion] | EmailTypeToInputMap[EMAIL_TYPES.newDiscussionReply]
 }
 
 export type StaleJobsReportContext = {

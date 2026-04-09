@@ -16,32 +16,29 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { AdminRequestDTO } from '@shared/domain/admin/dto/admin-request.dto'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
+import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
 import { SpacesHiddenDto } from '@shared/domain/space/dto/spaces-hidden.dto'
+import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
 import { SpaceAcceptOperation } from '@shared/domain/space/ops/accept-space'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PermissionError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
-import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
-import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
-import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { AdminRequestDTO } from '@shared/domain/admin/dto/admin-request.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
@@ -69,10 +66,7 @@ export class SpacesController {
   }
 
   @Put('/:id')
-  async update(
-    @Param('id', ParseIntPipe) spaceId: number,
-    @Body() space: UpdateSpaceDTO,
-  ): Promise<Space> {
+  async update(@Param('id', ParseIntPipe) spaceId: number, @Body() space: UpdateSpaceDTO): Promise<Space> {
     return await this.spaceService.update(spaceId, space)
   }
 
@@ -166,11 +160,7 @@ export class SpacesController {
         throw new PermissionError('Permissions are already corrected for guest side.')
       }
 
-      const response = await platformClient.projectInvite(
-        spaceToFix.hostProject,
-        spaceToFix.guestDxOrg,
-        'CONTRIBUTE',
-      )
+      const response = await platformClient.projectInvite(spaceToFix.hostProject, spaceToFix.guestDxOrg, 'CONTRIBUTE')
       this.logger.log({ response }, 'Guest organization invited to host project.')
     }
   }

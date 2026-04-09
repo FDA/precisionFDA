@@ -1,5 +1,5 @@
-import { UidUtils } from '@shared/utils/uid.utils'
 import { expect } from 'chai'
+import { UidUtils } from '@shared/utils/uid.utils'
 
 describe('UidUtils', () => {
   describe('isValidUId', () => {

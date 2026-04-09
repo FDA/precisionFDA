@@ -5,7 +5,9 @@ import { PaginatedRepository } from '@shared/database/repository/paginated.repos
 type TestEntity = { id: number }
 
 describe('PaginatedRepository#paginateWithPropertySort', () => {
-  const createQbChain = (ids: number[]): {
+  const createQbChain = (
+    ids: number[],
+  ): {
     qb: {
       select: ReturnType<typeof stub>
       leftJoin: ReturnType<typeof stub>

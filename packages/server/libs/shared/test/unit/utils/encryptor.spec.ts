@@ -1,5 +1,5 @@
-import { Encryptor } from '@shared/utils/encryptors/encryptor'
 import { expect } from 'chai'
+import { Encryptor } from '@shared/utils/encryptors/encryptor'
 
 describe('Encryptor', () => {
   it('should generate different token for the same session', () => {

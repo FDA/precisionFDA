@@ -1,7 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { CanActivate, Injectable, Logger } from '@nestjs/common'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UnauthorizedRequestError } from '@shared/errors'
 
 @Injectable()

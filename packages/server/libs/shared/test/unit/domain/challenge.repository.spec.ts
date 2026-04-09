@@ -1,10 +1,10 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
 import { database } from '@shared/database'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { create, db } from '../../../src/test'
 
 describe('ChallengeRepository tests', () => {

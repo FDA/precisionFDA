@@ -1,22 +1,12 @@
-import {
-  Collection,
-  Entity,
-  Filter,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  Property,
-  Ref,
-  Reference,
-} from '@mikro-orm/core'
+import { Collection, Entity, Filter, ManyToMany, ManyToOne, OneToMany, Property, Ref, Reference } from '@mikro-orm/core'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { JobRunData } from '@shared/domain/job/job.types'
 import { JobProperty } from '@shared/domain/property/job-property.entity'
 import { JobTagging } from '@shared/domain/tagging/job-tagging.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { formatDuration } from '../../utils/format'
@@ -28,7 +18,7 @@ import { Provenance } from './job.input'
 import { JobRepository } from './job.repository'
 
 @Entity({ tableName: 'jobs', repository: () => JobRepository })
-@Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
+@Filter({ name: 'ownedBy', cond: (args: { userId: number }) => ({ user: { id: args.userId } }) })
 // Tried the following but didn't work
 // @Filter({ name: 'isActive', cond: { $or: [ ACTIVE_STATES.map(x => { return { 'state': x } }) ]}})
 // @Filter({ name: 'isTerminal', cond: { $or: [ TERMINAL_STATES.map(x => { return { 'state': x } }) ]}})
@@ -53,11 +43,8 @@ import { JobRepository } from './job.repository'
 })
 @Filter({
   name: 'accessibleBy',
-  cond: (args) => ({
-    $or: [
-      { user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE },
-      { scope: { $in: args.spaceScopes } },
-    ],
+  cond: (args: { userId: number; spaceScopes: string[] }) => ({
+    $or: [{ user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE }, { scope: { $in: args.spaceScopes } }],
   }),
 })
 export class Job extends ScopedEntity {
@@ -89,7 +76,11 @@ export class Job extends ScopedEntity {
   })
   properties = new Collection<JobProperty>(this)
 
-  @OneToMany(() => JobTagging, (tagging) => tagging.job, { orphanRemoval: true })
+  @OneToMany(
+    () => JobTagging,
+    tagging => tagging.job,
+    { orphanRemoval: true },
+  )
   taggings = new Collection<JobTagging>(this)
 
   @Property({ type: WorkaroundJsonType })
@@ -114,7 +105,6 @@ export class Job extends ScopedEntity {
   @Property({ hidden: true })
   localFolderId: number
 
-  // relations
   @ManyToOne(() => User)
   user!: Ref<User>
 
@@ -169,7 +159,7 @@ export class Job extends ScopedEntity {
       return 0
     }
     if (!this.describe?.stoppedRunning) {
-      return Date.now()- this.describe?.startedRunning
+      return Date.now() - this.describe?.startedRunning
     }
     return this.describe.stoppedRunning - this.describe.startedRunning
   }
@@ -179,7 +169,7 @@ export class Job extends ScopedEntity {
   }
 
   elapsedTimeSinceCreation(): number {
-    return Date.now()- this.createdAt.getTime()
+    return Date.now() - this.createdAt.getTime()
   }
 
   elapsedTimeSinceCreationString(): string {
@@ -210,5 +200,3 @@ export class Job extends ScopedEntity {
     return this.isPrivate() && TERMINAL_STATES.includes(this.state)
   }
 }
-
-export const foo = 'bar'

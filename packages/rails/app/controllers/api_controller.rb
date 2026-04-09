@@ -15,7 +15,7 @@ class ApiController < ApplicationController
   skip_before_action :verify_authenticity_token, unless: lambda {
     @context.present? && @context.key?(:cli_client) && @context[:cli_client] == true
   }
-  before_action :require_api_login, except: %i(destroy cli_latest_version)
+  before_action :require_api_login, except: %i(destroy)
   before_action :validate_create_asset, only: :create_asset
   before_action :check_total_and_job_charges_limit, only: %i(run_workflow)
   before_action :check_total_charges_limit, only: %i(create_file create_asset)
@@ -1372,11 +1372,6 @@ class ApiController < ApplicationController
       end
 
     render json: items, root: "items", adapter: :json, meta: { messages: messages }
-  end
-
-  def cli_latest_version
-    res = https_apps_client.cli_latest_version
-    render json: res, adapter: :json
   end
 
   def track_provenance

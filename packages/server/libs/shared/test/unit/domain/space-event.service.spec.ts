@@ -1,28 +1,22 @@
-import { createStubInstance, stub } from 'sinon'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import {
-  SPACE_EVENT_ACTIVITY_TYPE,
-  SPACE_EVENT_OBJECT_TYPE,
-} from '@shared/domain/space-event/space-event.enum'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
-import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { Ref } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { createStubInstance, stub } from 'sinon'
 import { EmailService } from '@shared/domain/email/email.service'
-import { getEnumKeyByValue } from '@shared/utils/enum-utils'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SpaceEventDTO } from '@shared/domain/space-event/dto/space-event.dto'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { getEnumKeyByValue } from '@shared/utils/enum-utils'
 
 describe('SpaceEvent service tests', () => {
   const USER_ID = 1

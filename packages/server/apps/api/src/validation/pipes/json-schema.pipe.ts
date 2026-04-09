@@ -1,8 +1,8 @@
 import { ArgumentMetadata, PipeTransform } from '@nestjs/common'
-import { ErrorCodes, InternalError, ValidationError } from '@shared/errors'
-import { ajv } from '@shared/utils/validator'
 import type { JSONSchema7 } from 'json-schema'
 import { isEmpty } from 'ramda'
+import { ErrorCodes, InternalError, ValidationError } from '@shared/errors'
+import { ajv } from '@shared/utils/validator'
 
 /**
  * @Deprecated - use class-validator and class-transformer in combination with DTOs instead.
@@ -15,7 +15,7 @@ export class JsonSchemaPipe implements PipeTransform {
     }
   }
 
-  transform(value: unknown, metadata: ArgumentMetadata) {
+  transform(value: unknown, metadata: ArgumentMetadata): unknown {
     const validateFunction = ajv.compile(this.schema)
 
     if (validateFunction(value)) {

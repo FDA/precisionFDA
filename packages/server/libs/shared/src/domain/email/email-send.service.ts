@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
-import type { EmailSendInput } from '@shared/domain/email/email.config'
 import { config } from '@shared/config'
+import type { EmailSendInput } from '@shared/domain/email/email.config'
 import { ENVS } from '@shared/enums'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EmailClient } from '@shared/services/email-client'

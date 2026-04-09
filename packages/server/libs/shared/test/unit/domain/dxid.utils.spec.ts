@@ -1,5 +1,5 @@
-import { DxIdUtils } from '@shared/utils/dxid.utils'
 import { expect } from 'chai'
+import { DxIdUtils } from '@shared/utils/dxid.utils'
 
 describe('DxIdUtils', () => {
   describe('isDxIdValid', () => {

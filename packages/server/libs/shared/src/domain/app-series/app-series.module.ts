@@ -1,8 +1,8 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Module } from '@nestjs/common'
 import { AppSeries } from './app-series.entity'
-import { AppSeriesScopeFilterProvider } from './app-series-scope-filter.provider'
 import { AppSeriesCountService } from './app-series-count.service'
+import { AppSeriesScopeFilterProvider } from './app-series-scope-filter.provider'
 import { AppSeriesService } from './service/app-series.service'
 
 @Module({

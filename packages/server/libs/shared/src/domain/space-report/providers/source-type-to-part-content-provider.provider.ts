@@ -1,9 +1,7 @@
 import { Provider } from '@nestjs/common'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
+import { SpaceReportResultPartDiscussionHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-discussion-html-content.provider'
 import { SpaceReportResultPartHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-html-content.provider'
-import {
-  SpaceReportResultPartDiscussionHtmlContentProvider
-} from '@shared/domain/space-report/service/result/space-report-result-part-discussion-html-content.provider'
 import { SpaceReportResultPartProvenanceTreeHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-provenance-tree-html-content.provider'
 import { SpaceReportResultPartUserHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-user-html-content.provider'
 

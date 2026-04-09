@@ -1,6 +1,6 @@
-import { SpaceGroup } from '@shared/domain/space/space-group.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceGroup } from '@shared/domain/space/space-group.entity'
 
 type SpaceGroupSpaceDTO = {
   id: number
@@ -20,7 +20,7 @@ export class SpaceGroupDTO {
       id: spaceGroup.id,
       name: spaceGroup.name,
       description: spaceGroup.description,
-      spaces: spaceGroup.spaces.map((space) => SpaceGroupDTO.spaceMap(space, userId)),
+      spaces: spaceGroup.spaces.map(space => SpaceGroupDTO.spaceMap(space, userId)),
     }
   }
 
@@ -30,7 +30,7 @@ export class SpaceGroupDTO {
       name: space.name,
       type: SPACE_TYPE[space.type].toLowerCase(),
       isActiveMember: !!space.spaceMemberships.find(
-        (spaceMembership) => spaceMembership.active && spaceMembership.user.id === userId,
+        spaceMembership => spaceMembership.active && spaceMembership.user.id === userId,
       ),
     }
   }

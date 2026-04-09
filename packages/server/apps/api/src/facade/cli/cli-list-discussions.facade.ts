@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { CliDiscussionDTO } from '@shared/domain/cli/dto/cli-discussion.dto'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()

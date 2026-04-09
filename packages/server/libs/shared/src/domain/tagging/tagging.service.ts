@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { TagRepository } from '@shared/domain/tag/tag.repository'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { TaggingRepository } from '@shared/domain/tagging/tagging.repository'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import { TagRepository } from '@shared/domain/tag/tag.repository'
-import { Tag } from '@shared/domain/tag/tag.entity'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class TaggingService {
@@ -30,7 +30,7 @@ export class TaggingService {
     )
     let tag = await this.tagRepo.findOne({ name })
 
-    return this.em.transactional(async (em) => {
+    return this.em.transactional(async em => {
       if (!tag) {
         tag = new Tag()
         tag.name = name

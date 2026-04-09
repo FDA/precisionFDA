@@ -1,5 +1,5 @@
-import { IsString, IsOptional, IsNumber, IsNotEmpty, IsIn } from 'class-validator'
 import { Type } from 'class-transformer'
+import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class CliNodeSearchDTO {
   @IsString()

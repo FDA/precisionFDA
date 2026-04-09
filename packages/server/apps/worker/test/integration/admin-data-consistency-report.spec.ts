@@ -1,19 +1,17 @@
-import { database } from '@shared/database'
-import { App } from '@shared/domain/app/app.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
+import { EntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
+import { database } from '@shared/database'
+import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
+import { App } from '@shared/domain/app/app.entity'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { create, db, generate } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
 import { mocksReset as queueMocksReset } from '../utils/mocks'
-import { EntityManager } from '@mikro-orm/mysql'
-import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import {
-  AdminDataConsistencyReportService
-} from '@shared/debug/admin-data-consistency-report.service'
 
 // Very basic tests for now to make sure this queues and runs
 describe('TASK: AdminDataConsistencyReportOperation', () => {
@@ -36,7 +34,7 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
     const filesParams = {
       parentId: user.id,
       parentType: PARENT_TYPE.USER,
-      state: FILE_STATE_DX.CLOSED
+      state: FILE_STATE_DX.CLOSED,
     }
 
     create.filesHelper.create(em, { user }, { ...filesParams, parentFolderId: 1 })
@@ -53,18 +51,50 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
     const guest = create.userHelper.create(em)
 
     exceedingHostSpace = create.spacesHelper.create(em)
-    create.spacesHelper.addMember(em, {user: host, space: exceedingHostSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
-    create.spacesHelper.addMember(em, {user: user1, space: exceedingHostSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
-    create.spacesHelper.addMember(em, {user: guest, space: exceedingHostSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST})
+    create.spacesHelper.addMember(
+      em,
+      { user: host, space: exceedingHostSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { user: user1, space: exceedingHostSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { user: guest, space: exceedingHostSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+    )
 
     exceedingGuestSpace = create.spacesHelper.create(em, generate.space.group())
-    create.spacesHelper.addMember(em, {user: host, space: exceedingGuestSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
-    create.spacesHelper.addMember(em, {user: guest, space: exceedingGuestSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST})
-    create.spacesHelper.addMember(em, {user: user1, space: exceedingGuestSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST})
+    create.spacesHelper.addMember(
+      em,
+      { user: host, space: exceedingGuestSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { user: guest, space: exceedingGuestSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { user: user1, space: exceedingGuestSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+    )
 
     normalSpace = create.spacesHelper.create(em)
-    create.spacesHelper.addMember(em, {user: host, space: normalSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
-    create.spacesHelper.addMember(em, {user: guest, space: normalSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST})
+    create.spacesHelper.addMember(
+      em,
+      { user: host, space: normalSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { user: guest, space: normalSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+    )
 
     eqjp = {} as EmailQueueJobProducer
 

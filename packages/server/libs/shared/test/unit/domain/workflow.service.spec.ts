@@ -1,10 +1,10 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 import { App } from '@shared/domain/app/app.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
 import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
-import { expect } from 'chai'
-import { stub } from 'sinon'
 
 describe('WorkflowService', () => {
   const APP_1_UID = 'app 1 uid'

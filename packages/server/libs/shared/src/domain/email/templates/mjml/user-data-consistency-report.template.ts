@@ -28,9 +28,7 @@ const createSection = (title: string, count: number | undefined, content: object
 /**
  * Report various data consistency
  */
-export const userDataConsistencyReportTemplate = (
-  data: UserDataConsistencyReportTemplateInput,
-): string => `
+export const userDataConsistencyReportTemplate = (data: UserDataConsistencyReportTemplateInput): string => `
   ${header}
     <mj-section css-class="header-title">
       <mj-column>

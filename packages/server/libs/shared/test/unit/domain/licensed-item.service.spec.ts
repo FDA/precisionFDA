@@ -1,8 +1,8 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
+import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
 
 describe('LicensedItemService', () => {
   const getLicenseItemsForNodeStub = stub()

@@ -25,18 +25,14 @@ export abstract class SpaceReportPartProvenanceTreeResultProvider<
 
   protected abstract getMeta(entity: EntityInstance<T>): SpaceReportPartProvenanceTreeResultMeta
 
-  protected async getJsonResult(
-    entity: EntityInstance<T>,
-  ): Promise<SpaceReportPartProvenanceTreeJsonResult> {
+  protected async getJsonResult(entity: EntityInstance<T>): Promise<SpaceReportPartProvenanceTreeJsonResult> {
     return {
       ...this.getMeta(entity),
       provenance: await this.getProvenance(entity, 'raw'),
     }
   }
 
-  protected async getHtmlResult(
-    entity: EntityInstance<T>,
-  ): Promise<SpaceReportPartProvenanceTreeHtmlResult> {
+  protected async getHtmlResult(entity: EntityInstance<T>): Promise<SpaceReportPartProvenanceTreeHtmlResult> {
     return {
       ...this.getMeta(entity),
       svg: await this.getProvenance(entity, 'svg'),
@@ -48,10 +44,8 @@ export abstract class SpaceReportPartProvenanceTreeResultProvider<
     provenanceFormat: F,
   ): Promise<EntityProvenanceResultType<F>> {
     const entityProvenanceSource = { type: this.type, entity } as EntityProvenanceSourceUnion
-    return await this.entityProvenanceService.getEntityProvenance(
-      entityProvenanceSource,
-      provenanceFormat,
-      { omitStyles: true },
-    )
+    return await this.entityProvenanceService.getEntityProvenance(entityProvenanceSource, provenanceFormat, {
+      omitStyles: true,
+    })
   }
 }

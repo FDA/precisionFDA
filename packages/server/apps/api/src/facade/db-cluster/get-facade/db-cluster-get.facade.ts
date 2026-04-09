@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common'
 import { DbClusterDTO } from '@shared/domain/db-cluster/dto/db-cluster.dto'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
+import { LicenseService } from '@shared/domain/license/license.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { getIdFromScopeName } from '@shared/domain/space/space.helper'
+import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { LicenseService } from '@shared/domain/license/license.service'
 
 @Injectable()
 export class DbClusterGetFacade {
@@ -54,10 +54,7 @@ export class DbClusterGetFacade {
       })
     }
 
-    const membership = await this.spaceMembershipService.getCurrentMembership(
-      spaceId,
-      this.userContext.id,
-    )
+    const membership = await this.spaceMembershipService.getCurrentMembership(spaceId, this.userContext.id)
 
     return DbClusterDTO.mapToDTO(dbCluster, space, membership, fileLicense)
   }

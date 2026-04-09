@@ -1,8 +1,8 @@
+import path from 'node:path'
+import { default as dotenv } from 'dotenv'
+import { mergeDeepRight } from 'ramda'
 import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { parseEnumValueFromString } from '@shared/validation/parsers'
-import { default as dotenv } from 'dotenv'
-import path from 'node:path'
-import { mergeDeepRight } from 'ramda'
 import { ENVS } from '../enums'
 import { DeepPartial } from '../types'
 import { BILLING_INFO, MAX_JOB_DURATION_SECONDS } from './constants'
@@ -21,14 +21,12 @@ export const parseIntFromProcess = (envValue: string | undefined): Maybe<number>
   }
   return null
 }
-export const parseBooleanFromProcess = (
+export const parseBooleanFromProcess: (value: string | undefined, defaultValue?: boolean) => boolean = (
   value: string | undefined,
-  defaultValue = false,
+  defaultValue: boolean = false,
 ): boolean => (value ? value.toLowerCase() === 'true' : defaultValue)
 
-export const parseJSONFromProcess = (
-  envValue: string | undefined,
-): Maybe<Record<string, unknown> | null> => {
+export const parseJSONFromProcess = (envValue: string | undefined): Maybe<Record<string, unknown> | null> => {
   if (envValue) {
     try {
       return JSON.parse(envValue)
@@ -48,7 +46,7 @@ const getEnv = (): ENVS => {
   }
 }
 
-const env = getEnv()
+const env: ENVS = getEnv()
 
 const defaultConfig = {
   appName: 'https-apps-worker',
@@ -62,10 +60,7 @@ const defaultConfig = {
     url: process.env.NODE_URL ?? 'https://nodejs-api',
     railsHost: process.env.HOST ?? 'https://localhost:3000',
     // TODO - refactor to boolean
-    allowErrorTestingRoutes: parseBooleanFromProcess(
-      process.env.NODE_ALLOW_ERROR_TESTING_ROUTES,
-      true,
-    ),
+    allowErrorTestingRoutes: parseBooleanFromProcess(process.env.NODE_ALLOW_ERROR_TESTING_ROUTES, true),
     fdaSubnet: {
       allowedIpCidrBlock: {
         ipv4Quadruple: [127, 0, 0, 1],
@@ -85,8 +80,7 @@ const defaultConfig = {
   },
   database: {
     dbName: process.env.NODE_DATABASE_NAME ?? 'precisionfda-test',
-    clientUrl:
-      process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
+    clientUrl: process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
     ormMetadataCacheEnabled: false,
     printDBQueryValuesInLog: false,
   },
@@ -161,11 +155,9 @@ const defaultConfig = {
       // every two minutes
       // repeatPattern: '*/2 * * * *',
       repeatPattern: '*/15 * * * * *', // Every 15 seconds
-      staleJobsEmailAfter:
-        parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
+      staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
       staleJobsTerminateAfter:
-        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ??
-        MAX_JOB_DURATION_SECONDS,
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? MAX_JOB_DURATION_SECONDS,
     },
     nonTerminatedDbClusters: {
       repeatPattern: '0 6 * * *', // Once a day at 6am

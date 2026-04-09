@@ -27,7 +27,7 @@ export const getEntityType = (entityType: string): ENTITY_TYPE => {
  * @private
  */
 export const remapPfdaSpecToPlatformSpec = (pfdaSpecs: AppSpecItem[]): PlatformSpec[] => {
-  return pfdaSpecs.map((pfdaSpec) => {
+  return pfdaSpecs.map(pfdaSpec => {
     return {
       class: pfdaSpec.class,
       help: pfdaSpec.help,
@@ -39,7 +39,7 @@ export const remapPfdaSpecToPlatformSpec = (pfdaSpecs: AppSpecItem[]): PlatformS
 }
 
 export const stripChoices = (spec: AppInputSpecItem[]): AppInputSpecItem[] => {
-  return spec.map((s) => {
+  return spec.map(s => {
     if (s.choices && s.choices.length === 0) {
       delete s.choices
     }

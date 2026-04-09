@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { CliNodeRemoveDTO } from '@shared/domain/cli/dto/cli-node-remove.dto'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
-import { CliNodeRemoveDTO } from '@shared/domain/cli/dto/cli-node-remove.dto'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
@@ -23,7 +23,7 @@ export class CliNodeRemoveFacade {
     if (body.uids) {
       this.logger.log(`Removing nodes with UIDs: ${body.uids.join(', ')}`)
       const nodes = await this.nodeRepository.find({ uid: body.uids })
-      ids = nodes.map((node) => node.id)
+      ids = nodes.map(node => node.id)
     } else {
       this.logger.log(`Removing nodes with IDs: ${body.ids.join(', ')}`)
       ids = body.ids

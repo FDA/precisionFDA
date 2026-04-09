@@ -12,10 +12,10 @@ import {
 } from '@mikro-orm/core'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { ScopedEntity } from '@shared/database/scoped.entity'
-import { Job } from '@shared/domain/job/job.entity'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
-import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Job } from '@shared/domain/job/job.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { getLogger } from '../../logger'
 import { DxId } from '../entity/domain/dxid'
@@ -43,11 +43,8 @@ export interface Internal {
 @Entity({ tableName: 'apps', repository: () => AppRepository })
 @Filter({
   name: 'accessibleBy',
-  cond: (args) => ({
-    $or: [
-      { user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE },
-      { scope: { $in: args.spaceScopes } },
-    ],
+  cond: args => ({
+    $or: [{ user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE }, { scope: { $in: args.spaceScopes } }],
   }),
 })
 export class App extends ScopedEntity {

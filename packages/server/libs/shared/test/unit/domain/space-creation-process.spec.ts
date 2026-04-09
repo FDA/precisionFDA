@@ -1,11 +1,9 @@
 import { Reference } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { SinonStub, stub } from 'sinon'
 import { config } from '@shared/config'
 import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '@shared/domain/space-membership/space-membership.enum'
 import { AdministratorSpaceCreationProcess } from '@shared/domain/space/create/administrator-space-creation.process'
 import { GovernmentSpaceCreationProcess } from '@shared/domain/space/create/government-space-creation.process'
 import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
@@ -15,16 +13,15 @@ import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
+import { USER_STATE, User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PlatformClient } from '@shared/platform-client'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import * as generate from '@shared/test/generate'
-import { expect } from 'chai'
-import { stub, SinonStub } from 'sinon'
 
 describe('space creation process tests', () => {
   const SHARED_SPACE_ID = 2
@@ -150,7 +147,7 @@ describe('space creation process tests', () => {
     projectCreateStub.returns({ id: `project-${generate.random.dxstr()}` } as ClassIdResponse)
     createOrgStub.returns({ id: `org-${generate.random.dxstr()}` } as ClassIdResponse)
 
-    emTransactionalStub.callsFake(async (callback) => {
+    emTransactionalStub.callsFake(async callback => {
       return callback(emTransactionalStub)
     })
 
@@ -189,10 +186,10 @@ describe('space creation process tests', () => {
       })
       .resolves(guestLeadUser)
     emPersistAndFlushStub.reset()
-    emPersistAndFlushStub.callsFake(async (entity) => {
+    emPersistAndFlushStub.callsFake(async entity => {
       entity.id = SINGLE_SPACE_ID // setting group space id
     })
-    createOrgStub.callsFake((handle) => {
+    createOrgStub.callsFake(handle => {
       if (handle.includes('guest')) {
         return { id: GUEST_ORG_ID }
       }
@@ -251,9 +248,7 @@ describe('space creation process tests', () => {
         dxuser: config.platform.challengeBotUser,
       }
 
-      emFindOneStub
-        .withArgs(User, { dxuser: config.platform.challengeBotUser })
-        .resolves({ challengeBotUser })
+      emFindOneStub.withArgs(User, { dxuser: config.platform.challengeBotUser }).resolves({ challengeBotUser })
 
       const res = await groupsProcess(siteAdmin.dxuser, siteAdmin.id).build(input)
       expect(res).eq(SINGLE_SPACE_ID)
@@ -342,9 +337,7 @@ describe('space creation process tests', () => {
         expect.fail('Operation is expected to fail.')
       } catch (error) {
         expect(error.name).to.equal('PermissionError')
-        expect(error.message).eq(
-          'You are not allowed to create new Private Space for another user!',
-        )
+        expect(error.message).eq('You are not allowed to create new Private Space for another user!')
       }
     })
   })
@@ -415,9 +408,7 @@ describe('space creation process tests', () => {
         expect.fail('Operation is expected to fail.')
       } catch (error) {
         expect(error.name).to.equal('PermissionError')
-        expect(error.message).eq(
-          'You are not allowed to create new Administrator Space for another user!',
-        )
+        expect(error.message).eq('You are not allowed to create new Administrator Space for another user!')
       }
     })
   })
@@ -463,9 +454,7 @@ describe('space creation process tests', () => {
         expect.fail('Operation is expected to fail.')
       } catch (error) {
         expect(error.name).to.equal('PermissionError')
-        expect(error.message).eq(
-          'You are not allowed to create new Government Space for another user!',
-        )
+        expect(error.message).eq('You are not allowed to create new Government Space for another user!')
       }
     })
 
@@ -569,9 +558,7 @@ describe('space creation process tests', () => {
       input.protected = true
       input.restrictedReviewer = true
 
-      emFindOneStub
-        .withArgs(User, { id: hostLeadUser.id, userState: USER_STATE.ENABLED })
-        .resolves(hostLeadUser)
+      emFindOneStub.withArgs(User, { id: hostLeadUser.id, userState: USER_STATE.ENABLED }).resolves(hostLeadUser)
       emFindOneStub
         .withArgs(User, {
           dxuser: hostLeadUser.dxuser,
@@ -589,7 +576,7 @@ describe('space creation process tests', () => {
         .resolves(guestLeadUser)
       userRepoFindOneStub.withArgs({ dxuser: input.hostLeadDxuser }).resolves(hostLeadUser)
       emPersistAndFlushStub.reset()
-      emPersistAndFlushStub.callsFake(async (entity) => {
+      emPersistAndFlushStub.callsFake(async entity => {
         entity.id = SHARED_SPACE_ID // setting shared space id
         if (entity.sponsorOrgId) {
           // It's a shared space, so set confidential spaces
@@ -604,7 +591,7 @@ describe('space creation process tests', () => {
       addTaggingForEntityStub.reset()
       emCreateStub.callsFake((_entityClass, entityData) => entityData)
       emPopulateStub.resolves({})
-      createOrgStub.callsFake((handle) => {
+      createOrgStub.callsFake(handle => {
         if (handle.includes('guest')) {
           return { id: GUEST_ORG_ID }
         }
@@ -620,16 +607,11 @@ describe('space creation process tests', () => {
       expect(userRepoFindOneStub.calledTwice).to.be.true()
       expect(userRepoFindOneStub.calledWith({ dxuser: input.hostLeadDxuser })).to.be.true()
       expect(
-        userRepoFindOneStub.calledWith(
-          { dxuser: input.guestLeadDxuser },
-          { populate: ['organization'] },
-        ),
+        userRepoFindOneStub.calledWith({ dxuser: input.guestLeadDxuser }, { populate: ['organization'] }),
       ).to.be.true()
 
       expect(emFindOneStub.calledThrice).to.be.true()
-      expect(
-        emFindOneStub.calledWith(User, { id: hostLeadUser.id, userState: USER_STATE.ENABLED }),
-      ).to.be.true()
+      expect(emFindOneStub.calledWith(User, { id: hostLeadUser.id, userState: USER_STATE.ENABLED })).to.be.true()
       expect(
         emFindOneStub.calledWith(User, {
           dxuser: hostLeadUser.dxuser,

@@ -1,4 +1,6 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { mocksReset } from '@worker-test/utils/mocks'
+import { expect } from 'chai'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
@@ -6,11 +8,9 @@ import { PublisherService } from '@shared/domain/discussion/services/publisher.s
 import { Job } from '@shared/domain/job/job.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
-import { PlatformClient } from '@shared/platform-client'
-import { mocksReset } from '@worker-test/utils/mocks'
-import { expect } from 'chai'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
+import { PlatformClient } from '@shared/platform-client'
 import { create, db } from '../../../src/test'
 
 describe('PublisherService tests', () => {
@@ -24,11 +24,7 @@ describe('PublisherService tests', () => {
     user = create.userHelper.create(em)
     const userContext = create.contextHelper.create(user)
     await em.flush()
-    publisherService = new PublisherService(
-      em,
-      userContext,
-      new PlatformClient({ accessToken: 'foo' }),
-    )
+    publisherService = new PublisherService(em, userContext, new PlatformClient({ accessToken: 'foo' }))
     // using mocked platform client to avoid actual calls to platform
     mocksReset()
   })
@@ -138,10 +134,7 @@ describe('PublisherService tests', () => {
       },
     )
     await em.flush()
-    const count = await publisherService.publishComparisons(
-      [comparison1, comparison2],
-      STATIC_SCOPE.PUBLIC,
-    )
+    const count = await publisherService.publishComparisons([comparison1, comparison2], STATIC_SCOPE.PUBLIC)
     expect(count).eq(2)
     em.clear()
     const loadedComparison1 = await em.findOneOrFail(Comparison, { id: comparison1.id })

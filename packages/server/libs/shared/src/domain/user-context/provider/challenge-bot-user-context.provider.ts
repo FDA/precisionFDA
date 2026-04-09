@@ -1,8 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { FactoryProvider } from '@nestjs/common'
 import { config } from '@shared/config'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 export const CHALLENGE_BOT_USER_CONTEXT = 'CHALLENGE_BOT_USER_CONTEXT'
 

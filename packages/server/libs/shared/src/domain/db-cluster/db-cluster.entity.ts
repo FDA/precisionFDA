@@ -10,18 +10,18 @@ import {
   Reference,
   Unique,
 } from '@mikro-orm/core'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { DbClusterProperty } from '@shared/domain/property/db-cluster-property.entity'
+import { DbClusterTagging } from '@shared/domain/tagging/db-cluster-tagging.entity'
 import { formatDuration } from '../../utils/format'
 import { DxId } from '../entity/domain/dxid'
 import { User } from '../user/user.entity'
 import { DB_SYNC_STATUS, ENGINE, STATUS } from './db-cluster.enum'
-import { ScopedEntity } from '@shared/database/scoped.entity'
 import { DbClusterRepository } from './db-cluster.repository'
-import { DbClusterTagging } from '@shared/domain/tagging/db-cluster-tagging.entity'
 
 @Entity({ tableName: 'dbclusters', repository: () => DbClusterRepository })
-@Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
+@Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
 @Filter({
   name: 'isNonTerminal',
   cond: {
@@ -85,7 +85,11 @@ export class DbCluster extends ScopedEntity {
   })
   properties = new Collection<DbClusterProperty>(this)
 
-  @OneToMany(() => DbClusterTagging, (tagging) => tagging.dbCluster, { orphanRemoval: true })
+  @OneToMany(
+    () => DbClusterTagging,
+    tagging => tagging.dbCluster,
+    { orphanRemoval: true },
+  )
   taggings = new Collection<DbClusterTagging>(this)
 
   @Property({ nullable: true })

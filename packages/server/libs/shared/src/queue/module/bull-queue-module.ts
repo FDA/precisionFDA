@@ -5,8 +5,8 @@ import { BullBoardModule as BullBoardFeatureModule } from '@bull-board/nestjs/di
 import { BullModule } from '@nestjs/bull'
 import { BullModuleOptions } from '@nestjs/bull/dist/interfaces/bull-module-options.interface'
 import { DynamicModule } from '@nestjs/common'
-import { config } from '@shared/config'
 import { QueueOptions } from 'bull'
+import { config } from '@shared/config'
 
 export class BullQueueModule {
   static forRoot(): DynamicModule {
@@ -49,7 +49,6 @@ export class BullQueueModule {
   }
 
   static registerQueue(opts: BullModuleOptions): DynamicModule {
-
     const imports = [
       BullModule.registerQueue({
         ...opts,

@@ -1,4 +1,6 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { database } from '@shared/database'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { STATUS as DB_CLUSTER_STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
@@ -6,8 +8,6 @@ import { User } from '@shared/domain/user/user.entity'
 import { ErrorCodes } from '@shared/errors'
 import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { expect } from 'chai'
-import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -27,7 +27,7 @@ describe('POST /dbclusters/start', () => {
       create.dbClusterHelper.create(em, { user }, { status: DB_CLUSTER_STATUS.STOPPED }),
       create.dbClusterHelper.create(em, { user }, { status: DB_CLUSTER_STATUS.STOPPED }),
     ]
-    dxids = dbClusters.map((dbCluster) => dbCluster.dxid)
+    dxids = dbClusters.map(dbCluster => dbCluster.dxid)
     await em.flush()
     mocksReset()
   })

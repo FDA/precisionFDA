@@ -1,20 +1,20 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { STATIC_SCOPE } from '@shared/enums'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { PlatformClient } from '@shared/platform-client'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/create-db-cluster.dto'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { ErrorCodes, NotFoundError, PermissionError } from '@shared/errors'
-import { getIdFromScopeName, getProjectDxid } from '@shared/domain/space/space.helper'
-import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
-import { DbClusterAccessControlEncryptor } from '@shared/domain/db-cluster/access-control/db-cluster-access-control-encryptor'
-import { config } from '@shared/config'
-import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { omit } from 'ramda'
-import { SpaceService } from '@shared/domain/space/service/space.service'
+import { config } from '@shared/config'
+import { DbClusterAccessControlEncryptor } from '@shared/domain/db-cluster/access-control/db-cluster-access-control-encryptor'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/create-db-cluster.dto'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { getIdFromScopeName, getProjectDxid } from '@shared/domain/space/space.helper'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { STATIC_SCOPE } from '@shared/enums'
+import { ErrorCodes, NotFoundError, PermissionError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { PlatformClient } from '@shared/platform-client'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
+import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 
 @Injectable()
 export class DbClusterCreateFacade {
@@ -43,18 +43,13 @@ export class DbClusterCreateFacade {
       const spaceId = getIdFromScopeName(input.scope)
       const space = await this.spaceService.getEditableById(spaceId)
       if (!space) {
-        this.logger.warn(
-          { userId: user.id, spaceId: spaceId },
-          'User cannot create DbCluster in given space.',
-        )
+        this.logger.warn({ userId: user.id, spaceId: spaceId }, 'User cannot create DbCluster in given space.')
 
         throw new PermissionError('Unable to create DbCluster in selected context.', {
           statusCode: 403,
         })
       }
-      const membership = (await space.spaceMemberships.loadItems()).find(
-        (m) => m.user.id === user.id,
-      )
+      const membership = (await space.spaceMemberships.loadItems()).find(m => m.user.id === user.id)
 
       project = getProjectDxid(space, membership)
 
@@ -71,10 +66,7 @@ export class DbClusterCreateFacade {
     }
 
     const salt = DbClusterAccessControlEncryptor.generateSalt()
-    const password = DbClusterAccessControlEncryptor.generatePassword(
-      config.dbCluster.passwordSecret,
-      salt,
-    )
+    const password = DbClusterAccessControlEncryptor.generatePassword(config.dbCluster.passwordSecret, salt)
 
     const newCluster = await platformClient.dbClusterCreate({
       ...omit(['scope', 'description'], input),
@@ -89,12 +81,7 @@ export class DbClusterCreateFacade {
     })
     this.logger.log({ response: describeDbClusterRes }, 'Describe DbCluster response.')
 
-    const dbCluster = await this.dbClusterService.persistDbCluster(
-      input,
-      describeDbClusterRes,
-      user,
-      salt,
-    )
+    const dbCluster = await this.dbClusterService.persistDbCluster(input, describeDbClusterRes, user, salt)
     await this.mainJobProducer.createDbClusterSyncTask({ dxid: dbCluster.dxid }, this.userContext)
 
     this.logger.log({ dbClusterId: dbCluster.id }, 'DbCluster created.')

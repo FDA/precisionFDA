@@ -1,9 +1,9 @@
+import crypto from 'node:crypto'
+import { Transform } from 'class-transformer'
+import { IsBoolean, IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator'
 import { constructDxOrg } from '@shared/domain/org/org.utils'
 import { Space } from '@shared/domain/space/space.entity'
 import { getSpaceTypeEnum, SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { Transform } from 'class-transformer'
-import { IsBoolean, IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator'
-import crypto from 'node:crypto'
 
 export class CreateSpaceDTO {
   @IsString()
@@ -23,19 +23,19 @@ export class CreateSpaceDTO {
   @IsNotEmpty()
   hostLeadDxuser: string
 
-  @ValidateIf((o) => o.spaceType === SPACE_TYPE.REVIEW)
+  @ValidateIf(o => o.spaceType === SPACE_TYPE.REVIEW)
   @IsBoolean()
   restrictedReviewer: boolean = false
 
-  @ValidateIf((o) => o.spaceType === SPACE_TYPE.REVIEW)
+  @ValidateIf(o => o.spaceType === SPACE_TYPE.REVIEW)
   @IsBoolean()
   restrictedDiscussions: boolean = false
 
-  @ValidateIf((o) => o.spaceType === SPACE_TYPE.REVIEW)
+  @ValidateIf(o => o.spaceType === SPACE_TYPE.REVIEW)
   @IsString()
   cts: string
 
-  @ValidateIf((o) => o.spaceType === SPACE_TYPE.GROUPS || o.spaceType === SPACE_TYPE.REVIEW)
+  @ValidateIf(o => o.spaceType === SPACE_TYPE.GROUPS || o.spaceType === SPACE_TYPE.REVIEW)
   @IsString()
   guestLeadDxuser?: string
 

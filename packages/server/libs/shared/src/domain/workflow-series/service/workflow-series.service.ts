@@ -4,7 +4,6 @@ import { WorkflowSeriesCountService } from '@shared/domain/workflow-series/workf
 
 @Injectable()
 export class WorkflowSeriesService {
-
   constructor(private readonly workflowSeriesCountService: WorkflowSeriesCountService) {}
 
   /**

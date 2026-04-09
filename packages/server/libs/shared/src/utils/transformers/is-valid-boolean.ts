@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer'
 import { registerDecorator, ValidationArguments, ValidationOptions } from 'class-validator'
 
 export function TransformAndValidateBoolean(validationOptions?: ValidationOptions) {
-  return function (target: unknown, propertyKey: string) {
+  return function (target: object, propertyKey: string): void {
     Transform(
       ({ value }) => {
         if (typeof value === 'boolean') {
@@ -30,10 +30,10 @@ export function TransformAndValidateBoolean(validationOptions?: ValidationOption
       options: validationOptions,
       constraints: [],
       validator: {
-        validate(value: unknown) {
+        validate(value: boolean): boolean {
           return value === true || value === false
         },
-        defaultMessage(args: ValidationArguments) {
+        defaultMessage(args: ValidationArguments): string {
           return `Invalid boolean value: ${args.value}`
         },
       },

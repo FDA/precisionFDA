@@ -1,10 +1,4 @@
-import {
-  footer,
-  getBottomSpacer,
-  getMiddleSpacer,
-  header,
-  viewChallengePreregPageCtoButton,
-} from './common'
+import { footer, getBottomSpacer, getMiddleSpacer, header, viewChallengePreregPageCtoButton } from './common'
 
 export type ChallengePreregTemplateInput = {
   firstName: string

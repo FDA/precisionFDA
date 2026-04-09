@@ -1,10 +1,10 @@
-import { EntityService } from '@shared/domain/entity/entity.service'
-import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
-import { Expert } from '@shared/domain/expert/entity/expert.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { SearchResultExpertQuestionMapper } from '@shared/facade/search/result-mapper/search-result-expert-question-mapper'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { EntityService } from '@shared/domain/entity/entity.service'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
+import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { SearchResultExpertQuestionMapper } from '@shared/facade/search/result-mapper/search-result-expert-question-mapper'
 
 describe('SearchResultExpertQuestionMapper', () => {
   const USER_FULLNAME = 'USER_FULLNAME'

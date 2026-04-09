@@ -47,9 +47,7 @@ export class UserRunningJobsReportHandler extends EmailHandler<EMAIL_TYPES.userR
     }
   }
 
-  protected async getContextualData(
-    input: UserRunningJobsReportDTO,
-  ): Promise<UserRunningJobsReportContext> {
+  protected async getContextualData(input: UserRunningJobsReportDTO): Promise<UserRunningJobsReportContext> {
     return { input: input }
   }
 

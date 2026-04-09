@@ -1,18 +1,9 @@
-import {
-  Collection,
-  Entity,
-  Ref,
-  ManyToMany,
-  ManyToOne,
-  Property,
-  Reference,
-  Enum,
-} from '@mikro-orm/core'
+import { Collection, Entity, Enum, ManyToMany, ManyToOne, Property, Ref, Reference } from '@mikro-orm/core'
 import { Space } from '@shared/domain/space/space.entity'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from './space-membership.enum'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 
 @Entity({ tableName: 'space_memberships', repository: () => SpaceMembershipRepository })
 export class SpaceMembership extends BaseEntity {
@@ -28,7 +19,10 @@ export class SpaceMembership extends BaseEntity {
   @ManyToOne(() => User)
   user!: Ref<User>
 
-  @ManyToMany(() => Space, (space) => space.spaceMemberships)
+  @ManyToMany(
+    () => Space,
+    space => space.spaceMemberships,
+  )
   spaces = new Collection<Space>(this)
 
   constructor(user: User, space: Space, side: SPACE_MEMBERSHIP_SIDE, role: SPACE_MEMBERSHIP_ROLE) {

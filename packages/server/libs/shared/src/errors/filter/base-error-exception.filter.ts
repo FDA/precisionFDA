@@ -1,6 +1,6 @@
 import { Catch } from '@nestjs/common'
-import { BaseError } from '@shared/errors'
 import { config } from '@shared/config'
+import { BaseError } from '@shared/errors'
 import { AbstractExceptionFilter, ErrorPayload } from './abstract-exception.filter'
 
 @Catch(BaseError)

@@ -1,5 +1,5 @@
-import { config } from '@shared/config'
 import { IsOptional, IsString, MaxLength } from 'class-validator'
+import { config } from '@shared/config'
 
 export class UpdateDbClusterDTO {
   @IsString()

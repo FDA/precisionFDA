@@ -19,8 +19,7 @@ export interface SpaceReportPartDiscussionResultComment {
   attachments: SpaceReportPartDiscussionResultAttachment[]
 }
 
-export interface SpaceReportPartDiscussionResultAnswer
-  extends SpaceReportPartDiscussionResultComment {
+export interface SpaceReportPartDiscussionResultAnswer extends SpaceReportPartDiscussionResultComment {
   comments: SpaceReportPartDiscussionResultComment[]
 }
 

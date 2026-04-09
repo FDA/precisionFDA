@@ -1,8 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { ArrayUtils } from '@shared/utils/array.utils'
 

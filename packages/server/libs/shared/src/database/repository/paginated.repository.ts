@@ -88,7 +88,7 @@ export abstract class PaginatedRepository<T extends object> extends EntityReposi
       .offset(offset)
 
     const result: Array<{ id: number }> = await qb.execute('all')
-    const ids: number[] = result.map((r) => r.id)
+    const ids: number[] = result.map(r => r.id)
 
     if (ids.length === 0) {
       return {
@@ -108,17 +108,11 @@ export abstract class PaginatedRepository<T extends object> extends EntityReposi
       findOptions.populate = populate
     }
 
-    const entities = await this.find(
-      { id: { $in: ids } } as unknown as FilterQuery<T>,
-      findOptions,
-    )
+    const entities = await this.find({ id: { $in: ids } } as unknown as FilterQuery<T>, findOptions)
 
     // Preserve the order from the sorted query
     const idOrder = new Map(ids.map((id, idx) => [id, idx]))
-    entities.sort(
-      (a, b) =>
-        (idOrder.get((a as { id: number }).id) ?? 0) - (idOrder.get((b as { id: number }).id) ?? 0),
-    )
+    entities.sort((a, b) => (idOrder.get((a as { id: number }).id) ?? 0) - (idOrder.get((b as { id: number }).id) ?? 0))
 
     return {
       data: entities,

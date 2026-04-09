@@ -1,10 +1,12 @@
+import Bull, { Job } from 'bull'
 import { database } from '@shared/database'
 import { SyncSpacesPermissionsOperation } from '@shared/domain/space/ops/permissions-synchronize'
-import { Job } from 'bull'
 import { SyncSpacesPermissionsJob } from '@shared/queue/task.input'
 import { getChildLogger } from '../utils/logger'
 
-export const syncSpacesPermissionsHandler = async (bullJob: Job<SyncSpacesPermissionsJob>) => {
+export const syncSpacesPermissionsHandler: (bullJob: Bull.Job<SyncSpacesPermissionsJob>) => Promise<void> = async (
+  bullJob: Job<SyncSpacesPermissionsJob>,
+) => {
   const requestId = String(bullJob.id)
   const data = bullJob.data
   const log = getChildLogger(requestId)

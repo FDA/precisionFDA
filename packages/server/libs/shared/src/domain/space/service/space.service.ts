@@ -1,8 +1,22 @@
-import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
+import { FindOptions } from '@mikro-orm/core'
+import { FilterQuery, Loaded, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
+import { Logger } from 'nestjs-pino'
 import { CountStats } from '@shared/database/statistics.type'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { EventHelper } from '@shared/domain/event/event.helper'
+import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
+import { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP } from '@shared/domain/space/create/space-type-to-process-map.provider'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
+import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
+import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
+import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
+import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
+import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
+import { spaceActionPolicy } from '@shared/domain/space/space.action-policy'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import {
   ENTITY_TYPE,
@@ -12,31 +26,13 @@ import {
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP } from '@shared/domain/space/create/space-type-to-process-map.provider'
-import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
-import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
-import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
-import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
-import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
-import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
-import { spaceActionPolicy } from '@shared/domain/space/space.action-policy'
-import { Space } from '@shared/domain/space/space.entity'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { Node } from '@shared/domain/user-file/node.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import {
-  NotFoundError,
-  PermissionError,
-  SpaceNotFoundError,
-  UserNotFoundError,
-} from '@shared/errors'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NotFoundError, PermissionError, SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { StringUtils } from '@shared/utils/string.utils'
-import { Logger } from 'nestjs-pino'
 import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
 
 type SpaceFilter = FilterQuery<Space> & {
@@ -57,7 +53,6 @@ export class SpaceService {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly userContext: UserContext,
-
     @Inject(SPACE_TYPE_TO_PROCESS_PROVIDER_MAP)
     private readonly spaceTypeToCreatorProviderMap: {
       [T in SPACE_TYPE]: SpaceCreationProcess
@@ -68,6 +63,13 @@ export class SpaceService {
     private readonly spaceGroupService: SpaceGroupService,
     private readonly eventHelper: EventHelper,
   ) {}
+
+  async listAccessible<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
+    where: FilterQuery<Space>,
+    options?: Omit<FindOptions<Space, Hint, Fields, Excludes>, 'limit' | 'offset'>,
+  ): Promise<Loaded<Space, Hint, Fields, Excludes>[]> {
+    return this.spaceRepository.findAccessible(where, options)
+  }
 
   async findEditableById(id: number): Promise<Space> {
     return this.spaceRepository.findEditableOne({ id })
@@ -100,13 +102,8 @@ export class SpaceService {
     if (space.type === SPACE_TYPE.GOVERNMENT && !isHostLead) {
       throw new PermissionError('Government space can be updated only by owner.')
     }
-    if (
-      [SPACE_TYPE.GROUPS, SPACE_TYPE.ADMINISTRATOR].includes(space.type) &&
-      !(isSiteAdmin || isLead)
-    ) {
-      throw new PermissionError(
-        'Group and Admin spaces can be updated only by Host or Guest leads.',
-      )
+    if ([SPACE_TYPE.GROUPS, SPACE_TYPE.ADMINISTRATOR].includes(space.type) && !(isSiteAdmin || isLead)) {
+      throw new PermissionError('Group and Admin spaces can be updated only by Host or Guest leads.')
     }
     if (space.type === SPACE_TYPE.PRIVATE_TYPE && !isHostLead) {
       throw new PermissionError('Private space can be updated only by owner.')
@@ -131,7 +128,7 @@ export class SpaceService {
         space.meta.cts = spaceInput.cts
         await space.confidentialSpaces.loadItems()
 
-        space.confidentialSpaces.getItems().forEach((cs) => {
+        space.confidentialSpaces.getItems().forEach(cs => {
           cs.name = spaceInput.name
           cs.description = spaceInput.description
         })
@@ -167,9 +164,9 @@ export class SpaceService {
       throw new PermissionError('Lock operation is not permitted.')
     }
 
-    await this.em.transactional(async (tem) => {
+    await this.em.transactional(async tem => {
       space.state = SPACE_STATE.LOCKED
-      confidentialSpaces.forEach((cs) => {
+      confidentialSpaces.forEach(cs => {
         cs.state = SPACE_STATE.LOCKED
       })
 
@@ -208,9 +205,9 @@ export class SpaceService {
       throw new PermissionError('Unlock operation is not permitted.')
     }
 
-    await this.em.transactional(async (tem) => {
+    await this.em.transactional(async tem => {
       space.state = SPACE_STATE.ACTIVE
-      confidentialSpaces.forEach((cs) => {
+      confidentialSpaces.forEach(cs => {
         cs.state = SPACE_STATE.ACTIVE
       })
 
@@ -236,8 +233,7 @@ export class SpaceService {
     const space = await this.spaceRepository.findOne(node.getSpaceId())
     if (space.type === SPACE_TYPE.VERIFICATION && space.state === SPACE_STATE.LOCKED) {
       throw new PermissionError(
-        `You have no permissions to remove ${node.name} as` +
-          ' it is part of Locked Verification space.',
+        `You have no permissions to remove ${node.name} as it is part of Locked Verification space.`,
       )
     }
   }
@@ -290,7 +286,7 @@ export class SpaceService {
 
     // collect ids of confidential spaces + space id
     const confidentialSpaces = await this.spaceRepository.find({ spaceId: space.id })
-    const spaceIds = confidentialSpaces.map((space) => space.id)
+    const spaceIds = confidentialSpaces.map(space => space.id)
     spaceIds.push(space.id)
 
     return await this.spaceRepository.findSpacesByIdAndUser(spaceIds, this.userContext.id)
@@ -308,23 +304,8 @@ export class SpaceService {
     return await this.spaceRepository.findAccessibleOne({ id })
   }
 
-  async getAccessibleSpace(spaceId: number): Promise<Space | null> {
-    return this.spaceRepository.findAccessibleOne({ id: spaceId })
-  }
-
   async getSpaceMembers(spaceId: number): Promise<SpaceMembership[]> {
-    const user = await this.userContext.loadEntity()
-    let space: Space | null = null
-    if (await user.isSiteAdmin()) {
-      space = await this.spaceRepository.findOne({
-        id: spaceId,
-        type: { $ne: SPACE_TYPE.PRIVATE_TYPE },
-      })
-    } else {
-      space = await this.spaceRepository.findAccessibleOne({
-        id: spaceId,
-      })
-    }
+    const space = await this.spaceRepository.findAccessibleOne({ id: spaceId })
 
     if (!space) {
       throw new SpaceNotFoundError('Space does not exist or is not accessible')
@@ -364,14 +345,11 @@ export class SpaceService {
     const isSiteAdmin = await (await this.userContext.loadEntity()).isSiteAdmin()
     const isReviewSpaceAdmin = await (await this.userContext.loadEntity()).isReviewSpaceAdmin()
     const filterWhere = this.buildFilterWhere(query)
-    const accessWhere = this.buildSpaceGroupAccessWhere(
-      spaceGroupId,
-      isSiteAdmin || isReviewSpaceAdmin,
-    )
+    const accessWhere = this.buildSpaceGroupAccessWhere(spaceGroupId, isSiteAdmin || isReviewSpaceAdmin)
 
     const result = await this.fetchAndMapSpaces(query, { $and: [filterWhere, accessWhere] })
 
-    const hasMembership = result.data.some((space) => !!space.currentUserMembership)
+    const hasMembership = result.data.some(space => !!space.currentUserMembership)
 
     if (hasMembership || isSiteAdmin || isReviewSpaceAdmin) {
       return result
@@ -392,10 +370,7 @@ export class SpaceService {
     return this.spaceGroupService.create(spaceGroupDto)
   }
 
-  async updateSpaceGroup(
-    spaceGroupId: number,
-    spaceGroupInput: CreateSpaceGroupDTO,
-  ): Promise<void> {
+  async updateSpaceGroup(spaceGroupId: number, spaceGroupInput: CreateSpaceGroupDTO): Promise<void> {
     return this.spaceGroupService.update(spaceGroupId, spaceGroupInput)
   }
 
@@ -489,9 +464,9 @@ export class SpaceService {
     if (query.filter?.tags !== undefined) {
       const cleanedTags = query.filter.tags
         .split(',')
-        .map((t) => t.trim())
+        .map(t => t.trim())
         .filter(Boolean)
-      const likeConditions = cleanedTags.map((tag) => {
+      const likeConditions = cleanedTags.map(tag => {
         const safePattern = StringUtils.escapeRegExp(tag)
         return { name: new RegExp(safePattern, 'i') }
       })
@@ -514,9 +489,7 @@ export class SpaceService {
 
     return {
       meta: spaces.meta,
-      data: await Promise.all(
-        spaces.data.map((space) => SpaceListItemDTO.fromEntity(space, this.userContext.id)),
-      ),
+      data: await Promise.all(spaces.data.map(space => SpaceListItemDTO.fromEntity(space, this.userContext.id))),
     }
   }
 

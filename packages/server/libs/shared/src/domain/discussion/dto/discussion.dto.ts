@@ -1,6 +1,6 @@
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
 import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
-import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 import { EntityScope } from '@shared/types/common'
 import { DiscussionReplyDTO } from './discussion-reply.dto'

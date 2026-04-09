@@ -2,7 +2,6 @@ import { expect } from 'chai'
 import { isJobOrphaned } from '@shared/queue/queue.utils'
 import { generate } from '@shared/test'
 
-
 describe('queue.utils', () => {
   context('isJobOrphaned()', () => {
     it('should return false when next is in the future', () => {

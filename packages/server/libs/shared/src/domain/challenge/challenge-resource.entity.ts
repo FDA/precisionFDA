@@ -1,10 +1,10 @@
-import { Entity, Ref, ManyToOne, Property, Reference } from '@mikro-orm/core'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Entity, ManyToOne, Property, Ref, Reference } from '@mikro-orm/core'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
+import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { User } from '@shared/domain/user/user.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { Challenge } from './challenge.entity'
-import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
-import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 @Entity({ tableName: 'challenge_resources', repository: () => ChallengeResourceRepository })
 class ChallengeResource extends BaseEntity {

@@ -26,13 +26,9 @@ export abstract class EntityProvenanceDataService<T extends EntityWithProvenance
     return source.scope as EntityScope
   }
 
-  abstract getParents(
-    source: EntityProvenanceSource<T>['entity'],
-  ): Promise<EntityProvenanceSourceUnion[]>
+  abstract getParents(source: EntityProvenanceSource<T>['entity']): Promise<EntityProvenanceSourceUnion[]>
 
-  abstract getChildren(
-    source: EntityProvenanceSource<T>['entity'],
-  ): Promise<EntityProvenanceSourceUnion[]>
+  abstract getChildren(source: EntityProvenanceSource<T>['entity']): Promise<EntityProvenanceSourceUnion[]>
 
   async getData(source: EntityProvenanceSource<T>['entity']): Promise<EntityProvenanceData<T>> {
     return {

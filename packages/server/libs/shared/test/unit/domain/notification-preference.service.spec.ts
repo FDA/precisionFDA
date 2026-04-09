@@ -1,5 +1,4 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { User } from '@shared/domain/user/user.entity'
 import chai, { expect } from 'chai'
 import dirtyChai from 'dirty-chai'
 import { SinonStub, stub } from 'sinon'
@@ -10,6 +9,7 @@ import {
   NotificationPreferenceService,
   PreferenceKey,
 } from '@shared/domain/notification-preference/notification-preference.service'
+import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 chai.use(dirtyChai)

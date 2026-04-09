@@ -1,6 +1,6 @@
-import { stub, SinonStub } from 'sinon'
 import { EntityManager } from '@mikro-orm/core'
 import { MySqlDriver } from '@mikro-orm/mysql'
+import { SinonStub, stub } from 'sinon'
 import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
 
 interface RepositoryStub<T extends object> extends PaginatedRepository<T> {
@@ -76,7 +76,7 @@ export function createRepositoryStub<T extends object>(): RepositoryStub<T> {
 
   // EntityManager stubs
   const emTransactionalStub = stub()
-  emTransactionalStub.callsFake(async (callback) => {
+  emTransactionalStub.callsFake(async callback => {
     return callback({} as unknown as EntityManager<MySqlDriver>)
   })
 
@@ -103,7 +103,7 @@ export function createRepositoryStub<T extends object>(): RepositoryStub<T> {
   ]
 
   const reset = (): void => {
-    allStubs.forEach((stub) => {
+    allStubs.forEach(stub => {
       stub.reset()
       stub.throws()
     })
