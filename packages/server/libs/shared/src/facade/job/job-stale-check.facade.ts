@@ -66,7 +66,13 @@ export class JobStaleCheckFacade {
       }
     }
 
-    await this.sendRunningJobsReportToAdmin(jobsInfo)
+    const hasStaleJobs = Array.from(jobsInfo.values()).some(
+      (info) => info.staleJobs.length > 0,
+    )
+
+    if (hasStaleJobs) {
+      await this.sendRunningJobsReportToAdmin(jobsInfo)
+    }
     await this.sendRunningJobsToOwners(jobsInfo)
     this.logger.log('Completed stale jobs check and notification process')
   }

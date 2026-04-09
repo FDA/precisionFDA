@@ -131,6 +131,41 @@ describe('JobStaleCheckFacade', () => {
       expect(getUiLinkStub.notCalled).to.be.true()
     })
 
+    it('Only non-stale running jobs - no admin report sent', async () => {
+      findAllRunningJobsStub.resolves([RUNNING_JOB_3, RUNNING_JOB_4])
+
+      const facade = getInstance()
+      await facade.checkAndNotifyStaleJobs()
+
+      expect(findAllRunningJobsStub.calledOnce).to.be.true()
+      expect(
+        populateStub.calledOnceWithExactly([RUNNING_JOB_3, RUNNING_JOB_4], ['user']),
+      ).to.be.true()
+
+      expect(getUiLinkStub.callCount).to.equal(2)
+      expect(getUiLinkStub.getCall(0).args[0]).to.equal(RUNNING_JOB_3)
+      expect(getUiLinkStub.getCall(1).args[0]).to.equal(RUNNING_JOB_4)
+
+      const staleReportCalls = Array.from({ length: sendEmailStub.callCount }, (_, i) =>
+        sendEmailStub.getCall(i),
+      ).filter((call) => call.args[0].type === EMAIL_TYPES.staleJobsReport)
+      expect(staleReportCalls).to.have.length(0)
+
+      expect(sendEmailStub.callCount).to.equal(2)
+
+      expect(sendEmailStub.getCall(0).args[0].type).to.equal(EMAIL_TYPES.userRunningJobsReport)
+      expect(sendEmailStub.getCall(0).args[0].input).to.deep.equal({
+        jobOwner: getSimpleUserDTO(USER_1),
+        runningJobs: [getSimpleJobDTO(RUNNING_JOB_3)],
+      })
+
+      expect(sendEmailStub.getCall(1).args[0].type).to.equal(EMAIL_TYPES.userRunningJobsReport)
+      expect(sendEmailStub.getCall(1).args[0].input).to.deep.equal({
+        jobOwner: getSimpleUserDTO(USER_2),
+        runningJobs: [getSimpleJobDTO(RUNNING_JOB_4)],
+      })
+    })
+
     it('Stale jobs found', async () => {
       const facade = getInstance()
       await facade.checkAndNotifyStaleJobs()
