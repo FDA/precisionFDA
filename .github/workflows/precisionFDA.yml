@@ -103,14 +103,15 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        with:
+          version: 10.29.3
+
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 24.13.1
-
-      - name: Setup pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@10.29.3 --activate
+          cache: "pnpm"
 
       - name: Install modules
         run: pnpm install
@@ -199,8 +200,8 @@ jobs:
           LOG_REQUESTS: 1
         run: bundle exec rspec
 
-  test-https-apps:
-    name: Test HTTPS Apps
+  test-node-backend:
+    name: Test Node Backend
     runs-on: ubuntu-latest
     env:
       NODE_ENV: ci_test
@@ -231,14 +232,15 @@ jobs:
           bundler-cache: true
           cache-version: 1
 
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24.13.1
-
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
           version: 10.29.3
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 24.13.1
+          cache: "pnpm"
 
       - name: Verify pnpm
         run: pnpm -v
