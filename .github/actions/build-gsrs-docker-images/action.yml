@@ -42,12 +42,12 @@ runs:
   using: "composite"
   steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
       with:
         aws-region: ${{ inputs.region }}
         role-to-assume: ${{ inputs.role-arn }}
@@ -108,7 +108,7 @@ runs:
       shell: bash
 
     - name: Log in to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076
+      uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896 # v2.1.1
       with:
         registries: ${{ inputs.orchestration-account-id }}
 
@@ -148,11 +148,11 @@ runs:
       shell: bash
 
     - name: Setup Docker Buildx
-      uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349
+      uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
 
     - name: Build and push Docker image
       if: steps.check_ecr.outputs.build_needed == 'true'
-      uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75
+      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
       with:
         push: true
         provenance: false
