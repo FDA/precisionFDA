@@ -454,12 +454,15 @@ test.describe('My Home - Folders & Files', () => {
   })
 
   test('Delete Comment', async ({ page, app }) => {
-    await app.ensureRoute('/home/files')
+    await app.goto('/home/files')
     await FilesList.searchFileAndOpenDetail(page, fileName)
 
     await FileDetail.clickActionsMenuItem(page, 'Comments')
 
-    await page.locator('a', { hasText: 'Delete' }).click()
+    await Promise.all([
+      page.waitForEvent('dialog').then(dialog => dialog.accept()),
+      page.getByRole('link', { name: 'Delete', exact: true }).click(),
+    ])
 
     await expect(page.getByText('No comments yet.')).toBeVisible()
   })

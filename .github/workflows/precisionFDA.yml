@@ -112,6 +112,7 @@ jobs:
         with:
           node-version: 24.13.1
           cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install modules
         run: pnpm install
@@ -136,6 +137,7 @@ jobs:
           FILES: ${{ steps.changed-server.outputs.all_changed_files }}
 
       - name: Get changed files (client)
+        if: ${{ !cancelled() }}
         id: changed-client
         uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
         with:
@@ -144,7 +146,7 @@ jobs:
             packages/client/src/**/*.tsx
 
       - name: Run Biome CI on changed files (client)
-        if: steps.changed-client.outputs.any_changed == 'true'
+        if: ${{ !cancelled() && steps.changed-client.outputs.any_changed == 'true' }}
         working-directory: packages/client
         shell: bash
         run: |
@@ -241,6 +243,7 @@ jobs:
         with:
           node-version: 24.13.1
           cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Verify pnpm
         run: pnpm -v
@@ -295,6 +298,7 @@ jobs:
         with:
           node-version: "24.13.1"
           cache: "pnpm"
+          cache-dependency-path: packages/client/pnpm-lock.yaml
       - name: Install dependencies
         working-directory: ./packages/client
         run: pnpm install --frozen-lockfile --prod=false
@@ -321,6 +325,7 @@ jobs:
         with:
           node-version: "24.13.1"
           cache: "pnpm"
+          cache-dependency-path: packages/client/pnpm-lock.yaml
       - name: Install dependencies
         working-directory: ./packages/client
         run: pnpm install --frozen-lockfile --prod=false
