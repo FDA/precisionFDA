@@ -1,21 +1,21 @@
-import { test, expect } from './fixtures/shared-page'
-import { Page } from 'playwright/test'
-import path from 'node:path'
 import fs from 'node:fs'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { Page } from 'playwright/test'
+import { expect, test } from './fixtures/shared-page'
 import {
-  TIMEOUTS,
-  downloadsDir,
-  UrlHelper,
-  CreateAppForm,
   AppDetail,
   AppExecution,
-  RunAppForm,
   AppsList,
-  FilesList,
-  FileDetail,
-  SpacesList,
+  CreateAppForm,
   deleteFileAndAwaitSuccess,
+  downloadsDir,
+  FileDetail,
+  FilesList,
+  RunAppForm,
+  SpacesList,
+  TIMEOUTS,
+  UrlHelper,
   waitForComputeResources,
   withDialogHandler,
 } from './helpers/apps.helpers'
@@ -31,9 +31,9 @@ const testId = Date.now().toString(36)
  *
  * Tests for app creation, running, forking, comments, and management.
  * Uses testId (module-scoped) for unique resource names across tests.
- * 
+ *
  * Uses shared-page fixtures for faster serial test execution with SPA navigation.
- * 
+ *
  * SPA Navigation Pattern:
  * 1. Use worker-scoped fixtures for page and app (shared across all tests)
  * 2. Use app.ensureRoute() at the start of each test - it automatically:
@@ -66,7 +66,7 @@ test.setTimeout(TIMEOUTS.jobStatusChange + 60000)
 test.describe('My Home - Apps', () => {
   test('Create & search empty app', async ({ page, app }) => {
     await app.ensureRoute('/home/apps')
-    
+
     await createApp(page)
     await AppDetail.validateName(page, `cypress_app_${testId}`)
     await AppDetail.validateTitle(page, `Cypress App ${testId}`)
@@ -95,7 +95,11 @@ test.describe('My Home - Apps', () => {
   test.skip('Copy To Space', async ({ page, app }) => {
     await app.ensureRoute('/spaces')
 
-    await SpacesList.createPrivateSpaceIfNotExists(page, 'Cypress Private Space for "copy to space" action', 'Cypress Private')
+    await SpacesList.createPrivateSpaceIfNotExists(
+      page,
+      'Cypress Private Space for "copy to space" action',
+      'Cypress Private',
+    )
 
     await app.ensureRoute('/home/apps')
 
@@ -149,7 +153,10 @@ test.describe('My Home - Apps', () => {
 
     await expect(page.locator('#fork-app-to-modal').getByText('Fork App To')).toBeVisible()
 
-    await page.locator('#fork-app-to-modal td').filter({ hasText: /^My Home$/ }).click()
+    await page
+      .locator('#fork-app-to-modal td')
+      .filter({ hasText: /^My Home$/ })
+      .click()
 
     // Set up API response listener for user compute resources
     const computeResourcesPromise = waitForComputeResources(page)
@@ -168,7 +175,7 @@ test.describe('My Home - Apps', () => {
 
     const createAppPromise = page.waitForResponse(
       response => response.url().includes('/api/v2/apps') && response.request().method() === 'POST',
-      { timeout: TIMEOUTS.appSave }
+      { timeout: TIMEOUTS.appSave },
     )
 
     await page.getByRole('button', { name: 'Save Fork' }).click({ force: true })
@@ -274,7 +281,7 @@ test.describe('My Home - Apps', () => {
 
     const createAppPromise = page.waitForResponse(
       response => response.url().includes('/api/v2/apps') && response.request().method() === 'POST',
-      { timeout: TIMEOUTS.appSave }
+      { timeout: TIMEOUTS.appSave },
     )
 
     await page.getByRole('button', { name: 'Save Revision' }).click({ force: true })
@@ -336,7 +343,11 @@ test.describe('My Home - Apps', () => {
   test('Copy forked app with tags into space', async ({ page, app }) => {
     await app.ensureRoute('/spaces')
 
-    await SpacesList.createPrivateSpaceIfNotExists(page, 'Cypress Private Space for "copy to space" action', 'Cypress Private')
+    await SpacesList.createPrivateSpaceIfNotExists(
+      page,
+      'Cypress Private Space for "copy to space" action',
+      'Cypress Private',
+    )
 
     await app.ensureRoute('/home/apps')
 
@@ -392,10 +403,10 @@ test.describe('My Home - Apps', () => {
     await expect(page.getByText('Deleted 1 app')).toBeVisible()
   })
 })
-test.skip('My Home - Apps Run', () => {
+test.describe('My Home - Apps Run', () => {
   test('Create and Run Array Outputs App', async ({ page, app }) => {
     await app.ensureRoute('/home/apps')
-    
+
     // Set up API response listener for user compute resources
     const computeResourcesPromise = waitForComputeResources(page)
 
@@ -408,16 +419,43 @@ test.skip('My Home - Apps Run', () => {
     await CreateAppForm.setAppTitle(page, `Cypress Array App ${testId}`)
 
     // String Output
-    await CreateAppForm.addOutput(page, 0, 'string', 'string_output_name', 'String output label', 'String output help', true, true)
+    await CreateAppForm.addOutput(
+      page,
+      0,
+      'string',
+      'string_output_name',
+      'String output label',
+      'String output help',
+      true,
+      true,
+    )
 
     // Int Output
     await CreateAppForm.addOutput(page, 1, 'int', 'int_output_name', 'Int output label', 'Int output help', true, true)
 
     // Float Output
-    await CreateAppForm.addOutput(page, 2, 'float', 'float_output_name', 'Float output label', 'Float output help', true, true)
+    await CreateAppForm.addOutput(
+      page,
+      2,
+      'float',
+      'float_output_name',
+      'Float output label',
+      'Float output help',
+      true,
+      true,
+    )
 
     // File Output
-    await CreateAppForm.addOutput(page, 3, 'file', 'file_output_name', 'File output label', 'File output help', true, true)
+    await CreateAppForm.addOutput(
+      page,
+      3,
+      'file',
+      'file_output_name',
+      'File output label',
+      'File output help',
+      true,
+      true,
+    )
 
     await CreateAppForm.setInstanceType(page, 'Baseline 2')
 
@@ -469,10 +507,11 @@ test.skip('My Home - Apps Run', () => {
     await AppExecution.validateInstanceType(page, 'Baseline 2')
     await AppExecution.validateLocation(page, 'Private')
 
-    // Wait for job to finish (toast notification)
-    await expect(page.getByText(`Job cypress_array_app_${testId} has finished`)).toBeVisible({
-      timeout: TIMEOUTS.jobStatusChange,
-    })
+    await expect
+      .poll(async () => (await page.getByTestId('execution-status').textContent())?.trim(), {
+        timeout: TIMEOUTS.jobStatusChange,
+      })
+      .toBe('done')
 
     await AppExecution.validateOutput(page, 'String output label')
     await AppExecution.validateOutput(page, 'output_string_1,output_string_2,output_string_3')
@@ -503,10 +542,15 @@ test.skip('My Home - Apps Run', () => {
     await FilesList.searchFile(page, `cypress_array_app_output_files_${testId}`)
 
     await expect(
-      page.getByTestId('table-col-name').filter({ hasText: `cypress_array_app_output_files_${testId}` })
+      page.getByTestId('table-col-name').filter({ hasText: `cypress_array_app_output_files_${testId}` }),
     ).toBeVisible()
 
-    await page.locator('input[type="checkbox"]').last().check({ force: true })
+    await page
+      .getByTestId('data-row')
+      .filter({ hasText: `cypress_array_app_output_files_${testId}` })
+      .first()
+      .getByTestId('row-checkbox')
+      .click()
 
     await page.getByTestId('home-files-actions-button').click({ force: true })
 
@@ -519,7 +563,11 @@ test.skip('My Home - Apps Run', () => {
   test('Delete File Output App', async ({ page, app }) => {
     await app.ensureRoute('/home/apps')
 
-    await AppsList.searchAppAndOpenDetail(page, `cypress_file_output_app_${testId}`, `Cypress File Output App ${testId}`)
+    await AppsList.searchAppAndOpenDetail(
+      page,
+      `cypress_file_output_app_${testId}`,
+      `Cypress File Output App ${testId}`,
+    )
 
     await AppDetail.clickActionsMenuItem(page, 'Delete')
 
@@ -531,9 +579,9 @@ test.skip('My Home - Apps Run', () => {
 test.skip('My Home - Apps run using pre-filled run job form url', () => {
   test('Run empty app using pre-filled run job form url', async ({ page, app }) => {
     await app.ensureRoute('/home/apps')
-    
+
     await createApp(page)
-    await page.getByTestId('home-apps-link').click();
+    await page.getByTestId('home-apps-link').click()
     await AppsList.searchAppAndOpenDetail(page, `cypress_app_${testId}`, `Cypress App ${testId}`)
 
     // Set up API response listener for user compute resources
@@ -581,7 +629,7 @@ test.skip('My Home - Apps run using pre-filled run job form url', () => {
 test.skip('My Home - Run file to output app with output to folder', () => {
   test('Run file to output app with output to folder', async ({ page, app }) => {
     await app.ensureRoute('/home/apps')
-    
+
     // Set up API response listener for user compute resources
     const computeResourcesPromise = waitForComputeResources(page)
 
@@ -593,7 +641,16 @@ test.skip('My Home - Run file to output app with output to folder', () => {
     await CreateAppForm.setAppName(page, `cypress_file_output_app_${testId}`)
     await CreateAppForm.setAppTitle(page, `Cypress File Output App ${testId}`)
     await CreateAppForm.setInstanceType(page, 'baseline 2')
-    await CreateAppForm.addOutput(page, 0, 'file', 'cypress_output_file', 'cypress_output_label', 'cypress_output_help', false, false)
+    await CreateAppForm.addOutput(
+      page,
+      0,
+      'file',
+      'cypress_output_file',
+      'cypress_output_label',
+      'cypress_output_help',
+      false,
+      false,
+    )
 
     // Click Script tab
     await page.getByText('Write your shell script').click()
@@ -623,10 +680,11 @@ test.skip('My Home - Run file to output app with output to folder', () => {
     await RunAppForm.setOutputFolder(page, `cypress_output_folder_${testId}`)
     await RunAppForm.send(page)
 
-    // Wait for job to finish (toast notification)
-    await expect(
-      page.getByText(`Job cypress_file_output_app_${testId} output_to_folder has finished`)
-    ).toBeVisible({ timeout: TIMEOUTS.jobStatusChange })
+    await expect
+      .poll(async () => (await page.getByTestId('execution-status').textContent())?.trim(), {
+        timeout: TIMEOUTS.jobStatusChange,
+      })
+      .toBe('done')
 
     // Click on output file
     await page.getByTestId('execution-outputs').getByText(`cypress_output_file_${testId}.txt`).click()
@@ -637,10 +695,13 @@ test.skip('My Home - Run file to output app with output to folder', () => {
 
     await app.ensureRoute(`/home/files?scope=me&name=cypress_output_folder_${testId}`)
 
-    await page.getByTestId('table-col-name').filter({ hasText: `cypress_output_folder_${testId}` }).click()
+    await page
+      .getByTestId('table-col-name')
+      .filter({ hasText: `cypress_output_folder_${testId}` })
+      .click()
 
     await expect(
-      page.getByTestId('table-col-name').filter({ hasText: `cypress_output_file_${testId}.txt` })
+      page.getByTestId('table-col-name').filter({ hasText: `cypress_output_file_${testId}.txt` }),
     ).toBeVisible({ timeout: TIMEOUTS.pageLoad })
 
     await app.ensureRoute('/home/files')
@@ -648,10 +709,15 @@ test.skip('My Home - Run file to output app with output to folder', () => {
     await FilesList.searchFile(page, `cypress_output_folder_${testId}`)
 
     await expect(
-      page.getByTestId('table-col-name').filter({ hasText: `cypress_output_folder_${testId}` })
+      page.getByTestId('table-col-name').filter({ hasText: `cypress_output_folder_${testId}` }),
     ).toBeVisible()
 
-    await page.locator('input[type="checkbox"]').last().check({ force: true })
+    await page
+      .getByTestId('data-row')
+      .filter({ hasText: `cypress_output_folder_${testId}` })
+      .first()
+      .getByTestId('row-checkbox')
+      .click()
 
     await page.getByTestId('home-files-actions-button').click({ force: true })
 

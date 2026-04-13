@@ -1,7 +1,8 @@
-import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react'
 import fs from 'fs'
 import path from 'path'
+import babel from '@rolldown/plugin-babel'
+import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 
@@ -20,24 +21,21 @@ export default defineConfig(({ mode }) => {
     base: isProduction ? '/packs/' : '/',
 
     resolve: {
-      alias: {
-        '@': path.resolve(__dirname, 'src'),
-      },
+      tsconfigPaths: true,
     },
 
     plugins: [
-      react({
-        babel: {
-          plugins: [
-            [
-              'babel-plugin-styled-components',
-              {
-                displayName: true,
-                ssr: false,
-              },
-            ],
+      react(),
+      babel({
+        plugins: [
+          [
+            'babel-plugin-styled-components',
+            {
+              displayName: true,
+              ssr: false,
+            },
           ],
-        },
+        ],
       }),
       viteStaticCopy({
         targets: [
@@ -63,7 +61,7 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
       manifest: true,
       sourcemap: !isProduction,
-      rollupOptions: {
+      rolldownOptions: {
         input: path.resolve(__dirname, 'src/index.tsx'),
         output: {
           format: 'es',
@@ -75,8 +73,13 @@ export default defineConfig(({ mode }) => {
             }
             return '[name][extname]'
           },
-          manualChunks: {
-            vendor: ['react', 'react-dom', 'react-router'],
+          codeSplitting: {
+            groups: [
+              {
+                name: 'vendor',
+                test: /node_modules[\\/](react|react-dom|react-router)([\\/]|$)/,
+              },
+            ],
           },
         },
       },

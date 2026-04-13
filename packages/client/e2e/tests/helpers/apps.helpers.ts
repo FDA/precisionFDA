@@ -413,6 +413,10 @@ export const AppExecution = {
     await AppExecution.validateElementContains(page, 'execution-location', location)
   },
 
+  async validateStatus(page: Page, status: string | RegExp) {
+    await AppExecution.validateElementContains(page, 'execution-status', status)
+  },
+
   async validateOutput(page: Page, outputString: string | RegExp) {
     await AppExecution.validateElementContains(page, 'execution-outputs', outputString)
   },
@@ -424,7 +428,7 @@ export const AppExecution = {
 export const RunAppForm = {
   async prepare(page: Page) {
     // Check if we're on the run form (CONFIGURE text visible) or already on execution page
-    const configureVisible = await page.getByText('CONFIGURE').isVisible().catch(() => false)
+    const configureVisible = await page.getByTestId('run-app-configure-section').isVisible().catch(() => false)
     if (!configureVisible) {
       return // Already on execution page or form not shown
     }
@@ -447,7 +451,7 @@ export const RunAppForm = {
   },
 
   async setJobName(page: Page, jobName: string) {
-    const input = page.locator('input[name="jobName"]')
+    const input = page.getByTestId('run-app-job-name')
     const isVisible = await input.isVisible().catch(() => false)
     if (!isVisible) return
     await input.clear()
@@ -455,7 +459,7 @@ export const RunAppForm = {
   },
 
   async setJobLimit(page: Page, jobLimit: string) {
-    const input = page.locator('input[name="jobLimit"]')
+    const input = page.getByTestId('run-app-job-limit')
     const isVisible = await input.isVisible().catch(() => false)
     if (!isVisible) return
     await input.clear()
@@ -464,9 +468,12 @@ export const RunAppForm = {
 
   async setOutputFolder(page: Page, outputFolder: string) {
     const input = page.getByTestId('output_folder')
+    await input.waitFor({ state: 'visible', timeout: 5000 }).catch(() => null)
     const isVisible = await input.isVisible().catch(() => false)
     if (!isVisible) return
     await input.fill(outputFolder)
+    await expect(input).toHaveValue(outputFolder)
+    await input.press('Tab').catch(() => null)
   },
 
   async submit(page: Page) {
@@ -476,16 +483,16 @@ export const RunAppForm = {
 
   async send(page: Page) {
     // Check if "Run App" button is visible (might already be on execution page)
-    const runAppButton = page.getByRole('button', { name: 'Run App' })
+    const runAppButton = page.getByTestId('run-app-submit-button')
     const isVisible = await runAppButton.isVisible().catch(() => false)
     
     if (isVisible) {
-      await runAppButton.click({ force: true })
-      // Wait for the run app API call to complete
-      await page.waitForLoadState('networkidle')
+      await expect(runAppButton).toBeEnabled({ timeout: 10000 })
+      await runAppButton.scrollIntoViewIfNeeded()
+      await runAppButton.click()
     }
 
-    await AppExecution.validateBackToExecutionsLink(page)
+    await expect(page.getByTestId('execution-back-link')).toBeVisible({ timeout: TIMEOUTS.appRun })
   },
 }
 

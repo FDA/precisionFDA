@@ -33,7 +33,7 @@ export const SetOutputFolder = ({
       name="outputFolderPath"
       control={control}
       render={({ field }) => (
-        <Section>
+        <Section data-testid="run-app-output-folder-section">
           <SectionHeader>OUTPUT FOLDER</SectionHeader>
           <SectionBody>
             <FieldGroup label="Store outputs in">
@@ -45,6 +45,7 @@ export const SetOutputFolder = ({
                 data-testid="output_folder"
               />
               <Button
+                data-testid="run-app-choose-folder-button"
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => {

@@ -7,6 +7,7 @@ ARG BUNDLER_VERSION=2.4.10
 ARG GIT_BRANCH
 ARG GIT_REVISION
 
+FROM node:${NODE_VERSION}-alpine AS node_base
 FROM ruby:${RUBY_IMAGE_TAG}-alpine AS builder
 
 ENV RAILS_ENV=production
@@ -16,6 +17,14 @@ ENV NODE_ENV=production
 ARG NODE_VERSION
 ENV APP_DIR=/precision-fda
 WORKDIR $APP_DIR
+
+
+COPY --from=node_base /usr/local/bin/node /usr/local/bin/node
+COPY --from=node_base /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
+    ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx && \
+    chmod +x /usr/local/bin/npm /usr/local/bin/npx
+
 
 # Install system dependencies and Node.js
 RUN set -eux && \
@@ -36,8 +45,6 @@ RUN set -eux && \
       openssl-dev \
       libffi-dev \
       mariadb-connector-c-dev \
-      nodejs \
-      npm \
       tzdata \
       shared-mime-info
 
@@ -113,9 +120,15 @@ RUN set -eux && \
       libxml2 \
       libxslt \
       zlib \
-      nodejs \
-      npm \
       tzdata
+
+# Copy correct Node version from node_base instead of using apk's outdated nodejs
+COPY --from=node_base /usr/local/bin/node /usr/local/bin/node
+COPY --from=node_base /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
+    ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx && \
+    chmod +x /usr/local/bin/npm /usr/local/bin/npx
+
 
 COPY --from=builder $APP_DIR $APP_DIR
 COPY --from=builder /usr/local/bundle /usr/local/bundle

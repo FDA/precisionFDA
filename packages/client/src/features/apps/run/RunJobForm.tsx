@@ -1,23 +1,24 @@
-import React, { useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
+import type React from 'react'
+import { useState } from 'react'
+import { Controller, type FieldErrors, useFieldArray, useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router'
 import { Button, TransparentButton } from '@/components/Button'
 import { FieldGroup } from '@/components/form/FieldGroup'
+import { InputNumber, InputText } from '@/components/InputText'
 import { CrossIcon } from '@/components/icons/PlusIcon'
 import { QuestionIcon } from '@/components/icons/QuestionIcon'
-import { InputNumber, InputText } from '@/components/InputText'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
-import { IUser } from '@/types/user'
+import type { IUser } from '@/types/user'
 import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
-import { TreeOnSelectInfo } from '../../files/files.types'
+import type { TreeOnSelectInfo } from '../../files/files.types'
 import { Empty } from '../../home/home.styles'
-import { ServerScope } from '../../home/types'
+import type { ServerScope } from '../../home/types'
 import { fetchAcceptedLicenses } from '../../licenses/api'
 import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
 import { SavingModal } from '../../modal/SavingModal'
 import { fetchLicensesOnApp } from '../apps.api'
-import { AppSpec, BatchInput, IApp, RunJobFormType } from '../apps.types'
+import type { AppSpec, BatchInput, IApp, RunJobFormType } from '../apps.types'
 import { getDefaultValueFromServer } from '../form/common'
 import { useComputeInstances } from '../useComputeInstances'
 import { ErrorMessageForField } from './ErrorMessageForField'
@@ -222,7 +223,7 @@ export const RunJobForm = ({
     headerText: 'Select output folder',
     submitCaption: 'Select folder',
     scope: app.scope === 'public' ? 'private' : app.scope, // show private folders for public apps
-    onHandleSubmit: (folderId, info: TreeOnSelectInfo) => {
+    onHandleSubmit: (_folderId, info: TreeOnSelectInfo) => {
       setValue('outputFolderPath', info.node.path)
       setSelectFolderModal(false)
     },
@@ -348,23 +349,23 @@ export const RunJobForm = ({
   }
 
   return (
-    <StyledForm id="submitJobForm" autoComplete="off">
+    <StyledForm id="submitJobForm" autoComplete="off" data-testid="run-app-form">
       {exportModal?.modalComp}
       <AppsConfiguration>
         <TipsRow>
           <QuestionIcon height={14} />
           Need help? &nbsp;
-          <a href="/docs/guides/apps#running-an-app" target="_blank">
+          <a href="/docs/guides/apps#running-an-app" target="_blank" rel="noopener noreferrer">
             Learn more about running an app
           </a>
         </TipsRow>
-        <Section>
+        <Section data-testid="run-app-configure-section">
           <SectionHeader>CONFIGURE</SectionHeader>
           <SectionBody>
             <StyledGrid>
               <StyledJobName>
                 <FieldGroup label="Job Name" required>
-                  <InputText {...register('jobName')} disabled={isSubmitting} />
+                  <InputText {...register('jobName')} disabled={isSubmitting} data-testid="run-app-job-name" />
                   <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobName" />
                 </FieldGroup>
               </StyledJobName>
@@ -374,6 +375,7 @@ export const RunJobForm = ({
                   step="10"
                   {...register('jobLimit', { valueAsNumber: true })}
                   disabled={isSubmitting}
+                  data-testid="run-app-job-limit"
                 />
                 <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobLimit" />
               </FieldGroup>
@@ -493,6 +495,7 @@ export const RunJobForm = ({
       <StyledActionsContainer>
         <Button
           data-variant="primary"
+          data-testid="run-app-submit-button"
           disabled={isSubmitting || Object.keys(errors).length > 0}
           type="button"
           form="submitJobForm"

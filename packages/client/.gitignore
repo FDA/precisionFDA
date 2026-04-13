@@ -4,6 +4,10 @@
 storybook-static/
 build-storybook.log
 .swc
+.pnpm-store
+.turbo
+dist
+.tmp-vite-build
 
 
 # E2E test artifacts
