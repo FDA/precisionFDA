@@ -1,13 +1,13 @@
 import { useMutation } from '@tanstack/react-query'
-import React, { useMemo } from 'react'
-import { Loader } from '../../components/Loader'
-import { ResourceTable } from '../../components/ResourceTable'
-import { itemsCountString } from '../../utils/formatting'
+import { useMemo } from 'react'
+import { Button } from '@/components/Button'
+import { Loader } from '@/components/Loader'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { ResourceTable } from '@/components/ResourceTable'
+import { itemsCountString } from '@/utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import { Button } from '../../components/Button'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 
 export interface DeleteResponse {
   meta?: {
@@ -61,12 +61,17 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
     },
   })
 
-  const handleSubmit = () => {
+  const handleSubmit = (): void => {
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
   const modalComp = (
-    <ModalNext id="modal-resource-delete" data-testid="modal-resource-delete" isShown={isShown} hide={() => setShowModal(false)}>
+    <ModalNext
+      id="modal-resource-delete"
+      data-testid="modal-resource-delete"
+      isShown={isShown}
+      hide={() => setShowModal(false)}
+    >
       <ModalHeaderTop
         disableClose={false}
         headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}

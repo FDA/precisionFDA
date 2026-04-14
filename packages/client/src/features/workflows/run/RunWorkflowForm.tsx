@@ -1,36 +1,41 @@
-import React from 'react'
-import { useNavigate, useParams } from 'react-router'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import * as Yup from 'yup'
-import { Control, Controller, useForm, UseFormRegister, UseFormSetError } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { fetchLicensesOnWorkflow, fetchWorkflow, runWorkflow, RunWorkflowInput, RunWorkflowRequest } from '../workflows.api'
-import { InputOutput, IWorkflow, Stage } from '../workflows.types'
-import { InputNumber, InputText } from '../../../components/InputText'
-import { HomeLoader, NotFound, Title } from '../../home/show.styles'
-import { CubeIcon } from '../../../components/icons/CubeIcon'
-import { FieldGroup } from '../../../components/form/FieldGroup'
-import { JobRunInput } from '../../apps/run/JobRunInput'
-import { AcceptedLicense, InputSpec, SelectType } from '../../apps/apps.types'
-import { Section, SectionBody, SectionHeader, StyledGrid, Topbox, TopboxItem } from '../../apps/run/styles'
-import { StyledForm } from '../../home/home.styles'
-import { StyledAnalysisName, StyledStageHeader, WorkflowConfiguration } from './styles'
-import { GearIcon } from '../../../components/icons/GearIcon'
-import { fetchAcceptedLicenses, fetchLicensesForFiles } from '../../licenses/api'
-import { License } from '../../licenses/types'
-import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
-import { useAuthUser } from '../../auth/useAuthUser'
-import { getSpaceIdFromScope } from '../../../utils'
-import { IUser } from '../../../types/user'
-import { FileUid } from '../../files/files.types'
-import { FormPageContainer } from '../../../components/Page/styles'
-import { BackLink } from '../../../components/Page/PageBackLink'
-import { extractFileUids, getValue, useDefaultScopeSelection, useSelectableSpaces } from '../../apps/run/utils'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { type Control, Controller, type UseFormRegister, type UseFormSetError, useForm } from 'react-hook-form'
+import { useNavigate, useParams } from 'react-router'
+import * as Yup from 'yup'
+import { Button } from '@/components/Button'
+import { FieldGroup } from '@/components/form/FieldGroup'
+import { InputNumber, InputText } from '@/components/InputText'
+import { CubeIcon } from '@/components/icons/CubeIcon'
+import { GearIcon } from '@/components/icons/GearIcon'
+import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { BackLink } from '@/components/Page/PageBackLink'
+import { FormPageContainer } from '@/components/Page/styles'
+import type { IUser } from '@/types/user'
+import { getSpaceIdFromScope } from '@/utils'
+import type { AcceptedLicense, IApp, InputSpec, SelectType } from '../../apps/apps.types'
 import { getDefaultValueFromServer } from '../../apps/form/common'
-import { Button } from '../../../components/Button'
 import { ErrorMessageForField } from '../../apps/run/ErrorMessageForField'
+import { JobRunInput } from '../../apps/run/JobRunInput'
 import { SelectSpaceScope } from '../../apps/run/SelectSpaceScope'
-import { toastError } from '../../../components/NotificationCenter/ToastHelper'
+import { Section, SectionBody, SectionHeader, StyledGrid, Topbox, TopboxItem } from '../../apps/run/styles'
+import { extractFileUids, getValue, useDefaultScopeSelection, useSelectableSpaces } from '../../apps/run/utils'
+import { useAuthUser } from '../../auth/useAuthUser'
+import type { FileUid } from '../../files/files.types'
+import { StyledForm } from '../../home/home.styles'
+import { HomeLoader, NotFound, Title } from '../../home/show.styles'
+import { fetchAcceptedLicenses, fetchLicensesForFiles } from '../../licenses/api'
+import type { License } from '../../licenses/types'
+import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
+import {
+  fetchLicensesOnWorkflow,
+  fetchWorkflow,
+  type RunWorkflowInput,
+  type RunWorkflowRequest,
+  runWorkflow,
+} from '../workflows.api'
+import type { App, InputOutput, IWorkflow, Stage, WorkflowMeta } from '../workflows.types'
+import { StyledAnalysisName, StyledStageHeader, WorkflowConfiguration } from './styles'
 
 export interface RunWorkflowFormType {
   analysisName: string
@@ -42,7 +47,7 @@ export interface RunWorkflowFormType {
   }
 }
 
-const getLabel = (input: InputOutput) => (input.label ? input.label : input.name)
+const getLabel: (input: InputOutput) => string = (input: InputOutput) => (input.label ? input.label : input.name)
 
 const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[]): RunWorkflowFormType => {
   const defaultValues: RunWorkflowFormType = {
@@ -51,14 +56,16 @@ const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[
     inputs: {},
   }
 
-  stages?.flatMap(stage => stage.inputs).forEach(input => {
-    const fieldName = `${input.parent_slot}#${input.name}`
+  stages
+    ?.flatMap(stage => stage.inputs)
+    .forEach(input => {
+      const fieldName = `${input.parent_slot}#${input.name}`
 
-    const defaultValue = (input.default_workflow_value === null) ? undefined : input.default_workflow_value
-    if (defaultValue !== undefined) {
-      defaultValues.inputs[fieldName] = getDefaultValueFromServer(input.class, defaultValue)
-    }
-  })
+      const defaultValue = input.default_workflow_value === null ? undefined : input.default_workflow_value
+      if (defaultValue !== undefined) {
+        defaultValues.inputs[fieldName] = getDefaultValueFromServer(input.class, defaultValue)
+      }
+    })
   return defaultValues
 }
 
@@ -74,7 +81,7 @@ const fetchLicensesOnFiles = (jobData: RunWorkflowFormType): Promise<License[]> 
  * At least one input needs values.id null for Stage to show
  * @param stage
  */
-const hasUnfilledInputs = (stage: Stage) => {
+const hasUnfilledInputs: (stage: Stage) => boolean = (stage: Stage) => {
   return !stage.inputs.find(input => input.values.id !== null)
 }
 
@@ -87,9 +94,13 @@ const prepareValidations = (user?: IUser, stages?: Stage[], scope?: string) => {
     .forEach(input => {
       const fieldName = `${input.parent_slot}#${input.name}`
       if (input.class === 'boolean') {
-      inputs[fieldName] = Yup.boolean().nullable().required(`${getLabel(input)} is required`)
+        inputs[fieldName] = Yup.boolean()
+          .nullable()
+          .required(`${getLabel(input)} is required`)
       } else {
-      inputs[fieldName] = Yup.string().nullable().required(`${getLabel(input)} is required`)
+        inputs[fieldName] = Yup.string()
+          .nullable()
+          .required(`${getLabel(input)} is required`)
       }
     })
 
@@ -119,13 +130,32 @@ const getLicensesToAccept = (licensesToAccept: License[], acceptedLicenses: Acce
   return licensesToAccept.filter(license => !acceptedIds.includes(license.id.toString()))
 }
 
-const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, setError }:
-  { app: any, stage: Stage, errors: any, isSubmitting: boolean,
-    control: Control<any>, register: UseFormRegister<any>, setError: UseFormSetError<RunWorkflowFormType>}) => {
-
-  return (<> {hasUnfilledInputs(stage) &&
+const WorkflowStage = ({
+  app,
+  stage,
+  errors,
+  isSubmitting,
+  control,
+  register,
+  setError,
+}: {
+  app: App
+  stage: Stage
+  errors: any
+  isSubmitting: boolean
+  control: Control<any>
+  register: UseFormRegister<any>
+  setError: UseFormSetError<RunWorkflowFormType>
+}) => {
+  return (
+    <>
+      {' '}
+      {hasUnfilledInputs(stage) && (
         <>
-      <StyledStageHeader key={stage.app_uid}><GearIcon height={14} />&nbsp;{stage.name}</StyledStageHeader>
+          <StyledStageHeader key={stage.app_uid}>
+            <GearIcon height={14} />
+            &nbsp;{stage.name}
+          </StyledStageHeader>
           {stage.inputs.map(input => {
             const inputSpec: InputOutput = app.spec.input_spec.find(input_spec => input_spec.name === input.name)
             return (
@@ -148,10 +178,11 @@ const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, se
                 )}
               />
             )
-      },
+          })}
+        </>
       )}
-    </>}
-  </>)
+    </>
+  )
 }
 
 const createRequestObject = (workflowId: string, vals: RunWorkflowFormType, stages?: Stage[]): RunWorkflowRequest => {
@@ -167,7 +198,13 @@ const createRequestObject = (workflowId: string, vals: RunWorkflowFormType, stag
     const stage = stages?.find(s => s.slotId === stageName)
     const inputOutput = stage?.inputs.find(input => input.name === inputName)
     if (inputOutput !== undefined) {
-      const inputSpec: InputSpec = { default: null, choices: null, class: inputOutput.class, help: '', name: inputOutput.name }
+      const inputSpec: InputSpec = {
+        default: null,
+        choices: null,
+        class: inputOutput.class,
+        help: '',
+        name: inputOutput.name,
+      }
       const input: RunWorkflowInput = {
         input_name: key.replace('#', '.'),
         input_value: getValue(inputName, value, [inputSpec]),
@@ -187,9 +224,9 @@ const createRequestObject = (workflowId: string, vals: RunWorkflowFormType, stag
   } as RunWorkflowRequest
 }
 
-const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: any; user: IUser }) => {
+const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: WorkflowMeta; user: IUser }) => {
   const { stages }: { stages: Stage[] } = meta.spec.input_spec
-  const { apps }: { apps: [] } = meta
+  const { apps }: { apps: App[] } = meta
   const navigate = useNavigate()
   const defaultValues = prepareDefaultValues(workflow, user, stages)
   const validationSchema = prepareValidations(user, stages, workflow.scope)
@@ -236,7 +273,7 @@ const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: 
     },
   })
 
-  const onSubmit = async () => {
+  const onSubmit: () => Promise<void> = async () => {
     const valid = await trigger()
 
     if (valid) {
@@ -251,7 +288,7 @@ const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: 
           const req = createRequestObject(workflow.uid, getValues(), stages)
           await runWorkflowMutation.mutateAsync(req)
         }
-      } catch (e) {
+      } catch {
         toastError('Failed to run workflow')
       }
     }
@@ -277,7 +314,7 @@ const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: 
                   <InputNumber {...register('jobLimit')} disabled={isSubmitting} />
                   <ErrorMessageForField errors={errors} fieldName="jobLimit" />
                 </FieldGroup>
-                {workflow.scope && workflow.scope.startsWith('space-') && (
+                {workflow.scope?.startsWith('space-') && (
                   <SelectSpaceScope
                     control={control}
                     isSubmitting={isSubmitting}
@@ -337,7 +374,7 @@ const WorkflowRunPage = () => {
   const workflow = workflowData?.workflow
   const meta = workflowData?.meta
 
-  if (!workflow)
+  if (!workflow || !meta)
     return (
       <NotFound>
         <h1>Workflow not found</h1>
@@ -352,9 +389,7 @@ const WorkflowRunPage = () => {
   return (
     <FormPageContainer>
       <Topbox>
-      <BackLink linkTo={`/${baseLink}/workflows/${workflow.uid}`}>
-        Back to Workflow
-      </BackLink>
+        <BackLink linkTo={`/${baseLink}/workflows/${workflow.uid}`}>Back to Workflow</BackLink>
         <TopboxItem>
           <Title>
             <CubeIcon height={20} />

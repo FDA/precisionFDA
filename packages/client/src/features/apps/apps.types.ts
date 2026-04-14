@@ -1,10 +1,10 @@
-import { ComputeResourceKey } from '@/types/user'
-import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
-import { Note } from '../actionModals/AttachToModal/useListNotesQuery'
-import { IJob } from '../executions/executions.types'
-import { FileUid } from '../files/files.types'
-import { HomeScope, ServerScope } from '../home/types'
-import { CreateAppPayload } from './apps.api'
+import type { ComputeResourceKey } from '@/types/user'
+import type { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
+import type { Note } from '../actionModals/AttachToModal/useListNotesQuery'
+import type { IJob } from '../executions/executions.types'
+import type { FileUid } from '../files/files.types'
+import type { HomeScope, ServerScope } from '../home/types'
+import type { CreateAppPayload } from './apps.api'
 
 export interface IOSpec {
   class: 'string' | 'array:string' | 'file' | 'array:file' | 'int' | 'array:int' | 'float' | 'array:float' | 'boolean'

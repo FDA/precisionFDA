@@ -1,37 +1,37 @@
-import { useEffect, useMemo, useState } from 'react'
 import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { useQuery } from '@tanstack/react-query'
-import { ColumnDefResolved } from '@tanstack/react-table'
+import { type UseQueryResult, useQuery } from '@tanstack/react-query'
+import type { ColumnDefResolved } from '@tanstack/react-table'
+import { type ComponentProps, type ComponentType, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import styled from 'styled-components'
-import { BannerTitle, MainBanner } from '../../components/Banner'
-import { ContentFooter } from '../../components/Page/ContentFooter'
-import { compactScrollBarV2 } from '../../components/Page/styles'
-import { Pagination } from '../../components/Pagination'
+import { BannerTitle, MainBanner } from '@/components/Banner'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { compactScrollBarV2 } from '@/components/Page/styles'
+import { Pagination } from '@/components/Pagination'
+import { useColumnWidthLocalStorage } from '@/hooks/useColumnWidthLocalStorage'
+import { useHiddenColumnLocalStorage } from '@/hooks/useHiddenColumnLocalStorage'
+import { useOrderByParams } from '@/hooks/useOrderByState'
+import { usePaginationParams } from '@/hooks/usePaginationState'
+import { UserLayout } from '@/layouts/UserLayout'
+import { createLocationKey } from '@/utils'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
-import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
-import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
-import { useOrderByParams } from '../../hooks/useOrderByState'
-import { usePaginationParams } from '../../hooks/usePaginationState'
-import { UserLayout } from '../../layouts/UserLayout'
-import { createLocationKey } from '../../utils'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
 import { HomeLoader } from '../home/show.styles'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { useListSelect } from '../home/useListSelect'
 import { spaceGroupsListRequest } from '../space-groups/api'
-import { ISpaceGroup } from '../space-groups/types'
+import type { ISpaceGroup } from '../space-groups/types'
 import SpaceGroupsSidebar from './SpaceGroupsSidebar'
 import { SpaceQuickActions } from './SpaceQuickActions'
-import { FetchSpacesListResponse, spacesListRequest } from './spaces.api'
-import { columnFilters, ISpaceV2 } from './spaces.types'
+import { type FetchSpacesListResponse, spacesListRequest } from './spaces.api'
+import { columnFilters, type ISpaceV2 } from './spaces.types'
 import { useSpacesColumns } from './useSpacesColumns'
 import { useSpaceDnd } from './useSpacesDnd'
 
-const SpacesHeader = styled(MainBanner)`
+const SpacesHeader: ComponentType<ComponentProps<typeof MainBanner>> = styled(MainBanner)`
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -40,12 +40,12 @@ const SpacesHeader = styled(MainBanner)`
   border-bottom: 1px solid var(--c-layout-border);
 `
 
-const SpaceGroupHeading = styled.h4`
+const SpaceGroupHeading: ComponentType<ComponentProps<'h4'>> = styled.h4`
   font-weight: 700;
   opacity: 0.5;
 `
 
-const Layout = styled.div`
+const Layout: ComponentType<ComponentProps<'div'>> = styled.div`
   display: flex;
   height: 100vh;
   background: var(--tertiary-50);
@@ -53,14 +53,14 @@ const Layout = styled.div`
   flex-grow: 1;
 `
 
-const MainContent = styled.div`
+const MainContent: ComponentType<ComponentProps<'div'>> = styled.div`
   display: flex;
   flex-direction: column;
   overflow-x: auto;
   height: 100%;
 `
 
-export const SpaceGroupDescription = styled.div`
+export const SpaceGroupDescription: ComponentType<ComponentProps<'div'>> = styled.div`
   font-size: 14px;
   color: var(--c-banner-base);
   display: -webkit-box;
@@ -73,7 +73,7 @@ export const SpaceGroupDescription = styled.div`
   }
 `
 
-const StyledTable = styled.div`
+const StyledTable: ComponentType<ComponentProps<'div'>> = styled.div`
   font-size: 14px;
   flex-grow: 1;
   overflow: auto;
@@ -81,7 +81,7 @@ const StyledTable = styled.div`
   ${compactScrollBarV2}
 `
 
-const useQuerySpaceGroups = () => {
+const useQuerySpaceGroups = (): UseQueryResult<ISpaceGroup[]> => {
   return useQuery({
     queryKey: ['space-group-list'],
     queryFn: () => spaceGroupsListRequest(),
@@ -103,10 +103,18 @@ const SpacesList = () => {
   const { filterQuery, setSearchFilter } = useFilterParams({
     filters: columnFilters,
   })
+  const selectionResetTrigger = JSON.stringify({
+    filterQuery,
+    page: pagination.pageParam,
+    perPage: pagination.perPageParam,
+    sort,
+  })
 
   useEffect(() => {
-    setSelectedIndexes({})
-  }, [JSON.stringify(filterQuery), JSON.stringify(pagination), JSON.stringify(sort), setSelectedIndexes])
+    if (selectionResetTrigger) {
+      setSelectedIndexes({})
+    }
+  }, [selectionResetTrigger, setSelectedIndexes])
 
   const query = useListQuery<FetchSpacesListResponse>({
     fetchList: spacesListRequest,
@@ -126,8 +134,9 @@ const SpacesList = () => {
   // Space groups stuff
   const [spaceGroup, setSpaceGroup] = useState<ISpaceGroup>()
   const [searchParams, setSearchParams] = useSearchParams()
+  const searchParamsString = searchParams.toString()
   const spaceGroupIdString = searchParams.get('spaceGroupId')
-  const spaceGroupId = spaceGroupIdString ? parseInt(spaceGroupIdString) : undefined
+  const spaceGroupId = spaceGroupIdString ? parseInt(spaceGroupIdString, 10) : undefined
   const userCanAdministerSpaceGroups = !!user?.can_administer_site || !!user?.review_space_admin
 
   const { data: spaceGroups, isLoading: isSpaceGroupsLoading, error: errorSpaceGroups } = useQuerySpaceGroups()
@@ -139,19 +148,21 @@ const SpacesList = () => {
   })
 
   useEffect(() => {
-    setSelectedIndexes({})
-  }, [spaceGroupId])
+    if (spaceGroupId === undefined || spaceGroupId > 0) {
+      setSelectedIndexes({})
+    }
+  }, [spaceGroupId, setSelectedIndexes])
 
   useEffect(() => {
     if (spaceGroupId && spaceGroupsMemo) {
-      const newParams = new URLSearchParams(searchParams.toString())
+      const newParams = new URLSearchParams(searchParamsString)
       newParams.set('spaceGroupId', spaceGroupId.toString())
       setSearchParams(newParams)
       setSpaceGroup(spaceGroupsMemo?.find(sg => sg.id === spaceGroupId))
     } else {
       setSpaceGroup(undefined)
     }
-  }, [spaceGroupId, spaceGroupsMemo, setSearchFilter])
+  }, [searchParamsString, setSearchParams, spaceGroupId, spaceGroupsMemo])
 
   // @ts-expect-error: type is broken from react-table library
   const spacesColumns = useSpacesColumns().filter((c: ColumnDefResolved<ISpaceV2>) => {
@@ -167,7 +178,7 @@ const SpacesList = () => {
     return <HomeLoader />
   }
 
-  if (error || errorSpaceGroups) return <ResouceQueryErrorMessage />
+  if (error || errorSpaceGroups) return <ResourceQueryErrorMessage />
 
   return (
     <UserLayout innerScroll>
@@ -218,8 +229,8 @@ const SpacesList = () => {
                 totalPages={meta?.totalPages}
                 perPage={pagination.perPageParam}
                 isHidden={false}
-                setPage={p => pagination.setPageParam(p, true)}
-                onPerPageSelect={p => pagination.setPerPageParam(p, true)}
+                setPage={(p: number): void => pagination.setPageParam(p, true)}
+                onPerPageSelect={(p: number): void => pagination.setPerPageParam(p, true)}
               />
             </ContentFooter>
           </MainContent>

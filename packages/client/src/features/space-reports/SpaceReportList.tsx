@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { ColumnSizingState } from '@tanstack/react-table'
+import type { ColumnSizingState } from '@tanstack/react-table'
+import { useEffect } from 'react'
 import { Button } from '@/components/Button'
 import { SpaceReportIcon } from '@/components/icons/SpaceReportIcon'
 import { ActionsMenu } from '@/components/Menu'
@@ -12,12 +12,12 @@ import Table from '../../components/Table'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
-import { HomeScope, MetaV2, NOTIFICATION_ACTION } from '../home/types'
+import { type HomeScope, type IFilter, type MetaV2, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
-import { Params } from '../home/utils'
-import { ISpaceReport } from './space-report.types'
+import type { Params } from '../home/utils'
+import type { ISpaceReport } from './space-report.types'
 import { fetchReports } from './space-reports.api'
 import { useGenerateSpaceReportModal } from './useGenerateSpaceReportModal'
 import { useSpaceReportColumns } from './useSpaceReportColumns'
@@ -68,13 +68,14 @@ export const SpaceReportList = ({
 }) => {
   const { query, selectedIndexes, setSelectedIndexes, saveColumnResizeWidth, colWidths, resetSelected } =
     useList<ListType>({
-      fetchList: (_, params: Params) =>
+      fetchList: (_filters: IFilter[], params: Params): Promise<ListType> =>
         fetchReports(params.scope as HomeScope).then(reports => ({ reports, meta: {} as MetaV2 })),
       resource: 'space-reports',
       params: { scope },
     })
 
   const client = useQueryClient()
+  const scopeSpaceId = scope.includes('space-') ? scope.replace('space-', '') : undefined
 
   const lastJsonMessage = useLastWSNotification([
     NOTIFICATION_ACTION.SPACE_REPORT_DONE,
@@ -85,11 +86,11 @@ export const SpaceReportList = ({
     if (lastJsonMessage == null) {
       return
     }
-    query.refetch()
-    if (scope.includes('space-')) {
-      client.invalidateQueries({ queryKey: ['space', scope.replace('space-', '')] })
+    void query.refetch()
+    if (scopeSpaceId) {
+      void client.invalidateQueries({ queryKey: ['space', scopeSpaceId] })
     }
-  }, [lastJsonMessage])
+  }, [lastJsonMessage, scopeSpaceId])
 
   const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(selectedIndexes, query.data?.reports)
 
@@ -102,11 +103,11 @@ export const SpaceReportList = ({
   const { modalComp: generateModal, setShowModal: setGenerateModal } = useGenerateSpaceReportModal({
     scope,
     onClose: () => {
-      query.refetch()
+      void query.refetch()
     },
   })
 
-  if (query.error) return <ResouceQueryErrorMessage />
+  if (query.error) return <ResourceQueryErrorMessage />
 
   return (
     <>
@@ -114,7 +115,7 @@ export const SpaceReportList = ({
         <ActionsRow>
           <QuickActions>
             {(scope === 'private' || isContributorOrHigher) && (
-              <Button data-variant="primary" disabled={query.isLoading} onClick={() => setGenerateModal(true)}>
+              <Button data-variant="primary" disabled={query.isLoading} onClick={(): void => setGenerateModal(true)}>
                 <SpaceReportIcon height={14} /> Generate report
               </Button>
             )}

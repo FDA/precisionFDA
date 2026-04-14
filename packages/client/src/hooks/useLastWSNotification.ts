@@ -1,6 +1,6 @@
-import { type NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, type WebSocketMessage } from '../features/home/types'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../utils/config'
-import { getSessionExpiredAt } from '../utils/cookies'
+import { type NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, type WebSocketMessage } from '@/features/home/types'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '@/utils/config'
+import { getSessionExpiredAt } from '@/utils/cookies'
 import { useWebSocketSelector } from './useWebSocket'
 
 export const useLastWSNotification = (filteredActions: NOTIFICATION_ACTION[] = []): WebSocketMessage | null => {

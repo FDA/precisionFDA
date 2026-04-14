@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import {
-  ColumnDefResolved,
+import type {
   ColumnFiltersState,
   ColumnSizingState,
   ColumnSort,
@@ -9,24 +7,28 @@ import {
   RowSelectionState,
   VisibilityState,
 } from '@tanstack/react-table'
-import { ContentFooter } from '../../components/Page/ContentFooter'
-import { hidePagination, Pagination } from '../../components/Pagination'
+import { useEffect, useState } from 'react'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { hidePagination, Pagination } from '@/components/Pagination'
+import { StyledPageTable } from '@/components/Table/components/styles'
+import { useColumnWidthLocalStorage } from '@/hooks/useColumnWidthLocalStorage'
+import { useHiddenColumnLocalStorage } from '@/hooks/useHiddenColumnLocalStorage'
+import { useLastWSNotification } from '@/hooks/useLastWSNotification'
+import { useOrderByState } from '@/hooks/useOrderByState'
+import { usePaginationParams } from '@/hooks/usePaginationState'
+import { createLocationKey } from '@/utils'
+import { toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
-import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
-import { useLastWSNotification } from '../../hooks/useLastWSNotification'
-import { useOrderByState } from '../../hooks/useOrderByState'
-import { usePaginationParams } from '../../hooks/usePaginationState'
-import { createLocationKey } from '../../utils'
-import { toArrayFromObject } from '../../utils/object'
-import { IExecution } from '../executions/executions.types'
+import { shouldShowExecutionColumn } from '../executions/executionColumnVisibility'
+import { EXECUTION_LIST_NOTIFICATION_ACTIONS } from '../executions/executionList.constants'
+import type { IExecution } from '../executions/executions.types'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import { columnFilters } from '../home/columnFilters'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { IMeta, NOTIFICATION_ACTION } from '../home/types'
+import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
+import type { IFilter, IMeta } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
+import type { Params } from '../home/utils'
 import { fetchWorkflowExecutions } from './workflows.api'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
@@ -48,27 +50,21 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
   })
 
   const query = useListQuery<ListType>({
-    fetchList: (filters, params) => fetchWorkflowExecutions(filters, { ...params, uid }),
+    fetchList: (filters: IFilter[], params: Params): Promise<ListType> =>
+      fetchWorkflowExecutions(filters, { ...params, uid }),
     resource,
-    scope: uid,
     pagination: { page: pageParam, perPage: perPageParam },
     sort,
     filter: filterQuery,
     params: { uid },
   })
 
-  const setPerPage = (perPage: number) => {
-    setPerPageParam(perPage, 'pushIn')
+  const setPerPage = (perPage: number): void => {
+    setPerPageParam(perPage, true)
   }
   const { isLoading, data, error } = query
 
-  const lastJsonMessage = useLastWSNotification([
-    NOTIFICATION_ACTION.JOB_RUNNABLE,
-    NOTIFICATION_ACTION.JOB_RUNNING,
-    NOTIFICATION_ACTION.JOB_DONE,
-    NOTIFICATION_ACTION.JOB_FAILED,
-    NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-  ])
+  const lastJsonMessage = useLastWSNotification(EXECUTION_LIST_NOTIFICATION_ACTIONS)
 
   useEffect(() => {
     if (lastJsonMessage == null) {
@@ -79,7 +75,7 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
     })
   }, [lastJsonMessage])
 
-  if (error) return <ResouceQueryErrorMessage />
+  if (error) return <ResourceQueryErrorMessage />
 
   return (
     <>
@@ -102,7 +98,7 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
-          setPage={p => setPageParam(p, 'replaceIn')}
+          setPage={(p: number): void => setPageParam(p, true)}
           onPerPageSelect={setPerPage}
         />
       </ContentFooter>
@@ -138,25 +134,16 @@ export const ExecutionsListTable = ({
   columnVisibility: VisibilityState
 }) => {
   const [expanded, setExpanded] = useState<ExpandedState>({})
-  function filterColsByScope(c: ColumnDefResolved<IExecution>): boolean {
-    // Check if any of the conditions is true, then hide the column
-    return !(
-      c.accessorKey === 'workflow' ||
-      c.accessorKey === 'featured' ||
-      c.accessorKey === 'location' ||
-      c.accessorKey === 'tags' ||
-      c.id === 'select'
-    )
-  }
-  // @ts-expect-error: type is broken from react-table library
-  const col = useExecutionColumns({ filterDataTestIdPrefix: 'workflow-executions-list' }).filter(filterColsByScope)
+  const columns = useExecutionColumns({ filterDataTestIdPrefix: 'workflow-executions-list' }).filter(
+    (column: { id?: unknown; accessorKey?: unknown }): boolean => shouldShowExecutionColumn('workflow', column),
+  )
 
   return (
     <StyledPageTable>
       <Table<IExecution>
         isLoading={isLoading}
         data={jobs || []}
-        columns={col}
+        columns={columns}
         columnSizing={columnSizing}
         setColumnSizing={setColumnSizing}
         rowSelection={selectedRows ?? {}}

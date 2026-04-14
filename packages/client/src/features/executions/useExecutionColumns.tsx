@@ -1,6 +1,5 @@
-import React from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Column, ColumnDef } from '@tanstack/react-table'
+import type { Column, ColumnDef } from '@tanstack/react-table'
 import { useLocation } from 'react-router'
 import { FeaturedToggle } from '@/components/FeaturedToggle'
 import { BoltIcon } from '@/components/icons/BoltIcon'
@@ -15,7 +14,7 @@ import { getSpaceIdFromScope } from '@/utils'
 import SelectFilter, { selectFilterFn } from '../../components/Table/components/SelectFilter'
 import { StyledLinkCell } from '../home/home.styles'
 import { getBasePath, getBasePathFromScope } from '../home/utils'
-import { IExecution } from './executions.types'
+import type { IExecution } from './executions.types'
 import { getUserLink } from './executions.util'
 import { StateCell } from './StateCell'
 
@@ -45,7 +44,7 @@ export const useExecutionColumns = ({
         const pathname = `${getBasePath(spaceId)}/${rowType}/${row.original.uid}`
 
         return rowType === 'workflows' ? (
-          <>{row.original.name}</>
+          row.original.name
         ) : (
           <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
             <BoltIcon height={14} />
@@ -147,10 +146,7 @@ export const useExecutionColumns = ({
         }
 
         return (
-          <StyledLinkCell
-            to={`${getBasePath(spaceId)}/apps/${row.original.appUid}`}
-            $disable={!row.original.appActive}
-          >
+          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.appUid}`} $disable={!row.original.appActive}>
             <CubeIcon height={14} />
             {row.original.appTitle}
           </StyledLinkCell>
@@ -194,7 +190,7 @@ export const useExecutionColumns = ({
         props.row.original.jobs ? (
           <></>
         ) : (
-          <>{COMPUTE_RESOURCE_LABELS[props.row.original.instanceType] ?? props.row.original.instanceType}</>
+          (COMPUTE_RESOURCE_LABELS[props.row.original.instanceType] ?? props.row.original.instanceType)
         ),
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-instance-type` } : {}),
     },
@@ -236,9 +232,7 @@ export const useExecutionColumns = ({
       enableColumnFilter: false,
       size: 198,
       cell: props =>
-        props.row.original.launchedOn === null
-          ? props.row.original.createdAtDateTime
-          : props.row.original.launchedOn,
+        props.row.original.launchedOn === null ? props.row.original.createdAtDateTime : props.row.original.launchedOn,
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-on` } : {}),
     },
     {

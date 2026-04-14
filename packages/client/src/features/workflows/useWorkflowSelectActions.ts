@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { type ReactNode, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import { toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
@@ -9,10 +9,15 @@ import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useExportToModal } from '../apps/useExportToModal'
 import { useAuthUser } from '../auth/useAuthUser'
-import { Action } from '../home/action-types'
-import { HomeScope } from '../home/types'
-import { copyWorkflowsRequest, deleteWorkflowRequest, WorkflowCopyResponse } from './workflows.api'
-import { IWorkflow } from './workflows.types'
+import type { Action } from '../home/action-types'
+import type { ApiResponse, HomeScope } from '../home/types'
+import { copyWorkflowsRequest, deleteWorkflowRequest, type WorkflowCopyResponse } from './workflows.api'
+import type { IWorkflow } from './workflows.types'
+
+interface UseWorkflowSelectActionsResult {
+  actions: Action[]
+  modals: Record<string, ReactNode>
+}
 
 export const useWorkflowSelectActions = ({
   homeScope,
@@ -26,7 +31,7 @@ export const useWorkflowSelectActions = ({
   selectedItems: IWorkflow[]
   resourceKeys: string[]
   resetSelected?: () => void
-}) => {
+}): UseWorkflowSelectActionsResult => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
@@ -44,7 +49,7 @@ export const useWorkflowSelectActions = ({
     resource: 'workflows',
     selected,
     updateFunction: copyWorkflowsRequest,
-    onSuccess: res => {
+    onSuccess: (res: ApiResponse): void => {
       const workflowRes = res as WorkflowCopyResponse
       toastSuccess('The workflow has been copied to the space successfully.')
       queryClient.invalidateQueries({ queryKey: resourceKeys }).then(() => {
@@ -57,7 +62,11 @@ export const useWorkflowSelectActions = ({
 
   const { modalComp: tagsModal, setShowModal: setTagsModal } = useEditTagsModal({
     resource: 'workflows',
-    selected: { uid: `workflow-series-${selected[0]?.workflow_series_id}`, name: selected[0]?.name, tags: selected[0]?.tags },
+    selected: {
+      uid: `workflow-series-${selected[0]?.workflow_series_id}`,
+      name: selected[0]?.name,
+      tags: selected[0]?.tags,
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },

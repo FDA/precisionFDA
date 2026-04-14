@@ -1,5 +1,4 @@
-import React from 'react'
-import {
+import type {
   ColumnDefResolved,
   ColumnFiltersState,
   ColumnSizingState,
@@ -20,13 +19,13 @@ import { useGenerateKeyModal } from '../auth/useGenerateKeyModal'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta } from '../home/types'
+import type { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { fetchAssets } from './assets.api'
-import { IAsset } from './assets.types'
+import type { IAsset } from './assets.types'
 import { useAssetColumns } from './useAssetColumns'
 import { useAssetActions } from './useAssetSelectActions'
 
@@ -43,7 +42,9 @@ export const AssetList = ({
 }) => {
   const navigate = useNavigate()
 
-  const onRowClick = (uid: string) => navigate(`/home/assets/${uid}`)
+  const onRowClick = (uid: string): void => {
+    navigate(`/home/assets/${uid}`)
+  }
   const {
     setPerPageParam,
     setPageParam,
@@ -80,7 +81,7 @@ export const AssetList = ({
   })
   const generateCLIKeyAction = useGenerateKeyModal()
 
-  if (error) return <ResouceQueryErrorMessage />
+  if (error) return <ResourceQueryErrorMessage />
 
   return (
     <>
@@ -97,7 +98,7 @@ export const AssetList = ({
             >
               <QuestionIcon height={13} /> How to create assets
             </Button>
-            <Button data-variant="primary" onClick={() => generateCLIKeyAction.setShowModal(true)}>
+            <Button data-variant="primary" onClick={(): void => generateCLIKeyAction.setShowModal(true)}>
               <KeyIcon height={13} />
               Generate CLI Key
             </Button>
@@ -139,8 +140,8 @@ export const AssetList = ({
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, true)}
-          onPerPageSelect={p => setPerPageParam(p, true)}
+          setPage={(p: number): void => setPageParam(p, true)}
+          onPerPageSelect={(p: number): void => setPerPageParam(p, true)}
         />
       </ContentFooter>
 
