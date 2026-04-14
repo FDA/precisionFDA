@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
+import type { ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
+import { type ComponentProps, type ComponentType, useEffect } from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
 import { Button } from '@/components/Button'
@@ -18,21 +18,21 @@ import Table from '../../components/Table'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions, StyledRight } from '../home/home.styles'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
-import { HomeScope, MetaV2, NOTIFICATION_ACTION } from '../home/types'
+import { type HomeScope, type MetaV2, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { getBasePath } from '../home/utils'
 import { fetchDatabaseList } from './databases.api'
-import { IDatabase } from './databases.types'
+import type { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 
-const DBStyledRight = styled(StyledRight)`
+const DBStyledRight: ComponentType<ComponentProps<typeof StyledRight>> = styled(StyledRight)`
   gap: 20px;
 `
-const NoDatabases = styled.div`
+const NoDatabases: ComponentType<ComponentProps<'div'>> = styled.div`
   display: flex;
   flex-direction: column;
   padding: 24px;
@@ -40,9 +40,9 @@ const NoDatabases = styled.div`
 `
 
 type ListType = { data: IDatabase[]; meta: MetaV2 }
+type DatabaseListProps = { homeScope?: HomeScope; spaceId?: number }
 
-export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; spaceId?: number }) => {
-  const basePath = getBasePath(spaceId)
+export const DatabaseList = ({ homeScope, spaceId }: DatabaseListProps) => {
   if (homeScope && homeScope !== 'me' && homeScope !== 'spaces') {
     return (
       <NoDatabases>
@@ -51,6 +51,13 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
       </NoDatabases>
     )
   }
+
+  return <DatabaseListContent homeScope={homeScope} spaceId={spaceId} />
+}
+
+const DatabaseListContent = ({ homeScope, spaceId }: DatabaseListProps) => {
+  const basePath = getBasePath(spaceId)
+
   const {
     setSortBy,
     sortBy,
@@ -96,7 +103,7 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
     resourceKeys: ['dbclusters'],
   })
 
-  if (error) return <ResouceQueryErrorMessage />
+  if (error) return <ResourceQueryErrorMessage />
 
   return (
     <>
@@ -113,7 +120,12 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
             </Button>
           </QuickActions>
           <DBStyledRight>
-            <Button onClick={() => query.refetch()} disabled={query.isFetching}>
+            <Button
+              onClick={() => {
+                void query.refetch()
+              }}
+              disabled={query.isFetching}
+            >
               <Refresh $spin={query.isFetching}>
                 <SyncIcon height={13} />
               </Refresh>
@@ -149,8 +161,8 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope; sp
           totalPages={data?.meta?.totalPages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, true)}
-          onPerPageSelect={p => setPerPageParam(p, true)}
+          setPage={(p: number): void => setPageParam(p, true)}
+          onPerPageSelect={(p: number): void => setPerPageParam(p, true)}
         />
       </ContentFooter>
 

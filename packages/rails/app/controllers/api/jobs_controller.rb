@@ -55,22 +55,14 @@ module Api
           jobs = @space.jobs.
             eager_load(:app, user: :org, analysis: :workflow).
             includes(:taggings).
-            search_by_tags(params.dig(:filters, :tags)).
-            order(order_params).page(page_from_params).per(page_size)
-          jobs.each { |job| job.current_user = @context.user }
+            search_by_tags(params.dig(:filters, :tags))
+
+          jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
 
           jobs = JobService::JobsFilter.call(jobs, params[:filters])
         end
 
-        page_dict = pagination_dict(jobs)
-
-        if show_count
-          render plain: page_dict[:total_count]
-        else
-          render json: jobs, root: Job.model_name.plural,
-                 meta: { count: page_dict[:total_count], pagination: page_dict },
-                 adapter: :json
-        end
+        render_jobs_list(jobs)
       else
         # Fetches all user 'private' jobs.
         jobs = Job.

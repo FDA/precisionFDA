@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react'
 import { DndContext } from '@dnd-kit/core'
-import {
+import type {
   ColumnDefResolved,
   ColumnFiltersState,
   ColumnSizingState,
@@ -10,6 +9,7 @@ import {
 } from '@tanstack/react-table'
 import { clsx } from 'clsx'
 import { ArrowUpRightFromSquareIcon } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { CopyText } from '@/components/CopyText/CopyText'
 import { FileIcon } from '@/components/icons/FileIcon'
@@ -25,17 +25,17 @@ import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '@
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
 import { FilesListResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta, MetaPath } from '../home/types'
+import type { HomeScope, IMeta, MetaPath } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
-import { ISpace } from '../spaces/spaces.types'
+import type { ISpace } from '../spaces/spaces.types'
 import { centerToCursorCollisionDetection } from './centerToCursorCollisionDetection'
 import { FileBreadcrumb } from './FileBreadcrumb'
 import styles from './FileList.module.css'
 import { fetchFiles } from './files.api'
-import { IFile, IFolder } from './files.types'
+import type { IFile, IFolder } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
 import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
@@ -88,7 +88,7 @@ export const FileList = ({
     },
   })
 
-  const onRowClick = (id: string) => {
+  const onRowClick = (id: string): void => {
     navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search } })
   }
 
@@ -105,12 +105,12 @@ export const FileList = ({
     if (!isLoading && data?.meta) {
       previousMetaRef.current = data.meta.path
     }
-  }, [data?.meta?.path, isLoading])
+  }, [data?.meta, isLoading])
 
   // Use current data if available, otherwise use cached value only during loading
   const currentMetaPath = !isLoading && data?.meta ? data.meta.path : isLoading ? previousMetaRef.current : undefined
 
-  const onFolderClick = (folderId: string) => {
+  const onFolderClick = (folderId: string): void => {
     resetSelected()
     const search = new URLSearchParams(
       cleanObject({
@@ -138,7 +138,7 @@ export const FileList = ({
 
   const { actions: folderActions, modals: folderModals } = useFolderActions(
     homeScope,
-    folderIdParam!,
+    folderIdParam,
     space?.id.toString(),
     resetSelected,
     data?.meta?.path,
@@ -146,11 +146,10 @@ export const FileList = ({
 
   const openAction = actions.find(action => action.name === 'Open')
 
-  const findAction = (actionName: string) => {
-    return folderActions.find(action => action.name === actionName)
-  }
+  const findAction = (actionName: string): (typeof folderActions)[number] | undefined =>
+    folderActions.find(action => action.name === actionName)
 
-  if (error) return <ResouceQueryErrorMessage />
+  if (error) return <ResourceQueryErrorMessage />
 
   return (
     <>
@@ -162,7 +161,7 @@ export const FileList = ({
                 <Button
                   variant="default"
                   data-testid="home-files-add-folder-button"
-                  onClick={() => {
+                  onClick={(): void => {
                     const action = findAction('Add Folder')
                     if (action && 'func' in action) {
                       action.func(false)
@@ -174,7 +173,7 @@ export const FileList = ({
                 <Button
                   variant="default"
                   data-testid="home-files-add-files-button"
-                  onClick={() => {
+                  onClick={(): void => {
                     const actionName = space?.id ? 'Choose Add Option' : 'Add Files'
                     const action = findAction(actionName)
                     if (action && 'func' in action) {
@@ -201,7 +200,7 @@ export const FileList = ({
             {openAction && selectedFileIds.length > 0 && (
               <Button
                 variant="outline"
-                onClick={() => {
+                onClick={(): void => {
                   if ('func' in openAction && openAction.func) {
                     openAction.func(false)
                   }
@@ -255,8 +254,8 @@ export const FileList = ({
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, true)}
-          onPerPageSelect={p => setPerPageParam(p, true)}
+          setPage={(p: number): void => setPageParam(p, true)}
+          onPerPageSelect={(p: number): void => setPerPageParam(p, true)}
         />
       </ContentFooter>
 
@@ -312,7 +311,7 @@ export const FilesListTable = ({
   folderId?: number
   setColumnVisibility: (cols: VisibilityState) => void
   columnVisibility: VisibilityState
-}) => {
+}): JSX.Element => {
   const location = useLocation()
   const { handleDragEnd, handleDragStart, sensors, dndMoveModal } = useFileDnd({
     setSelectedRows,
@@ -364,7 +363,9 @@ export const FilesListTable = ({
           <CopyText
             value={folderId.toString()}
             className={styles.folderIdPill}
-            onCopy={() => toastInfo('Folder ID copied to clipboard')}
+            onCopy={(): void => {
+              toastInfo('Folder ID copied to clipboard')
+            }}
           >
             <span className={clsx(styles.currentFolderIdLabel, 'flex', 'items-center')}>Folder ID:</span>{' '}
             <span className={styles.currentFolderId}>{folderId}</span>

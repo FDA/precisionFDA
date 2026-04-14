@@ -1,5 +1,4 @@
-import React from 'react'
-import {
+import type {
   ColumnDefResolved,
   ColumnFiltersState,
   ColumnSizingState,
@@ -16,12 +15,12 @@ import { StyledPageTable } from '@/components/Table/components/styles'
 import { toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
 import { ActionsRow, QuickActions } from '../home/home.styles'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
-import { HomeScope, MetaV2 } from '../home/types'
+import type { HomeScope, MetaV2 } from '../home/types'
 import { useList } from '../home/useList'
 import { fetchDiscussionsRequest } from './api'
-import { Discussion } from './discussions.types'
+import type { Discussion } from './discussions.types'
 import { useDiscussionColumns } from './useDiscussionColumns'
 
 type ListType = { data: Discussion[]; meta: MetaV2 }
@@ -117,7 +116,7 @@ export const DiscussionList = ({
 
   const location = useLocation()
 
-  if (query.error) return <ResouceQueryErrorMessage />
+  if (query.error) return <ResourceQueryErrorMessage />
 
   return (
     <>
@@ -161,8 +160,8 @@ export const DiscussionList = ({
           perPage={query.data?.meta.pageSize}
           isHidden={false}
           showPerPage={false}
-          setPage={p => setPageParam(p, true)}
-          onPerPageSelect={p => setPerPageParam(p, true)}
+          setPage={(p: number): void => setPageParam(p, true)}
+          onPerPageSelect={(p: number): void => setPerPageParam(p, true)}
         />
       </ContentFooter>
     </>

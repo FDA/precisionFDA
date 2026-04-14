@@ -45,9 +45,6 @@
         "useArrowFunction": "off",
         "noStaticOnlyClass": "off",
         "noThisInStatic": "off"
-      },
-      "nursery": {
-        "useExplicitType": "error"
       }
     }
   }

@@ -1,9 +1,11 @@
-import { toast, ToastOptions, ToastContent } from 'react-toastify'
-import { SEVERITY } from '../../features/home/types'
+import { type ToastContent, type ToastOptions, toast } from 'react-toastify'
+import { SEVERITY } from '@/features/home/types'
 
 let markAsReadFn: ((id: string | number | (string | number)[]) => void) | null = null
 
-export const initializeToastHelper = (markAsReadFunction: (id: string | number | (string | number)[]) => void): void => {
+export const initializeToastHelper = (
+  markAsReadFunction: (id: string | number | (string | number)[]) => void,
+): void => {
   markAsReadFn = markAsReadFunction
 }
 

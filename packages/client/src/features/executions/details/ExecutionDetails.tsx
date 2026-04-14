@@ -164,7 +164,7 @@ export const ExecutionDetails = ({
     queryCache.invalidateQueries({
       queryKey: ['execution', executionUid],
     })
-  }, [lastJsonMessage, queryCache, executionUid])
+  }, [lastJsonMessage, executionUid])
 
   const liveMetrics = useLiveMetrics(execution)
 

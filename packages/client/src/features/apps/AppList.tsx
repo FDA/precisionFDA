@@ -1,5 +1,4 @@
-import React from 'react'
-import {
+import type {
   ColumnDefResolved,
   ColumnFiltersState,
   ColumnSizingState,
@@ -20,16 +19,16 @@ import Table from '../../components/Table'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta } from '../home/types'
+import type { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { fetchApps } from './apps.api'
-import { IApp } from './apps.types'
+import type { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
-import { useAppsColumns } from './useAppsColumns'
 import { useAppSelectionActions } from './useAppSelectionActions'
+import { useAppsColumns } from './useAppsColumns'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -89,7 +88,7 @@ export const AppList = ({
     spaceId: spaceId?.toString() || '',
   })
 
-  if (error) return <ResouceQueryErrorMessage />
+  if (error) return <ResourceQueryErrorMessage />
 
   return (
     <>
@@ -111,7 +110,7 @@ export const AppList = ({
               <Button
                 data-variant="primary"
                 data-testid="spaces-apps-add-app-button"
-                onClick={() => {
+                onClick={(): void => {
                   const action = listActions.find(a => a.name === 'Add App')
                   if (action && 'func' in action) {
                     ;(action.func as () => void)()
@@ -157,8 +156,8 @@ export const AppList = ({
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, true)}
-          onPerPageSelect={p => setPerPageParam(p, true)}
+          setPage={(p: number): void => setPageParam(p, true)}
+          onPerPageSelect={(p: number): void => setPerPageParam(p, true)}
         />
       </ContentFooter>
 
@@ -203,7 +202,7 @@ export const AppsListTable = ({
   setColumnVisibility: (cols: VisibilityState) => void
   columnVisibility: VisibilityState
 }) => {
-  function filterColsByScope(c: ColumnDefResolved<IApp>) {
+  function filterColsByScope(c: ColumnDefResolved<IApp>): boolean {
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.

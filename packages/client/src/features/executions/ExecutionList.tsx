@@ -1,7 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import {
-  ColumnDefResolved,
+import type {
   ColumnFiltersState,
   ColumnSizingState,
   ColumnSort,
@@ -9,6 +7,7 @@ import {
   RowSelectionState,
   VisibilityState,
 } from '@tanstack/react-table'
+import { useEffect, useState } from 'react'
 import { ActionsMenu } from '@/components/Menu'
 import { ContentFooter } from '@/components/Page/ContentFooter'
 import { Pagination } from '@/components/Pagination'
@@ -20,13 +19,15 @@ import Table from '../../components/Table'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow } from '../home/home.styles'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
 import { ResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta, NOTIFICATION_ACTION } from '../home/types'
+import type { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
+import { shouldShowExecutionColumn } from './executionColumnVisibility'
+import { EXECUTION_LIST_NOTIFICATION_ACTIONS, EXECUTION_LIST_QUERY_KEY } from './executionList.constants'
 import { fetchExecutions } from './executions.api'
-import { IExecution } from './executions.types'
+import type { IExecution } from './executions.types'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionSelectActions } from './useExecutionSelectActions'
 
@@ -68,31 +69,25 @@ export const ExecutionList = ({
   const { isLoading, data, error } = query
   const { data: propertiesData } = usePropertiesQuery('job', homeScope, spaceId)
 
-  const lastJsonMessage = useLastWSNotification([
-    NOTIFICATION_ACTION.JOB_RUNNABLE,
-    NOTIFICATION_ACTION.JOB_RUNNING,
-    NOTIFICATION_ACTION.JOB_DONE,
-    NOTIFICATION_ACTION.JOB_FAILED,
-    NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-  ])
+  const lastJsonMessage = useLastWSNotification(EXECUTION_LIST_NOTIFICATION_ACTIONS)
 
   useEffect(() => {
     if (lastJsonMessage == null) {
       return
     }
     queryCache.invalidateQueries({
-      queryKey: ['jobs'],
+      queryKey: EXECUTION_LIST_QUERY_KEY,
     })
   }, [lastJsonMessage])
 
-  const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.jobs)
+  const selectedExecutionObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.jobs)
   const { actions, modals } = useExecutionSelectActions({
     homeScope,
-    selectedItems: selectedFileObjects,
+    selectedItems: selectedExecutionObjects,
     resourceKeys: ['jobs'],
   })
 
-  if (error) return <ResouceQueryErrorMessage />
+  if (error) return <ResourceQueryErrorMessage />
 
   return (
     <ErrorBoundary>
@@ -129,8 +124,8 @@ export const ExecutionList = ({
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          setPage={p => setPageParam(p, true)}
-          onPerPageSelect={p => setPerPageParam(p, true)}
+          setPage={(p: number) => setPageParam(p, true)}
+          onPerPageSelect={(p: number) => setPerPageParam(p, true)}
         />
       </ContentFooter>
 
@@ -173,33 +168,16 @@ export const ExecutionsListTable = ({
   columnVisibility: VisibilityState
 }) => {
   const [expanded, setExpanded] = useState<ExpandedState>({})
-  function filterColsByScope(c: ColumnDefResolved<IExecution>): boolean {
-    // Check if any of the conditions is true, then hide the column
-    return !(
-      // If the homeScope is 'me', hide 'addedBy' regardless of other conditions.
-      (
-        (homeScope === 'me' && c.accessorKey === 'addedBy') ||
-        // Hide 'location' for all homeScopes except 'spaces'.
-        (homeScope !== 'spaces' && c.accessorKey === 'location') ||
-        // Hide 'featured' for all homeScopes except 'everybody'.
-        (homeScope !== 'everybody' && c.accessorKey === 'featured') ||
-        c.accessorKey === 'createdAtDateTime' ||
-        c.accessorKey === 'workflowTitle'
-      )
-    )
-  }
-
-  // @ts-expect-error: type is broken from react-table library
-  const col = useExecutionColumns({ isAdmin, properties }).filter(filterColsByScope)
-
-  const data = useMemo(() => jobs || [], [jobs, selectedRows])
+  const columns = useExecutionColumns({ isAdmin, properties }).filter(
+    (column: { id?: unknown; accessorKey?: unknown }) => shouldShowExecutionColumn('home', column, homeScope),
+  )
 
   return (
     <StyledPageTable>
       <Table<IExecution>
         isLoading={isLoading}
-        data={data || []}
-        columns={col}
+        data={jobs ?? []}
+        columns={columns}
         columnSizing={columnSizing}
         setColumnSizing={setColumnSizing}
         rowSelection={selectedRows ?? {}}
