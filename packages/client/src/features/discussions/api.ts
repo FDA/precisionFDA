@@ -1,7 +1,8 @@
 import axios from 'axios'
-import { HomeScope, IFilter, MetaV2, ServerScope } from '../home/types'
-import { Params, prepareListFetch } from '../home/utils'
-import { Attachment, Discussion, PostAttachments } from './discussions.types'
+import type { IFilter, MetaV2, ServerScope } from '../home/types'
+import { prepareListFetchV2 } from '../home/utils'
+import type { Params } from '../home/utils'
+import type { Attachment, Discussion, PostAttachments } from './discussions.types'
 
 export type BasePayload = {
   content: string
@@ -62,7 +63,10 @@ export interface DiscussionListResponse {
 }
 
 export async function fetchDiscussionsRequest(filters: IFilter[], params: Params) {
-  const query = prepareListFetch(filters, { ...params, scope: params.entityScope as HomeScope })
+  const query = prepareListFetchV2(filters, params)
+  if (params.entityScope) {
+    query.scope = params.entityScope
+  }
   const paramQ = `?${new URLSearchParams(query).toString()}`
   return axios.get(`/api/v2/discussions${paramQ}`).then(r => r.data as DiscussionListResponse)
 }

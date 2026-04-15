@@ -1,6 +1,6 @@
 import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { type UseQueryResult, useQuery } from '@tanstack/react-query'
-import type { ColumnDefResolved } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { type ComponentProps, type ComponentType, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import styled from 'styled-components'
@@ -164,13 +164,11 @@ const SpacesList = () => {
     }
   }, [searchParamsString, setSearchParams, spaceGroupId, spaceGroupsMemo])
 
-  // @ts-expect-error: type is broken from react-table library
-  const spacesColumns = useSpacesColumns().filter((c: ColumnDefResolved<ISpaceV2>) => {
-    return (
-      userCanAdministerSite ||
-      (userCanAdministerSpaceGroups && c.accessorKey !== 'hidden') ||
-      (c.accessorKey !== 'hidden' && c.id !== 'select')
-    )
+  const spacesColumns = useSpacesColumns().filter((column: ColumnDef<ISpaceV2>) => {
+    const isHiddenColumn = 'accessorKey' in column && column.accessorKey === 'hidden'
+    const isSelectColumn = 'id' in column && column.id === 'select'
+
+    return userCanAdministerSite || (userCanAdministerSpaceGroups && !isHiddenColumn) || (!isHiddenColumn && !isSelectColumn)
   })
 
   // This could possibly happen if you access Space Group directly via URL

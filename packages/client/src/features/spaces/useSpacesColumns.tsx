@@ -1,21 +1,21 @@
-import { Column, ColumnDef } from '@tanstack/react-table'
+import type { Column, ColumnDef } from '@tanstack/react-table'
 import React, { useEffect } from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
-import { SwitchButton } from '../../components/Button'
+import { SwitchButton } from '@/components/Button'
+import { AdminIcon } from '@/components/icons/AdminIcon'
+import { GovernmentIcon } from '@/components/icons/GovernmentIcon'
+import { PrivateIcon } from '@/components/icons/PrivateIcon'
+import { ProfileIcon } from '@/components/icons/ProfileIcon'
+import { UsersIcon } from '@/components/icons/UsersIcon'
+import { selectColumnDef } from '@/components/Table/selectColumnDef'
+import { StyledTagItem, StyledTags } from '@/components/Tags'
+import { formatDateOnly } from '@/utils/formatting'
 import SelectFilter, { selectFilterFn } from '../../components/Table/components/SelectFilter'
-import { selectColumnDef } from '../../components/Table/selectColumnDef'
-import { StyledTagItem, StyledTags } from '../../components/Tags'
-import { AdminIcon } from '../../components/icons/AdminIcon'
-import { GovernmentIcon } from '../../components/icons/GovernmentIcon'
-import { PrivateIcon } from '../../components/icons/PrivateIcon'
-import { ProfileIcon } from '../../components/icons/ProfileIcon'
-import { UsersIcon } from '../../components/icons/UsersIcon'
-import { formatDateOnly } from '../../utils/formatting'
+import { SpaceTypeName } from './common'
 import { FdaRestrictedIcon } from './FdaRestrictedIcon'
 import { ProtectedIcon } from './ProtectedIcon'
-import { SpaceTypeName } from './common'
-import { ISpaceV2 } from './spaces.types'
+import type { ISpaceV2 } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
 
 const SpaceHiddenToggle = ({ id, hidden }: { id: number; hidden: boolean }) => {
@@ -105,20 +105,7 @@ export const SpaceTableTypeCell = styled.div`
   gap: 10px;
   flex-shrink: 0;
 `
-export const SpaceTableCounterCell = styled.div`
-  display: flex;
-  gap: 14px;
-  width: max-content;
-`
-export const SpaceTableCounterItem = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  & svg {
-    flex-shrink: 0;
-  }
-`
+
 export const findSpaceTypeIcon = (type: string | number) => {
   switch (type) {
     case 'groups':

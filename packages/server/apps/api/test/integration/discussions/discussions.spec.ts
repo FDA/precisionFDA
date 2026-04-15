@@ -384,4 +384,98 @@ describe('/discussions', async () => {
     expect(body.data).to.be.an('array').of.length(2)
     expect(body.data.map(d => d.id)).to.have.members([discussion1.id, discussion2.id])
   })
+
+  it('should filter public discussions by title', async () => {
+    const author = create.userHelper.create(em)
+    await em.flush()
+
+    const matchingDiscussion = create.discussionHelper.createPublic(em, { user: author })
+    const otherDiscussion = create.discussionHelper.createPublic(em, { user: author })
+    await em.flush()
+
+    const matchingNote = await matchingDiscussion.note.load()
+    matchingNote.title = 'Genome Safety Review'
+    const otherNote = await otherDiscussion.note.load()
+    otherNote.title = 'Variant Analysis'
+    await em.flush()
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get('/discussions')
+      .query({ scope: 'everybody', 'filter[title]': 'Genome' })
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body.data).to.be.an('array').of.length(1)
+    expect(body.data[0].id).to.equal(matchingDiscussion.id)
+  })
+
+  it('should return empty list when title filter has no matches', async () => {
+    const author = create.userHelper.create(em)
+    await em.flush()
+
+    const discussion = create.discussionHelper.createPublic(em, { user: author })
+    await em.flush()
+
+    const note = await discussion.note.load()
+    note.title = 'Genome Safety Review'
+    await em.flush()
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get('/discussions')
+      .query({ scope: 'everybody', 'filter[title]': 'Not Present' })
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body.data).to.be.an('array').of.length(0)
+  })
+
+  it('should return zero counts for public discussions without replies', async () => {
+    const author = create.userHelper.create(em)
+    await em.flush()
+    const discussion = create.discussionHelper.createPublic(em, { user: author })
+    await em.flush()
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get('/discussions?scope=everybody')
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    const resultDiscussion = body.data.find(d => d.id === discussion.id)
+    expect(resultDiscussion).to.exist()
+    expect(resultDiscussion.answersCount).to.equal(0)
+    expect(resultDiscussion.commentsCount).to.equal(0)
+  })
+
+  it('should include answer and comment counts for public discussions', async () => {
+    const author = create.userHelper.create(em)
+    await em.flush()
+    const discussion = create.discussionHelper.createPublic(em, { user: author })
+    await em.flush()
+
+    create.discussionHelper.createReply(em, DISCUSSION_REPLY_TYPE.ANSWER, {
+      user: author,
+      discussion,
+      scope: STATIC_SCOPE.PUBLIC,
+    })
+    create.discussionHelper.createReply(em, DISCUSSION_REPLY_TYPE.COMMENT, {
+      user: author,
+      discussion,
+      scope: STATIC_SCOPE.PUBLIC,
+    })
+    await em.flush()
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get('/discussions?scope=everybody')
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    const resultDiscussion = body.data.find((d: { id: number }) => d.id === discussion.id)
+    expect(resultDiscussion).to.exist()
+    expect(resultDiscussion.answersCount).to.equal(1)
+    expect(resultDiscussion.commentsCount).to.equal(1)
+  })
 })
