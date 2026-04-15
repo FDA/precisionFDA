@@ -199,7 +199,12 @@ export class DiscussionService {
       DISCUSSION_REPLY_TYPE.COMMENT,
     )
     const discussions = result.data.map(discussion =>
-      SimpleDiscussionDTO.fromEntity(discussion, false, answerCount[discussion.id], commentCount[discussion.id]),
+      SimpleDiscussionDTO.fromEntity(
+        discussion,
+        false,
+        answerCount[discussion.id] ?? 0,
+        commentCount[discussion.id] ?? 0,
+      ),
     )
 
     return {

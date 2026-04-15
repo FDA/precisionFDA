@@ -1,11 +1,10 @@
-import { ColumnDef } from '@tanstack/react-table'
-import React from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
 import { useLocation } from 'react-router'
-import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
-import { getSpaceIdFromScope } from '../../utils'
-import { formatDate } from '../../utils/formatting'
+import { ObjectGroupIcon } from '@/components/icons/ObjectGroupIcon'
+import { getSpaceIdFromScope } from '@/utils'
+import { formatDate } from '@/utils/formatting'
 import { StyledLink, StyledLinkCell } from '../home/home.styles'
-import { Discussion } from './discussions.types'
+import type { Discussion } from './discussions.types'
 
 export const useDiscussionColumns = (): ColumnDef<Discussion>[] => {
   const location = useLocation()
@@ -13,8 +12,8 @@ export const useDiscussionColumns = (): ColumnDef<Discussion>[] => {
     {
       header: 'Title',
       accessorKey: 'title',
-      enableSorting: false,
-      enableColumnFilter: false,
+      enableSorting: true,
+      enableColumnFilter: true,
       filterFn: 'includesString',
       size: 480,
       cell: c => {
@@ -26,7 +25,7 @@ export const useDiscussionColumns = (): ColumnDef<Discussion>[] => {
     {
       header: 'Created',
       accessorKey: 'createdAt',
-      enableSorting: false,
+      enableSorting: true,
       enableColumnFilter: false,
       size: 190,
       cell: c => {
@@ -40,7 +39,9 @@ export const useDiscussionColumns = (): ColumnDef<Discussion>[] => {
       filterFn: 'includesString',
       enableSorting: false,
       size: 150,
-      cell: c => <StyledLinkCell to={`/users/${c.row.original.user.dxuser}`}>{c.row.original.user.fullName}</StyledLinkCell>,
+      cell: c => (
+        <StyledLinkCell to={`/users/${c.row.original.user.dxuser}`}>{c.row.original.user.fullName}</StyledLinkCell>
+      ),
     },
     {
       header: 'Location',

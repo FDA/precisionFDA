@@ -1,5 +1,5 @@
 import type {
-  ColumnDefResolved,
+  ColumnDef,
   ColumnFiltersState,
   ColumnSizingState,
   ColumnSort,
@@ -32,6 +32,7 @@ const DiscussionListTable = ({
   columnFilters,
   setColumnFilters,
   sortBy,
+  setSortBy,
   selectedRows,
   setSelectedRows,
   columnVisibility,
@@ -53,12 +54,11 @@ const DiscussionListTable = ({
   columnVisibility: VisibilityState
   setColumnVisibility: (cols: VisibilityState) => void
 }) => {
-  function filterColsByScope(c: ColumnDefResolved<Discussion>): boolean {
+  function filterColsByScope(c: ColumnDef<Discussion>): boolean {
     // Hide 'location' for all homeScopes except 'spaces'.
-    return !(homeScope !== 'spaces' && c.accessorKey === 'note.scope')
+    return !(homeScope !== 'spaces' && 'accessorKey' in c && c.accessorKey === 'scope')
   }
 
-  // @ts-expect-error: type is broken from react-table library
   const col = useDiscussionColumns().filter(filterColsByScope)
 
   return (
@@ -72,12 +72,13 @@ const DiscussionListTable = ({
         rowSelection={selectedRows ?? {}}
         setSelectedRows={setSelectedRows}
         columnSortBy={sortBy}
+        setColumnSortBy={setSortBy}
         columnVisibility={columnVisibility}
         setColumnVisibility={setColumnVisibility}
         setColumnFilters={setColumnFilters}
         columnFilters={columnFilters}
         emptyText="No one's started a discussion yet."
-        enableColumnFilters={false}
+        enableColumnFilters={true}
       />
     </StyledPageTable>
   )
