@@ -68,7 +68,7 @@
     "compare-versions": "^6.1.1",
     "d3": "^7.9.0",
     "dirty-chai": "^2.0.1",
-    "dompurify": "^3.3.3",
+    "dompurify": "^3.4.0",
     "dotenv": "^17.3.1",
     "isomorphic-dompurify": "^3.5.1",
     "jsdom": "^29.0.0",
