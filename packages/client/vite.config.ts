@@ -42,6 +42,7 @@ export default defineConfig(({ mode }) => {
           {
             src: 'node_modules/monaco-editor/min/vs',
             dest: 'monaco-editor/min',
+            rename: { stripBase: 3 },
           },
         ],
       }),
