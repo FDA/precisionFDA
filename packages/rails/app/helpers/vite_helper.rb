@@ -1,3 +1,5 @@
+require "set"
+
 module ViteHelper
   MANIFEST_PATH = "public/packs/.vite/manifest.json"
 
@@ -12,11 +14,25 @@ module ViteHelper
 
   # Look up the hashed CSS paths for a Vite entry point.
   def vite_css_paths(entry)
-    css = manifest.dig(entry, "css") || []
-    css.map { |path| "/packs/#{path}" }
+    resolve_css_paths(entry).map { |path| "/packs/#{path}" }
   end
 
   private
+
+  def resolve_css_paths(entry, seen = Set.new)
+    return [] if seen.include?(entry)
+
+    seen.add(entry)
+
+    entry_data = manifest&.[](entry) || {}
+    css_paths = entry_data.fetch("css", [])
+
+    imported_css_paths = entry_data.fetch("imports", []).flat_map do |import_entry|
+      resolve_css_paths(import_entry, seen)
+    end
+
+    (css_paths + imported_css_paths).uniq
+  end
 
   def manifest
     @manifest ||= begin
