@@ -31,6 +31,7 @@ export enum TASK_TYPE {
   CLOSE_FILE = 'close_file',
   CHECK_CHALLENGE_JOBS = 'check_challenge_jobs',
   CHECK_STALE_JOBS = 'check_stale_jobs',
+  NOTIFY_RUNNING_JOBS = 'notify_running_jobs',
   CHECK_USER_JOBS = 'check_user_jobs',
   FOLLOW_UP_ACTION = 'follow_up_action',
   CHECK_NON_TERMINATED_DBCLUSTERS = 'check_non_terminated_dbclusters',

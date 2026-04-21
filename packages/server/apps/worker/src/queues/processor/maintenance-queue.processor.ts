@@ -7,6 +7,7 @@ import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { UserService } from '@shared/domain/user/service/user.service'
+import { JobRunningNotificationFacade } from '@shared/facade/job/job-running-notification.facade'
 import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
 import { JobSyncTaskCheckFacade } from '@shared/facade/job/job-sync-task-check.facade'
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
@@ -23,6 +24,7 @@ export class MaintenanceQueueProcessor {
     private readonly spaceMembershipService: SpaceMembershipService,
     private readonly userCheckupFacade: UserCheckupFacade,
     private readonly jobStaleCheckFacade: JobStaleCheckFacade,
+    private readonly jobRunningNotificationFacade: JobRunningNotificationFacade,
     private readonly jobSyncTaskCheckFacade: JobSyncTaskCheckFacade,
     private readonly jobSyncService: JobSynchronizationService,
   ) {}
@@ -35,6 +37,11 @@ export class MaintenanceQueueProcessor {
   @ProcessWithContext(TASK_TYPE.CHECK_STALE_JOBS)
   async checkStaleJobs(): Promise<void> {
     await this.jobStaleCheckFacade.checkAndNotifyStaleJobs()
+  }
+
+  @ProcessWithContext(TASK_TYPE.NOTIFY_RUNNING_JOBS)
+  async notifyRunningJobs(): Promise<void> {
+    await this.jobRunningNotificationFacade.notifyOwnersOfRunningJobs()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS)

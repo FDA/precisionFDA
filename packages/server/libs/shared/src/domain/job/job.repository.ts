@@ -33,14 +33,17 @@ export class JobRepository extends AccessControlRepository<Job> {
   }
 
   async findAllRunningJobs(): Promise<Job[]> {
-    return await this.find({
-      $or: [
-        { state: JOB_STATE.IDLE },
-        { state: JOB_STATE.RUNNING },
-        { state: JOB_STATE.RUNNABLE },
-        { state: JOB_STATE.TERMINATING },
-      ],
-    })
+    return await this.find(
+      {
+        $or: [
+          { state: JOB_STATE.IDLE },
+          { state: JOB_STATE.RUNNING },
+          { state: JOB_STATE.RUNNABLE },
+          { state: JOB_STATE.TERMINATING },
+        ],
+      },
+      { populate: ['user'] },
+    )
   }
 
   async findRunningJobsByUser(input: { userId: number }): Promise<Job[]> {

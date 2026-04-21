@@ -89,6 +89,7 @@ const initMaintenanceQueue = async (): Promise<void> => {
 
   await maintenanceJobProducer.createCheckChallengeJobsTask()
   await maintenanceJobProducer.createCheckStaleJobsTask()
+  await maintenanceJobProducer.createNotifyRunningJobsTask()
 }
 
 // removeRepeatable and removeRepeatableJob explanation:

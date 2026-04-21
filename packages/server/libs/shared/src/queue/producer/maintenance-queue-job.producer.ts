@@ -97,6 +97,21 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
+  async createNotifyRunningJobsTask(): Promise<Job> {
+    const wrapped = {
+      type: TASK_TYPE.NOTIFY_RUNNING_JOBS as const,
+      payload: undefined,
+    }
+
+    const options: JobOptions = {
+      jobId: TASK_TYPE.NOTIFY_RUNNING_JOBS,
+      repeat: {
+        cron: config.workerJobs.jobRunningNotification.repeatPattern,
+      },
+    }
+    return await this.addToQueue(wrapped, options)
+  }
+
   async createSyncSpacesPermissionsTask(): Promise<Job<SyncSpacesPermissionsJob>> {
     const wrapped = {
       type: TASK_TYPE.SYNC_SPACES_PERMISSIONS as const,

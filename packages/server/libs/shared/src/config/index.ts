@@ -181,6 +181,9 @@ const defaultConfig = {
     jobStaleCheck: {
       repeatPattern: process.env.NODE_JOB_STALE_CHECK_REPEAT ?? '0 2 * * 0',
     },
+    jobRunningNotification: {
+      repeatPattern: process.env.NODE_JOB_RUNNING_NOTIFICATION_REPEAT ?? '0 2 * * 0',
+    },
   },
   // TODO(samuel) apply "satisfies" operator
   // https://devblogs.microsoft.com/typescript/announcing-typescript-4-9-beta/#the-satisfies-operator
