@@ -1,4 +1,3 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
@@ -18,24 +17,11 @@ export class JobStaleCheckFacade {
   private readonly logger: Logger
 
   constructor(
-    private readonly em: SqlEntityManager,
     private readonly jobService: JobService,
     private readonly emailService: EmailService,
     private readonly entityLinkService: EntityLinkService,
   ) {}
 
-  /**
-   * Asynchronously checks for stale jobs and performs necessary actions.
-   *
-   * The method performs the following steps:
-   * 1. Retrieves all running jobs.
-   * 2. Logs and returns an empty array if no running jobs are found.
-   * 3. Filters out the stale jobs and non-stale jobs based on a maximum duration threshold and logs the result.
-   * 4. Generates and sends an email report to the admin user and a predefined email address, containing details of stale and non-stale jobs.
-   * 5. Generates and sends individual email notifications to each job owner with details of their running jobs.
-   *
-   * @returns {Promise<void>} A promise that resolves when the stale job check and notification process is complete.
-   */
   async checkAndNotifyStaleJobs(): Promise<void> {
     this.logger.log('Starting stale jobs check and notification process')
     const runningJobs = await this.jobService.findAllRunningJobs()
@@ -47,7 +33,7 @@ export class JobStaleCheckFacade {
     const isOverMaxDuration = buildIsOverMaxDuration('notify')
 
     const jobsInfo = new Map<number, JobStaleCheckDTO>()
-    await this.em.populate(runningJobs, ['user'])
+    let hasStaleJobs = false
     for (const job of runningJobs) {
       const jobLink = await this.entityLinkService.getUiLink(job)
       const simpleJob = SimpleJobDTO.fromEntity(job, jobLink)
@@ -60,20 +46,19 @@ export class JobStaleCheckFacade {
         })
       }
       if (isOverMaxDuration(job)) {
+        hasStaleJobs = true
         jobsInfo.get(job.user.id).staleJobs.push(simpleJob)
       } else {
         jobsInfo.get(job.user.id).nonStaleJobs.push(simpleJob)
       }
     }
 
-    const hasStaleJobs = Array.from(jobsInfo.values()).some(
-      (info) => info.staleJobs.length > 0,
-    )
-
-    if (hasStaleJobs) {
-      await this.sendRunningJobsReportToAdmin(jobsInfo)
+    if (!hasStaleJobs) {
+      this.logger.log('No stale jobs found, skipping admin report')
+      return
     }
-    await this.sendRunningJobsToOwners(jobsInfo)
+
+    await this.sendRunningJobsReportToAdmin(jobsInfo)
     this.logger.log('Completed stale jobs check and notification process')
   }
 
@@ -86,18 +71,5 @@ export class JobStaleCheckFacade {
       },
     }
     await this.emailService.sendEmail(input)
-  }
-
-  private async sendRunningJobsToOwners(jobsInfo: Map<number, JobStaleCheckDTO>): Promise<void> {
-    for (const [, { user, staleJobs, nonStaleJobs }] of jobsInfo) {
-      const input: TypedEmailBodyDto<EMAIL_TYPES.userRunningJobsReport> = {
-        type: EMAIL_TYPES.userRunningJobsReport,
-        input: {
-          jobOwner: user,
-          runningJobs: staleJobs.concat(nonStaleJobs),
-        },
-      }
-      await this.emailService.sendEmail(input)
-    }
   }
 }

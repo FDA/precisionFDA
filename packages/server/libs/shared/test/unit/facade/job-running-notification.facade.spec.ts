@@ -1,6 +1,3 @@
-import { expect } from 'chai'
-import { stub } from 'sinon'
-import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
@@ -9,9 +6,11 @@ import { Job } from '@shared/domain/job/job.entity'
 import { JobService } from '@shared/domain/job/job.service'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 import { User } from '@shared/domain/user/user.entity'
-import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
+import { JobRunningNotificationFacade } from '@shared/facade/job/job-running-notification.facade'
+import { expect } from 'chai'
+import { stub } from 'sinon'
 
-describe('JobStaleCheckFacade', () => {
+describe('JobRunningNotificationFacade', () => {
   const findAllRunningJobsStub = stub()
   const getUiLinkStub = stub()
   const sendEmailStub = stub()
@@ -73,19 +72,6 @@ describe('JobStaleCheckFacade', () => {
     },
   } as unknown as Job
 
-  const RUNNING_JOB_4 = {
-    id: 104,
-    name: 'Data Analysis Job 4',
-    uid: 'job-uid-104',
-    state: 'running',
-    createdAt: new Date(Date.now() - 30 * 60 * 1000),
-    elapsedTimeSinceCreationString: () => '30m',
-    user: {
-      id: USER_2.id,
-      getEntity: (): User => USER_2,
-    },
-  } as unknown as Job
-
   const jobService = {
     findAllRunningJobs: findAllRunningJobsStub,
   } as unknown as JobService
@@ -99,7 +85,6 @@ describe('JobStaleCheckFacade', () => {
   beforeEach(() => {
     findAllRunningJobsStub.reset()
     findAllRunningJobsStub.throws()
-    findAllRunningJobsStub.resolves([RUNNING_JOB_1, RUNNING_JOB_2, RUNNING_JOB_3, RUNNING_JOB_4])
 
     getUiLinkStub.reset()
     getUiLinkStub.throws()
@@ -110,57 +95,44 @@ describe('JobStaleCheckFacade', () => {
     sendEmailStub.resolves()
   })
 
-  context('checkAndNotifyStaleJobs', () => {
+  context('notifyOwnersOfRunningJobs', () => {
     it('No running jobs', async () => {
       findAllRunningJobsStub.resolves([])
 
       const facade = getInstance()
-      await facade.checkAndNotifyStaleJobs()
+      await facade.notifyOwnersOfRunningJobs()
+
       expect(findAllRunningJobsStub.calledOnce).to.be.true()
       expect(sendEmailStub.notCalled).to.be.true()
       expect(getUiLinkStub.notCalled).to.be.true()
     })
 
-    it('Only non-stale running jobs', async () => {
-      findAllRunningJobsStub.resolves([RUNNING_JOB_3, RUNNING_JOB_4])
+    it('Running jobs for multiple owners', async () => {
+      findAllRunningJobsStub.resolves([RUNNING_JOB_1, RUNNING_JOB_2, RUNNING_JOB_3])
 
       const facade = getInstance()
-      await facade.checkAndNotifyStaleJobs()
-
-      expect(findAllRunningJobsStub.calledOnce).to.be.true()
-      expect(sendEmailStub.notCalled).to.be.true()
-      expect(getUiLinkStub.callCount).to.equal(2)
-    })
-
-    it('Stale jobs found', async () => {
-      const facade = getInstance()
-      await facade.checkAndNotifyStaleJobs()
+      await facade.notifyOwnersOfRunningJobs()
 
       expect(findAllRunningJobsStub.calledOnce).to.be.true()
 
-      expect(getUiLinkStub.callCount).to.equal(4)
+      expect(getUiLinkStub.callCount).to.equal(3)
       expect(getUiLinkStub.getCall(0).args[0]).to.equal(RUNNING_JOB_1)
       expect(getUiLinkStub.getCall(1).args[0]).to.equal(RUNNING_JOB_2)
       expect(getUiLinkStub.getCall(2).args[0]).to.equal(RUNNING_JOB_3)
-      expect(getUiLinkStub.getCall(3).args[0]).to.equal(RUNNING_JOB_4)
 
-      expect(sendEmailStub.callCount).to.equal(1)
-      expect(sendEmailStub.getCall(0).args[0].type).to.equal(EMAIL_TYPES.staleJobsReport)
-      expect(sendEmailStub.getCall(0).args[0].input.jobsInfo).to.deep.equal([
-        {
-          user: getSimpleUserDTO(USER_1),
-          staleJobs: [getSimpleJobDTO(RUNNING_JOB_1)],
-          nonStaleJobs: [getSimpleJobDTO(RUNNING_JOB_3)],
-        },
-        {
-          user: getSimpleUserDTO(USER_2),
-          staleJobs: [getSimpleJobDTO(RUNNING_JOB_2)],
-          nonStaleJobs: [getSimpleJobDTO(RUNNING_JOB_4)],
-        },
-      ])
-      expect(sendEmailStub.getCall(0).args[0].input.maxDuration).to.equal(
-        config.workerJobs.syncJob.staleJobsTerminateAfter.toString() ?? '-1',
-      )
+      expect(sendEmailStub.callCount).to.equal(2)
+
+      expect(sendEmailStub.getCall(0).args[0].type).to.equal(EMAIL_TYPES.userRunningJobsReport)
+      expect(sendEmailStub.getCall(0).args[0].input).to.deep.equal({
+        jobOwner: getSimpleUserDTO(USER_1),
+        runningJobs: [getSimpleJobDTO(RUNNING_JOB_1), getSimpleJobDTO(RUNNING_JOB_3)],
+      })
+
+      expect(sendEmailStub.getCall(1).args[0].type).to.equal(EMAIL_TYPES.userRunningJobsReport)
+      expect(sendEmailStub.getCall(1).args[0].input).to.deep.equal({
+        jobOwner: getSimpleUserDTO(USER_2),
+        runningJobs: [getSimpleJobDTO(RUNNING_JOB_2)],
+      })
     })
   })
 
@@ -184,7 +156,7 @@ describe('JobStaleCheckFacade', () => {
     } as unknown as SimpleJobDTO
   }
 
-  function getInstance(): JobStaleCheckFacade {
-    return new JobStaleCheckFacade(jobService, emailService, entityLinkService)
+  function getInstance(): JobRunningNotificationFacade {
+    return new JobRunningNotificationFacade(jobService, emailService, entityLinkService)
   }
 })
