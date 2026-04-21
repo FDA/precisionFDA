@@ -7,7 +7,6 @@ import { FileCheckIcon } from '../../../../components/icons/FileCheckIcon'
 import { FileIcon } from '../../../../components/icons/FileIcon'
 import { FolderOpenIcon } from '../../../../components/icons/FolderOpenIcon'
 import { cn } from '../../../../utils/cn'
-import { displayPayloadMessage, Payload } from '../../../../utils/api'
 import { ApiErrorResponse, HomeScope, ServerScope } from '../../../home/types'
 import { getBasePathFromScope } from '../../../home/utils'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
@@ -17,13 +16,13 @@ import { IExistingFileSet, ISelectedFile, ISelectedFolder, SelectedNode } from '
 import { ScopeAndFolderSelection } from './ScopeAndFolderSelection'
 import styles from './CopyFilesModal.module.css'
 import { Footer } from '../../../modal/styles'
-import { toastError } from '../../../../components/NotificationCenter/ToastHelper'
+import { toastError, toastSuccess } from '../../../../components/NotificationCenter/ToastHelper'
 
 interface FileListItemContentProps {
   file: ISelectedFile
 }
 
-const FileListItemContent = ({ file }: FileListItemContentProps) => {
+const FileListItemContent = ({ file }: FileListItemContentProps): React.ReactElement => {
   const [searchParams] = useSearchParams()
   const homeScope = searchParams.get('scope') as HomeScope
   const currentPath = window.location.pathname
@@ -83,7 +82,7 @@ interface SelectedFileProps {
   file: ISelectedFile
 }
 
-const SelectedFile = ({ file }: SelectedFileProps) => {
+const SelectedFile = ({ file }: SelectedFileProps): React.ReactElement => {
   return (
     <li className={cn(styles.fileCard, file.isCopied && styles.fileCardCopied)}>
       <FileListItemContent file={file} />
@@ -95,7 +94,7 @@ interface SelectedFolderProps {
   folder: ISelectedFolder
 }
 
-const SelectedFolder = ({ folder }: SelectedFolderProps) => {
+const SelectedFolder = ({ folder }: SelectedFolderProps): React.ReactElement => {
   const [searchParams] = useSearchParams()
   const homeScope = searchParams.get('scope') as HomeScope
   const currentPath = window.location.pathname
@@ -117,7 +116,10 @@ const SelectedFolder = ({ folder }: SelectedFolderProps) => {
       </div>
       <ul className={styles.folderChildren}>
         {folder.children.map((child: ISelectedFile, index: number) => (
-          <li key={index} className={cn(styles.folderChild, !folder.isCopied && child.isCopied && styles.folderChildCopied)}>
+          <li
+            key={index}
+            className={cn(styles.folderChild, !folder.isCopied && child.isCopied && styles.folderChildCopied)}
+          >
             <FileListItemContent file={child} />
           </li>
         ))}
@@ -130,11 +132,15 @@ interface CopyFileListProps {
   nodes: SelectedNode[]
 }
 
-const CopyFileList = ({ nodes }: CopyFileListProps) => {
+const CopyFileList = ({ nodes }: CopyFileListProps): React.ReactElement => {
   return (
     <ul className={styles.selectedItemsList}>
       {nodes.map((node: SelectedNode, index: number) => {
-        return node.type === 'UserFile' ? <SelectedFile key={index} file={node} /> : <SelectedFolder key={index} folder={node} />
+        return node.type === 'UserFile' ? (
+          <SelectedFile key={index} file={node} />
+        ) : (
+          <SelectedFolder key={index} folder={node} />
+        )
       })}
     </ul>
   )
@@ -154,7 +160,7 @@ export const useCopyFilesModal = ({
   sourceScopes: ServerScope[]
   selectedIds: number[]
   onSuccess?: () => void
-}) => {
+}): { modalComp: React.ReactElement; setShowModal: (show: boolean) => void; isShown: boolean } => {
   const { isShown, setShowModal } = useModal()
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>(undefined)
   const [selectedScope, setSelectedScope] = useState<ServerScope | null>(null)
@@ -265,7 +271,7 @@ export const useCopyFilesModal = ({
     onSuccess: () => {
       if (onSuccess) onSuccess()
       setShowModal(false)
-      toast.success('Copying has started')
+      toastSuccess('Copying has started')
     },
     onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error
@@ -277,7 +283,7 @@ export const useCopyFilesModal = ({
     },
   })
 
-  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault()
     if (!selectedScope) return
     mutation.mutate(selectedScope)
@@ -289,10 +295,10 @@ export const useCopyFilesModal = ({
       data-testid="modal-files-validate-copied"
       headerText="Add Files To Space"
       isShown={isShown}
-      hide={() => setShowModal(false)}
+      hide={(): void => setShowModal(false)}
       variant="large"
     >
-      <ModalHeaderTop headerText="Copy Files" hide={() => setShowModal(false)} />
+      <ModalHeaderTop headerText="Copy Files" hide={(): void => setShowModal(false)} />
       <div className={styles.modalContainer}>
         {/* Left Panel - Selected Items */}
         <div className={cn(styles.panel, styles.panelLeft)}>
@@ -314,8 +320,13 @@ export const useCopyFilesModal = ({
         />
       </div>
       <Footer>
-        <Button onClick={() => setShowModal(false)}>Cancel</Button>
-        <Button data-variant="primary" type="button" disabled={isLoading || isDisableCopy} onClick={e => handleSubmit(e)}>
+        <Button onClick={(): void => setShowModal(false)}>Cancel</Button>
+        <Button
+          data-variant="primary"
+          type="button"
+          disabled={isLoading || isDisableCopy}
+          onClick={(e: React.MouseEvent<HTMLButtonElement>): void => handleSubmit(e)}
+        >
           Copy
         </Button>
       </Footer>

@@ -203,7 +203,7 @@ describe('SpaceReportResultPartDiscussionHtmlContentProvider', () => {
     expect(res.textContent).to.include(COMMENT_2_CONTENT)
   })
 
-  function getInstance() {
+  function getInstance(): SpaceReportResultPartDiscussionHtmlContentProvider {
     const entityService = { getEntityIcon: getEntityIconStub } as unknown as EntityService
 
     return new SpaceReportResultPartDiscussionHtmlContentProvider(entityService)

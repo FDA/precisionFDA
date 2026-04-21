@@ -53,7 +53,7 @@ describe('SpaceReportPartWorkflowResultProvider', () => {
     expect(res).to.deep.equal({ title: NAME, created: CREATED, provenance: PROVENANCE_RAW })
   })
 
-  function getInstance() {
+  function getInstance(): SpaceReportPartWorkflowResultProvider {
     const entityProvenanceService = {
       getEntityProvenance: getEntityProvenanceStub,
     } as unknown as EntityProvenanceService

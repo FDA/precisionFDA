@@ -261,7 +261,7 @@ describe('EntityProvenanceDataProviderService', () => {
     expect(res).to.deep.equal(expected)
   })
 
-  function getInstance() {
+  function getInstance(): EntityProvenanceDataProviderService {
     const ENTITY_PARENT_RESOLVER_MAP: {
       [T in EntityType]: EntityProvenanceDataService<T>
     } = {

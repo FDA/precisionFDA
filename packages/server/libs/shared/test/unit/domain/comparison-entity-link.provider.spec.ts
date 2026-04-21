@@ -19,7 +19,7 @@ describe('ComparisonEntityLinkProvider', () => {
     expect(res).to.equal(`/comparisons/${ID}`)
   })
 
-  function getInstance() {
+  function getInstance(): ComparisonEntityLinkProvider {
     return new ComparisonEntityLinkProvider()
   }
 })

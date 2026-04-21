@@ -101,7 +101,7 @@ describe('EntityProvenanceService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): EntityProvenanceService {
     const entityProvenanceDataProviderService = {
       getData: getDataStub,
     } as unknown as EntityProvenanceDataProviderService

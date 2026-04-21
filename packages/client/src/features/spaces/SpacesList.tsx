@@ -1,12 +1,10 @@
 import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { type UseQueryResult, useQuery } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
-import { type ComponentProps, type ComponentType, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import styled from 'styled-components'
 import { BannerTitle, MainBanner } from '@/components/Banner'
 import { ContentFooter } from '@/components/Page/ContentFooter'
-import { compactScrollBarV2 } from '@/components/Page/styles'
 import { Pagination } from '@/components/Pagination'
 import { useColumnWidthLocalStorage } from '@/hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '@/hooks/useHiddenColumnLocalStorage'
@@ -27,59 +25,10 @@ import type { ISpaceGroup } from '../space-groups/types'
 import SpaceGroupsSidebar from './SpaceGroupsSidebar'
 import { SpaceQuickActions } from './SpaceQuickActions'
 import { type FetchSpacesListResponse, spacesListRequest } from './spaces.api'
+import styles from './spaces.module.css'
 import { columnFilters, type ISpaceV2 } from './spaces.types'
 import { useSpacesColumns } from './useSpacesColumns'
 import { useSpaceDnd } from './useSpacesDnd'
-
-const SpacesHeader: ComponentType<ComponentProps<typeof MainBanner>> = styled(MainBanner)`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 24px 32px;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--c-layout-border);
-`
-
-const SpaceGroupHeading: ComponentType<ComponentProps<'h4'>> = styled.h4`
-  font-weight: 700;
-  opacity: 0.5;
-`
-
-const Layout: ComponentType<ComponentProps<'div'>> = styled.div`
-  display: flex;
-  height: 100vh;
-  background: var(--tertiary-50);
-  overflow: auto;
-  flex-grow: 1;
-`
-
-const MainContent: ComponentType<ComponentProps<'div'>> = styled.div`
-  display: flex;
-  flex-direction: column;
-  overflow-x: auto;
-  height: 100%;
-`
-
-export const SpaceGroupDescription: ComponentType<ComponentProps<'div'>> = styled.div`
-  font-size: 14px;
-  color: var(--c-banner-base);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-width: 650px;
-  &::first-letter {
-    text-transform: uppercase;
-  }
-`
-
-const StyledTable: ComponentType<ComponentProps<'div'>> = styled.div`
-  font-size: 14px;
-  flex-grow: 1;
-  overflow: auto;
-
-  ${compactScrollBarV2}
-`
 
 const useQuerySpaceGroups = (): UseQueryResult<ISpaceGroup[]> => {
   return useQuery({
@@ -180,19 +129,19 @@ const SpacesList = () => {
 
   return (
     <UserLayout innerScroll>
-      <SpacesHeader>
-        {spaceGroup && <SpaceGroupHeading>Space Group</SpaceGroupHeading>}
+      <MainBanner className={styles.spacesHeader}>
+        {spaceGroup && <h4 className={styles.spaceGroupHeading}>Space Group</h4>}
         <BannerTitle>{spaceGroup ? spaceGroup.name : 'Spaces'}</BannerTitle>
-        {spaceGroup && <SpaceGroupDescription>{spaceGroup.description}</SpaceGroupDescription>}
-      </SpacesHeader>
-      <Layout>
+        {spaceGroup && <div className={styles.spaceGroupDescription}>{spaceGroup.description}</div>}
+      </MainBanner>
+      <div className={styles.spacesLayout}>
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} sensors={sensors}>
           <SpaceGroupsSidebar
             userCanAdministerSpaceGroups={userCanAdministerSpaceGroups}
             spaceGroups={spaceGroups}
             isLoading={isSpaceGroupsLoading}
           />
-          <MainContent>
+          <div className={styles.spacesMainContent}>
             <SpaceQuickActions
               spaceGroupId={spaceGroupId}
               spaceGroup={spaceGroup}
@@ -201,7 +150,7 @@ const SpacesList = () => {
               spaceGroups={spaceGroupsMemo}
               selectedItems={selectedObjects}
             />
-            <StyledTable>
+            <div className={styles.spacesStyledTable}>
               <Table<ISpaceV2>
                 isLoading={isLoading}
                 data={data?.data || []}
@@ -219,7 +168,7 @@ const SpacesList = () => {
                 enableDnd={userCanAdministerSpaceGroups}
                 emptyText="No spaces available."
               />
-            </StyledTable>
+            </div>
             <ContentFooter>
               <Pagination
                 page={meta?.page}
@@ -231,9 +180,9 @@ const SpacesList = () => {
                 onPerPageSelect={(p: number): void => pagination.setPerPageParam(p, true)}
               />
             </ContentFooter>
-          </MainContent>
+          </div>
         </DndContext>
-      </Layout>
+      </div>
       {dndAddSpacesModal?.modalComp}
     </UserLayout>
   )

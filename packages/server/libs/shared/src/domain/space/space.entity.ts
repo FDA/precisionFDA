@@ -121,6 +121,29 @@ export class Space extends BaseEntity {
     return this.spaceId !== null
   }
 
+  private get typeLabel(): string {
+    switch (this.type) {
+      case SPACE_TYPE.REVIEW:
+        return this.spaceId !== null ? 'Private Review' : 'Shared Review'
+      case SPACE_TYPE.VERIFICATION:
+        return 'Verification'
+      case SPACE_TYPE.GROUPS:
+        return 'Group'
+      case SPACE_TYPE.PRIVATE_TYPE:
+        return 'Private'
+      case SPACE_TYPE.GOVERNMENT:
+        return 'Government'
+      case SPACE_TYPE.ADMINISTRATOR:
+        return 'Administrator'
+      default:
+        return 'Unknown'
+    }
+  }
+
+  get title(): string {
+    return `${this.name} (${this.typeLabel})`
+  }
+
   isConfidentialReviewerSpace(): boolean {
     return this.isConfidentialNonPrivateSpace() && this.hostDxOrg !== null
   }

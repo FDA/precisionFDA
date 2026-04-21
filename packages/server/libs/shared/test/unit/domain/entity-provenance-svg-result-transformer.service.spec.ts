@@ -198,11 +198,11 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
     return null
   }
 
-  async function getResultSvg(options?: EntityProvenanceSvgOptions) {
+  async function getResultSvg(options?: EntityProvenanceSvgOptions): Promise<SVGSVGElement> {
     return new JSDOM(await getInstance().transform(PROVENANCE, options)).window.document.querySelector('svg')
   }
 
-  function getInstance() {
+  function getInstance(): EntityProvenanceSvgResultTransformerService {
     const entityService = { getEntityIcon: getEntityIconStub } as unknown as EntityService
 
     return new EntityProvenanceSvgResultTransformerService(entityService)

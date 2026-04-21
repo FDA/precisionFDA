@@ -144,7 +144,7 @@ describe('SpaceReportResultJsonProvider', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): SpaceReportResultJsonProvider {
     const em = {
       findOneOrFail: findOneOrFailStub,
     } as unknown as SqlEntityManager

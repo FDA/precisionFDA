@@ -103,7 +103,7 @@ describe('SpaceReportPartAppResultProvider', () => {
     expect(res.title).to.eq(TITLE)
   }
 
-  function getInstance() {
+  function getInstance(): SpaceReportPartAppResultProvider {
     const entityProvenanceService = {
       getEntityProvenance: getEntityProvenanceStub,
     } as unknown as EntityProvenanceService

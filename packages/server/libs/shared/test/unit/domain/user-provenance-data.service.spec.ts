@@ -51,7 +51,7 @@ describe('UserProvenanceDataService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): UserProvenanceDataService {
     const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 
     return new UserProvenanceDataService(entityService)

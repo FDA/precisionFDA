@@ -150,7 +150,7 @@ describe('JobProvenanceDataService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): JobProvenanceDataService {
     const em = {
       getRepository: getRepositoryStub,
     } as unknown as SqlEntityManager

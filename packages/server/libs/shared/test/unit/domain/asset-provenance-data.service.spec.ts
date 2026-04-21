@@ -52,7 +52,7 @@ describe('AssetProvenanceDataService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): AssetProvenanceDataService {
     const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 
     return new AssetProvenanceDataService(entityService)

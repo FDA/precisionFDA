@@ -366,10 +366,12 @@ module Api
     # Returns an Arel SQL node for ordering by cost extracted from the JSON describe column.
     # Jobs without totalPrice (NULL or missing key) sort as -1 to appear at the boundary.
     def energy_order_sql
-      dir = order_direction(params[:order_dir])
-      Arel.sql(
-        "COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(jobs.describe, '$.totalPrice')) AS DECIMAL(10,3)), -1) #{dir}",
-      )
+      base = "COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(jobs.describe, '$.totalPrice')) AS DECIMAL(10,3)), -1)"
+      if order_direction(params[:order_dir]) == Sortable::DIRECTION_ASC
+        Arel.sql("#{base} ASC")
+      else
+        Arel.sql("#{base} DESC")
+      end
     end
 
     # A common method for apps list json rendering.

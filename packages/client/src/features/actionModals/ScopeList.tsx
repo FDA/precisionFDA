@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
-import { Button } from '../../components/Button'
-import { HomeIcon } from '../../components/icons/HomeIcon'
-import { InputText } from '../../components/InputText'
+import type React from 'react'
+import { useState } from 'react'
+import { Button } from '@/components/Button'
+import { InputText } from '@/components/InputText'
+import { HomeIcon } from '@/components/icons/HomeIcon'
 import { Col, ColBody, HeaderRow, Table, TableRow } from '../modal/ModalCheckList'
 import { ModalScroll } from '../modal/styles'
 import { FdaRestrictedIcon } from '../spaces/FdaRestrictedIcon'
 import { ProtectedIcon } from '../spaces/ProtectedIcon'
-import { EditableSpace, fetchEditableSpacesList } from '../spaces/spaces.api'
+import { type EditableSpace, fetchEditableSpacesList } from '../spaces/spaces.api'
 import { findSpaceTypeIcon } from '../spaces/useSpacesColumns'
 import { ColScopeTitle, ModalSearchBar, ScopeIcon } from './styles'
 
@@ -16,7 +17,7 @@ export const MY_HOME = {
   scope: 'private',
 } as EditableSpace
 
-export const ScopeList = ({ onSelect }: { onSelect: (scope?: EditableSpace) => void }) => {
+export const ScopeList = ({ onSelect }: { onSelect: (scope?: EditableSpace) => void }): React.ReactElement => {
   const { data = [], isLoading } = useQuery({
     queryKey: ['editable_spaces_list'],
     queryFn: fetchEditableSpacesList,
@@ -30,7 +31,7 @@ export const ScopeList = ({ onSelect }: { onSelect: (scope?: EditableSpace) => v
 
   const scopeList = data.filter(space => space.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
-  const handleSelect = (selected: EditableSpace) => {
+  const handleSelect = (selected: EditableSpace): void => {
     if (selected.scope === selectedScope) {
       setSelectedScope('')
       onSelect(undefined)
@@ -60,7 +61,11 @@ export const ScopeList = ({ onSelect }: { onSelect: (scope?: EditableSpace) => v
             </HeaderRow>
           </thead>
           <tbody>
-            <TableRow $isSelected={selectedScope === MY_HOME.scope} key={MY_HOME.scope} onClick={() => handleSelect(MY_HOME)}>
+            <TableRow
+              $isSelected={selectedScope === MY_HOME.scope}
+              key={MY_HOME.scope}
+              onClick={() => handleSelect(MY_HOME)}
+            >
               <Col>
                 <ColScopeTitle>
                   <ScopeIcon>
@@ -79,7 +84,7 @@ export const ScopeList = ({ onSelect }: { onSelect: (scope?: EditableSpace) => v
                   <ColScopeTitle>
                     <ScopeIcon>{findSpaceTypeIcon(s.type)}</ScopeIcon>
                     {s.protected && <ProtectedIcon />}
-                    {s.restricted_reviewer && <FdaRestrictedIcon />}
+                    {s.restrictedReviewer && <FdaRestrictedIcon />}
                     {s.name}
                   </ColScopeTitle>
                 </Col>

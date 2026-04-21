@@ -21,6 +21,7 @@ import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { EditableSpaceDTO } from '@shared/domain/space/dto/editable-space.dto'
 import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
 import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
 import { SpacesHiddenDto } from '@shared/domain/space/dto/spaces-hidden.dto'
@@ -163,6 +164,11 @@ export class SpacesController {
       const response = await platformClient.projectInvite(spaceToFix.hostProject, spaceToFix.guestDxOrg, 'CONTRIBUTE')
       this.logger.log({ response }, 'Guest organization invited to host project.')
     }
+  }
+
+  @Get('/editable')
+  async listEditableSpaces(): Promise<EditableSpaceDTO[]> {
+    return this.spaceService.listEditableSpaces()
   }
 
   @Get('/:id/selectable-spaces')

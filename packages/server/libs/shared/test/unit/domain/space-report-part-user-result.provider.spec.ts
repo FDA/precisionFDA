@@ -59,7 +59,7 @@ describe('SpaceReportPartUserResultProvider', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): SpaceReportPartUserResultProvider {
     return new SpaceReportPartUserResultProvider()
   }
 })
