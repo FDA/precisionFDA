@@ -27,7 +27,7 @@ describe('DiscussionEntityLinkProvider', () => {
     expect(res).to.equal(`/spaces/${SPACE_ID}/discussions/${ID}`)
   })
 
-  function getInstance() {
+  function getInstance(): DiscussionEntityLinkProvider {
     return new DiscussionEntityLinkProvider()
   }
 })

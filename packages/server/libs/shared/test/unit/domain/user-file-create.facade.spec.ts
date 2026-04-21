@@ -19,7 +19,7 @@ describe('UserFileCreateFacade', () => {
   const FILE_SCOPE = STATIC_SCOPE.PRIVATE
   const DESCRIPTION = 'description'
   const STATE = FILE_STATE_DX.OPEN
-  const PROJECT = 'project'
+  const PROJECT = 'project-1'
   const DXID = 'dxid'
   const NAME = 'name'
 
@@ -33,7 +33,7 @@ describe('UserFileCreateFacade', () => {
   const SERVICE_RESULT = {
     name: NAME,
     uid: `${DXID}-1`,
-  } as UserFile
+  } as unknown as UserFile
 
   const platformCreateFileStub = stub()
   const serviceCreateFileStub = stub()
@@ -145,7 +145,7 @@ describe('UserFileCreateFacade', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): UserFileCreateFacade {
     const platformFileService = {
       createFile: platformCreateFileStub,
       uploadFileContent: uploadFileContentStub,

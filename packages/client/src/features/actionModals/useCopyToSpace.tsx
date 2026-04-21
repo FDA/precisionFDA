@@ -1,24 +1,21 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
-import React, { useMemo, useState } from 'react'
-import styled from 'styled-components'
-import { Button } from '../../components/Button'
-import { Loader } from '../../components/Loader'
-import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
-import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../constants'
-import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../constants/consts'
-import { breakPoints } from '../../styles/theme'
-import { displayPayloadMessage, Payload } from '../../utils/api'
+import { useMutation } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
+import type React from 'react'
+import { useMemo, useState } from 'react'
+import { Button } from '@/components/Button'
+import { InputText } from '@/components/InputText'
+import { Loader } from '@/components/Loader'
+import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '@/constants'
+import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '@/constants/consts'
+import { displayPayloadMessage, type Payload } from '@/utils/api'
 import { useConfirmModal } from '../files/actionModals/useConfirmModal'
-import { ApiErrorResponse, APIResource, ApiResponse } from '../home/types'
-import { CheckCol, Col, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../modal/ModalCheckList'
+import type { APIResource, ApiErrorResponse, ApiResponse } from '../home/types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import { FdaRestrictedIcon } from '../spaces/FdaRestrictedIcon'
-import { ProtectedIcon } from '../spaces/ProtectedIcon'
-import { fetchEditableSpacesList } from '../spaces/spaces.api'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
+import { SpaceSelectionList } from '../spaces/SpaceSelectionList'
+import { ModalSearchBar } from './styles'
 
 export interface CopyToSpaceProperties {
   createAppRevision?: boolean
@@ -34,61 +31,31 @@ const SpacesList = ({
   selected?: string
   spaceId?: string
   onSelect: (scope: string) => void
-}) => {
-  const { data = [], isLoading } = useQuery({
-    queryKey: ['editable_spaces_list'],
-    queryFn: fetchEditableSpacesList,
-  })
-
-  const spacesList = data.filter(space => !space.scope.endsWith(`-${spaceId}`))
-
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-  if (spacesList.length === 0) {
-    return <div>You have no spaces.</div>
-  }
+}): React.ReactElement => {
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const excludeScopes = spaceId ? [`space-${spaceId}`] : []
 
   return (
-    <Table>
-      <tbody>
-        <HeaderRow>
-          <TitleCol />
-          <TitleCol>Title</TitleCol>
-          <Col>Scope</Col>
-          <CheckCol />
-        </HeaderRow>
-        {spacesList.map(s => (
-          <TableRow $isSelected={selected === s.scope} key={s.scope} onClick={() => onSelect(s.scope)}>
-            <Col>
-              {s.protected && <ProtectedIcon />}
-              {s.restricted_reviewer && <FdaRestrictedIcon />}
-            </Col>
-            <TitleCol>
-              <ColBody>{s.title}</ColBody>
-            </TitleCol>
-            <Col>
-              <ColBody>{s.scope}</ColBody>
-            </Col>
-            <CheckCol>
-              <ColBody>{selected === s.scope && <CircleCheckIcon height={16} />}</ColBody>
-            </CheckCol>
-          </TableRow>
-        ))}
-      </tbody>
-    </Table>
+    <>
+      <ModalSearchBar>
+        <InputText
+          placeholder={'Search space...'}
+          value={searchQuery}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+        />
+        <Button type="button" onClick={(): void => setSearchQuery('')}>
+          Clear
+        </Button>
+      </ModalSearchBar>
+      <SpaceSelectionList
+        excludeScopes={excludeScopes}
+        filterString={searchQuery}
+        selectedScope={selected}
+        onSelect={space => onSelect(space.scope)}
+      />
+    </>
   )
 }
-
-const StyledForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  @media (min-width: ${breakPoints.small}px) {
-    width: auto;
-  }
-`
 
 const CopyToSpaceForm = ({
   resource,
@@ -104,7 +71,7 @@ const CopyToSpaceForm = ({
   setShowModal: (show: boolean) => void
   updateFunction: (space: string, ids: string[], properties?: CopyToSpaceProperties) => Promise<ApiResponse>
   onSuccess: (res: ApiResponse) => void
-}) => {
+}): React.ReactElement => {
   const [selectedTarget, setSelectedTarget] = useState<string>()
 
   const mutation = useMutation({
@@ -134,7 +101,10 @@ const CopyToSpaceForm = ({
     CONFIRM_APP_REVISION,
     async () => {
       setShowAppRevisionConfirmModal(false)
-      await mutation.mutateAsync({ space: selectedTarget!, properties: { createAppRevision: true } })
+      await mutation.mutateAsync({
+        space: selectedTarget!,
+        properties: { createAppRevision: true },
+      })
     },
   )
 
@@ -143,11 +113,14 @@ const CopyToSpaceForm = ({
     CONFIRM_APP_SERIES,
     async () => {
       setShowAppSeriesConfirmModal(false)
-      await mutation.mutateAsync({ space: selectedTarget!, properties: { createAppSeries: true } })
+      await mutation.mutateAsync({
+        space: selectedTarget!,
+        properties: { createAppSeries: true },
+      })
     },
   )
 
-  const handleSelect = (f: string) => {
+  const handleSelect = (f: string): void => {
     if (f === selectedTarget) {
       setSelectedTarget(undefined)
     } else {
@@ -155,7 +128,7 @@ const CopyToSpaceForm = ({
     }
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
     if (selectedTarget) {
       mutation.mutateAsync({ space: selectedTarget })
@@ -164,9 +137,9 @@ const CopyToSpaceForm = ({
   return (
     <>
       <ModalScroll>
-        <StyledForm id="copy-to-space-form" onSubmit={handleSubmit}>
+        <form className="p-4" id="copy-to-space-form" onSubmit={handleSubmit}>
           <SpacesList selected={selectedTarget} spaceId={spaceId?.toString()} onSelect={handleSelect} />
-        </StyledForm>
+        </form>
       </ModalScroll>
       <Footer>
         <ButtonRow>
@@ -174,7 +147,12 @@ const CopyToSpaceForm = ({
           <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
-          <Button data-variant="primary" type="submit" form="copy-to-space-form" disabled={!selectedTarget || mutation.isPending}>
+          <Button
+            data-variant="primary"
+            type="submit"
+            form="copy-to-space-form"
+            disabled={!selectedTarget || mutation.isPending}
+          >
             Copy
           </Button>
         </ButtonRow>
@@ -197,21 +175,25 @@ export function useCopyToSpaceModal<T extends { id: string | number }>({
   spaceId?: number
   updateFunction: (space: string, ids: string[], properties?: CopyToSpaceProperties) => Promise<ApiResponse>
   onSuccess: (res: ApiResponse) => void
-}) {
+}): {
+  modalComp: React.ReactElement
+  setShowModal: (show: boolean) => void
+  isShown: boolean
+} {
   const { isShown, setShowModal } = useModal()
-  const momoSelected = useMemo(() => selected, [isShown])
+  const momoSelected = useMemo(() => selected, [selected])
 
   const modalComp = (
     <ModalNext
       id={`modal-${resource}-copytospace`}
       data-testid={`modal-${resource}-copytospace`}
       isShown={isShown}
-      hide={() => setShowModal(false)}
+      hide={(): void => setShowModal(false)}
     >
       <ModalHeaderTop
         disableClose={false}
         headerText={`Copy to space: ${momoSelected.length} item${momoSelected.length > 1 ? 's' : ''}`}
-        hide={() => setShowModal(false)}
+        hide={(): void => setShowModal(false)}
       />
       <CopyToSpaceForm
         updateFunction={updateFunction}

@@ -168,7 +168,7 @@ describe('FileProvenanceDataService', () => {
     return file
   }
 
-  function getInstance() {
+  function getInstance(): FileProvenanceDataService {
     const em = {
       getRepository: getRepositoryStub,
     } as unknown as SqlEntityManager

@@ -47,7 +47,7 @@ describe('SpaceReportResultPartUserContentProvider', () => {
     expect(link.textContent).to.eq(DXUSER)
   })
 
-  function getInstance() {
+  function getInstance(): SpaceReportResultPartUserHtmlContentProvider {
     return new SpaceReportResultPartUserHtmlContentProvider()
   }
 })

@@ -33,6 +33,7 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { NotFoundError, PermissionError, SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { StringUtils } from '@shared/utils/string.utils'
+import { EditableSpaceDTO } from '../dto/editable-space.dto'
 import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
 
 type SpaceFilter = FilterQuery<Space> & {
@@ -491,6 +492,14 @@ export class SpaceService {
       meta: spaces.meta,
       data: await Promise.all(spaces.data.map(space => SpaceListItemDTO.fromEntity(space, this.userContext.id))),
     }
+  }
+
+  async listEditableSpaces(): Promise<EditableSpaceDTO[]> {
+    const spaces = await this.spaceRepository.findEditable(
+      { state: SPACE_STATE.ACTIVE },
+      { orderBy: { createdAt: 'DESC' } },
+    )
+    return spaces.map(EditableSpaceDTO.fromEntity)
   }
 
   async getStatistics(): Promise<CountStats> {

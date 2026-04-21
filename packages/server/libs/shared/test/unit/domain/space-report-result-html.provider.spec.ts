@@ -268,7 +268,7 @@ describe('SpaceReportResultHtmlProvider', () => {
     return new JSDOM(await getInstance().provide(REPORT, { styles })).window.document
   }
 
-  function getInstance() {
+  function getInstance(): SpaceReportResultHtmlProvider {
     const ENTITY_PARENT_RESOLVER_MAP = {
       app: {
         provide: appContentProvideStub,
@@ -299,7 +299,7 @@ describe('SpaceReportResultHtmlProvider', () => {
     return new SpaceReportResultHtmlProvider(ENTITY_PARENT_RESOLVER_MAP, em)
   }
 
-  function getContentFake(id: string, title: string) {
+  function getContentFake(id: string, title: string): HTMLDivElement {
     return new JSDOM(`<div><h3 id="${id}">${title}</h3></div>`).window.document.querySelector('div')
   }
 })

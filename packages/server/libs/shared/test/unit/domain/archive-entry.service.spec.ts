@@ -45,7 +45,7 @@ describe('ArchiveEntryService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): ArchiveEntryService {
     return new ArchiveEntryService(em, archiveEntryRepo)
   }
 })

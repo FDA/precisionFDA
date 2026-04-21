@@ -58,7 +58,6 @@ export const authHandlers = [
           links: {
             space_create: '/api/spaces',
             space_info: '/api/spaces/info',
-            accessible_spaces: '/api/spaces/editable_spaces',
             accessible_apps: '/api/list_apps',
             accessible_workflows: '/api/list_workflows',
             accessible_files: '/api/list_files',
@@ -250,7 +249,6 @@ export const authHandlers = [
           links: {
             space_create: '/api/spaces',
             space_info: '/api/spaces/info',
-            accessible_spaces: '/api/spaces/editable_spaces',
             accessible_apps: '/api/list_apps',
             accessible_workflows: '/api/list_workflows',
             accessible_files: '/api/list_files',

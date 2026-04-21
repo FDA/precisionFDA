@@ -263,7 +263,7 @@ describe('SpaceReportResultGenerateFacade', () => {
     expect(createFileWithContentStub.calledOnce).to.be.true()
   })
 
-  function stubForReport(report) {
+  function stubForReport(report): void {
     findOneStub.reset()
     findOneStub.throws()
     findOneStub.withArgs(SpaceReport, REPORT_ID, { lockMode: LockMode.PESSIMISTIC_WRITE }).resolves(report)
@@ -277,7 +277,7 @@ describe('SpaceReportResultGenerateFacade', () => {
     generateResultStub.withArgs(report, { styles: STYLES }).resolves(RESULT)
   }
 
-  function getInstance() {
+  function getInstance(): SpaceReportResultGenerateFacade {
     const em = {
       transactional: transactionalStub,
       findOne: findOneStub,

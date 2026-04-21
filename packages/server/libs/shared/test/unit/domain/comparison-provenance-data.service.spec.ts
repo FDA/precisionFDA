@@ -117,7 +117,7 @@ describe('ComparisonProvenanceDataService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): ComparisonProvenanceDataService {
     const em = {
       getRepository: getRepositoryStub,
     } as unknown as SqlEntityManager

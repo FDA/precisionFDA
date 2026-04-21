@@ -78,7 +78,7 @@ describe('WorkflowProvenanceDataService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): WorkflowProvenanceDataService {
     const workflowService = { getApps: getAppsStub } as unknown as WorkflowService
     const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 

@@ -502,16 +502,18 @@ export const spacesMocks = [
       space_memberships: mockMembers,
     })
   }),
-  http.get('/api/spaces/editable_spaces', () =>
+  http.get('/api/v2/spaces/editable', () =>
     HttpResponse.json(
       [
-        { scope: 'space-1445', name: 'admin test', type: 'administrator', title: 'admin test (Administrator)', protected: false },
+        { scope: 'space-1445', name: 'admin test', type: 'administrator', title: 'admin test (Administrator)', protected: false, restrictedReviewer: false, createdAt: '2024-03-15T10:00:00.000Z' },
         {
           scope: 'space-1442',
           name: 'isdgfoiauwgfoawijgf',
           type: 'administrator',
           title: 'isdgfoiauwgfoawijgf (Administrator)',
           protected: false,
+          restrictedReviewer: false,
+          createdAt: '2024-03-14T10:00:00.000Z',
         },
         {
           scope: 'space-1436',
@@ -519,6 +521,8 @@ export const spacesMocks = [
           type: 'private_type',
           title: 'My Awesome Space (Private)',
           protected: false,
+          restrictedReviewer: false,
+          createdAt: '2024-03-13T10:00:00.000Z',
         },
         {
           scope: 'space-1451',
@@ -526,6 +530,8 @@ export const spacesMocks = [
           type: 'private_type',
           title: 'My Private Space (Private)',
           protected: false,
+          restrictedReviewer: false,
+          createdAt: '2024-03-12T10:00:00.000Z',
         },
         {
           scope: 'space-1479',
@@ -533,6 +539,8 @@ export const spacesMocks = [
           type: 'groups',
           title: 'Our Very Best Challenge (Group)',
           protected: false,
+          restrictedReviewer: false,
+          createdAt: '2024-03-11T10:00:00.000Z',
         },
         {
           scope: 'space-1450',
@@ -540,15 +548,19 @@ export const spacesMocks = [
           type: 'private_type',
           title: 'private challenge space (Private)',
           protected: false,
+          restrictedReviewer: false,
+          createdAt: '2024-03-10T10:00:00.000Z',
         },
-        { scope: 'space-1440', name: 'som hladny', type: 'administrator', title: 'som hladny (Administrator)', protected: false },
-        { scope: 'space-1454', name: 'test', type: 'groups', title: 'test (Group)', protected: false },
+        { scope: 'space-1440', name: 'som hladny', type: 'administrator', title: 'som hladny (Administrator)', protected: false, restrictedReviewer: false, createdAt: '2024-03-09T10:00:00.000Z' },
+        { scope: 'space-1454', name: 'test', type: 'groups', title: 'test (Group)', protected: false, restrictedReviewer: false, createdAt: '2024-03-08T10:00:00.000Z' },
         {
           scope: 'space-1439',
           name: 'test admin space pls work',
           type: 'administrator',
           title: 'test admin space pls work (Administrator)',
           protected: false,
+          restrictedReviewer: false,
+          createdAt: '2024-03-07T10:00:00.000Z',
         },
         {
           scope: 'space-1405',
@@ -556,6 +568,8 @@ export const spacesMocks = [
           type: 'groups',
           title: 'Test for creating challenge (Group)',
           protected: false,
+          restrictedReviewer: false,
+          createdAt: '2024-03-06T10:00:00.000Z',
         },
         {
           scope: 'space-1441',
@@ -563,6 +577,8 @@ export const spacesMocks = [
           type: 'administrator',
           title: 'test pls work i just wanna merge it (Administrator)',
           protected: false,
+          restrictedReviewer: false,
+          createdAt: '2024-03-05T10:00:00.000Z',
         },
         {
           scope: 'space-1444',
@@ -570,6 +586,8 @@ export const spacesMocks = [
           type: 'private_type',
           title: 'test private space (Private)',
           protected: true,
+          restrictedReviewer: false,
+          createdAt: '2024-03-04T10:00:00.000Z',
         },
         {
           scope: 'space-1443',
@@ -577,7 +595,8 @@ export const spacesMocks = [
           type: 'administrator',
           title: 'test422 (Administrator)',
           protected: false,
-          restricted_reviewer: true,
+          restrictedReviewer: true,
+          createdAt: '2024-03-03T10:00:00.000Z',
         },
         {
           scope: 'space-1446',
@@ -585,7 +604,8 @@ export const spacesMocks = [
           type: 'administrator',
           title: 'testsests (Administrator)',
           protected: true,
-          restricted_reviewer: true,
+          restrictedReviewer: true,
+          createdAt: '2024-03-02T10:00:00.000Z',
         },
       ],
       { status: 200 },

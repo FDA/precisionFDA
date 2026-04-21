@@ -101,7 +101,7 @@ describe('UIdScopedEntityLinkProvider', () => {
     ]
   }
 
-  function getInstance() {
+  function getInstance(): UIdScopedEntityLinkProvider {
     return new UIdScopedEntityLinkProvider()
   }
 })

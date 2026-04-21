@@ -36,7 +36,7 @@ describe('SpaceReportResultPartProvenanceTreeContentProvider', () => {
     expect(res.textContent).to.include(SVG)
   })
 
-  function getInstance() {
+  function getInstance(): SpaceReportResultPartProvenanceTreeHtmlContentProvider {
     return new SpaceReportResultPartProvenanceTreeHtmlContentProvider()
   }
 })

@@ -188,7 +188,7 @@ describe('SpaceReportErrorFacade', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): SpaceReportErrorFacade {
     const em = {
       transactional: transactionalStub,
       findOne: findOneStub,

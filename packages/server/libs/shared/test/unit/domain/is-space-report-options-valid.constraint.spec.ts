@@ -76,12 +76,12 @@ describe('IsSpaceReportOptionsValidConstraint', () => {
       expect(res).to.equal('Options do not satisfy constraints for the provided format "FORMAT"')
     })
 
-    function defaultMessage(args: { object?: unknown }) {
+    function defaultMessage(args: { object?: unknown }): string {
       return getInstance().defaultMessage(args as ValidationArguments)
     }
   })
 
-  function getInstance() {
+  function getInstance(): IsSpaceReportOptionsValidConstraint {
     return new IsSpaceReportOptionsValidConstraint()
   }
 })

@@ -419,7 +419,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     expect(createResultTaskStub.calledOnce).to.be.true()
   })
 
-  function getInstance() {
+  function getInstance(): SpaceReportBatchResultGenerateFacade {
     const em = {
       transactional: transactionalStub,
       find: findStub,

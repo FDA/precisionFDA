@@ -104,13 +104,14 @@ export interface EditableSpace {
   type: 'groups' | 'review' | 'verification' | 'private_type' | 'government' | 'administrator'
   title: string
   protected: boolean
-  restricted_reviewer?: boolean
+  restrictedReviewer?: boolean
+  createdAt?: string
 }
 
 export type EditableSpacesResponse = EditableSpace[]
 
 export async function fetchEditableSpacesList(): Promise<EditableSpacesResponse> {
-  return axios.get('/api/spaces/editable_spaces').then(res => res.data)
+  return axios.get('/api/v2/spaces/editable').then(res => res.data)
 }
 
 export async function createSpaceRequest(payload: CreateSpacePayload): Promise<CreateSpaceResponse> {

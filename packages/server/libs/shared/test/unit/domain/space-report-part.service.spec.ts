@@ -137,7 +137,7 @@ describe('SpaceReportPartService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): SpaceReportPartService {
     const em = {
       transactional: transactionalStub,
       find: findStub,

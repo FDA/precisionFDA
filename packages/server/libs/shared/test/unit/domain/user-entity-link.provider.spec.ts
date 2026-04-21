@@ -19,7 +19,7 @@ describe('UserEntityLinkProvider', () => {
     expect(res).to.equal(`/users/${DX_USER}`)
   })
 
-  function getInstance() {
+  function getInstance(): UserEntityLinkProvider {
     return new UserEntityLinkProvider()
   }
 })

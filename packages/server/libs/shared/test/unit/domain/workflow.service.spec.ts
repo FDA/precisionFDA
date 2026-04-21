@@ -98,7 +98,7 @@ describe('WorkflowService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): WorkflowService {
     const em = {
       find: findStub,
     } as unknown as SqlEntityManager
