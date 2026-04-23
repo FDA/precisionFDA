@@ -110,7 +110,7 @@ module Admin
 
       begin
         api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
-        api.call(user.dxid, "resetUserMFA", user_id: user.dxid, org_id: ORG_EVERYONE)
+        api.call(user.dxid, "resetUserMFA", user_id: user.dxid, org_id: ORG_EVERYONE, revokeChildTokens: false)
       rescue DXClient::Errors::DXClientError => e
         if e.message =~ /MFA is already reset/
           redirect_back(

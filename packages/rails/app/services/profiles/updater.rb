@@ -27,7 +27,7 @@ module Profiles
       profile.assign_attributes(email_confirmed: false)
       api = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI, context.token)
       raise ApiError, I18n.t('profiles.updater.InvalidInput') if params[:password].blank? || params[:otp].blank?
-      data = { newEmail: profile.email, password: params[:password], otp: params[:otp] }
+      data = { newEmail: profile.email, password: params[:password], otp: params[:otp], revokeChildTokens: false }
       api.call("user-#{profile.user.dxuser}", AUTH_METHOD, data)
     rescue AuthError => e
       raise ApiError, I18n.t("profiles.updater.#{e.data['error']['type']}")

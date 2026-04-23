@@ -7,7 +7,7 @@ import { config } from '../config'
 import { getLogger } from '../logger'
 import { PlatformClientBase } from './platform-client-base'
 
-const defaultLog = getLogger('platform-auth-client-logger')
+const defaultLog: Logger = getLogger('platform-auth-client-logger')
 
 // Putting the Params/Responses here for now
 type NewAuthTokenResponse = {
@@ -94,7 +94,10 @@ export class PlatformAuthClient extends PlatformClientBase implements IPlatformA
     const url = `${config.platform.authApiUrl}/${params.dxid}/resetUserMFA`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: params.data,
+      data: {
+        ...params.data,
+        revokeChildTokens: false,
+      },
       url,
       headers: this.setupHeaders(this.accessToken),
     }
