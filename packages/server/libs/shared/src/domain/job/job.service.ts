@@ -376,7 +376,7 @@ export class JobService implements SearchableByUid<'job'> {
   private remapFiles(outputParam: JobOutput): JobOutput {
     const output = JSON.parse(JSON.stringify(outputParam))
     for (const key in output) {
-      // biome-ignore lint/suspicious/noPrototypeBuiltins: fails in CI
+      // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
       if (Object.prototype.hasOwnProperty.call(output, key)) {
         const value = output[key]
         if (Array.isArray(value)) {
@@ -413,7 +413,7 @@ export class JobService implements SearchableByUid<'job'> {
   private collectIds(output: JobOutput): string[] {
     const uniqueFileDxIds = new Set<string>()
     for (const key in output) {
-      // biome-ignore lint/suspicious/noPrototypeBuiltins: fails in CI
+      // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
       if (Object.prototype.hasOwnProperty.call(output, key)) {
         const value = output[key]
         if (Array.isArray(value)) {
