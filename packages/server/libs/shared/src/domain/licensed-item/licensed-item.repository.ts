@@ -1,8 +1,8 @@
-import { EntityRepository } from '@mikro-orm/mysql'
+import { BaseEntityRepository } from '@shared/database/repository/base-entity.repository'
 import { License } from '../license/license.entity'
 import { LicensedItem } from './licensed-item.entity'
 
-export class LicensedItemRepository extends EntityRepository<LicensedItem> {
+export class LicensedItemRepository extends BaseEntityRepository<LicensedItem> {
   async getLicenseItemsForNode(nodeId: number): Promise<LicensedItem[]> {
     return await this.find({
       licenseableId: nodeId,

@@ -25,6 +25,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
+import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { FolderService } from '@shared/domain/user-file/folder.service'
@@ -125,10 +126,11 @@ describe('AppCreateFacade', () => {
       nodeHelper,
       {} as unknown as FileCountService,
       {} as unknown as AssetCountService,
+      {} as unknown as AssetRepository,
     )
 
     appService = new AppService(appRepository)
-    appSeriesService = new AppSeriesService(em, userCtx, appSeriesRepository, {} as unknown as AppSeriesCountService)
+    appSeriesService = new AppSeriesService(userCtx, appSeriesRepository, {} as unknown as AppSeriesCountService)
 
     appletCreateStub.reset()
     appletCreateStub.throws()

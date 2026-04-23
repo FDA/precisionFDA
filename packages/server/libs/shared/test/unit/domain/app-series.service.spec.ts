@@ -68,6 +68,6 @@ describe('AppSeriesService', () => {
   })
 
   function getInstance(): AppSeriesService {
-    return new AppSeriesService(em, userCtx, appSeriesRepository, appSeriesCountService)
+    return new AppSeriesService(userCtx, appSeriesRepository, appSeriesCountService)
   }
 })

@@ -1,4 +1,4 @@
-import { EntityRepository } from '@mikro-orm/mysql'
+import { BaseEntityRepository } from '@shared/database/repository/base-entity.repository'
 import { Tag } from '@shared/domain/tag/tag.entity'
 
-export class TagRepository extends EntityRepository<Tag> {}
+export class TagRepository extends BaseEntityRepository<Tag> {}

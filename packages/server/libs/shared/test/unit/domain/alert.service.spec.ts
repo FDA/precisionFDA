@@ -1,6 +1,7 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { database } from '@shared/database'
+import { AlertRepository } from '@shared/domain/alert/alert.repository'
 import { Alert } from '@shared/domain/alert/entity/alert.entity'
 import { AlertService } from '@shared/domain/alert/services/alert.service'
 import { create, db } from '../../../src/test'
@@ -13,7 +14,7 @@ describe('AlertService tests', () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork({ useContext: true }) as EntityManager<MySqlDriver>
     await em.flush()
-    alertService = new AlertService(em)
+    alertService = new AlertService(em.getRepository(Alert) as AlertRepository)
   })
 
   it('create alert', async () => {
