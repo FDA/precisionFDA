@@ -81,11 +81,14 @@ services:
       - ../key.pem:/keys/key.pem
     ports:
       - 3001:3001
+    # tini forwards signals to the main process (node/make) so shutdown is reliable
+    init: true
     stop_grace_period: 15s
   nodejs-worker:
     extends:
       service: base_nodejs
     command: ["make", "run-worker-dist"]
+    init: true
     stop_grace_period: 15s
   nodejs-admin-platform-client:
     extends:
@@ -93,6 +96,7 @@ services:
     command: ["make", "run-admin-platform-client-dist"]
     ports:
       - 3002:3002
+    init: true
   db:
     image: mysql:8.0
     environment:
