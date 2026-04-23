@@ -60,8 +60,12 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     return []
   }
 
+  private get emailTypeName(): string {
+    return EMAIL_TYPES[this.emailType] ?? String(this.emailType)
+  }
+
   async sendEmail(inputDto: EmailTypeToInputMap[T]): Promise<void> {
-    this.logger.log(`Sending email ${inputDto}`)
+    this.logger.log(`Preparing email of type '${this.emailTypeName}'`)
     const contextObject = await this.getContextualData(inputDto)
     await this.validateInput(inputDto)
     const receivers = await this.determineReceivers(contextObject)
@@ -83,6 +87,7 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     }
 
     for (const input of emailInputs) {
+      this.logger.log(`Sending email: type='${this.emailTypeName}', subject='${input.subject}'`)
       await this.emailClient.sendEmail(input)
     }
   }
