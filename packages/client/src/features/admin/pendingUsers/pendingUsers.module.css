@@ -1,0 +1,88 @@
+.linkCell {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 14px;
+    line-height: 20px;
+    padding-top: 16px;
+    padding-left: 32px;
+}
+
+.breadcrumbs a {
+    color: var(--c-text-500);
+}
+
+.breadcrumbs a:last-child {
+    color: var(--c-text-400);
+}
+
+.breadcrumbDivider {
+    margin: 0 8px;
+    color: var(--c-text-500);
+}
+
+.topbox {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-left: 32px;
+    padding-right: 16px;
+}
+
+.topLeft {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.title {
+    display: flex;
+    font-size: 24px;
+    font-weight: bold;
+    align-items: center;
+    margin: 16px 0 8px;
+    margin-right: 16px;
+    gap: 8px;
+}
+
+.pageTable {
+    font-size: 14px;
+    flex: 1;
+    overflow: auto;
+}
+
+.pageTable::-webkit-scrollbar-track {
+    background-color: transparent;
+    border-radius: 20px;
+    border: solid 5px transparent;
+    box-sizing: border-box;
+}
+
+.pageTable::-webkit-scrollbar {
+    width: 18px;
+    height: 18px;
+}
+
+.pageTable::-webkit-scrollbar-thumb {
+    background-color: var(--c-scrollbar);
+    border-radius: 20px;
+    border: solid 5px transparent;
+    background-clip: content-box;
+    min-height: 30px;
+}
+
+.pageTable::-webkit-scrollbar-thumb:hover {
+    background-color: var(--c-scrollbar-2);
+    border-radius: 20px;
+    border: solid 5px transparent;
+    background-clip: content-box;
+}
+
+.pageTable tr:nth-child(odd) td {
+    background-color: var(--c-textarea-bg);
+}

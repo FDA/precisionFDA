@@ -22,8 +22,8 @@ interface RepositoryStub<T extends object> extends PaginatedRepository<T> {
     flush: SinonStub
     remove: SinonStub
     removeAndFlush: SinonStub
-    // EntityManager methods
-    emTransactional: SinonStub
+    // Repository transactional method
+    transactional: SinonStub
     // Utility
     reset: () => void
   }
@@ -74,15 +74,10 @@ export function createRepositoryStub<T extends object>(): RepositoryStub<T> {
   const removeStub = stub()
   const removeAndFlushStub = stub()
 
-  // EntityManager stubs
-  const emTransactionalStub = stub()
-  emTransactionalStub.callsFake(async callback => {
+  const transactionalStub = stub()
+  transactionalStub.callsFake(async (callback: (em: EntityManager<MySqlDriver>) => Promise<unknown>) => {
     return callback({} as unknown as EntityManager<MySqlDriver>)
   })
-
-  const em = {
-    transactional: emTransactionalStub,
-  } as unknown as EntityManager<MySqlDriver>
 
   const allStubs = [
     findStub,
@@ -130,7 +125,7 @@ export function createRepositoryStub<T extends object>(): RepositoryStub<T> {
     removeAndFlush: removeAndFlushStub,
 
     // Other required methods
-    getEntityManager: () => em,
+    transactional: transactionalStub,
 
     stubs: {
       find: findStub,
@@ -148,7 +143,7 @@ export function createRepositoryStub<T extends object>(): RepositoryStub<T> {
       flush: flushStub,
       remove: removeStub,
       removeAndFlush: removeAndFlushStub,
-      emTransactional: emTransactionalStub,
+      transactional: transactionalStub,
       reset,
     },
   } as unknown as RepositoryStub<T>

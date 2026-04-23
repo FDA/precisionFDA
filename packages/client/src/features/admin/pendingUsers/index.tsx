@@ -1,40 +1,32 @@
-import { ColumnDef } from '@tanstack/react-table'
-import React from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
+import type React from 'react'
 import { Link } from 'react-router'
-import styled from 'styled-components'
-import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
-import { UsersIcon } from '../../../components/icons/UserIcon'
-import { ContentFooter } from '../../../components/Page/ContentFooter'
-import { hidePagination, Pagination } from '../../../components/Pagination'
+import { useResendActivationEmailMutation } from '@/api/mutations/user'
+import { DEFAULT_PAGINATED_DATA } from '@/api/types'
+import { Button } from '@/components/Button'
+import { HoverDNAnexusLogo } from '@/components/icons/DNAnexusLogo'
+import { UsersIcon } from '@/components/icons/UserIcon'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { hidePagination, Pagination } from '@/components/Pagination'
+import { selectColumnDef } from '@/components/Table/selectColumnDef'
+import { usePageMeta } from '@/hooks/usePageMeta'
+import { UserLayout } from '@/layouts/UserLayout'
+import { formatDate } from '@/utils/formatting'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import Table from '../../../components/Table'
-import { selectColumnDef } from '../../../components/Table/selectColumnDef'
-import { usePageMeta } from '../../../hooks/usePageMeta'
-import { UserLayout } from '../../../layouts/UserLayout'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useList } from '../../home/useList'
-import { AdminSectionBreadcrumbDivider, AdminSectionBreadcrumbs, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
-import { AdminUserListType, User } from '../users/types'
-import { fetchPendingUsers } from './api'
 import { ButtonsRow } from '../common'
-import { Button } from '../../../components/Button'
-import { useResendActivationEmailMutation } from '../../../api/mutations/user'
-import { formatDate } from '../../../utils/formatting'
-import { DEFAULT_PAGINATED_DATA } from '../../../api/types'
-
-const StyledLinkCell = styled.a`
-  display: flex;
-  align-items: center;
-  gap: 5px;
-`
+import { fetchPendingUsers, type PendingUser, type PendingUserListType } from './api'
+import styles from './pendingUsers.module.css'
 
 const UserLinkCell = ({ dxuser, children }: { dxuser: string; children: React.ReactNode }) => (
-  <StyledLinkCell data-turbolinks="false" href={`/users/${dxuser}`}>
+  <a className={styles.linkCell} data-turbolinks="false" href={`/users/${dxuser}`}>
     {children}
-  </StyledLinkCell>
+  </a>
 )
 
-const getAdminUserColumns = (): ColumnDef<User>[] => [
-  selectColumnDef<User>(),
+const getAdminUserColumns = (): ColumnDef<PendingUser>[] => [
+  selectColumnDef<PendingUser>(),
   {
     header: 'Username',
     accessorKey: 'dxuser',
@@ -53,6 +45,7 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
     header: 'Created At',
     accessorKey: 'createdAt',
     size: 300,
+    enableColumnFilter: false,
     cell: ({ row }) => formatDate(row.original.createdAt),
   },
 ]
@@ -73,7 +66,7 @@ const PendingUsersList = () => {
     setSelectedIndexes,
     saveColumnResizeWidth,
     colWidths,
-  } = useList<AdminUserListType>({
+  } = useList<PendingUserListType>({
     fetchList: fetchPendingUsers,
     resource: 'admin-users',
     params: {},
@@ -99,21 +92,21 @@ const PendingUsersList = () => {
 
   return (
     <UserLayout innerScroll>
-      <AdminSectionBreadcrumbs>
+      <div className={styles.breadcrumbs}>
         <Link to="/admin" data-turbolinks="false">
           Admin Dashboard
         </Link>
-        <AdminSectionBreadcrumbDivider>/</AdminSectionBreadcrumbDivider>
+        <span className={styles.breadcrumbDivider}>/</span>
         <Link to="/admin/users" data-turbolinks="false">
           Pending Users
         </Link>
-      </AdminSectionBreadcrumbs>
+      </div>
 
-      <Topbox>
-        <TopLeft>
+      <div className={styles.topbox}>
+        <div className={styles.topLeft}>
           <UsersIcon height={20} />
-          <Title>Pending Users Management</Title>
-        </TopLeft>
+          <div className={styles.title}>Pending Users Management</div>
+        </div>
         <ButtonsRow>
           <Button
             data-variant="primary"
@@ -124,10 +117,10 @@ const PendingUsersList = () => {
             Resend Activation Email
           </Button>
         </ButtonsRow>
-      </Topbox>
+      </div>
 
-      <AdminStyledPageTable>
-        <Table<User>
+      <div className={styles.pageTable}>
+        <Table<PendingUser>
           isLoading={isLoading}
           data={data.data}
           columns={columns}
@@ -139,8 +132,9 @@ const PendingUsersList = () => {
           columnSortBy={sortBy}
           setColumnSortBy={setSortBy}
           columnFilters={filters}
+          enableColumnSelect={false}
         />
-      </AdminStyledPageTable>
+      </div>
 
       <ContentFooter>
         <Pagination
