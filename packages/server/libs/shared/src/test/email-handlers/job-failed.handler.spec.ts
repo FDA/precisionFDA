@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
@@ -18,6 +19,7 @@ describe('JobFailedEmailHandler', () => {
   const emailClientSendEmailStub = stub()
   const jobRepoFindOneOrFailStub = stub()
   const userRepoFindOneOrFailStub = stub()
+  const loggerLogStub = stub()
 
   const userRepo = {
     findOneOrFail: userRepoFindOneOrFailStub,
@@ -29,8 +31,10 @@ describe('JobFailedEmailHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
-    return new JobFailedEmailHandler(userRepo, jobRepo, emailClient)
+  const getHandler = (): JobFailedEmailHandler => {
+    const handler = new JobFailedEmailHandler(userRepo, jobRepo, emailClient)
+    ;(handler as unknown as { logger: Logger }).logger = { log: loggerLogStub } as unknown as Logger
+    return handler
   }
 
   const input = new JobEventDTO()
@@ -45,6 +49,8 @@ describe('JobFailedEmailHandler', () => {
 
     userRepoFindOneOrFailStub.reset()
     userRepoFindOneOrFailStub.throws()
+
+    loggerLogStub.reset()
   })
 
   describe('#sendEmail', () => {
@@ -106,6 +112,42 @@ describe('JobFailedEmailHandler', () => {
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.equal(`Execution "${job.name}" failed`)
       expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(job.describe.failureReason)
+    })
+
+    it('logs email type and subject without leaking PII', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.id = USER_ID
+      user.firstName = 'Test'
+      user.lastName = 'User'
+      user.email = 'sensitive@email.com'
+      const job = new Job(user)
+      job.name = 'secret-job'
+
+      jobRepoFindOneOrFailStub.withArgs({ id: JOB_ID }).resolves(job)
+      userRepoFindOneOrFailStub.withArgs({ id: USER_ID }).resolves(user)
+      emailClientSendEmailStub.reset()
+
+      job.describe = {
+        failureReason: 'Some failure',
+      } as JobDescribeResponse
+
+      const handler = getHandler()
+      await handler.sendEmail(input)
+
+      // First log: preparing — contains human-readable type name
+      const preparingLog = loggerLogStub.getCall(0).firstArg as string
+      expect(preparingLog).to.contain('jobFailed')
+      expect(preparingLog).to.not.contain('[object Object]')
+      expect(preparingLog).to.not.contain(user.email)
+
+      // Second log: sending — contains human-readable type and subject (which includes job name)
+      const sendingLog = loggerLogStub.getCall(1).firstArg as string
+      expect(sendingLog).to.contain('jobFailed')
+      expect(sendingLog).to.contain(job.name)
+      expect(sendingLog).to.not.contain('[object Object]')
+      expect(sendingLog).to.not.contain(user.email)
+      expect(sendingLog).to.not.contain(user.firstName)
     })
   })
 })
