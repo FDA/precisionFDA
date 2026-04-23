@@ -129,16 +129,30 @@ export class SpaceMembershipService {
 
 **Transactions:**
 ```ts
-await this.em.transactional(async () => {
-  this.em.persist(entity)
+await this.spaceMembershipRepository.transactional(async () => {
+  this.spaceMembershipRepository.persist(entity)
   await this.anotherService.method() // auto-joins transaction
 })
 ```
 
 **Persist pattern:**
 ```ts
-this.em.persist(object)
-await this.em.flush()  // NOT persistAndFlush (hard to mock)
+// Stage + flush separately (preferred - easy to mock)
+this.spaceMembershipRepository.persist(entity)
+await this.spaceMembershipRepository.flush()
+
+// Or persist and flush in one call
+await this.spaceMembershipRepository.persistAndFlush(entity)
+```
+
+**Delete pattern:**
+```ts
+// Stage + flush separately (preferred - easy to mock)
+this.spaceMembershipRepository.remove(entity)
+await this.spaceMembershipRepository.flush()
+
+// Or remove and flush in one call
+await this.spaceMembershipRepository.removeAndFlush(entity)
 ```
 
 ## Controllers

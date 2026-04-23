@@ -24,6 +24,8 @@ export class AdminPlatformClientService {
     'userUnlock',
     'orgFindMembers',
     'orgSetMemberAccess',
+    'resendActivationEmail',
+    'userResetMfa',
   ]
 
   constructor(private readonly platformClient: PlatformClient) {}

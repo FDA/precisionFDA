@@ -1,6 +1,8 @@
 import { Inject, Logger } from '@nestjs/common'
 import { DNANEXUS_INVALID_EMAIL, ORG_EVERYONE } from '@shared/config/consts'
+import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { PendingUserDTO } from '@shared/domain/user/dto/pending-user.dto'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { Resource, USER_STATE, User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
@@ -68,9 +70,22 @@ export class UserManagementService {
     await this.userRepo.bulkUpdateSetJobLimit(ids, jobLimit)
   }
 
-  async paginatePendingUsers(query: UserPaginationDto): Promise<PaginatedResult<User>> {
+  async paginatePendingUsers(query: UserPaginationDto): Promise<PaginatedResult<PendingUserDTO>> {
     this.logger.log(`Paginating pending users with query: ${JSON.stringify(query)}`)
-    return await this.userRepo.paginate(query, { privateFilesProject: null })
+
+    const where: ObjectFilterQuery<User> = { privateFilesProject: null }
+    if (query.filter?.dxuser) {
+      where.dxuser = { $like: `%${query.filter.dxuser}%` }
+    }
+    if (query.filter?.email) {
+      where.email = { $like: `%${query.filter.email}%` }
+    }
+
+    const result = await this.userRepo.paginate(query, where)
+    return {
+      ...result,
+      data: result.data.map(PendingUserDTO.fromEntity),
+    }
   }
 
   async activateUsers(ids: number[]): Promise<void> {
@@ -92,7 +107,7 @@ export class UserManagementService {
       )
     }
 
-    await this.userRepo.getEntityManager().transactional(() => {
+    await this.userRepo.transactional(async () => {
       users.forEach(user => {
         user.disableMessage = null
         if (user.email) {
@@ -129,7 +144,7 @@ export class UserManagementService {
     const encodeEmail = (email: string): string =>
       Buffer.from(email, 'utf8').toString('base64').replace('\n', '') + DNANEXUS_INVALID_EMAIL
 
-    await this.userRepo.getEntityManager().transactional(() => {
+    await this.userRepo.transactional(async () => {
       users.forEach(user => {
         user.disableMessage = `Deactivated by admin: ${this.user.dxuser}`
         user.userState = USER_STATE.DEACTIVATED

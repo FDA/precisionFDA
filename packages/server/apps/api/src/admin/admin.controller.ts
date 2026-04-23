@@ -25,6 +25,7 @@ import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { InvitationService } from '@shared/domain/invitation/services/invitation.service'
 import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
+import { PendingUserDTO } from '@shared/domain/user/dto/pending-user.dto'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { UserService } from '@shared/domain/user/service/user.service'
 import { UserManagementService } from '@shared/domain/user/service/user-management.service'
@@ -70,7 +71,7 @@ export class AdminController {
   }
 
   @Get('/users/pending')
-  async getPendingUsers(@Query() query: UserPaginationDto): Promise<PaginatedResult<User>> {
+  async getPendingUsers(@Query() query: UserPaginationDto): Promise<PaginatedResult<PendingUserDTO>> {
     return this.userManagementService.paginatePendingUsers(query)
   }
 
