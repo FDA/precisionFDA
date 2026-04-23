@@ -1,4 +1,3 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { constructDxid } from '@shared/domain/app/app.helper'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
@@ -16,7 +15,6 @@ export class AppSeriesService {
   private readonly logger: Logger
 
   constructor(
-    private readonly em: SqlEntityManager,
     private readonly user: UserContext,
     private readonly appSeriesRepository: AppSeriesRepository,
     private readonly appSeriesCountService: AppSeriesCountService,
@@ -44,7 +42,7 @@ export class AppSeriesService {
     appSeries.dxid = appSeriesDxid
     appSeries.scope = scope
     this.logger.log(`Creating app series ${appSeries.dxid}`)
-    await this.em.persist(appSeries).flush()
+    await this.appSeriesRepository.persistAndFlush(appSeries)
     return appSeries
   }
 }

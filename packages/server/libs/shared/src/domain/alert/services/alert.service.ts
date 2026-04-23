@@ -1,6 +1,5 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { plainToInstance } from 'class-transformer'
+import { AlertRepository } from '@shared/domain/alert/alert.repository'
 import { AlertDTO } from '@shared/domain/alert/dto/AlertDTO'
 import { CreateAlertDTO } from '@shared/domain/alert/dto/CreateAlertDTO'
 import { Alert } from '@shared/domain/alert/entity/alert.entity'
@@ -12,36 +11,36 @@ export class AlertService {
   @ServiceLogger()
   private readonly logger: Logger
 
-  constructor(private readonly em: SqlEntityManager) {}
+  constructor(private readonly repo: AlertRepository) {}
 
   async create(alert: CreateAlertDTO): Promise<AlertDTO> {
     const alertEntity = new Alert()
     this.mapToEntity(alertEntity, alert)
-    await this.em.persistAndFlush(alertEntity)
-    return plainToInstance(AlertDTO, alertEntity)
+    await this.repo.persistAndFlush(alertEntity)
+    return AlertDTO.fromEntity(alertEntity)
   }
 
   async update(id: number, alert: CreateAlertDTO): Promise<AlertDTO> {
-    return await this.em.transactional(async () => {
-      const alertEntity = await this.em.findOne(Alert, { id })
+    return this.repo.transactional(async () => {
+      const alertEntity = await this.repo.findOne({ id })
       if (!alertEntity) {
         throw new NotFoundError('Alert not found')
       }
 
       this.mapToEntity(alertEntity, alert)
-      this.em.persist(alertEntity)
-      return plainToInstance(AlertDTO, alertEntity)
+      this.repo.persist(alertEntity)
+      return AlertDTO.fromEntity(alertEntity)
     })
   }
 
   async delete(id: number): Promise<number> {
-    return await this.em.transactional(async () => {
-      const alert = await this.em.findOne(Alert, id)
+    return this.repo.transactional(async () => {
+      const alert = await this.repo.findOne(id)
       if (!alert) {
         throw new NotFoundError('Alert not found')
       }
       this.logger.log(`Deleting alert with id: ${alert.id}, title: ${alert.title}`)
-      this.em.remove(alert)
+      this.repo.remove(alert)
       return alert.id
     })
   }
@@ -60,8 +59,8 @@ export class AlertService {
       }
     }
 
-    const alerts = await this.em.find(Alert, conditions)
-    return alerts.map(alert => plainToInstance(AlertDTO, alert))
+    const alerts = await this.repo.find(conditions)
+    return alerts.map(AlertDTO.fromEntity)
   }
 
   private mapToEntity(alertEntity: Alert, alert: CreateAlertDTO): void {

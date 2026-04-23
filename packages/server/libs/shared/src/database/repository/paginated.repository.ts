@@ -1,8 +1,9 @@
-import { EntityRepository, FilterQuery, FindOptions, Loaded, QBFilterQuery, raw } from '@mikro-orm/mysql'
+import { FilterQuery, FindOptions, Loaded, QBFilterQuery, raw } from '@mikro-orm/mysql'
+import { BaseEntityRepository } from '@shared/database/repository/base-entity.repository'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
 
-export abstract class PaginatedRepository<T extends object> extends EntityRepository<T> {
+export abstract class PaginatedRepository<T extends object> extends BaseEntityRepository<T> {
   async paginate<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
     pagination: PaginationDTO<T>,
     where: FilterQuery<T> = {},
@@ -130,25 +131,5 @@ export abstract class PaginatedRepository<T extends object> extends EntityReposi
       return null
     }
     return (page - 1) * limit
-  }
-
-  persist(entity: T | Iterable<T>): void {
-    this.getEntityManager().persist(entity)
-  }
-
-  async persistAndFlush(entity: T | Iterable<T>): Promise<void> {
-    await this.getEntityManager().persistAndFlush(entity)
-  }
-
-  async flush(): Promise<void> {
-    await this.getEntityManager().flush()
-  }
-
-  remove(entity: T | Iterable<T>): void {
-    this.getEntityManager().remove(entity)
-  }
-
-  async removeAndFlush(entity: T | Iterable<T>): Promise<void> {
-    await this.getEntityManager().removeAndFlush(entity)
   }
 }

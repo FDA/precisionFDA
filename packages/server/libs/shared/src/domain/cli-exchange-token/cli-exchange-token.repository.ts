@@ -1,4 +1,4 @@
-import { EntityRepository } from '@mikro-orm/mysql'
+import { BaseEntityRepository } from '@shared/database/repository/base-entity.repository'
 import { CliExchangeToken } from './cli-exchange-token.entity'
 
-export class CliExchangeTokenRepository extends EntityRepository<CliExchangeToken> {}
+export class CliExchangeTokenRepository extends BaseEntityRepository<CliExchangeToken> {}

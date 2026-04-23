@@ -1,4 +1,4 @@
-import { EntityRepository } from '@mikro-orm/mysql'
+import { BaseEntityRepository } from '@shared/database/repository/base-entity.repository'
 import { Organization } from './organization.entity'
 
-export class OrganizationRepository extends EntityRepository<Organization> {}
+export class OrganizationRepository extends BaseEntityRepository<Organization> {}
