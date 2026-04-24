@@ -19,7 +19,7 @@
         <!-- Nav tabs -->
         <ul class="nav nav-pills nav-pills-center nav-tabs-padded" role="tablist">
           <!-- ko foreach: objectLists -->
-          <li role="presentation" data-bind="attr: {'data-classname': className}">
+          <li role="presentation" data-bind="attr: {'data-classname': className}, click: clickTab">
             <a role="tab" data-toggle="tab" data-bind="attr: {href: '#tab-' + $parent.id + '-' + className}">
               <span data-bind="text: name"></span>
               <span class="badge" data-bind="visible: numFilteredObjects, text: numFilteredObjects"></span>
@@ -59,7 +59,10 @@
               </div>
               <!-- ko if: !busy() -->
               <!-- ko if: numFilteredObjects() > 0 -->
-              <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: objects.filtered}"></div>
+              <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: displayedObjects}"></div>
+              <!-- ko if: hasMore -->
+                <button class="btn btn-link btn-block" data-bind="click: showMore">Show more...</button>
+              <!-- /ko -->
               <!-- /ko -->
               <!-- ko if: numFilteredObjects() == 0 -->
               <div class="alert alert-warning alert-single">No <span data-bind="text: className"></span> objects found</div>
@@ -88,7 +91,7 @@
 
 
 <script type="text/html" id="object-item-template">
-  <div class="list-group-item" data-bind="css: {selectable: isSelectable, 'not-selectable': !isSelectable(), radio: selectionType == 'radio', checkbox: selectionType == 'checkbox'}">
+  <div class="list-group-item" data-bind="css: {selectable: isSelectable, 'not-selectable': !isSelectable, radio: selectionType == 'radio', checkbox: selectionType == 'checkbox'}">
     <div class="media">
       <div class="media-body">
         <label data-bind="attr: {title: uid}">
@@ -108,11 +111,11 @@
                 <span data-bind="text: scopeFormatted" class="text-capitalize"></span>
               </li>
               <!-- ko if: loaded -->
-                <!-- ko if: className() == 'file' && showFolderName() -->
+                <!-- ko if: className == 'file' && showFolderName -->
                 <li data-bind="text: filePath"></li>
                 <!-- /ko -->
               <li data-bind="text: userName"></li>
-              <!-- ko if: _.size(all_tags_list()) -->
+              <!-- ko if: _.size(all_tags_list) -->
               <li>
                 <ul class="pfda-tags list list-inline" data-bind="foreach: all_tags_list">
                   <li class="pfda-tag" data-bind="text: $data"></li>

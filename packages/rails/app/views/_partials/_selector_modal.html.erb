@@ -82,7 +82,10 @@
                 </div>
                 <!-- ko if: !busy() || (busy() && className == 'file') -->
                   <!-- ko if: numFilteredObjects() > 0 -->
-                    <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: objects.filtered}"></div>
+                    <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: displayedObjects}"></div>
+                  <!-- ko if: hasMore -->
+                    <button class="btn btn-link btn-block" data-bind="click: showMore">Show more...</button>
+                  <!-- /ko -->
                   <!-- /ko -->
                 <!-- /ko -->
                 <!-- ko if: !busy() && numFilteredObjects() == 0 -->
@@ -118,7 +121,7 @@
 </script>
 
 <script type="text/html" id="object-item-template">
-  <div class="list-group-item" data-bind="css: {selectable: isSelectable, 'not-selectable': !isSelectable(), radio: selectionType == 'radio', checkbox: selectionType == 'checkbox'}">
+  <div class="list-group-item" data-bind="css: {selectable: isSelectable, 'not-selectable': !isSelectable, radio: selectionType == 'radio', checkbox: selectionType == 'checkbox'}">
     <div class="media">
       <div class="media-body">
         <label data-bind="attr: {title: uid}" style="margin-bottom: 0;">
@@ -144,12 +147,12 @@
                 <span data-bind="text: scopeFormatted" class="text-capitalize"></span>
               </li>
               <!-- ko if: loaded -->
-                <!-- ko if: className() == 'file' && showFolderName() -->
+                <!-- ko if: className == 'file' && showFolderName -->
                   <li data-bind="text: filePath"></li>
                 <!-- /ko -->
               <li data-bind="text: userName"></li>
               <li data-bind="text: orgName"></li>
-                <!-- ko if: _.size(all_tags_list()) -->
+                <!-- ko if: _.size(all_tags_list) -->
                   <li>
                     <ul class="pfda-tags list list-inline" data-bind="foreach: all_tags_list">
                       <li class="pfda-tag" data-bind="text: $data"></li>

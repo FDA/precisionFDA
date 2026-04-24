@@ -194,6 +194,10 @@ class ObjectListModel
     @filterQuery = ko.observable()
     @filterQueryOnInput = _.debounce(@setFilterQuery, 400)
 
+    @_rawObjects = []
+    @_rawCount = ko.observable(0)
+    @_materialized = ko.observable(false)
+
     if @className == "selected" && @selectorModel.selectionType == "radio"
       @objects = ko.observable()
     else
@@ -209,24 +213,39 @@ class ObjectListModel
       if @className != "selected"
         objects = @filterByProperty(objects, 'owned') if @selectorModel.filterByOwned()
 
-      if @className == 'file' && @totalCount != @objects().length && !_.isEmpty(@filterQuery()) && @lastQuery == undefined
-        @objects.removeAll()
-        @getObjects(0, @totalCount)
-
-      if @lastQuery != @filterQuery() && @name == 'Files'
-        @objects.removeAll()
-        @lastQuery = @filterQuery()
-        @getObjects(0, 1000, @lastQuery)
-      else
-        objects = @filterSetOfObjects(objects, @patternQuery()) if @patternQuery()?
-        objects = @filterSetOfObjects(objects, @filterQuery())
+      objects = @filterSetOfObjects(objects, @patternQuery()) if @patternQuery()?
+      objects = @filterSetOfObjects(objects, @filterQuery())
         
       objects = _.sortBy(objects, 'name')
       return objects
     )
     @numFilteredObjects = ko.computed(=>
-      @objects.filtered().length
+      if @_materialized()
+        @objects.filtered().length
+      else
+        @_rawCount()
     )
+
+    if @className == 'file'
+      @filterQuery.subscribe((newQuery) =>
+        if @lastQuery != newQuery
+          @objects.removeAll()
+          @lastQuery = newQuery
+          @_materialized(false)
+          @_rawCount(0)
+          @displayLimit(100)
+          @getObjects(0, 1000, newQuery)
+      )
+
+    @displayLimit = ko.observable(100)
+    @displayedObjects = ko.computed(=>
+      @objects.filtered().slice(0, @displayLimit())
+    )
+    @hasMore = ko.computed(=>
+      @objects.filtered().length > @displayLimit()
+    )
+    @showMore = () =>
+      @displayLimit(@displayLimit() + 100)
 
     @activeRelatedObjects = ko.observableArray().extend({ notify: 'always' })
     @isRelatedVisible = ko.computed(=>
@@ -235,9 +254,23 @@ class ObjectListModel
 
   clickTab: () ->
     @selectorModel.tabSelected($(this)[0].className)
+    if !@_materialized() && @_rawObjects.length > 0
+      @_materializeModels()
 
   clearActiveRelated: () ->
     @activeRelatedObjects([])
+
+  _materializeModels: () ->
+    objectModels = _.map(@_rawObjects, (object) =>
+      objectModel = new ObjectItemModel(@selectorModel, this, object)
+      @selectorModel.objectsHash[objectModel.uid] = objectModel
+      objectModel
+    )
+    if (@className == 'file')
+      @selectorModel.numAllObjects(objectModels.length)
+      @selectorModel.filteredObjects(objectModels)
+    @objects(objectModels)
+    @_materialized(true)
 
   getObjects: (offset = 0, limit = 100, query = '') ->
     return $.Deferred().resolve() if !@apiEndpoint?
@@ -264,16 +297,11 @@ class ObjectListModel
     @objects.removeAll() unless @className == 'file'
     Precision.api("/api/#{@apiEndpoint}", params, (result) =>
       @totalCount = result['count'] if result['count']
-      objects = if result['objects'] then result['objects'] else result
-      objectModels = _.map(objects, (object) =>
-        objectModel = new ObjectItemModel(@selectorModel, this, object)
-        @selectorModel.objectsHash[objectModel.uid] = objectModel
-        objectModel
-      )
-      if (@className == 'file')
-        @selectorModel.numAllObjects(objectModels.length)
-        @selectorModel.filteredObjects(objectModels)
-      @objects(objectModels)
+      rawObjects = if result['objects'] then result['objects'] else result
+      @_rawObjects = rawObjects
+      @_rawCount(rawObjects.length)
+      if @selectorModel.tabSelected() == @className || @_materialized()
+        @_materializeModels()
     ).always(=>
       @busy(false)
       @selectorModel.busy(false)
@@ -281,7 +309,7 @@ class ObjectListModel
 
   filterByProperty: (objects, property) ->
     return _.filter(objects, (object) ->
-      object[property].peek()
+      object[property]
     )
 
   filterSetOfObjects: (objects, query) ->
@@ -291,13 +319,13 @@ class ObjectListModel
       return _.filter(objects, (object) ->
         _.some(query, (queryToTest) ->
           regexp = Precision.utils.globToRegex(queryToTest, "i")
-          object.title.peek().match(regexp) || _.some(object.all_tags_list.peek(), (tag) -> tag.match(regexp))
+          object.title.match(regexp) || _.some(object.all_tags_list, (tag) -> tag.match(regexp))
         )
       )
     else
       regexp = new RegExp(query, "i")
       return _.filter(objects, (object) ->
-        object.title.peek().match(regexp) || _.some(object.all_tags_list.peek(), (tag) -> tag.match(regexp))
+        object.title.match(regexp) || _.some(object.all_tags_list, (tag) -> tag.match(regexp))
       )
 
 class ObjectItemModel
@@ -310,53 +338,44 @@ class ObjectItemModel
     @id = object.id
     @uid = object.uid
 
-    @title = ko.observable(object.title)
-    @className = ko.observable(object.className || object.klass)
-    @classIcon = ko.observable("fa fa-fw #{object.fa_class}")
-    @scope = ko.observable(object.scope)
+    @title = object.title
+    @className = object.className || object.klass
+    @classIcon = "fa fa-fw #{object.fa_class}"
+    @scope = object.scope
 
-    @path = ko.observable(object.path)
-    @parentFolderName = ko.observable(object.parent_folder_name)
-    @filePath = ko.observable(@sanitizeFilePath(object.file_path))
-    @userName = ko.observable(object.user?.full_name)
-    @orgName = ko.observable(object.org?.name)
-    @all_tags_list = ko.observable(object.all_tags_list)
+    @path = object.path
+    @parentFolderName = object.parent_folder_name
+    @filePath = @sanitizeFilePath(object.file_path)
+    @userName = object.user?.full_name
+    @orgName = object.org?.name
+    @all_tags_list = object.all_tags_list || []
 
-    @owned = ko.observable(object.owned)
-    @editable = ko.observable(object.editable)
-    @accessible = ko.observable(object.accessible)
-    @public = ko.observable(object.public)
-    @private = ko.observable(object.private)
-    @in_space = ko.observable(object.in_space)
+    @owned = object.owned
+    @editable = object.editable
+    @accessible = object.accessible
+    @public = object.public
+    @private = object.private
+    @in_space = object.in_space
     @review_space_private = object.space_private
     @review_space_public = object.space_public
 
-    @showFolderName = ko.computed(=>
-      if @owned() || (!@owned() && @in_space())
-        return true
-      else
-        return false
-    )
-    @scopeFormatted = ko.computed(=>
-      if @public()
-        "Public"
-      else if @private()
-        "Private"
-      else if @review_space_private
-        "Shared in Space(Confidential)"
-      else if @review_space_public
-        "Shared in Space(Cooperative)"
-      else if @in_space()
-        "Shared in Space"
-    )
-    @scopeIcon = ko.computed(=>
-      if @public()
-        "fa fa-fw fa-globe"
-      else if @private()
-        "fa fa-fw fa-lock"
-      else if @in_space()
-        "fa fa-fw fa-object-group"
-    )
+    @showFolderName = @owned || (!@owned && @in_space)
+    @scopeFormatted = if @public
+      "Public"
+    else if @private
+      "Private"
+    else if @review_space_private
+      "Shared in Space(Confidential)"
+    else if @review_space_public
+      "Shared in Space(Cooperative)"
+    else if @in_space
+      "Shared in Space"
+    @scopeIcon = if @public
+      "fa fa-fw fa-globe"
+    else if @private
+      "fa fa-fw fa-lock"
+    else if @in_space
+      "fa fa-fw fa-object-group"
 
     @activeRelatedObjects = @listModel.activeRelatedObjects
 
@@ -372,10 +391,8 @@ class ObjectItemModel
     @user_license.pending = ko.computed(=> @user_license()?.pending)
     @user_license.unset = ko.computed(=> @user_license()?.unset)
 
-    @isSelectable = ko.computed( =>
-      isArray = _.isArray(@selectableClasses)
-      @selectableClasses == true || (isArray && _.includes(@selectableClasses, @className()))
-    )
+    isArray = _.isArray(@selectableClasses)
+    @isSelectable = @selectableClasses == true || (isArray && _.includes(@selectableClasses, @className))
 
     @disabledToCheck = ko.computed(() =>
       if @selectionType == 'checkbox'
@@ -397,22 +414,45 @@ class ObjectItemModel
     if filePath && filePath.length > 1 then filePath.replace(/\/$/, "") else filePath
 
   update: (object) ->
-    @title(object.title)
-    @className(object.className || object.klass)
-    @classIcon("fa fa-fw #{object.fa_class}")
-    @scope(object.scope)
-    @path(object.path)
-    @userName(object.user?.full_name)
-    @orgName(object.org?.name)
-    @owned(object.owned)
-    @editable(object.editable)
-    @accessible(object.accessible)
-    @public(object.public)
-    @private(object.private)
-    @in_space(object.in_space)
+    @title = object.title
+    @className = object.className || object.klass
+    @classIcon = "fa fa-fw #{object.fa_class}"
+    @scope = object.scope
+    @path = object.path
+    @userName = object.user?.full_name
+    @orgName = object.org?.name
+    @owned = object.owned
+    @editable = object.editable
+    @accessible = object.accessible
+    @public = object.public
+    @private = object.private
+    @in_space = object.in_space
+    @review_space_private = object.space_private
+    @review_space_public = object.space_public
     @license(object.license)
     @user_license(object.user_license)
-    @all_tags_list(object.all_tags_list)
+    @all_tags_list = object.all_tags_list || []
+
+    @showFolderName = @owned || (!@owned && @in_space)
+    @scopeFormatted = if @public
+      "Public"
+    else if @private
+      "Private"
+    else if @review_space_private
+      "Shared in Space(Confidential)"
+    else if @review_space_public
+      "Shared in Space(Cooperative)"
+    else if @in_space
+      "Shared in Space"
+    @scopeIcon = if @public
+      "fa fa-fw fa-globe"
+    else if @private
+      "fa fa-fw fa-lock"
+    else if @in_space
+      "fa fa-fw fa-object-group"
+
+    isArray = _.isArray(@selectableClasses)
+    @isSelectable = @selectableClasses == true || (isArray && _.includes(@selectableClasses, @className))
 
     @loaded(true)
 

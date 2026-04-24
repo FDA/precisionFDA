@@ -85,9 +85,9 @@ class NoteModel
         _.each(selected, (item) =>
           itemModel = new ItemModel({
             uid: item.uid
-            klass: item.className()
-            title: item.title()
-            path: item.path()
+            klass: item.className
+            title: item.title
+            path: item.path
           }, { isNew: true })
           this["#{itemModel.klass}s"].items.push(itemModel)
         )
