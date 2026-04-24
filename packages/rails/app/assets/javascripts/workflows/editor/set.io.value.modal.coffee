@@ -15,7 +15,7 @@ class SetIOValueModal
 
   setFileValue: (file) =>
     @value(file.uid)
-    @fileTitle(file.title())
+    @fileTitle(file.title)
 
   validate: () ->
     if @editingInput().class == 'int'

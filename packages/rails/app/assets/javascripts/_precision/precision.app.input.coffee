@@ -130,7 +130,7 @@ class AppInputModel
           if !_.isArray(selected)
             @value({
               uid: selected.uid
-              name: selected.title()
+              name: selected.title
             })
             if selected.license()? && !selected.user_license.accepted()
               @licenseToAccept({
@@ -148,7 +148,7 @@ class AppInputModel
                 })
               return {
                 uid: object.uid
-                name: object.title()
+                name: object.title
               }
             ))
 
