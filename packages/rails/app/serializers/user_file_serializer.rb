@@ -111,8 +111,6 @@ class UserFileSerializer < NodeSerializer
       if object.owned_by_user?(current_user) && !(object.in_space? && member_viewer?)
         # publish single file if it is not public already and in a root folder
         links[:publish] = publish_object unless object.public? || object.parent_folder_id
-        # POST: /api/files/remove - Delete file(s) & folder(s), being selected
-        links[:remove] = remove_api_files_path unless object.resource?
         # POST associate item to a license
         links[:license] = "/api/licenses/:id/license_item/:item_uid" if licenseable
         if object.license&.owned_by_user?(current_user)

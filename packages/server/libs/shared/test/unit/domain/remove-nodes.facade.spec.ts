@@ -2,6 +2,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { ComparisonService } from '@shared/domain/comparison/comparison.service'
+import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
@@ -10,7 +11,6 @@ import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-even
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -21,13 +21,18 @@ import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-en
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { ClientRequestError } from '@shared/errors'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { PlatformClient } from '@shared/platform-client'
 
 describe('RemoveNodesFacade', () => {
   const USER_ID = 1
+  const user = {
+    id: USER_ID,
+  }
   const userCtx = {
     id: USER_ID,
+    loadEntity: async () => user,
   } as UserContext
 
   const emTransactionalStub = stub().callsArg(0)
@@ -45,7 +50,6 @@ describe('RemoveNodesFacade', () => {
   const nodeServiceValidateProtectedSpacesStub = stub()
   const nodeServiceValidateSpaceReportsStub = stub()
   const userFileRepositoryCountStub = stub()
-  const userRepositoryFindOneStub = stub()
   const licensedItemServiceRemoveItemLicensedForNodeStub = stub()
   const removeArchiveEntriesForNodeStub = stub()
   const taggingServiceRemoveTaggingsStub = stub()
@@ -54,6 +58,7 @@ describe('RemoveNodesFacade', () => {
   const nodeHelperGetNodePathStub = stub()
   const eventHelperCreateFileEventStub = stub()
   const eventHelperCreateFolderEventStub = stub()
+  const dataPortalServiceValidatePortalImageStub = stub()
 
   const createRemoveNodesFacade = (): RemoveNodesFacade => {
     const em = {
@@ -62,9 +67,6 @@ describe('RemoveNodesFacade', () => {
       persist: emPersistStub,
       remove: emRemoveStub,
     } as unknown as SqlEntityManager
-    const userRepository = {
-      findOne: userRepositoryFindOneStub,
-    } as unknown as UserRepository
     const userFileRepository = {
       count: userFileRepositoryCountStub,
     } as unknown as UserFileRepository
@@ -112,10 +114,13 @@ describe('RemoveNodesFacade', () => {
       createFolderEvent: eventHelperCreateFolderEventStub,
     } as unknown as EventHelper
 
+    const dataPortalService = {
+      validatePortalImage: dataPortalServiceValidatePortalImageStub,
+    } as unknown as DataPortalService
+
     return new RemoveNodesFacade(
       em,
       userCtx,
-      userRepository,
       userFileRepository,
       nodeHelper,
       eventHelper,
@@ -126,6 +131,7 @@ describe('RemoveNodesFacade', () => {
       spaceEventService,
       licensedItemService,
       archiveEntryService,
+      dataPortalService,
       fileSyncQueueJobProducer,
       userClient,
     )
@@ -174,9 +180,6 @@ describe('RemoveNodesFacade', () => {
     userFileRepositoryCountStub.reset()
     userFileRepositoryCountStub.throws()
 
-    userRepositoryFindOneStub.reset()
-    userRepositoryFindOneStub.throws()
-
     licensedItemServiceRemoveItemLicensedForNodeStub.reset()
     licensedItemServiceRemoveItemLicensedForNodeStub.throws()
 
@@ -200,6 +203,10 @@ describe('RemoveNodesFacade', () => {
 
     eventHelperCreateFolderEventStub.reset()
     eventHelperCreateFolderEventStub.throws()
+
+    dataPortalServiceValidatePortalImageStub.reset()
+    dataPortalServiceValidatePortalImageStub.throws()
+    dataPortalServiceValidatePortalImageStub.resolves()
   })
 
   describe('#removeNodesAsync', () => {
@@ -290,7 +297,6 @@ describe('RemoveNodesFacade', () => {
       emClearStub.reset()
       userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
       userFileRepositoryCountStub.withArgs({ dxid: node2.dxid }).returns(2)
-      userRepositoryFindOneStub.returns({ id: USER_ID })
       licensedItemServiceRemoveItemLicensedForNodeStub.reset()
       taggingServiceRemoveTaggingsStub.reset()
       emPersistStub.reset()
@@ -323,10 +329,10 @@ describe('RemoveNodesFacade', () => {
 
       expect(eventHelperCreateFileEventStub.calledTwice).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', userCtx),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', user),
       ).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node2, '/path/to/node2', userCtx),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node2, '/path/to/node2', user),
       ).to.be.true()
       expect(userClientFileRemoveStub.calledOnce).to.be.true()
       expect(
@@ -388,7 +394,6 @@ describe('RemoveNodesFacade', () => {
       emClearStub.reset()
       userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
       userFileRepositoryCountStub.withArgs({ dxid: node2.dxid }).returns(2)
-      userRepositoryFindOneStub.returns({ id: USER_ID })
       licensedItemServiceRemoveItemLicensedForNodeStub.reset()
       taggingServiceRemoveTaggingsStub.reset()
       emPersistStub.reset()
@@ -398,7 +403,12 @@ describe('RemoveNodesFacade', () => {
           projectId: node1.project,
           ids: [node1.dxid],
         })
-        .throws({ props: { clientStatusCode: 404 } })
+        .throws(
+          new ClientRequestError('File not found', {
+            clientStatusCode: 404,
+            clientResponse: '',
+          }),
+        )
       spaceEventServiceCreateAndSendSpaceEventStub.reset()
       emRemoveStub.reset()
 
@@ -429,10 +439,10 @@ describe('RemoveNodesFacade', () => {
 
       expect(eventHelperCreateFileEventStub.calledTwice).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', userCtx),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', user),
       ).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node2, '/path/to/node2', userCtx),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node2, '/path/to/node2', user),
       ).to.be.true()
 
       expect(userClientFileRemoveStub.calledOnce).to.be.true()
@@ -490,7 +500,6 @@ describe('RemoveNodesFacade', () => {
       userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
       // simulate any kind of error
       userFileRepositoryCountStub.withArgs({ dxid: node2.dxid }).throws(new Error('Error'))
-      userRepositoryFindOneStub.returns({ id: USER_ID })
       licensedItemServiceRemoveItemLicensedForNodeStub.reset()
       taggingServiceRemoveTaggingsStub.reset()
       emPersistStub.reset()
@@ -528,7 +537,6 @@ describe('RemoveNodesFacade', () => {
       nodeServiceLoadNodesStub.withArgs([node1.id]).returns(nodes)
       emClearStub.reset()
       userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
-      userRepositoryFindOneStub.returns({ id: USER_ID })
       licensedItemServiceRemoveItemLicensedForNodeStub.reset()
       taggingServiceRemoveTaggingsStub.reset()
       emPersistStub.reset()
@@ -554,7 +562,7 @@ describe('RemoveNodesFacade', () => {
 
       expect(eventHelperCreateFileEventStub.calledOnce).to.be.true()
       expect(
-        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', userCtx),
+        eventHelperCreateFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', user),
       ).to.be.true()
 
       expect(userClientFileRemoveStub.calledOnce).to.be.true()

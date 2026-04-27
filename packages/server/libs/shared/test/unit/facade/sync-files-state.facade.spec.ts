@@ -4,6 +4,7 @@ import { Job } from 'bull'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
+import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
@@ -14,6 +15,7 @@ import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-
 import { PlatformClient } from '@shared/platform-client'
 import { FileStateResult } from '@shared/platform-client/platform-client.responses'
 import { TASK_TYPE } from '@shared/queue/task.input'
+import { mocksReset } from '@shared/test/mocks'
 
 describe('SyncFilesStateFacade', () => {
   const user = {
@@ -28,6 +30,7 @@ describe('SyncFilesStateFacade', () => {
   const nodeHelperFindRecentClosingFilesAndAssetsStub = stub()
   const nodeHelperFindOldClosingFilesAndAssetsStub = stub()
   const nodeHelperFindOldOpenFilesAndAssetsStub = stub()
+  const dataPortalServiceResetPortalImageStub = stub()
 
   let findUnclosedFilesOrAssetsStub: SinonStub
   let findFileOrAssetWithUidStub: SinonStub
@@ -35,6 +38,7 @@ describe('SyncFilesStateFacade', () => {
 
   const em = {
     flush: emFlushStub,
+    transactional: (fn: (em: unknown) => Promise<unknown>) => fn(em),
   } as unknown as SqlEntityManager
   const nodeHelper = {
     findRecentClosingFilesAndAssets: nodeHelperFindRecentClosingFilesAndAssetsStub,
@@ -53,6 +57,9 @@ describe('SyncFilesStateFacade', () => {
   const challengeService = {
     updateCardImageUrl: challengeServiceUpdateCardImageUrlStub,
   } as unknown as ChallengeService
+  const dataPortalService = {
+    resetPortalImage: dataPortalServiceResetPortalImageStub,
+  } as unknown as DataPortalService
   const removeNodesFacade = {
     removeFile: removeNodesFacadeRemoveFileStub,
   } as unknown as RemoveNodesFacade
@@ -96,6 +103,11 @@ describe('SyncFilesStateFacade', () => {
 
     platformClientFileStatesStub.reset()
     platformClientFileStatesStub.throws()
+
+    dataPortalServiceResetPortalImageStub.reset()
+    dataPortalServiceResetPortalImageStub.resolves()
+
+    mocksReset()
   })
 
   afterEach(() => {
@@ -106,7 +118,15 @@ describe('SyncFilesStateFacade', () => {
   })
 
   function getInstance(): SyncFilesStateFacade {
-    return new SyncFilesStateFacade(em, userCtx, platformClient, challengeService, nodeHelper, removeNodesFacade)
+    return new SyncFilesStateFacade(
+      em,
+      userCtx,
+      platformClient,
+      challengeService,
+      dataPortalService,
+      nodeHelper,
+      removeNodesFacade,
+    )
   }
 
   describe('#getBullJobId', () => {
@@ -288,6 +308,7 @@ describe('SyncFilesStateFacade', () => {
 
     it('remove abandoned', async () => {
       const file1 = {
+        id: 1,
         uid: 'file1-dxid-1',
         dxid: 'file1-dxid',
         project: 'project-1',
@@ -314,6 +335,8 @@ describe('SyncFilesStateFacade', () => {
       const facade = getInstance()
       await facade.syncFiles(job)
 
+      expect(dataPortalServiceResetPortalImageStub.calledOnce).to.be.true()
+      expect(dataPortalServiceResetPortalImageStub.firstCall.args[0]).to.deep.eq(file1.id)
       expect(removeNodesFacadeRemoveFileStub.calledOnce).to.be.true()
       expect(removeNodesFacadeRemoveFileStub.firstCall.firstArg).to.deep.eq(file1)
       expect(emFlushStub.calledOnce).to.be.true()
@@ -360,12 +383,14 @@ describe('SyncFilesStateFacade', () => {
 
     it('remove abandoned files (open, closing)', async () => {
       const file1 = {
+        id: 1,
         uid: 'file1-dxid-1',
         dxid: 'file1-dxid',
         project: 'project-1',
         isCreatedByChallengeBot: () => false,
       } as unknown as FileOrAsset
       const file2 = {
+        id: 2,
         uid: 'file2-dxid-1',
         dxid: 'file2-dxid',
         project: 'project-1',
@@ -396,6 +421,9 @@ describe('SyncFilesStateFacade', () => {
       const facade = getInstance()
       await facade.syncFiles({} as unknown as Job)
 
+      expect(dataPortalServiceResetPortalImageStub.callCount).to.eq(2)
+      expect(dataPortalServiceResetPortalImageStub.getCall(0).args[0]).to.deep.eq(file1.id)
+      expect(dataPortalServiceResetPortalImageStub.getCall(1).args[0]).to.deep.eq(file2.id)
       expect(removeNodesFacadeRemoveFileStub.callCount).to.eq(2)
       expect(removeNodesFacadeRemoveFileStub.getCall(0).args[0]).to.deep.eq(file1)
       expect(removeNodesFacadeRemoveFileStub.getCall(1).args[0]).to.deep.eq(file2)

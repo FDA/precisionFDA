@@ -1,4 +1,4 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
+import { FilterQuery, FindOneOptions, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -143,6 +143,10 @@ export class UserFileService {
       this.em.persist(fileEvent)
       this.logger.log(`Unlocked file ${fileToUnlock.uid}`)
     })
+  }
+
+  async findEditableOne(where: FilterQuery<UserFile>, options?: FindOneOptions<UserFile>): Promise<UserFile> {
+    return this.fileRepo.findEditableOne(where, options)
   }
 
   /**

@@ -3,8 +3,9 @@ import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { BaseEntity } from '../../database/base.entity'
+import { ResourceRepository } from './resource.repository'
 
-@Entity({ tableName: 'resources' })
+@Entity({ tableName: 'resources', repository: () => ResourceRepository })
 class Resource extends BaseEntity {
   @Property()
   meta: string

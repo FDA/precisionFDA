@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { cleanObject } from '../../utils/object'
-import { DownloadListResponse, HomeScope, IFilter, IMeta, MetaPath, ServerScope } from '../home/types'
-import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
-import { FileType, IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
-import { License } from '../licenses/types'
+import type { DownloadListResponse, HomeScope, IFilter, IMeta, MetaPath, ServerScope } from '../home/types'
+import { formatScopeQ, type Params, prepareListFetch } from '../home/utils'
+import type { License } from '../licenses/types'
+import type { FileType, IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
 
 export interface FetchFilesQuery {
   files: (IFile | IFolder)[]
@@ -54,7 +54,7 @@ export async function fetchFilesListLockingRequest(ids: number[], scope?: string
 }
 
 export async function deleteFilesRequest(ids: number[]) {
-  return axios.post('/api/files/remove', { ids }).then(r => r.data)
+  return axios.delete('/api/v2/nodes/remove', { data: { ids, async: true } }).then(r => r.data)
 }
 
 export type LockUnlockActionType = 'lock' | 'unlock'
@@ -78,16 +78,22 @@ export async function addFolderRequest(
   return axios.post('/api/files/create_folder', data).then(r => {
     // Handle error responses that come with 200 status code
     if (r.data.message?.type === 'error') {
-      const errorText = Array.isArray(r.data.message.text) 
-        ? r.data.message.text.join(', ') 
-        : r.data.message.text
+      const errorText = Array.isArray(r.data.message.text) ? r.data.message.text.join(', ') : r.data.message.text
       throw new Error(errorText)
     }
     return r.data
   })
 }
 
-export async function featureFileRequest({ ids, uids, featured }: { ids: string[]; uids: string[]; featured: boolean }) {
+export async function featureFileRequest({
+  ids,
+  uids,
+  featured,
+}: {
+  ids: string[]
+  uids: string[]
+  featured: boolean
+}) {
   return axios.put('/api/files/feature', { item_ids: [...ids, ...uids], featured }).then(r => r.data)
 }
 
@@ -95,7 +101,15 @@ export async function copyFilesRequest(scope: string, ids: number[], folderId?: 
   return axios.post('/api/v2/nodes/copy', { ids, scope, folderId }).then(r => r.data)
 }
 
-export async function editFileRequest({ name, description, fileId }: { name: string; description: string; fileId: string }) {
+export async function editFileRequest({
+  name,
+  description,
+  fileId,
+}: {
+  name: string
+  description: string
+  fileId: string
+}) {
   return axios.put(`/api/files/${fileId}`, { file: { name, description } }).then(r => r.data)
 }
 
@@ -116,7 +130,7 @@ export async function fetchFolderChildren(params: FetchChildrenDTO): Promise<(IF
   return axios.get('/api/v2/folders/children', { params }).then(res => res.data)
 }
 
-export type MoveFilesResponse = {count: number}
+export type MoveFilesResponse = { count: number }
 export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number | null, spaceId?: number) => {
   const url = spaceId ? `/api/spaces/${spaceId}/files/move` : '/api/files/move'
   const body = cleanObject({

@@ -3,6 +3,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Job } from 'bull'
 import { difference, groupBy } from 'ramda'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
+import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { findFileOrAssetsWithDxid, findFileOrAssetWithUid } from '@shared/domain/user-file/user-file.helper'
@@ -27,6 +28,7 @@ export class SyncFilesStateFacade {
     private readonly userCtx: UserContext,
     private readonly platformClient: PlatformClient,
     private readonly challengeService: ChallengeService,
+    private readonly dataPortalService: DataPortalService,
     private readonly nodeHelper: NodeHelper,
     private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
@@ -72,7 +74,7 @@ export class SyncFilesStateFacade {
     )
 
     for (const file of oldOpenFiles) {
-      await this.removeNodesFacade.removeFile(file, true)
+      await this.removeFile(file, true)
     }
     // TODO add notification PFDA-6613
   }
@@ -87,7 +89,7 @@ export class SyncFilesStateFacade {
     )
 
     for (const file of oldClosingFiles) {
-      await this.removeNodesFacade.removeFile(file, true)
+      await this.removeFile(file, true)
     }
     // TODO add notification PFDA-6613
   }
@@ -190,7 +192,7 @@ export class SyncFilesStateFacade {
       }
 
       for (const file of fileOrAssets) {
-        await this.removeNodesFacade.removeFile(file)
+        await this.removeFile(file)
       }
     }
 
@@ -246,5 +248,12 @@ export class SyncFilesStateFacade {
         'Completed with closing files remaining',
       )
     }
+  }
+
+  private async removeFile(file: FileOrAsset, skipCreateSpaceEvent?: boolean): Promise<void> {
+    await this.em.transactional(async () => {
+      await this.dataPortalService.resetPortalImage(file.id)
+      await this.removeNodesFacade.removeFile(file, skipCreateSpaceEvent)
+    })
   }
 }

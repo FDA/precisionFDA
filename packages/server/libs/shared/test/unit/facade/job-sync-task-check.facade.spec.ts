@@ -9,7 +9,7 @@ import { JobSyncTaskCheckFacade } from '@shared/facade/job/job-sync-task-check.f
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import * as queueUtils from '@shared/queue/queue.utils'
 import { generate } from '@shared/test'
-import { fakes, mocksReset, mocksRestore } from '@shared/test/mocks'
+import { fakes, mocksReset } from '@shared/test/mocks'
 
 describe('JobSyncTaskCheckFacade', () => {
   const findRunningJobsByUserStub = stub()
@@ -90,7 +90,6 @@ describe('JobSyncTaskCheckFacade', () => {
   })
 
   after(() => {
-    mocksRestore()
     getBullJobIdStub.restore()
     isJobOrphanedStub.restore()
   })

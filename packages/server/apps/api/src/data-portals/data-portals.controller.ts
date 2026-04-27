@@ -6,6 +6,7 @@ import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPo
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { CreateResourceResponse } from '@shared/domain/data-portal/service/data-portal.types'
 import { CreateDataPortalFacade } from '@shared/facade/data-portal-create/create-data-portal.facade'
+import { DataPortalResourceRemoveFacade } from '@shared/facade/data-portal-resource/data-portal-resource-remove.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @UseGuards(UserContextGuard)
@@ -14,6 +15,7 @@ export class DataPortalsController {
   constructor(
     private readonly dataPortalService: DataPortalService,
     private readonly createDataPortalFacade: CreateDataPortalFacade,
+    private readonly dataPortalResourceRemoveFacade: DataPortalResourceRemoveFacade,
   ) {}
 
   /**
@@ -31,9 +33,13 @@ export class DataPortalsController {
   /**
    * Removes resource from the database.
    */
-  @Delete('/:portalId/resources/:resourceId')
-  async removeResource(@Param('resourceId', ParseIntPipe) resourceId: number): Promise<void> {
-    return await this.dataPortalService.removeResource(resourceId)
+  @HttpCode(204)
+  @Delete('/:identifier/resources/:resourceId')
+  async removeResource(
+    @Param('identifier') identifier: string,
+    @Param('resourceId', ParseIntPipe) resourceId: number,
+  ): Promise<void> {
+    return await this.dataPortalResourceRemoveFacade.remove(resourceId, identifier)
   }
 
   /**

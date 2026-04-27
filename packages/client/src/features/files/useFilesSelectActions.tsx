@@ -1,17 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
+import type { AxiosError } from 'axios'
 import { useNavigate } from 'react-router'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
-import { displayPayloadMessage, Payload } from '@/utils/api'
+import { displayPayloadMessage, type Payload } from '@/utils/api'
 import { pluralize, sanitizeFileName } from '@/utils/formatting'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { getBaseLink } from '../apps/run/utils'
 import { useAuthUser } from '../auth/useAuthUser'
-import { Action } from '../home/action-types'
+import type { Action } from '../home/action-types'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
-import { BaseAPIResponse, HomeScope, ServerScope } from '../home/types'
+import type { BaseAPIResponse, HomeScope, ServerScope } from '../home/types'
 import { useLicensesListQuery } from '../licenses/queries'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
@@ -21,7 +21,7 @@ import {
   isActionDisabledBasedOnProtected,
   isActionDisabledBasedOnRole,
 } from '../spaces/common'
-import { ISpace } from '../spaces/spaces.types'
+import type { ISpace } from '../spaces/spaces.types'
 import { useCopyFilesModal } from './actionModals/useCopyFilesModal'
 import { useDeleteFileModal } from './actionModals/useDeleteFileModal'
 import { useDownloadFileModal } from './actionModals/useDownloadFileModal'
@@ -32,7 +32,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { isOpenable } from './file.utils'
 import { moveFilesRequest } from './files.api'
-import { IFile, TreeOnSelectInfo } from './files.types'
+import type { IFile, TreeOnSelectInfo } from './files.types'
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
   if (scope) {
@@ -385,7 +385,7 @@ export const useFilesSelectActions = ({
       func: () => setDeleteFileModal(true),
       isDisabled:
         selected.length === 0 ||
-        selected.some(e => !e.links.remove) ||
+        selected.some(e => e.resource) ||
         isActionDisabledBasedOnProtected(user?.id, space) ||
         selected.every(e => e.locked),
       shouldHide: isViewer,

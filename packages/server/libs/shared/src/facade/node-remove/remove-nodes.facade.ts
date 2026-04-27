@@ -1,6 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { ComparisonService } from '@shared/domain/comparison/comparison.service'
+import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
@@ -9,7 +10,6 @@ import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-even
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -21,6 +21,7 @@ import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-en
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { ClientRequestError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 
@@ -32,7 +33,6 @@ export class RemoveNodesFacade {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
-    private readonly userRepository: UserRepository,
     private readonly userFileRepository: UserFileRepository,
     private readonly nodeHelper: NodeHelper,
     private readonly eventHelper: EventHelper,
@@ -43,6 +43,7 @@ export class RemoveNodesFacade {
     private readonly spaceEventService: SpaceEventService,
     private readonly licensedItemService: LicensedItemService,
     private readonly archiveEntryService: ArchiveEntryService,
+    private readonly dataPortalService: DataPortalService,
     private readonly fileSyncQueueJobProducer: FileSyncQueueJobProducer,
     private readonly userClient: PlatformClient,
   ) {}
@@ -124,6 +125,7 @@ export class RemoveNodesFacade {
       if (node.stiType === FILE_STI_TYPE.USERFILE) {
         await this.comparisonService.validateComparisons(node as UserFile)
         await this.nodeService.validateSpaceReports(node as UserFile)
+        await this.dataPortalService.validatePortalImage(node.id)
       }
       if (node.stiType === FILE_STI_TYPE.ASSET) {
         await this.nodeService.validateAssetRemoval(node as Asset)
@@ -136,8 +138,7 @@ export class RemoveNodesFacade {
 
     const lastNode = (await this.userFileRepository.count({ dxid: fileToRemove.dxid })) === 1
     const filePath = await this.nodeHelper.getNodePath(fileToRemove as Node)
-    const user = await this.userRepository.findOne(this.user.id)
-
+    const user = await this.user.loadEntity()
     return await this.em.transactional(async () => {
       await this.licensedItemService.removeItemLicensedForNode(fileToRemove.id)
       await this.taggingService.removeTaggings(fileToRemove.id, TAGGABLE_TYPE.NODE)
@@ -158,7 +159,7 @@ export class RemoveNodesFacade {
             ids: [fileToRemove.dxid],
           })
         } catch (error) {
-          if (error.props?.clientStatusCode === 404) {
+          if (error instanceof ClientRequestError && error.props?.clientStatusCode === 404) {
             this.logger.log(`File with dxid ${fileToRemove.dxid} already does not exist on platform`)
           } else {
             throw error
@@ -182,7 +183,7 @@ export class RemoveNodesFacade {
   }
 
   private async removeFolder(folderToRemove: Folder): Promise<number> {
-    const user = await this.userRepository.findOne(this.user.id)
+    const user = await this.user.loadEntity()
     const folderPath = await this.nodeHelper.getNodePath(folderToRemove)
 
     return await this.em.transactional(async () => {

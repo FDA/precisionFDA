@@ -48,9 +48,8 @@ describe UserFileSerializer do
         expect(user_file_serialized["links"]["publish"]).to be_nil
       end
 
-      it "links[rename, remove, copy] are nil" do
+      it "links[rename, copy] are nil" do
         expect(user_file_serialized["links"]["rename"]).to be_nil
-        expect(user_file_serialized["links"]["remove"]).to be_nil
         expect(user_file_serialized["links"]["copy"]).to eq(copy_api_files_path)
       end
 
@@ -116,10 +115,9 @@ describe UserFileSerializer do
               expect(user_file).to be_owned_by_user(user)
             end
 
-            it "links[publish, rename, remove] are nil" do
+            it "links[publish, rename] are nil" do
               expect(user_file_serialized["links"]["publish"]).to be_nil
               expect(user_file_serialized["links"]["rename"]).to be_nil
-              expect(user_file_serialized["links"]["remove"]).to be_nil
             end
           end
 
@@ -135,8 +133,7 @@ describe UserFileSerializer do
                 to eq("/publish?id=#{user_file.uid}")
             end
 
-            it "links[remove, organize] exist" do
-              expect(user_file_serialized["links"]["remove"]).to eq(remove_api_files_path)
+            it "links[organize] exist" do
               expect(user_file_serialized["links"]["organize"]).to eq(move_api_files_path)
             end
           end
@@ -293,10 +290,6 @@ describe UserFileSerializer do
         it "links[download, link, publish] exist" do
           expect(user_file_serialized["links"]["publish"]).to be_nil
         end
-      end
-
-      it "links[remove] exist" do
-        expect(user_file_serialized["links"]["remove"]).to eq(remove_api_files_path)
       end
 
       it "links[license, organize, copy] exist" do
