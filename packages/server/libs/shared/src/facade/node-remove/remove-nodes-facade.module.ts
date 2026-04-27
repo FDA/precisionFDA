@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ComparisonModule } from '@shared/domain/comparison/comparison.module'
+import { DataPortalModule } from '@shared/domain/data-portal/data-portal.module'
 import { EventModule } from '@shared/domain/event/event.module'
 import { LicensedItemModule } from '@shared/domain/licensed-item/licensed-item.module'
 import { SpaceModule } from '@shared/domain/space/space.module'
@@ -19,6 +20,7 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
     SpaceEventModule,
     TaggingModule,
     LicensedItemModule,
+    DataPortalModule,
     PlatformClientModule,
     EventModule,
   ],

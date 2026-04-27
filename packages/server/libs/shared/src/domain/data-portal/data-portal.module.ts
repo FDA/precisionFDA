@@ -5,7 +5,6 @@ import { DataPortalService } from '@shared/domain/data-portal/service/data-porta
 import { EntityModule } from '@shared/domain/entity/entity.module'
 import { NotificationModule } from '@shared/domain/notification/notification.module'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
-import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes-facade.module'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 
 @Module({
@@ -15,7 +14,6 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
     UserFileModule,
     EntityModule,
     MikroOrmModule.forFeature([DataPortal]),
-    RemoveNodesFacadeModule,
   ],
   providers: [DataPortalService],
   exports: [DataPortalService, MikroOrmModule],

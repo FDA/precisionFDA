@@ -345,7 +345,7 @@ class UserFile < Node
   end
 
   def resource?
-    Resource.exists?(user_file_id: id)
+    in_space? && (Resource.exists?(user_file_id: id) || DataPortal.exists?(card_image_id: id))
   end
 
   def describe_fields

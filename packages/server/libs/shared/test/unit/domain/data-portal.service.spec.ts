@@ -19,7 +19,6 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { DataPortalUrlSlugFormatError, NotFoundError, PermissionError } from '@shared/errors'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import type { PlatformClient } from '@shared/platform-client'
 import type { ClassIdResponse, FileDownloadLinkResponse } from '@shared/platform-client/platform-client.responses'
 import { create, db } from '../../../src/test'
@@ -43,10 +42,8 @@ describe('DataPortalService', () => {
   let notificationService: NotificationService
   let dataPortalRepository: DataPortalRepository
   let entityService: EntityService
-  let removeNodesFacade: RemoveNodesFacade
   const findDataPortalsStub = stub()
   const entityServiceGetEntityDownloadLinkStub = stub()
-  const removeNodesStub = stub()
 
   const createDataPortalService = (userId: number): DataPortalService => {
     const userCtx: UserContext = {
@@ -66,19 +63,7 @@ describe('DataPortalService', () => {
       getEntityDownloadLink: entityServiceGetEntityDownloadLinkStub,
     } as unknown as EntityService
 
-    removeNodesFacade = {
-      removeNodes: removeNodesStub,
-    } as unknown as RemoveNodesFacade
-
-    return new DataPortalService(
-      em,
-      userCtx,
-      dataPortalRepository,
-      userClient,
-      notificationService,
-      entityService,
-      removeNodesFacade,
-    )
+    return new DataPortalService(em, userCtx, dataPortalRepository, userClient, notificationService, entityService)
   }
 
   beforeEach(async () => {
@@ -759,46 +744,6 @@ describe('DataPortalService', () => {
         if (error instanceof Error) {
           expect(error.name).to.equal('PermissionError')
           expect(error.message).to.equal('Only roles ADMIN,LEAD,CONTRIBUTOR can create resources')
-        } else {
-          expect.fail('Unexpected error type')
-        }
-      }
-    })
-  })
-
-  describe('#removeResource', () => {
-    it('basic', async () => {
-      dataPortalService = createDataPortalService(user.id)
-
-      const loadedDataPortal = await createAndLoadPortal()
-      await dataPortalService.removeResource(loadedDataPortal.resources.getItems()[0].id)
-      em.clear()
-
-      // load portal and verify that resource was removed
-      const loadedDataPortalAfterRemoval = await em.findOneOrFail(
-        DataPortal,
-        { id: loadedDataPortal.id },
-        { populate: ['space', 'resources.userFile'] },
-      )
-      expect(loadedDataPortalAfterRemoval.resources.getItems().length).eq(0)
-
-      // verify that resource was removed from database
-      expect(removeNodesStub.callCount).eq(1)
-    })
-
-    it('test remove data portal resource - fail with lack of privileges', async () => {
-      const loadedDataPortal = await createAndLoadPortal()
-      const unprivilegedUser = create.userHelper.create(em)
-      await em.flush()
-
-      try {
-        dataPortalService = createDataPortalService(unprivilegedUser.id)
-        await dataPortalService.removeResource(loadedDataPortal.resources.getItems()[0].id)
-        expect.fail('Operation is expected to fail')
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          expect(error.name).to.equal('PermissionError')
-          expect(error.message).to.equal('Only roles ADMIN,LEAD,CONTRIBUTOR can remove resources')
         } else {
           expect.fail('Unexpected error type')
         }

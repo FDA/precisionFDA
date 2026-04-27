@@ -18,10 +18,10 @@ import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import {
   DataPortalUrlSlugFormatError,
   DataPortalUrlSlugNotUniqueError,
+  DeleteRelationError,
   NotFoundError,
   PermissionError,
 } from '@shared/errors'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { SCOPE } from '@shared/types/common'
@@ -56,7 +56,6 @@ export class DataPortalService {
     private readonly platformClient: PlatformClient,
     private readonly notificationService: NotificationService,
     private readonly entityService: EntityService,
-    private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
   listResources = async (dataPortalIdentifier: string): Promise<{ id: number; name: string; url: string }[]> => {
@@ -109,25 +108,20 @@ export class DataPortalService {
     return { id: resource.id, fileUid: userFile.uid }
   }
 
-  async removeResource(id: number): Promise<void> {
-    this.logger.log(`Removing resource: ${id}`)
-    const resource = await this.em.findOneOrFail(Resource, { id: id }, { populate: ['userFile'] })
-    const dataPortal = await this.em.findOneOrFail(
-      DataPortal,
-      { id: resource.dataPortal.id },
-      { populate: ['space.spaceMemberships.user', 'space'] },
-    )
-    if (!(await this.hasRoles(dataPortal, CAN_EDIT_ROLES, this.user.id))) {
-      throw new PermissionError(`Only roles ${this.editRolesText} can remove resources`)
+  async resetPortalImage(fileId: number): Promise<void> {
+    const portal = await this.dataPortalRepo.findOne({ cardImage: fileId })
+    if (portal) {
+      portal.cardImage = null
+      portal.cardImageUrl = null
+      await this.em.persist(portal).flush()
     }
+  }
 
-    this.logger.log(`Deleting resource with id: ${resource.id}, userFile.uid: ${resource.userFile.getEntity().uid}`)
-
-    await this.em.transactional(async () => {
-      await this.em.remove(resource).flush()
-      this.logger.log(`Deleting user file with uid: ${resource.userFile.getEntity().uid}`)
-      await this.removeNodesFacade.removeNodes([resource.userFile.id])
-    })
+  async validatePortalImage(fileId: number): Promise<void> {
+    const portal = await this.dataPortalRepo.count({ cardImage: fileId })
+    if (portal) {
+      throw new DeleteRelationError('file', 'data portal')
+    }
   }
 
   private createFile = async (
