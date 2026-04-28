@@ -46,6 +46,7 @@ import { SpaceMembership } from '@shared/domain/space-membership/space-membershi
 import { User } from '@shared/domain/user/user.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
+import { AccessRequestConfirmationHandler } from './templates/handlers/access-request-confirmation.handler'
 import { StaleJobsReportHandler } from './templates/handlers/stale-jobs-report.handler'
 import { UserRunningJobsReportHandler } from './templates/handlers/user-running-jobs-report.handler'
 
@@ -109,6 +110,7 @@ import { UserRunningJobsReportHandler } from './templates/handlers/user-running-
     NewDiscussionHandler,
     NewDiscussionReplyHandler,
     TypeToHandlerMapProvider,
+    AccessRequestConfirmationHandler,
     StaleJobsReportHandler,
     UserRunningJobsReportHandler,
   ],

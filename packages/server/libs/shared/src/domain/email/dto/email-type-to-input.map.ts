@@ -17,6 +17,7 @@ import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { AdminStaleJobsReportDTO } from '@shared/domain/job/dto/admin-stale-job-report-input.dto'
 import { UserRunningJobsReportDTO } from '@shared/domain/job/dto/user-running-job-report-input.dto'
 
+// biome-ignore lint/nursery/useExplicitType: unable to fix without uglyness
 export const emailTypeToInputDtoMap = {
   [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO,
   [EMAIL_TYPES.jobFinished]: JobEventDTO,
@@ -51,6 +52,7 @@ export const emailTypeToInputDtoMap = {
   [EMAIL_TYPES.newDiscussion]: DiscussionNotificationDTO,
   [EMAIL_TYPES.newDiscussionReply]: DiscussionNotificationDTO,
   [EMAIL_TYPES.userRunningJobsReport]: UserRunningJobsReportDTO,
+  [EMAIL_TYPES.accessRequestConfirmation]: ObjectIdInputDTO,
 } satisfies Record<EMAIL_TYPES, new () => object>
 
 export type EmailTypeToInputMap = {

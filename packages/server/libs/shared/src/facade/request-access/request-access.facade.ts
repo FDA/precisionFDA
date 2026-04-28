@@ -40,6 +40,12 @@ export class RequestAccessFacade {
         id: invitation.id,
       },
     })
+    await this.emailService.sendEmail({
+      type: EMAIL_TYPES.accessRequestConfirmation,
+      input: {
+        id: invitation.id,
+      },
+    })
     return { id: invitation.id }
   }
 
