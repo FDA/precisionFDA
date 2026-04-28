@@ -23,6 +23,7 @@ import { SpaceActivationEmailHandler } from '@shared/domain/email/templates/hand
 import { SpaceChangedEmailHandler } from '@shared/domain/email/templates/handlers/space-change.handler'
 import { SpaceInvitationHandler } from '@shared/domain/email/templates/handlers/space-invitation.handler'
 import { UserProvisionedHandler } from '@shared/domain/email/templates/handlers/user-provisioned.handler'
+import { AccessRequestConfirmationHandler } from './templates/handlers/access-request-confirmation.handler'
 import { StaleJobsReportHandler } from './templates/handlers/stale-jobs-report.handler'
 import { UserRunningJobsReportHandler } from './templates/handlers/user-running-jobs-report.handler'
 
@@ -54,6 +55,7 @@ type TypeToHandlerMap = {
   [EMAIL_TYPES.newDiscussionReply]: NewDiscussionReplyHandler
   [EMAIL_TYPES.staleJobsReport]: StaleJobsReportHandler
   [EMAIL_TYPES.userRunningJobsReport]: UserRunningJobsReportHandler
+  [EMAIL_TYPES.accessRequestConfirmation]: AccessRequestConfirmationHandler
 }
 
 const TypeToHandlerMapProvider: Provider = {
@@ -84,6 +86,7 @@ const TypeToHandlerMapProvider: Provider = {
     NewDiscussionReplyHandler,
     StaleJobsReportHandler,
     UserRunningJobsReportHandler,
+    AccessRequestConfirmationHandler,
   ],
   useFactory: (
     alertMessageHandler: AlertMessageHandler,
@@ -111,6 +114,7 @@ const TypeToHandlerMapProvider: Provider = {
     newDicussionReplyHandler: NewDiscussionReplyHandler,
     staleJobsReportHandler: StaleJobsReportHandler,
     userRunningJobsReportHandler: UserRunningJobsReportHandler,
+    accessRequestConfirmationHandler: AccessRequestConfirmationHandler,
   ): TypeToHandlerMap => {
     return {
       [EMAIL_TYPES.alertMessage]: alertMessageHandler,
@@ -138,6 +142,7 @@ const TypeToHandlerMapProvider: Provider = {
       [EMAIL_TYPES.newDiscussionReply]: newDicussionReplyHandler,
       [EMAIL_TYPES.staleJobsReport]: staleJobsReportHandler,
       [EMAIL_TYPES.userRunningJobsReport]: userRunningJobsReportHandler,
+      [EMAIL_TYPES.accessRequestConfirmation]: accessRequestConfirmationHandler,
     }
   },
 }

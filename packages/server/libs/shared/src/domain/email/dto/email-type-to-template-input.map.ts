@@ -23,6 +23,7 @@ import { SpaceActivatedTemplateInput } from '@shared/domain/email/templates/mjml
 import { SpaceActivationTemplateInput } from '@shared/domain/email/templates/mjml/space-activation.template'
 import { SpaceChangeTemplateInput } from '@shared/domain/email/templates/mjml/space-change.template'
 import { SpaceInvitationTemplateInput } from '@shared/domain/email/templates/mjml/space-invitation.template'
+import { AccessRequestConfirmationTemplateInput } from '../templates/mjml/access-request-confirmation.template'
 import { ReportStaleJobsTemplateInput } from '../templates/mjml/report-stale-jobs.template'
 import { ReportRunningJobsTemplateInput } from '../templates/mjml/report-user-running-jobs.template'
 
@@ -60,4 +61,5 @@ export type EmailTypeToTemplateInputMap = {
   [EMAIL_TYPES.newDiscussion]: DiscussionEmailInput
   [EMAIL_TYPES.newDiscussionReply]: DiscussionEmailInput
   [EMAIL_TYPES.userRunningJobsReport]: ReportRunningJobsTemplateInput
+  [EMAIL_TYPES.accessRequestConfirmation]: AccessRequestConfirmationTemplateInput
 }

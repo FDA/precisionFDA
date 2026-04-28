@@ -179,6 +179,7 @@ type EmailTypeToContextMapOverride = {
   [EMAIL_TYPES.newDiscussion]: DiscussionContext
   [EMAIL_TYPES.newDiscussionReply]: DiscussionContext
   [EMAIL_TYPES.userRunningJobsReport]: UserRunningJobsReportContext
+  [EMAIL_TYPES.accessRequestConfirmation]: InvitationContext
 }
 
 export type EmailTypeToContextMap = {
