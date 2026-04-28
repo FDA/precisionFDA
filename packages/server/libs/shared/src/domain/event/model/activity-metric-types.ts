@@ -1,0 +1,15 @@
+export const ACTIVITY_METRIC_TYPES = [
+  'userViewed',
+  'userAccessRequested',
+  'userLoggedIn',
+  'dataUpload',
+  'dataDownload',
+  'dataGenerated',
+  'appCreated',
+  'appPublished',
+  'appRun',
+  'jobRun',
+  'jobFailed',
+  'submissionsCreated',
+  'usersSignedUpForChallenge',
+] as const

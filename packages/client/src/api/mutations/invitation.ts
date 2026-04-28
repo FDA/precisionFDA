@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import { pluralize } from '../../utils/formatting'
-import { Invitation, provisionUsers } from '../../features/admin/users/api'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { Invitation, provisionUsers } from '@/features/admin/users/api'
+import { pluralize } from '@/utils/formatting'
 
 interface UseProvisionMutationProps {
   invitations: Invitation[]
@@ -25,7 +25,7 @@ export const useProvisionMutation = ({ invitations, selectedSpaces, onSuccess }:
       const userCount = invitations.length
       queryClient.invalidateQueries({ queryKey: ['admin-invitations'] })
       toastSuccess(`Started provisioning ${userCount} ${pluralize('user', userCount)}`)
-      navigate(`/admin/invitations/provisioning?invitations=${invitations.map(({ id }) => id).join(',')}`)
+      navigate(`/account/admin/users/invitations/provisioning?invitations=${invitations.map(({ id }) => id).join(',')}`)
       onSuccess?.()
     },
     onError: () => toastError('Error provisioning users'),

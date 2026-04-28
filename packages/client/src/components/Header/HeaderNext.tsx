@@ -1,17 +1,15 @@
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import clsx from 'clsx'
 import { Link, useLocation } from 'react-router'
 import { PlacesType, Tooltip } from 'react-tooltip'
 import { useAlertDismissed } from '@/features/admin/alerts/useAlertDismissedLocalStorage'
 import { CDMHKey, logout } from '@/features/auth/api'
 import { useAuthUser } from '@/features/auth/useAuthUser'
-import { useGenerateKeyModal } from '@/features/auth/useGenerateKeyModal'
 import { CDMHNames, SiteSettingsDataPortal, useSiteSettingsQuery } from '@/features/auth/useSiteSettingsQuery'
 import { useOnOutsideClickRef } from '@/hooks/useOnOutsideClick'
 import { IUser } from '@/types/user'
 import { AlertBanner } from '../AlertBanner'
 import { TransparentButton } from '../Button'
-import { CloudResourceModal } from '../CloudResourcesModal'
 import { useSearchModal } from '../GlobalSearch/useSearchModal'
 import { ArrowLeftIcon } from '../icons/ArrowLeftIcon'
 import { CaretIcon } from '../icons/CaretIcon'
@@ -288,15 +286,13 @@ const SiteNav = ({
   )
 }
 
-const Header: React.FC = () => {
+const Header = () => {
   const [showSiteNav, setShowSiteNav] = useState(false)
   const { pathname } = useLocation()
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
-  const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
   const buttonElement = useRef<HTMLButtonElement>(null)
-  const generateCLIKeyAction = useGenerateKeyModal()
   const { isShown, modalComp, setShowModal } = useEditFavoritesModal()
   const { isShown: isSearchShown, modalComp: searchModalComp, setShowModal: setShowSearch } = useSearchModal()
   const { userSiteNavItems } = useUserSiteNavItems()
@@ -428,24 +424,11 @@ const Header: React.FC = () => {
                 </Menu.Trigger>
               }
             >
-              <UserMenu
-                user={user}
-                userCanAdministerSite={userCanAdministerSite}
-                handleLogout={handleLogout}
-                showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
-                generateCLIKey={() => generateCLIKeyAction.setShowModal(true)}
-              />
+              <UserMenu user={user} userCanAdministerSite={userCanAdministerSite} handleLogout={handleLogout} />
             </Menu>
           </HeaderRight>
         </Nav>
       </StyledHeader>
-      <CloudResourceModal
-        isShown={isCloudResourcesModalShown}
-        hide={() => {
-          setCloudResourcesModalShown(false)
-        }}
-      />
-      {generateCLIKeyAction.modalComp}
     </>
   )
 }

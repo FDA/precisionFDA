@@ -3,15 +3,20 @@ import { Svg } from './Svg'
 
 export const KeyIcon = ({
   width,
-  height = 16,
+  height,
+  size = 16,
+  className,
 }: {
   width?: number
   height?: number
+  size?: number
+  className?: string
 }) => (
   <Svg
     aria-hidden="true"
-    height={height}
-    width={width}
+    height={height ?? size}
+    width={width ?? size}
+    className={className}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 512 512"
     fill="currentColor"

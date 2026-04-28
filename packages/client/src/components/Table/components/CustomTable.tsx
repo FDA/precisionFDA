@@ -1,15 +1,15 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import { Column, flexRender, Row, RowData, Table } from '@tanstack/react-table'
+import { type Column, flexRender, type Row, type RowData, type Table } from '@tanstack/react-table'
 import clsx from 'clsx'
 import { range } from 'ramda'
-import React, { DragEventHandler } from 'react'
+import React, { type DragEventHandler } from 'react'
 import styled from 'styled-components'
-import { IFile } from '../../../features/files/files.types'
+import type { IFile } from '../../../features/files/files.types'
 import { Draggable, Droppable } from '../DnD'
 import { ColumnSelect } from './ColumnSelect'
 import Filter from './Filter'
 import { LoadingRows } from './LoadingRows'
-import { getRowGroup, getTableHeaderGroups, TableGroup } from './util'
+import { getRowGroup, getTableHeaderGroups, type TableGroup } from './util'
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -29,6 +29,7 @@ type Props<T extends RowData> = {
   spacerWidth?: number
   enableColumnSelect?: boolean
   enableRowClickSelection?: boolean
+  onRowClick?: (row: Row<T>) => void
 }
 
 const DnDRow = ({
@@ -53,9 +54,10 @@ const DnDRow = ({
   if (!isSelected && row.original.type === 'Folder') {
     DnDComp = Droppable
   }
+  const RowComponent = DnDComp as React.ElementType
   const dndProps = DnDComp !== 'tr' ? { numSelected } : {}
   return (
-    <DnDComp
+    <RowComponent
       data-testid="data-row"
       as="tr"
       {...dndProps}
@@ -65,14 +67,14 @@ const DnDRow = ({
       className={className}
     >
       {children}
-    </DnDComp>
+    </RowComponent>
   )
 }
 
 const Filler = styled.td``
 
 function shouldIgnoreRowClick(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) return false
+  if (!(target instanceof Element)) return false
   return Boolean(
     target.closest(
       [
@@ -102,6 +104,7 @@ export function CustomTable<T extends RowData>({
   displayColSpacer = true,
   enableColumnSelect = true,
   enableRowClickSelection = false,
+  onRowClick,
 }: Props<T>) {
   const [headerGroups] = getTableHeaderGroups(table, tableGroup)
   const numSelected = table.getSelectedRowModel().rows.length
@@ -145,7 +148,10 @@ export function CustomTable<T extends RowData>({
                       {header.column.getIsSorted() ? (header.column.getIsSorted() === 'asc' ? '↑' : '↓') : ''}
                     </button>
 
-                    <div
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      aria-label="Resize column"
                       onDoubleClick={() => header.column.resetSize()}
                       onMouseDown={header.getResizeHandler()}
                       onTouchStart={header.getResizeHandler()}
@@ -188,11 +194,14 @@ export function CustomTable<T extends RowData>({
             range(0, 3).map(i => <LoadingRows visibleColumns={headerGroups[0].headers.map(h => h.column)} delay={i} key={i} />)}
           {table.getRowModel().rows.map(row => {
             const handleRowClick: React.MouseEventHandler<HTMLTableRowElement> = e => {
-              if (!enableRowClickSelection) return
               if (shouldIgnoreRowClick(e.target)) return
-              row.toggleSelected()
+              if (enableRowClickSelection) {
+                row.toggleSelected()
+              }
+              onRowClick?.(row)
             }
 
+            const isRowClickable = enableRowClickSelection || !!onRowClick
             const cells = getRowGroup(row, tableGroup).map(cell => (
               <td
                 className={clsx({ 'cell-select sticky-left': cell.column.id === 'select', relative: true })}
@@ -211,7 +220,7 @@ export function CustomTable<T extends RowData>({
                   row={row as Row<IFile>}
                   numSelected={numSelected}
                   onClick={handleRowClick}
-                  className={clsx({ 'row-click-select': enableRowClickSelection })}
+                  className={clsx({ 'row-click-select': isRowClickable })}
                 >
                   {cells}
                   {colFiller('td')}
@@ -226,7 +235,7 @@ export function CustomTable<T extends RowData>({
                 <tr
                   data-testid="data-row"
                   key={row.id}
-                  className={clsx({ 'sub-row': isSubRow, 'row-click-select': enableRowClickSelection })}
+                  className={clsx({ 'sub-row': isSubRow, 'row-click-select': isRowClickable })}
                   draggable={true}
                   onDragStart={onDragStart}
                   id={`html-dnd-${row.id}`}
@@ -242,7 +251,7 @@ export function CustomTable<T extends RowData>({
               <tr
                 data-testid="data-row"
                 key={row.id}
-                className={clsx({ 'sub-row': isSubRow, 'row-click-select': enableRowClickSelection })}
+                className={clsx({ 'sub-row': isSubRow, 'row-click-select': isRowClickable })}
                 onClick={handleRowClick}
               >
                 {cells}

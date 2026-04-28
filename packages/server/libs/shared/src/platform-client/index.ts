@@ -47,6 +47,7 @@ import {
   UserRemoveFromOrgParams,
   UserResetMfaParams,
   UserUnlockParams,
+  UserUpdateEmailParams,
   WorkflowDescribeParams,
 } from './platform-client.params'
 import {
@@ -697,6 +698,20 @@ export class PlatformClient {
     }
   }
 
+  async userUpdateEmail(params: UserUpdateEmailParams): Promise<unknown> {
+    const url = `${config.platform.authApiUrl}/${params.dxid}/updateEmail`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        ...params.data,
+        revokeChildTokens: false,
+      },
+      url,
+    }
+
+    return await this.sendRequest(options)
+  }
+
   async userUnlock(params: UserUnlockParams): Promise<unknown> {
     const url = `${config.platform.authApiUrl}/${params.dxid}/unlockUserAccount`
     const options: AxiosRequestConfig = {
@@ -1068,7 +1083,7 @@ export class PlatformClient {
     // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
     const err = error as any
     // response status code is NOT 2xx
-    if (err.response) {
+    if (axios.isAxiosError(err) && err.response) {
       this.logger.error(
         {
           response: err.response.data,
@@ -1087,9 +1102,11 @@ export class PlatformClient {
       // However, there's also a class of error response where the response payload is HTML
       // See platform-client.mock.ts for more examples
       //
+      const data = err.response.data as Record<string, unknown> | undefined
+      const errorObj = (data?.error ?? {}) as Record<string, unknown>
       const statusCode = err.response.status
-      const errorType = err.response.data?.error?.type || 'Server Error'
-      const errorMessage = err.response.data?.error?.message || err.response.data
+      const errorType = (errorObj.type as string) || 'Server Error'
+      const errorMessage = (errorObj.message as string) || String(data)
       if (customErrorThrower) {
         customErrorThrower(statusCode, errorType, errorMessage)
       }
@@ -1097,7 +1114,7 @@ export class PlatformClient {
         clientResponse: err.response.data,
         clientStatusCode: statusCode,
       })
-    } else if (err.request) {
+    } else if (axios.isAxiosError(err) && err.request) {
       // the request was made but no response was received
       this.logger.error({ err }, 'Failed platform request - no response received')
     } else {
@@ -1106,10 +1123,12 @@ export class PlatformClient {
     // todo: handle this does not result in 500 API error
     // TODO(2): Need to consider other error types and handle them with a descriptive message
     // e.g. See ETIMEOUT error in platform-client.mock.ts
-    const errorMessage = err.stack || err.message || 'Unknown error - no platform response received'
+    const errorMessage =
+      err instanceof Error ? err.stack || err.message : 'Unknown error - no platform response received'
+    const axiosErr = axios.isAxiosError(err) ? err : undefined
     throw new ClientRequestError(errorMessage, {
-      clientResponse: err.response?.data || 'No platform response',
-      clientStatusCode: err.response?.status || 408,
+      clientResponse: axiosErr?.response?.data || 'No platform response',
+      clientStatusCode: axiosErr?.response?.status || 408,
     })
   }
 }

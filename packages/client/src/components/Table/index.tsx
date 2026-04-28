@@ -1,8 +1,8 @@
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  ColumnSizingState,
-  ExpandedState,
+  type ColumnDef,
+  type ColumnFiltersState,
+  type ColumnSizingState,
+  type ExpandedState,
   getCoreRowModel,
   getExpandedRowModel,
   getFacetedMinMaxValues,
@@ -12,19 +12,19 @@ import {
   getGroupedRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  GroupingState,
-  OnChangeFn,
-  RowSelectionState,
-  SortingState,
+  type GroupingState,
+  type OnChangeFn,
+  type Row,
+  type RowSelectionState,
+  type SortingState,
   useReactTable,
-  VisibilityState,
+  type VisibilityState,
 } from '@tanstack/react-table'
-import React, { DragEventHandler, useMemo } from 'react'
+import React, { type DragEventHandler, useMemo } from 'react'
 
 import CustomTable from './components/CustomTable'
 import { TableStyles } from './components/styles'
 import { useComponentWidth } from './useComponentWidth'
-import { useDebounce } from './useDebounce'
 
 function Table<T extends { id: number | string }>({
   enableColumnFilters = true,
@@ -47,6 +47,7 @@ function Table<T extends { id: number | string }>({
   enableDnd,
   enableHtmlDnd,
   onDragStart,
+  onRowClick,
   expanded = {},
   setExpanded,
   subRowKey,
@@ -71,6 +72,7 @@ function Table<T extends { id: number | string }>({
   enableDnd?: boolean
   enableHtmlDnd?: boolean
   onDragStart?: DragEventHandler
+  onRowClick?: (row: Row<T>) => void
   expanded?: ExpandedState
   setExpanded?: (e: ExpandedState) => void
   setColumnVisibility?: (cols: VisibilityState) => void
@@ -177,13 +179,12 @@ function Table<T extends { id: number | string }>({
   .reduce((accumulator, value) => {
     return accumulator + value
   }, 0)
-  const dSum = useDebounce(sum, 300)
   const spacerWidth = useMemo(() => {
     if (!columnVisibility || !columnSizing) {
       return 0
     }
     return containerWidth > sum ? containerWidth - sum - 8 : 50
-  }, [columnVisibility, containerWidth, dSum])
+  }, [columnVisibility, columnSizing, containerWidth, sum])
 
   return (
     <TableStyles ref={containerRef}>
@@ -194,6 +195,7 @@ function Table<T extends { id: number | string }>({
         enableDnd={enableDnd}
         enableHtmlDnd={enableHtmlDnd}
         onDragStart={onDragStart}
+        onRowClick={onRowClick}
         spacerWidth={spacerWidth}
         enableColumnSelect={enableColumnSelect}
         enableRowClickSelection={enableRowClickSelection}

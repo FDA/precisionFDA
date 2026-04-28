@@ -1,7 +1,7 @@
 import { getSpaceIdFromScope } from '../../utils'
 import { cleanObject } from '../../utils/object'
-import { SortConfig } from '../../types/sorting'
-import { FilterVal, HomeScope, IFilter, ServerScope } from './types'
+import type { SortConfig } from '../../types/sorting'
+import type { FilterVal, HomeScope, IFilter, ServerScope } from './types'
 
 /**
  * Formats numbers using US locale, e.g., 4000000 -> "4,000,000.00"
@@ -74,6 +74,8 @@ const customKeyMappings = {
   launched_on: 'created_at',
   dx_instance_class: 'instance',
   createdAtDateTime: 'createdAt',
+  totalLimit: 'cloudResourceSettings.total_limit',
+  jobLimit: 'cloudResourceSettings.job_limit',
 }
 // Some of the list API's order_by values do not match their keys in JSON responses
 // so we need a custom mapping
@@ -95,7 +97,9 @@ export type Params = {
   page?: number
 } & Record<string, unknown>
 
-export type QueryType = Record<string, any>
+export type QueryType = Record<string, unknown>
+
+const createSortQueryKey = (sortField: string) => sortField.split('.').reduce((key, segment) => `${key}[${segment}]`, 'sort')
 
 export function formatScopeQ(scope?: HomeScope) {
   if (!scope || scope === 'me') return ''
@@ -177,7 +181,7 @@ export function prepareListFetchV2(filters: IFilter[], params: Params): QueryTyp
     : renameOrderByKeys(params?.sortBy?.order_by)
 
   const sort = sortField && params.sortBy?.order_dir
-    ? { [`sort[${sortField}]`]: params.sortBy.order_dir }
+    ? { [createSortQueryKey(sortField)]: params.sortBy.order_dir }
     : {}
 
   return cleanObject({

@@ -1,17 +1,16 @@
 import styled from 'styled-components'
-import { BreadcrumbDivider, StyledBreadcrumbs } from '../../components/Breadcrumb'
-import { Svg } from '../../components/icons/Svg'
-import { StyledPageTable } from '../../components/Table/components/styles'
+import { BreadcrumbDivider, StyledBreadcrumbs } from '@/components/Breadcrumb'
+import { Svg } from '@/components/icons/Svg'
+import { ContentFooter } from '@/components/Page/ContentFooter'
+import { StyledPageTable } from '@/components/Table/components/styles'
 
 export const Title = styled.div`
   display: flex;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   align-items: center;
-  margin: 16px 0;
-  margin-right: 16px;
-  margin-bottom: 8px;
   gap: 8px;
+  white-space: nowrap;
 `
 
 export const TopLeft = styled.div`
@@ -22,10 +21,10 @@ export const TopLeft = styled.div`
 
 export const Topbox = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  padding-left: 32px;
-  padding-right: 16px;
+  gap: 16px;
+  padding: 12px 16px 8px 32px;
 `
 
 export const AdminSectionBreadcrumbs = styled(StyledBreadcrumbs)`
@@ -64,4 +63,9 @@ export const AdminStyledPageTable = styled(StyledPageTable)`
       background-color: var(--c-textarea-bg);
     }
   }
+`
+
+export const AdminContentFooter = styled(ContentFooter)`
+  padding-left: 32px;
+  padding-right: 16px;
 `

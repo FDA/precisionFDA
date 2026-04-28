@@ -1,38 +1,37 @@
-import styled from 'styled-components'
 import React, { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { Button } from '../../../components/Button'
+import styles from './LinkButton.module.css'
 
-const StyledLink = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: bold;
-  white-space: nowrap;
-  line-height: 1.428571429;
-  color: var(--c-text-500);
-`
-
-const LinkButton = ({ to, nonReact, icon, label }: {to: string, nonReact?: boolean, icon?: ReactNode, label?: string}) => {
+const LinkButton = ({
+  to,
+  nonReact,
+  icon,
+  label,
+}: {
+  to: string
+  nonReact?: boolean
+  icon?: ReactNode
+  label?: string
+}) => {
+  const content = (
+    <>
+      <div className={styles.iconWrapper}>{icon}</div>
+      <span className={styles.label}>{label}</span>
+    </>
+  )
 
   if (nonReact) {
     return (
-      <Button as="a" href={to}>
-        <StyledLink>
-          {icon}
-          {label}
-        </StyledLink>
-      </Button>
+      <a href={to} className={styles.linkCard}>
+        {content}
+      </a>
     )
   }
 
   return (
-    <Button as={Link} to={to}>
-      <StyledLink>
-        {icon}
-        {label}
-      </StyledLink>
-    </Button>
+    <Link to={to} className={styles.linkCard}>
+      {content}
+    </Link>
   )
 }
 

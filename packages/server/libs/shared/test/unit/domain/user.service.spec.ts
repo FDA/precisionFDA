@@ -18,7 +18,7 @@ describe('user service tests', () => {
   const userRepoFindStub = stub()
   const userRepoFindOneStub = stub()
 
-  const createUserService = () => {
+  const createUserService = (): UserService => {
     const em = {
       transactional: emTransactionalStub,
       flush: emFlushStub,
@@ -48,7 +48,7 @@ describe('user service tests', () => {
         id: 42,
         dxuser: 'user1',
         accessToken: 'access_token',
-        loadEntity: () => null,
+        loadEntity: async (): Promise<User> => null as unknown as User,
       },
       userRepo,
       emailsJobProducer,
@@ -321,6 +321,39 @@ describe('user service tests', () => {
       expect(userRepoPaginateStub.getCall(0).args[2].orderBy).to.deep.equal({
         dxuser: 'ASC',
       })
+    })
+  })
+
+  describe('#getUserInOrganization', () => {
+    it('delegates to userRepo.findOne with id and organization constraints', async () => {
+      const foundUser = { id: 7, dxuser: 'member.user' }
+      userRepoFindOneStub.reset()
+      userRepoFindOneStub.withArgs({ id: 7, organization: 10 }).resolves(foundUser)
+
+      const userService = createUserService()
+      const result = await userService.getUserInOrganization(7, 10)
+
+      expect(userRepoFindOneStub.calledOnceWithExactly({ id: 7, organization: 10 })).to.equal(true)
+      expect(result).to.equal(foundUser)
+    })
+  })
+
+  describe('#getUsersInOrganization', () => {
+    it('delegates to userRepo.find with organization filter and dxuser ASC ordering', async () => {
+      const orgUsers = [
+        { id: 1, dxuser: 'alpha.user' },
+        { id: 2, dxuser: 'beta.user' },
+      ]
+      userRepoFindStub.reset()
+      userRepoFindStub.withArgs({ organization: 10 }, { orderBy: { dxuser: 'ASC' } }).resolves(orgUsers)
+
+      const userService = createUserService()
+      const result = await userService.getUsersInOrganization(10)
+
+      expect(userRepoFindStub.calledOnceWithExactly({ organization: 10 }, { orderBy: { dxuser: 'ASC' } })).to.equal(
+        true,
+      )
+      expect(result).to.equal(orgUsers)
     })
   })
 })

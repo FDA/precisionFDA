@@ -1,33 +1,18 @@
-import { useMutation, UseQueryResult } from '@tanstack/react-query'
-import React, { useState } from 'react'
-import Menu from '../../../components/Menu/Menu'
-import { useNavigate } from 'react-router'
-import { Button } from '../../../components/Button'
-import { ArrowIcon } from '../../../components/icons/ArrowIcon'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { UnlockIcon } from '../../../components/icons/UnlockIcon'
+import { type UseQueryResult, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
+import { ChevronDown } from 'lucide-react'
+import type { BackendError } from '@/api/types'
+import { Button } from '@/components/Button'
+import Menu from '@/components/Menu/Menu'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { itemsCountString } from '@/utils/formatting'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { MetaV2 } from '../../home/types'
-import { ResourceDropdownContent } from './ResourceDropdown'
-import { User } from './types'
-import { UserLimitForm } from './UserLimitForm'
-import { bulkActivate, bulkDeactivate, setJobLimit, setTotalLimit, userUnlock } from './api'
-import { AxiosError } from 'axios'
-import { itemsCountString } from '../../../utils/formatting'
+import type { MetaV2 } from '../../home/types'
 import { ButtonsRow } from '../common'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
-import { BackendError } from '../../../api/types'
-
-const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button>>((props, ref) => {
-  return (
-    // @ts-expect-error ref type mismatch between Dropdown and Button components
-    <Button as="div" data-variant="primary" ref={ref} {...props}>
-      Resources &nbsp;
-      <ArrowIcon />
-    </Button>
-  )
-})
-DropdownButton.displayName = 'DropdownButton'
+import { bulkActivate, bulkDeactivate, userUnlock } from './api'
+import { canAdminUnlockUsers } from './canAdminUnlockUsers'
+import { ResourcesMenu } from './ResourcesMenu'
+import type { User } from './types'
 
 type UserListActionRowProps = {
   selectedUsers: User[]
@@ -35,158 +20,88 @@ type UserListActionRowProps = {
 }
 
 export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActionRowProps) => {
-  const [totalLimitInput, setTotalLimitInput] = useState(NaN)
-  const [jobLimitInput, setJobLimitInput] = useState(NaN)
-  const navigate = useNavigate()
-
+  const queryClient = useQueryClient()
   const currentUserCtx = useAuthUser()
   const selectedIds = selectedUsers.map(({ id }) => id)
+  const noSelection = selectedUsers.length === 0
+
+  const invalidate = () => {
+    refetchUsers()
+    queryClient.invalidateQueries({ queryKey: ['admin-user'] })
+  }
+
+  const handleError = (e: AxiosError<BackendError>, fallback: string) => {
+    toastError(e.response?.data?.error?.message ? `Error: ${e.response.data.error.message}` : fallback)
+  }
+
   const unlockMutation = useMutation({
     mutationKey: ['unlock'],
     mutationFn: () => userUnlock(selectedIds[0]),
     onSuccess: () => {
       toastSuccess('User was successfully unlocked!')
+      invalidate()
     },
-    onError: (e: AxiosError<BackendError>) => {
-      if (e.response?.data?.error?.message) {
-        toastError(`Error: ${e.response.data.error.message}`)
-      } else {
-        toastError('Error unlocking users!')
-      }
-    },
+    onError: (e: AxiosError<BackendError>) => handleError(e, 'Error unlocking user!'),
   })
+
   const deactivateMutation = useMutation({
     mutationKey: ['bulk-deactivate'],
     mutationFn: () => bulkDeactivate(selectedIds),
     onSuccess: () => {
       toastSuccess(`${itemsCountString('user', selectedIds.length)} successfully deactivated!`)
-      refetchUsers()
+      invalidate()
     },
-    onError: (e: AxiosError<BackendError>) => {
-      if (e.response?.data?.error?.message) {
-        toastError(`Error: ${e.response.data.error.message}`)
-      } else {
-        toastError('Error deactivating users')
-      }
-    },
+    onError: (e: AxiosError<BackendError>) => handleError(e, 'Error deactivating users'),
   })
+
   const activateMutation = useMutation({
     mutationKey: ['bulk-activate'],
     mutationFn: () => bulkActivate(selectedIds),
     onSuccess: () => {
       toastSuccess(`${itemsCountString('user', selectedIds.length)} successfully activated!`)
-      refetchUsers()
+      invalidate()
     },
-    onError: (e: AxiosError<BackendError>) => {
-      if (e.response?.data?.error?.message) {
-        toastError(`Error: ${e.response.data.error.message}`)
-      } else {
-        toastError('Error activating users')
-      }
-    },
+    onError: (e: AxiosError<BackendError>) => handleError(e, 'Error activating users'),
   })
-  const setTotalLimitMutation = useMutation({
-    mutationKey: ['set-total-limit'],
-    mutationFn: () => setTotalLimit(selectedIds, totalLimitInput),
-    onSuccess: () => {
-      toastSuccess(`Total limit successfully set to $${totalLimitInput}!`)
-      refetchUsers()
-    },
-    onError: (e: AxiosError<BackendError>) => {
-      if (e.response?.data?.error?.message) {
-        toastError(`Error: ${e.response.data.error.message}`)
-      } else {
-        toastError('Error setting total limit')
-      }
-    },
-  })
-  const setJobLimitMutation = useMutation({
-    mutationKey: ['set-job-limit'],
-    mutationFn: () => setJobLimit(selectedIds, jobLimitInput),
-    onSuccess: () => {
-      toastSuccess(`Job limit successfully set to $${jobLimitInput}!`)
-      refetchUsers()
-    },
-    onError: (e: AxiosError<BackendError>) => {
-      if (e.response?.data?.error?.message) {
-        toastError(`Error: ${e.response.data.error.message}`)
-      } else {
-        toastError('Error setting job limit')
-      }
-    },
-  })
-  const areAllSelectedUsersInDeactivatedState =
-    selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'deactivated')
-  const areAllSelectedUsersInEnabledState =
-    selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'active')
+
+  const areAllDeactivated = !noSelection && selectedUsers.every(({ userState }) => userState === 'deactivated')
+  const areAllActive = !noSelection && selectedUsers.every(({ userState }) => userState === 'active')
   const isCurrentUserSelected = selectedUsers.some(({ id }) => id === currentUserCtx?.id)
+  const canUnlock = canAdminUnlockUsers(selectedUsers)
+
+  const showActivate = areAllDeactivated
+  const showDeactivate = areAllActive && !isCurrentUserSelected
 
   return (
     <ButtonsRow>
-      <Button
-        data-variant="primary"
-        onClick={() => {
-          navigate('/admin/invitations')
-        }}
-        data-testid="admin-users-provision-button"
-        data-turbolinks="false"
-      >
-        <PlusIcon height={12} />
-        &nbsp;Provision new users
-      </Button>
-      {!areAllSelectedUsersInDeactivatedState && (
-        <Button
-          data-variant="primary"
-          data-testid="admin-users-deactivate-button"
-          disabled={selectedUsers.length === 0 || !areAllSelectedUsersInEnabledState || isCurrentUserSelected}
-          onClick={() => deactivateMutation.mutateAsync()}
-        >
-          Deactivate
-        </Button>
-      )}
-      {areAllSelectedUsersInDeactivatedState && (
-        <Button
-          data-variant="primary"
-          data-testid="admin-users-activate-button"
-          disabled={isCurrentUserSelected}
-          onClick={() => activateMutation.mutateAsync()}
-        >
-          Activate
-        </Button>
-      )}
-      <Button
-        data-variant="primary"
-        data-testid="admin-users-unlock-button"
-        disabled={selectedUsers.length !== 1}
-        onClick={() => unlockMutation.mutateAsync()}
-        style={{ marginRight: 16 }}
-      >
-        <UnlockIcon height={12} />
-        &nbsp;Unlock
-      </Button>
-      <UserLimitForm
-        buttonText="Set Total Limit ($)"
-        selectedUsers={selectedUsers}
-        onSubmit={() => setTotalLimitMutation.mutateAsync()}
-        onChange={setTotalLimitInput}
-        isSubmitButtonDisabled={Number.isNaN(totalLimitInput) || totalLimitInput < 0}
-      />
-      <UserLimitForm
-        buttonText="Set Job Limit ($)"
-        selectedUsers={selectedUsers}
-        onSubmit={() => setJobLimitMutation.mutateAsync()}
-        onChange={setJobLimitInput}
-        isSubmitButtonDisabled={Number.isNaN(jobLimitInput) || jobLimitInput < 0}
-      />
       <Menu
+        disableInitialFocus
+        positioner={{ side: 'bottom', align: 'end' }}
         trigger={
           <Menu.Trigger>
-            <DropdownButton data-testid="admin-users-resource-button" disabled={selectedUsers.length === 0} />
+            <Button as="div" data-variant="primary" data-testid="admin-users-actions-button" disabled={noSelection}>
+              Actions
+              <ChevronDown size={14} />
+            </Button>
           </Menu.Trigger>
         }
       >
-        <ResourceDropdownContent selectedUsers={selectedUsers} />
+        {showActivate && (
+          <Menu.Item disabled={activateMutation.isPending} onClick={() => void activateMutation.mutateAsync()}>
+            Activate
+          </Menu.Item>
+        )}
+        {showDeactivate && (
+          <Menu.Item disabled={deactivateMutation.isPending} onClick={() => void deactivateMutation.mutateAsync()}>
+            Deactivate
+          </Menu.Item>
+        )}
+        <Menu.Item disabled={!canUnlock || unlockMutation.isPending} onClick={() => void unlockMutation.mutateAsync()}>
+          Unlock
+        </Menu.Item>
       </Menu>
+
+      <ResourcesMenu selectedUsers={selectedUsers} />
     </ButtonsRow>
   )
 }

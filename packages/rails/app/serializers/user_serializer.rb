@@ -13,6 +13,7 @@ class UserSerializer < ApplicationSerializer
     :resources,
     :total_limit,
     :header_items,
+    :time_zone,
   )
 
   attribute :can_administer_site?, key: :can_administer_site

@@ -1,10 +1,11 @@
 import styled, { css } from 'styled-components'
-import { compactScrollBarV2 } from '../../Page/styles'
 import { ArrowIcon } from '../../icons/ArrowIcon'
+import { compactScrollBarV2 } from '../../Page/styles'
 
 export const StyledPageTable = styled.div`
   font-size: 14px;
   flex: 1;
+  min-height: 0;
   ${compactScrollBarV2}
   overflow: auto;
 `
@@ -227,11 +228,15 @@ export const TableStyles = styled.div`
   }
 `
 
-export const ExpandArrowIcon = styled(ArrowIcon)<{expanded?: boolean, hide?: boolean}>`
-  ${({ hide }) => hide && css`
+export const ExpandArrowIcon = styled(ArrowIcon)<{ expanded?: boolean; hide?: boolean }>`
+  ${({ hide }) =>
+    hide &&
+    css`
     display: none;
   `}
-  ${({ expanded }) => !expanded && css`
+  ${({ expanded }) =>
+    !expanded &&
+    css`
     transform: rotate(-90deg);
   `}
 `

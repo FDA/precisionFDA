@@ -6,7 +6,7 @@ import '../styles/variables.css'
 import '../styles/app-globals.css'
 import GlobalStyle from '../styles/global'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
-import { ColorModeProvider } from '../utils/ThemeContext'
+import { ThemeProvider } from '../utils/ThemeContext'
 import { FileUploadModalProvider } from '../features/files/actionModals/useFileUploadModal/FileUploadModalProvider'
 import { OnlineStatusProvider } from '../utils/OnlineStatusContext'
 
@@ -21,7 +21,7 @@ const queryClient = new QueryClient({
 
 export function StorybookProviders({ children }: React.PropsWithChildren) {
   return (
-    <ColorModeProvider>
+    <ThemeProvider>
       <BrowserRouter>
         <GlobalStyle railsAlertHeight={0} />
         <QueryClientProvider client={queryClient}>
@@ -32,6 +32,6 @@ export function StorybookProviders({ children }: React.PropsWithChildren) {
           </AlertDismissedProvider>
         </QueryClientProvider>
       </BrowserRouter>
-    </ColorModeProvider>
+    </ThemeProvider>
   )
 }

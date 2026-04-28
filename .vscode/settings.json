@@ -22,16 +22,16 @@
   },
   "biome.enabled": true,
   "biome.requireConfiguration": true,
-  "biome.lsp.bin": "./node_modules/@biomejs/biome/bin/biome",
+  "biome.lsp.bin": "./node_modules/@biomejs/bin/biome",
   "markdown.preview.scrollPreviewWithEditor": false,
   "debug.openDebug": "openOnDebugBreak",
   "debug.internalConsoleOptions": "openOnSessionStart",
   "workbench.colorCustomizations": {
-    "activityBar.background": "#2A3020",
-    "titleBar.activeBackground": "#3B432C",
-    "titleBar.activeForeground": "#FAFBF8",
-    "titleBar.inactiveBackground": "#05304E",
-    "titleBar.inactiveForeground": "#F8FCFF"
+    "activityBar.background": "#4a4752",
+    "titleBar.activeBackground": "#322750",
+    "titleBar.activeForeground": "#f9f8fb",
+    "titleBar.inactiveBackground": "#322750",
+    "titleBar.inactiveForeground": "#fcfbfd"
   },
   "files.watcherExclude": {
     "**/.git/**": true,

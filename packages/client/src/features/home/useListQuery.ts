@@ -53,6 +53,7 @@ export function useListQuery<T>({
         },
         scope,
       ),
+    placeholderData: previousData => previousData,
     refetchOnWindowFocus: false,
     ...queryOptions,
   })

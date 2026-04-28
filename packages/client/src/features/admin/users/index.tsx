@@ -1,37 +1,29 @@
-import { Column, ColumnDef } from '@tanstack/react-table'
+import type { Column, ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import { Link } from 'react-router'
 import styled from 'styled-components'
 import { DEFAULT_PAGINATED_DATA } from '../../../api/types'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
-import { UsersIcon } from '../../../components/icons/UserIcon'
-import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import Table from '../../../components/Table'
 import DateTimeRangeFilter, { dateRangeFilterFn } from '../../../components/Table/components/DateTimeRangeFilter'
 import SelectFilter, { selectFilterFn } from '../../../components/Table/components/SelectFilter'
 import { selectColumnDef } from '../../../components/Table/selectColumnDef'
 import { usePageMeta } from '../../../hooks/usePageMeta'
-import { UserLayout } from '../../../layouts/UserLayout'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useList } from '../../home/useList'
 import { formatNumberUS } from '../../home/utils'
-import { AdminSectionBreadcrumbDivider, AdminSectionBreadcrumbs, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
+import { AdminContentFooter, AdminStyledPageTable, Title, Topbox } from '../styles'
+import { AdminTablePlaceholderLoader, getAdminTableLoadingState } from '../tableLoading'
+import { AdminUserDetailsDrawer } from './AdminUserDetailsDrawer'
 import { fetchUsers } from './api'
 import { UsersListActionRow } from './ListPageActionRow'
-import { AdminUserListType, User } from './types'
+import type { AdminUserListType, User } from './types'
 
-const StyledLinkCell = styled.a`
+const StyledCell = styled.div`
   display: flex;
   align-items: center;
   gap: 5px;
 `
-
-const UserLinkCell = ({ dxuser, children }: { dxuser: string; children: React.ReactNode }) => (
-  <StyledLinkCell data-turbolinks="false" href={`/users/${dxuser}`}>
-    {children}
-  </StyledLinkCell>
-)
 
 const USER_STATUS_OPTIONS = [
   { label: 'Active', option: 0 },
@@ -40,7 +32,7 @@ const USER_STATUS_OPTIONS = [
 ]
 
 const formatLastLogin = (lastLogin: string | null) => {
-  if (!lastLogin) return null
+  if (!lastLogin) return 'N/A'
 
   return new Date(lastLogin).toLocaleDateString('en-US', {
     month: 'short',
@@ -60,14 +52,14 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
     accessorKey: 'dxuser',
     filterFn: 'includesString',
     size: 200,
-    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{row.original.dxuser}</UserLinkCell>,
+    cell: ({ row }) => <StyledCell>{row.original.dxuser}</StyledCell>,
   },
   {
     header: 'Email ID',
     accessorKey: 'email',
     filterFn: 'includesString',
     size: 300,
-    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{row.original.email}</UserLinkCell>,
+    cell: ({ row }) => <StyledCell>{row.original.email}</StyledCell>,
   },
   {
     header: 'Last Login Date',
@@ -77,7 +69,7 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
       filterElement: (column: Column<User>) => <DateTimeRangeFilter column={column} />,
     },
     size: 300,
-    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{formatLastLogin(row.original.lastLogin)}</UserLinkCell>,
+    cell: ({ row }) => <StyledCell>{formatLastLogin(row.original.lastLogin)}</StyledCell>,
   },
   {
     header: 'Status',
@@ -87,7 +79,7 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
       filterElement: (column: Column<User>) => <SelectFilter column={column} options={USER_STATUS_OPTIONS} />,
     },
     size: 250,
-    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{row.original.userState.toUpperCase()}</UserLinkCell>,
+    cell: ({ row }) => <StyledCell>{row.original.userState.toUpperCase()}</StyledCell>,
   },
   {
     header: 'Total Limit',
@@ -96,11 +88,11 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
     size: 250,
     enableColumnFilter: false,
     cell: ({ row }) => (
-      <UserLinkCell dxuser={row.original.dxuser}>
-        {row.original.cloudResourceSettings?.total_limit
+      <StyledCell>
+        {typeof row.original.cloudResourceSettings?.total_limit === 'number'
           ? `$${formatNumberUS(row.original.cloudResourceSettings?.total_limit)}`
           : 'N/A'}
-      </UserLinkCell>
+      </StyledCell>
     ),
   },
   {
@@ -110,17 +102,18 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
     enableColumnFilter: false,
     size: 250,
     cell: ({ row }) => (
-      <UserLinkCell dxuser={row.original.dxuser}>
-        {row.original.cloudResourceSettings?.job_limit
+      <StyledCell>
+        {typeof row.original.cloudResourceSettings?.job_limit === 'number'
           ? `$${formatNumberUS(row.original.cloudResourceSettings?.job_limit)}`
           : 'N/A'}
-      </UserLinkCell>
+      </StyledCell>
     ),
   },
 ]
 
 const UsersList = () => {
   usePageMeta({ title: 'precisionFDA Admin - Users' })
+  const [openedUserId, setOpenedUserId] = React.useState<User['id'] | null>(null)
 
   const {
     setPerPageParam,
@@ -135,6 +128,8 @@ const UsersList = () => {
     setSelectedIndexes,
     saveColumnResizeWidth,
     colWidths,
+    columnVisibility,
+    setColumnVisibility,
   } = useList<AdminUserListType>({
     fetchList: fetchUsers,
     resource: 'admin-users',
@@ -142,6 +137,19 @@ const UsersList = () => {
   })
 
   const { data = DEFAULT_PAGINATED_DATA, isLoading, error } = query
+  const { showLoadingState, showPlaceholderLoader, tableClassName } = getAdminTableLoadingState({
+    data: query.data,
+    isLoading,
+    isFetching: query.isFetching,
+    isPlaceholderData: query.isPlaceholderData,
+  })
+
+  React.useEffect(() => {
+    if (openedUserId == null) return
+    if (isLoading) return
+    if (data.data.some(user => user.id === openedUserId)) return
+    setOpenedUserId(null)
+  }, [data.data, isLoading, openedUserId])
 
   if (error) {
     return <div>{JSON.stringify(error)}</div>
@@ -152,42 +160,35 @@ const UsersList = () => {
   const filters = toArrayFromObject(filterQuery)
 
   return (
-    <UserLayout innerScroll>
-      <AdminSectionBreadcrumbs>
-        <Link to="/admin" data-turbolinks="false">
-          Admin Dashboard
-        </Link>
-        <AdminSectionBreadcrumbDivider>/</AdminSectionBreadcrumbDivider>
-        <Link to="/admin/users" data-turbolinks="false">
-          Users
-        </Link>
-      </AdminSectionBreadcrumbs>
-
+    <>
       <Topbox>
-        <TopLeft>
-          <UsersIcon height={20} />
-          <Title>User Management</Title>
-        </TopLeft>
+        <Title>User Management</Title>
         <UsersListActionRow selectedUsers={selectedUsers} refetchUsers={query.refetch} />
       </Topbox>
 
-      <AdminStyledPageTable>
-        <Table<User>
-          isLoading={isLoading}
-          data={data.data}
-          columns={columns}
-          columnSizing={colWidths}
-          setColumnSizing={saveColumnResizeWidth}
-          rowSelection={selectedIndexes}
-          setSelectedRows={setSelectedIndexes}
-          setColumnFilters={setSearchFilter}
-          columnSortBy={sortBy}
-          setColumnSortBy={setSortBy}
-          columnFilters={filters}
-        />
-      </AdminStyledPageTable>
+      <div className="relative flex flex-1 min-h-0 flex-col">
+        {showPlaceholderLoader && <AdminTablePlaceholderLoader />}
+        <AdminStyledPageTable className={tableClassName}>
+          <Table<User>
+            isLoading={showLoadingState}
+            data={data.data}
+            columns={columns}
+            columnSizing={colWidths}
+            setColumnSizing={saveColumnResizeWidth}
+            columnVisibility={columnVisibility}
+            setColumnVisibility={setColumnVisibility}
+            rowSelection={selectedIndexes}
+            setSelectedRows={setSelectedIndexes}
+            setColumnFilters={setSearchFilter}
+            columnSortBy={sortBy}
+            setColumnSortBy={setSortBy}
+            columnFilters={filters}
+            onRowClick={row => setOpenedUserId(row.original.id)}
+          />
+        </AdminStyledPageTable>
+      </div>
 
-      <ContentFooter>
+      <AdminContentFooter>
         <Pagination
           page={data.meta.page}
           totalCount={data.meta.total}
@@ -199,8 +200,10 @@ const UsersList = () => {
           showListCount
         />
         <HoverDNAnexusLogo opacity height={14} />
-      </ContentFooter>
-    </UserLayout>
+      </AdminContentFooter>
+
+      <AdminUserDetailsDrawer userId={openedUserId} open={openedUserId != null} onClose={() => setOpenedUserId(null)} />
+    </>
   )
 }
 

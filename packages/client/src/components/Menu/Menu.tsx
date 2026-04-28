@@ -59,6 +59,7 @@ export interface MenuProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   positioner?: React.ComponentProps<typeof BaseMenu.Positioner>
+  disableInitialFocus?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -195,13 +196,20 @@ function MenuSubmenu({ trigger, children }: MenuSubmenuProps) {
   )
 }
 
-function Menu({ children, trigger, open, onOpenChange, positioner = { side: 'bottom', align: 'end' } }: MenuProps) {
+function Menu({ children, trigger, open, onOpenChange, positioner = { side: 'bottom', align: 'end' }, disableInitialFocus = false }: MenuProps) {
   return (
     <BaseMenu.Root open={open} onOpenChange={onOpenChange}>
       {trigger}
       <BaseMenu.Portal>
         <BaseMenu.Positioner className={styles.positioner} {...positioner}>
           <BaseMenu.Popup className={styles.popup}>
+            {disableInitialFocus && (
+              <button
+                type="button"
+                tabIndex={0}
+                style={{ position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden', padding: 0, border: 'none', background: 'none' }}
+              />
+            )}
             {children}
           </BaseMenu.Popup>
         </BaseMenu.Positioner>

@@ -178,6 +178,10 @@ export class SpaceMembershipsController {
 
 ## DTOs & Validation
 
+- DTO static mapping methods (e.g. `fromEntity`) must be synchronous
+- Do not perform database or platform calls in DTO static methods
+- Load required relations in service/facade before calling DTO mappers
+
 ```ts
 export class UpdateSpaceMembershipDTO {
   @IsArray()
@@ -329,6 +333,19 @@ describe('SpaceMembershipService', () => {
 | URLs | kebab-case | `/data-portals/:id` |
 | Params | camelCase | `membershipIds` |
 | Classes | PascalCase + suffix | `SpaceMembershipService` |
+
+### Model Files Convention
+
+- Place domain model definitions in `model/` under the domain folder
+- Use one export per file in model files
+- File name must match exported symbol name converted to kebab-case
+- Use `.type.ts` suffix only for string union types
+- Common model suffixes are `.dto.ts`, `.map.ts`, `.type.ts`; otherwise use plain file name
+
+Examples:
+- `run-app.dto.ts` exports `RunAppDTO`
+- `entity.type.ts` exports `EntityType`
+- `entity-instance.ts` exports `EntityInstance`
 
 ## Types
 

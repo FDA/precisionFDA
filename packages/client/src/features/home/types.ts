@@ -1,6 +1,6 @@
-import { IChallenge } from '@/types/challenge'
-import { IOSpec } from '../apps/apps.types'
-import { License } from '../licenses/types'
+import type { IChallenge } from '@/types/challenge'
+import type { IOSpec } from '../apps/apps.types'
+import type { License } from '../licenses/types'
 
 export interface ApiErrorResponse {
   error?: {
@@ -54,6 +54,7 @@ export type HomeResourceType = Exclude<ResourceTypeUrlNames, 'members'>
 
 export type APIResource =
   | 'admin-users'
+  | 'admin-pending-users'
   | 'admin-invitations'
   | 'files'
   | 'folders'

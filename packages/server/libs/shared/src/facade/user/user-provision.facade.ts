@@ -15,6 +15,7 @@ import { Organization } from '@shared/domain/org/organization.entity'
 import { OrganizationRepository } from '@shared/domain/org/organization.repository'
 import { Profile } from '@shared/domain/profile/profile.entity'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import {
   CURRENT_SCHEMA_VERSION,
   DEFAULT_CLOUD_RESOURCE_SETTINGS,
@@ -23,7 +24,6 @@ import {
 } from '@shared/domain/user/user.entity'
 import { constructOrgFromUsername, constructUsername, isGovEmail } from '@shared/domain/user/user.helper'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
@@ -248,15 +248,14 @@ export class UserProvisionFacade {
   }
 
   private createProfile(invitation: Invitation, user: User): Profile {
-    const profile = new Profile()
+    const profile = new Profile(user)
     profile.email = invitation.email
     profile.user = Reference.create(user)
     return profile
   }
 
   private createNotificationPreference(user: User): NotificationPreference {
-    const notificationPreference = new NotificationPreference(user)
-    return notificationPreference
+    return new NotificationPreference(user)
   }
 
   private async storeUserData(

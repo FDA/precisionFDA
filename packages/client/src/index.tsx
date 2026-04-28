@@ -1,4 +1,5 @@
 import Axios from 'axios'
+import { lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
 import { ENABLE_DEV_MSW } from '@/utils/env'
@@ -8,6 +9,10 @@ import './styles/variables.css'
 import './styles/app-globals.css'
 import Root from './routes/root'
 import { getAuthenticityToken } from './utils/api'
+
+const DevInspector = import.meta.env.DEV
+  ? lazy(() => import('react-dev-inspector').then(mod => ({ default: mod.Inspector })))
+  : null
 
 async function enableMocking() {
   if (!ENABLE_DEV_MSW) {
@@ -36,7 +41,16 @@ const renderApp = () => {
     ReactModal.setAppElement('#app-root')
     loadRuntimeEnv().then(() => {
       enableMocking().then(() => {
-        root.render(<Root />)
+        root.render(
+          <>
+            {DevInspector ? (
+              <Suspense fallback={null}>
+                <DevInspector />
+              </Suspense>
+            ) : null}
+            <Root />
+          </>,
+        )
       })
     })
   }

@@ -94,6 +94,7 @@ export interface IUser {
   last_name: string
   handle: string
   session_id: string
+  time_zone?: string
   total_limit: number
 }
 

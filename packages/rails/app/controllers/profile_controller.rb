@@ -8,39 +8,6 @@ class ProfileController < ApplicationController
   before_action :find_admin, only: %i(provision_org)
 
   # rubocop:disable Metrics/MethodLength
-  def index
-    usa_id = Country.find_by(name: "United States").id
-    @user = User.includes(:org).find(@context.user_id)
-    org_id = @user.singular? ? nil : @user.org_id
-
-    users = if !@user.singular?
-      User.where(org_id: @user.org_id)
-    else
-      User.where(id: @user.id)
-    end
-
-    @users_grid = initialize_grid(
-      users,
-      order: "dxuser",
-      order_direction: "asc",
-      per_page: 100,
-    )
-
-    profile = Profiles::Getter.call(@user, @context).view_fields
-
-    js(usa_id: usa_id, country_codes: Country.countries_for_codes, profile: profile, org_id: org_id)
-  end
-
-  def update
-    profile = current_user.profile || current_user.build_profile
-
-    if Profiles::Updater.call(unsafe_params, @context, profile)
-      render json: profile.view_fields, status: :ok
-    else
-      render json: profile.errors, status: :unprocessable_entity
-    end
-  end
-
   def provision_user
     @user = User.includes(:org).find(@context.user_id)
     raise unless @user.can_provision_accounts?

@@ -1,0 +1,200 @@
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--c-text-500);
+  background-color: var(--background);
+  border: 1px solid var(--c-layout-border);
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: border-color 150ms ease;
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+.trigger:hover {
+  border-color: var(--primary-400);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--primary-300);
+  outline-offset: 1px;
+}
+
+.trigger[data-popup-open] {
+  border-color: var(--primary-400);
+}
+
+.triggerIcon {
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.triggerText {
+  flex: 1;
+  text-align: left;
+}
+
+.placeholder {
+  color: var(--c-text-400);
+}
+
+/* Positioner */
+.positioner {
+  z-index: 1000;
+}
+
+/* Popup */
+.popup {
+  border-radius: 8px;
+  border: 1px solid var(--c-dropdown-menu-border);
+  background-color: var(--c-dropdown-bg);
+  padding: 12px;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  outline: none;
+  animation: fadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  width: 260px;
+}
+
+.popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+/* Calendar Header */
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.calendarTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-700);
+}
+
+.navButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--c-text-500);
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.navButton:hover {
+  background-color: var(--c-dropdown-hover-bg);
+}
+
+/* Weekday Labels */
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.weekday {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--c-text-400);
+  text-align: center;
+  padding: 4px 0;
+  text-transform: uppercase;
+}
+
+/* Day Grid */
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--c-text-700);
+  cursor: pointer;
+  transition: all 150ms ease;
+  margin: auto;
+}
+
+.day:hover {
+  background-color: var(--c-dropdown-hover-bg);
+}
+
+.dayOutside {
+  color: var(--c-text-300);
+}
+
+.dayToday {
+  font-weight: 700;
+  color: var(--primary-500);
+}
+
+.daySelected {
+  background-color: var(--primary-500);
+  color: white;
+  font-weight: 600;
+}
+
+.daySelected:hover {
+  background-color: var(--primary-600);
+}
+
+/* Clear button */
+.clearRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--c-dropdown-menu-border);
+}
+
+.clearButton {
+  font-size: 11px;
+  color: var(--c-text-400);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: all 150ms ease;
+}
+
+.clearButton:hover {
+  color: var(--c-text-600);
+  background-color: var(--c-dropdown-hover-bg);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

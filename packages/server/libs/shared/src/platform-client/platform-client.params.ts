@@ -272,6 +272,15 @@ export type UserUnlockParams = {
   }
 }
 
+export type UserUpdateEmailParams = {
+  dxid: string
+  data: {
+    newEmail: string
+    password: string
+    otp: string
+  }
+}
+
 export type UserCreateData = {
   username: string
   email: string

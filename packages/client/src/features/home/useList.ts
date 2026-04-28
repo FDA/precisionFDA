@@ -1,16 +1,18 @@
+import type { UseQueryOptions } from '@tanstack/react-query'
 import { useEffect, useEffectEvent } from 'react'
-import { UseQueryOptions } from '@tanstack/react-query'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByParams } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { createLocationKey } from '../../utils'
-import { columnFilters } from './columnFilters'
-import { APIResource, HomeScope, IFilter, IMeta, MetaV2 } from './types'
+import { columnFilters as defaultColumnFilters } from './columnFilters'
+import type { APIResource, HomeScope, IFilter, IMeta, MetaV2 } from './types'
 import { useFilterParams } from './useFilterState'
 import { useListQuery } from './useListQuery'
 import { useListSelect } from './useListSelect'
-import { Params } from './utils'
+import type { Params } from './utils'
+
+const defaultListFilters: Record<string, string> = defaultColumnFilters
 
 export type FetchListFn<T = unknown> = (filter: IFilter[], params: Params) => Promise<T>
 
@@ -22,9 +24,16 @@ interface IUseList<T> {
   resource: APIResource
   params?: Params
   queryOptions?: UseQueryOptions<T>
+  filters?: Record<string, string>
 }
 
-export function useList<T extends ListType>({ fetchList, resource, params = {}, scope }: IUseList<T>) {
+export function useList<T extends ListType>({
+  fetchList,
+  resource,
+  params = {},
+  scope,
+  filters = defaultListFilters,
+}: IUseList<T>) {
   const locationKey = createLocationKey(resource, params?.spaceId)
   const pagination = usePaginationParams(resource)
   const { selectedIndexes, setSelectedIndexes } = useListSelect()
@@ -35,9 +44,10 @@ export function useList<T extends ListType>({ fetchList, resource, params = {}, 
   const resetSelected = useEffectEvent(() => setSelectedIndexes({}))
 
   const { filterQuery, setSearchFilter } = useFilterParams({
-    filters: columnFilters,
+    filters,
   })
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: we need reset on those value changes
   useEffect(() => {
     resetSelected()
   }, [JSON.stringify(filterQuery), JSON.stringify(pagination), JSON.stringify(sort), scope, params.spaceId])

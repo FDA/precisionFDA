@@ -1,4 +1,5 @@
 import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
+import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
 import { Job } from 'bull'
 import { Logger } from '@nestjs/common'
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
@@ -28,7 +29,6 @@ import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
 import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { TASK_TYPE, Task } from '@shared/queue/task.input'
-import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
 import { FollowUpDecider } from '../../src/domain/user-file/follow-up-decider'
 import { EmailQueueProcessor } from '../../src/domain/email/processor/email-queue.processor'
 import { FileSyncQueueProcessor } from '../../src/domain/user-file/processor/file-sync-queue.processor'
@@ -161,7 +161,6 @@ const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> |
   [TASK_TYPE.UNLOCK_NODES]: (job: Job): Promise<void> => processor.FILE().unlockNodes(job),
 }
 
-// TODO(PFDA-4831) - remove and replace usages by actual job creation in redis
 export const mockHandler = async (job: Job<Task>): Promise<void> => {
   const processFn = jobToProcessorMap[job.data.type]
 

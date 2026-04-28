@@ -4,7 +4,7 @@ import { FC } from 'react'
 import { BrowserRouter } from 'react-router'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
-import { ColorModeProvider } from '../utils/ThemeContext'
+import { ThemeProvider } from '../utils/ThemeContext'
 import { OnlineStatusProvider } from '../utils/OnlineStatusContext'
 import { FileUploadModalProvider } from '../features/files/actionModals/useFileUploadModal/FileUploadModalProvider'
 
@@ -27,7 +27,7 @@ const queryClient = new QueryClient({
 })
 
 export const AllTheProviders: FC<{ children: React.ReactNode }> = ({ children }) => (
-  <ColorModeProvider>
+  <ThemeProvider>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AlertDismissedProvider>
@@ -37,7 +37,7 @@ export const AllTheProviders: FC<{ children: React.ReactNode }> = ({ children })
         </AlertDismissedProvider>
       </QueryClientProvider>
     </BrowserRouter>
-  </ColorModeProvider>
+  </ThemeProvider>
 )
 
 const customRender = (ui: React.ReactElement, { route = '/' } = {}) => {

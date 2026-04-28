@@ -1,4 +1,5 @@
-import { Entity, OneToOne, PrimaryKey, Property, Ref } from '@mikro-orm/core'
+import { Entity, ManyToOne, OneToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
+import { Country } from '../country/country.entity'
 import { User } from '../user/user.entity'
 import { ProfileRepository } from './profile.repository'
 
@@ -7,40 +8,43 @@ export class Profile {
   @PrimaryKey()
   id: number
 
-  @Property()
-  address1: string
+  @Property({ nullable: true })
+  address1?: string | null
 
-  @Property()
-  address2: string
+  @Property({ nullable: true })
+  address2?: string | null
 
-  @Property()
-  city: string
+  @Property({ nullable: true })
+  city?: string | null
 
-  @Property()
-  email: string
+  @Property({ nullable: true })
+  email?: string | null
 
-  @Property()
-  emailConfirmed: boolean
+  @Property({ default: false })
+  emailConfirmed: boolean = false
 
-  @Property()
-  postalCode: string
+  @Property({ nullable: true })
+  postalCode?: string | null
 
-  @Property()
-  phone: string
+  @Property({ nullable: true })
+  phone?: string | null
 
-  @Property()
-  phoneConfirmed: boolean
+  @Property({ default: false })
+  phoneConfirmed: boolean = false
 
-  @Property()
-  usState: string
+  @Property({ nullable: true })
+  usState?: string | null
 
-  @OneToOne({ entity: () => User })
+  @OneToOne({ entity: () => User, fieldName: 'user_id' })
   user: Ref<User>
 
-  // FKs to country table, but unused currently
-  @Property()
-  countryId: number
+  @ManyToOne({ entity: () => Country, fieldName: 'country_id', nullable: true })
+  country?: Ref<Country> | null
 
-  @Property()
-  phoneCountryId: number
+  @ManyToOne({ entity: () => Country, fieldName: 'phone_country_id', nullable: true })
+  phoneCountry?: Ref<Country> | null
+
+  constructor(user: User) {
+    this.user = Reference.create(user)
+  }
 }

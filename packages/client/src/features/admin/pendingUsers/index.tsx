@@ -1,29 +1,22 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import type React from 'react'
-import { Link } from 'react-router'
+import { useEffect, useState } from 'react'
 import { useResendActivationEmailMutation } from '@/api/mutations/user'
 import { DEFAULT_PAGINATED_DATA } from '@/api/types'
-import { Button } from '@/components/Button'
 import { HoverDNAnexusLogo } from '@/components/icons/DNAnexusLogo'
-import { UsersIcon } from '@/components/icons/UserIcon'
-import { ContentFooter } from '@/components/Page/ContentFooter'
 import { hidePagination, Pagination } from '@/components/Pagination'
 import { selectColumnDef } from '@/components/Table/selectColumnDef'
+import { Button } from '@/components/ui/button'
 import { usePageMeta } from '@/hooks/usePageMeta'
-import { UserLayout } from '@/layouts/UserLayout'
 import { formatDate } from '@/utils/formatting'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import Table from '../../../components/Table'
 import { useList } from '../../home/useList'
 import { ButtonsRow } from '../common'
+import { AdminContentFooter, AdminStyledPageTable, Title, Topbox } from '../styles'
+import { AdminTablePlaceholderLoader, getAdminTableLoadingState } from '../tableLoading'
+import { AdminUserDetailsDrawer } from '../users/AdminUserDetailsDrawer'
+import type { User } from '../users/types'
 import { fetchPendingUsers, type PendingUser, type PendingUserListType } from './api'
-import styles from './pendingUsers.module.css'
-
-const UserLinkCell = ({ dxuser, children }: { dxuser: string; children: React.ReactNode }) => (
-  <a className={styles.linkCell} data-turbolinks="false" href={`/users/${dxuser}`}>
-    {children}
-  </a>
-)
 
 const getAdminUserColumns = (): ColumnDef<PendingUser>[] => [
   selectColumnDef<PendingUser>(),
@@ -32,14 +25,12 @@ const getAdminUserColumns = (): ColumnDef<PendingUser>[] => [
     accessorKey: 'dxuser',
     filterFn: 'includesString',
     size: 400,
-    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{row.original.dxuser}</UserLinkCell>,
   },
   {
     header: 'Email ID',
     accessorKey: 'email',
     filterFn: 'includesString',
     size: 400,
-    cell: ({ row }) => <UserLinkCell dxuser={row.original.dxuser}>{row.original.email}</UserLinkCell>,
   },
   {
     header: 'Created At',
@@ -52,6 +43,7 @@ const getAdminUserColumns = (): ColumnDef<PendingUser>[] => [
 
 const PendingUsersList = () => {
   usePageMeta({ title: 'precisionFDA Admin - Pending Users' })
+  const [openedUserId, setOpenedUserId] = useState<User['id'] | null>(null)
 
   const {
     setPerPageParam,
@@ -68,12 +60,25 @@ const PendingUsersList = () => {
     colWidths,
   } = useList<PendingUserListType>({
     fetchList: fetchPendingUsers,
-    resource: 'admin-users',
+    resource: 'admin-pending-users',
     params: {},
   })
 
   const { mutate: resendActivationEmail } = useResendActivationEmailMutation()
   const { data = DEFAULT_PAGINATED_DATA, isLoading, error } = query
+  const { showLoadingState, showPlaceholderLoader, tableClassName } = getAdminTableLoadingState({
+    data: query.data,
+    isLoading,
+    isFetching: query.isFetching,
+    isPlaceholderData: query.isPlaceholderData,
+  })
+
+  useEffect(() => {
+    if (openedUserId == null) return
+    if (isLoading) return
+    if (data.data.some(user => user.id === openedUserId)) return
+    setOpenedUserId(null)
+  }, [data.data, isLoading, openedUserId])
 
   if (error) {
     return <div>{JSON.stringify(error)}</div>
@@ -91,25 +96,12 @@ const PendingUsersList = () => {
   }
 
   return (
-    <UserLayout innerScroll>
-      <div className={styles.breadcrumbs}>
-        <Link to="/admin" data-turbolinks="false">
-          Admin Dashboard
-        </Link>
-        <span className={styles.breadcrumbDivider}>/</span>
-        <Link to="/admin/users" data-turbolinks="false">
-          Pending Users
-        </Link>
-      </div>
-
-      <div className={styles.topbox}>
-        <div className={styles.topLeft}>
-          <UsersIcon height={20} />
-          <div className={styles.title}>Pending Users Management</div>
-        </div>
+    <>
+      <Topbox>
+        <Title>Pending Users</Title>
         <ButtonsRow>
           <Button
-            data-variant="primary"
+            size="sm"
             data-testid="admin-users-activate-button"
             disabled={!isSingleUserSelected}
             onClick={handleResendActivation}
@@ -117,26 +109,30 @@ const PendingUsersList = () => {
             Resend Activation Email
           </Button>
         </ButtonsRow>
+      </Topbox>
+
+      <div className="relative flex flex-1 min-h-0 flex-col">
+        {showPlaceholderLoader && <AdminTablePlaceholderLoader />}
+        <AdminStyledPageTable className={tableClassName}>
+          <Table<PendingUser>
+            isLoading={showLoadingState}
+            data={data.data}
+            columns={columns}
+            columnSizing={colWidths}
+            setColumnSizing={saveColumnResizeWidth}
+            rowSelection={selectedIndexes}
+            setSelectedRows={setSelectedIndexes}
+            setColumnFilters={setSearchFilter}
+            columnSortBy={sortBy}
+            setColumnSortBy={setSortBy}
+            columnFilters={filters}
+            enableColumnSelect={false}
+            onRowClick={row => setOpenedUserId(row.original.id)}
+          />
+        </AdminStyledPageTable>
       </div>
 
-      <div className={styles.pageTable}>
-        <Table<PendingUser>
-          isLoading={isLoading}
-          data={data.data}
-          columns={columns}
-          columnSizing={colWidths}
-          setColumnSizing={saveColumnResizeWidth}
-          rowSelection={selectedIndexes}
-          setSelectedRows={setSelectedIndexes}
-          setColumnFilters={setSearchFilter}
-          columnSortBy={sortBy}
-          setColumnSortBy={setSortBy}
-          columnFilters={filters}
-          enableColumnSelect={false}
-        />
-      </div>
-
-      <ContentFooter>
+      <AdminContentFooter>
         <Pagination
           page={data.meta.page}
           totalCount={data.meta.total}
@@ -148,8 +144,10 @@ const PendingUsersList = () => {
           showListCount
         />
         <HoverDNAnexusLogo opacity height={14} />
-      </ContentFooter>
-    </UserLayout>
+      </AdminContentFooter>
+
+      <AdminUserDetailsDrawer userId={openedUserId} open={openedUserId != null} onClose={() => setOpenedUserId(null)} />
+    </>
   )
 }
 

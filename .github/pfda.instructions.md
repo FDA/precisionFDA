@@ -78,7 +78,7 @@ We use React 19.2
 - the useEffectEvent feature is stable. - Use the useEffectEvent documentation: https://react.dev/reference/react/useEffectEvent
 - `forwardRef` is not longer used and ref is passed in through props.
 
-- Use CSS modules for styling React components.
+- Use tailwind for css utility, and CSS modules for styling advanced React components.
 - Our project css variables are defined in packages/client/src/styles/variables.ts
 - Take heavy inspiration from shadcn ui for styling for components.
 - for accessibility, use base-ui components where possible. https://base-ui.com/llms.txt

@@ -1,30 +1,37 @@
+import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios'
 import { PlatformErrors } from '@shared/platform-client'
 
-export const createPlatformError: (
-  statusCode: number,
-  type: string,
-  message: string,
-) => {
-  response: { status: number; headers: unknown[]; data: { error: { type: string; message: string } } }
-} = (statusCode: number, type: string, message: string) => {
-  return {
-    response: {
-      status: statusCode,
-      headers: [],
-      data: {
-        error: {
-          type: type,
-          message: message,
-        },
-      },
-    },
+type PlatformErrorPayload = { error: { type: string; message: string } }
+
+type PlatformAxiosError = AxiosError<PlatformErrorPayload | string>
+
+function createAxiosError(statusCode: number, data: PlatformErrorPayload | string, code?: string): PlatformAxiosError {
+  const error = new AxiosError('Platform request failed', code)
+
+  const response: AxiosResponse<PlatformErrorPayload | string> = {
+    data,
+    status: statusCode,
+    statusText: String(statusCode),
+    headers: new AxiosHeaders(),
+    config: { headers: new AxiosHeaders() },
   }
+
+  error.response = response
+
+  return error
+}
+
+export const createPlatformError = (statusCode: number, type: string, message: string): PlatformAxiosError => {
+  return createAxiosError(statusCode, {
+    error: {
+      type,
+      message,
+    },
+  })
 }
 
 // An example of a regular platform error
-export const createPermissionsDeniedError: () => {
-  response: { status: number; headers: unknown[]; data: { error: { type: string; message: string } } }
-} = () => {
+export const createPermissionsDeniedError = (): PlatformAxiosError => {
   return createPlatformError(
     401,
     PlatformErrors.PermissionDenied,
@@ -33,23 +40,17 @@ export const createPermissionsDeniedError: () => {
 }
 
 // A 504 error we sometimes encounter
-export const createGatewayError: () => { response: { status: number; headers: unknown[]; data: string } } = () => {
-  return {
-    response: {
-      status: 504,
-      headers: [],
-      data: '<html>\r\n<head><title>504 Gateway Time-out</title></head></html>\r\n',
-    },
-  }
+export const createGatewayError = (): PlatformAxiosError => {
+  return createAxiosError(504, '<html>\r\n<head><title>504 Gateway Time-out</title></head></html>\r\n')
 }
 
 // ETIMEOUT error
-export const createETIMEOUTError: () => { message: string; name: string; stack: string; code: string } = () => {
-  return {
-    message: 'connect ETIMEDOUT 192.168.119.135:443',
-    name: 'Error',
-    stack:
-      'Error: connect ETIMEDOUT 192.168.119.135:443\n    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1144:16)',
-    code: 'ETIMEDOUT',
-  }
+export const createETIMEOUTError = (): PlatformAxiosError => {
+  const error = new AxiosError('connect ETIMEDOUT 192.168.119.135:443', 'ETIMEDOUT')
+  error.name = 'Error'
+  error.stack =
+    'Error: connect ETIMEDOUT 192.168.119.135:443\n    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1144:16)'
+  error.request = {}
+
+  return error
 }

@@ -1,7 +1,7 @@
-import { IUser } from '../../../types/user'
-import { MapKeysByObj } from '../../../utils/generics'
-import { snakeToCamelMapping } from '../../../utils/snakeCaseMapping'
-import { MetaV2 } from '../../home/types'
+import type { IUser } from '../../../types/user'
+import type { MapKeysByObj } from '../../../utils/generics'
+import type { snakeToCamelMapping } from '../../../utils/snakeCaseMapping'
+import type { MetaV2 } from '../../home/types'
 
 // NOTE(samuel) duplicate from backend - ideally generate these types
 export const RESOURCE_TYPES = [
@@ -34,6 +34,7 @@ export const RESOURCE_TYPES = [
 ] as const
 
 export type User = MapKeysByObj<IUser, typeof snakeToCamelMapping> & {
+  createdAt?: string
   lastLogin: string
   userState: 'active' | 'deactivated' | 'locked' | 'n/a'
   cloudResourceSettings: {
@@ -44,3 +45,35 @@ export type User = MapKeysByObj<IUser, typeof snakeToCamelMapping> & {
 }
 
 export type AdminUserListType = { data: User[]; meta: MetaV2 }
+
+export type AdminUserDetails = {
+  id: number
+  dxuser: string
+  firstName: string
+  lastName: string
+  fullName: string
+  email: string
+  userState: User['userState']
+  createdAt: string
+  updatedAt: string
+  lastLogin: string | null
+  timeZone: string | null
+  disableMessage: string | null
+  cloudResourceSettings: User['cloudResourceSettings'] | null
+  organization: {
+    id: number
+    name: string
+    handle: string
+    adminId: number | null
+    adminFullName: string | null
+    singular: boolean
+  }
+  permissions: {
+    isGovernmentUser: boolean
+    isOrgAdmin: boolean
+    isSiteAdmin: boolean
+    isReviewSpaceAdmin: boolean
+    isChallengeAdmin: boolean
+    pendingActivation: boolean
+  }
+}
