@@ -137,6 +137,7 @@ Rails.application.routes.draw do
     # get "home-old" => "home#index"
     # get "/home-old/*all", to: "home#index"
 
+    get "/account", to: "home#index"
     get "/account/*all", to: "home#index"
     get "/challenges/propose", to: "challenges#index"
     get "/challenges/create", to: "challenges#index"

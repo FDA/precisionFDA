@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify'
 import { useTheme } from './ThemeContext'
 
 export const PFDAToastContainer = () => {
-  const { theme } = useTheme()
+  const { resolvedTheme } = useTheme()
   return (
     <ToastContainer
       position="top-right"
@@ -11,7 +11,7 @@ export const PFDAToastContainer = () => {
       closeOnClick
       pauseOnHover
       limit={5}
-      theme={theme}
+      theme={resolvedTheme}
       toastStyle={{
         marginTop: '40px',
         paddingRight: '25px',

@@ -183,6 +183,9 @@ export class User extends BaseEntity {
   @Property({ nullable: true })
   lastDataCheckup?: Date
 
+  @Property({ nullable: true })
+  timeZone?: string | null
+
   @Enum({
     type: () => USER_STATE,
     serializer: (value: USER_STATE) => {

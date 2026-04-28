@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
+import { inspectorServer } from '@react-dev-inspector/vite-plugin'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
@@ -16,6 +17,24 @@ export default defineConfig(({ mode }) => {
   const certPath = path.resolve(__dirname, '../../cert.pem')
   const hasHttpsCerts = fs.existsSync(keyPath) && fs.existsSync(certPath)
 
+  const devOnlyPlugins = isProduction
+    ? []
+    : [
+        inspectorServer(),
+        babel({
+          plugins: [
+            [
+              'babel-plugin-styled-components',
+              {
+                displayName: true,
+                ssr: false,
+              },
+            ],
+            '@react-dev-inspector/babel-plugin',
+          ],
+        }),
+      ]
+
   return {
     // Base path for rails production - chunks will be loaded from /packs/
     base: isProduction ? '/packs/' : '/',
@@ -26,17 +45,7 @@ export default defineConfig(({ mode }) => {
 
     plugins: [
       react(),
-      babel({
-        plugins: [
-          [
-            'babel-plugin-styled-components',
-            {
-              displayName: true,
-              ssr: false,
-            },
-          ],
-        ],
-      }),
+      ...devOnlyPlugins,
       viteStaticCopy({
         targets: [
           {
@@ -78,7 +87,7 @@ export default defineConfig(({ mode }) => {
             groups: [
               {
                 name: 'vendor',
-                test: /node_modules[\\/](react|react-dom|react-router)([\\/]|$)/,
+                test: /node_modules[\\/](react|react-dom|react-router|react-dev-inspector)([\\/]|$)/,
               },
             ],
           },
@@ -91,9 +100,9 @@ export default defineConfig(({ mode }) => {
       port: 4000,
       https: hasHttpsCerts
         ? {
-            key: fs.readFileSync(keyPath),
-            cert: fs.readFileSync(certPath),
-          }
+          key: fs.readFileSync(keyPath),
+          cert: fs.readFileSync(certPath),
+        }
         : undefined,
       proxy: {
         '/docs': {
@@ -176,20 +185,42 @@ export default defineConfig(({ mode }) => {
           secure: false,
           changeOrigin: true,
         },
-        // /workflows/*/edit
         '^/workflows/.+/edit$': {
           target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
-        // /experts/*/edit
         '^/experts/.+/edit$': {
           target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,
         },
-        // /experts/new
         '/experts/new': {
+          target: 'https://localhost:3000',
+          secure: false,
+          changeOrigin: true,
+        },
+        '/admin/comparator_settings': {
+          target: 'https://localhost:3000',
+          secure: false,
+          changeOrigin: true,
+        },
+        '/admin/org_action_requests': {
+          target: 'https://localhost:3000',
+          secure: false,
+          changeOrigin: true,
+        },
+        '/admin/participants': {
+          target: 'https://localhost:3000',
+          secure: false,
+          changeOrigin: true,
+        },
+        '/admin/admin_memberships': {
+          target: 'https://localhost:3000',
+          secure: false,
+          changeOrigin: true,
+        },
+        '/admin/activity_reports': {
           target: 'https://localhost:3000',
           secure: false,
           changeOrigin: true,

@@ -1,40 +1,57 @@
-require 'rails_helper'
+describe Profiles::EmailSynchronizer do
+  let(:token) { 'token-123' }
+  let(:user) { create(:user, email: 'old@example.com', normalized_email: 'old@example.com') }
+  let(:api) { instance_double('DNAnexusAPI') }
 
-RSpec.describe Profiles::EmailSynchronizer, type: :service do
-  let(:service_response) { described_class.call(user, context) }
-  let(:user) { create(:user) }
-  let!(:profile) { create(:profile, email_confirmed: false, user: user) }
-  let(:context) { Context.new(user.id, nil, SecureRandom.uuid, nil, nil) }
+  before do
+    allow(DNAnexusAPI).to receive(:new).and_call_original
+    allow(DNAnexusAPI).to receive(:new).with(token).and_return(api)
+  end
 
-  describe '#call' do
-    context 'when an user changed email in own profile' do
-      context 'and has confirmed new email by verification link' do
-        before do
-          stub_request(:post, "https://stagingauth.dnanexus.com/system/getUserInfo")
-            .to_return(status: 200, body: "{\"email\": \"#{profile.email}\"}")
-        end
-        it 'updates the user email' do
-          expect { service_response }.to change { user.email }.to(profile.email)
-        end
+  context 'when platform email matches profile email' do
+    let!(:profile) { create(:profile, user: user, email: 'new@example.com', email_confirmed: false) }
 
-        it 'and set email_confirm field in profile in true' do
-          expect { service_response }.to change { profile.email_confirmed }.to(true)
-        end
-      end
+    it 'marks profile as confirmed and synchronizes user email' do
+      allow(api).to receive(:user_describe).with("user-#{user.dxuser}").and_return({ 'email' => 'new@example.com' })
 
-      context 'and has not confirmed new email by verification link' do
-        before do
-          stub_request(:post, "https://stagingauth.dnanexus.com/system/getUserInfo")
-            .to_return(status: 200, body: "{\"email\": \"#{user.email}\"}")
-        end
-        it 'does not update the user email' do
-          expect { service_response }.not_to change { user.email }
-        end
+      expect(described_class.call(user, token)).to eq(true)
+      expect(user.reload.normalized_email).to eq('new@example.com')
+      expect(user.reload.email).to eq('new@example.com')
+      expect(profile.reload.email_confirmed).to eq(true)
+    end
+  end
 
-        it 'and does not set email_confirm field in profile in true' do
-          expect { service_response }.not_to change { profile.email_confirmed }
-        end
-      end
+  context 'when profile has pending unconfirmed email and platform is still old' do
+    let!(:profile) { create(:profile, user: user, email: 'pending@example.com', email_confirmed: false) }
+
+    it 'keeps pending profile value and does not force confirmation' do
+      allow(api).to receive(:user_describe).with("user-#{user.dxuser}").and_return({ 'email' => 'old@example.com' })
+
+      expect(described_class.call(user, token)).to eq(true)
+      expect(user.reload.normalized_email).to eq('old@example.com')
+      expect(profile.reload.email).to eq('pending@example.com')
+      expect(profile.reload.email_confirmed).to eq(false)
+    end
+  end
+
+  context 'when profile is already confirmed but diverges from platform' do
+    let!(:profile) { create(:profile, user: user, email: 'old@example.com', email_confirmed: true) }
+
+    it 'updates profile and user email to platform value' do
+      allow(api).to receive(:user_describe).with("user-#{user.dxuser}").and_return({ 'email' => 'changed@example.com' })
+
+      expect(described_class.call(user, token)).to eq(true)
+      expect(user.reload.normalized_email).to eq('changed@example.com')
+      expect(profile.reload.email).to eq('changed@example.com')
+      expect(profile.reload.email_confirmed).to eq(true)
+    end
+  end
+
+  context 'when platform request fails' do
+    it 'returns false and does not raise' do
+      allow(api).to receive(:user_describe).with("user-#{user.dxuser}").and_raise(StandardError.new('boom'))
+
+      expect(described_class.call(user, token)).to eq(false)
     end
   end
 end

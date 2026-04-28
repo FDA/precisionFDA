@@ -25,6 +25,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { StringUtils } from '@shared/utils/string.utils'
+import { AdminUserDetailsDTO } from '../dto/admin-user-details.dto'
 
 @Injectable()
 export class UserService {
@@ -175,8 +176,27 @@ export class UserService {
     return await this.userRepo.findOne({ id: id })
   }
 
+  async getAdminUserDetails(id: number): Promise<AdminUserDetailsDTO> {
+    const user = await this.userRepo.findOneOrFail({ id })
+    await this.em.populate(user, [
+      'organization',
+      'organization.admin',
+      'adminMemberships',
+      'adminMemberships.adminGroup',
+    ])
+    return AdminUserDetailsDTO.fromEntity(user)
+  }
+
+  async getUserInOrganization(userId: number, organizationId: number): Promise<User | null> {
+    return await this.userRepo.findOne({ id: userId, organization: organizationId })
+  }
+
   async getUserByDxuser(dxuser: string): Promise<User> {
     return await this.userRepo.findOne({ dxuser: dxuser })
+  }
+
+  async getUsersInOrganization(organizationId: number): Promise<User[]> {
+    return await this.userRepo.find({ organization: organizationId }, { orderBy: { dxuser: 'ASC' } })
   }
 
   async getCloudResources(): Promise<UserCloudResourcesDTO> {
@@ -188,6 +208,17 @@ export class UserService {
     const result = await this.platformClient.userCloudResources(dxOrg)
 
     return new UserCloudResourcesDTO(result, user)
+  }
+
+  async updateTimeZone(timeZone: string): Promise<void> {
+    this.logger.log(`Updating time zone for user: ${this.user.dxuser} to ${timeZone}`)
+    const user = await this.userRepo.findOne({ id: this.user.id })
+    if (!user) {
+      throw new NotFoundError('User not found')
+    }
+
+    user.timeZone = timeZone
+    await this.em.flush()
   }
 
   async emailExistsOnDB(email: string): Promise<boolean> {

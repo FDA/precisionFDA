@@ -1,0 +1,188 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 700px;
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--c-text-700);
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+.description {
+  color: var(--c-text-500);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--c-text-500);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.totalRow .td {
+  font-weight: 700;
+  color: var(--c-text-700);
+  background-color: var(--background-shaded);
+  border-top: 2px solid var(--c-layout-border);
+  font-size: 1rem;
+}
+
+.limitsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.usageTable {
+  border: 1px solid var(--c-layout-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px var(--base-opacity-06);
+}
+
+.usageRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--c-layout-border);
+}
+
+.usageTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: var(--primary-50);
+  border-top: 2px solid var(--primary-200);
+}
+
+.usageTotalRow .usageLabel {
+  font-weight: 600;
+  color: var(--primary-700);
+}
+
+.usageTotalRow .usageAmount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-900);
+}
+
+.usageLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--c-text-500);
+}
+
+.usageAmount {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--c-text-700);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 6rem;
+}
+
+.limitCard {
+  background-color: var(--background);
+  border: 1px solid var(--c-layout-border);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 1px 2px 0 var(--base-opacity-06);
+}
+
+.limitCard.highlight {
+  background-color: var(--primary-50);
+  border-color: var(--primary-200);
+}
+
+.limitCard.highlight .limitLabel {
+  color: var(--primary-700);
+}
+
+.limitCard.highlight .limitValue {
+  color: var(--primary-900);
+}
+
+.limitLabel {
+  font-size: 0.875rem;
+  color: var(--c-text-500);
+  font-weight: 500;
+}
+
+.limitValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--c-text-700);
+  font-variant-numeric: tabular-nums;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.th {
+  text-align: left;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  color: var(--c-text-500);
+  background-color: var(--background-shaded);
+  border-bottom: 1px solid var(--c-layout-border);
+  font-size: 0.75rem;
+}
+
+.td {
+  padding: 1rem 1.5rem;
+  color: var(--c-text-700);
+  border-bottom: 1px solid var(--c-layout-border);
+  transition: background-color 0.2s;
+}
+
+.tr:last-child .td {
+  border-bottom: none;
+}
+
+.tr:hover .td {
+  background-color: var(--background-shaded);
+}
+
+.amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.tableContainer {
+  background-color: var(--background);
+  border: 1px solid var(--c-layout-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 var(--base-opacity-06);
+}

@@ -251,6 +251,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
         end
       end
 
+      Profiles::EmailSynchronizer.call(user, token) unless user.profile&.email_confirmed
+
       Session.delete_expired
 
       redirect_url = root_url

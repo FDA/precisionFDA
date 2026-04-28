@@ -1,15 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
 import { useNavigate } from 'react-router'
-import { BackLink } from '../../../components/Page/PageBackLink'
-import { PageTitle } from '../../../components/Page/styles'
-import { UserLayout } from '../../../layouts/UserLayout'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { BackLink } from '@/components/Page/PageBackLink'
+import { PageTitle } from '@/components/Page/styles'
 import { AdminWrapper } from '../../admin/AdminWrapper'
 import { createNewsItemRequest } from '../api'
 import { NewsItemPayload } from '../types'
 import { NewsItemForm } from './NewsItemForm'
 import { FormPageContainer } from './styles'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const CreateNewsItemPage = () => {
   const navigate = useNavigate()
@@ -18,7 +16,7 @@ const CreateNewsItemPage = () => {
     mutationKey: ['create-news-item'],
     mutationFn: (payload: NewsItemPayload) => createNewsItemRequest(payload),
     onSuccess: () => {
-      navigate('/admin/news')
+      navigate('/account/admin/news')
       queryClient.invalidateQueries({
         queryKey: ['news'],
       })
@@ -34,15 +32,13 @@ const CreateNewsItemPage = () => {
   }
 
   return (
-    <UserLayout mainScroll>
-      <AdminWrapper>
-        <FormPageContainer>
-          <BackLink linkTo="/admin/news">Back to admin news list</BackLink>
-          <PageTitle>Create a news item</PageTitle>
-          <NewsItemForm onSubmit={handleSubmit} />
-        </FormPageContainer>
-      </AdminWrapper>
-    </UserLayout>
+    <AdminWrapper>
+      <FormPageContainer>
+        <BackLink linkTo="/account/admin/news">Back to admin news list</BackLink>
+        <PageTitle>Create a news item</PageTitle>
+        <NewsItemForm onSubmit={handleSubmit} />
+      </FormPageContainer>
+    </AdminWrapper>
   )
 }
 

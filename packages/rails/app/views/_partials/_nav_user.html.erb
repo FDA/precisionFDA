@@ -8,15 +8,12 @@
       </div>
     </a>
     <div class="dropdown-menu dropdown-menu-right">
-      <div class="dropdown-item"><%= link_to "Profile", profile_path %></div>
-      <% if @context.logged_in? %>
-        <div class="dropdown-item"><%= link_to "Public Profile", user_path(@context.username) %></div>
-      <% end %>
+      <div class="dropdown-item">
+        <a href="/account" data-turbolinks="false">Account</a>
+      </div>
       <% if @context.logged_in? %>
         <div class="dropdown-item">
-          <a data-bind="click: showCloudResourcesModal">
-            Cloud Resources
-          </a>
+          <a href="/account/cloud-resources" data-turbolinks="false">Cloud Resources</a>
         </div>
       <% end %>
       <div class="dropdown-item"><%= link_to "Manage Licenses", licenses_path %></div>
@@ -29,7 +26,7 @@
       <div class="dropdown-item"><a href="<%= docs_path %>" data-turbolinks="false"><span class="fa fa-fw fa-book"></span> Docs</a></div>
       <div role="separator" class="divider"></div>
       <% if @context.logged_in? && @context.can_administer_site? %>
-        <div class="dropdown-item"><%= link_to "Admin Dashboard", admin_root_path, data: { turbolinks: false } %></div>
+        <div class="dropdown-item"><%= link_to "Admin Dashboard", '/account/admin', data: { turbolinks: false } %></div>
         <div role="separator" class="divider"></div>
       <% end %>
       <div class="dropdown-item"><%= link_to "Log out", logout_path, method: :delete, data: { no_turbolink: true } %></div>

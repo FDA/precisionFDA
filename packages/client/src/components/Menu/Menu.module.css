@@ -121,7 +121,7 @@
   background-color: var(--c-dropdown-hover-bg, #f3f4f6);
 }
 
-.item[data-disabled='true'] {
+.item[data-disabled] {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
@@ -151,7 +151,7 @@
   background-color: var(--c-dropdown-hover-bg, #f3f4f6);
 }
 
-.checkboxItem[data-disabled='true'] {
+.checkboxItem[data-disabled] {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
@@ -180,7 +180,7 @@
   background-color: var(--c-dropdown-hover-bg, #f3f4f6);
 }
 
-.radioItem[data-disabled='true'] {
+.radioItem[data-disabled] {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
@@ -241,7 +241,7 @@
   background-color: var(--c-dropdown-active-bg, #e5e7eb);
 }
 
-.subTrigger[data-disabled='true'] {
+.subTrigger[data-disabled] {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;

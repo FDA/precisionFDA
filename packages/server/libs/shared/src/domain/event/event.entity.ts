@@ -18,6 +18,13 @@ export enum EVENT_TYPES {
   FILE_CREATED = 'Event::FileCreated',
   DBCLUSTER_PASSWORD_ROTATED = 'Event::DbClusterPasswordRotated',
   SPACE_DELETED = 'Event::SpaceDeleted',
+  FILE_DOWNLOADED = 'Event::FileDownloaded',
+  USER_VIEWED = 'Event::UserViewed',
+  USER_LOGGED_IN = 'Event::UserLoggedIn',
+  USER_ACCESS_REQUESTED = 'Event::UserAccessRequested',
+  JOB_RUN = 'Event::JobRun',
+  SUBMISSION_CREATED = 'Event::SubmissionCreated',
+  SIGNED_UP_FOR_CHALLENGE = 'Event::SignedUpForChallenge',
 }
 
 @Entity({ tableName: 'events' })

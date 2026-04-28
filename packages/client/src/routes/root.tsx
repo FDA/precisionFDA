@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react'
+import 'react-tooltip/dist/react-tooltip.css'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { createBrowserRouter, Navigate, Outlet } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { AlertDismissedProvider } from '@/features/admin/alerts/useAlertDismissedLocalStorage'
 import { ExpiringSessionModal } from '@/features/auth/ExpiringSessionModal'
 import { SessionExpiredModal } from '@/features/auth/SessionExpiredModal'
+import { FileUploadModalProvider } from '@/features/files/actionModals/useFileUploadModal'
 import { useModal } from '@/features/modal/useModal'
 import { LayoutLoader, UserLayout } from '@/layouts/UserLayout'
+import { OnlineStatusProvider } from '@/utils/OnlineStatusContext'
 import { PFDAToastContainer } from '@/utils/PFDAToastContainer'
 import queryClientInstance, { setAuthFailureCallback } from '@/utils/queryClient'
+import { ThemeProvider } from '@/utils/ThemeContext'
 import AuthWall from '../AuthWall'
 import Header from '../components/Header/HeaderNext'
-import NoFoundPage from '../pages/NoFoundPage'
-import GlobalStyle from '../styles/global'
-import 'react-tooltip/dist/react-tooltip.css'
-import { FileUploadModalProvider } from '@/features/files/actionModals/useFileUploadModal'
-import { OnlineStatusProvider } from '@/utils/OnlineStatusContext'
-import { ColorModeProvider } from '@/utils/ThemeContext'
 import HomeShowLayout from '../features/home/HomeShowLayout'
 import RequestAccessPage from '../features/request-access/RequestAccessPage'
+import NoFoundPage from '../pages/NoFoundPage'
+import GlobalStyle from '../styles/global'
+import accountRoutes from './account'
 import { homeRoutes } from './home'
 import spacesRoutes from './spaces'
 
@@ -29,22 +30,31 @@ const ChallengeDetailsLayout = React.lazy(() => import('../features/challenges/d
 const ContentEditorPage = React.lazy(() => import('../features/challenges/content/ContentEditorPage'))
 const PublishingPage = React.lazy(() => import('../features/publishing/PublishingPage'))
 const TrackPage = React.lazy(() => import('../features/tracks/TrackPage'))
-const Admin = React.lazy(() => import('../features/admin'))
 const ChallengesList = React.lazy(() => import('../features/challenges/list/ChallengesList'))
 const CreateChallengePage = React.lazy(() => import('../features/challenges/form/CreateChallengePage'))
 const ProposeChallengePage = React.lazy(() => import('../features/challenges/form/ProposeChallengePage'))
 const NewsListPage = React.lazy(() => import('../features/news/NewsPage'))
-const CreateNewsItemPage = React.lazy(() => import('../features/news/form/CreateNewsItemPage'))
 const LandingPage = React.lazy(() => import('../features/overview/OverviewPage'))
 const AboutPage = React.lazy(() => import('../pages/AboutPage'))
-const NotificationsPage = React.lazy(() => import('../pages/Account/Notifications'))
 const ExpertsListPage = React.lazy(() => import('../features/experts/ExpertsList'))
 const WorkflowRunPage = React.lazy(() => import('../features/workflows/run/RunWorkflowForm'))
-const EditNewsItemPage = React.lazy(() => import('../features/news/form/EditNewsItemPage'))
-const ListAdminNews = React.lazy(() => import('../features/news/ListAdminNews'))
-
 const ToS = React.lazy(() => import('../pages/ToS'))
 const Security = React.lazy(() => import('../pages/Security'))
+
+const AdminRouteRedirect = () => {
+  const location = useLocation()
+
+  return (
+    <Navigate
+      replace
+      to={{
+        pathname: location.pathname.replace(/^\/admin(?=\/|$)/, '/account/admin'),
+        search: location.search,
+        hash: location.hash,
+      }}
+    />
+  )
+}
 
 const RootComponent = () => {
   const sessionExpiredModal = useModal()
@@ -64,26 +74,24 @@ const RootComponent = () => {
   }, [])
 
   return (
-    <ColorModeProvider>
-      <React.Fragment>
-        <GlobalStyle railsAlertHeight={railsAlertHeight} />
-        <QueryClientProvider client={queryClientInstance}>
-          <OnlineStatusProvider>
-            <FileUploadModalProvider>
-              <AlertDismissedProvider>
-                <Header />
-                <React.Suspense fallback={<LayoutLoader />}>
-                  <Outlet />
-                </React.Suspense>
-                <PFDAToastContainer />
-                <SessionExpiredModal {...sessionExpiredModal} />
-                <ExpiringSessionModal modal={expiringSessionModal} />
-              </AlertDismissedProvider>
-            </FileUploadModalProvider>
-          </OnlineStatusProvider>
-        </QueryClientProvider>
-      </React.Fragment>
-    </ColorModeProvider>
+    <ThemeProvider>
+      <GlobalStyle railsAlertHeight={railsAlertHeight} />
+      <QueryClientProvider client={queryClientInstance}>
+        <OnlineStatusProvider>
+          <FileUploadModalProvider>
+            <AlertDismissedProvider>
+              <Header />
+              <React.Suspense fallback={<LayoutLoader />}>
+                <Outlet />
+              </React.Suspense>
+              <PFDAToastContainer />
+              <SessionExpiredModal {...sessionExpiredModal} />
+              <ExpiringSessionModal modal={expiringSessionModal} />
+            </AlertDismissedProvider>
+          </FileUploadModalProvider>
+        </OnlineStatusProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   )
 }
 
@@ -112,7 +120,6 @@ const router = createBrowserRouter([
       {
         element: <AuthWall />,
         children: [
-          { path: 'admin/*', element: <Admin /> },
           { path: 'challenges/create', element: <CreateChallengePage /> },
           { path: 'challenges/:challengeId/content', element: <Navigate to="info" replace /> },
           {
@@ -136,16 +143,17 @@ const router = createBrowserRouter([
             element: <HomeShowLayout />,
             children: homeRoutes,
           },
-          { path: 'account/notifications', element: <NotificationsPage /> },
+          {
+            path: 'account',
+            children: accountRoutes,
+          },
           {
             path: 'spaces/*',
             children: spacesRoutes,
           },
           { path: 'publish/*', element: <PublishingPage /> },
           { path: 'workflows/:workflowUid/analyses/new', element: <WorkflowRunPage /> },
-          { path: 'admin/news', element: <ListAdminNews /> },
-          { path: 'admin/news/create', element: <CreateNewsItemPage /> },
-          { path: 'admin/news/:id/edit', element: <EditNewsItemPage /> },
+          { path: 'admin/*', element: <AdminRouteRedirect /> },
           { path: 'comparisons/:identifier/track', element: <TrackPage /> },
           { path: 'notes/:identifier/track', element: <TrackPage /> },
           { path: 'data-portals/*', element: <DataPortalRoutes /> },

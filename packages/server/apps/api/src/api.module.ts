@@ -8,6 +8,7 @@ import { apiExceptionFilterProviders } from '@shared/errors/filter/api-exception
 import { LoggerModule } from '@shared/logger/logger.module'
 import { QueueModule } from '@shared/queue/queue.module'
 import { AccountApiModule } from './account/account.api.module'
+import { ActivityReportsApiModule } from './activity-reports/activity-reports.api.module'
 import { AdminApiModule } from './admin/admin.api.module'
 import { AlertsApiModule } from './alerts/alerts.api.module'
 import { AppApiModule } from './apps/app.api.module'
@@ -31,6 +32,7 @@ import { NodesApiModule } from './nodes/nodes.api.module'
 import { NotesApiModule } from './notes/notes.api.module'
 import { NotificationPreferencesApiModule } from './notification-preferences/notification-preferences.api.module'
 import { NotificationsApiModule } from './notifications/notifications.api.module'
+import { ProfileApiModule } from './profile/profile.api.module'
 import { ParticipantsApiModule } from './participants/participants.api.module'
 import { PropertiesApiModule } from './properties/properties.api.module'
 import { PublishApiModule } from './publish/publish.api.module'
@@ -64,6 +66,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     UserContextModule,
     WebsocketModule,
     AccountApiModule,
+    ActivityReportsApiModule,
     AdminApiModule,
     AppApiModule,
     ChallengeApiModule,
@@ -99,6 +102,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     ReportsApiModule,
     RequestAccessApiModule,
     SessionApiModule,
+    ProfileApiModule,
     PublishApiModule,
     SearchApiModule,
   ],

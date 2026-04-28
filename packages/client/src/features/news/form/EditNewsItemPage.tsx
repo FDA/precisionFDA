@@ -1,16 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { Loader } from '../../../components/Loader'
-import { BackLinkMargin } from '../../../components/Page/PageBackLink'
-import { PageTitle } from '../../../components/Page/styles'
-import { UserLayout } from '../../../layouts/UserLayout'
+import { Loader } from '@/components/Loader'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { BackLinkMargin } from '@/components/Page/PageBackLink'
+import { PageTitle } from '@/components/Page/styles'
 import { AdminWrapper } from '../../admin/AdminWrapper'
 import { deleteNewsItemRequest, editNewsItemRequest, newsItemRequest } from '../api'
 import { NewsItem, NewsItemPayload } from '../types'
 import { NewsItemForm } from './NewsItemForm'
 import { FormPageContainer } from './styles'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const useNewsItemRequest = (id: string) => {
   return useQuery({
@@ -26,7 +24,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
     mutationKey: ['edit-news-item'],
     mutationFn: (payload: NewsItemPayload) => editNewsItemRequest(data.id, payload),
     onSuccess: () => {
-      navigate('/admin/news')
+      navigate('/account/admin/news')
       queryClient.invalidateQueries({
         queryKey: ['news'],
       })
@@ -44,7 +42,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
     mutationKey: ['delete-news-item'],
     mutationFn: () => deleteNewsItemRequest(data.id),
     onSuccess: () => {
-      navigate('/admin/news')
+      navigate('/account/admin/news')
       queryClient.invalidateQueries({
         queryKey: ['news-item'],
       })
@@ -75,15 +73,13 @@ const EditNewsItemPage = () => {
   const { data, isLoading } = useNewsItemRequest(idParam!)
 
   return (
-    <UserLayout mainScroll>
-      <AdminWrapper>
-        <FormPageContainer>
-          <BackLinkMargin linkTo="/admin/news">Back to admin news list</BackLinkMargin>
-          <PageTitle>Edit news item</PageTitle>
-          {isLoading ? <Loader /> : data ? <EditNewsItemMutation data={data} /> : <div>News item not found.</div>}
-        </FormPageContainer>
-      </AdminWrapper>
-    </UserLayout>
+    <AdminWrapper>
+      <FormPageContainer>
+        <BackLinkMargin linkTo="/account/admin/news">Back to admin news list</BackLinkMargin>
+        <PageTitle>Edit news item</PageTitle>
+        {isLoading ? <Loader /> : data ? <EditNewsItemMutation data={data} /> : <div>News item not found.</div>}
+      </FormPageContainer>
+    </AdminWrapper>
   )
 }
 

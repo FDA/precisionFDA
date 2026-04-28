@@ -12,7 +12,7 @@ if (!ENABLE_DEV_MSW) {
 }
 
 const MonacoEditor = (props: Partial<EditorProps & { formatDocument: boolean }>) => {
-  const { theme } = useTheme()
+  const { resolvedTheme } = useTheme()
   const editorDidMountHook = (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: Monaco) => {
     const model = editor.getModel()
     if (!model) return
@@ -39,7 +39,7 @@ const MonacoEditor = (props: Partial<EditorProps & { formatDocument: boolean }>)
         minimap: {
           enabled: false,
         },
-        theme: theme === 'dark' ? 'vs-dark' : 'vs-light',
+        theme: resolvedTheme === 'dark' ? 'vs-dark' : 'vs-light',
       }}
       {...props}
       onMount={editorDidMountHook}

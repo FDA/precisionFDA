@@ -3,6 +3,7 @@ export const columnFilters = {
   title: 'string',
   revision: 'string',
   state: 'string',
+  type: 'string',
   engine: 'string',
   dx_instance_class: 'string',
   dxInstanceClass: 'string',

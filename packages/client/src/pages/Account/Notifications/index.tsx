@@ -1,14 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, Path, PathValue, useForm } from 'react-hook-form'
-import { Button } from '../../../components/Button'
-import { Checkbox } from '../../../components/CheckboxNext'
-import { Loader } from '../../../components/Loader'
-import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
-import { PageActions, PageHeader, PageTitle } from '../../../components/Page/styles'
-import { FieldLabelRow } from '../../../components/form/styles'
-import { usePageMeta } from '../../../hooks/usePageMeta'
-import { UserLayout } from '../../../layouts/UserLayout'
+import { Button } from '@/components/Button'
+import { Checkbox } from '@/components/CheckboxNext'
+import { FieldLabelRow } from '@/components/form/styles'
+import { Loader } from '@/components/Loader'
+import { toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { PageActions, PageHeader, PageTitle } from '@/components/Page/styles'
+import { usePageMeta } from '@/hooks/usePageMeta'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
 import {
   FieldGroup,
@@ -173,7 +172,9 @@ const NotificationForm = ({
                     {...field}
                     disabled={isSubmitting}
                     checked={!!field.value}
-                    onChange={e => handleSetValue(`admin.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                    onChange={e =>
+                      handleSetValue(`admin.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                    }
                   />
                   {NotificationLabel[notification]}
                 </FieldLabelRow>
@@ -199,7 +200,10 @@ const NotificationForm = ({
                         disabled={isSubmitting}
                         checked={!!field.value}
                         onChange={e =>
-                          handleSetValue(`group_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                          handleSetValue(
+                            `group_lead.${notification}` as Path<NotificationPreferences>,
+                            e.target.checked,
+                          )
                         }
                       />
                       {NotificationLabel[notification]}
@@ -224,7 +228,10 @@ const NotificationForm = ({
                         disabled={isSubmitting}
                         checked={!!field.value}
                         onChange={e =>
-                          handleSetValue(`group_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                          handleSetValue(
+                            `group_contributor.${notification}` as Path<NotificationPreferences>,
+                            e.target.checked,
+                          )
                         }
                       />
                       {NotificationLabel[notification]}
@@ -249,7 +256,10 @@ const NotificationForm = ({
                         disabled={isSubmitting}
                         checked={!!field.value}
                         onChange={e =>
-                          handleSetValue(`group_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                          handleSetValue(
+                            `group_viewer.${notification}` as Path<NotificationPreferences>,
+                            e.target.checked,
+                          )
                         }
                       />
                       {NotificationLabel[notification]}
@@ -278,7 +288,10 @@ const NotificationForm = ({
                         disabled={isSubmitting}
                         checked={!!field.value}
                         onChange={e =>
-                          handleSetValue(`shared_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                          handleSetValue(
+                            `shared_lead.${notification}` as Path<NotificationPreferences>,
+                            e.target.checked,
+                          )
                         }
                       />
                       {NotificationLabel[notification]}
@@ -303,7 +316,10 @@ const NotificationForm = ({
                         disabled={isSubmitting}
                         checked={!!field.value}
                         onChange={e =>
-                          handleSetValue(`shared_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                          handleSetValue(
+                            `shared_contributor.${notification}` as Path<NotificationPreferences>,
+                            e.target.checked,
+                          )
                         }
                       />
                       {NotificationLabel[notification]}
@@ -328,7 +344,10 @@ const NotificationForm = ({
                         disabled={isSubmitting}
                         checked={!!field.value}
                         onChange={e =>
-                          handleSetValue(`shared_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                          handleSetValue(
+                            `shared_viewer.${notification}` as Path<NotificationPreferences>,
+                            e.target.checked,
+                          )
                         }
                       />
                       {NotificationLabel[notification]}
@@ -384,14 +403,12 @@ const NotificationsPage = () => {
   }
 
   return (
-    <UserLayout mainScroll>
-      <StyledPageContainer>
-        <PageHeader>
-          <PageTitle>Notification Preferences</PageTitle>
-        </PageHeader>
-        {isLoading ? <Loader /> : <NotificationForm onSave={handleOnsSubmit} preferences={data!.preference} />}
-      </StyledPageContainer>
-    </UserLayout>
+    <StyledPageContainer>
+      <PageHeader>
+        <PageTitle>Notification Preferences</PageTitle>
+      </PageHeader>
+      {isLoading ? <Loader /> : <NotificationForm onSave={handleOnsSubmit} preferences={data!.preference} />}
+    </StyledPageContainer>
   )
 }
 

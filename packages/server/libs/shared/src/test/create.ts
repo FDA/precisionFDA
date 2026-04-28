@@ -917,7 +917,7 @@ const invitationHelper = {
 
 const profileHelper = {
   create: (em: EntityManager, references: { user: User }, data?: Partial<Profile>): Profile => {
-    const profile = wrap(new Profile()).assign(
+    const profile = wrap(new Profile(references.user)).assign(
       {
         ...data,
         user: references.user,

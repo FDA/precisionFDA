@@ -1,5 +1,4 @@
 import Bull from 'bull'
-import { RedisClientType } from 'redis'
 import sinon from 'sinon'
 import { PlatformClient } from '@shared/platform-client'
 import * as queue from '@shared/queue'
@@ -61,6 +60,8 @@ const fakes: {
     appPublishFake: sinon.stub(),
     appDescribeFake: sinon.stub(),
     workflowDescribeFake: sinon.stub(),
+    userResetMfaFake: sinon.stub(),
+    userUpdateEmailFake: sinon.stub(),
     fileDownloadLinkFake: sinon.stub(),
   },
   queue: {
@@ -178,9 +179,12 @@ const mocksSetDefaultBehaviour = (): void => {
     createdBy: random.word(),
   }))
 
-  fakes.bull.addFake.callsFake(() => {})
-  fakes.bull.getJobFake.callsFake(() => undefined)
-  fakes.bull.isReadyFake.callsFake(() => Promise.resolve(true))
+  fakes.client.userResetMfaFake.callsFake(() => ({ authorization_code: '12345678' }))
+  fakes.client.userUpdateEmailFake.callsFake(() => ({}))
+
+  ;(fakes.bull.addFake as sinon.SinonStub).callsFake(() => {})
+  ;(fakes.bull.getJobFake as sinon.SinonStub).callsFake(() => undefined)
+  ;(fakes.bull.isReadyFake as sinon.SinonStub).callsFake(() => Promise.resolve(true))
 
   mockServiceFactory.reset()
 }
@@ -210,6 +214,7 @@ const mocksSetup = (): void => {
   sandbox.replace(PlatformClient.prototype, 'folderRemove', fakes.client.folderRemoveFake)
   sandbox.replace(PlatformClient.prototype, 'fileRemove', fakes.client.fileRemoveFake)
   sandbox.replace(PlatformClient.prototype, 'userDescribe', fakes.client.userDescribeFake)
+  sandbox.replace(PlatformClient.prototype, 'userUpdateEmail', fakes.client.userUpdateEmailFake)
   sandbox.replace(PlatformClient.prototype, 'cloneObjects', fakes.client.cloneObjectFake)
   sandbox.replace(PlatformClient.prototype, 'appAddAuthorizedUsers', fakes.client.appAddAuthorizedUsersFake)
   sandbox.replace(PlatformClient.prototype, 'appPublish', fakes.client.appPublishFake)
@@ -241,7 +246,7 @@ const mocksSetup = (): void => {
     subscribe: async (): Promise<void> => undefined,
     quit: async (): Promise<string> => 'OK',
   }
-  sandbox.stub(redis, 'createRedisClient').resolves(redisClientMock as unknown as RedisClientType)
+  ;(sandbox.stub(redis, 'createRedisClient') as sinon.SinonStub).resolves(redisClientMock as unknown as never)
 }
 
 const mocksReset = (): void => {
@@ -270,9 +275,11 @@ const mocksReset = (): void => {
   fakes.client.removeUserFromOrganizationFake.reset()
   fakes.client.fileRemoveFake.reset()
   fakes.client.userDescribeFake.reset()
+  fakes.client.userResetMfaFake.reset()
+  fakes.client.userUpdateEmailFake.reset()
   fakes.client.fileDownloadLinkFake.reset()
 
-  fakes.queue.findRepeatableFake.reset()
+  ;(fakes.queue.findRepeatableFake as sinon.SinonStub).reset()
 
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.removeRepeatableJobsFake.resetHistory()

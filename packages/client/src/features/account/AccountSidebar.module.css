@@ -1,0 +1,148 @@
+.sidebar {
+  width: 240px;
+  background-color: var(--background);
+  border: 1px solid var(--c-layout-border);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.header {
+  padding: 0.5rem 0.5rem 1rem 0.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  background-color: var(--primary-500);
+  color: white;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.logoTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--c-text-700);
+}
+
+.logoSubtitle {
+  font-size: 0.75rem;
+  color: var(--c-text-500);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-scrollbar) transparent;
+}
+
+.nav::-webkit-scrollbar {
+  width: 12px;
+}
+
+.nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nav::-webkit-scrollbar-thumb {
+  background-color: var(--c-scrollbar);
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  min-height: 24px;
+}
+
+.nav::-webkit-scrollbar-thumb:hover {
+  background-color: var(--c-scrollbar);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sectionTitle {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--c-text-400);
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.05em;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.375rem;
+  color: var(--c-text-600);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.link:hover {
+  background-color: var(--background-shaded);
+  color: var(--c-text-700);
+}
+
+.active {
+  background-color: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.active:hover {
+  background-color: var(--primary-200);
+}
+
+.icon {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.active .icon {
+  opacity: 1;
+}
+
+.externalLinkIcon {
+  margin-left: auto;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
