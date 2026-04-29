@@ -143,7 +143,7 @@ module Api
       filters = params[:filters]
       apps = apps_series.map do |series|
         series_app = series.latest_accessible(@context)
-        if series_app.in_space? && AppSeriesService::AppSeriesFilter.
+        if series_app&.in_space? && AppSeriesService::AppSeriesFilter.
             match(series_app, filters)
           series_app
         end
