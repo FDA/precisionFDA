@@ -36,8 +36,8 @@ const EditTags = ({ spaceId, tags = [] }: { spaceId: number; tags?: string[] }) 
 
   return (
     <FieldGroup label="Tags">
-      <StyledTags>
-        {tags && tags.map(tag => <StyledTagItem key={tag}>{tag}</StyledTagItem>)}
+      <StyledTags data-testid="tags-container">
+        {tags && tags.map(tag => <StyledTagItem data-testid="space-tag-item" key={tag}>{tag}</StyledTagItem>)}
         <StyledButton type="button" onClick={() => setTagsModal(true)}>
           Edit Tags
         </StyledButton>
@@ -145,7 +145,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
         </div>
       )}
       <FieldGroup label="Space Type">
-        <InputText value={SpaceTypeName[space.type]} disabled />
+        <InputText data-testid="space-type" value={SpaceTypeName[space.type]} disabled />
       </FieldGroup>
       <FieldGroup label="Name" required>
         <InputText {...register('name', { required: 'Name is required.' })} disabled={isSubmitting} />
