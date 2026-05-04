@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useEffect } from 'react'
 import { mockExportApp } from '../../../mocks/handlers/apps.handlers'
 import { mockExportInputData } from '../../../mocks/handlers/files.handlers'

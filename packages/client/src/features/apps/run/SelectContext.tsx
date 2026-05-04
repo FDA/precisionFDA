@@ -1,9 +1,8 @@
-import React from 'react'
-import { Control, Controller, FieldErrors } from 'react-hook-form'
-import { FieldGroup } from '../../../components/form/FieldGroup'
-import { Select } from '../../../components/Select'
+import { type Control, Controller, type FieldErrors } from 'react-hook-form'
+import { FieldGroup } from '@/components/form/FieldGroup'
+import { Select } from '@/components/Select'
+import type { RunJobFormType, SelectType } from '../apps.types'
 import { ErrorMessageForField } from './ErrorMessageForField'
-import { RunJobFormType, SelectType } from '../apps.types'
 
 /**
  * Component for selecting context if applicable.
@@ -22,8 +21,8 @@ export const SelectContext = ({
 }: {
   control: Control<RunJobFormType, unknown, unknown>
   isSubmitting: boolean
-  selectableContexts: SelectType[] | undefined,
-  errors: FieldErrors<RunJobFormType>,
+  selectableContexts: SelectType[] | undefined
+  errors: FieldErrors<RunJobFormType>
 }) => {
   return (
     <FieldGroup label="Context" required>

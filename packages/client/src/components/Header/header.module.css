@@ -1,0 +1,73 @@
+/* Narrow overrides that are awkward in Tailwind: drawer scrollbar + disabled-row hover inside drawer */
+
+.siteNavDisabledRow {
+  /* marker; styles applied via Tailwind in headerClasses */
+}
+
+.siteNavBodyScroll::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 20px;
+  border: solid 5px transparent;
+  box-sizing: border-box;
+}
+
+.siteNavBodyScroll::-webkit-scrollbar {
+  width: 18px;
+  height: 18px;
+}
+
+.siteNavBodyScroll::-webkit-scrollbar-thumb {
+  background-color: var(--c-scrollbar);
+  border-radius: 20px;
+  border: solid 5px transparent;
+  background-clip: content-box;
+  min-height: 30px;
+}
+
+.siteNavBodyScroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--c-scrollbar-2);
+  border-radius: 20px;
+  border: solid 5px transparent;
+  background-clip: content-box;
+}
+
+/* Horizontal favorites strip: one-line height + thin bar so the track does not sit on nav items */
+.headerFavoritesScroll {
+  /* Pull the scrollbar slightly below the row so it does not cover links / star */
+  margin-bottom: -4px;
+  padding-bottom: 4px;
+  scrollbar-color: var(--c-scrollbar) transparent;
+  /* Match WebKit track height; Firefox "thin" is ~2–4px (stable) */
+  scrollbar-width: thin;
+}
+
+.headerFavoritesScroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.headerFavoritesScroll::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 3px;
+  border: 0;
+  box-sizing: border-box;
+  margin: 0 2px 4px 2px; /* 4px down: bar clears the item row */
+}
+
+.headerFavoritesScroll::-webkit-scrollbar-thumb {
+  background-color: var(--c-scrollbar);
+  border-radius: 3px;
+  border: 0;
+  min-width: 40px;
+}
+
+.headerFavoritesScroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--c-scrollbar-2);
+  border-radius: 3px;
+  border: 0;
+}
+
+/* Sidebar disabled rows: tertiary hover only when inside the drawer */
+/* biome-ignore lint/correctness/noUnknownPseudoClass: <explanation> */
+:global([data-site-nav-drawer]) .siteNavDisabledRow:hover {
+  background-color: var(--tertiary-70);
+}

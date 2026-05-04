@@ -1,5 +1,5 @@
 import { render, setAuthenticatedSession } from '@/test/test-utils'
-import Header from './HeaderNext'
+import Header from './Header'
 
 test('Logged in user should see My Home link', async () => {
   setAuthenticatedSession()

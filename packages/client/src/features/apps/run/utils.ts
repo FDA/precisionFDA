@@ -1,19 +1,20 @@
-import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { isSafeInteger, uniq } from 'lodash'
-import { UseFormSetValue } from 'react-hook-form'
+import type React from 'react'
+import { useEffect } from 'react'
+import type { UseFormSetValue } from 'react-hook-form'
 import * as Yup from 'yup'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
-import { IUser } from '@/types/user'
+import type { IUser } from '@/types/user'
 import { cleanObject } from '@/utils/object'
 import { fetchAccessibleFilesByUID } from '../../databases/databases.api'
-import { FileUid } from '../../files/files.types'
-import { ServerScope } from '../../home/types'
+import type { FileUid } from '../../files/files.types'
+import type { ServerScope } from '../../home/types'
 import { fetchLicensesForFiles } from '../../licenses/api'
-import { License } from '../../licenses/types'
-import { RunWorkflowFormType } from '../../workflows/run/RunWorkflowForm'
-import { RunJobRequest } from '../apps.api'
-import {
+import type { License } from '../../licenses/types'
+import type { RunWorkflowFormType } from '../../workflows/run/RunWorkflowForm'
+import type { RunJobRequest } from '../apps.api'
+import type {
   AcceptedLicense,
   BatchInput,
   ComputeInstance,
@@ -45,10 +46,18 @@ export const prepareValidationsForInputs = (inputSpec: InputSpec[]) => {
       inputs[i.name] = getSchema(Yup.string(), i).nullable()
     }
     if (i.class === 'file') {
-      inputs[i.name] = getSchema(Yup.string(), i).nullable()
+      // Nullable must come before required so cleared/null values fail required validation reliably.
+      inputs[i.name] = i.optional
+        ? Yup.string().nullable().optional()
+        : Yup.string()
+            .nullable()
+            .required(`${getLabel(i)} is required`)
     }
     if (i.class === 'array:file') {
-      inputs[i.name] = getSchema(Yup.array(Yup.string()), i).nullable()
+      const reqMsg = `${getLabel(i)} is required`
+      inputs[i.name] = i.optional
+        ? Yup.array(Yup.string()).nullable().optional()
+        : Yup.array(Yup.string()).nullable().required(reqMsg).min(1, reqMsg)
     }
     if (i.class === 'array:string') {
       inputs[i.name] = getSchema(Yup.array(Yup.string()), i)

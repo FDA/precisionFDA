@@ -1,4 +1,4 @@
-import { IApp, InputSpec } from '../apps.types'
+import type { IApp, InputSpec } from '../apps.types'
 import { createRequestObject, generateCopyUrl, shouldIncludeInputValue } from './utils'
 
 describe('shouldIncludeInputValue', () => {

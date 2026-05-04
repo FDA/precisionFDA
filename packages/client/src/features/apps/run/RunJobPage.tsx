@@ -1,20 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
-import React from 'react'
 import { useParams } from 'react-router'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { BackLink } from '../../../components/Page/PageBackLink'
-import { FormPageContainer } from '../../../components/Page/styles'
 import { useAuthUser } from '../../auth/useAuthUser'
+import { defaultHomeContext, type HomeScopeContextValue } from '../../home/HomeScopeContext'
 import { HomeLoader, NotFound, Title } from '../../home/show.styles'
+import { useHomeDisplayScope } from '../../home/useHomeDisplayScope'
 import { fetchApp } from '../apps.api'
 import { RunJobForm } from './RunJobForm'
-import { Topbox, TopboxItem } from './styles'
 import { getBaseLink } from './utils'
-import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
-import { useHomeDisplayScope } from '../../home/useHomeDisplayScope'
 
 export const RunJobPage = ({ homeContext = defaultHomeContext }: { homeContext?: HomeScopeContextValue }) => {
-  const { appIdentifier, spaceId } = useParams<{ appIdentifier: string, spaceId: string }>()
+  const { appIdentifier, spaceId } = useParams<{ appIdentifier: string; spaceId: string }>()
   const user = useAuthUser()
   const { data: appData, isLoading } = useQuery({
     queryKey: ['app', appIdentifier],
@@ -43,21 +40,19 @@ export const RunJobPage = ({ homeContext = defaultHomeContext }: { homeContext?:
   const appTitle = app.title ? app.title : app.name
 
   return (
-    <FormPageContainer>
-      <Topbox>
+    <div className="mx-auto w-full min-w-0 max-w-[800px] px-4">
+      <div className="py-4">
         <BackLink linkTo={`/${getBaseLink(spaceId)}/apps/${app.uid}`}>Back to App</BackLink>
-        <TopboxItem>
-          <Title>
-            <CubeIcon height={20} />
-            <span>Run App:</span>
-            <span>
-              {appTitle} (rev{app.revision})
-            </span>
-          </Title>
-        </TopboxItem>
-      </Topbox>
+      </div>
+      <Title>
+        <CubeIcon height={20} />
+        <span>Run App:</span>
+        <span>
+          {appTitle} (rev{app.revision})
+        </span>
+      </Title>
 
       <RunJobForm app={app} spec={spec} userJobLimit={user.job_limit} />
-    </FormPageContainer>
+    </div>
   )
 }

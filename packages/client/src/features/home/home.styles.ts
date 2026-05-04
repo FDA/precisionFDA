@@ -1,9 +1,9 @@
 import { Link } from 'react-router'
 import styled, { css } from 'styled-components'
+import { Svg } from '../../components/icons/Svg'
 import { NavLink } from '../../components/NavLink'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { compactScrollBarV2 } from '../../components/Page/styles'
-import { Svg } from '../../components/icons/Svg'
 
 export const StyledBackLink = styled(BackLink)`
   margin: 16px 16px;
@@ -103,7 +103,7 @@ export const StyledMenu = styled.div<{ $expanded: boolean }>`
             padding: 18px 0;
           }
         `}
-  border-right: solid 1px var(--c-layout-border);
+  border-right: solid 1px var(--c-layout-border-200);
   overflow: none;
 `
 export const Main = styled.div`

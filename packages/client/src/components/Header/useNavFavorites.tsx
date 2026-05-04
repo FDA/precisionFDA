@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import { IUser } from '@/types/user'
+import type { IUser } from '@/types/user'
 
 export type NavFavorite = {
   name: string
@@ -27,8 +27,8 @@ export const useUpdateFavoritesMutation = () => {
       await axios.put('/api/v2/users/header-items', validated)
       return validated
     },
-    onSuccess: (newFavorites) => {
-      queryClient.setQueryData<{ user: IUser; meta: any }>(['auth-user'], (old) => {
+    onSuccess: newFavorites => {
+      queryClient.setQueryData<{ user: IUser; meta: any }>(['auth-user'], old => {
         if (!old) return old
         return { ...old, user: { ...old.user, header_items: newFavorites } }
       })

@@ -1,22 +1,21 @@
-import { HomeIcon } from '../icons/HomeIcon'
-import { GSRSIcon } from '../icons/GSRSIcon'
-import { DiscussionIcon } from '../icons/DiscussionIcon'
-import { TrophyIcon } from '../icons/TrophyIcon'
-import { LightBulbIcon } from '../icons/LightBulbIcon'
-import { FortIcon } from '../icons/FortIcon'
-import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
-import { StickyNoteIcon } from '../icons/StickyNote'
-import { BullsEyeIcon } from '../icons/BullsEyeIcon'
-import { BookIcon } from '../icons/BookIcon'
-import { DaaasPortalIcon } from '../icons/DaaasPortalIcon'
-import { AdministrationPortalIcon } from '../icons/AdministrationPortalIcon'
-import { PrismPortalIcon } from '../icons/PrismPortalIcon'
-import { ToolsPortalIcon } from '../icons/ToolsPortalIcon'
-import { GlobeIcon } from '../icons/GlobeIcon'
-import { QuestionIcon } from '../icons/QuestionIcon'
 import { PFDA_EMAIL } from '../../constants'
+import { AdministrationPortalIcon } from '../icons/AdministrationPortalIcon'
+import { BookIcon } from '../icons/BookIcon'
+import { BullsEyeIcon } from '../icons/BullsEyeIcon'
+import { DaaasPortalIcon } from '../icons/DaaasPortalIcon'
 import { DataPortalIcon } from '../icons/DataPortalIcon'
-
+import { DiscussionIcon } from '../icons/DiscussionIcon'
+import { FortIcon } from '../icons/FortIcon'
+import { GlobeIcon } from '../icons/GlobeIcon'
+import { GSRSIcon } from '../icons/GSRSIcon'
+import { HomeIcon } from '../icons/HomeIcon'
+import { LightBulbIcon } from '../icons/LightBulbIcon'
+import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
+import { PrismPortalIcon } from '../icons/PrismPortalIcon'
+import { QuestionIcon } from '../icons/QuestionIcon'
+import { StickyNoteIcon } from '../icons/StickyNote'
+import { ToolsPortalIcon } from '../icons/ToolsPortalIcon'
+import { TrophyIcon } from '../icons/TrophyIcon'
 
 export const getNavigationPath = (navItem: SiteNavItemType): string => {
   switch (navItem.navigation.type) {
@@ -32,7 +31,7 @@ export const getNavigationPath = (navItem: SiteNavItemType): string => {
 }
 
 export const getNavigationTarget = (navItem: SiteNavItemType): string | undefined => {
-  return (navItem.navigation.type === 'external' || navItem.navigation.type === 'mailto') ? '_blank' : undefined
+  return navItem.navigation.type === 'external' || navItem.navigation.type === 'mailto' ? '_blank' : undefined
 }
 
 export const getNavigationRel = (navItem: SiteNavItemType): string | undefined => {
@@ -45,7 +44,7 @@ export const getNavigationRel = (navItem: SiteNavItemType): string | undefined =
  * - external: External URL opened in new tab
  * - mailto: Email link that opens user's default email client
  */
-export type NavigationTarget = 
+export type NavigationTarget =
   | { type: 'internal'; path: string }
   | { type: 'external'; url: string }
   | { type: 'mailto'; email: string }

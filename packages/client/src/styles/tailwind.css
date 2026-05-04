@@ -1,16 +1,16 @@
-@import '@fontsource/lato/100.css';
-@import '@fontsource/lato/100-italic.css';
-@import '@fontsource/lato/300.css';
-@import '@fontsource/lato/300-italic.css';
-@import '@fontsource/lato/400.css';
-@import '@fontsource/lato/400-italic.css';
-@import '@fontsource/lato/700.css';
-@import '@fontsource/lato/700-italic.css';
-@import '@fontsource/lato/900.css';
-@import '@fontsource/lato/900-italic.css';
-@import '@fontsource-variable/jetbrains-mono';
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "@fontsource/lato/100.css";
+@import "@fontsource/lato/100-italic.css";
+@import "@fontsource/lato/300.css";
+@import "@fontsource/lato/300-italic.css";
+@import "@fontsource/lato/400.css";
+@import "@fontsource/lato/400-italic.css";
+@import "@fontsource/lato/700.css";
+@import "@fontsource/lato/700-italic.css";
+@import "@fontsource/lato/900.css";
+@import "@fontsource/lato/900-italic.css";
+@import "@fontsource-variable/jetbrains-mono";
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -23,6 +23,9 @@
   --popover-foreground: oklch(0.2138 0.0019 286.2347);
   --primary: var(--primary-500);
   --primary-foreground: oklch(0.9851 0 0);
+  --success: var(--success-500);
+  --success-hover: var(--success-600);
+  --success-foreground: oklch(0.9851 0 0);
   --secondary: oklch(0.9702 0 0);
   --secondary-foreground: oklch(0.2138 0.0019 286.2347);
   --muted: oklch(0.9702 0 0);
@@ -54,7 +57,7 @@
   --sidebar-border: oklch(0.9219 0 0);
   --sidebar-ring: oklch(0.709 0 0);
   --font-sans: Lato, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: JetBrains Mono, ui-monospace, monospace;
   --radius: 0.4rem;
   --shadow-x: 0;
@@ -73,6 +76,9 @@
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
+
+  /* Legacy app shell (also see variables.css); used by @theme below */
+  --header-favorite-inactive: #bfbfbf;
 }
 
 .dark {
@@ -80,10 +86,13 @@
   --foreground: oklch(0.9851 0 0);
   --card: oklch(0.2138 0.0019 286.2347);
   --card-foreground: oklch(0.9851 0 0);
-  --popover: oklch(0.2686 0 0);
+  --popover: oklch(0.2138 0.0019 286.2347);
   --popover-foreground: oklch(0.9851 0 0);
   --primary: var(--primary-400);
   --primary-foreground: oklch(0.9851 0 0);
+  --success: var(--success-500);
+  --success-hover: var(--success-600);
+  --success-foreground: oklch(0.9851 0 0);
   --secondary: oklch(0.2686 0 0);
   --secondary-foreground: oklch(0.9851 0 0);
   --muted: oklch(0.2686 0 0);
@@ -115,7 +124,7 @@
   --sidebar-border: oklch(0.2768 0 0);
   --sidebar-ring: oklch(0.4386 0 0);
   --font-sans: Lato, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: JetBrains Mono, ui-monospace, monospace;
   --radius: 0.4rem;
   --shadow-x: 0;
@@ -155,6 +164,9 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-hover: var(--success-hover);
   --color-border: var(--border);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
@@ -191,6 +203,35 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+
+  /* Legacy app header / nav / dropdowns — resolve at runtime from variables.css */
+  --color-app-header: var(--c-app-header-bg);
+  --color-app-header-hover: var(--c-app-header-bg-hover);
+  --color-app-header-active: var(--c-app-header-bg-active);
+  --color-app-header-border: var(--c-app-header-border, transparent);
+  --color-app-header-menu: var(--c-app-header-menu-base);
+  --color-app-header-menu-surface: var(--c-app-header-menu-hover);
+  --color-app-header-nav-active: var(--c-app-header-menu-active-bg);
+  --color-app-header-favorite-inactive: var(--header-favorite-inactive);
+  --color-layout-border: var(--c-layout-border);
+  --color-background-shaded: var(--background-shaded);
+  --color-scrollbar: var(--c-scrollbar);
+  --color-scrollbar-strong: var(--c-scrollbar-2);
+  --color-dropdown-bg: var(--c-dropdown-bg);
+  --color-dropdown-hover-bg: var(--c-dropdown-hover-bg);
+  --color-legacy-link: var(--c-link);
+  --color-legacy-base: var(--base);
+  --color-tertiary-muted: var(--tertiary-70);
+  --color-menu-item-disabled: var(--tertiary-500);
+  --color-menu-item-disabled-dark: var(--tertiary-300);
+  --color-menu-item-disabled-drawer: var(--tertiary-400);
+
+  /* App shell vertical rhythm — sources: variables.css, app-globals.css, global.ts (rails) */
+  --height-site-header: var(--site-header-height);
+  --height-rails-alert: var(--rails-alert-height, 0px);
+  --height-site-alert: var(--site-alert-height, 0px);
+  /** Sum of header + optional rails strip + optional in-app alert (site nav drawer, etc.) */
+  --spacing-below-header: calc(var(--height-site-header) + var(--height-rails-alert) + var(--height-site-alert));
 }
 
 @layer base {

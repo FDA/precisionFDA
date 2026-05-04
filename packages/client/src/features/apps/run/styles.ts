@@ -71,31 +71,6 @@ export const StyledJobName = styled.div`
   flex-grow: 1;
 `
 
-export const StyledForm = styled.form`
-  padding-bottom: 64px;
-`
-
-export const RemoveButton = styled.button`
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--c-text-600);
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 5%;
-
-  &:hover {
-    background-color: var(--tertiary-100);
-  }
-
-  &:focus {
-    outline: none;
-  }
-`
-
 export const StyledActionsContainer = styled.div`
   display: flex;
   justify-content: space-between;

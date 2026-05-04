@@ -1,16 +1,22 @@
 import { ErrorMessage } from '@hookform/error-message'
-import React from 'react'
-import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Button } from '../../../components/Button'
+import { useCallback } from 'react'
+import { useForm } from 'react-hook-form'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
-import { ButtonRow, Footer, ModalScroll, StyledForm } from '../../modal/styles'
-import { useConditionalModal } from '../../modal/useModal'
-import { HomeScope } from '../../home/types'
-import { addFolderRequest } from '../files.api'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import type { HomeScope } from '../../home/types'
+import { useConditionalModal } from '../../modal/useModal'
+import { addFolderRequest } from '../files.api'
 
 type FolderModalArgs = {
   folderId?: string
@@ -56,18 +62,28 @@ export const useAddFolderModal = ({ folderId, spaceId, homeScope, isAllowed, onV
     mutation.mutateAsync({ name: vals.name })
   }
 
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open && mutation.isPending) {
+        return
+      }
+      setShowModal(open)
+    },
+    [mutation.isPending, setShowModal],
+  )
+
   const modalComp = (
-    <ModalNext
-      id="modal-files-add-folder"
-      data-testid="modal-files-add-folder"
-      isShown={Boolean(isShown)}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop headerText="Create new folder" hide={() => setShowModal(false)} />
-      <ModalScroll>
-        <StyledForm id="add-folder-form" onSubmit={handleSubmit(onSubmit)}>
+    <Dialog open={Boolean(isShown)} onOpenChange={handleOpenChange}>
+      <DialogContent id="modal-files-add-folder" data-testid="modal-files-add-folder">
+        <DialogHeader>
+          <DialogTitle>Create new folder</DialogTitle>
+          <DialogDescription className="sr-only">Enter a name for the new folder.</DialogDescription>
+        </DialogHeader>
+        <form id="add-folder-form" className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
+            <label htmlFor="add-folder-name">Folder name</label>
             <InputText
+              id="add-folder-name"
               {...register('name')}
               placeholder="Enter Name..."
               // eslint-disable-next-line jsx-a11y/no-autofocus
@@ -76,19 +92,17 @@ export const useAddFolderModal = ({ folderId, spaceId, homeScope, isAllowed, onV
             />
             <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
-        </StyledForm>
-      </ModalScroll>
-      <Footer>
-        <ButtonRow>
-          <Button type="button" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
+        </form>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
-          <Button data-variant="primary" type="submit" form="add-folder-form" disabled={mutation.isPending}>
+          <Button type="submit" form="add-folder-form" disabled={mutation.isPending}>
             Add
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

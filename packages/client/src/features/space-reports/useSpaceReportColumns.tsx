@@ -1,7 +1,7 @@
-import { ColumnDef } from '@tanstack/react-table'
-import React from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
+import { selectColumnDef } from '@/components/Table/selectColumnDef'
 import { formatDate } from '../../utils/formatting'
-import { ISpaceReport, SpaceReportState } from './space-report.types'
+import type { ISpaceReport, SpaceReportState } from './space-report.types'
 
 export const reportStateToTextMap: Record<SpaceReportState, string> = {
   CREATED: 'Generating...',
@@ -12,6 +12,7 @@ export const reportStateToTextMap: Record<SpaceReportState, string> = {
 
 export const useSpaceReportColumns = (): ColumnDef<ISpaceReport>[] => {
   return [
+    selectColumnDef<ISpaceReport>(),
     {
       header: 'Created',
       accessorKey: 'createdAt',

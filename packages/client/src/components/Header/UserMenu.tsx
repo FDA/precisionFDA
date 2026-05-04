@@ -1,7 +1,13 @@
 import { Link } from 'react-router'
-import { IUser } from '../../types/user'
+import { cn } from '@/utils/cn'
+import type { IUser } from '../../types/user'
 import Menu from '../Menu/Menu'
-import { StyledLink } from './styles'
+
+/** User dropdown menu links (replaces Header/styles StyledLink) */
+const userMenuDropdownLink = cn(
+  'block w-auto cursor-pointer px-3 leading-[30px] transition-colors duration-300 ease-in-out',
+  'bg-dropdown-bg hover:bg-dropdown-hover-bg hover:text-inherit',
+)
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -13,63 +19,70 @@ export const UserMenu = ({ user, userCanAdministerSite = false, handleLogout }: 
   <>
     <Menu.Item
       render={
-        <StyledLink as={Link} data-turbolinks="false" to="/account">
+        <Link className={userMenuDropdownLink} data-turbolinks="false" to="/account">
           Account
-        </StyledLink>
+        </Link>
       }
     />
     {user && (
       <>
         <Menu.Item
           render={
-            <StyledLink as={Link} to="/account/cloud-resources">
+            <a className={userMenuDropdownLink} data-turbolinks="false" href={`/users/${user.dxuser}`}>
+              Public Profile
+            </a>
+          }
+        />
+        <Menu.Item
+          render={
+            <Link className={userMenuDropdownLink} data-turbolinks="false" to="/account/cloud-resources">
               Cloud Resources
-            </StyledLink>
+            </Link>
           }
         />
       </>
     )}
     <Menu.Item
       render={
-        <StyledLink as={Link} to="/account/api-keys">
+        <Link className={userMenuDropdownLink} data-turbolinks="false" to="/account/api-keys">
           API Keys
-        </StyledLink>
+        </Link>
       }
     />
     <Menu.Item
       render={
-        <StyledLink data-turbolinks="false" target="_blank" href="/licenses">
+        <Link className={userMenuDropdownLink} data-turbolinks="false" to="/account/licenses">
           Manage Licenses
-        </StyledLink>
+        </Link>
       }
     />
     <Menu.Item
       render={
-        <StyledLink as={Link} data-turbolinks="false" to="/account/notifications">
+        <Link className={userMenuDropdownLink} data-turbolinks="false" to="/account/notifications">
           Notification Settings
-        </StyledLink>
+        </Link>
       }
     />
     <Menu.Separator />
     <Menu.Item
       render={
-        <StyledLink as={Link} to="/about" data-turbolinks="false">
+        <Link className={userMenuDropdownLink} to="/about" data-turbolinks="false">
           About
-        </StyledLink>
+        </Link>
       }
     />
     <Menu.Item
       render={
-        <StyledLink data-turbolinks="false" href="/guidelines">
+        <a className={userMenuDropdownLink} data-turbolinks="false" href="/guidelines">
           Guidelines
-        </StyledLink>
+        </a>
       }
     />
     <Menu.Item
       render={
-        <StyledLink as="a" target="_blank" href="/docs" data-turbolinks="false">
+        <a className={userMenuDropdownLink} target="_blank" href="/docs" data-turbolinks="false" rel="noreferrer">
           Docs
-        </StyledLink>
+        </a>
       }
     />
     <Menu.Separator />
@@ -77,9 +90,9 @@ export const UserMenu = ({ user, userCanAdministerSite = false, handleLogout }: 
       <>
         <Menu.Item
           render={
-            <StyledLink as={Link} to="/account/admin">
+            <Link className={userMenuDropdownLink} to="/account/admin">
               Admin Dashboard
-            </StyledLink>
+            </Link>
           }
         />
         <Menu.Separator />

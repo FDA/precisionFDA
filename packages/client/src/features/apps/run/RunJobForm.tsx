@@ -1,14 +1,15 @@
 import { yupResolver } from '@hookform/resolvers/yup'
+import { Share, XIcon } from 'lucide-react'
 import type React from 'react'
 import { useState } from 'react'
-import { Controller, type FieldErrors, useFieldArray, useForm } from 'react-hook-form'
+import { Controller, type FieldErrors, FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router'
-import { Button, TransparentButton } from '@/components/Button'
+import { Button } from '@/components/Button'
 import { FieldGroup } from '@/components/form/FieldGroup'
 import { InputNumber, InputText } from '@/components/InputText'
-import { CrossIcon } from '@/components/icons/PlusIcon'
-import { QuestionIcon } from '@/components/icons/QuestionIcon'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { Button as UiButton } from '@/components/ui/button'
+import { FieldSet } from '@/components/ui/field'
 import type { IUser } from '@/types/user'
 import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
 import type { TreeOnSelectInfo } from '../../files/files.types'
@@ -27,19 +28,7 @@ import { SelectContext } from './SelectContext'
 import { SelectInstanceType } from './SelectInstanceType'
 import { SelectSpaceScope } from './SelectSpaceScope'
 import { SetOutputFolder } from './SetOutputFolder'
-import {
-  AppsConfiguration,
-  RemoveButton,
-  RightGroup,
-  Section,
-  SectionBody,
-  SectionHeader,
-  StyledActionsContainer,
-  StyledForm,
-  StyledGrid,
-  StyledJobName,
-  TipsRow,
-} from './styles'
+import { RightGroup, StyledActionsContainer, StyledGrid, StyledJobName } from './styles'
 import { useExportInputsModal } from './useExportInputsModal'
 import { useRunJobMutation } from './useRunJobMutation'
 import {
@@ -202,6 +191,11 @@ export const RunJobForm = ({
 
   const validationSchema = prepareValidations(spec.input_spec, userJobLimit, app.scope)
 
+  const form = useForm<RunJobFormType>({
+    mode: 'onBlur',
+    resolver: yupResolver(validationSchema),
+    defaultValues,
+  })
   const {
     control,
     register,
@@ -213,11 +207,7 @@ export const RunJobForm = ({
     setError,
     watch,
     reset,
-  } = useForm<RunJobFormType>({
-    mode: 'onBlur',
-    resolver: yupResolver(validationSchema),
-    defaultValues,
-  })
+  } = form
 
   const { modalComp: selectFolderModal, setShowModal: setSelectFolderModal } = useSelectFolderModal({
     headerText: 'Select output folder',
@@ -349,230 +339,267 @@ export const RunJobForm = ({
   }
 
   return (
-    <StyledForm id="submitJobForm" autoComplete="off" data-testid="run-app-form">
-      {exportModal?.modalComp}
-      <AppsConfiguration>
-        <TipsRow>
-          <QuestionIcon height={14} />
-          Need help? &nbsp;
-          <a href="/docs/guides/apps#running-an-app" target="_blank" rel="noopener noreferrer">
-            Learn more about running an app
-          </a>
-        </TipsRow>
-        <Section data-testid="run-app-configure-section">
-          <SectionHeader>CONFIGURE</SectionHeader>
-          <SectionBody>
-            <StyledGrid>
-              <StyledJobName>
-                <FieldGroup label="Job Name" required>
-                  <InputText {...register('jobName')} disabled={isSubmitting} data-testid="run-app-job-name" />
-                  <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobName" />
-                </FieldGroup>
-              </StyledJobName>
-              <FieldGroup label="Execution Cost Limit ($)" required>
-                <InputNumber
-                  min="0"
-                  step="10"
-                  {...register('jobLimit', { valueAsNumber: true })}
-                  disabled={isSubmitting}
-                  data-testid="run-app-job-limit"
-                />
-                <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobLimit" />
-              </FieldGroup>
-              {app.entity_type === 'https' && (
-                <SelectContext
-                  control={control}
-                  isSubmitting={isSubmitting}
-                  selectableContexts={selectableContexts}
-                  errors={errors}
-                />
-              )}
-              {app.scope.startsWith('space-') && (
+    <FormProvider {...form}>
+      <form id="submitJobForm" autoComplete="off" data-testid="run-app-form" className="min-w-0 max-w-full pb-16">
+        {exportModal?.modalComp}
+        <div className="min-w-0 max-w-full">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 py-3 text-left text-sm text-(--c-text-600)">
+            <span>
+              Need help?{' '}
+              <a
+                href="/docs/guides/apps#running-an-app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline underline-offset-2"
+              >
+                Learn more about running an app
+              </a>
+            </span>
+          </div>
+          <FieldSet
+            className="mb-6 min-w-0 max-w-full gap-0 overflow-x-clip rounded-md border border-border p-0"
+            data-testid="run-app-configure-section"
+            aria-labelledby="run-app-configure-section-title"
+          >
+            <div
+              id="run-app-configure-section-title"
+              className="w-full min-w-0 min-h-[40px] content-center border-b border-border bg-muted-foreground/5 px-3 py-1.5 text-left text-sm font-bold normal-case text-muted-foreground"
+            >
+              Configure
+            </div>
+            <div className="w-full min-w-0 px-3 py-2 sm:px-4 sm:py-2.5">
+              <StyledGrid>
                 <StyledJobName>
-                  <SelectSpaceScope
+                  <FieldGroup label="Job Name" required>
+                    <InputText {...register('jobName')} disabled={isSubmitting} data-testid="run-app-job-name" />
+                    <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobName" />
+                  </FieldGroup>
+                </StyledJobName>
+                <FieldGroup label="Execution Cost Limit ($)" required>
+                  <InputNumber
+                    min="0"
+                    step="10"
+                    {...register('jobLimit', { valueAsNumber: true })}
+                    disabled={isSubmitting}
+                    data-testid="run-app-job-limit"
+                  />
+                  <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobLimit" />
+                </FieldGroup>
+                {app.entity_type === 'https' && (
+                  <SelectContext
                     control={control}
                     isSubmitting={isSubmitting}
-                    selectableSpaces={selectableSpaces}
+                    selectableContexts={selectableContexts}
                     errors={errors}
                   />
-                </StyledJobName>
-              )}
-              {!isBatchRun && (
-                <SelectInstanceType
-                  control={control}
-                  selectedInstance={watch().inputs[0].instanceType}
-                  name={'inputs.0.instanceType'}
-                  jobLimit={watch().jobLimit}
-                  isSubmitting={isSubmitting}
-                  computeInstances={computeInstances}
-                  isComputeInstancesLoading={computeInstancesLoading}
-                  errors={errors}
-                  inputId="select_instance_type"
-                />
-              )}
-            </StyledGrid>
-          </SectionBody>
-        </Section>
-      </AppsConfiguration>
-      <AppsConfiguration>
-        {inputs.fields.map((batchInput, batchIndex) => (
-          <Section key={batchInput.id} data-testid={`batch_group_${batchIndex}`}>
-            <SectionHeader>
-              {isBatchRun ? (
-                <>
-                  <div>
-                    BATCH INPUT {batchIndex + 1} of {inputs.fields.length}
-                  </div>
-                  <RemoveButton disabled={isSubmitting} type="button" onClick={() => removeInput(batchIndex)}>
-                    <CrossIcon height={14} />
-                  </RemoveButton>
-                </>
-              ) : (
-                <>
-                  <div>INPUTS</div>
-                  <TransparentButton type="button" onClick={() => handleExportInputClick()}>
-                    Export Values
-                  </TransparentButton>
-                </>
-              )}
-            </SectionHeader>
-            <SectionBody>
-              {isBatchRun && (
-                <SelectInstanceType
-                  control={control}
-                  selectedInstance={watch().inputs[batchIndex].instanceType}
-                  name={`inputs.${batchIndex}.instanceType`}
-                  jobLimit={watch().jobLimit}
-                  isSubmitting={isSubmitting}
-                  computeInstances={computeInstances}
-                  isComputeInstancesLoading={computeInstancesLoading}
-                  errors={errors}
-                  inputId={`select_instance_type_${batchIndex}`}
-                />
-              )}
-              {spec.input_spec.length > 0 ? (
-                spec.input_spec.map(inputSpec => {
-                  return (
-                    <Controller
-                      key={`${inputSpec.name}-${batchInput.id}`}
+                )}
+                {app.scope.startsWith('space-') && (
+                  <StyledJobName>
+                    <SelectSpaceScope
                       control={control}
-                      name={`inputs.${batchIndex}.fields.${inputSpec.name}`}
-                      render={({ field }) => (
-                        <FieldGroup
-                          label={getLabel(inputSpec)}
-                          required={!inputSpec.optional}
-                          key={inputSpec.name + inputSpec}
-                        >
-                          <JobRunInput
-                            key={inputSpec.name + inputSpec}
-                            field={field}
-                            inputSpec={inputSpec}
-                            errors={errors as FieldErrors<Record<string, unknown>>}
-                            disabled={isSubmitting}
-                            register={register}
-                            setError={setError}
-                            scope={app.entity_type === 'https' ? watch().scope?.value : app.scope}
-                            validatedFilesCache={validatedFilesCache}
-                          />
-                        </FieldGroup>
-                      )}
+                      isSubmitting={isSubmitting}
+                      selectableSpaces={selectableSpaces}
+                      errors={errors}
                     />
-                  )
-                })
-              ) : (
-                <Empty>App has no inputs.</Empty>
-              )}
-            </SectionBody>
-          </Section>
-        ))}
-        <SetOutputFolder
-          control={control}
-          isSubmitting={isSubmitting}
-          spec={spec}
-          setShowModal={setSelectFolderModal}
+                  </StyledJobName>
+                )}
+                {!isBatchRun && (
+                  <SelectInstanceType
+                    control={control}
+                    selectedInstance={watch().inputs[0].instanceType}
+                    name={'inputs.0.instanceType'}
+                    jobLimit={watch().jobLimit}
+                    isSubmitting={isSubmitting}
+                    computeInstances={computeInstances}
+                    isComputeInstancesLoading={computeInstancesLoading}
+                    errors={errors}
+                    inputId="select_instance_type"
+                  />
+                )}
+              </StyledGrid>
+            </div>
+          </FieldSet>
+        </div>
+        <div className="min-w-0 max-w-full">
+          {inputs.fields.map((batchInput, batchIndex) => (
+            <FieldSet
+              key={batchInput.id}
+              className="mb-6 min-w-0 max-w-full gap-0 overflow-x-clip rounded-md border border-border p-0"
+              data-testid={`batch_group_${batchIndex}`}
+              aria-label={isBatchRun ? `Batch input ${batchIndex + 1} of ${inputs.fields.length}` : 'App inputs'}
+            >
+              <div className="flex min-h-10 flex-wrap items-center justify-between gap-2 border-b border-border bg-muted-foreground/5 px-3 py-2">
+                {isBatchRun ? (
+                  <>
+                    <div className="text-sm font-bold normal-case text-muted-foreground">
+                      Batch input {batchIndex + 1} of {inputs.fields.length}
+                    </div>
+                    <UiButton
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      disabled={isSubmitting}
+                      className="text-muted-foreground hover:bg-muted-foreground/10 hover:text-foreground dark:hover:bg-muted-foreground/30"
+                      onClick={() => removeInput(batchIndex)}
+                      aria-label="Remove batch input"
+                    >
+                      <XIcon className="size-3.5" aria-hidden />
+                    </UiButton>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-sm font-bold normal-case text-muted-foreground">Inputs</div>
+                    <UiButton
+                      type="button"
+                      variant="ghost"
+                      size="xs"
+                      className="h-6 min-h-6 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                      onClick={() => handleExportInputClick()}
+                    >
+                      <Share className="size-3 shrink-0" aria-hidden />
+                      Export Values
+                    </UiButton>
+                  </>
+                )}
+              </div>
+              <div className="w-full min-w-0 space-y-2 px-3 py-2 sm:px-4 sm:py-2.5">
+                {isBatchRun && (
+                  <SelectInstanceType
+                    control={control}
+                    selectedInstance={watch().inputs[batchIndex].instanceType}
+                    name={`inputs.${batchIndex}.instanceType`}
+                    jobLimit={watch().jobLimit}
+                    isSubmitting={isSubmitting}
+                    computeInstances={computeInstances}
+                    isComputeInstancesLoading={computeInstancesLoading}
+                    errors={errors}
+                    inputId={`select_instance_type_${batchIndex}`}
+                  />
+                )}
+                {spec.input_spec.length > 0 ? (
+                  spec.input_spec.map(inputSpec => {
+                    return (
+                      <Controller
+                        key={`${inputSpec.name}-${batchInput.id}`}
+                        control={control}
+                        name={`inputs.${batchIndex}.fields.${inputSpec.name}`}
+                        render={({ field }) => (
+                          <FieldGroup
+                            label={getLabel(inputSpec)}
+                            required={!inputSpec.optional}
+                            key={inputSpec.name + inputSpec}
+                          >
+                            <JobRunInput
+                              key={inputSpec.name + inputSpec}
+                              field={field}
+                              inputSpec={inputSpec}
+                              errors={errors as FieldErrors<Record<string, unknown>>}
+                              disabled={isSubmitting}
+                              register={register}
+                              setError={setError}
+                              scope={app.entity_type === 'https' ? watch().scope?.value : app.scope}
+                              validatedFilesCache={validatedFilesCache}
+                            />
+                          </FieldGroup>
+                        )}
+                      />
+                    )
+                  })
+                ) : (
+                  <Empty>App has no inputs.</Empty>
+                )}
+              </div>
+            </FieldSet>
+          ))}
+          <SetOutputFolder
+            control={control}
+            isSubmitting={isSubmitting}
+            spec={spec}
+            setShowModal={setSelectFolderModal}
+          />
+        </div>
+        <StyledActionsContainer>
+          <Button
+            data-variant="primary"
+            data-testid="run-app-submit-button"
+            disabled={isSubmitting || Object.keys(errors).length > 0}
+            type="button"
+            form="submitJobForm"
+            onClick={handleSubmit(onSubmit)}
+          >
+            {isSubmitting ? runningButtonText : runButtonText}
+          </Button>
+          <RightGroup>
+            {isBatchRun && (
+              <>
+                <Button
+                  data-variant="success"
+                  disabled={isSubmitting}
+                  type="button"
+                  onClick={event => exportFormData(event, getValues())}
+                >
+                  Export Inputs
+                </Button>
+
+                <input
+                  type="file"
+                  style={{ display: 'none' }}
+                  id="fileInput"
+                  onChange={event =>
+                    importFormData(
+                      event,
+                      vals => reset(vals),
+                      getValues(),
+                      setShowValidationWait,
+                      setValidatedFilesCache,
+                      setTotalFilesToValidate,
+                      setTotalFilesValidated,
+                    )
+                  }
+                />
+                <Button data-variant="success" disabled={isSubmitting} type="button" onClick={handleImportClick}>
+                  Import Inputs
+                </Button>
+              </>
+            )}
+            {computeInstances.length > 0 && (
+              <Button data-variant="success" disabled={isSubmitting} type="button" onClick={addInput}>
+                Add batch
+              </Button>
+            )}
+          </RightGroup>
+        </StyledActionsContainer>
+        {licensesModal}
+        {selectFolderModal}
+
+        <SavingModal
+          modalId="run-batch-job-processing"
+          headerText="Starting batch run jobs"
+          body={
+            <div>
+              <p>{getRunningLabelText()}.</p>
+              <p>Please wait until this message disappears.</p>
+            </div>
+          }
+          isSaving={isSubmitting && isBatchRun}
+          key="run-batch-job-processing"
         />
-      </AppsConfiguration>
-      <StyledActionsContainer>
-        <Button
-          data-variant="primary"
-          data-testid="run-app-submit-button"
-          disabled={isSubmitting || Object.keys(errors).length > 0}
-          type="button"
-          form="submitJobForm"
-          onClick={handleSubmit(onSubmit)}
-        >
-          {isSubmitting ? runningButtonText : runButtonText}
-        </Button>
-        <RightGroup>
-          {isBatchRun && (
-            <>
-              <Button
-                data-variant="success"
-                disabled={isSubmitting}
-                type="button"
-                onClick={event => exportFormData(event, getValues())}
-              >
-                Export Inputs
-              </Button>
-
-              <input
-                type="file"
-                style={{ display: 'none' }}
-                id="fileInput"
-                onChange={event =>
-                  importFormData(
-                    event,
-                    vals => reset(vals),
-                    getValues(),
-                    setShowValidationWait,
-                    setValidatedFilesCache,
-                    setTotalFilesToValidate,
-                    setTotalFilesValidated,
-                  )
-                }
-              />
-              <Button data-variant="success" disabled={isSubmitting} type="button" onClick={handleImportClick}>
-                Import Inputs
-              </Button>
-            </>
-          )}
-          {computeInstances.length > 0 && (
-            <Button data-variant="success" disabled={isSubmitting} type="button" onClick={addInput}>
-              Add batch
-            </Button>
-          )}
-        </RightGroup>
-      </StyledActionsContainer>
-      {licensesModal}
-      {selectFolderModal}
-
-      <SavingModal
-        modalId="run-batch-job-processing"
-        headerText="Starting batch run jobs"
-        body={
-          <div>
-            <p>{getRunningLabelText()}.</p>
-            <p>Please wait until this message disappears.</p>
-          </div>
-        }
-        isSaving={isSubmitting && isBatchRun}
-        key="run-batch-job-processing"
-      />
-      <SavingModal
-        modalId="select-output-folder"
-        headerText="Validating file inputs"
-        body={
-          <div>
-            <p>File inputs are being validated.</p>
-            <p>
-              Processing file {totalFilesValidated}/{totalFilesToValidate}.
-            </p>
-            <p>Please wait until this message disappears.</p>
-          </div>
-        }
-        isSaving={showValidationWait}
-        key="select-output-folder"
-      />
-    </StyledForm>
+        <SavingModal
+          modalId="select-output-folder"
+          headerText="Validating file inputs"
+          body={
+            <div>
+              <p>File inputs are being validated.</p>
+              <p>
+                Processing file {totalFilesValidated}/{totalFilesToValidate}.
+              </p>
+              <p>Please wait until this message disappears.</p>
+            </div>
+          }
+          isSaving={showValidationWait}
+          key="select-output-folder"
+        />
+      </form>
+    </FormProvider>
   )
 }

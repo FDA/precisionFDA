@@ -1,37 +1,87 @@
-import React from 'react'
-import { ControllerRenderProps, FieldValues, Path } from 'react-hook-form'
-import styled from 'styled-components'
+import type { ControllerRenderProps, FieldValues, Path, PathValue } from 'react-hook-form'
 import { Loader } from '@/components/Loader'
-import { Select } from '@/components/Select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/utils/cn'
+import type { ComputeInstance } from '../apps.types'
 import { useComputeInstances } from '../useComputeInstances'
 
-const StyledInstanceSelect = styled(Select)`
-  min-width: 225px;
-`
+export type ComputeInstanceSelectProps = {
+  id: string
+  name: string
+  value: string | null
+  onChange: (instanceId: string) => void
+  onBlur: () => void
+  ref: ControllerRenderProps<FieldValues, Path<FieldValues>>['ref']
+  options: ComputeInstance[]
+  isLoading: boolean
+  disabled?: boolean
+  placeholder?: string
+  triggerClassName?: string
+}
 
-interface SelectOption {
-  value: string
-  label: string
+export const ComputeInstanceSelect = ({
+  id,
+  name,
+  value,
+  onChange,
+  onBlur,
+  ref,
+  options,
+  isLoading,
+  disabled,
+  placeholder = 'Select instance type',
+  triggerClassName,
+}: ComputeInstanceSelectProps) => {
+  if (isLoading) return <Loader />
+
+  return (
+    <Select
+      id={id}
+      items={options}
+      value={value}
+      onValueChange={v => {
+        onChange(v ?? '')
+      }}
+      name={name}
+      disabled={disabled}
+    >
+      <SelectTrigger
+        className={cn('w-full min-w-0 max-w-full', triggerClassName)}
+        onBlur={onBlur}
+        ref={ref}
+      >
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map(option => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
 }
 
 type InstanceTypeSelectProps<T extends FieldValues = FieldValues> = {
   field: ControllerRenderProps<T, Path<T>>
+  id: string
 }
 
-export const InstanceTypeSelect = <T extends FieldValues = FieldValues>({ field }: InstanceTypeSelectProps<T>) => {
+export const InstanceTypeSelect = <T extends FieldValues = FieldValues>({ id, field }: InstanceTypeSelectProps<T>) => {
   const { computeInstances, isLoading } = useComputeInstances()
-  if (isLoading) return <Loader />
-
   return (
-    <StyledInstanceSelect
-      {...field}
-      options={computeInstances}
-      onChange={option => {
-        const selectedOption = option as SelectOption | null
-        field.onChange(selectedOption?.value || '')
+    <ComputeInstanceSelect
+      id={id}
+      name={field.name}
+      value={field.value == null || field.value === '' ? null : String(field.value)}
+      onChange={instanceId => {
+        field.onChange(instanceId as PathValue<T, Path<T>>)
       }}
       onBlur={field.onBlur}
-      value={computeInstances.find((option: SelectOption) => option.value === field.value)}
+      ref={field.ref}
+      options={computeInstances}
+      isLoading={isLoading}
     />
   )
 }
