@@ -1,29 +1,30 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { get } from 'lodash'
-import React from 'react'
-import {
-  Control,
-  Controller,
-  FieldErrors,
-  UseFormRegister,
-} from 'react-hook-form'
+import type React from 'react'
+import { type Control, Controller, type FieldErrors, type UseFormRegister } from 'react-hook-form'
 import { Tooltip } from 'react-tooltip'
 import styled, { css } from 'styled-components'
 import { Button } from '../../../components/Button'
-import {
-  BoolButton,
-  BoolButtonGroup,
-} from '../../../components/Button/BoolButtons'
-import Menu from '../../../components/Menu/Menu'
-import { StyledDropMenuLinks } from '../../../components/Header/styles'
-import { InputText } from '../../../components/InputText'
-import { InputError } from '../../../components/form/styles'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { theme } from '../../../styles/theme'
-import { SelectMultiFileInput } from '../SelectMultiFileInput'
-import { CreateAppForm, IOSpec } from '../apps.types'
-import { formatCSVStringToArray, handleSnakeNameChange } from './common'
+import { BoolButton, BoolButtonGroup } from '../../../components/Button/BoolButtons'
 import { Checkbox } from '../../../components/CheckboxNext'
+import { InputError } from '../../../components/form/styles'
+import { InputText } from '../../../components/InputText'
+import { PlusIcon } from '../../../components/icons/PlusIcon'
+import Menu from '../../../components/Menu/Menu'
+import { theme } from '../../../styles/theme'
+import type { CreateAppForm, IOSpec } from '../apps.types'
+import { SelectMultiFileInput } from '../SelectMultiFileInput'
+import { formatCSVStringToArray, handleSnakeNameChange } from './common'
+
+const StyledDropMenuLinks = styled.div`
+  padding-top: 0;
+  line-height: 28px;
+  display: flex;
+  flex-direction: column;
+  color: var(--c-text-700);
+  border-radius: 3px;
+  font-size: 14px;
+`
 
 export const InputTextS = styled(InputText)<{ $isError?: boolean }>`
   ${({ $isError }) =>
@@ -110,9 +111,7 @@ export const Name = ({ base, register, index, errors }: SpecProps) => {
         $isError={isError}
       />
 
-      {isError && (
-        <Tooltip id={`${base}.${index}.name`} />
-      )}
+      {isError && <Tooltip id={`${base}.${index}.name`} />}
     </td>
   )
 }
@@ -128,13 +127,9 @@ export const Label = ({ base, register, index, errors }: SpecProps) => {
         data-tooltip-id={`${base}.${index}.label`}
         data-tooltip-content={errorMessage}
         $isError={isError}
-        placeholder={`Enter ${
-          base === 'input_spec' ? 'input' : 'output'
-        } label`}
+        placeholder={`Enter ${base === 'input_spec' ? 'input' : 'output'} label`}
       />
-      {isError && (
-        <Tooltip id={`${base}.${index}.label`} />
-      )}
+      {isError && <Tooltip id={`${base}.${index}.label`} />}
     </td>
   )
 }
@@ -152,9 +147,7 @@ export const Help = ({ base, register, index, errors }: SpecProps) => {
         $isError={isError}
         placeholder="Enter help text"
       />
-      {isError && (
-        <Tooltip id={`${base}.${index}.help`} />
-      )}
+      {isError && <Tooltip id={`${base}.${index}.help`} />}
     </td>
   )
 }
@@ -173,9 +166,7 @@ export const DefaultString = ({ base, register, index, errors }: SpecProps) => {
         $isError={isError}
         placeholder="Optional default"
       />
-      {isError && (
-        <Tooltip id={`${base}.${index}.default`} />
-      )}
+      {isError && <Tooltip id={`${base}.${index}.default`} />}
     </td>
   )
 }
@@ -193,9 +184,7 @@ export const DefaultFloat = ({ base, register, index, errors }: SpecProps) => {
         // @ts-expect-error - dynamic field path not recognized by TypeScript
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
-      {isError && (
-        <Tooltip id={`${base}.${index}.default`} />
-      )}
+      {isError && <Tooltip id={`${base}.${index}.default`} />}
     </td>
   )
 }
@@ -213,20 +202,12 @@ export const DefaultInt = ({ base, register, index, errors }: SpecProps) => {
         // @ts-expect-error - dynamic field path not recognized by TypeScript
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
-      {isError && (
-        <Tooltip id={`${base}.${index}.default`} />
-      )}
+      {isError && <Tooltip id={`${base}.${index}.default`} />}
     </td>
   )
 }
 
-export const DefaultFile = ({
-  base,
-  index,
-  control,
-  errors,
-  sClass,
-}: SpecProps) => {
+export const DefaultFile = ({ base, index, control, errors, sClass }: SpecProps) => {
   const isError = Boolean(get(errors, `${base}.${index}.default`))
   const errorMessage = get(errors, `${base}.${index}.default`)?.message || null
 
@@ -255,19 +236,12 @@ export const DefaultFile = ({
           )
         }}
       />
-      {isError && (
-        <Tooltip id={`input_spec.${index}.default`} />
-      )}
+      {isError && <Tooltip id={`input_spec.${index}.default`} />}
     </td>
   )
 }
 
-export const DefaultBoolean = ({
-  base,
-  control,
-  index,
-  errors,
-}: SpecProps) => {
+export const DefaultBoolean = ({ base, control, index, errors }: SpecProps) => {
   return (
     <DefaultBooleanTd>
       <Controller
@@ -280,9 +254,7 @@ export const DefaultBoolean = ({
               <BoolButton
                 type="button"
                 data-selected={(field.value === 'true').toString() as BooleanString}
-                onClick={() =>
-                  field.onChange(field.value === 'true' ? null : 'true')
-                }
+                onClick={() => field.onChange(field.value === 'true' ? null : 'true')}
               >
                 True
               </BoolButton>
@@ -290,9 +262,7 @@ export const DefaultBoolean = ({
               <BoolButton
                 type="button"
                 data-selected={(field.value === 'false').toString() as BooleanString}
-                onClick={() =>
-                  field.onChange(field.value === 'false' ? null : 'false')
-                }
+                onClick={() => field.onChange(field.value === 'false' ? null : 'false')}
               >
                 False
               </BoolButton>
@@ -324,9 +294,7 @@ export const Choice = ({ base, register, index, errors }: SpecProps) => {
         {...register(`${base}.${index}.choices`, { setValueAs: formatCSVStringToArray })}
         placeholder="Optional comma separated values"
       />
-      {isError && (
-        <Tooltip id={`${base}.${index}.choices`} />
-      )}
+      {isError && <Tooltip id={`${base}.${index}.choices`} />}
     </td>
   )
 }
@@ -356,9 +324,7 @@ export const Optional = ({ base, index, control, errors }: SpecProps) => {
           )
         }}
       />
-      {isError && (
-        <Tooltip id={id} />
-      )}
+      {isError && <Tooltip id={id} />}
     </td>
   )
 }
@@ -378,7 +344,7 @@ export const IsArray = ({ base, index, control, errors }: SpecProps) => {
           return (
             <CheckboxWrapLabel id={id}>
               <Checkbox
-                data-testid={id+'-checkbox'}
+                data-testid={id + '-checkbox'}
                 checked={field.value as boolean}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
@@ -387,9 +353,7 @@ export const IsArray = ({ base, index, control, errors }: SpecProps) => {
           )
         }}
       />
-      {isError && (
-        <Tooltip id={id} />
-      )}
+      {isError && <Tooltip id={id} />}
     </StyledIsArray>
   )
 }
@@ -498,18 +462,13 @@ export const SelectIOClass = ({
     <Menu
       positioner={{ side: 'bottom', align: 'start' }}
       trigger={
-        <StyledButton
-          as={Menu.Trigger}
-          type="button"
-          data-testid={testId}
-        >
+        <StyledButton as={Menu.Trigger} type="button" data-testid={testId}>
           <PlusIcon height={12} />
           {children}
         </StyledButton>
       }
     >
-      <StyledDropMenuLinks
-        data-testid="io-items">
+      <StyledDropMenuLinks data-testid="io-items">
         <Menu.Item
           onClick={() => {
             addRow('string')

@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
+import type { AxiosError } from 'axios'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
-import { ApiErrorResponse, ServerScope } from '../../home/types'
-import { runJob, RunJobRequest } from '../apps.api'
+import type { ApiErrorResponse, ServerScope } from '../../home/types'
+import { type RunJobRequest, runJob } from '../apps.api'
 
 export const useRunJobMutation = (scope: ServerScope) => {
   const queryClient = useQueryClient()

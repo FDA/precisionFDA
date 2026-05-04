@@ -1,9 +1,10 @@
-import React from 'react'
-import { Control, Controller, FieldErrors, Path } from 'react-hook-form'
+import { type Control, Controller, type FieldErrors, type Path } from 'react-hook-form'
 import { FieldGroup } from '@/components/form/FieldGroup'
-import { Select } from '@/components/Select'
-import { ComputeResourceKey, ComputeResourcePricingMap } from '@/types/user'
-import { ComputeInstance, RunJobFormType } from '../apps.types'
+import { Loader } from '@/components/Loader'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { type ComputeResourceKey, ComputeResourcePricingMap } from '@/types/user'
+import { cn } from '@/utils/cn'
+import type { ComputeInstance, RunJobFormType } from '../apps.types'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { StyledMaxRuntime } from './styles'
 
@@ -44,31 +45,54 @@ export const SelectInstanceType = ({
   }
 
   return (
-    <FieldGroup label="Instance Type" required>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
-          <>
-            <Select
-              options={computeInstances}
-              placeholder="Choose..."
-              onChange={value => {
-                field.onChange(value)
-                field.onBlur()
-              }}
-              isLoading={isComputeInstancesLoading}
-              isSearchable
-              onBlur={field.onBlur}
-              value={field.value}
-              isDisabled={isSubmitting}
-              inputId={inputId}
-            />
-            <StyledMaxRuntime>{maxRuntime}</StyledMaxRuntime>
-          </>
-        )}
-      />
-      <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName={name} />
-    </FieldGroup>
+    <div className="w-full min-w-0 max-w-64">
+      <FieldGroup label="Instance Type" required>
+        <Controller
+          name={name}
+          control={control}
+          render={({ field }) => {
+            if (isComputeInstancesLoading) {
+              return <Loader />
+            }
+            const current = field.value as ComputeInstance | undefined
+            return (
+              <>
+                <Select
+                  id={inputId}
+                  name={String(field.name)}
+                  items={computeInstances}
+                  value={current?.value ?? null}
+                  onValueChange={id => {
+                    const next = computeInstances.find(c => c.value === id)
+                    if (next) {
+                      field.onChange(next)
+                    }
+                    field.onBlur()
+                  }}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger
+                    className={cn('h-8 w-full min-w-0 max-w-full justify-between pr-1 pl-1.5')}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                  >
+                    <SelectValue placeholder="Choose…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {computeInstances.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <StyledMaxRuntime>{maxRuntime}</StyledMaxRuntime>
+              </>
+            )
+          }}
+        />
+        <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName={name} />
+      </FieldGroup>
+    </div>
   )
 }

@@ -6,13 +6,13 @@ import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { AlertBanner } from '../../../components/AlertBanner'
 import { Button } from '../../../components/Button'
-import { InputDateTime, InputText } from '../../../components/InputText'
 import { FieldGroup, FieldLabel, InputError, InputSelect } from '../../../components/form/styles'
-import { createAlertRequest, deleteAlertRequest, updateAlertRequest } from './alerts.api'
-import { Form, FormPage, PreviewBanner, StyledRow } from './alerts.styles'
-import { Alert, AlertType } from './alerts.types'
-import { alertTypesArray, alertTypesText, formatInTimeZone, validationSchema } from './alerts.common'
+import { InputDateTime, InputText } from '../../../components/InputText'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import { createAlertRequest, deleteAlertRequest, updateAlertRequest } from './alerts.api'
+import { alertTypesArray, alertTypesText, formatInTimeZone, validationSchema } from './alerts.common'
+import { Form, FormPage, PreviewBanner, StyledRow } from './alerts.styles'
+import type { Alert, AlertType } from './alerts.types'
 
 export type AlertFormType = {
   title: string

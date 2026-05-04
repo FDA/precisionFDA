@@ -1,18 +1,28 @@
+import { useQuery } from '@tanstack/react-query'
 import { isSafeInteger } from 'lodash'
-import React, { useEffect } from 'react'
-import { ControllerRenderProps, FieldErrors, UseFormRegister, UseFormSetError } from 'react-hook-form'
-import Select, { SingleValueProps, components } from 'react-select'
+import { useEffect } from 'react'
+import {
+  type ControllerRenderProps,
+  type FieldErrors,
+  type FieldPath,
+  type FieldValues,
+  type UseFormRegister,
+  type UseFormSetError,
+  useFormContext,
+} from 'react-hook-form'
+import Select, { components, type SingleValueProps } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import styled from 'styled-components'
+import { FieldError } from '@/components/ui/field'
+import type { RunWorkflowFormType } from '@/features/workflows/run/RunWorkflowForm'
 import { BoolButton, BoolButtonGroup } from '../../../components/Button/BoolButtons'
-import { InputText } from '../../../components/InputText'
 import { FieldInfo } from '../../../components/form/FieldInfo'
+import { InputText } from '../../../components/InputText'
 import { noAccessText } from '../../files/file.utils'
-import { SelectMultiFileInput } from '../SelectMultiFileInput'
-import { IOSpec, InputSpec, RunJobFormType } from '../apps.types'
+import type { InputSpec, IOSpec, RunJobFormType } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
+import { SelectMultiFileInput } from '../SelectMultiFileInput'
 import { ErrorMessageForField } from './ErrorMessageForField'
-import { useQuery } from '@tanstack/react-query'
 import { validateFile } from './utils'
 
 const getDefaultValue = val => {
@@ -87,23 +97,29 @@ const enhanceScope = (scope: string) => {
   return ['public', 'private'].includes(scope) ? ['private', 'public'] : [scope, 'public']
 }
 
+/** Reads validation for this path via RHF context (works for nested paths like inputs.0.fields.x). Requires FormProvider. */
+function FileFieldMessage({ name }: { name: FieldPath<FieldValues> }) {
+  const { getFieldState, formState } = useFormContext<FieldValues>()
+  const { error } = getFieldState(name, formState)
+  return error?.message ? <FieldError>{error.message}</FieldError> : null
+}
+
 const ArrayFileInput = ({
   disabled,
   field,
   scope,
   inputSpec,
-  errors,
   setError,
   validatedFilesCache,
 }: {
   inputSpec: InputSpec
   field: ControllerRenderProps<RunJobFormType, any>
-  errors: FieldErrors<Record<string, unknown>>
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
   scope: string
   validatedFilesCache: Record<string, boolean>
 }) => {
+  const { setValue } = useFormContext<FieldValues>()
   const fileUids: string[] = field?.value || []
   const areAllFilesPreValidated = fileUids.every(fileUid => validatedFilesCache[fileUid])
 
@@ -129,15 +145,17 @@ const ArrayFileInput = ({
         dialogTitle="Select input files"
         disabled={disabled}
         onChange={value => {
-          field.onChange(value?.map(v => v.uid) ?? null)
-          field.onBlur()
+          setValue(field.name as FieldPath<FieldValues>, value?.map(v => v.uid) ?? null, {
+            shouldValidate: true,
+            shouldTouch: true,
+          })
         }}
         value={field?.value ?? null}
         scopes={enhanceScope(scope)}
       />
 
       <FieldInfo text={inputSpec.help} />
-      <ErrorMessageForField errors={errors} fieldName={field.name} />
+      <FileFieldMessage name={field.name as FieldPath<FieldValues>} />
     </>
   )
 }
@@ -147,18 +165,17 @@ const SingleFileInput = ({
   field,
   scope,
   inputSpec,
-  errors,
   setError,
   validatedFilesCache,
 }: {
   inputSpec: InputSpec
   field: ControllerRenderProps<RunJobFormType, any>
-  errors: FieldErrors<Record<string, unknown>>
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
   scope: string
   validatedFilesCache: Record<string, boolean>
 }) => {
+  const { setValue } = useFormContext<FieldValues>()
   const fileUid = field?.value
   const hasValue = !!fileUid && fileUid.length > 0
   const isSuccessfullyPreValidated = validatedFilesCache[fileUid]
@@ -166,7 +183,7 @@ const SingleFileInput = ({
   const fileListQuery = useQuery({
     queryFn: () => validateFile(fileUid),
     queryKey: ['user-list-files', fileUid],
-    enabled: !!fileUid && fileUid.length > 0 && !(isSuccessfullyPreValidated),
+    enabled: !!fileUid && fileUid.length > 0 && !isSuccessfullyPreValidated,
   })
 
   const error = hasValue && fileListQuery.isSuccess && !(isSuccessfullyPreValidated || fileListQuery?.data === true)
@@ -183,8 +200,10 @@ const SingleFileInput = ({
         dialogTitle="Select input file"
         disabled={disabled}
         onChange={value => {
-          field.onChange(value?.[0].uid ?? null)
-          field.onBlur()
+          setValue(field.name as FieldPath<FieldValues>, value?.[0].uid ?? null, {
+            shouldValidate: true,
+            shouldTouch: true,
+          })
         }}
         dialogType="radio"
         value={field.value && [field.value]}
@@ -192,7 +211,7 @@ const SingleFileInput = ({
       />
 
       <FieldInfo text={inputSpec.help} />
-      <ErrorMessageForField errors={errors} fieldName={field.name} />
+      <FileFieldMessage name={field.name as FieldPath<FieldValues>} />
     </>
   )
 }
@@ -211,7 +230,7 @@ export const JobRunInput = ({
   field: ControllerRenderProps<RunJobFormType, any>
   errors: FieldErrors<Record<string, unknown>>
   disabled: boolean
-  register: UseFormRegister<RunJobFormType>
+  register: UseFormRegister<RunJobFormType> | UseFormRegister<RunWorkflowFormType>
   setError: UseFormSetError<RunJobFormType>
   scope: string
   validatedFilesCache?: Record<string, boolean>
@@ -226,7 +245,6 @@ export const JobRunInput = ({
         <SingleFileInput
           setError={setError}
           disabled={disabled}
-          errors={errors}
           field={field}
           inputSpec={inputSpec}
           scope={scope}
@@ -239,7 +257,6 @@ export const JobRunInput = ({
         <ArrayFileInput
           setError={setError}
           disabled={disabled}
-          errors={errors}
           field={field}
           inputSpec={inputSpec}
           scope={scope}

@@ -1,15 +1,15 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
+import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { useFetchFilesByUIDQuery } from '../../files/query/useFetchFilesByUIDQuery'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { IApp } from '../apps.types'
+import type { IApp } from '../apps.types'
 import { generateCopyUrl } from './utils'
-import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const StyledButtonRow = styled(ButtonRow)`
   justify-content: space-between;

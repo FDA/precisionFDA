@@ -1,13 +1,11 @@
-import React from 'react'
 import { ErrorMessage } from '@hookform/error-message'
-import { FieldErrors } from 'react-hook-form'
-import { InputError } from '../../../components/form/styles'
+import type { FieldErrors } from 'react-hook-form'
+import { FieldError } from '@/components/ui/field'
 
-export const ErrorMessageForField = ({ errors, fieldName }:
-  { errors: FieldErrors, fieldName: string }) =>
-(
+export const ErrorMessageForField = ({ errors, fieldName }: { errors: FieldErrors; fieldName: string }) => (
   <ErrorMessage
     errors={errors}
     name={fieldName}
-    render={({ message }) =>
-      <InputError>{message}</InputError>} />)
+    render={({ message }) => (message ? <FieldError>{message}</FieldError> : null)}
+  />
+)

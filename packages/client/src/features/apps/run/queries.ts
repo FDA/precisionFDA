@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { getSpaceIdFromScope } from '../../../utils'
 import { fetchEditableSpacesList } from '../../spaces/spaces.api'
-import { ISpace, SPACE_TYPES } from '../../spaces/spaces.types'
+import { type ISpace, SPACE_TYPES } from '../../spaces/spaces.types'
 import { fetchSelectableSpaces } from '../apps.api'
-import { IApp } from '../apps.types'
+import type { IApp } from '../apps.types'
 
 const getTitle = (space: ISpace): string => {
   if (space.type === SPACE_TYPES.REVIEW) {
@@ -43,7 +43,7 @@ export const fetchAndConvertSelectableSpaces = (scope: IApp['scope']) => {
   return useQuery({
     queryKey: ['selectable-space', scope],
     queryFn: () => fetchSelectableSpaces(spaceId!),
-    select: (data) => {
+    select: data => {
       if (scope.includes('space')) {
         return data.map(space => ({
           isDisabled: false,

@@ -1,14 +1,12 @@
 import { getSpaceIdFromScope } from '../../../utils'
-import { EditableSpace, fetchEditableSpacesList } from '../../spaces/spaces.api'
-import { ISpace, SPACE_TYPES } from '../../spaces/spaces.types'
+import { type EditableSpace, fetchEditableSpacesList } from '../../spaces/spaces.api'
+import { type ISpace, SPACE_TYPES } from '../../spaces/spaces.types'
 import { fetchSelectableSpaces } from '../apps.api'
-import { IApp, SelectableSpace, SelectType } from '../apps.types'
+import type { IApp, SelectableSpace, SelectType } from '../apps.types'
 
 const getTitle = (space: ISpace): string => {
   if (space.type === SPACE_TYPES.REVIEW) {
-    return space.spaceId
-      ? `${space.name} (Private Review)`
-      : `${space.name} (Shared Review)`
+    return space.spaceId ? `${space.name} (Private Review)` : `${space.name} (Shared Review)`
   }
   if (space.type === SPACE_TYPES.VERIFICATION) {
     return `${space.name} (Verification)`
@@ -37,9 +35,7 @@ const fetchAndConvertSelectableSpaces = async (scope: string): Promise<Selectabl
   return []
 }
 
-const fetchAndConvertSelectableContexts = async (entity_type: IApp['entity_type']): Promise<
-  SelectType[]
-> => {
+const fetchAndConvertSelectableContexts = async (entity_type: IApp['entity_type']): Promise<SelectType[]> => {
   if (entity_type === 'https') {
     const spaces: EditableSpace[] = await fetchEditableSpacesList()
     const options = spaces.map(s => ({

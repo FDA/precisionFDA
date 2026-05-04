@@ -1,73 +1,39 @@
-import React from 'react'
-import styled from 'styled-components'
-import { TransparentButton } from './Button'
-import { headerPaddings } from './Header/styles'
-import { CrossIcon } from './icons/PlusIcon'
+import { X } from 'lucide-react'
+import { cn } from '@/utils/cn'
 import { alertTypesText } from '../features/admin/alerts/alerts.common'
-import { AlertType } from '../features/admin/alerts/alerts.types'
+import type { AlertType } from '../features/admin/alerts/alerts.types'
+import { TransparentButton } from './Button'
 
-const Message = styled.div`
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  text-wrap: pretty;
-`
+const alertBannerRoot = (variant: AlertType) =>
+  cn(
+    'site-alert-banner box-border flex h-site-alert justify-between gap-4 px-8 py-0.5 text-[13px]',
+    variant === 'warning' ? 'bg-[#e73a3a] text-white' : 'bg-[#f0c250] text-[hsl(0_0%_20%)]',
+  )
 
-const Close = styled(TransparentButton)`
-  justify-content: center;
-  align-items: center;
-  align-self: flex-start;
-  display: flex;
-  cursor: pointer;
-  margin-top: 2px;
-`
-
-export const StyledAlertBanner = styled.div<{ 'data-variant': AlertType }>`
-  --c-info: #f0c250;
-  --c-warning: #e73a3a;
-
-  background-color: var(--c-info);
-  box-sizing: border-box;
-
-  &[data-variant="warning"] {
-    background-color: var(--c-warning);
-    color: white;
-  }
-  &[data-variant="info"] {
-    background-color: var(--c-info);
-  }
-  color: hsl(0, 0%, 20%);
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  gap: 16px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  height: var(--site-alert-height);
-  ${headerPaddings}
-`
-
-export const Variant = styled.span`
- text-transform: capitalize;
- font-weight: bolder;
- margin-right: 8px;
-`
-
-export const AlertBanner = ({ variant, alertText, dismissAlert }: { variant: AlertType, alertText?: string; dismissAlert: () => void }) => {
-  if (!alert) return null
-
-  const handleClose = () => {
-    dismissAlert()
-  }
+export const AlertBanner = ({
+  variant,
+  alertText,
+  dismissAlert,
+}: {
+  variant: AlertType
+  alertText?: string
+  dismissAlert: () => void
+}) => {
+  if (!alertText) return null
 
   return (
-    <StyledAlertBanner className='site-alert-banner' data-variant={variant}>
-      <Message>
-        <Variant>{alertTypesText[variant]}:</Variant> {alertText}
-      </Message>
-      <Close onClick={handleClose}>
-        <CrossIcon height="14" />
-      </Close>
-    </StyledAlertBanner>
+    <div className={alertBannerRoot(variant)} data-variant={variant}>
+      <div className="flex flex-1 justify-center text-pretty">
+        <span className="mr-2 font-bold capitalize">{alertTypesText[variant]}:</span> {alertText}
+      </div>
+      <TransparentButton
+        type="button"
+        className="mt-0.5 flex cursor-pointer items-center justify-center self-start"
+        onClick={dismissAlert}
+        aria-label="Dismiss alert"
+      >
+        <X height={14} />
+      </TransparentButton>
+    </div>
   )
 }

@@ -154,10 +154,15 @@ export const TransparentButton = styled(Button)`
   display: flex;
   box-shadow: none;
   min-width: auto;
-  background: none;
+  background-color: transparent;
+  background-image: none;
   border: none;
   cursor: pointer;
   padding: 0;
+  /* Base Button dims the whole control on hover; let host classes (e.g. header) paint hover bg. */
+  &:hover:not([aria-disabled='true']) {
+    filter: none;
+  }
   &:active {
     position: relative;
     top: 1px;

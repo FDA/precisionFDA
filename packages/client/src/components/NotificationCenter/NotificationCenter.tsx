@@ -1,16 +1,17 @@
 import { formatDistanceToNow } from 'date-fns'
-import React, { useEffect } from 'react'
+import type React from 'react'
+import { useEffect } from 'react'
 import { useNotificationCenter } from 'react-toastify/addons/use-notification-center'
 import { useFetchUnreadNotificationsQuery } from '../../api/queries/notification'
-import { Notification, NOTIFICATION_ACTION } from '../../features/home/types'
+import { NOTIFICATION_ACTION, type Notification } from '../../features/home/types'
 import { confirmNotification } from '../../features/notifications/notifications.api'
 import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { Button } from '../Button'
-import { DropdownMenuItem } from '../Header/styles'
-import Menu from '../Menu/Menu'
-import { BasicToast, ToastWithLink } from '../Toast'
+import { headerDropdownTrigger } from '../Header/header.classes'
 import { BellIcon } from '../icons/BellIcon'
 import { TrashIcon } from '../icons/TrashIcon'
+import Menu from '../Menu/Menu'
+import { BasicToast, ToastWithLink } from '../Toast'
 import styles from './NotificationCenter.module.css'
 import { initializeToastHelper, toastHandlers } from './ToastHelper'
 
@@ -31,12 +32,7 @@ const NO_TOAST_NOTIFICATIONS = [
 const createToastContent = (message: string, meta?: Notification['meta']) => {
   if (meta?.linkTitle && meta?.linkUrl) {
     return (
-      <ToastWithLink
-        message={message}
-        linkTitle={meta.linkTitle}
-        linkUrl={meta.linkUrl}
-        linkTarget={meta.linkTarget}
-      />
+      <ToastWithLink message={message} linkTitle={meta.linkTitle} linkUrl={meta.linkUrl} linkTarget={meta.linkTarget} />
     )
   }
   return <BasicToast message={message} />
@@ -110,13 +106,13 @@ export const NotificationCenter = () => {
       positioner={{ sideOffset: 2, side: 'bottom', align: 'end' }}
       trigger={
         <Menu.Trigger>
-          <DropdownMenuItem $active={false} data-testid="notifications-menu">
+          <div className={headerDropdownTrigger(false)} data-testid="notifications-menu">
             <div className={styles.wrapper}>
               <BellIcon />
               {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
               {unreadCount == 0 && notifications.length > 0 && <span className={styles.emptyBadge}></span>}
             </div>
-          </DropdownMenuItem>
+          </div>
         </Menu.Trigger>
       }
       onOpenChange={() => markAllAsRead()}
@@ -141,11 +137,19 @@ export const NotificationCenter = () => {
               <div key={n.id} className={`${styles.notificationItem} ${!n.read ? styles.unread : ''}`}>
                 <div className={styles.notificationContent}>
                   <div className={styles.notificationBody}>
-                    <div className={styles.notificationText}>{typeof n.content === 'function' ? 'Notification' : n.content}</div>
-                    <p className={styles.notificationTime}>{formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}</p>
+                    <div className={styles.notificationText}>
+                      {typeof n.content === 'function' ? 'Notification' : n.content}
+                    </div>
+                    <p className={styles.notificationTime}>
+                      {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                    </p>
                   </div>
                   <div className={styles.notificationActions}>
-                    <button className={styles.deleteButton} onClick={() => handleRemove(n.id)} title="Remove notification">
+                    <button
+                      className={styles.deleteButton}
+                      onClick={() => handleRemove(n.id)}
+                      title="Remove notification"
+                    >
                       <TrashIcon height={14} />
                     </button>
                   </div>

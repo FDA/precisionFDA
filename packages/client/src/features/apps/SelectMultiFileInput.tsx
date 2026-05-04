@@ -1,14 +1,10 @@
-import React from 'react'
 import styled, { css } from 'styled-components'
 import { Button } from '../../components/Button'
-import { pluralize } from '../../utils/formatting'
-import {
-  useSelectFileModal,
-} from '../files/actionModals/useSelectFileModal'
-
 import { theme } from '../../styles/theme'
-import { IAccessibleFile } from '../databases/databases.api'
-import { DialogType } from '../home/types'
+import { pluralize } from '../../utils/formatting'
+import type { IAccessibleFile } from '../databases/databases.api'
+import { useSelectFileModal } from '../files/actionModals/useSelectFileModal'
+import type { DialogType } from '../home/types'
 import { ButtonRow } from '../modal/styles'
 
 const StyledButtonRow = styled(ButtonRow)`
@@ -17,7 +13,9 @@ const StyledButtonRow = styled(ButtonRow)`
 `
 
 const FileButton = styled(Button)<{ $isError?: boolean }>`
-  ${({ $isError }) => $isError && css`
+  ${({ $isError }) =>
+    $isError &&
+    css`
     border-color: ${theme.colors.darkRed};
     color: ${theme.colors.darkRed};
     &:hover {

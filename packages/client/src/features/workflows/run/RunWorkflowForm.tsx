@@ -1,6 +1,13 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { type Control, Controller, type UseFormRegister, type UseFormSetError, useForm } from 'react-hook-form'
+import {
+  type Control,
+  Controller,
+  FormProvider,
+  type UseFormRegister,
+  type UseFormSetError,
+  useForm,
+} from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import * as Yup from 'yup'
 import { Button } from '@/components/Button'
@@ -170,8 +177,8 @@ const WorkflowStage = ({
                       inputSpec={inputSpec}
                       errors={errors}
                       disabled={isSubmitting}
-                      setError={setError}
                       register={register}
+                      setError={setError}
                       scope={app.scope}
                     />
                   </FieldGroup>
@@ -234,6 +241,11 @@ const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: 
   const { data: selectableSpaces } = useSelectableSpaces(workflow.scope)
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
 
+  const form = useForm<RunWorkflowFormType>({
+    mode: 'onBlur',
+    resolver: yupResolver(validationSchema),
+    defaultValues,
+  })
   const {
     control,
     register,
@@ -243,11 +255,7 @@ const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: 
     getValues,
     setValue,
     trigger,
-  } = useForm<RunWorkflowFormType>({
-    mode: 'onBlur',
-    resolver: yupResolver(validationSchema),
-    defaultValues,
-  })
+  } = form
 
   useDefaultScopeSelection(getValues(), selectableSpaces, workflow.scope, setValue)
 
@@ -298,61 +306,63 @@ const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: 
     <>
       {licensesModal}
 
-      <StyledForm id="submitWorkflowForm" autoComplete="off">
-        <WorkflowConfiguration>
-          <Section>
-            <SectionHeader>CONFIGURE</SectionHeader>
-            <SectionBody>
-              <StyledGrid>
-                <StyledAnalysisName>
-                  <FieldGroup label="Analysis Name" required>
-                    <InputText {...register('analysisName')} disabled={isSubmitting} />
-                    <ErrorMessageForField errors={errors} fieldName="jobName" />
+      <FormProvider {...form}>
+        <StyledForm id="submitWorkflowForm" autoComplete="off">
+          <WorkflowConfiguration>
+            <Section>
+              <SectionHeader>CONFIGURE</SectionHeader>
+              <SectionBody>
+                <StyledGrid>
+                  <StyledAnalysisName>
+                    <FieldGroup label="Analysis Name" required>
+                      <InputText {...register('analysisName')} disabled={isSubmitting} />
+                      <ErrorMessageForField errors={errors} fieldName="jobName" />
+                    </FieldGroup>
+                  </StyledAnalysisName>
+                  <FieldGroup label="Execution Cost Limit ($)" required>
+                    <InputNumber {...register('jobLimit')} disabled={isSubmitting} />
+                    <ErrorMessageForField errors={errors} fieldName="jobLimit" />
                   </FieldGroup>
-                </StyledAnalysisName>
-                <FieldGroup label="Execution Cost Limit ($)" required>
-                  <InputNumber {...register('jobLimit')} disabled={isSubmitting} />
-                  <ErrorMessageForField errors={errors} fieldName="jobLimit" />
-                </FieldGroup>
-                {workflow.scope?.startsWith('space-') && (
-                  <SelectSpaceScope
-                    control={control}
-                    isSubmitting={isSubmitting}
-                    selectableSpaces={selectableSpaces}
+                  {workflow.scope?.startsWith('space-') && (
+                    <SelectSpaceScope
+                      control={control}
+                      isSubmitting={isSubmitting}
+                      selectableSpaces={selectableSpaces}
+                      errors={errors}
+                    />
+                  )}
+                </StyledGrid>
+              </SectionBody>
+            </Section>
+            <Section>
+              <SectionHeader>INPUTS</SectionHeader>
+              <SectionBody>
+                {stages?.map(stage => (
+                  <WorkflowStage
+                    key={stage.stageIndex}
+                    stage={stage}
                     errors={errors}
+                    app={apps.find(app => app.dxid === stage.app_dxid)}
+                    control={control}
+                    register={register}
+                    setError={setError}
+                    isSubmitting={isSubmitting}
                   />
-                )}
-              </StyledGrid>
-            </SectionBody>
-          </Section>
-          <Section>
-            <SectionHeader>INPUTS</SectionHeader>
-            <SectionBody>
-              {stages?.map(stage => (
-                <WorkflowStage
-                  key={stage.stageIndex}
-                  stage={stage}
-                  errors={errors}
-                  app={apps.find(app => app.dxid === stage.app_dxid)}
-                  control={control}
-                  register={register}
-                  setError={setError}
-                  isSubmitting={isSubmitting}
-                />
-              ))}
-            </SectionBody>
-          </Section>
-        </WorkflowConfiguration>
-        <Button
-          data-variant="primary"
-          disabled={isSubmitting}
-          type="submit"
-          form="submitJobForm"
-          onClick={handleSubmit(onSubmit)}
-        >
-          {isSubmitting ? 'Running' : 'Run Workflow'}
-        </Button>
-      </StyledForm>
+                ))}
+              </SectionBody>
+            </Section>
+          </WorkflowConfiguration>
+          <Button
+            data-variant="primary"
+            disabled={isSubmitting}
+            type="submit"
+            form="submitJobForm"
+            onClick={handleSubmit(onSubmit)}
+          >
+            {isSubmitting ? 'Running' : 'Run Workflow'}
+          </Button>
+        </StyledForm>
+      </FormProvider>
     </>
   )
 }
@@ -390,13 +400,13 @@ const WorkflowRunPage = () => {
     <FormPageContainer>
       <Topbox>
         <BackLink linkTo={`/${baseLink}/workflows/${workflow.uid}`}>Back to Workflow</BackLink>
-        <TopboxItem>
+        <div>
           <Title>
             <CubeIcon height={20} />
             <span>Run Workflow:</span>
             <span>{workflowTitle}</span>
           </Title>
-        </TopboxItem>
+        </div>
       </Topbox>
       <RunWorkflowForm workflow={workflow} meta={meta} user={user} />
     </FormPageContainer>

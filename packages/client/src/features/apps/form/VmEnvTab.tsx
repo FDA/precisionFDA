@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Control, Controller } from 'react-hook-form'
+import { type Control, Controller } from 'react-hook-form'
 import { Link } from 'react-router'
 import styled from 'styled-components'
 import { Button, TransparentButton } from '@/components/Button'
@@ -10,7 +10,7 @@ import { CrossIcon } from '@/components/icons/PlusIcon'
 import { Svg } from '@/components/icons/Svg'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import { useAssetAttachModal } from '../../actionModals/useAssetAttachModal'
-import { CreateAppForm } from '../apps.types'
+import type { CreateAppForm } from '../apps.types'
 import { InputTextS } from './Fields'
 import { InstanceTypeSelect } from './InstanceTypeSelect'
 import { FormFields, Help } from './styles'
@@ -203,7 +203,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
     <FormFields>
       <Help>
         <span>Need help?</span>
-        <a target="_blank" href="/docs/guides/creating-apps#vm-environment">
+        <a target="_blank" href="/docs/guides/creating-apps#vm-environment" rel="noopener">
           {' '}
           Learn more about the virtual machine environment
         </a>
@@ -229,9 +229,9 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
           name="instance_type"
           control={control}
           render={({ field }) => (
-            <SelectFieldLabel>
+            <SelectFieldLabel htmlFor="instance_type" className="self-start w-fit">
               Instance Type
-              <InstanceTypeSelect field={field} />
+              <InstanceTypeSelect id="instance_type" field={field} />
             </SelectFieldLabel>
           )}
         />

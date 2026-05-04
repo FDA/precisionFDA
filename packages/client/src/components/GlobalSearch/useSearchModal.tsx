@@ -1,50 +1,121 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Search, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
-import styled from 'styled-components'
-import { ModalNext } from '../../features/modal/ModalNext'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { cn } from '@/utils/cn'
 import { useModal } from '../../features/modal/useModal'
-import { CloseIcon } from '../icons/CloseIcon'
-import { SearchIcon } from '../icons/SearchIcon'
-import { InputText } from '../InputText'
 import { useDebounce } from '../Table/useDebounce'
 import { useSearchChallenges, useSearchDocs, useSearchExperts, useSearchQuestions } from './queries'
 import {
-  CountPill,
-  EmptyState,
-  FilterOption,
-  FilterSidebar,
-  FilterTitle,
-  Header,
-  HeaderContent,
-  ModalContainer,
-  ResultDescription,
-  ResultLink,
-  ResultTitle,
-  SearchBar,
-  SearchContainer,
-  SearchResultItem,
-  SearchResults,
-  Section,
-  SectionHeader,
-  Title,
-  ViewMoreButton,
-} from './styles'
-
-import {
   DISPLAY_NAMES,
   FILTER_OPTIONS,
-  FilterType,
-  GroupedResults,
-  SearchCategory,
-  SearchData,
-  SearchResultWithCategory,
+  type FilterType,
+  type GroupedResults,
+  type SearchCategory,
+  type SearchData,
+  type SearchResultWithCategory,
 } from './types'
-import { CloseButton } from '../../features/modal/styles'
-import { PlusIcon } from '../icons/PlusIcon'
 
-const NoResultText = styled.p`
-  font-weight: bold;
-`
+const modalContainer = cn(
+  'flex h-full max-h-[90vh] flex-col overflow-hidden rounded-xl max-md:max-h-[95vh] max-md:rounded-lg max-sm:max-h-[98vh]',
+)
+
+const modalHeader = cn('flex shrink-0 items-start border-b border-border px-6 py-4 pr-14 max-md:px-4 max-md:pr-12')
+
+const modalTitle = cn('m-0 text-2xl font-bold tracking-tight text-foreground max-md:text-xl max-sm:text-lg')
+
+const section = cn('mb-4 flex flex-col gap-2 pb-4 last:mb-0 last:pb-0 max-md:mb-3 max-md:pb-3')
+
+const searchContainer = cn(
+  'flex h-150 min-h-0 flex-1 overflow-hidden rounded-lg bg-background max-md:h-auto max-md:max-h-[calc(95vh-200px)] max-md:flex-col max-sm:max-h-[calc(98vh-150px)]',
+)
+
+const searchBar = cn('relative shrink-0 border-b border-border px-6 py-4 max-md:px-4')
+
+const searchBarIconLeft = cn(
+  'pointer-events-none absolute left-6 top-1/2 z-10 flex items-center pl-2 -translate-y-1/2 text-muted-foreground max-md:left-4 max-md:pl-1.5',
+)
+
+const searchBarClearButton = cn(
+  'absolute right-6 top-1/2 z-10 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md border-none bg-transparent text-muted-foreground max-md:right-4',
+  'hover:bg-muted hover:text-foreground',
+)
+
+const searchInput = cn(
+  'box-border w-full min-w-0 rounded-lg border border-input bg-background py-2.5 pl-12 pr-14 font-sans text-sm text-foreground',
+  'placeholder:text-muted-foreground max-md:py-2 max-sm:pl-11 max-sm:pr-12 max-sm:text-sm',
+  'focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/50',
+)
+
+const filterSidebar = cn(
+  'w-55 shrink-0 border-r border-border bg-muted/20 p-4 max-md:w-full max-md:flex-row max-md:flex-wrap max-md:items-center max-md:gap-2 max-md:border-b max-md:border-r-0',
+)
+
+const filterTitle = cn(
+  'm-0 mb-3 w-full text-xs font-semibold uppercase tracking-wide text-muted-foreground max-md:mb-0 max-md:mr-2 max-md:w-auto',
+)
+
+const filterOption = cn(
+  'group/filterOpt flex w-full cursor-pointer items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm text-muted-foreground',
+  'hover:bg-muted/80 max-md:w-auto max-md:shrink-0 max-md:py-1.5 max-md:text-sm',
+  'data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary',
+)
+
+const filterLabelText = cn('min-w-0 flex-1')
+
+const filterRadio = cn('m-0 size-4 shrink-0 cursor-pointer accent-primary max-md:size-3.5')
+
+/** Fixed-width numeric column so counts share one right edge (desktop sidebar). */
+const countPill = cn(
+  'inline-flex min-w-6 shrink-0 justify-end rounded-md bg-muted px-1.5 py-0.5 text-right text-xs font-medium tabular-nums text-muted-foreground',
+  'group-data-[selected=true]/filterOpt:bg-primary/20 group-data-[selected=true]/filterOpt:text-primary',
+)
+
+const searchResults = cn('flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4 max-md:p-4 max-sm:p-3')
+
+const searchResultItem = cn(
+  'rounded-lg border border-border bg-background p-3 max-md:p-2.5',
+  'hover:border-primary/40 hover:bg-muted/30',
+)
+
+const resultLink = cn('flex h-full w-full flex-col no-underline')
+
+const resultTitle = cn('m-0 mb-1 text-sm font-semibold leading-snug text-foreground')
+
+const resultDescription = cn('mb-2 line-clamp-2 flex-1 text-xs leading-normal text-muted-foreground')
+
+const resultViewMore = cn('text-xs font-medium text-primary')
+
+const sectionHeader = cn(
+  'm-0 mb-2 border-b border-border pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground',
+)
+
+const viewMoreButton = cn(
+  '!mx-auto !my-3 flex items-center gap-1.5 !rounded-full !border-0 !px-4 !py-2 text-xs font-semibold max-md:!my-2 max-md:!px-3 max-md:!py-1.5',
+)
+
+const emptyState = cn(
+  'flex min-h-50 flex-col items-center justify-center gap-4 p-8 text-center text-muted-foreground max-md:min-h-45 max-md:p-6',
+  '[&>svg]:size-12 [&>svg]:shrink-0 max-md:[&>svg]:size-10',
+  '[&_p]:m-0 [&_p]:max-w-sm [&_p]:text-sm [&_p]:leading-relaxed',
+)
+
+const noResultLead = cn('font-semibold text-foreground')
+
+const withListKeys = (items: SearchResultWithCategory[]): SearchResultWithCategory[] =>
+  items.map(item => ({ ...item, listKey: crypto.randomUUID() }))
+
+const withGroupedListKeys = (grouped: GroupedResults): GroupedResults => {
+  const out: GroupedResults = {}
+  for (const key of Object.keys(grouped) as SearchCategory[]) {
+    const items = grouped[key]
+    if (items?.length) {
+      out[key] = withListKeys(items)
+    }
+  }
+  return out
+}
 
 const getAllResults = (
   searchData: SearchData,
@@ -73,8 +144,9 @@ const getAllResults = (
 
   Object.entries(allResults).forEach(([categoryKey, categoryResults]) => {
     const category = categoryKey as SearchCategory
-    const resultsToShow = categoryResults!.slice(0, 3)
-    const hasMoreResults = categoryResults!.length > 3
+    const list = categoryResults ?? []
+    const resultsToShow = list.slice(0, 3)
+    const hasMoreResults = list.length > 3
 
     // Add hasMore flag to the last result if there are more
     if (hasMoreResults) {
@@ -113,7 +185,7 @@ const getFilteredResults = (
   results: SearchResultWithCategory[]
   groupedResults?: GroupedResults
 } => {
-  if (!searchQuery.trim()) return { results: []}
+  if (!searchQuery.trim()) return { results: [] }
 
   if (selectedFilter === 'all') {
     return getAllResults(searchData)
@@ -124,47 +196,53 @@ const getFilteredResults = (
 }
 
 const EmptySearchState = () => (
-  <EmptyState>
-    <SearchIcon height={48} />
+  <div className={emptyState}>
+    <Search aria-hidden strokeWidth={1.75} />
     <p>Enter a search term to find content</p>
-  </EmptyState>
+  </div>
 )
 
 const LoadingState = () => (
-  <EmptyState>
-    <SearchIcon height={48} />
+  <div className={emptyState}>
+    <Search aria-hidden strokeWidth={1.75} />
     <p>Searching...</p>
-  </EmptyState>
+  </div>
 )
 
 const NoResultsState = ({ searchQuery }: { searchQuery: string }) => (
-  <EmptyState>
-    <NoResultText>No results found for &quot;{searchQuery}&quot;</NoResultText>
+  <div className={emptyState}>
+    <p className={noResultLead}>No results found for &quot;{searchQuery}&quot;</p>
     <p>Try adjusting your search terms or filters</p>
-  </EmptyState>
+  </div>
 )
 
-const SearchResultItemComponent = ({ result, onLinkClick }: { result: SearchResultWithCategory; onLinkClick: () => void }) => {
-  const ItemContent = (
+const SearchResultItemComponent = ({
+  result,
+  onLinkClick,
+}: {
+  result: SearchResultWithCategory
+  onLinkClick: () => void
+}) => {
+  const itemContent = (
     <>
-      <ResultTitle>{result.title}</ResultTitle>
-      <ResultDescription>{result.description}</ResultDescription>
-      <span>View more</span>
+      <h4 className={resultTitle}>{result.title}</h4>
+      <p className={resultDescription}>{result.description}</p>
+      <span className={resultViewMore}>View more →</span>
     </>
   )
 
   return (
-    <SearchResultItem>
+    <div className={searchResultItem}>
       {['documentation', 'qa-pages'].includes(result.category) ? (
-        <ResultLink href={result.link} as="a" onClick={onLinkClick}>
-          {ItemContent}
-        </ResultLink>
+        <a className={resultLink} href={result.link} onClick={onLinkClick}>
+          {itemContent}
+        </a>
       ) : (
-        <ResultLink as={Link} to={result.link} onClick={onLinkClick}>
-          {ItemContent}
-        </ResultLink>
+        <Link className={resultLink} to={result.link} onClick={onLinkClick}>
+          {itemContent}
+        </Link>
       )}
-    </SearchResultItem>
+    </div>
   )
 }
 
@@ -182,28 +260,34 @@ const GroupedSearchResults = ({
       const category = categoryKey as SearchCategory
       const displayName = DISPLAY_NAMES[category]
       return (
-        <Section key={category}>
-          <SectionHeader>{displayName}</SectionHeader>
-          {categoryResults!.map((result, index) => (
-            <SearchResultItemComponent key={index} result={result} onLinkClick={onLinkClick} />
+        <div key={category} className={section}>
+          <h3 className={sectionHeader}>{displayName}</h3>
+          {(categoryResults ?? []).map(result => (
+            <SearchResultItemComponent key={result.listKey} result={result} onLinkClick={onLinkClick} />
           ))}
-          {categoryResults!.some(r => r.hasMore) && (
-            <ViewMoreButton data-variant="primary" onClick={() => onViewMore(category)}>
+          {(categoryResults ?? []).some(r => r.hasMore) && (
+            <Button type="button" variant="default" className={viewMoreButton} onClick={() => onViewMore(category)}>
               View all results for {displayName}
-            </ViewMoreButton>
+            </Button>
           )}
-        </Section>
+        </div>
       )
     })}
   </>
 )
 
-const FlatSearchResults = ({ results, onLinkClick }: { results: SearchResultWithCategory[]; onLinkClick: () => void }) => (
-  <Section>
-    {results.map((result, index) => (
-      <SearchResultItemComponent key={index} result={result} onLinkClick={onLinkClick} />
+const FlatSearchResults = ({
+  results,
+  onLinkClick,
+}: {
+  results: SearchResultWithCategory[]
+  onLinkClick: () => void
+}) => (
+  <div className={section}>
+    {results.map(result => (
+      <SearchResultItemComponent key={result.listKey} result={result} onLinkClick={onLinkClick} />
     ))}
-  </Section>
+  </div>
 )
 
 const SearchResultsContent = ({
@@ -273,12 +357,24 @@ export const SearchModal = ({ isShown, hide }: { isShown: boolean; hide: () => v
 
   const isSearching = searchQuery.trim() !== debouncedSearchQuery.trim() || isLoading
 
-  const { results, groupedResults } = getFilteredResults(debouncedSearchQuery, selectedFilter, {
-    docs,
-    challenges,
-    experts,
-    questions,
-  })
+  const { results, groupedResults } = useMemo(() => {
+    const raw = getFilteredResults(debouncedSearchQuery, selectedFilter, {
+      docs,
+      challenges,
+      experts,
+      questions,
+    })
+    if (raw.groupedResults) {
+      return {
+        results: withListKeys(raw.results),
+        groupedResults: withGroupedListKeys(raw.groupedResults),
+      }
+    }
+    return {
+      results: withListKeys(raw.results),
+      groupedResults: undefined,
+    }
+  }, [debouncedSearchQuery, selectedFilter, docs, challenges, experts, questions])
 
   const getCountText = (filterOption: FilterType) => {
     if (filterOption === 'all') {
@@ -306,68 +402,77 @@ export const SearchModal = ({ isShown, hide }: { isShown: boolean; hide: () => v
   }
 
   return (
-    <ModalNext id="global-search-modal" data-testid="global-search-modal" isShown={isShown} hide={hide} variant="large">
-      <ModalContainer>
-        <Header>
-          <HeaderContent>
-            <Title>Global Search</Title>
-          </HeaderContent>
-          <CloseButton data-testid="modal-close-button" type="button" data-dismiss="modal" aria-label="Close" onClick={hide}>
-            <PlusIcon height={16} />
-          </CloseButton>
-        </Header>
-        <SearchBar>
-          <div className="iconwrap">
-            <SearchIcon height={18} />
+    <Dialog open={isShown} onOpenChange={open => !open && hide()}>
+      <DialogContent
+        id="global-search-modal"
+        data-testid="global-search-modal"
+        showCloseButton
+        className="flex h-[min(80vh,700px)] max-h-[90vh] w-[min(80vw,1000px)] max-w-[calc(100vw-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(1000px,calc(100%-2rem))]"
+      >
+        <div className={modalContainer}>
+          <div className={modalHeader}>
+            <DialogTitle className={modalTitle}>Global Search</DialogTitle>
           </div>
-          <InputText
-            ref={searchInputRef}
-            placeholder="Search for documentation, challenges, expert blogs, and Q&A..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-          {searchQuery?.length ? (
-            <button
-              className="iconwrap iconwrap-right"
-              type="button"
-              onClick={onCancelSearchClick}
-              aria-label="Clear search"
-            >
-              <CloseIcon height={14} />
-            </button>
-          ) : null}
-        </SearchBar>
-        <SearchContainer>
-          <FilterSidebar>
-            <FilterTitle>Filter By</FilterTitle>
-            {FILTER_OPTIONS.map(option => (
-              <FilterOption key={option} data-selected={selectedFilter === option}>
-                <input
-                  type="radio"
-                  name="searchFilter"
-                  value={option}
-                  checked={selectedFilter === option}
-                  onChange={e => setSelectedFilter(e.target.value as FilterType)}
-                />
-                {DISPLAY_NAMES[option]}
-                {<CountPill>{getCountText(option)}</CountPill>}
-              </FilterOption>
-            ))}
-          </FilterSidebar>
-          <SearchResults>
-            <SearchResultsContent
-              searchQuery={searchQuery}
-              isLoading={isSearching}
-              results={results}
-              selectedFilter={selectedFilter}
-              groupedResults={groupedResults}
-              onViewMore={handleViewMore}
-              onLinkClick={hide}
+          <div className={searchBar}>
+            <div className={searchBarIconLeft}>
+              <Search aria-hidden className="size-[18px] shrink-0" strokeWidth={2} />
+            </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              className={searchInput}
+              placeholder="Search for documentation, challenges, expert blogs, and Q&A..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
             />
-          </SearchResults>
-        </SearchContainer>
-      </ModalContainer>
-    </ModalNext>
+            {searchQuery?.length ? (
+              <button
+                className={searchBarClearButton}
+                type="button"
+                onClick={onCancelSearchClick}
+                aria-label="Clear search"
+              >
+                <X aria-hidden className="size-3.5" strokeWidth={2} />
+              </button>
+            ) : null}
+          </div>
+          <div className={searchContainer}>
+            <div className={filterSidebar}>
+              <h3 className={filterTitle}>Filter By</h3>
+              {FILTER_OPTIONS.map(option => (
+                <label
+                  key={option}
+                  className={filterOption}
+                  data-selected={selectedFilter === option ? 'true' : 'false'}
+                >
+                  <input
+                    className={filterRadio}
+                    type="radio"
+                    name="searchFilter"
+                    value={option}
+                    checked={selectedFilter === option}
+                    onChange={e => setSelectedFilter(e.target.value as FilterType)}
+                  />
+                  <span className={filterLabelText}>{DISPLAY_NAMES[option]}</span>
+                  <span className={countPill}>{getCountText(option)}</span>
+                </label>
+              ))}
+            </div>
+            <div className={searchResults}>
+              <SearchResultsContent
+                searchQuery={searchQuery}
+                isLoading={isSearching}
+                results={results}
+                selectedFilter={selectedFilter}
+                groupedResults={groupedResults}
+                onViewMore={handleViewMore}
+                onLinkClick={hide}
+              />
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
