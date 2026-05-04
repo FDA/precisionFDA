@@ -1,5 +1,5 @@
 import React from 'react'
-import { Outlet, type RouteObject } from 'react-router'
+import { Outlet, type RouteObject, useLocation } from 'react-router'
 import { HomeLoader } from '@/features/home/show.styles'
 import { useSpaceCountersDataHook } from '@/features/spaces/show/useSpaceCountersData.hook'
 import { useSpaceDataHook } from '@/features/spaces/show/useSpaceData.hook'
@@ -39,10 +39,14 @@ const SpaceShowRoot = () => {
   usePageMeta({ title: 'Spaces - precisionFDA' })
   const { space, isLoading, isNotAllowed, isLocked } = useSpaceDataHook()
   const { counters } = useSpaceCountersDataHook()
+  const { pathname } = useLocation()
+  const isEditRoute = pathname.endsWith('/edit')
 
   if (isLoading) return <HomeLoader />
   if (isNotAllowed) return <SpaceNotAllowed />
-  if (isLocked || space?.state === 'locked') return <SpaceLocked space={space} />
+  // Let the /edit route render even when the space is locked so RSAs can reach
+  // Space Settings to unlock it. Without this the lock screen swallows the route.
+  if ((isLocked || space?.state === 'locked') && !isEditRoute) return <SpaceLocked space={space} />
   if (!space) return <SpaceNotAllowed />
 
   // Handle inactivated spaces
