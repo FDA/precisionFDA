@@ -3,6 +3,7 @@ import { stub } from 'sinon'
 import { LicenseService } from '@shared/domain/license/license.service'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { LicenseRepository } from '@shared/domain/license/license.repository'
 
 describe('LicenseService', () => {
   const findStub = stub()
@@ -50,8 +51,9 @@ describe('LicenseService', () => {
 
   const licensedItemRepo = { find: findStub } as unknown as LicensedItemRepository
   const nodeRepo = { find: findStub } as unknown as NodeRepository
+  const licenseRepo = {} as unknown as LicenseRepository
 
   function getInstance(): LicenseService {
-    return new LicenseService(licensedItemRepo, nodeRepo)
+    return new LicenseService(licenseRepo, licensedItemRepo, nodeRepo)
   }
 })

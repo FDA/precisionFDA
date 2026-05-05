@@ -266,7 +266,7 @@ describe AssetSerializer do
             expect(accepted_license.user_id).to eq(user.id)
             expect(accepted_license.state).not_to eq("active")
             expect(asset_serialized["links"]["accept_license_action"]).
-              to eq(accept_api_license_path(license.id))
+              to eq("/api/v2/licenses/#{license.id}")
           end
         end
       end

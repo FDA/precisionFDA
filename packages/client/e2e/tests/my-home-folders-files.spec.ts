@@ -232,7 +232,8 @@ test.describe('My Home - Folders & Files', () => {
     await expect(page.getByTestId('modal-files-upload')).not.toBeVisible()
 
     // Verify first file
-    await FilesList.searchFileAndOpenDetailWhenClosed(page, fileName)
+    await FilesList.waitForFileToBeClosed(page, fileName)
+    await FilesList.openDetail(page, fileName)
     await page.waitForTimeout(5000)
     await page.reload()
     await FileDetail.validateAddedByUsername(page, username)
@@ -242,7 +243,8 @@ test.describe('My Home - Folders & Files', () => {
     // Go back and verify second file
     await page.goBack()
 
-    await FilesList.searchFileAndOpenDetailWhenClosed(page, everyoneFile)
+    await FilesList.waitForFileToBeClosed(page, everyoneFile)
+    await FilesList.openDetail(page, everyoneFile)
 
     await FileDetail.validateAddedByUsername(page, username)
     await FileDetail.validateOrigin(page, 'Uploaded')

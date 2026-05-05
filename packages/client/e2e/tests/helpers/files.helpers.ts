@@ -1,4 +1,4 @@
-import { expect, Page } from 'playwright/test'
+import { expect, type Page } from 'playwright/test'
 import path from 'node:path'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -74,9 +74,8 @@ export const FilesList = {
     await filterInput.clear()
     await filterInput.fill(fileName)
 
-    // Wait for debounce (500ms) then network to settle
+    // Allow the table filter debounce to apply before callers assert on results.
     await page.waitForTimeout(600)
-    await page.waitForLoadState('networkidle')
   },
 
   /**
@@ -103,28 +102,33 @@ export const FilesList = {
   },
 
   /**
-   * Search for a file, wait for it to be closed (show size in bytes), then open detail
+   * Wait for a file to appear in the list with a populated size.
    */
-  async searchFileAndOpenDetailWhenClosed(page: Page, fileName: string) {
+  async waitForFileToBeClosed(page: Page, fileName: string) {
     const fileLink = page
       .getByTestId('file-row-name')
       .filter({ hasText: new RegExp(`^${UrlHelper.escapeRegExp(fileName)}$`) })
       .first()
+    const populatedSizePattern = /^\d+(?:\.\d+)?\s*(?:byte|bytes|kb|mb|gb|tb)$/i
 
     await expect
       .poll(
         async () => {
           await FilesList.searchFile(page, fileName)
-          return await fileLink.count()
+          if ((await fileLink.count()) === 0) {
+            return false
+          }
+
+          const row = fileLink.locator('xpath=ancestor::tr[1]')
+          const sizeCellText = ((await row.locator('td').nth(3).textContent()) || '').trim()
+          return populatedSizePattern.test(sizeCellText)
         },
         {
           timeout: TIMEOUTS.fileUploadComplete,
           intervals: [500, 1000, 2000],
         },
       )
-      .toBeGreaterThan(0)
-
-    await FilesList.openDetail(page, fileName)
+      .toBe(true)
   },
 }
 
@@ -352,7 +356,7 @@ export const SpacesList = {
   /**
    * Search for a space by name
    */
-  async searchSpace(page: Page, spaceName: string, spaceState?: string) {
+  async searchSpace(page: Page, spaceName: string) {
     await expect(page.locator('h1').filter({ hasText: 'Spaces' })).toBeVisible({ timeout: TIMEOUTS.pageLoad })
 
     // Find the Name column filter input
@@ -461,7 +465,8 @@ export async function deleteFileFromMyHome(page: Page, fileName: string, scope?:
     await page.goto('/home/files')
   }
 
-  await FilesList.searchFileAndOpenDetailWhenClosed(page, fileName)
+  await FilesList.waitForFileToBeClosed(page, fileName)
+  await FilesList.openDetail(page, fileName)
 
   await FileDetail.clickActionsMenuItem(page, 'Delete')
 

@@ -7,19 +7,19 @@
   </div>
 </div>
 
-<div class="container-fluid container-padded">
-  <%= form_for @acceptedLicense, url: request_approval_license_path(@license), html: {class: 'form form-horizontal'} do |f| %>
+<div class="container-fluid container-padded" data-testid="license-request-approval-page">
+  <%= form_for @acceptedLicense, url: request_approval_license_path(@license), html: {class: 'form form-horizontal', data: {testid: 'license-request-approval-form'}} do |f| %>
     <%= render "_partials/form_errors", object: @acceptedLicense %>
     <div class="form-group">
       <%= f.label :message, "Request Message", class: 'control-label col-sm-2' %>
       <div class="col-sm-19 col-sm-offset-1">
-        <%= f.text_area :message, class: "form-control", rows: 10, placeholder: "Explain why you are requesting approval...", required: "required" %>
+        <%= f.text_area :message, class: "form-control", rows: 10, placeholder: "Explain why you are requesting approval...", required: "required", data: {testid: "license-request-message"} %>
       </div>
     </div>
 
     <div class="form-group">
       <div class="col-sm-offset-3">
-        <%= f.submit "Request", class: 'btn btn-primary pull-left', data: {disable_with: "Requesting..."} %>
+        <%= f.submit "Request", class: 'btn btn-primary pull-left', data: {disable_with: "Requesting...", testid: "license-request-submit"} %>
         <div class="btn-static text-muted">
           <span class="fa fa-warning"></span> By requesting approval you agree to have read and accepted the terms of <%= link_to 'the license', license_path(@license) %>
         </div>

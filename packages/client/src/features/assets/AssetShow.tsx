@@ -8,7 +8,6 @@ import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink } from '../home/home.styles'
 import { License } from '../licenses/License'
 import {
-  ActionsButton,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -110,7 +109,11 @@ export const AssetShow = ({ assetUid, homeContext = defaultHomeContext }: { asse
               <FileIcon height={24} />
               {typeof asset?.origin === 'object' ? asset.origin.text : asset.name}
             </Title>
-            {asset.show_license_pending && <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" />}
+            {asset.show_license_pending && (
+              <div data-testid="asset-license-pending">
+                <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" />
+              </div>
+            )}
           </HeaderLeft>
           <div>
             <AssetActions homeScope={homeScope} asset={asset} />

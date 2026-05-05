@@ -1,11 +1,14 @@
-import React from 'react'
+import type { ReactNode } from 'react'
 import styled from 'styled-components'
 import { CloudResourcesConditionalAnchor } from '../../components/ConditionalAnchor'
 import { CheckIcon } from '../../components/icons/CheckIcon'
 import { NavLink } from '../../components/NavLink'
 import { colors } from '../../styles/theme'
-import { Action, FunctionAction, LinkAction as LinkActionType, ModalAction, RouteAction, SelectionAction } from './action-types'
+import type { Action, FunctionAction, LinkAction as LinkActionType, ModalAction, RouteAction, SelectionAction } from './action-types'
 import { ActionsMenu } from '../../components/Menu'
+
+const actionNameToTestId = (name: string) =>
+  `action-menu-item-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`
 
 const StyleSelection = styled.div`
   width: fit-content;
@@ -34,11 +37,18 @@ export const StyledActionsMessage = styled.div`
 
 const ActionItem = ({ action }: { action: Action }) => {
   const isDisabled = action?.isDisabled ?? false
+  const dataTestId = actionNameToTestId(action.name)
 
   switch (action?.type) {
     case 'route': {
       const routeAction = action as RouteAction
-      return <ActionsMenu.Item disabled={isDisabled} render={<NavLink to={routeAction.to}>{action.name}</NavLink>} />
+      return (
+        <ActionsMenu.Item
+          disabled={isDisabled}
+          data-testid={dataTestId}
+          render={<NavLink to={routeAction.to}>{action.name}</NavLink>}
+        />
+      )
     }
     case 'link': {
       const linkAction = action as LinkActionType
@@ -48,6 +58,7 @@ const ActionItem = ({ action }: { action: Action }) => {
         return (
           <ActionsMenu.Item
             disabled={isDisabled}
+            data-testid={dataTestId}
             render={
               <CloudResourcesConditionalAnchor
                 href={url}
@@ -63,6 +74,7 @@ const ActionItem = ({ action }: { action: Action }) => {
       return (
         <ActionsMenu.Item
           disabled={isDisabled}
+          data-testid={dataTestId}
           render={
             <a data-turbolinks="false" href={url} data-method={method}>
               {action.name}
@@ -83,6 +95,7 @@ const ActionItem = ({ action }: { action: Action }) => {
           }}
           disabled={isDisabled}
           checked={selectionAction.isSelected}
+          data-testid={dataTestId}
         >
           <StyleSelection>
             <StyleSelectionIcon>
@@ -96,7 +109,12 @@ const ActionItem = ({ action }: { action: Action }) => {
     case 'modal': {
       const modalAction = action as ModalAction
       return (
-        <ActionsMenu.Item key={action.name} onClick={() => !isDisabled && modalAction.func()} disabled={isDisabled}>
+        <ActionsMenu.Item
+          key={action.name}
+          data-testid={dataTestId}
+          onClick={() => !isDisabled && modalAction.func()}
+          disabled={isDisabled}
+        >
           {action.name}
         </ActionsMenu.Item>
       )
@@ -106,6 +124,7 @@ const ActionItem = ({ action }: { action: Action }) => {
       return (
         <ActionsMenu.Item
           key={action.name}
+          data-testid={dataTestId}
           onClick={() => {
             if (!isDisabled) {
               functionAction.func()
@@ -120,7 +139,7 @@ const ActionItem = ({ action }: { action: Action }) => {
   }
 }
 
-export function ActionsMenuContent({ actions, message }: { actions: Action[]; message?: React.ReactNode }) {
+export function ActionsMenuContent({ actions, message }: { actions: Action[]; message?: ReactNode }) {
   const visibleActions = actions.filter(action => !action.shouldHide)
 
   return (

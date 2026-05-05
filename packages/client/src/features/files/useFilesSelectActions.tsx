@@ -451,13 +451,20 @@ export const useFilesSelectActions = ({
       shouldHide: selected.length !== 1 || !selected[0]?.file_license?.id || !!selected[0]?.show_license_pending,
     },
     {
+      name: 'Request license approval',
+      type: 'link',
+      isDisabled: selected.length !== 1 || selectedButNotClosed,
+      link: selected[0]?.links.request_approval_license || '',
+      shouldHide: !selected[0]?.links.request_approval_license,
+    },
+    {
       name: 'Accept License',
       type: 'modal',
       func: () => setAcceptLicensesModal(true),
       modal: acceptLicensesModal,
       showModal: isShownAcceptLicensesModal,
-      isDisabled: selectedButNotClosed,
-      shouldHide: selected.length !== 1 || !selected[0]?.show_license_pending,
+      isDisabled: false,
+      shouldHide: selected.length !== 1 || !selected[0]?.links.accept_license_action || selectedButNotClosed,
     },
     {
       name: 'Edit tags',

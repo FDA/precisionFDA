@@ -298,10 +298,6 @@ Rails.application.routes.draw do
       end
 
       resources :licenses, only: %i(index show) do
-        post "accept",
-             on: :member,
-             action: :accept,
-             as: "accept"
         post "remove_item/:item_uid",
              on: :member,
              action: :remove_item,
@@ -414,7 +410,6 @@ Rails.application.routes.draw do
       post "list_jobs"
       post "list_workflows"
       post "describe_license"
-      post "accept_licenses"
       post "license_items/:license_id/:items_to_license",
            action: :license_items,
            as: "license_items"

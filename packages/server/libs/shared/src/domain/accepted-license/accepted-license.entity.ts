@@ -22,9 +22,10 @@ export class AcceptedLicense extends BaseEntity {
   @Property()
   message: string
 
-  constructor(license: License, user: User) {
+  constructor(license: License, user: User, state: string = 'active') {
     super()
     this.license = Reference.create(license)
     this.user = Reference.create(user)
+    this.state = state
   }
 }

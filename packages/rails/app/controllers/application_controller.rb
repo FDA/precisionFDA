@@ -57,7 +57,10 @@ class ApplicationController < ActionController::Base
       if cookies.present?
         forward_header[:Cookie] = cookies.to_hash.map { |k, v| "#{k}=#{v}" }.join(";")
         csrf_token = request.headers["X-CSRF-Token"]
-        csrf_token ||= unsafe_params[:authenticity_token]
+        # Use a global CSRF token (not per-form) so NestJS can verify it.
+        # Per-form tokens are HMAC'd with the form action URL, but NestJS
+        # only verifies global tokens (HMAC'd with '!real_csrf_token').
+        csrf_token ||= form_authenticity_token if session[:_csrf_token].present?
         forward_header["x-csrf-token"] = csrf_token if csrf_token.present?
       end
 

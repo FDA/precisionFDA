@@ -674,31 +674,6 @@ class ApiController < ApplicationController
     render json: describe_for_api(item, unsafe_params[:describe])
   end
 
-  # Inputs:
-  #
-  # license_ids (array of license ids, required, nonempty): licenses to accept
-  #
-  # Outputs:
-  #
-  # accepted_licenses: license_ids (same as input)
-  #
-  def accept_licenses
-    license_ids = unsafe_params["license_ids"]
-    fail "License license_ids needs to be an Array of Integers" unless license_ids.is_a?(Array) && license_ids.all? do |license_id|
-                                                                          license_id.is_a?(Numeric) && (license_id.to_i == license_id)
-                                                                        end && !license_ids.empty?
-    license_ids.uniq!
-    fail "Some license_ids do not exist" unless License.where(id: license_ids).count == license_ids.count
-
-    AcceptedLicense.transaction do
-      license_ids.each do |license_id|
-        AcceptedLicense.find_or_create_by(license_id: license_id, user_id: @context.user_id)
-      end
-    end
-
-    render json: { accepted_licenses: license_ids }
-  end
-
   # Use this to associate multiple items to a license
   #
   # Inputs

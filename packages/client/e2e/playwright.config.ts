@@ -103,13 +103,24 @@ export default defineConfig({
     // Authenticated tests (regular user)
     {
       name: 'chromium',
-      testMatch: /^(?!.*logged-out)(?!.*challenges-flow).*\.spec\.ts$/,
+      testMatch: /^(?!.*logged-out)(?!.*challenges-flow)(?!.*licenses).*\.spec\.ts$/,
       use: { 
         ...devices['Desktop Chrome'],
         // Use stored auth state (relative to client package root)
         storageState: path.join(__dirname, '.auth/primary.json'),
       },
       dependencies: ['setup-primary'],
+    },
+
+    // License flow tests (uses primary + secondary user)
+    {
+      name: 'chromium-licenses',
+      testMatch: /licenses\.spec\.ts$/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: path.join(__dirname, '.auth/primary.json'),
+      },
+      dependencies: ['setup-primary', 'setup-secondary'],
     },
 
     // Challenge flow tests (uses admin + admin2 + secondary user)

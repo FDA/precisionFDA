@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { License } from '@shared/domain/license/license.entity'
+import { LicenseRepository } from '@shared/domain/license/license.repository'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 
 @Injectable()
 export class LicenseService {
   constructor(
+    private readonly licenseRepository: LicenseRepository,
     private readonly licensedItemRepo: LicensedItemRepository,
     private readonly nodeRepo: NodeRepository,
   ) {}
@@ -79,5 +81,9 @@ export class LicenseService {
 
     const licenses = licensedItems.map(item => item.license.getEntity())
     return [...new Map(licenses.map(item => [item.id, item])).values()]
+  }
+
+  async findAccessibleByIds(ids: number[]): Promise<License[]> {
+    return this.licenseRepository.findAccessible({ id: { $in: ids } })
   }
 }

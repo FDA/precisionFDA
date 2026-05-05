@@ -104,12 +104,16 @@ class LicensesController < ApplicationController
         message: message
       })
       if accepted_license.persisted?
-        request = {
-          license_id: @license.id,
-          user_id: @context.user.id,
-          message:,
-        }
-        https_apps_client.email_send(NotificationPreference.email_types[:license_request_email], request)
+        begin
+          request = {
+            license_id: @license.id,
+            user_id: @context.user.id,
+            message:,
+          }
+          https_apps_client.email_send(NotificationPreference.email_types[:license_request_email], request)
+        rescue HttpsAppsClient::Error => e
+          Rails.logger.error("Failed to send license request email: #{e.message}")
+        end
         flash[:success] = "License approval requested"
       end
       redirect_to license_path(@license)
@@ -133,7 +137,9 @@ class LicensesController < ApplicationController
     if license.approval_required
       redirect_to request_approval_path(license)
     else
-      if AcceptedLicense.find_or_create_by(license_id: license.id, user_id: @context.user_id)
+      accepted = AcceptedLicense.find_or_create_by(license_id: license.id, user_id: @context.user_id)
+      if accepted.persisted?
+        accepted.update!(state: "active") unless accepted.state == "active"
         flash[:success] = "License accepted"
       else
         flash[:error] = "Sorry, this license does not exist or is not accessible by you"

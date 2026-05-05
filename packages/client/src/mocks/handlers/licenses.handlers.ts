@@ -139,24 +139,15 @@ export const licensesMocks = [
     })
   }),
 
-  http.post('/api/licenses/:licenseId/accept', ({ params }) => {
+  http.patch('/api/v2/licenses/:licenseId', ({ params }) => {
     const { licenseId } = params
-    return HttpResponse.json({
-      message: `License ${licenseId} accepted successfully`,
-    })
+    return new HttpResponse(null, { status: 204 })
   }),
 
-  http.post('/api/accept_licenses', async ({ request }) => {
-    const { license_ids } = await request.json() as { license_ids: string[] }
+  http.patch('/api/v2/licenses', async ({ request }) => {
+    const { ids } = await request.json() as { ids: string[] }
     return HttpResponse.json({
-      message: 'Licenses accepted successfully',
-      accepted_licenses: license_ids.map(id => ({
-        id: parseInt(id),
-        license: parseInt(id),
-        message: 'License accepted via API',
-        state: 'accepted',
-        user: 123,
-      })),
+      acceptedLicenses: ids.map(id => parseInt(id)),
     })
   }),
 ]

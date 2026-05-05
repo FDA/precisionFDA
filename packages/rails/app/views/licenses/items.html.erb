@@ -1,12 +1,12 @@
 <%= render "licenses/header" %>
 
 <!-- Tab panes -->
-<div class="tab-content">
+<div class="tab-content" data-testid="license-items-content">
   <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-items">
     <% if @license.editable_by?(@context) && @license.licensed_items.count > 0 %>
     <div class="pfda-toolbar pfda-toolbar-transparent">
       <div class="btn-group pull-right">
-        <%= link_to remove_items_license_path(@license), method: :post, data: { confirm: 'Are you certain you want to detach all items from this license?' }, class: "btn btn-danger" do %>
+        <%= link_to remove_items_license_path(@license), method: :post, data: { confirm: 'Are you certain you want to detach all items from this license?', testid: "license-detach-all-items-button" }, class: "btn btn-danger" do %>
           <span class="fa fa-ban"></span> Detach all items <span class="badge"><%= @license.licensed_items.count %></span>
         <% end %>
       </div>
@@ -14,14 +14,14 @@
     <br>
     <% end %>
 
-    <ul class="list-group">
+    <ul class="list-group" data-testid="license-items-list">
       <% if @items_count > 0 %>
         <% @items.each do |item| %>
-          <li class="list-group-item clearfix">
-            <span class="label label-info text-uppercase"><%= item.licenseable.klass %></span> <%= unilinkfw(item.licenseable, target: "_blank") %>
+          <li class="list-group-item clearfix" data-testid="license-item-row">
+            <span class="label label-info text-uppercase" data-testid="license-item-kind"><%= item.licenseable.klass %></span> <%= unilinkfw(item.licenseable, target: "_blank") %>
             <% if @license.editable_by?(@context) %>
             <div class="btn-group pull-right">
-              <%= link_to "Detach", remove_item_license_path(@license.id, item.licenseable.uid), method: :post %>
+              <%= link_to "Detach", remove_item_license_path(@license.id, item.licenseable.uid), method: :post, data: {testid: "license-detach-item-button"} %>
             </div>
             <% end %>
           </li>

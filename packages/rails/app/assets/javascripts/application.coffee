@@ -19,7 +19,6 @@
 #= require jquery-ui
 #= require jquery_ujs
 #= require bootstrap
-#= require bootstrap-sprockets
 #= require turbolinks
 #= require lodash
 #= require graphlib

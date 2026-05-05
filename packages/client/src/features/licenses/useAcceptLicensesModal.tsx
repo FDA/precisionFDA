@@ -123,7 +123,7 @@ export const useAcceptLicensesModal = () => {
     },
     onSuccess: res => {
       setShowModal(false)
-      toastSuccess(`Accepted ${res.accepted_licenses.length} license(s)`)
+      toastSuccess(`Accepted ${res.acceptedLicenses.length} license(s)`)
     },
   })
 
