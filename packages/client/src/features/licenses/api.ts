@@ -9,7 +9,7 @@ export async function fetchLicense(id: string): Promise<unknown> {
 }
 
 export async function fetchAcceptedLicenses(): Promise<AcceptedLicense[]> {
-  const res = await axios.get('/api/licenses/accepted')
+  const res = await axios.get('/api/v2/licenses/accepted')
   return res.data
 }
 
@@ -32,11 +32,11 @@ export async function detachLicenseRequest({ licenseId, dxid }: { licenseId: str
 }
 
 export async function acceptLicenseRequest({ licenseId }: { licenseId: string }): Promise<unknown> {
-  const res = await axios.post(`/api/licenses/${licenseId}/accept`, {})
+  const res = await axios.patch(`/api/v2/licenses/${licenseId}`, { accepted: true })
   return res.data
 }
 
-export async function acceptLicensesRequest({ licenseIds }: { licenseIds: string[] }): Promise<{ accepted_licenses: unknown[]}> {
-  const res = await axios.post('/api/accept_licenses', { 'license_ids': licenseIds })
+export async function acceptLicensesRequest({ licenseIds }: { licenseIds: string[] }): Promise<{ acceptedLicenses: number[] }> {
+  const res = await axios.patch('/api/v2/licenses', { ids: licenseIds.map(Number), accepted: true })
   return res.data
 }

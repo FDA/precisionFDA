@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import styled from 'styled-components'
 import { CircleCheckIcon } from '@/components/icons/CircleCheckIcon'
 import { ResourceTable, StyledName } from '@/components/ResourceTable'
 import { useModal } from '../modal/useModal'
-import { APIResource } from '../home/types'
+import type { APIResource } from '../home/types'
 import { attachLicenseRequest } from './api'
-import { License } from './types'
+import type { License } from './types'
 import { useLicensesListQuery } from './queries'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { Button } from '@/components/Button'
 import { Empty } from '../home/home.styles'
+import type { IFile } from '../files/files.types'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { LicenseCarrier } from './license-carrier.types'
 
@@ -98,19 +99,30 @@ export function useAttachLicensesModal<T extends LicenseCarrier>({
         <ScrollWrapper>
           <>
             {licenses.length === 0 ? (
-              <Empty>You don&apos;t have any licenses.</Empty>
+              <Empty data-testid="attach-license-empty">You don&apos;t have any licenses.</Empty>
             ) : (
               <ResourceTable
-                rows={licenses.map((s, i) => {
+                rows={licenses.map(s => {
                   const isCurrent = selectedLicense === s.id
                   return {
                     title: (
-                      <StyledName as="div" key={`${i}-name`} onClick={() => handleClickLicense(s)} isCurrent={isCurrent}>
+                      <StyledName
+                        as="div"
+                        key={`${s.id}-name`}
+                        onClick={() => handleClickLicense(s)}
+                        isCurrent={isCurrent}
+                        data-testid={`attach-license-option-${s.id}`}
+                      >
                         {s.title}
                       </StyledName>
                     ),
                     action: (
-                      <StyledAction key={`${s.id}-action`} onClick={() => handleClickLicense(s)} isCurrent={isCurrent}>
+                      <StyledAction
+                        key={`${s.id}-action`}
+                        onClick={() => handleClickLicense(s)}
+                        isCurrent={isCurrent}
+                        data-testid={`attach-license-option-indicator-${s.id}`}
+                      >
                         {isCurrent ? <CircleCheckIcon /> : <HiddenElement />}
                       </StyledAction>
                     ),
@@ -129,6 +141,7 @@ export function useAttachLicensesModal<T extends LicenseCarrier>({
           <Button onClick={handleClose}>Cancel</Button>
           <Button
             data-variant="primary"
+            data-testid="attach-license-submit"
             onClick={() => handleSubmit(selectedLicense)}
             disabled={!selectedLicense || selectedLicense === selectedLicenseRef?.id}
           >

@@ -12,6 +12,8 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { create, db } from '../../../src/test'
+import { License } from '@shared/domain/license/license.entity'
+import { LicenseRepository } from '@shared/domain/license/license.repository'
 
 describe("licenses for app's assets tests", () => {
   let em: EntityManager<MySqlDriver>
@@ -57,6 +59,7 @@ describe("licenses for app's assets tests", () => {
 
     const freshEm = database.orm().em.fork() as EntityManager<MySqlDriver>
     const freshLicenseService = new LicenseService(
+      freshEm.getRepository(License) as LicenseRepository,
       freshEm.getRepository(LicensedItem) as LicensedItemRepository,
       freshEm.getRepository(Node) as unknown as NodeRepository,
     )
@@ -88,6 +91,7 @@ describe("licenses for app's assets tests", () => {
 
     const freshEm = database.orm().em.fork() as EntityManager<MySqlDriver>
     const freshLicenseService = new LicenseService(
+      freshEm.getRepository(License) as LicenseRepository,
       freshEm.getRepository(LicensedItem) as LicensedItemRepository,
       freshEm.getRepository(Node) as unknown as NodeRepository,
     )

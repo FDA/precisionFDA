@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import styled from 'styled-components'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
-import { License as ILicense } from './types'
+import type { License as ILicense } from './types'
 
 
 const StyledTitle = styled.div`
@@ -21,10 +21,10 @@ export const License = ({ license, className, link }: { license?: ILicense, clas
 
   return (
     <StyledLicense className={classes}>
-      <StyledTitle>
+      <StyledTitle data-testid="license-title">
         <a data-turbolinks="false" href={link} target='_blank' rel='noopener noreferrer'>{license?.title}</a>
       </StyledTitle>
-      <MarkdownStyle><Markdown data={license?.content} /></MarkdownStyle>
+      <MarkdownStyle data-testid="license-content"><Markdown data={license?.content} /></MarkdownStyle>
     </StyledLicense>
   )
 }

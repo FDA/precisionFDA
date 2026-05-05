@@ -88,7 +88,7 @@ class DbClusterSerializer < ApplicationSerializer
           !object.license_status?(current_user, AcceptedLicense::STATUS_PENDING)
       links[:request_approval_license] = request_approval_license_path(license)
     else
-      links[:accept_license] = accept_api_license_path(license)
+      links[:accept_license] = "/api/v2/licenses/#{license.id}"
     end
 
     return unless object.owned_by_user?(current_user) && !member_viewer?

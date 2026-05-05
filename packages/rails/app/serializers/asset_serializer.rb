@@ -61,9 +61,8 @@ class AssetSerializer < UserFileSerializer
             links[:request_approval_action] = "api/licenses/:id/request_approval"
           end
         else
-          # POST /api/licenses/:id/accept
           links[:accept_license_action] =
-            object.license && accept_api_license_path(object.license.id)
+            object.license && "/api/v2/licenses/#{object.license.id}"
         end
       end
 

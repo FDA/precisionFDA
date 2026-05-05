@@ -94,7 +94,8 @@ test.describe('Spaces - Discussions in Spaces', () => {
     await page.waitForLoadState('networkidle')
 
     // Search and open file detail (waits for file size to show bytes, meaning file is closed)
-    await FilesList.searchFileAndOpenDetailWhenClosed(page, cypressFile)
+    await FilesList.waitForFileToBeClosed(page, cypressFile)
+    await FilesList.openDetail(page, cypressFile)
 
     await FileDetail.validateName(page, cypressFile)
     await FileDetail.validateLocation(page, `${spaceName} - Shared`)

@@ -182,25 +182,6 @@ module Api
     end
     # rubocop:enable Metrics/MethodLength
 
-    #
-    # POST accept_api_license /api/licenses/:id/accept
-    # Called from license#show, file#show, asset#show
-    # Accept a single license for file/asset
-    # @param id [Integer] - license :id - "6-license-title".
-    def accept
-      accessible_license
-
-      if AcceptedLicense.find_or_create_by(license_id: @license.id, user_id: @context.user_id)
-        type = :success
-        text = "License \"#{@license.title}\" accepted"
-      else
-        type = :error
-        text = "Sorry, license \"#{@license.title}\" does not exist or is not accessible by you"
-      end
-
-      render json: { message: { type: type, text: text } }, adapter: :json
-    end
-
     # Returns all licenses accepted by current user
     #
     # Outputs

@@ -132,7 +132,9 @@ export const FileShow = ({
               <FileIcon height={22} />
               <span data-testid="file-name">{file.name}</span>
               {file.show_license_pending && (
-                <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" className="" state={file.state ?? undefined} />
+                <div data-testid="file-license-pending">
+                  <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" className="" state={file.state ?? undefined} />
+                </div>
               )}
             </Title>
           </HeaderLeft>

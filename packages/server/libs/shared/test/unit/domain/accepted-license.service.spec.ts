@@ -71,6 +71,6 @@ describe('AcceptedLicenseService', () => {
   })
 
   function getInstance(): AcceptedLicenseService {
-    return new AcceptedLicenseService(userCtx, acceptedLicenseRepository)
+    return new AcceptedLicenseService(em, userCtx, acceptedLicenseRepository)
   }
 })

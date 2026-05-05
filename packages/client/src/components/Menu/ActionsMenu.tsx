@@ -1,4 +1,4 @@
-import React from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { ChevronDownIcon } from 'lucide-react'
 import { cn } from '../../utils/cn'
@@ -7,7 +7,7 @@ import styles from './ActionsMenu.module.css'
 import baseStyles from './Menu.module.css'
 
 export interface ActionsMenuProps {
-  children: React.ReactNode
+  children: ReactNode
   label?: string
   disabled?: boolean
   open?: boolean
@@ -17,24 +17,26 @@ export interface ActionsMenuProps {
 }
 
 export interface ActionsMenuItemProps {
-  children?: React.ReactNode
+  children?: ReactNode
   onClick?: () => void
   disabled?: boolean
   className?: string
   closeOnClick?: boolean
-  render?: React.ReactElement<Record<string, unknown>> | ((props: unknown, state: unknown) => React.ReactElement)
+  render?: ReactElement<Record<string, unknown>> | ((props: unknown, state: unknown) => ReactElement)
+  'data-testid'?: string
 }
 
 export interface ActionsMenuCheckboxItemProps {
-  children: React.ReactNode
+  children: ReactNode
   checked?: boolean
   onCheckedChange?: (checked: boolean) => void
   disabled?: boolean
   className?: string
+  'data-testid'?: string
 }
 
 export interface ActionsMenuMessageProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 function ActionsMenuTrigger({
@@ -66,12 +68,14 @@ function ActionsMenuItem({
   className,
   closeOnClick = true,
   render,
+  'data-testid': dataTestId,
 }: ActionsMenuItemProps) {
   return (
     <BaseMenu.Item
       onClick={onClick}
       disabled={disabled}
       data-disabled={disabled || undefined}
+      data-testid={dataTestId}
       closeOnClick={closeOnClick}
       className={`${baseStyles.item} ${className || ''}`}
       render={render}
@@ -87,16 +91,18 @@ function ActionsMenuCheckboxItem({
   onCheckedChange,
   disabled,
   className,
+  'data-testid': dataTestId,
 }: ActionsMenuCheckboxItemProps) {
   return (
     <BaseMenu.CheckboxItem
       checked={checked}
       onCheckedChange={onCheckedChange}
       disabled={disabled}
+      data-testid={dataTestId}
       className={`${baseStyles.checkboxItem} ${className || ''}`}
     >
       <BaseMenu.CheckboxItemIndicator className={baseStyles.itemIndicator}>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
           <path
             d="M10 3L4.5 8.5L2 6"
             stroke="currentColor"

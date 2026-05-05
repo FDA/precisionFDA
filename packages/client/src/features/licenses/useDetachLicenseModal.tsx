@@ -1,9 +1,8 @@
-import React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, StyledModalContent } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import { APIResource } from '../home/types'
+import type { APIResource } from '../home/types'
 import { detachLicenseRequest } from './api'
 import { Button } from '@/components/Button'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
@@ -64,7 +63,7 @@ export function useDetachLicenseModal<T extends LicenseCarrier>({
       <Footer>
         <ButtonRow>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button data-variant="primary" type="button" onClick={onSubmit}>
+          <Button data-testid="detach-license-submit" data-variant="primary" type="button" onClick={onSubmit}>
             Detach
           </Button>
         </ButtonRow>
