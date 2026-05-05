@@ -34,7 +34,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
         cron: config.workerJobs.adminDataConsistencyReport.repeatPattern,
       },
     }
-    return await this.addToQueue(wrapped, options)
+    return await this.addRepeatableToQueueEnsureUnique(wrapped, options)
   }
 
   async createCheckChallengeJobsTask(): Promise<Job> {
@@ -49,7 +49,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
         cron: config.workerJobs.checkChallengeJobs.repeatPattern,
       },
     }
-    return await this.addToQueue(wrapped, options)
+    return await this.addRepeatableToQueueEnsureUnique(wrapped, options)
   }
 
   async createCheckNonTerminatedDbClustersTask(): Promise<Job> {
@@ -64,7 +64,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
         cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
       },
     }
-    return await this.addToQueue(wrapped, options)
+    return await this.addRepeatableToQueueEnsureUnique(wrapped, options)
   }
 
   async createUserInactivityAlertTask(): Promise<Job> {
@@ -79,7 +79,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
         cron: config.workerJobs.userInactivityAlert.repeatPattern,
       },
     }
-    return await this.addToQueue(wrapped, options)
+    return await this.addRepeatableToQueueEnsureUnique(wrapped, options)
   }
 
   async createCheckStaleJobsTask(): Promise<Job> {
@@ -94,7 +94,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
         cron: config.workerJobs.jobStaleCheck.repeatPattern,
       },
     }
-    return await this.addToQueue(wrapped, options)
+    return await this.addRepeatableToQueueEnsureUnique(wrapped, options)
   }
 
   async createNotifyRunningJobsTask(): Promise<Job> {
@@ -109,7 +109,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
         cron: config.workerJobs.jobRunningNotification.repeatPattern,
       },
     }
-    return await this.addToQueue(wrapped, options)
+    return await this.addRepeatableToQueueEnsureUnique(wrapped, options)
   }
 
   async createSyncSpacesPermissionsTask(): Promise<Job<SyncSpacesPermissionsJob>> {

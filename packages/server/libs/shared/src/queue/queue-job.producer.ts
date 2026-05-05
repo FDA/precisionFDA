@@ -23,7 +23,7 @@ export abstract class QueueJobProducer {
     return await this.queue.add(task.type, taskWithTrace, options)
   }
 
-  protected async addBulkToQueue<T extends Task>(tasks: Parameters<Queue<T>['addBulk']>[0]) {
+  protected async addBulkToQueue<T extends Task>(tasks: Parameters<Queue<T>['addBulk']>[0]): Promise<Job<T>[]> {
     this.validateQueue()
 
     this.logger.log({ tasks: tasks.map(t => this.getTaskInfo(t.data)) }, 'adding a bulk of task to queue')
@@ -31,7 +31,7 @@ export abstract class QueueJobProducer {
     return await this.queue.addBulk(tasks.map(t => ({ name: t.data.type, data: t.data })))
   }
 
-  removeJobs(pattern: string) {
+  removeJobs(pattern: string): Promise<void> {
     return this.queue.removeJobs(pattern)
   }
 
@@ -39,7 +39,7 @@ export abstract class QueueJobProducer {
   //    allow a duplicate job with the same bull jobId to be added
   //    repeatable jobs should not use this function
   // TODO: The queue methods should be cleaned up and a lot of code could be consolidated
-  async addToQueueEnsureUnique<T extends Task>(task: T, jobId: string | undefined) {
+  async addToQueueEnsureUnique<T extends Task>(task: T, jobId: string | undefined): Promise<Job<T>> {
     // If jobId is provided, there should not be multiple items with this jobId in the queue
     if (jobId) {
       // Do not allow a second job to be added to the queue
@@ -59,7 +59,22 @@ export abstract class QueueJobProducer {
     return await this.addToQueue(task, options)
   }
 
-  private getTaskInfo(task: Task, payloadFn?: (payload: unknown) => unknown) {
+  protected async addRepeatableToQueueEnsureUnique<T extends Task>(task: T, options: JobOptions): Promise<Job<T>> {
+    const jobId = options.jobId
+
+    if (!jobId) {
+      throw new Error(`jobId must be provided for repeatable jobs (task: ${task.type})`)
+    }
+
+    const repeatableJobs = await this.queue.getRepeatableJobs()
+    await Promise.all(
+      repeatableJobs.filter(job => job.id === jobId).map(job => this.queue.removeRepeatableByKey(job.key)),
+    )
+
+    return await this.addToQueue(task, options)
+  }
+
+  private getTaskInfo(task: Task, payloadFn?: (payload: unknown) => unknown): Record<string, unknown> {
     const whitelistPayloadFn = payloadFn ?? (payload => payload)
 
     return {
@@ -70,7 +85,7 @@ export abstract class QueueJobProducer {
     }
   }
 
-  private validateQueue() {
+  private validateQueue(): void {
     if (!this.queue) {
       throw new Error('Queue not defined. Define queue to produce jobs.')
     }
