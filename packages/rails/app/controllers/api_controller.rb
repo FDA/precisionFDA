@@ -733,9 +733,9 @@ class ApiController < ApplicationController
     project = UserFile.publication_project!(current_user, @scope)
 
     parent = current_user
-    # file could be uploaded by CLi inside job
+    # file could be uploaded by CLI inside job; fall back to current_user if job is not found
     if params[:parent_type] == "Job" && params[:parent_id] != ""
-      parent = Job.find_by!(dxid: params[:parent_id])
+      parent = Job.find_by(dxid: params[:parent_id]) || current_user
     end
 
     api = DNAnexusAPI.new(RequestContext.instance.token)
