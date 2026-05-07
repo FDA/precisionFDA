@@ -1,12 +1,15 @@
-import Editor, { EditorProps, loader, Monaco } from '@monaco-editor/react'
-import * as monacoEditor from 'monaco-editor'
+import Editor, { type EditorProps, loader, type Monaco } from '@monaco-editor/react'
+import type * as monacoEditor from 'monaco-editor'
 import { ENABLE_DEV_MSW } from '@/utils/env'
 import { useTheme } from '@/utils/ThemeContext'
 
 if (!ENABLE_DEV_MSW) {
   loader.config({
     paths: {
-      vs: `${import.meta.env.BASE_URL}monaco-editor/min/vs`,
+      // Use absolute path to avoid monaco-editor bug when loading from relative path (https://github.com/microsoft/monaco-editor/issues/4778)
+      // vs: `${import.meta.env.BASE_URL}monaco-editor/min/vs`,
+      // TODO(PFDA-6918): Bump monaco-editor when they fix the dompurify dependency to resolve the CVE-2026-0540 vulnerability (https://nvd.nist.gov/vuln/detail/CVE-2026-0540)
+      vs: `${window.location.origin}${import.meta.env.BASE_URL}monaco-editor/min/vs`,
     },
   })
 }
