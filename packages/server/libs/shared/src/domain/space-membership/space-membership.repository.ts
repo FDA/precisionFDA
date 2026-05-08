@@ -10,6 +10,10 @@ export class SpaceMembershipRepository extends PaginatedRepository<SpaceMembersh
     return this.findOne({ spaces: spaceId, user: userId, active: true })
   }
 
+  async findInactiveByUserAndSpace(userId: number, spaceId: number): Promise<SpaceMembership | null> {
+    return this.findOne({ user: userId, spaces: spaceId, active: false })
+  }
+
   async findActiveMembershipAndSpace(userId: number, role: SPACE_MEMBERSHIP_ROLE): Promise<SpaceMembership[]> {
     return await this.em.find(
       SpaceMembership,
@@ -77,5 +81,20 @@ export class SpaceMembershipRepository extends PaginatedRepository<SpaceMembersh
       user: userId,
       side,
     })
+  }
+
+  async findActiveLeadMembershipsInAdminSpaces(userId: number): Promise<SpaceMembership[]> {
+    return this.find(
+      {
+        user: userId,
+        role: SPACE_MEMBERSHIP_ROLE.LEAD,
+        active: true,
+        spaces: {
+          type: SPACE_TYPE.ADMINISTRATOR,
+          state: SPACE_STATE.ACTIVE,
+        },
+      },
+      { populate: ['spaces'], populateWhere: PopulateHint.INFER },
+    )
   }
 }

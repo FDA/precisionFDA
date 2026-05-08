@@ -58,7 +58,7 @@ export const useExecutionColumns = ({
       header: 'State',
       id: 'state',
       accessorKey: 'state',
-      size: 100,
+      size: 120,
       filterFn: selectFilterFn,
       meta: {
         filterElement: (column: Column<IExecution>) => (

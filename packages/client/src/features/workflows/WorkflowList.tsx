@@ -1,5 +1,4 @@
-import React from 'react'
-import {
+import type {
   ColumnDefResolved,
   ColumnFiltersState,
   ColumnSizingState,
@@ -13,7 +12,7 @@ import { ActionsMenu } from '@/components/Menu'
 import { ContentFooter } from '@/components/Page/ContentFooter'
 import { Pagination } from '@/components/Pagination'
 import { StyledPageTable } from '@/components/Table/components/styles'
-import { ErrorBoundary } from '@/utils/ErrorBoundry'
+import { ErrorBoundary } from '@/utils/ErrorBoundary'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
 import { useAuthUser } from '../auth/useAuthUser'
@@ -21,14 +20,14 @@ import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ResourceHeader } from '../home/show.styles'
-import { HomeScope } from '../home/types'
+import type { HomeScope } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { useWorkflowColumns } from './useWorkflowColumns'
 import { useWorkflowListActions } from './useWorkflowListActions'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { fetchWorkflowList } from './workflows.api'
-import { IWorkflow, WorkflowMeta } from './workflows.types'
+import type { IWorkflow, WorkflowMeta } from './workflows.types'
 
 type ListType = { workflows: IWorkflow[]; meta: WorkflowMeta }
 
@@ -69,7 +68,7 @@ export const WorkflowList = ({
     },
   })
   const { isLoading, data, error } = query
-  const { data: propetiesData } = usePropertiesQuery('workflowSeries', homeScope, spaceId)
+  const { data: propertiesData } = usePropertiesQuery('workflowSeries', homeScope, spaceId)
 
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.workflows)
   const { actions, modals } = useWorkflowSelectActions({
@@ -128,7 +127,7 @@ export const WorkflowList = ({
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery)}
         workflows={data?.workflows}
-        properties={propetiesData?.keys}
+        properties={propertiesData?.keys}
         isLoading={isLoading}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}

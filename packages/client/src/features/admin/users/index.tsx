@@ -1,23 +1,19 @@
 import type { Column, ColumnDef } from '@tanstack/react-table'
-import React from 'react'
 import styled from 'styled-components'
-import { DEFAULT_PAGINATED_DATA } from '../../../api/types'
-import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
-import { hidePagination, Pagination } from '../../../components/Pagination'
-import Table from '../../../components/Table'
-import DateTimeRangeFilter, { dateRangeFilterFn } from '../../../components/Table/components/DateTimeRangeFilter'
-import SelectFilter, { selectFilterFn } from '../../../components/Table/components/SelectFilter'
-import { selectColumnDef } from '../../../components/Table/selectColumnDef'
-import { usePageMeta } from '../../../hooks/usePageMeta'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import Table from '@/components/Table'
+import DateTimeRangeFilter, { dateRangeFilterFn } from '@/components/Table/components/DateTimeRangeFilter'
+import SelectFilter, { selectFilterFn } from '@/components/Table/components/SelectFilter'
+import { selectColumnDef } from '@/components/Table/selectColumnDef'
+import { usePageMeta } from '@/hooks/usePageMeta'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import { useList } from '../../home/useList'
 import { formatNumberUS } from '../../home/utils'
-import { AdminContentFooter, AdminStyledPageTable, Title, Topbox } from '../styles'
-import { AdminTablePlaceholderLoader, getAdminTableLoadingState } from '../tableLoading'
+import { AdminListPage } from '../AdminListPage'
 import { AdminUserDetailsDrawer } from './AdminUserDetailsDrawer'
 import { fetchUsers } from './api'
 import { UsersListActionRow } from './ListPageActionRow'
 import type { AdminUserListType, User } from './types'
+import { useOpenedUser } from './useOpenedUser'
 
 const StyledCell = styled.div`
   display: flex;
@@ -78,7 +74,7 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
     meta: {
       filterElement: (column: Column<User>) => <SelectFilter column={column} options={USER_STATUS_OPTIONS} />,
     },
-    size: 250,
+    size: 270,
     cell: ({ row }) => <StyledCell>{row.original.userState.toUpperCase()}</StyledCell>,
   },
   {
@@ -113,7 +109,6 @@ const getAdminUserColumns = (): ColumnDef<User>[] => [
 
 const UsersList = () => {
   usePageMeta({ title: 'precisionFDA Admin - Users' })
-  const [openedUserId, setOpenedUserId] = React.useState<User['id'] | null>(null)
 
   const {
     setPerPageParam,
@@ -136,42 +131,27 @@ const UsersList = () => {
     params: {},
   })
 
-  const { data = DEFAULT_PAGINATED_DATA, isLoading, error } = query
-  const { showLoadingState, showPlaceholderLoader, tableClassName } = getAdminTableLoadingState({
-    data: query.data,
-    isLoading,
-    isFetching: query.isFetching,
-    isPlaceholderData: query.isPlaceholderData,
-  })
-
-  React.useEffect(() => {
-    if (openedUserId == null) return
-    if (isLoading) return
-    if (data.data.some(user => user.id === openedUserId)) return
-    setOpenedUserId(null)
-  }, [data.data, isLoading, openedUserId])
-
-  if (error) {
-    return <div>{JSON.stringify(error)}</div>
-  }
+  const rows = query?.data?.data ?? []
+  const { openedUserId, openUser, closeUser } = useOpenedUser(rows, query.isLoading)
 
   const columns = getAdminUserColumns()
-  const selectedUsers = getSelectedObjectsFromIndexes(selectedIndexes, data.data)
+  const selectedUsers = getSelectedObjectsFromIndexes(selectedIndexes, rows)
   const filters = toArrayFromObject(filterQuery)
 
   return (
     <>
-      <Topbox>
-        <Title>User Management</Title>
-        <UsersListActionRow selectedUsers={selectedUsers} refetchUsers={query.refetch} />
-      </Topbox>
-
-      <div className="relative flex flex-1 min-h-0 flex-col">
-        {showPlaceholderLoader && <AdminTablePlaceholderLoader />}
-        <AdminStyledPageTable className={tableClassName}>
+      <AdminListPage
+        title="User Management"
+        actions={<UsersListActionRow selectedUsers={selectedUsers} refetchUsers={query.refetch} />}
+        query={query}
+        perPage={perPageParam}
+        setPage={setPageParam as (n: number) => void}
+        setPerPage={setPerPageParam as (n: number) => void}
+      >
+        {({ isLoading }) => (
           <Table<User>
-            isLoading={showLoadingState}
-            data={data.data}
+            isLoading={isLoading}
+            data={rows}
             columns={columns}
             columnSizing={colWidths}
             setColumnSizing={saveColumnResizeWidth}
@@ -183,26 +163,12 @@ const UsersList = () => {
             columnSortBy={sortBy}
             setColumnSortBy={setSortBy}
             columnFilters={filters}
-            onRowClick={row => setOpenedUserId(row.original.id)}
+            onRowClick={row => openUser(row.original.id)}
           />
-        </AdminStyledPageTable>
-      </div>
+        )}
+      </AdminListPage>
 
-      <AdminContentFooter>
-        <Pagination
-          page={data.meta.page}
-          totalCount={data.meta.total}
-          totalPages={data.meta.totalPages}
-          perPage={perPageParam}
-          isHidden={hidePagination(query.isFetched, data.data.length, data.meta.totalPages)}
-          setPage={setPageParam as (n: number) => void}
-          onPerPageSelect={setPerPageParam as (n: number) => void}
-          showListCount
-        />
-        <HoverDNAnexusLogo opacity height={14} />
-      </AdminContentFooter>
-
-      <AdminUserDetailsDrawer userId={openedUserId} open={openedUserId != null} onClose={() => setOpenedUserId(null)} />
+      <AdminUserDetailsDrawer userId={openedUserId} open={openedUserId != null} onClose={closeUser} />
     </>
   )
 }

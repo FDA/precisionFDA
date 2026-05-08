@@ -151,7 +151,7 @@ export function prepareListFetch(filters: IFilter[], params: Params): QueryType 
       ? params.sortBy?.order_by?.replace('props.', '')
       : renameOrderByKeys(params?.sortBy?.order_by)
 
-  const queryParams: QueryType = cleanObject({
+  return cleanObject({
     scope: params.entityScope,
     folder_id: params?.folderId,
     space_id: params?.spaceId,
@@ -161,8 +161,6 @@ export function prepareListFetch(filters: IFilter[], params: Params): QueryType 
     order_dir: params?.sortBy?.order_dir,
     ...filterParams,
   })
-
-  return queryParams
 }
 
 export function prepareListFetchV2(filters: IFilter[], params: Params): QueryType {
@@ -171,7 +169,6 @@ export function prepareListFetchV2(filters: IFilter[], params: Params): QueryTyp
   modFilters = mapSizeFilter(modFilters)
   modFilters = modFilters.filter(f => f.value !== undefined)
 
-  // Convert params in a way to work with backend - not a great way to pass params in the url
   const filterParams: Record<string, FilterVal> = {}
 
   modFilters.forEach(f => {

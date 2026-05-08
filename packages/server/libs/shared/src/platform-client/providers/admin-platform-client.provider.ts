@@ -9,7 +9,7 @@ import { PlatformClient } from '@shared/platform-client'
 const ADMIN_PLATFORM_CLIENT_URL = `${config.service.adminPlatformClient.url}/execute`
 const logger = new Logger('AdminPlatformClient')
 
-const streamJobLogs = (jobDxId: string) => {
+const streamJobLogs: (jobDxId: string) => WebSocket = (jobDxId: string) => {
   const ws = new WebSocket(`ws://${new URL(config.service.adminPlatformClient.url).host}`)
   ws.on('open', () => {
     ws.send(JSON.stringify({ event: 'getLog', data: { jobDxId: jobDxId } }))

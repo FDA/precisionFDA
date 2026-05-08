@@ -1,6 +1,5 @@
-import React from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Controller, Path, PathValue, useForm } from 'react-hook-form'
+import { Controller, type Path, type PathValue, useForm } from 'react-hook-form'
 import { Button } from '@/components/Button'
 import { Checkbox } from '@/components/CheckboxNext'
 import { FieldLabelRow } from '@/components/form/styles'
@@ -18,7 +17,7 @@ import {
   StyledNotifications,
   StyledPageContainer,
 } from './styles'
-import { AllNotification, NotificationPreferences } from './types'
+import type { AllNotification, NotificationPreferences } from './types'
 
 type NotificationLabelType = Record<string, string>
 
@@ -407,7 +406,7 @@ const NotificationsPage = () => {
       <PageHeader>
         <PageTitle>Notification Preferences</PageTitle>
       </PageHeader>
-      {isLoading ? <Loader /> : <NotificationForm onSave={handleOnsSubmit} preferences={data!.preference} />}
+      {isLoading || !data ? <Loader /> : <NotificationForm onSave={handleOnsSubmit} preferences={data.preference} />}
     </StyledPageContainer>
   )
 }

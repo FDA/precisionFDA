@@ -1,17 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useEffect } from 'react'
-import { DEFAULT_PAGINATED_DATA } from '../../../api/types'
-import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
-import { hidePagination, Pagination } from '../../../components/Pagination'
-import Table from '../../../components/Table'
-import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import Table from '@/components/Table'
+import { useLastWSNotification } from '@/hooks/useLastWSNotification'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '@/utils/object'
 import { type IFilter, NOTIFICATION_ACTION } from '../../home/types'
 import { useList } from '../../home/useList'
 import { type Params, prepareListFetchV2 } from '../../home/utils'
-import { AdminContentFooter, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
-import { AdminTablePlaceholderLoader, getAdminTableLoadingState } from '../tableLoading'
+import { AdminListPage } from '../AdminListPage'
 import { fetchInvitations, type Invitation } from '../users/api'
 import InvitationActionRow from './ActionRow'
 import type { InvitationListType } from './types'
@@ -55,14 +51,9 @@ export const InvitationsTable = ({
       ...additionalParams,
     },
   })
-  const { data = DEFAULT_PAGINATED_DATA, isLoading } = query
-  const { showLoadingState, showPlaceholderLoader, tableClassName } = getAdminTableLoadingState({
-    data: query.data,
-    isLoading,
-    isFetching: query.isFetching,
-    isPlaceholderData: query.isPlaceholderData,
-  })
-  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data.data)
+
+  const rows = query?.data?.data ?? []
+  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, rows)
   const filters = toArrayFromObject(filterQuery)
   const queryClient = useQueryClient()
 
@@ -81,52 +72,31 @@ export const InvitationsTable = ({
     })
   }, [lastJsonMessage, queryClient])
 
-  if (query.error) {
-    return <div>{JSON.stringify(query.error)}</div>
-  }
-
   return (
-    <>
-      <Topbox>
-        <TopLeft>
-          <Title>{title}</Title>
-        </TopLeft>
-        <InvitationActionRow selectedInvitations={selectedObjects} setSelectedIndexes={setSelectedIndexes} />
-      </Topbox>
-
-      <div className="relative flex flex-1 min-h-0 flex-col">
-        {showPlaceholderLoader && <AdminTablePlaceholderLoader />}
-        <AdminStyledPageTable className={tableClassName}>
-          <Table<Invitation>
-            isLoading={showLoadingState}
-            data={data.data}
-            columns={columns}
-            columnSizing={colWidths}
-            setColumnSizing={saveColumnResizeWidth}
-            columnVisibility={columnVisibility}
-            setColumnVisibility={setColumnVisibility}
-            rowSelection={selectedIndexes}
-            setSelectedRows={setSelectedIndexes}
-            setColumnFilters={setSearchFilter}
-            columnFilters={filters}
-            emptyText="No invitations found"
-          />
-        </AdminStyledPageTable>
-      </div>
-
-      <AdminContentFooter>
-        <Pagination
-          page={data.meta.page}
-          totalCount={data.meta.total}
-          totalPages={data.meta.totalPages}
-          perPage={perPageParam}
-          isHidden={hidePagination(query.isFetched, data.data.length, data.meta.totalPages)}
-          setPage={setPageParam as (n: number) => void}
-          onPerPageSelect={setPerPageParam as (n: number) => void}
-          showListCount
+    <AdminListPage
+      title={title}
+      actions={<InvitationActionRow selectedInvitations={selectedObjects} setSelectedIndexes={setSelectedIndexes} />}
+      query={query}
+      perPage={perPageParam}
+      setPage={setPageParam as (n: number) => void}
+      setPerPage={setPerPageParam as (n: number) => void}
+    >
+      {({ isLoading }) => (
+        <Table<Invitation>
+          isLoading={isLoading}
+          data={rows}
+          columns={columns}
+          columnSizing={colWidths}
+          setColumnSizing={saveColumnResizeWidth}
+          columnVisibility={columnVisibility}
+          setColumnVisibility={setColumnVisibility}
+          rowSelection={selectedIndexes}
+          setSelectedRows={setSelectedIndexes}
+          setColumnFilters={setSearchFilter}
+          columnFilters={filters}
+          emptyText="No invitations found"
         />
-        <HoverDNAnexusLogo opacity height={14} />
-      </AdminContentFooter>
-    </>
+      )}
+    </AdminListPage>
   )
 }

@@ -1,10 +1,12 @@
-import { Column, Row } from '@tanstack/react-table'
-import React, { useState } from 'react'
-import styled from 'styled-components'
+import type { Column, Row } from '@tanstack/react-table'
+import type React from 'react'
+import { useState } from 'react'
+import { cn } from '@/utils/cn'
+import styles from './DateTimeRangeFilter.module.css'
 
 export const dateRangeFilterFn = <T,>(row: Row<T>, columnId: string, filterValue: unknown): boolean => {
   const filter = filterValue as { from?: string; to?: string } | undefined | null
-  if (!filter || !filter.from || !filter.to) return true
+  if (!filter?.from || !filter.to) return true
 
   const cellValue = row.getValue<string>(columnId)
   if (!cellValue) return false
@@ -15,18 +17,6 @@ export const dateRangeFilterFn = <T,>(row: Row<T>, columnId: string, filterValue
 
   return cellDate >= fromDate && cellDate <= toDate
 }
-
-const DateInput = styled.input`
-  min-width: 140px;
-  font-size: 14px;
-  font-weight: 400;
-  padding: 4px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  max-width: 140px;
-  margin-right: 4px;
-  height: 23px;
-`
 
 const DateTimeRangeFilter = <T,>({ column }: { column: Column<T> }) => {
   const filteredValue = column.getFilterValue() as [string | undefined, string | undefined] | undefined
@@ -49,18 +39,18 @@ const DateTimeRangeFilter = <T,>({ column }: { column: Column<T> }) => {
   }
 
   return (
-    <div>
-      <DateInput
+    <div className={styles.range}>
+      <input
         type="date"
-        defaultValue={undefined}
+        className={cn(styles.input, filterValue[0] && styles.active)}
         name="from"
         value={filterValue[0] || ''}
         onChange={handleChange}
         placeholder="From"
       />
-      <DateInput
+      <input
         type="date"
-        defaultValue={undefined}
+        className={cn(styles.input, filterValue[1] && styles.active)}
         name="to"
         value={filterValue[1] || ''}
         onChange={handleChange}

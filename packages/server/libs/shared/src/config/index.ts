@@ -100,6 +100,7 @@ const defaultConfig = {
     orgDummyHandle: 'precisionfda.dummy_dev',
     billingInfo: parseJSONFromProcess(process.env.BILLING_INFO) ?? BILLING_INFO,
     billingConfirmation: process.env.BILLING_CONFIRMATION,
+    pfdaAdminOrg: process.env.PFDA_ADMIN_ORG ?? '',
   },
   emails: {
     smtp: {

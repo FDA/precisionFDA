@@ -10,6 +10,7 @@ import { AlertsPage } from '@/features/admin/alerts/AlertsPage'
 import { AdminDashboard } from '@/features/admin/dashboard/Dashboard'
 import { InvitationsList } from '@/features/admin/invitations'
 import { ProvisioningList } from '@/features/admin/invitations/ProvisioningList'
+import AdminMembershipsPage from '@/features/admin/memberships'
 import { SpacesList } from '@/features/admin/spaces'
 import { AdminUsersLayout } from '@/features/admin/users/AdminUsersLayout'
 import { useAuthUser } from '@/features/auth/useAuthUser'
@@ -60,6 +61,7 @@ const accountRoutes = [
               { path: 'invitations', element: <InvitationsList /> },
               { path: 'invitations/provisioning', element: <ProvisioningList /> },
               { path: 'pending', element: <PendingUsersList /> },
+              { path: 'memberships', element: <AdminMembershipsPage /> },
             ],
           },
           { path: 'invitations', element: <Navigate to="../users/invitations" replace /> },

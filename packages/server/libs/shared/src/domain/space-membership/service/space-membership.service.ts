@@ -18,7 +18,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { UserInviteToOrgResponse } from '@shared/platform-client/platform-client.responses'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { SpaceMembership } from '../space-membership.entity'
-import { SPACE_MEMBERSHIP_ROLE } from '../space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '../space-membership.enum'
 import { SpaceMembershipRepository } from '../space-membership.repository'
 
 @Injectable()
@@ -212,8 +212,7 @@ export class SpaceMembershipService {
       }
     }
     const leadProvider = this.spaceMembershipUpdatePermissionProviderMap[SPACE_MEMBERSHIP_ROLE.LEAD]
-    const updatedMemberships = await leadProvider.update(sharedSpace, currentLeadMember, allLeadMemberships)
-    return updatedMemberships
+    return await leadProvider.update(sharedSpace, currentLeadMember, allLeadMemberships)
   }
 
   async syncPlatformAccess(spaceId: number, memberIds: number[]): Promise<void> {
@@ -250,6 +249,27 @@ export class SpaceMembershipService {
       })
     })
     await Promise.all(promises)
+  }
+
+  async activateOrCreateAdminSpaceMembership(user: User, space: Space): Promise<void> {
+    const existing = await this.spaceMembershipRepository.findInactiveByUserAndSpace(user.id, space.id)
+    if (existing) {
+      existing.active = true
+    } else {
+      const membership = new SpaceMembership(user, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN)
+      this.em.persist(membership)
+    }
+  }
+
+  async deactivateAdminSpaceMembership(space: Space, user: User): Promise<boolean> {
+    const membership = await this.spaceMembershipRepository.getMembership(space.id, user.id)
+    if (!membership) return false
+    membership.active = false
+    return true
+  }
+
+  async findActiveLeadMembershipsInAdminSpaces(userId: number): Promise<SpaceMembership[]> {
+    return this.spaceMembershipRepository.findActiveLeadMembershipsInAdminSpaces(userId)
   }
 
   async syncSpaceLeadBillTo(leadMembershipId: number): Promise<void> {

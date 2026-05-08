@@ -56,6 +56,7 @@ export type APIResource =
   | 'admin-users'
   | 'admin-pending-users'
   | 'admin-invitations'
+  | 'admin-memberships'
   | 'files'
   | 'folders'
   | 'apps'

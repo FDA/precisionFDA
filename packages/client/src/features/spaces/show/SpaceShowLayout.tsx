@@ -1,4 +1,3 @@
-import React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { Outlet, useOutletContext } from 'react-router'
 import { BoltIcon } from '@/components/icons/BoltIcon'
@@ -14,10 +13,10 @@ import { UsersIcon } from '@/components/icons/UsersIcon'
 import { MenuCounter } from '@/components/MenuCounter'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { SpaceOutletContext } from '@/routes/spaces'
-import { ErrorBoundary } from '@/utils/ErrorBoundry'
+import type { SpaceOutletContext } from '@/routes/spaces'
+import { ErrorBoundary } from '@/utils/ErrorBoundary'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../../home/home.styles'
-import { ApiErrorResponse } from '../../home/types'
+import type { ApiErrorResponse } from '../../home/types'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
 import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
 import { ProtectedIcon } from '../ProtectedIcon'
@@ -40,6 +39,10 @@ import {
 export const SpaceShowLayout = () => {
   const context = useOutletContext<SpaceOutletContext | undefined>()
   if (!context?.space) return null
+  return <SpaceShowLayoutContent context={context} />
+}
+
+const SpaceShowLayoutContent = ({ context }: { context: SpaceOutletContext }) => {
   const { space, counters } = context
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedSpacesSidebar', true)
 

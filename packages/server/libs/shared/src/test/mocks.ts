@@ -1,4 +1,6 @@
+import { HttpService } from '@nestjs/axios'
 import Bull from 'bull'
+import { of } from 'rxjs'
 import sinon from 'sinon'
 import { PlatformClient } from '@shared/platform-client'
 import * as queue from '@shared/queue'
@@ -20,15 +22,8 @@ const mockServiceFactory: ReturnType<typeof createMockServiceFactory> = createMo
 
 const sandbox: sinon.SinonSandbox = sinon.createSandbox()
 
-const fakes: {
-  client: Record<string, sinon.SinonStub>
-  queue: Record<string, sinon.SinonStub | sinon.SinonSpy>
-  bull: Record<string, sinon.SinonStub | sinon.SinonSpy>
-  notificationService: ReturnType<typeof createMockServiceFactory>['notificationService']
-  platformAuthClient: ReturnType<typeof createMockServiceFactory>['platformAuthClient']
-  workstationClient: ReturnType<typeof createMockServiceFactory>['workstationClient']
-  emailService: ReturnType<typeof createMockServiceFactory>['emailService']
-} = {
+// biome-ignore lint/nursery/useExplicitType: rely on inferred per-key types so SinonStub vs SinonSpy methods (callsFake, resolves, withArgs) remain accessible at call sites; an explicit Record union erases that distinction
+const fakes = {
   client: {
     jobDescribeFake: sinon.stub(),
     jobCreateFake: sinon.stub(),
@@ -80,6 +75,10 @@ const fakes: {
     addFake: sinon.stub(),
     addBulkFake: sinon.stub(),
     getJobFake: sinon.stub(),
+  },
+  // TODO: PFDA-6910
+  http: {
+    postFake: sinon.stub(),
   },
   notificationService: mockServiceFactory.notificationService,
   platformAuthClient: mockServiceFactory.platformAuthClient,
@@ -181,10 +180,23 @@ const mocksSetDefaultBehaviour = (): void => {
 
   fakes.client.userResetMfaFake.callsFake(() => ({ authorization_code: '12345678' }))
   fakes.client.userUpdateEmailFake.callsFake(() => ({}))
+  fakes.client.inviteUserToOrganizationFake.callsFake(() => ({}))
+  fakes.client.removeUserFromOrganizationFake.callsFake(() => ({}))
 
-  ;(fakes.bull.addFake as sinon.SinonStub).callsFake(() => {})
-  ;(fakes.bull.getJobFake as sinon.SinonStub).callsFake(() => undefined)
-  ;(fakes.bull.isReadyFake as sinon.SinonStub).callsFake(() => Promise.resolve(true))
+  fakes.bull.addFake.callsFake(() => {})
+  fakes.bull.getJobFake.callsFake(() => undefined)
+  fakes.bull.isReadyFake.callsFake(() => Promise.resolve(true))
+
+  // LUDVIK TODO: PFDA-6910 remove and replace with proper mock.
+  // Admin platform client is a Proxy that forwards every method call to
+  // httpService.post(adminClientUrl, { method, params }). Stub HttpService.post
+  // to dispatch by `method` to the matching fakes.client.<method>Fake stub, so
+  // tests can program/assert behavior the same way they do for direct PlatformClient mocks.
+  fakes.http.postFake.callsFake((_url: string, body: { method: string; params: unknown[] }) => {
+    const stub = (fakes.client as Record<string, sinon.SinonStub | undefined>)[`${body?.method}Fake`]
+    const data = stub ? stub(...(body.params ?? [])) : undefined
+    return of({ data })
+  })
 
   mockServiceFactory.reset()
 }
@@ -225,6 +237,9 @@ const mocksSetup = (): void => {
   sandbox.replace(PlatformClient.prototype, 'dbClusterAction', fakes.client.dbClusterActionFake)
   sandbox.replace(PlatformClient.prototype, 'dbClusterCreate', fakes.client.dbClusterCreateFake)
   sandbox.replace(PlatformClient.prototype, 'dbClusterDescribe', fakes.client.dbClusterDescribeFake)
+
+  // stub HttpService.post so the admin platform client proxy never hits the network TODO: PFDA-6910
+  sandbox.replace(HttpService.prototype, 'post', fakes.http.postFake as unknown as HttpService['post'])
 
   // stub Bull
   sandbox.replace(Bull.prototype, 'process', fakes.bull.processFake)
@@ -279,7 +294,7 @@ const mocksReset = (): void => {
   fakes.client.userUpdateEmailFake.reset()
   fakes.client.fileDownloadLinkFake.reset()
 
-  ;(fakes.queue.findRepeatableFake as sinon.SinonStub).reset()
+  fakes.queue.findRepeatableFake.reset()
 
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.removeRepeatableJobsFake.resetHistory()
@@ -292,6 +307,9 @@ const mocksReset = (): void => {
   fakes.bull.isReadyFake.resetHistory()
   fakes.bull.addFake.resetHistory()
   fakes.bull.getJobFake.resetHistory()
+
+  // TODO: PFDA-6910
+  fakes.http.postFake.reset()
 
   mocksSetDefaultBehaviour()
 }

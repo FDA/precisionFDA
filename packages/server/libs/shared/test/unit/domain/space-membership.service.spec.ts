@@ -638,6 +638,53 @@ describe('SpaceMembershipService', () => {
     })
   })
 
+  context('findActiveLeadMembershipsInAdminSpaces', () => {
+    it('returns lead memberships in active admin spaces', async () => {
+      const adminSpace = create.spacesHelper.create(em, {
+        type: SPACE_TYPE.ADMINISTRATOR,
+        state: SPACE_STATE.ACTIVE,
+      })
+      create.spacesHelper.addMember(
+        em,
+        { user: hostLead, space: adminSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      await em.flush()
+
+      const result = await getInstance().findActiveLeadMembershipsInAdminSpaces(hostLead.id)
+      expect(result).to.have.length(1)
+      expect(result[0].role).to.equal(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(result[0].spaces.getItems().some((s) => s.id === adminSpace.id)).to.be.true()
+    })
+
+    it('returns empty array when user has no lead memberships in admin spaces', async () => {
+      const result = await getInstance().findActiveLeadMembershipsInAdminSpaces(hostLead.id)
+      expect(result).to.have.length(0)
+    })
+
+    it('does not return lead memberships in non-admin spaces', async () => {
+      // hostLeadMembership is LEAD in groupSpace (SPACE_TYPE.GROUPS), not ADMINISTRATOR
+      const result = await getInstance().findActiveLeadMembershipsInAdminSpaces(hostLead.id)
+      expect(result).to.have.length(0)
+    })
+
+    it('does not return non-lead memberships in admin spaces', async () => {
+      const adminSpace = create.spacesHelper.create(em, {
+        type: SPACE_TYPE.ADMINISTRATOR,
+        state: SPACE_STATE.ACTIVE,
+      })
+      create.spacesHelper.addMember(
+        em,
+        { user: hostLead, space: adminSpace },
+        { role: SPACE_MEMBERSHIP_ROLE.ADMIN, side: SPACE_MEMBERSHIP_SIDE.HOST },
+      )
+      await em.flush()
+
+      const result = await getInstance().findActiveLeadMembershipsInAdminSpaces(hostLead.id)
+      expect(result).to.have.length(0)
+    })
+  })
+
   context('syncPlatformAccess', () => {
     it('should return early if no memberships found', async () => {
       const result = await getInstance().syncPlatformAccess(groupSpace.id, [-1, -2])
