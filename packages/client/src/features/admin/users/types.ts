@@ -76,4 +76,5 @@ export type AdminUserDetails = {
     isChallengeAdmin: boolean
     pendingActivation: boolean
   }
+  isSSO: boolean
 }

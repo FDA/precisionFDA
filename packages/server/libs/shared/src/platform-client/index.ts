@@ -28,6 +28,7 @@ import {
   FileGetUploadUrlParams,
   FileRemoveParams,
   FileStatesParams,
+  GetSsoIdData,
   JobCreateParams,
   JobDescribeParams,
   JobFindParams,
@@ -220,6 +221,11 @@ export class PlatformClient {
     return await this.sendRequest<FindJobsResponse>(options)
   }
 
+  /**
+   * Runs an app or applet.
+   * API: /app-xxxx[/yyyy]/run
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-run
+   */
   async jobCreate(params: JobCreateParams): Promise<JobCreateResponse> {
     const url = `${config.platform.apiUrl}/${params.appId}/run`
     const data = omit(['appId'], params)
@@ -231,6 +237,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Terminates a job.
+   * API: /job-xxxx/terminate
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/applets-and-entry-points#api-method-job-xxxx-terminate
+   */
   async jobTerminate(params: JobTerminateParams): Promise<JobTerminateResponse> {
     const url = `${config.platform.apiUrl}/${params.jobId}/terminate`
     const options: AxiosRequestConfig = {
@@ -241,6 +252,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Renames a folder in a data container.
+   * API: /class-xxxx/renameFolder
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-renamefolder
+   */
   async renameFolder(params: RenameFolderParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/renameFolder`
     const options: AxiosRequestConfig = {
@@ -254,6 +270,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Removes a folder from a data container.
+   * API: /class-xxxx/removeFolder
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-removefolder
+   */
   // NOT USED ANYMORE
   async folderRemove(params: RemoveFolderParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/removeFolder`
@@ -268,6 +289,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Describes a job's attributes.
+   * API: /job-xxxx/describe
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/applets-and-entry-points#api-method-job-xxxx-describe
+   */
   async jobDescribe(params: JobDescribeParams): Promise<JobDescribeResponse> {
     const url = `${config.platform.apiUrl}/${params.jobDxId}/describe`
     const options: AxiosRequestConfig = {
@@ -323,6 +349,15 @@ export class PlatformClient {
    * @param params ids of nodes that should be removed
    * @returns
    */
+  /**
+   * Removes nodes specified by their ids. Works recursively and
+   * therefore contents of folders is removed as well.
+   * API: /class-xxxx/removeObjects
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-removeobjects
+   *
+   * @param params ids of nodes that should be removed
+   * @returns
+   */
   async fileRemove(params: FileRemoveParams): Promise<FileRemoveResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/removeObjects`
     const options: AxiosRequestConfig = {
@@ -372,6 +407,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Paginated query for file states via /system/findDataObjects.
+   * API: /system/findDataObjects
+   * @see https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
+   */
   async fileStatesPaginated(params: FileStatesParams, starting: Starting | undefined): Promise<FileStatesResponse> {
     const data: AnyObject = {
       class: 'file',
@@ -408,6 +448,8 @@ export class PlatformClient {
    * Given a list of fileDxids, query platform the current file states
    * This is designed to only query files within the same dx project, because without the project hint
    * the /system/findDataObjects call is very inefficient and can take a long time
+   * API: /system/findDataObjects
+   * @see https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
    */
   async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
     return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>(nextMapping =>
@@ -454,6 +496,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Lists files in a project folder via paginated /system/findDataObjects calls.
+   * API: /system/findDataObjects
+   * @see https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
+   */
   async filesList(params: ListFilesParams): Promise<ListFilesResult[]> {
     return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>(nextMapping =>
       this.filesListPaginated(params, nextMapping),
@@ -480,6 +527,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Requests an upload URL for a file part.
+   * API: /file-xxxx/upload
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-upload
+   */
   async getFileUploadUrl(params: FileGetUploadUrlParams): Promise<GetUploadURLResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/upload`
     const data = {
@@ -495,6 +547,11 @@ export class PlatformClient {
   //    F O L D E R S
   // ----------------------
 
+  /**
+   * Lists folders in a project via /project-xxxx/describe with the folders field.
+   * API: /project-xxxx/describe
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-describe
+   */
   async foldersList(params: DescribeFoldersParams): Promise<DescribeFoldersResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/describe`
     const options: AxiosRequestConfig = {
@@ -505,6 +562,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Creates a new folder in a data container.
+   * API: /class-xxxx/newFolder
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-newfolder
+   */
   async folderCreate(params: CreateFolderParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/newFolder`
     const data: AnyObject = {
@@ -519,6 +581,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Moves objects (and optionally folders) into a destination folder.
+   * API: /class-xxxx/move
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-move
+   */
   async filesMoveToFolder(params: MoveFilesParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/move`
     // todo: keep in mind max. amounts of files
@@ -538,6 +605,13 @@ export class PlatformClient {
   //    D B C L U S T E R
   // -----------------------
 
+  /**
+   * Starts, stops, or terminates a DB cluster.
+   * API: /dbcluster-xxxx/{start|stop|terminate}
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-xxxx-start
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-xxxx-stop
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-xxxx-terminate
+   */
   async dbClusterAction(params: DbClusterActionParams, action: DbClusterAction): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/${action}`
     const options: AxiosRequestConfig = {
@@ -549,6 +623,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Creates a new DB cluster.
+   * API: /dbcluster/new
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-new
+   */
   async dbClusterCreate(params: DbClusterCreateParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/dbcluster/new`
     const options: AxiosRequestConfig = {
@@ -560,6 +639,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Describes a DB cluster.
+   * API: /dbcluster-xxxx/describe
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-xxxx-describe
+   */
   async dbClusterDescribe(params: DbClusterDescribeParams): Promise<DbClusterDescribeResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/describe`
     const data = omit(['dxid'], params)
@@ -671,6 +755,27 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * API: /user/getSSOId
+   * Inputs:
+   *   - id    {string} User ID    (optional if email is present)
+   *   - email {string} User email (optional if id is present)
+   *
+   * Outputs:
+   *   - {SSOId: string} Identity provider ID from Okta, or empty string for non-SSO users
+   */
+  async getSSOId(data: GetSsoIdData): Promise<{ SSoId: string }> {
+    const url = `${config.platform.apiUrl}/user/getSSOId`
+
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
+      url,
+    }
+
+    return await this.sendRequest(options)
+  }
+
   // TODO - Refactor auth API into a separate class
   async userResetMfa(params: UserResetMfaParams): Promise<unknown> {
     const url = `${config.platform.authApiUrl}/${params.dxid}/resetUserMFA`
@@ -745,6 +850,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Fetches compute, storage, and data egress charges for an org via /org-xxxx/describe.
+   * API: /org-xxxx/describe
+   * @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-describe
+   */
   async userCloudResources(orgDxid: string): Promise<CloudResourcesResponse> {
     const url = `${config.platform.apiUrl}/${orgDxid}/describe`
     const options: AxiosRequestConfig = {
@@ -888,6 +998,11 @@ export class PlatformClient {
     await this.sendRequest(options)
   }
 
+  /**
+   * Leaves a project the caller is a member of.
+   * API: /project-xxxx/leave
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-leave
+   */
   async projectLeave(params: ProjectLeaveParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.projectDxid}/leave`
     const options: AxiosRequestConfig = {
@@ -898,6 +1013,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Updates a project's metadata.
+   * API: /project-xxxx/update
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-update
+   */
   async projectUpdate(projectDxid: DxId<'project'>, data: unknown): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${projectDxid}/update`
     const options: AxiosRequestConfig = {
@@ -959,6 +1079,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Describes an app.
+   * API: /app-xxxx/describe
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-describe
+   */
   async appDescribe(appDxId: string): Promise<AppDescribeResponse> {
     const url = `${config.platform.apiUrl}/${appDxId}/describe`
     const options: AxiosRequestConfig = {
@@ -969,6 +1094,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Describes a workflow.
+   * API: /workflow-xxxx/describe
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/workflows-and-analyses#api-method-workflow-xxxx-describe
+   */
   async workflowDescribe(params: WorkflowDescribeParams): Promise<WorkflowDescribeResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/describe`
     const options: AxiosRequestConfig = {
@@ -983,6 +1113,11 @@ export class PlatformClient {
   //    O B J E C T S
   // ---------------------
 
+  /**
+   * Clones objects from a source data container into a destination one.
+   * API: /class-xxxx/clone
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/cloning#api-method-class-xxxx-clone
+   */
   async cloneObjects(params: CloneObjectsParams): Promise<CloneObjectsResponse> {
     const url = `${config.platform.apiUrl}/${params.sourceProject}/clone`
     const options: AxiosRequestConfig = {

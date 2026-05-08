@@ -4,4 +4,5 @@ export class UserExtras {
   has_seen_guidelines: boolean = false
   inactivity_email_sent: boolean = false
   header_items: HeaderItem[] = []
+  sso_enabled: boolean = null
 }

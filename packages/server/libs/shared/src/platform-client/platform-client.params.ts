@@ -290,6 +290,11 @@ export type UserCreateData = {
   pfdasso?: boolean
 }
 
+export interface GetSsoIdData {
+  id?: DxId<'user'>
+  email?: string
+}
+
 export type AppDescribeParams = {
   dxid: string
 }

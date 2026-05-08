@@ -139,6 +139,7 @@ export const DEFAULT_USER_EXTRAS: UserExtras = {
   header_items: DEFAULT_HEADER_ITEMS,
   inactivity_email_sent: true,
   has_seen_guidelines: true,
+  sso_enabled: null,
 }
 
 @Entity({ tableName: 'users', repository: () => UserRepository })
