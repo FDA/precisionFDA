@@ -505,4 +505,8 @@ export class SpaceService {
   async getStatistics(): Promise<CountStats> {
     return this.spaceRepository.getStatistics()
   }
+
+  async findAdminSpaces(): Promise<Space[]> {
+    return this.spaceRepository.findAdminSpaces()
+  }
 }

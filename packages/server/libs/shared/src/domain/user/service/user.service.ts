@@ -1,9 +1,10 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
+import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { ORG_DUMMY } from '@shared/config/consts'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { CountStats } from '@shared/database/statistics.type'
+import { AdminMembershipPaginationDTO } from '@shared/domain/admin-membership/dto/admin-membership-pagination.dto'
 import { EmailSendInput } from '@shared/domain/email/email.config'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
@@ -174,6 +175,16 @@ export class UserService {
 
   async getUserById(id: number): Promise<User> {
     return await this.userRepo.findOne({ id: id })
+  }
+
+  async paginateUsersWithAdminRoles(query: AdminMembershipPaginationDTO): Promise<PaginatedResult<User>> {
+    const where: FilterQuery<User> = { userState: USER_STATE.ENABLED }
+    if (query.filter?.dxuser) where.dxuser = { $like: `%${query.filter.dxuser}%` }
+    if (query.filter?.email) where.email = { $like: `%${query.filter.email}%` }
+    if (query.filter?.role != null) {
+      where.adminMemberships = { adminGroup: { role: query.filter.role } }
+    }
+    return this.userRepo.paginate(query, where, { populate: ['adminMemberships.adminGroup'] })
   }
 
   async getAdminUserDetails(id: number): Promise<AdminUserDetailsDTO> {

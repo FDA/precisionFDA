@@ -1,12 +1,12 @@
-import { Column, ColumnDef } from '@tanstack/react-table'
-import React from 'react'
+import type { Column, ColumnDef } from '@tanstack/react-table'
+import type React from 'react'
+import { Done, Failed, Runnable, Running } from '@/components/icons/StateIcons'
+import { selectColumnDef } from '@/components/Table/selectColumnDef'
+import { convertDateToUserTime } from '@/utils/datetime'
 import DateTimeRangeFilter, { dateRangeFilterFn } from '../../../components/Table/components/DateTimeRangeFilter'
 import SelectFilter, { selectFilterFn } from '../../../components/Table/components/SelectFilter'
-import { selectColumnDef } from '../../../components/Table/selectColumnDef'
-import { Done, Failed, Runnable, Running } from '../../../components/icons/StateIcons'
-import { convertDateToUserTime } from '../../../utils/datetime'
 import { StateLabel } from '../styles'
-import { Invitation } from '../users/api'
+import type { Invitation } from '../users/api'
 
 export const ProvisionStateCell = ({ provisionState }: { provisionState: string }) => {
   const icon = {
@@ -54,6 +54,7 @@ export const useInvitationColumns = (withSelectColumn: boolean): ColumnDef<Invit
       accessorKey: 'provisioningState',
       filterFn: selectFilterFn,
       enableSorting: false,
+      size: 200,
       meta: {
         filterElement: (column: Column<Invitation>) => (
           <SelectFilter
@@ -79,7 +80,7 @@ export const useInvitationColumns = (withSelectColumn: boolean): ColumnDef<Invit
       header: 'Requested At',
       accessorKey: 'createdAt',
       filterFn: dateRangeFilterFn,
-      minSize: 400,
+      minSize: 350,
       enableSorting: false,
       meta: {
         filterElement: (column: Column<unknown>) => <DateTimeRangeFilter column={column} />,

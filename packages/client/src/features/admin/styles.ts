@@ -11,6 +11,7 @@ export const Title = styled.div`
   align-items: center;
   gap: 8px;
   white-space: nowrap;
+
 `
 
 export const TopLeft = styled.div`

@@ -1,10 +1,10 @@
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { useEffect, useEffectEvent } from 'react'
-import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
-import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
-import { useOrderByParams } from '../../hooks/useOrderByState'
-import { usePaginationParams } from '../../hooks/usePaginationState'
-import { createLocationKey } from '../../utils'
+import { useColumnWidthLocalStorage } from '@/hooks/useColumnWidthLocalStorage'
+import { useHiddenColumnLocalStorage } from '@/hooks/useHiddenColumnLocalStorage'
+import { useOrderByParams } from '@/hooks/useOrderByState'
+import { usePaginationParams } from '@/hooks/usePaginationState'
+import { createLocationKey } from '@/utils'
 import { columnFilters as defaultColumnFilters } from './columnFilters'
 import type { APIResource, HomeScope, IFilter, IMeta, MetaV2 } from './types'
 import { useFilterParams } from './useFilterState'
@@ -43,7 +43,7 @@ export function useList<T extends ListType>({
 
   const resetSelected = useEffectEvent(() => setSelectedIndexes({}))
 
-  const { filterQuery, setSearchFilter } = useFilterParams({
+  const { filterQuery, setSearchFilter, setFilterParam } = useFilterParams({
     filters,
   })
 
@@ -67,6 +67,7 @@ export function useList<T extends ListType>({
     setPageParam: pagination.setPageParam,
     perPageParam: pagination.perPageParam,
     setSearchFilter,
+    setFilterParam,
     setSelectedIndexes,
     resetSelected,
     setSortBy,

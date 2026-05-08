@@ -1,0 +1,100 @@
+/* Shared rounded table container for admin list pages. */
+.tableContainer {
+  flex: 1;
+  overflow: auto;
+  font-size: 14px;
+  margin: 0 2rem;
+  border: 1px solid var(--c-layout-border-200);
+  border-radius: 8px;
+  background-color: var(--background);
+}
+
+/* Scrollbar */
+.tableContainer::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 20px;
+  border: solid 5px transparent;
+  box-sizing: border-box;
+}
+
+.tableContainer::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background-color: var(--c-scrollbar);
+  border-radius: 20px;
+  border: solid 4px transparent;
+  background-clip: content-box;
+  min-height: 30px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb:hover {
+  background-color: var(--c-scrollbar-2);
+}
+
+/* Remove default top-border on header since the container provides a border */
+.tableContainer table th {
+  border-top: none;
+}
+
+/* Header name row — subtle tinted background */
+.tableContainer table .name-row th {
+  background-color: var(--tertiary-70);
+}
+
+/* Header labels — small, uppercase, tracked */
+.tableContainer table .name-btn {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--c-text-500);
+  font-weight: 600;
+}
+
+/* Filter row — slightly lighter than header */
+.tableContainer table .filter-row th {
+  background-color: var(--tertiary-50);
+}
+
+/* Filter inputs — clean rounded style with focus ring */
+.tableContainer table .filter-row input {
+  border-radius: 4px;
+  border-color: var(--c-layout-border-200);
+  background-color: var(--background);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.tableContainer table .filter-row input:focus-visible {
+  border-color: var(--primary-300);
+  box-shadow: 0 0 0 2px var(--primary-100);
+}
+
+/* Alternating row stripes */
+.tableContainer table tbody tr:nth-child(even) td {
+  background-color: var(--tertiary-30);
+}
+
+/* Row hover feedback */
+.tableContainer table tbody td {
+  transition: background-color 0.12s ease;
+}
+
+.tableContainer table tbody tr:hover td {
+  background-color: var(--primary-50);
+}
+
+/* Username links */
+.tableContainer table tbody a {
+  color: var(--c-link);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tableContainer table tbody a:hover {
+  color: var(--c-link-hover);
+  text-decoration: underline;
+}

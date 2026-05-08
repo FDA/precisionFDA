@@ -1,6 +1,7 @@
 import { Collection, Entity, Enum, OneToMany } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
+import { AdminGroupRepository } from './admin-group.repository'
 
 export enum ADMIN_GROUP_ROLES {
   ROLE_SITE_ADMIN = 0,
@@ -9,7 +10,7 @@ export enum ADMIN_GROUP_ROLES {
   ROLE_CHALLENGE_EVALUATOR = 3,
 }
 
-@Entity({ tableName: 'admin_groups' })
+@Entity({ tableName: 'admin_groups', repository: () => AdminGroupRepository })
 export class AdminGroup extends BaseEntity {
   @Enum()
   role: ADMIN_GROUP_ROLES

@@ -1226,7 +1226,7 @@ i.page-break,
   background-color: rgba(150, 150, 150, 0.4);
 }
 
-.emoji-inner::moz-selection {
+.emoji-inner::-moz-selection {
   color: transparent;
   background-color: rgba(150, 150, 150, 0.4);
 }
@@ -1337,7 +1337,6 @@ i.page-break,
 }
 
 .table-cell-action-button {
-  display: flex;
   justify-content: center;
   align-items: center;
   border: 0;
@@ -1484,8 +1483,6 @@ button.action-button:disabled {
   margin-bottom: 1px;
   background: #fff;
   padding: 4px;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
   vertical-align: middle;
   overflow: auto;
   height: 36px;
@@ -1495,8 +1492,7 @@ button.action-button:disabled {
   /* NOTE: change begin */
   min-height: 36px;
   border: 1px solid var(--c-layout-border-200);
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-radius: 10px;
   filter: drop-shadow(0px -18px 6px #ffffff);
   flex-wrap: wrap;
   /* NOTE: change end */
@@ -1526,7 +1522,6 @@ button.toolbar-item.spaced {
 
 button.toolbar-item i.format {
   background-size: contain;
-  display: inline-block;
   height: 18px;
   width: 18px;
   vertical-align: -0.25em;
@@ -1782,12 +1777,12 @@ button.item.dropdown-item-active i {
 
 .TableNode__contentEditable {
   min-height: 20px;
-  border: 0px;
+  border: 0;
   resize: none;
   cursor: text;
   display: block;
   position: relative;
-  outline: 0px;
+  outline: 0;
   padding: 0;
   user-select: text;
   font-size: 15px;

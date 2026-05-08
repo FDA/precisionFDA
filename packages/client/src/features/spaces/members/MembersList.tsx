@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import type { ColumnFiltersState, ColumnSort, RowSelectionState } from '@tanstack/react-table'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
-import { ErrorBoundary } from '../../../utils/ErrorBoundry'
-import { useLocalSpaceSettings } from '../../../hooks/useLocalSpaceSettings'
-import { ISpace, SideRole } from '../spaces.types'
-import { spacesMembersListRequest } from './members.api'
-import { useAddMembersModal } from './useAddMembersModal'
-import { ActionsRow, SpaceTitle } from '../../home/home.styles'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { Button } from '../../../components/Button'
-import { ColumnFiltersState, ColumnSort, RowSelectionState } from '@tanstack/react-table'
-import { MembersListTable } from './MembersListTable'
-import { MemberCard } from './MemberCard'
+import { Button } from '@/components/Button'
+import { RadioButtonGroup } from '@/components/form/RadioButtonGroup'
+import { Grid2x2Icon } from '@/components/icons/Grid2x2Icon'
+import { ListIcon } from '@/components/icons/ListIcon'
+import { PlusIcon } from '@/components/icons/PlusIcon'
+import { useColumnWidthLocalStorage } from '@/hooks/useColumnWidthLocalStorage'
+import { useHiddenColumnLocalStorage } from '@/hooks/useHiddenColumnLocalStorage'
+import { useLocalSpaceSettings } from '@/hooks/useLocalSpaceSettings'
+import { createLocationKey } from '@/utils'
+import { ErrorBoundary } from '@/utils/ErrorBoundary'
 import Menu from '../../../components/Menu/Menu'
 import { ActionsMenuContent } from '../../home/ActionMenuContent'
-import { ActionsButton } from '../../home/show.styles'
-import { useMemberSelectionActions } from './useMemberSelectionActions'
-import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
-import { createLocationKey } from '../../../utils'
-import { useHiddenColumnLocalStorage } from '../../../hooks/useHiddenColumnLocalStorage'
 import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
-import { ListIcon } from '../../../components/icons/ListIcon'
-import { Grid2x2Icon } from '../../../components/icons/Grid2x2Icon'
+import { ActionsRow, SpaceTitle } from '../../home/home.styles'
+import { ActionsButton } from '../../home/show.styles'
+import type { ISpace, SideRole } from '../spaces.types'
+import { MemberCard } from './MemberCard'
+import { MembersListTable } from './MembersListTable'
+import { spacesMembersListRequest } from './members.api'
+import { useAddMembersModal } from './useAddMembersModal'
+import { useMemberSelectionActions } from './useMemberSelectionActions'
 
 const StyledMemberListPage = styled.div`
   flex: 1;
@@ -75,6 +75,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
   const [sortBy, setSortBy] = useState<ColumnSort[]>([])
   const [selectedRows, setSelectedRows] = useState<RowSelectionState>({})
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: space.id is a reset trigger, not a read value — when navigating to a different space, reset side role to undefined
   useEffect(() => {
     setSideRole(undefined)
   }, [space.id])
@@ -144,8 +145,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
                 },
               ]}
               value={viewMode}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onChange={(v: any) => setViewMode(v)}
+              onChange={v => setViewMode(v as 'table' | 'cards')}
               ariaLabel="View mode"
             />
 
@@ -160,7 +160,11 @@ export const MembersList = ({ space }: { space: ISpace }) => {
               <div />
               <Menu
                 trigger={
-                  <ActionsButton as={Menu.Trigger} data-testid="members-actions-button" disabled={selectedMembers.length === 0} />
+                  <ActionsButton
+                    as={Menu.Trigger}
+                    data-testid="members-actions-button"
+                    disabled={selectedMembers.length === 0}
+                  />
                 }
               >
                 <ActionsMenuContent actions={actions} />

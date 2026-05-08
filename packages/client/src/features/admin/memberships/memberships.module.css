@@ -1,0 +1,18 @@
+/* Centered role-toggle cells */
+.roleCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+/* Center role column headers and cells (columns 3+ are role toggle columns) */
+.membershipsTable th:nth-child(n+3) button {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.membershipsTable td:nth-child(n+3) {
+  text-align: center;
+}

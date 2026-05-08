@@ -81,7 +81,12 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :admin_memberships, only: %i(index create destroy new)
+      # # admin_memberships migrated to React + NestJS — redirect legacy URLs
+      # get 'admin_memberships', to: redirect('/admin/memberships')
+      # get 'admin_memberships/new', to: redirect('/admin/memberships')
+
+      # Catch-all for React SPA routes (e.g. /admin/memberships on hard refresh)
+      get "/*all", to: "base#index"
     end
 
     # hotfix for PFDA-557

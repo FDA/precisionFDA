@@ -24,4 +24,5 @@ export const columnFilters = {
   lastName: 'string',
   provisioningState: 'string',
   createdAt: 'date_range',
+  role: 'number',
 }

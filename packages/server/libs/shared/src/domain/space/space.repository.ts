@@ -4,6 +4,7 @@ import { CountStats } from '@shared/database/statistics.type'
 import { User } from '@shared/domain/user/user.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { Space } from './space.entity'
+import { SPACE_TYPE } from './space.enum'
 
 export class SpaceRepository extends AccessControlRepository<Space> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Space>> {
@@ -39,6 +40,10 @@ export class SpaceRepository extends AccessControlRepository<Space> {
         },
       },
     }
+  }
+
+  async findAdminSpaces(): Promise<Space[]> {
+    return this.find({ type: SPACE_TYPE.ADMINISTRATOR })
   }
 
   async findSpacesByIdAndUser(spaceIds: number[], userId: number): Promise<Space[]> {

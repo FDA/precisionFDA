@@ -145,7 +145,7 @@ export const useSpacesColumns = (): ColumnDef<ISpaceV2>[] => {
           />
         ),
       },
-      size: 150,
+      size: 170,
       cell: ({ row }) => (
         <SpaceTableTypeCell>
           {findSpaceTypeIcon(row.original.type)}
@@ -188,7 +188,7 @@ export const useSpacesColumns = (): ColumnDef<ISpaceV2>[] => {
     {
       header: 'State',
       accessorKey: 'state',
-      size: 150,
+      size: 170,
       enableSorting: false,
       filterFn: selectFilterFn,
       meta: {
@@ -213,7 +213,7 @@ export const useSpacesColumns = (): ColumnDef<ISpaceV2>[] => {
     {
       header: 'Hidden',
       accessorKey: 'hidden',
-      size: 100,
+      size: 120,
       enableSorting: false,
       filterFn: selectFilterFn,
       meta: {

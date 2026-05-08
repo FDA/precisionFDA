@@ -1991,7 +1991,7 @@ toastWarning('Please review your input')
 Use the ErrorBoundary component for catching rendering errors:
 
 ```tsx
-import { ErrorBoundary } from '@/utils/ErrorBoundry'
+import { ErrorBoundary } from '@/utils/ErrorBoundary'
 
 <ErrorBoundary fallback={<ErrorFallback />}>
   <RiskyComponent />

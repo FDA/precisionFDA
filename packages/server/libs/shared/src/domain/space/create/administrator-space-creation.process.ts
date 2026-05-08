@@ -118,7 +118,7 @@ export class AdministratorSpaceCreationProcess extends SpaceCreationProcess {
     )
     this.logger.log(`created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`)
 
-    await this.userClient.projectInvite(hostProject.id, space.hostDxOrg, 'CONTRIBUTE')
+    await this.userClient.projectInvite(hostProject.id, space.hostDxOrg, 'ADMINISTER')
     this.logger.log(`invited host org: ${space.hostDxOrg} to host project: ${hostProject.id}`)
 
     space.hostProject = hostProject.id as DxId<'project'>

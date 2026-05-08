@@ -1,13 +1,13 @@
 import React from 'react'
-import { theme } from '../styles/theme'
+import { theme } from '@/styles/theme'
 
 interface IState {
-  hasError: boolean;
-  message: string;
+  hasError: boolean
+  message: string
 }
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, Pick<IState, 'hasError'>> {
@@ -20,7 +20,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, Pick<ISta
     // Update state so the next render will show the fallback UI.
     return { hasError: true }
   }
-  
+
   componentDidCatch(/* error: Error, errorInfo: React.ErrorInfo */): void {
     // You can also log the error to an error reporting service
     // logErrorToMyService(error, errorInfo)
@@ -44,7 +44,7 @@ export class ErrorBoundaryDetails extends React.Component<ErrorBoundaryProps, IS
     // Update state so the next render will show the fallback UI.
     return { hasError: true, message: error.message }
   }
-  
+
   componentDidCatch(/* error: Error, errorInfo: React.ErrorInfo */): void {
     // You can also log the error to an error reporting service
     // logErrorToMyService(error, errorInfo)
@@ -54,7 +54,9 @@ export class ErrorBoundaryDetails extends React.Component<ErrorBoundaryProps, IS
       // You can render any custom fallback UI
       return (
         <div style={{ color: theme.colors.darkRed, padding: 4 }}>
-          <div><b>An error occurred:</b> {this.state.message}</div>
+          <div>
+            <b>An error occurred:</b> {this.state.message}
+          </div>
         </div>
       )
     }

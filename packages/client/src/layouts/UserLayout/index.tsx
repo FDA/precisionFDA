@@ -4,7 +4,7 @@ import { Loader } from '@/components/Loader'
 import { NotAllowedPage } from '@/components/NotAllowed'
 import { useAuthUser } from '@/features/auth/useAuthUser'
 import { useScrollMode } from '@/hooks/useScrollMode'
-import { ErrorBoundary } from '@/utils/ErrorBoundry'
+import { ErrorBoundary } from '@/utils/ErrorBoundary'
 import Logo from '../../components/Logo'
 
 const StyledLayoutLoader = styled.div`

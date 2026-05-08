@@ -1,7 +1,7 @@
 import axios from 'axios'
-import { IFilter, MetaV2 } from '../home/types'
-import { Params, prepareListFetchV2 } from '../home/utils'
-import { Counters, ISpace, ISpaceV2 } from './spaces.types'
+import type { IFilter, MetaV2 } from '../home/types'
+import { type Params, prepareListFetchV2 } from '../home/utils'
+import type { Counters, ISpace, ISpaceV2 } from './spaces.types'
 
 export type FetchSpacesListResponse = { meta: MetaV2; data: ISpaceV2[] }
 export type FetchSpaceDetailsResponse = { meta: unknown; space: ISpace }

@@ -1,6 +1,6 @@
+import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { Link, Outlet } from 'react-router'
-import { useQuery } from '@tanstack/react-query'
 import {
   BannerPickedInfo,
   BannerPicker,
@@ -9,7 +9,6 @@ import {
   BannerTitle,
   ResourceBanner,
 } from '../../components/Banner'
-import { MenuCounter } from '../../components/MenuCounter'
 import { BoltIcon } from '../../components/icons/BoltIcon'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
@@ -19,16 +18,17 @@ import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { FlapIcon } from '../../components/icons/FlapIcon'
 import { NetworkIcon } from '../../components/icons/NetworkIcon'
 import { SpaceReportIcon } from '../../components/icons/SpaceReportIcon'
+import { MenuCounter } from '../../components/MenuCounter'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
-import { ErrorBoundary } from '../../utils/ErrorBoundry'
-import { counterRequest } from './counterRequest'
-import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from './home.styles'
-import { HomeResourceType, HomeScope } from './types'
-import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
-import { toTitleCase } from './utils'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { UserLayout } from '../../layouts/UserLayout'
+import { ErrorBoundary } from '../../utils/ErrorBoundary'
+import { counterRequest } from './counterRequest'
 import { HomeScopeProvider, useHomeScope } from './HomeScopeContext'
+import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from './home.styles'
+import type { HomeResourceType, HomeScope } from './types'
+import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
+import { toTitleCase } from './utils'
 
 const HOME_SCOPE_TO_RESOURCES: Record<HomeScope, HomeResourceType[]> = {
   me: ['files', 'apps', 'databases', 'assets', 'workflows', 'executions', 'reports'],
@@ -67,7 +67,13 @@ const HomeShowContent = () => {
       </MenuItem>
     ),
     apps: (
-      <MenuItem data-testid="home-apps-link" to={`/home/apps${routeScopeParam}`} activeClassName="active" title="Apps" key="apps">
+      <MenuItem
+        data-testid="home-apps-link"
+        to={`/home/apps${routeScopeParam}`}
+        activeClassName="active"
+        title="Apps"
+        key="apps"
+      >
         <CubeIcon height={14} />
         <MenuText>Apps</MenuText>
         {expandedSidebar && <MenuCounter count={counterData?.apps} active={activeResource === 'apps'} />}

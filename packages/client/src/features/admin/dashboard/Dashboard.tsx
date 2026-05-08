@@ -1,11 +1,8 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Building2 } from 'lucide-react'
-import { FileIcon } from '../../../components/icons/FileIcon'
-import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
-import { UsersIcon } from '../../../components/icons/UsersIcon'
-import { Loader } from '../../../components/Loader'
-import { UserLayout } from '../../../layouts/UserLayout'
+import { Building2, FileText, LayoutGrid, Users } from 'lucide-react'
+import { useState } from 'react'
+import { UserLayout } from '@/layouts/UserLayout'
+import { cn } from '@/utils/cn'
 import { fetchAdminStats } from '../users/api'
 
 const PERIODS = ['1M', '6M', 'YTD', '1Y']
@@ -48,11 +45,6 @@ export function AdminDashboard() {
   const spacesCount = getPeriodCount(data.spacesCount, spacesPeriod)
   const filesCount = getPeriodCount(data.filesCount, filesPeriod)
 
-  const statCardClassName =
-    'rounded-lg border border-(--c-layout-border) bg-(--background) p-6 shadow-[0_1px_3px_0_var(--base-opacity-06),0_1px_2px_0_var(--base-opacity-06)]'
-  const periodButtonBaseClassName =
-    'cursor-pointer rounded border border-(--c-layout-border) bg-(--background-shaded) px-1.5 py-1 text-[10px] font-medium text-(--c-text-500) transition-colors duration-200 hover:bg-(--c-dropdown-hover-bg)'
-
   const stats = [
     {
       key: 'users',
@@ -63,8 +55,9 @@ export function AdminDashboard() {
       setPeriod: setUsersPeriod,
       singular: 'user',
       plural: 'users',
-      Icon: UsersIcon,
-      iconClassName: 'text-(--primary-500)',
+      icon: Users,
+      iconColor: 'text-blue-500',
+      bgTint: 'bg-blue-500/10',
     },
     {
       key: 'spaces',
@@ -75,8 +68,9 @@ export function AdminDashboard() {
       setPeriod: setSpacesPeriod,
       singular: 'space',
       plural: 'spaces',
-      Icon: ObjectGroupIcon,
-      iconClassName: 'text-(--success-500)',
+      icon: LayoutGrid,
+      iconColor: 'text-emerald-500',
+      bgTint: 'bg-emerald-500/10',
     },
     {
       key: 'files',
@@ -87,50 +81,54 @@ export function AdminDashboard() {
       setPeriod: setFilesPeriod,
       singular: 'file',
       plural: 'files',
-      Icon: FileIcon,
-      iconClassName: 'text-(--highlight-500)',
+      icon: FileText,
+      iconColor: 'text-amber-500',
+      bgTint: 'bg-amber-500/10',
     },
   ]
 
   return (
     <UserLayout mainScroll>
-      <div className="px-8 py-8">
-        <div className="mb-8">
-          <div className="mb-2 flex items-center gap-3">
-            <h1 className="m-0 text-2xl font-bold text-(--c-text-700)">Admin Dashboard</h1>
-          </div>
-          <p className="m-0 text-sm text-(--c-text-500)">Manage and monitor precisionFDA</p>
+      <div className="flex flex-col gap-8 p-8">
+        <div>
+          <h1 className="mb-1 text-2xl font-bold text-foreground">Admin Dashboard</h1>
+          <p className="m-0 text-sm text-muted-foreground">Manage and monitor precisionFDA</p>
         </div>
 
-        <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map(stat => (
-            <div key={stat.key} className={statCardClassName}>
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium text-(--c-text-500)">{stat.label}</span>
-                <div className={stat.iconClassName}>
-                  <stat.Icon height={20} />
+            <div
+              key={stat.key}
+              className="rounded-lg border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
+                <div className={cn('flex size-9 items-center justify-center rounded-lg', stat.bgTint)}>
+                  <stat.icon className={cn('size-5', stat.iconColor)} />
                 </div>
               </div>
-              <div className="mb-4 text-[32px] leading-none font-bold text-(--c-text-700)">
-                {isLoading ? <Loader height={20} /> : stat.total.toLocaleString()}
-              </div>
+              {isLoading ? (
+                <div className="mb-4 h-9 w-20 animate-pulse rounded-md bg-muted" />
+              ) : (
+                <div className="mb-4 text-3xl font-bold tracking-tight text-foreground">
+                  {stat.total.toLocaleString()}
+                </div>
+              )}
               <div className="flex items-center justify-between gap-2">
-                <div
-                  className="text-[13px] whitespace-nowrap text-(--success-400) transition-all duration-300 ease-in-out"
-                  key={`${stat.key}-${stat.period}`}
-                >
+                <span className="text-xs font-medium text-emerald-500" key={`${stat.key}-${stat.period}`}>
                   {stat.periodValue.toLocaleString()} new {stat.periodValue === 1 ? stat.singular : stat.plural}
-                </div>
-                <div className="flex flex-wrap gap-1">
+                </span>
+                <div className="flex gap-1">
                   {PERIODS.map(period => (
                     <button
                       type="button"
                       key={period}
-                      className={`${periodButtonBaseClassName} ${
+                      className={cn(
+                        'rounded-md border px-2 py-1 text-[10px] font-medium transition-colors',
                         stat.period === period
-                          ? 'border-(--primary-400) bg-(--primary-400) !text-white hover:bg-(--primary-500)'
-                          : ''
-                      }`}
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-border bg-secondary text-muted-foreground hover:bg-accent',
+                      )}
                       onClick={() => stat.setPeriod(period)}
                     >
                       {period}
@@ -141,14 +139,18 @@ export function AdminDashboard() {
             </div>
           ))}
 
-          <div className={statCardClassName}>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium text-(--c-text-500)">Total Organizations</span>
-              <Building2 size={20} className="text-(--purple-500)" />
+          <div className="rounded-lg border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">Total Organizations</span>
+              <div className="flex size-9 items-center justify-center rounded-lg bg-violet-500/10">
+                <Building2 className="size-5 text-violet-500" />
+              </div>
             </div>
-            <div className="text-[32px] leading-none font-bold text-(--c-text-700)">
-              {isLoading ? <Loader height={20} /> : data.orgsCount.toLocaleString()}
-            </div>
+            {isLoading ? (
+              <div className="h-9 w-20 animate-pulse rounded-md bg-muted" />
+            ) : (
+              <div className="text-3xl font-bold tracking-tight text-foreground">{data.orgsCount.toLocaleString()}</div>
+            )}
           </div>
         </div>
       </div>
