@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/CheckboxNext'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { COMPUTE_RESOURCE_LABELS, DATABASE_RESOURCE_LABELS, RESOURCE_LABELS, type ResourceKey } from '@/types/user'
 import { formatDate } from '@/utils/formatting'
+import { relativeTimeAgo } from '@/utils/datetime'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { formatNumberUS } from '../../home/utils'
 import { ModalScroll } from '../../modal/styles'
@@ -50,7 +51,6 @@ const statusClassName: Record<AdminUserDetails['userState'], string> = {
 
 const formatDateTime = (value: string | null) => (value ? formatDate(value) : 'N/A')
 const formatCurrency = (value: number | undefined) => (typeof value === 'number' ? `$${formatNumberUS(value)}` : 'N/A')
-
 const invalidateAdminUserQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
   queryClient.invalidateQueries({ queryKey: ['admin-users'] })
   queryClient.invalidateQueries({ queryKey: ['admin-user'] })
@@ -68,7 +68,7 @@ const handleMutationError = (error: AxiosError<BackendError>, fallbackMessage: s
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="flex items-center gap-3 py-1.5">
-    <dt className="w-40 shrink-0 text-xs text-(--c-text-400)">{label}</dt>
+    <dt className="w-40 shrink-0 text-sm text-(--c-text-600)">{label}</dt>
     <dd className="min-w-0 flex-1 text-sm text-(--c-text-700)">{children}</dd>
   </div>
 )
@@ -116,7 +116,7 @@ const LimitField = ({
   if (editing) {
     return (
       <Row label={label}>
-        <div className="flex h-[26px] items-center gap-2">
+        <div className="flex h-6.5 items-center gap-2">
           <span className="text-xs text-(--c-text-400)">$</span>
           <input
             type="number"
@@ -148,7 +148,7 @@ const LimitField = ({
 
   return (
     <Row label={label}>
-      <div className="group flex h-[26px] items-center gap-1.5">
+      <div className="group flex h-6.5 items-center gap-1.5">
         <span>{formatCurrency(value)}</span>
         {value !== undefined && (
           <button
@@ -358,8 +358,22 @@ const DrawerBody = ({
           {statusLabel[details.userState]}
         </span>
       </Row>
+      <Row label="Single sign-on">
+        <span
+          className={`inline-flex w-8 items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium ${
+            details.isSSO ? 'bg-(--success-100) text-(--success-700)' : 'bg-(--warning-100) text-(--warning-700)'
+          }`}
+        >
+          {details.isSSO ? 'Yes' : 'No'}
+        </span>
+      </Row>
       <Row label="Joined">{formatDateTime(details.createdAt)}</Row>
-      <Row label="Last login">{formatDateTime(details.lastLogin)}</Row>
+      <Row label="Last login">
+        {formatDateTime(details.lastLogin)}
+        {relativeTimeAgo(details.lastLogin) ? (
+          <span className="ml-1.5 text-xs text-(--c-text-400)">({relativeTimeAgo(details.lastLogin)})</span>
+        ) : null}
+      </Row>
       <Row label="Last updated">{formatDateTime(details.updatedAt)}</Row>
       <Row label="Timezone">{details.timeZone ?? 'N/A'}</Row>
 
@@ -370,11 +384,20 @@ const DrawerBody = ({
       <Row label="Type">{details.organization.singular ? 'Single-user' : 'Multi-user'}</Row>
 
       <SectionHeading title="Access" />
-      {permissionRows.map(({ label, enabled }) => (
-        <Row key={label} label={label}>
-          <span className={enabled ? 'text-(--success-600)' : 'text-(--c-text-400)'}>{enabled ? 'Yes' : 'No'}</span>
-        </Row>
-      ))}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 py-1">
+        {permissionRows.map(({ label, enabled }) => (
+          <div key={label} className="flex items-center justify-between gap-2 rounded px-1 py-1">
+            <span className="text-sm text-(--c-text-600)">{label}</span>
+            <span
+              className={`inline-flex w-8 items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                enabled ? 'bg-(--success-100) text-(--success-700)' : 'bg-(--warning-100) text-(--warning-700)'
+              }`}
+            >
+              {enabled ? 'Yes' : 'No'}
+            </span>
+          </div>
+        ))}
+      </div>
 
       <SectionHeading title="Cloud Resources" />
       <CloudResourcesSection userId={details.id} settings={details.cloudResourceSettings} queryClient={queryClient} />
@@ -520,7 +543,7 @@ export const AdminUserDetailsDrawer = ({ userId, open, onClose }: AdminUserDetai
       <Drawer.Portal keepMounted>
         <Drawer.Backdrop className="fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 data-closed:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0" />
         <Drawer.Viewport className="fixed inset-0 z-50">
-          <Drawer.Popup className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[600px] outline-none transition-transform duration-200 ease-out data-closed:translate-x-full data-starting-style:translate-x-full data-ending-style:translate-x-full">
+          <Drawer.Popup className="fixed inset-y-0 right-0 z-50 flex w-full max-w-150 outline-none transition-transform duration-200 ease-out data-closed:translate-x-full data-starting-style:translate-x-full data-ending-style:translate-x-full">
             <Drawer.Content className="flex h-full w-full flex-col overflow-hidden border-l border-(--tertiary-250) bg-background shadow-[-16px_0_48px_rgba(0,0,0,0.16)] outline-none">
               <Drawer.Description className="sr-only">
                 Admin-visible account details, roles, and cloud resource access.

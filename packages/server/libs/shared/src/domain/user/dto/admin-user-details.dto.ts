@@ -44,6 +44,7 @@ export class AdminUserDetailsDTO {
     isChallengeAdmin: boolean
     pendingActivation: boolean
   }
+  isSSO: boolean
 
   static fromEntity(user: User): AdminUserDetailsDTO {
     const dto = new AdminUserDetailsDTO()
@@ -82,6 +83,7 @@ export class AdminUserDetailsDTO {
       isChallengeAdmin: adminRoles.has(ADMIN_GROUP_ROLES.ROLE_CHALLENGE_ADMIN),
       pendingActivation: user.privateFilesProject == null,
     }
+    dto.isSSO = user.extras?.sso_enabled === true
 
     return dto
   }

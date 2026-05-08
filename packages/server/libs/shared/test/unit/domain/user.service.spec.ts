@@ -12,16 +12,20 @@ import { PlatformClient } from '@shared/platform-client'
 describe('user service tests', () => {
   const emFlushStub = sinon.stub()
   const emTransactionalStub = stub()
+  const emPopulateStub = stub()
   const createSendEmailTaskStub = stub()
   const userRepoPaginateStub = stub()
   const userRepoFindActiveStub = stub()
   const userRepoFindStub = stub()
   const userRepoFindOneStub = stub()
+  const userRepoFindOneOrFailStub = stub()
+  const platformClientGetSSOIdStub = stub()
 
   const createUserService = (): UserService => {
     const em = {
       transactional: emTransactionalStub,
       flush: emFlushStub,
+      populate: emPopulateStub,
     } as unknown as EntityManager<MySqlDriver>
 
     const emailsJobProducer = {
@@ -33,13 +37,16 @@ describe('user service tests', () => {
       findActive: userRepoFindActiveStub,
       find: userRepoFindStub,
       findOne: userRepoFindOneStub,
+      findOneOrFail: userRepoFindOneOrFailStub,
     } as unknown as UserRepository
 
     emTransactionalStub.callsFake(async callback => {
       return callback(em)
     })
 
-    const platformClient = {} as unknown as PlatformClient
+    const platformClient = {
+      getSSOId: platformClientGetSSOIdStub,
+    } as unknown as PlatformClient
     const adminPlatformClient = {} as unknown as PlatformClient
 
     return new UserService(
@@ -354,6 +361,102 @@ describe('user service tests', () => {
         true,
       )
       expect(result).to.equal(orgUsers)
+    })
+  })
+
+  describe('#getAdminUserDetails', () => {
+    const buildUser = (extras: { sso_enabled: boolean | null }): User =>
+      ({
+        id: 99,
+        dxuser: 'sso.user',
+        dxid: 'user-sso.user',
+        firstName: 'Sso',
+        lastName: 'User',
+        fullName: 'Sso User',
+        email: 'sso.user@example.com',
+        userState: USER_STATE.ENABLED,
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-02'),
+        lastLogin: null,
+        timeZone: null,
+        disableMessage: null,
+        cloudResourceSettings: null,
+        privateFilesProject: 'project-x',
+        extras,
+        organization: {
+          getEntity: () => ({
+            id: 1,
+            name: 'Org',
+            handle: 'org',
+            singular: false,
+            admin: null,
+          }),
+        },
+        adminMemberships: {
+          getItems: () => [],
+        },
+        isGovUser: () => false,
+      }) as unknown as User
+
+    beforeEach(() => {
+      userRepoFindOneOrFailStub.reset()
+      emPopulateStub.reset()
+      emFlushStub.reset()
+      platformClientGetSSOIdStub.reset()
+      emPopulateStub.resolves(undefined)
+      emFlushStub.resolves(undefined)
+    })
+
+    it('lazy-backfills sso_enabled when null and persists', async () => {
+      const user = buildUser({ sso_enabled: null })
+      userRepoFindOneOrFailStub.resolves(user)
+      platformClientGetSSOIdStub.resolves({ SSoId: 'idp-okta-123' })
+
+      const userService = createUserService()
+      const dto = await userService.getAdminUserDetails(99)
+
+      expect(platformClientGetSSOIdStub.calledOnceWithExactly({ id: 'user-sso.user' })).to.equal(true)
+      expect(user.extras?.sso_enabled).to.equal(true)
+      expect(emFlushStub.callCount).to.equal(1)
+      expect(dto.isSSO).to.equal(true)
+    })
+
+    it('records non-SSO users when platform returns empty SSoId', async () => {
+      const user = buildUser({ sso_enabled: null })
+      userRepoFindOneOrFailStub.resolves(user)
+      platformClientGetSSOIdStub.resolves({ SSoId: '' })
+
+      const userService = createUserService()
+      const dto = await userService.getAdminUserDetails(99)
+
+      expect(user.extras?.sso_enabled).to.equal(false)
+      expect(emFlushStub.callCount).to.equal(1)
+      expect(dto.isSSO).to.equal(false)
+    })
+
+    it('skips platform call when sso_enabled is already set', async () => {
+      const user = buildUser({ sso_enabled: false })
+      userRepoFindOneOrFailStub.resolves(user)
+
+      const userService = createUserService()
+      const dto = await userService.getAdminUserDetails(99)
+
+      expect(platformClientGetSSOIdStub.callCount).to.equal(0)
+      expect(emFlushStub.callCount).to.equal(0)
+      expect(dto.isSSO).to.equal(false)
+    })
+
+    it('swallows platform errors and leaves sso_enabled untouched', async () => {
+      const user = buildUser({ sso_enabled: null })
+      userRepoFindOneOrFailStub.resolves(user)
+      platformClientGetSSOIdStub.rejects(new Error('platform unavailable'))
+
+      const userService = createUserService()
+      const dto = await userService.getAdminUserDetails(99)
+
+      expect(user.extras?.sso_enabled).to.equal(null)
+      expect(emFlushStub.callCount).to.equal(0)
+      expect(dto.isSSO).to.equal(false)
     })
   })
 })

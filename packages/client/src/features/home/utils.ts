@@ -1,12 +1,12 @@
-import { getSpaceIdFromScope } from '../../utils'
-import { cleanObject } from '../../utils/object'
-import type { SortConfig } from '../../types/sorting'
+import type { SortConfig } from '@/types/sorting'
+import { getSpaceIdFromScope } from '@/utils'
+import { cleanObject } from '@/utils/object'
 import type { FilterVal, HomeScope, IFilter, ServerScope } from './types'
 
 /**
  * Formats numbers using US locale, e.g., 4000000 -> "4,000,000.00"
  * @param value - The number to format
- * @returns Formatted string with commas as thousand separators and two decimal places
+ * @returns Formatted string with commas as a thousand separators and two decimal places
  */
 export const formatNumberUS = (value: number): string => {
   return new Intl.NumberFormat('en-US', {
@@ -16,7 +16,9 @@ export const formatNumberUS = (value: number): string => {
 }
 
 export function mapSizeFilter(filters: IFilter[]): IFilter[] {
-  const value = filters.find(f => f.id === 'file_size')?.['value'] as { from?: number | null; to?: number | null } | undefined
+  const value = filters.find(f => f.id === 'file_size')?.['value'] as
+    | { from?: number | null; to?: number | null }
+    | undefined
   if (!value || typeof value !== 'object') {
     return filters
   }
@@ -58,7 +60,7 @@ const idMappings: Record<string, string> = {
 export function renameFilterKeys(filters: IFilter[]) {
   return filters.map((filter: IFilter) => {
     const key = { ...filter }
-    
+
     if (key.id in idMappings) {
       key.id = idMappings[key.id]
     }
@@ -99,14 +101,15 @@ export type Params = {
 
 export type QueryType = Record<string, unknown>
 
-const createSortQueryKey = (sortField: string) => sortField.split('.').reduce((key, segment) => `${key}[${segment}]`, 'sort')
+const createSortQueryKey = (sortField: string) =>
+  sortField.split('.').reduce((key, segment) => `${key}[${segment}]`, 'sort')
 
 export function formatScopeQ(scope?: HomeScope) {
   if (!scope || scope === 'me') return ''
   return `/${scope}`
 }
 
-export function formatScopeQuery(scope?: HomeScope, spaceId?: string|number) {
+export function formatScopeQuery(scope?: HomeScope, spaceId?: string | number) {
   let scopeQ = '?scope='
   if (scope) {
     const scopeVal = scope === 'me' ? 'private' : scope
@@ -138,7 +141,7 @@ export function prepareListFetch(filters: IFilter[], params: Params): QueryType 
   // Convert params in a way to work with backend - not a great way to pass params in the url
   const filterParams: Record<string, FilterVal> = {}
 
-  modFilters.forEach((f) => {
+  modFilters.forEach(f => {
     filterParams[`filters[${f.id}]`] = f.value
   })
 
@@ -171,7 +174,7 @@ export function prepareListFetchV2(filters: IFilter[], params: Params): QueryTyp
   // Convert params in a way to work with backend - not a great way to pass params in the url
   const filterParams: Record<string, FilterVal> = {}
 
-  modFilters.forEach((f) => {
+  modFilters.forEach(f => {
     const id = f.id as FilterVal
     filterParams[`filter[${id}]`] = f.value
   })
@@ -180,9 +183,7 @@ export function prepareListFetchV2(filters: IFilter[], params: Params): QueryTyp
     ? params.sortBy.order_by.replace('props.', '')
     : renameOrderByKeys(params?.sortBy?.order_by)
 
-  const sort = sortField && params.sortBy?.order_dir
-    ? { [createSortQueryKey(sortField)]: params.sortBy.order_dir }
-    : {}
+  const sort = sortField && params.sortBy?.order_dir ? { [createSortQueryKey(sortField)]: params.sortBy.order_dir } : {}
 
   return cleanObject({
     folder_id: params?.folderId?.toString(),
