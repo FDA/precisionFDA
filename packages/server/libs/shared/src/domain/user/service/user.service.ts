@@ -64,8 +64,8 @@ export class UserService {
         ...(upper && { $lte: upper }),
       }
     }
-    if (query.filter?.userState) {
-      where.userState = query.filter?.userState
+    if (query.filter?.userState != null) {
+      where.userState = query.filter.userState
     }
 
     where.cloudResourceSettings = {} as CloudResourceSettings

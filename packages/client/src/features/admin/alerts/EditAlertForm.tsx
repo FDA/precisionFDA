@@ -2,13 +2,14 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { addDays, format } from 'date-fns'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { AlertBanner } from '../../../components/AlertBanner'
-import { Button } from '../../../components/Button'
-import { FieldGroup, FieldLabel, InputError, InputSelect } from '../../../components/form/styles'
-import { InputDateTime, InputText } from '../../../components/InputText'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import { getBackendErrorMessage } from '@/api/types'
+import { AlertBanner } from '@/components/AlertBanner'
+import { Button } from '@/components/Button'
+import { FieldGroup, FieldLabel, InputError, InputSelect } from '@/components/form/styles'
+import { InputDateTime, InputText } from '@/components/InputText'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { createAlertRequest, deleteAlertRequest, updateAlertRequest } from './alerts.api'
 import { alertTypesArray, alertTypesText, formatInTimeZone, validationSchema } from './alerts.common'
 import { Form, FormPage, PreviewBanner, StyledRow } from './alerts.styles'
@@ -145,8 +146,8 @@ export const EditAlertForm = ({
       onSuccess(r)
       toastSuccess('Created site alert')
     },
-    onError: () => {
-      toastError('Error: Adding site alert')
+    onError: error => {
+      toastError(getBackendErrorMessage(error, 'Error: Adding site alert'))
     },
   })
 
@@ -159,8 +160,8 @@ export const EditAlertForm = ({
       onSuccess()
       toastSuccess('Removed site alert')
     },
-    onError: () => {
-      toastError('Error: Adding site alert')
+    onError: error => {
+      toastError(getBackendErrorMessage(error, 'Error: Deleting site alert'))
     },
   })
 
@@ -172,8 +173,8 @@ export const EditAlertForm = ({
       queryClient.invalidateQueries({ queryKey: ['site-settings'] })
       toastSuccess('Updated site alert')
     },
-    onError: () => {
-      toastError('Error: Updating site alert')
+    onError: error => {
+      toastError(getBackendErrorMessage(error, 'Error: Updating site alert'))
     },
   })
 

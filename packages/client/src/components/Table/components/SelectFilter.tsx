@@ -21,7 +21,7 @@ const SelectFilter = <T = unknown>({ column, options }: { column: Column<T>; opt
       value={options.find(o => o.option === v)}
       onChange={(newValue: unknown) => {
         const val = newValue as SelectOption | null
-        column.setFilterValue(val?.option || undefined)
+        column.setFilterValue(val == null || val.option === '' ? undefined : val.option)
       }}
       isOptionSelected={(option: unknown) => {
         const o = option as SelectOption

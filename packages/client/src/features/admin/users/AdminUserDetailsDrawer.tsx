@@ -1,16 +1,15 @@
 import { Drawer } from '@base-ui/react/drawer'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { AxiosError } from 'axios'
 import { Pencil, X } from 'lucide-react'
 import type React from 'react'
 import { useState } from 'react'
-import type { BackendError } from '@/api/types'
+import { getBackendErrorMessage } from '@/api/types'
 import { Button } from '@/components/Button'
 import { Checkbox } from '@/components/CheckboxNext'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { COMPUTE_RESOURCE_LABELS, DATABASE_RESOURCE_LABELS, RESOURCE_LABELS, type ResourceKey } from '@/types/user'
-import { formatDate } from '@/utils/formatting'
 import { relativeTimeAgo } from '@/utils/datetime'
+import { formatDate } from '@/utils/formatting'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { formatNumberUS } from '../../home/utils'
 import { ModalScroll } from '../../modal/styles'
@@ -54,14 +53,6 @@ const formatCurrency = (value: number | undefined) => (typeof value === 'number'
 const invalidateAdminUserQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
   queryClient.invalidateQueries({ queryKey: ['admin-users'] })
   queryClient.invalidateQueries({ queryKey: ['admin-user'] })
-}
-
-const handleMutationError = (error: AxiosError<BackendError>, fallbackMessage: string) => {
-  if (error.response?.data?.error?.message) {
-    toastError(`Error: ${error.response.data.error.message}`)
-    return
-  }
-  toastError(fallbackMessage)
 }
 
 // ─── Shared layout primitives ────────────────────────────────────────────────
@@ -149,16 +140,20 @@ const LimitField = ({
   return (
     <Row label={label}>
       <div className="group flex h-6.5 items-center gap-1.5">
-        <span>{formatCurrency(value)}</span>
-        {value !== undefined && (
+        {value !== undefined ? (
           <button
             type="button"
             onClick={startEdit}
             aria-label={`Edit ${label}`}
-            className="opacity-0 transition-opacity group-hover:opacity-60 hover:opacity-100! text-(--c-text-400)"
+            className="group flex items-center gap-1.5 rounded text-sm text-(--c-text-700) hover:text-(--c-text-900) focus:outline-none focus-visible:ring-1 focus-visible:ring-(--primary-400)"
           >
-            <Pencil size={11} />
+            <span className="group-hover:underline group-hover:decoration-dashed group-hover:underline-offset-2">
+              {formatCurrency(value)}
+            </span>
+            <Pencil size={11} className="text-(--c-text-400) opacity-40 transition-opacity group-hover:opacity-100" />
           </button>
+        ) : (
+          <span>{formatCurrency(value)}</span>
         )}
       </div>
     </Row>
@@ -193,7 +188,7 @@ const ResourceGroup = ({
           <label
             key={r}
             htmlFor={`resource-${r}`}
-            className="flex cursor-pointer items-center gap-2 py-0.5 text-sm text-(--c-text-700) select-none"
+            className="flex w-fit cursor-pointer items-center gap-2 py-0.5 text-sm text-(--c-text-700) select-none"
           >
             <Checkbox
               id={`resource-${r}`}
@@ -230,7 +225,7 @@ const CloudResourcesSection = ({
       toastSuccess('Total limit updated')
       onMutateSuccess()
     },
-    onError: (e: AxiosError<BackendError>) => handleMutationError(e, 'Failed to update total limit'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Failed to update total limit')),
   })
 
   const jobLimitMutation = useMutation({
@@ -240,7 +235,7 @@ const CloudResourcesSection = ({
       toastSuccess('Job limit updated')
       onMutateSuccess()
     },
-    onError: (e: AxiosError<BackendError>) => handleMutationError(e, 'Failed to update job limit'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Failed to update job limit')),
   })
 
   const toggleResource = async (resource: ResourceKey, currentlyEnabled: boolean) => {
@@ -252,8 +247,8 @@ const CloudResourcesSection = ({
         await bulkEnableResource([userId], resource)
       }
       onMutateSuccess()
-    } catch {
-      toastError('Failed to update resource')
+    } catch (error) {
+      toastError(getBackendErrorMessage(error, 'Failed to update resource'))
     } finally {
       setPendingResources(prev => {
         const next = new Set(prev)
@@ -484,7 +479,7 @@ export const AdminUserDetailsDrawer = ({ userId, open, onClose }: AdminUserDetai
       toastSuccess('Activation email was resent to the user')
       invalidateAdminUserQueries(queryClient)
     },
-    onError: (e: AxiosError<BackendError>) => handleMutationError(e, 'Failed to resend activation email to the user'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Failed to resend activation email to the user')),
   })
 
   const resetMfaMutation = useMutation({
@@ -494,7 +489,7 @@ export const AdminUserDetailsDrawer = ({ userId, open, onClose }: AdminUserDetai
       toastSuccess('Multi-factor authentication was reset for the user')
       invalidateAdminUserQueries(queryClient)
     },
-    onError: (e: AxiosError<BackendError>) => handleMutationError(e, 'Failed to reset multi-factor authentication'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Failed to reset multi-factor authentication')),
   })
 
   const disableUserMutation = useMutation({
@@ -504,7 +499,7 @@ export const AdminUserDetailsDrawer = ({ userId, open, onClose }: AdminUserDetai
       toastSuccess('User was successfully deactivated!')
       invalidateAdminUserQueries(queryClient)
     },
-    onError: (e: AxiosError<BackendError>) => handleMutationError(e, 'Error deactivating user'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Error deactivating user')),
   })
 
   const unlockUserMutation = useMutation({
@@ -514,7 +509,7 @@ export const AdminUserDetailsDrawer = ({ userId, open, onClose }: AdminUserDetai
       toastSuccess('User was successfully unlocked!')
       invalidateAdminUserQueries(queryClient)
     },
-    onError: (e: AxiosError<BackendError>) => handleMutationError(e, 'Error unlocking user'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Error unlocking user')),
   })
 
   const { open: openDisableUserConfirmation, Confirm: DisableUserConfirm } = useConfirm({

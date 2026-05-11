@@ -1,24 +1,24 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
-import React, { useEffect, useState } from 'react'
+import type React from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import * as Yup from 'yup'
-import { Button } from '../../../components/Button'
-import { FieldGroup, InputError } from '../../../components/form/styles'
-import { InputText } from '../../../components/InputText'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
-import { Select } from '../../../components/Select'
+import { getBackendErrorMessage } from '@/api/types'
+import { Button } from '@/components/Button'
+import { FieldGroup, InputError } from '@/components/form/styles'
+import { InputText } from '@/components/InputText'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { Select } from '@/components/Select'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { Footer } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { fetchSpaceMemberships } from '../../spaces/members/members.api'
 import { StyledFields } from '../../spaces/members/members.styles'
-import { MemberSideV2, SpaceMembershipV2 } from '../../spaces/members/members.types'
-import { ISpaceV2 } from '../../spaces/spaces.types'
+import type { MemberSideV2, SpaceMembershipV2 } from '../../spaces/members/members.types'
+import type { ISpaceV2 } from '../../spaces/spaces.types'
 import { recoverSpaceLeadRequest } from './api'
-import { BackendError } from '@/api/types'
 
 const validationSchema = Yup.object().shape({
   currentLead: Yup.object()
@@ -72,8 +72,13 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
   }, [spaceMemberships])
 
   const mutation = useMutation({
-    mutationFn: ({ currentLeadMembershipId, newLeadDxuser }: { currentLeadMembershipId: number; newLeadDxuser: string }) =>
-      recoverSpaceLeadRequest(space.id, currentLeadMembershipId, newLeadDxuser),
+    mutationFn: ({
+      currentLeadMembershipId,
+      newLeadDxuser,
+    }: {
+      currentLeadMembershipId: number
+      newLeadDxuser: string
+    }) => recoverSpaceLeadRequest(space.id, currentLeadMembershipId, newLeadDxuser),
     onSuccess: () => {
       toastSuccess('Recovered space lead successfully')
       reset()
@@ -82,12 +87,8 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
         queryKey: ['spaces'],
       })
     },
-    onError: (error: AxiosError<BackendError>) => {
-      if (error.response?.data?.error?.message) {
-        toastError(`Recover space lead failed. ${error.response?.data?.error?.message}`)
-      } else {
-        toastError('Recover space lead failed. Unknown error')
-      }
+    onError: error => {
+      toastError(`Recover space lead failed. ${getBackendErrorMessage(error, 'Unknown error')}`)
     },
   })
 
@@ -130,12 +131,20 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
               />
             )}
           />
-          <ErrorMessage errors={errors} name="currentLead" render={({ message }) => <InputError>{message}</InputError>} />
+          <ErrorMessage
+            errors={errors}
+            name="currentLead"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
         </FieldGroup>
         <FieldGroup>
           <label>New Lead user</label>
           <InputText {...register('newLeadDxuser')} placeholder="" disabled={isSubmitting} />
-          <ErrorMessage errors={errors} name="newLeadDxuser" render={({ message }) => <InputError>{message}</InputError>} />
+          <ErrorMessage
+            errors={errors}
+            name="newLeadDxuser"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
         </FieldGroup>
       </StyledFields>
       <Footer>
@@ -174,6 +183,7 @@ export const useRecoverSpaceLeadModal = ({ space }: { space: ISpaceV2 }) => {
       <RecoverSpaceLeadForm space={space} onClose={onClose} />
     </ModalNext>
   )
+
   return {
     modalComp,
     setShowModal,

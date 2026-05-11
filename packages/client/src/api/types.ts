@@ -13,8 +13,20 @@ export interface BackendError {
   }
 }
 
+type StatusMessages = {
+  unauthorized?: string
+  forbidden?: string
+  serverError?: string
+}
+
+const DEFAULT_STATUS_MESSAGES: Required<StatusMessages> = {
+  unauthorized: 'Your session has expired or is invalid. Sign in again and retry.',
+  forbidden: 'You do not have permission to perform this action.',
+  serverError: 'The server could not complete this request. Please try again in a few minutes.',
+}
+
 /** Prefer server `error.message`; fall back to HTTP status hints, then `Error.message`. */
-export function getBackendErrorMessage(error: unknown, fallback: string): string {
+export function getBackendErrorMessage(error: unknown, fallback: string, statusMessages: StatusMessages = {}): string {
   if (isAxiosError(error)) {
     const payload = error.response?.data as BackendError | undefined
     if (payload?.error?.message) {
@@ -22,13 +34,13 @@ export function getBackendErrorMessage(error: unknown, fallback: string): string
     }
     const status = error.response?.status
     if (status === 401) {
-      return 'Your session has expired or is invalid. Sign in again, then try changing your email.'
+      return statusMessages.unauthorized ?? DEFAULT_STATUS_MESSAGES.unauthorized
     }
     if (status === 403) {
-      return 'You are not allowed to change your email address. Contact support if you need help.'
+      return statusMessages.forbidden ?? DEFAULT_STATUS_MESSAGES.forbidden
     }
     if (status !== undefined && status >= 500) {
-      return 'The server could not complete this request. Please try again in a few minutes.'
+      return statusMessages.serverError ?? DEFAULT_STATUS_MESSAGES.serverError
     }
     return fallback
   }

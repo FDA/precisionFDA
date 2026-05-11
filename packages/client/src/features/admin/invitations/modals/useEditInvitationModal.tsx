@@ -1,17 +1,18 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import * as Yup from 'yup'
-import { Button } from '../../../../components/Button'
-import { FieldGroup, InputError } from '../../../../components/form/styles'
-import { InputText } from '../../../../components/InputText'
+import { getBackendErrorMessage } from '@/api/types'
+import { Button } from '@/components/Button'
+import { FieldGroup, InputError } from '@/components/form/styles'
+import { InputText } from '@/components/InputText'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 import { ButtonRow, Footer, StyledForm, StyledModalScroll } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
-import { editInvitationBasicInfo, Invitation } from '../../users/api'
-import { toastError, toastSuccess } from '../../../../components/NotificationCenter/ToastHelper'
+import { editInvitationBasicInfo, type Invitation } from '../../users/api'
 
 const editInvitationSchema = Yup.object().shape({
   firstName: Yup.string().min(1).max(255).required(),
@@ -46,8 +47,8 @@ const EditInvitationInfoForm = ({ invitation, handleClose }: { invitation: Invit
       handleClose()
       toastSuccess('Updated invitation information successfully')
     },
-    onError: () => {
-      toastError('Failed to update invitation information')
+    onError: error => {
+      toastError(getBackendErrorMessage(error, 'Failed to update invitation information'))
     },
   })
 
@@ -70,7 +71,11 @@ const EditInvitationInfoForm = ({ invitation, handleClose }: { invitation: Invit
               placeholder="Enter first name..."
               disabled={isSubmitting}
             />
-            <ErrorMessage errors={errors} name="firstName" render={({ message }) => <InputError>{message}</InputError>} />
+            <ErrorMessage
+              errors={errors}
+              name="firstName"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
           </FieldGroup>
           <FieldGroup>
             <label>Last Name</label>
@@ -79,7 +84,11 @@ const EditInvitationInfoForm = ({ invitation, handleClose }: { invitation: Invit
               placeholder="Enter last name..."
               disabled={isSubmitting}
             />
-            <ErrorMessage errors={errors} name="lastName" render={({ message }) => <InputError>{message}</InputError>} />
+            <ErrorMessage
+              errors={errors}
+              name="lastName"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
           </FieldGroup>
           <FieldGroup>
             <label>Email</label>

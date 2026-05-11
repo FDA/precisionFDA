@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useEffectEvent, useRef, useState, type RefObject } from 'react'
+import { type RefObject, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { getBackendErrorMessage } from '@/api/types'
 import { isValidPrecisionEmailFormat } from '@/utils/emailFormat'
 import type { UseModal } from '../modal/useModal'
@@ -165,7 +165,9 @@ export function useAccountEmailEditor({ profileEmail }: UseAccountEmailEditorArg
       return
     }
     if (!otp.trim()) {
-      setCredentialsError('Enter a one-time code from your authenticator app. Use a new code, not one you already used.')
+      setCredentialsError(
+        'Enter a one-time code from your authenticator app. Use a new code, not one you already used.',
+      )
       return
     }
 
@@ -189,6 +191,10 @@ export function useAccountEmailEditor({ profileEmail }: UseAccountEmailEditorArg
         getBackendErrorMessage(
           error,
           'Unable to update your email. Check the new address, your password, and a fresh one-time code, then try again.',
+          {
+            unauthorized: 'Your session has expired or is invalid. Sign in again, then try changing your email.',
+            forbidden: 'You are not allowed to change your email address. Contact support if you need help.',
+          },
         ),
       )
     }
