@@ -278,18 +278,6 @@ describe('POST /apps/:id/run', () => {
       expect(body.error).to.have.property('code', ErrorCodes.PROJECT_NOT_FOUND)
     })
 
-    // deprecated, admin owns the apps
-    it.skip('throws 401 when user does not own the app', async () => {
-      const anotherUser = create.userHelper.create(em)
-      const anotherApp = create.appHelper.createHTTPS(em, { user: anotherUser })
-      await em.flush()
-      const { body } = await supertest(testedApp.getHttpServer())
-        .post(`/apps/${anotherApp.uid}/run`)
-        .set(getDefaultHeaderData(user))
-        .send(generate.app.runAppInput())
-      expect(body.error).to.have.property('code', ErrorCodes.APP_NOT_FOUND)
-    })
-
     it('throws 404 if requested app does not follow the requirements', async () => {
       const nonExistentAppUid = 'app-000000000000000000000000-1'
       await em.flush()

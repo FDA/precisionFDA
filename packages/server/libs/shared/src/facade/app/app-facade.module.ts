@@ -6,6 +6,7 @@ import { CliExchangeTokenModule } from '@shared/domain/cli-exchange-token/cli-ex
 import { JobModule } from '@shared/domain/job/job.module'
 import { LicenseModule } from '@shared/domain/license/license.module'
 import { SpaceMembershipModule } from '@shared/domain/space-membership/space-membership.module'
+import { UserModule } from '@shared/domain/user/user.module'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { AppCreateFacade } from './app-create.facade'
@@ -22,6 +23,7 @@ import { AppRunFacade } from './app-run.facade'
     UserFileModule,
     PlatformClientModule,
     CliExchangeTokenModule,
+    UserModule,
   ],
   providers: [AppRunFacade, AppCreateFacade],
   exports: [AppRunFacade, AppCreateFacade],

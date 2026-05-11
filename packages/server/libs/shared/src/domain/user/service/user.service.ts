@@ -21,12 +21,13 @@ import { CloudResourceSettings, USER_STATE, User } from '@shared/domain/user/use
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserExtras } from '@shared/domain/user/user-extras'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { ClientRequestError, NotFoundError } from '@shared/errors'
+import { ClientRequestError, InvalidStateError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { StringUtils } from '@shared/utils/string.utils'
 import { AdminUserDetailsDTO } from '../dto/admin-user-details.dto'
+import { USER_ERRORS } from '../user.errors'
 
 @Injectable()
 export class UserService {
@@ -281,6 +282,13 @@ export class UserService {
     }
 
     return true
+  }
+
+  async checkTotalChargesLimit(): Promise<void> {
+    const userCloudResources = await this.getCloudResources()
+    if (userCloudResources.totalCharges >= userCloudResources.usageLimit) {
+      throw new InvalidStateError(USER_ERRORS.CHARGES_LIMIT_EXCEEDED)
+    }
   }
 
   // PFDA-6051 TODO Ludvik Bobek will update this to use the new pagination method

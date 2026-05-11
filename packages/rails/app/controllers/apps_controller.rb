@@ -4,7 +4,7 @@ class AppsController < ApplicationController
   include CloudResourcesConcern
 
   before_action :validate_app_before_export, only: %i(export cwl_export wdl_export)
-  before_action :check_total_and_job_charges_limit, only: %i(batch_app run)
+  before_action :check_total_and_job_charges_limit, only: %i(batch_app)
 
   def index
     @app = nil
