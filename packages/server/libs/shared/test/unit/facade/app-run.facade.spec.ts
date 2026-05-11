@@ -15,14 +15,22 @@ import { LicenseService } from '@shared/domain/license/license.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { UserService } from '@shared/domain/user/service/user.service'
 import { User } from '@shared/domain/user/user.entity'
+import { USER_ERRORS } from '@shared/domain/user/user.errors'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import { InvalidRequestError, InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
-import { AppRunFacade } from '@shared/facade/app/app-run.facade'
+import {
+  ClientRequestError,
+  InvalidRequestError,
+  InvalidStateError,
+  NotFoundError,
+  PermissionError,
+} from '@shared/errors'
+import { APP_RUN_ERRORS, AppRunFacade } from '@shared/facade/app/app-run.facade'
 import { PlatformClient } from '@shared/platform-client'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { TimeUtils } from '@shared/utils/time.utils'
@@ -44,6 +52,7 @@ describe('AppRunFacade tests', () => {
   const createSyncJobStatusTaskStub = stub()
   const createNewTokenStub = stub()
   const deleteTokenStub = stub()
+  const checkTotalChargesLimitStub = stub()
 
   const USER_JOB_LIMIT = 100
   const USER = {
@@ -54,6 +63,7 @@ describe('AppRunFacade tests', () => {
       resources: ['baseline-2', 'baseline-4', 'hidisk-2', 'hidisk-4', 'himem-2', 'himem-4'],
     },
     privateFilesProject: 'project-userprivatefiles',
+    isJobExecutionEnabled: (): boolean => true,
   } as unknown as User
   const VIEWER = {
     id: 2,
@@ -63,6 +73,7 @@ describe('AppRunFacade tests', () => {
       resources: ['baseline-2', 'baseline-4', 'hidisk-2', 'hidisk-4', 'himem-2', 'himem-4'],
     },
     privateFilesProject: 'project-viewerprivatefiles',
+    isJobExecutionEnabled: (): boolean => true,
   } as unknown as User
 
   const APP_UID = 'app-1234567890abcdef12345678-1'
@@ -257,6 +268,9 @@ describe('AppRunFacade tests', () => {
     createNewToken: createNewTokenStub,
     deleteToken: deleteTokenStub,
   } as unknown as CliExchangeTokenService
+  const userService = {
+    checkTotalChargesLimit: checkTotalChargesLimitStub,
+  } as unknown as UserService
   const mainQueueJobProducer = {
     createSyncJobStatusTask: createSyncJobStatusTaskStub,
   } as unknown as MainQueueJobProducer
@@ -332,11 +346,43 @@ describe('AppRunFacade tests', () => {
     createSyncJobStatusTaskStub.reset()
     createSyncJobStatusTaskStub.throws()
     createSyncJobStatusTaskStub.resolves()
+
+    checkTotalChargesLimitStub.reset()
+    checkTotalChargesLimitStub.throws()
+    checkTotalChargesLimitStub.resolves()
   })
 
   afterEach(() => {
     referenceStub.restore()
     collectionAddStub.restore()
+  })
+
+  it('throws InvalidStateError if user cannot run any jobs', async () => {
+    const userWithoutJobPermissions = {
+      id: 3,
+      loadEntity: async (): Promise<User> =>
+        ({
+          id: 3,
+          isJobExecutionEnabled: (): boolean => false,
+        }) as unknown as User,
+    } as unknown as UserContext
+    const facade = getInstance(userWithoutJobPermissions)
+    const runAppDTO = new RunAppDTO()
+
+    await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
+      InvalidStateError,
+      APP_RUN_ERRORS.JOB_EXECUTION_NOT_AUTHORIZED,
+    )
+  })
+
+  it('throws InvalidStateError if user has charges that exceed their limit', async () => {
+    const errorMessage = USER_ERRORS.CHARGES_LIMIT_EXCEEDED
+    checkTotalChargesLimitStub.throws(new InvalidStateError(errorMessage))
+
+    const facade = getInstance()
+    const runAppDTO = new RunAppDTO()
+
+    await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(InvalidStateError, errorMessage)
   })
 
   it('throws InvalidRequestError if job limit is exceeded', async () => {
@@ -346,18 +392,18 @@ describe('AppRunFacade tests', () => {
 
     await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
       InvalidRequestError,
-      'Job limit exceeds maximum user setting',
+      APP_RUN_ERRORS.JOB_LIMIT_EXCEEDS,
     )
   })
 
   it('throws InvalidStateError if instance type is invalid', async () => {
     const facade = getInstance()
     const runAppDTO = new RunAppDTO()
-    runAppDTO.instanceType = 'invalid-instance-type'
+    runAppDTO.instanceType = 'hidisk-16'
 
     await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
       InvalidStateError,
-      'Instance type not allowed for user',
+      APP_RUN_ERRORS.INSTANCE_NOT_ALLOWED,
     )
   })
 
@@ -403,7 +449,7 @@ describe('AppRunFacade tests', () => {
 
     await expect(facade.run(APP_WITH_ASSETS_UID, runAppDTO)).to.be.rejectedWith(
       PermissionError,
-      `Asset license "${LICENSE.title}" must be accepted before running this app`,
+      APP_RUN_ERRORS.LICENSE_ACCEPTANCE_REQUIRED(LICENSE.title),
     )
     expect(populateStub.calledTwice).to.be.true()
     expect(populateStub.firstCall.args[0]).to.deep.equal(APP_WITH_ASSETS)
@@ -422,10 +468,7 @@ describe('AppRunFacade tests', () => {
 
     getMembershipStub.withArgs(spaceId, USER.id).resolves(null)
 
-    await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
-      PermissionError,
-      'Unable to execute the app in selected context.',
-    )
+    await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(PermissionError, APP_RUN_ERRORS.INVALID_CONTEXT)
   })
 
   it('throws PermissionError if user is not allowed to run app within the context', async () => {
@@ -435,10 +478,7 @@ describe('AppRunFacade tests', () => {
     runAppDTO.instanceType = 'baseline-2'
     runAppDTO.scope = `space-${SPACE.id}`
 
-    await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
-      PermissionError,
-      'Unable to execute the app in selected context.',
-    )
+    await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(PermissionError, APP_RUN_ERRORS.INVALID_CONTEXT)
   })
 
   it('throws NotFoundError if input files are not found', async () => {
@@ -456,7 +496,7 @@ describe('AppRunFacade tests', () => {
 
     await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
       NotFoundError,
-      `1 file not found (${notExistentFileUid})`,
+      APP_RUN_ERRORS.FILES_NOT_FOUND('1 file', notExistentFileUid),
     )
   })
 
@@ -472,7 +512,7 @@ describe('AppRunFacade tests', () => {
 
     await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
       InvalidStateError,
-      `Input "${APP_UID}:file_input" is required but no value provided`,
+      APP_RUN_ERRORS.APP_INPUT_REQUIRED(APP_UID, 'file_input'),
     )
   })
 
@@ -494,7 +534,7 @@ describe('AppRunFacade tests', () => {
 
     await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
       PermissionError,
-      'The Lead of this Space does not have Workstations permissions for their account, so a Workstation cannot be launched in this Space context.',
+      APP_RUN_ERRORS.LEAD_SPACE_PERMISSION_REQUIRED,
     )
   })
 
@@ -513,14 +553,18 @@ describe('AppRunFacade tests', () => {
       project: USER.privateFilesProject,
     })
     jobCreateStub.throws(
-      new Error(
+      new ClientRequestError(
         'PermissionDenied (401): BillTo for this job\'s project must have the "httpsApp" feature enabled to run this executable',
+        {
+          clientResponse: '',
+          clientStatusCode: 401,
+        },
       ),
     )
 
     await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
       PermissionError,
-      'Workstations require additional account permissions. Reach out to precisionFDA support to request this permission.',
+      APP_RUN_ERRORS.WORKSTATION_PERMISSION_REQUIRED,
     )
   })
 
@@ -723,6 +767,7 @@ describe('AppRunFacade tests', () => {
       jobService,
       authService,
       cliExchangeTokenService,
+      userService,
       mainQueueJobProducer,
     )
   }

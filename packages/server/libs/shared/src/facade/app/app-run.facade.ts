@@ -23,6 +23,7 @@ import { LicenseService } from '@shared/domain/license/license.service'
 import { getIdFromScopeName, getProjectDxid } from '@shared/domain/space/space.helper'
 import { SpaceMembershipService } from '@shared/domain/space-membership/service/space-membership.service'
 import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
+import { UserService } from '@shared/domain/user/service/user.service'
 import { User } from '@shared/domain/user/user.entity'
 import { getProjectToRunApp } from '@shared/domain/user/user.helper'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -36,6 +37,24 @@ import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.prod
 import { SCOPE } from '@shared/types/common'
 import { getPluralizedTerm } from '@shared/utils/format'
 import { TimeUtils } from '@shared/utils/time.utils'
+
+export const APP_RUN_ERRORS = {
+  JOB_EXECUTION_NOT_AUTHORIZED:
+    'This precisionFDA user is not authorized to run executions at this time. Please email precisionFDA@fda.hhs.gov to request authorization to run executions.',
+  LEAD_SPACE_PERMISSION_REQUIRED:
+    'The Lead of this Space does not have Workstations permissions for their account, so a Workstation cannot be launched in this Space context.',
+  WORKSTATION_PERMISSION_REQUIRED:
+    'Workstations require additional account permissions. Reach out to precisionFDA support to request this permission.',
+  JOB_LIMIT_EXCEEDS: 'Job limit exceeds maximum user setting',
+  INSTANCE_NOT_ALLOWED: 'Instance type not allowed for user',
+  INVALID_CONTEXT: 'Unable to execute the app in selected context.',
+
+  FILES_NOT_FOUND: (fileCount: string, fileUids: string) => `${fileCount} not found (${fileUids})`,
+  APP_INPUT_REQUIRED: (appUid: Uid<'app'>, specName: string) =>
+    `Input "${appUid}:${specName}" is required but no value provided`,
+  LICENSE_ACCEPTANCE_REQUIRED: (licenseTitle: string): string =>
+    `Asset license "${licenseTitle}" must be accepted before running this app`,
+} as const
 
 @Injectable()
 export class AppRunFacade {
@@ -53,12 +72,14 @@ export class AppRunFacade {
     private readonly jobService: JobService,
     private readonly authService: AuthService,
     private readonly cliExchangeTokenService: CliExchangeTokenService,
+    private readonly userService: UserService,
     private readonly mainQueueJobProducer: MainQueueJobProducer,
   ) {}
 
   async run(appUid: Uid<'app'>, runAppInput: RunAppDTO): Promise<{ id: Uid<'job'> }> {
     const user = await this.userContext.loadEntity()
 
+    await this.validateJobRunCapacity(user)
     await this.validateAppRunInput(runAppInput, user)
 
     const app = await this.appService.getValidAccessibleApp(appUid)
@@ -96,19 +117,16 @@ export class AppRunFacade {
     let newJobClientRes: JobCreateResponse
     try {
       newJobClientRes = await this.platformClient.jobCreate(platformRunInput)
-    } catch (e) {
+    } catch (e: unknown) {
       if (
+        e instanceof Error &&
         e.message ===
-        'PermissionDenied (401): BillTo for this job\'s project must have the "httpsApp" feature enabled to run this executable'
+          'PermissionDenied (401): BillTo for this job\'s project must have the "httpsApp" feature enabled to run this executable'
       ) {
         if (platformRunInput.project !== user.privateFilesProject) {
-          throw new PermissionError(
-            'The Lead of this Space does not have Workstations permissions for their account, so a Workstation cannot be launched in this Space context.',
-          )
+          throw new PermissionError(APP_RUN_ERRORS.LEAD_SPACE_PERMISSION_REQUIRED)
         } else {
-          throw new PermissionError(
-            'Workstations require additional account permissions. Reach out to precisionFDA support to request this permission.',
-          )
+          throw new PermissionError(APP_RUN_ERRORS.WORKSTATION_PERMISSION_REQUIRED)
         }
       }
       if (exchangeToken) {
@@ -168,7 +186,7 @@ export class AppRunFacade {
         } else if (spec.optional) {
           continue
         } else {
-          throw new InvalidStateError(`Input "${app.uid}:${spec.name}" is required but no value provided`)
+          throw new InvalidStateError(APP_RUN_ERRORS.APP_INPUT_REQUIRED(app.uid, spec.name))
         }
       }
 
@@ -201,7 +219,7 @@ export class AppRunFacade {
       const spaceId = getIdFromScopeName(scope)
       const membership = await this.spaceMembershipService.getMembership(spaceId, this.userContext.id)
       if (!membership || !CAN_EDIT_ROLES.includes(membership.role)) {
-        throw new PermissionError('Unable to execute the app in selected context.')
+        throw new PermissionError(APP_RUN_ERRORS.INVALID_CONTEXT)
       }
       await this.em.populate(membership, ['spaces'])
       const space = membership.spaces.getItems().find(s => s.id === spaceId)
@@ -241,7 +259,10 @@ export class AppRunFacade {
     if (notFoundFileUids.length > 0) {
       const uniqueNotFoundFileUids = Array.from(new Set(notFoundFileUids))
       throw new NotFoundError(
-        `${getPluralizedTerm(uniqueNotFoundFileUids.length, 'file')} not found (${uniqueNotFoundFileUids.join(', ')})`,
+        APP_RUN_ERRORS.FILES_NOT_FOUND(
+          getPluralizedTerm(uniqueNotFoundFileUids.length, 'file'),
+          uniqueNotFoundFileUids.join(', '),
+        ),
         {
           code: ErrorCodes.USER_FILE_NOT_FOUND,
         },
@@ -254,11 +275,18 @@ export class AppRunFacade {
   private async validateAppRunInput(input: RunAppDTO, user: User): Promise<void> {
     this.logger.log('Validating app run input against user settings')
     if (input.jobLimit > user.cloudResourceSettings.job_limit) {
-      throw new InvalidRequestError('Job limit exceeds maximum user setting')
+      throw new InvalidRequestError(APP_RUN_ERRORS.JOB_LIMIT_EXCEEDS)
     }
     if (!user.cloudResourceSettings.resources.includes(input.instanceType)) {
-      throw new InvalidStateError('Instance type not allowed for user')
+      throw new InvalidStateError(APP_RUN_ERRORS.INSTANCE_NOT_ALLOWED)
     }
+  }
+
+  private async validateJobRunCapacity(user: User): Promise<void> {
+    if (!user.isJobExecutionEnabled()) {
+      throw new InvalidStateError(APP_RUN_ERRORS.JOB_EXECUTION_NOT_AUTHORIZED)
+    }
+    await this.userService.checkTotalChargesLimit()
   }
 
   private async validateAssetsLicenses(app: App): Promise<void> {
@@ -275,7 +303,7 @@ export class AppRunFacade {
       })
       for (const license of licenses) {
         if (license.acceptedLicenses.getItems().length === 0) {
-          throw new PermissionError(`Asset license "${license.title}" must be accepted before running this app`)
+          throw new PermissionError(APP_RUN_ERRORS.LICENSE_ACCEPTANCE_REQUIRED(license.title))
         }
       }
     }

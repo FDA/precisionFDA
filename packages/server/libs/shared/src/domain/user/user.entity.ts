@@ -384,4 +384,8 @@ export class User extends BaseEntity {
   billTo(): DxId<'org'> {
     return this.organization.getEntity().getDxOrg()
   }
+
+  isJobExecutionEnabled(): boolean {
+    return this.cloudResourceSettings.job_limit > 0
+  }
 }

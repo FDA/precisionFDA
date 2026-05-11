@@ -3,10 +3,13 @@ import { expect } from 'chai'
 import sinon, { match, stub } from 'sinon'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { Organization } from '@shared/domain/org/organization.entity'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { UserService } from '@shared/domain/user/service/user.service'
 import { USER_STATE, User } from '@shared/domain/user/user.entity'
+import { USER_ERRORS } from '@shared/domain/user/user.errors'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import { InvalidStateError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 
 describe('user service tests', () => {
@@ -18,8 +21,33 @@ describe('user service tests', () => {
   const userRepoFindActiveStub = stub()
   const userRepoFindStub = stub()
   const userRepoFindOneStub = stub()
+  const userCloudResourcesStub = stub()
   const userRepoFindOneOrFailStub = stub()
   const platformClientGetSSOIdStub = stub()
+
+  const USER_ID = 42
+  const USER_DXUSER = 'user1'
+  const USER_ORG = {
+    id: 1,
+    handle: USER_DXUSER,
+    getDxOrg: () => `org-pfda..${USER_DXUSER}`,
+  } as unknown as Organization
+  const USER = {
+    id: USER_ID,
+    dxuser: USER_DXUSER,
+    organization: {
+      load: async () => USER_ORG,
+    },
+    cloudResourceSettings: {
+      total_limit: 100,
+      job_limit: 10,
+      charges_baseline: {
+        computeCharges: 38,
+        storageCharges: 1.39,
+        dataEgressCharges: 1.79,
+      },
+    },
+  } as unknown as User
 
   const createUserService = (): UserService => {
     const em = {
@@ -46,16 +74,17 @@ describe('user service tests', () => {
 
     const platformClient = {
       getSSOId: platformClientGetSSOIdStub,
+      userCloudResources: userCloudResourcesStub,
     } as unknown as PlatformClient
     const adminPlatformClient = {} as unknown as PlatformClient
 
     return new UserService(
       em,
       {
-        id: 42,
-        dxuser: 'user1',
+        id: USER_ID,
+        dxuser: USER_DXUSER,
         accessToken: 'access_token',
-        loadEntity: async (): Promise<User> => null as unknown as User,
+        loadEntity: async (): Promise<User> => USER,
       },
       userRepo,
       emailsJobProducer,
@@ -76,6 +105,9 @@ describe('user service tests', () => {
 
     userRepoFindStub.reset()
     userRepoFindStub.throws()
+
+    userCloudResourcesStub.reset()
+    userCloudResourcesStub.throws()
   })
 
   describe('#listActiveUserNames', () => {
@@ -457,6 +489,48 @@ describe('user service tests', () => {
       expect(user.extras?.sso_enabled).to.equal(null)
       expect(emFlushStub.callCount).to.equal(0)
       expect(dto.isSSO).to.equal(false)
+    })
+  })
+
+  describe('#getCloudResources', () => {
+    it('should get cloud resources for user', async () => {
+      userCloudResourcesStub.withArgs(USER_ORG.getDxOrg()).resolves({
+        computeCharges: 50,
+        storageCharges: 20,
+        dataEgressCharges: 10,
+      })
+
+      const userService = createUserService()
+      const result = await userService.getCloudResources()
+      const computeCharges = Math.max(50 - USER.cloudResourceSettings.charges_baseline.computeCharges, 0)
+      const storageCharges = Math.max(20 - USER.cloudResourceSettings.charges_baseline.storageCharges, 0)
+      const dataEgressCharges = Math.max(10 - USER.cloudResourceSettings.charges_baseline.dataEgressCharges, 0)
+      const totalCharges = computeCharges + storageCharges + dataEgressCharges
+
+      expect(userCloudResourcesStub.callCount).to.equal(1)
+      expect(result.computeCharges).to.equal(computeCharges)
+      expect(result.storageCharges).to.equal(storageCharges)
+      expect(result.dataEgressCharges).to.equal(dataEgressCharges)
+      expect(result.totalCharges).to.equal(totalCharges)
+      expect(result.usageLimit).to.equal(USER.cloudResourceSettings.total_limit)
+      expect(result.jobLimit).to.equal(USER.cloudResourceSettings.job_limit)
+      expect(result.usageAvailable).to.equal(USER.cloudResourceSettings.total_limit - totalCharges)
+    })
+  })
+
+  describe('#checkTotalChargesLimit', () => {
+    it('should throw an error if user has exceeded total charges limit', async () => {
+      userCloudResourcesStub.withArgs(USER_ORG.getDxOrg()).resolves({
+        computeCharges: 100,
+        storageCharges: 50,
+        dataEgressCharges: 10,
+      })
+
+      const userService = createUserService()
+      await expect(userService.checkTotalChargesLimit()).to.be.rejectedWith(
+        InvalidStateError,
+        USER_ERRORS.CHARGES_LIMIT_EXCEEDED,
+      )
     })
   })
 })

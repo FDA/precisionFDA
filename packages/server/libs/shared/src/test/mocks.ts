@@ -57,6 +57,7 @@ const fakes = {
     workflowDescribeFake: sinon.stub(),
     userResetMfaFake: sinon.stub(),
     userUpdateEmailFake: sinon.stub(),
+    userCloudResourcesFake: sinon.stub(),
     fileDownloadLinkFake: sinon.stub(),
   },
   queue: {
@@ -182,6 +183,11 @@ const mocksSetDefaultBehaviour = (): void => {
   fakes.client.userUpdateEmailFake.callsFake(() => ({}))
   fakes.client.inviteUserToOrganizationFake.callsFake(() => ({}))
   fakes.client.removeUserFromOrganizationFake.callsFake(() => ({}))
+  fakes.client.userCloudResourcesFake.callsFake(() => ({
+    computeCharges: 0,
+    storageCharges: 0,
+    dataEgressCharges: 0,
+  }))
 
   fakes.bull.addFake.callsFake(() => {})
   fakes.bull.getJobFake.callsFake(() => undefined)
@@ -227,6 +233,7 @@ const mocksSetup = (): void => {
   sandbox.replace(PlatformClient.prototype, 'fileRemove', fakes.client.fileRemoveFake)
   sandbox.replace(PlatformClient.prototype, 'userDescribe', fakes.client.userDescribeFake)
   sandbox.replace(PlatformClient.prototype, 'userUpdateEmail', fakes.client.userUpdateEmailFake)
+  sandbox.replace(PlatformClient.prototype, 'userCloudResources', fakes.client.userCloudResourcesFake)
   sandbox.replace(PlatformClient.prototype, 'cloneObjects', fakes.client.cloneObjectFake)
   sandbox.replace(PlatformClient.prototype, 'appAddAuthorizedUsers', fakes.client.appAddAuthorizedUsersFake)
   sandbox.replace(PlatformClient.prototype, 'appPublish', fakes.client.appPublishFake)
@@ -293,6 +300,7 @@ const mocksReset = (): void => {
   fakes.client.userResetMfaFake.reset()
   fakes.client.userUpdateEmailFake.reset()
   fakes.client.fileDownloadLinkFake.reset()
+  fakes.client.userCloudResourcesFake.reset()
 
   fakes.queue.findRepeatableFake.reset()
 
