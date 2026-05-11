@@ -171,7 +171,7 @@ GEM
     crack (0.4.5)
       rexml
     crass (1.0.6)
-    css_parser (1.14.0)
+    css_parser (1.22.0)
       addressable
     csv (3.3.5)
     daemons (1.4.1)
