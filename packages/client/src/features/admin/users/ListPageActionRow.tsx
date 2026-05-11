@@ -1,7 +1,6 @@
 import { type UseQueryResult, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { AxiosError } from 'axios'
 import { ChevronDown } from 'lucide-react'
-import type { BackendError } from '@/api/types'
+import { getBackendErrorMessage } from '@/api/types'
 import { Button } from '@/components/Button'
 import Menu from '@/components/Menu/Menu'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
@@ -30,10 +29,6 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     queryClient.invalidateQueries({ queryKey: ['admin-user'] })
   }
 
-  const handleError = (e: AxiosError<BackendError>, fallback: string) => {
-    toastError(e.response?.data?.error?.message ? `Error: ${e.response.data.error.message}` : fallback)
-  }
-
   const unlockMutation = useMutation({
     mutationKey: ['unlock'],
     mutationFn: () => userUnlock(selectedIds[0]),
@@ -41,7 +36,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
       toastSuccess('User was successfully unlocked!')
       invalidate()
     },
-    onError: (e: AxiosError<BackendError>) => handleError(e, 'Error unlocking user!'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Error unlocking user!')),
   })
 
   const deactivateMutation = useMutation({
@@ -51,7 +46,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
       toastSuccess(`${itemsCountString('user', selectedIds.length)} successfully deactivated!`)
       invalidate()
     },
-    onError: (e: AxiosError<BackendError>) => handleError(e, 'Error deactivating users'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Error deactivating users')),
   })
 
   const activateMutation = useMutation({
@@ -61,7 +56,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
       toastSuccess(`${itemsCountString('user', selectedIds.length)} successfully activated!`)
       invalidate()
     },
-    onError: (e: AxiosError<BackendError>) => handleError(e, 'Error activating users'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Error activating users')),
   })
 
   const areAllDeactivated = !noSelection && selectedUsers.every(({ userState }) => userState === 'deactivated')

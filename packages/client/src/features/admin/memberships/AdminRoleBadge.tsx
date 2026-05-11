@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { AxiosError } from 'axios'
 import type React from 'react'
-import type { BackendError } from '@/api/types'
+import { getBackendErrorMessage } from '@/api/types'
 import { Checkbox } from '@/components/Checkbox'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { useConfirm } from '@/features/modal/useConfirm'
@@ -27,8 +26,8 @@ export function AdminRoleBadge({ user, role, isRootAdmin }: AdminRoleBadgeProps)
       queryClient.invalidateQueries({ queryKey: ['admin-memberships'] })
       toastSuccess('Role assigned successfully')
     },
-    onError: (error: AxiosError<BackendError>) => {
-      toastError(error.response?.data?.error?.message ?? 'Failed to assign role')
+    onError: error => {
+      toastError(getBackendErrorMessage(error, 'Failed to assign role'))
     },
   })
 
@@ -38,8 +37,8 @@ export function AdminRoleBadge({ user, role, isRootAdmin }: AdminRoleBadgeProps)
       queryClient.invalidateQueries({ queryKey: ['admin-memberships'] })
       toastSuccess('Role removed successfully')
     },
-    onError: (error: AxiosError<BackendError>) => {
-      toastError(error.response?.data?.error?.message ?? 'Failed to remove role')
+    onError: error => {
+      toastError(getBackendErrorMessage(error, 'Failed to remove role'))
     },
   })
 

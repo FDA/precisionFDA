@@ -1,8 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { AxiosError } from 'axios'
 import { ChevronDown } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import type { BackendError } from '@/api/types'
+import { getBackendErrorMessage } from '@/api/types'
 import { Button } from '@/components/Button'
 import { Checkbox } from '@/components/CheckboxNext'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
@@ -38,14 +37,6 @@ const areAllEnabled = (users: User[]) =>
 const invalidateQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
   queryClient.invalidateQueries({ queryKey: ['admin-users'] })
   queryClient.invalidateQueries({ queryKey: ['admin-user'] })
-}
-
-const handleError = (e: AxiosError<BackendError>, fallback: string) => {
-  if (e.response?.data?.error?.message) {
-    toastError(`Error: ${e.response.data.error.message}`)
-  } else {
-    toastError(fallback)
-  }
 }
 
 const getCommonLimit = (users: User[], key: 'total_limit' | 'job_limit'): string => {
@@ -158,7 +149,7 @@ export const ResourcesMenu = ({ selectedUsers }: { selectedUsers: User[] }) => {
       toastSuccess('Resources updated')
       invalidateQueries(queryClient)
     },
-    onError: (e: AxiosError<BackendError>) => handleError(e, 'Failed to update resources'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Failed to update resources')),
   })
 
   const totalLimitMutation = useMutation({
@@ -168,7 +159,7 @@ export const ResourcesMenu = ({ selectedUsers }: { selectedUsers: User[] }) => {
       toastSuccess(`Total limit set to $${totalInput}`)
       invalidateQueries(queryClient)
     },
-    onError: (e: AxiosError<BackendError>) => handleError(e, 'Failed to set total limit'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Failed to set total limit')),
   })
 
   const jobLimitMutation = useMutation({
@@ -178,7 +169,7 @@ export const ResourcesMenu = ({ selectedUsers }: { selectedUsers: User[] }) => {
       toastSuccess(`Job limit set to $${jobInput}`)
       invalidateQueries(queryClient)
     },
-    onError: (e: AxiosError<BackendError>) => handleError(e, 'Failed to set job limit'),
+    onError: error => toastError(getBackendErrorMessage(error, 'Failed to set job limit')),
   })
 
   const toggleResource = async (resource: ResourceKey, currentlyEnabled: boolean) => {
@@ -191,8 +182,8 @@ export const ResourcesMenu = ({ selectedUsers }: { selectedUsers: User[] }) => {
       }
       toastSuccess('Resource updated')
       invalidateQueries(queryClient)
-    } catch {
-      toastError('Failed to update resource')
+    } catch (error) {
+      toastError(getBackendErrorMessage(error, 'Failed to update resource'))
     } finally {
       setPendingResources(prev => {
         const next = new Set(prev)

@@ -1,6 +1,5 @@
-import { isAxiosError } from 'axios'
 import type { ReactNode } from 'react'
-import { type BackendError, DEFAULT_PAGINATED_DATA } from '@/api/types'
+import { DEFAULT_PAGINATED_DATA, getBackendErrorMessage } from '@/api/types'
 import { HoverDNAnexusLogo } from '@/components/icons/DNAnexusLogo'
 import { hidePagination, Pagination } from '@/components/Pagination'
 import { Button } from '@/components/ui/button'
@@ -90,24 +89,14 @@ export const AdminListPage = <T extends ListShape>({
   )
 }
 
-const getListErrorMessage = (error: unknown): string => {
-  if (isAxiosError(error)) {
-    const payload = error.response?.data as BackendError | undefined
-    if (payload?.error?.message) return payload.error.message
-    const status = error.response?.status
-    if (status === 401) return 'Your session has expired. Sign in again and retry.'
-    if (status === 403) return 'You do not have permission to view this list.'
-    if (status !== undefined && status >= 500)
-      return 'The server could not complete this request. Please try again in a few minutes.'
-  }
-  if (error instanceof Error && error.message) return error.message
-  return 'An unexpected error occurred. Try again or contact support.'
-}
-
-const AdminListErrorState = ({ error, onRetry }: { error: unknown; onRetry: () => void }) => (
+export const AdminListErrorState = ({ error, onRetry }: { error: unknown; onRetry: () => void }) => (
   <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 py-12 text-center">
     <div className="text-sm font-medium text-(--c-text-700)">Could not load data</div>
-    <div className="max-w-md text-xs text-(--c-text-500)">{getListErrorMessage(error)}</div>
+    <div className="max-w-md text-xs text-(--c-text-500)">
+      {getBackendErrorMessage(error, 'An unexpected error occurred. Try again or contact support.', {
+        forbidden: 'You do not have permission to view this list.',
+      })}
+    </div>
     <Button size="sm" variant="outline" onClick={onRetry}>
       Retry
     </Button>

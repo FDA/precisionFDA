@@ -11,6 +11,7 @@ import { useList } from '../../home/useList'
 import { type Params, prepareListFetchV2 } from '../../home/utils'
 import { type ISpaceV2, columnFilters as spaceListColumnFilters } from '../../spaces/spaces.types'
 import { useSpacesColumns } from '../../spaces/useSpacesColumns'
+import { AdminListErrorState } from '../AdminListPage'
 import { AdminContentFooter, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
 import { AdminTablePlaceholderLoader, getAdminTableLoadingState } from '../tableLoading'
 import { SpacesListActionRow } from './SpacesListActionRow'
@@ -57,7 +58,7 @@ export const SpacesList = () => {
     isPlaceholderData: query.isPlaceholderData,
   })
   if (error) {
-    return <div>{JSON.stringify(error)}</div>
+    return <AdminListErrorState error={error} onRetry={query.refetch} />
   }
 
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data.data)

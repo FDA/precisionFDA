@@ -1,14 +1,13 @@
-import { useMutation, UseQueryResult } from '@tanstack/react-query'
-import { RowSelectionState } from '@tanstack/react-table'
-import { AxiosError } from 'axios'
-import React from 'react'
-import { BackendError } from '../../../api/types'
-import { Button } from '../../../components/Button'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
-import { MetaV2 } from '../../home/types'
+import { type UseQueryResult, useMutation } from '@tanstack/react-query'
+import type { RowSelectionState } from '@tanstack/react-table'
+import type React from 'react'
+import { getBackendErrorMessage } from '@/api/types'
+import { Button } from '@/components/Button'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import type { MetaV2 } from '../../home/types'
 import { ModalScroll } from '../../modal/styles'
 import { useConfirm } from '../../modal/useConfirm'
-import { ISpaceV2 } from '../../spaces/spaces.types'
+import type { ISpaceV2 } from '../../spaces/spaces.types'
 import { useSpaceHiddenMutation } from '../../spaces/useSpaceHiddenMutation'
 import { ButtonsRow } from '../common'
 import { bulkDelete } from './api'
@@ -31,12 +30,8 @@ export const SpacesListActionRow = ({ selectedSpaces, setSelectedIndexes, refetc
       refetchSpaces()
       setSelectedIndexes({})
     },
-    onError: (e: AxiosError<BackendError>) => {
-      if (e.response?.data?.error?.message) {
-        toastError(e.response.data.error.message)
-      } else {
-        toastError('Error deleting spaces!')
-      }
+    onError: error => {
+      toastError(getBackendErrorMessage(error, 'Error deleting spaces!'))
     },
   })
 
