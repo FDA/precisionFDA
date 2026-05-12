@@ -1,7 +1,6 @@
 import crypto from 'node:crypto'
 import { JobInformation } from 'bull'
 import Chance from 'chance'
-import { DateTime } from 'luxon'
 import { customAlphabet } from 'nanoid'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
@@ -704,9 +703,7 @@ const dbCluster = {
       engineVersion: '5.7.12',
       host: `dbcluster.${chance.word()}.com`,
       port: chance.pickone(['3306', '3307', '3308']),
-      statusAsOf: DateTime.now()
-        .minus({ minutes: chance.natural({ min: 1, max: 30 }) })
-        .toJSDate(),
+      statusAsOf: new Date(Date.now() - chance.natural({ min: 1, max: 30 }) * 60 * 1000),
       status: DB_CLUSTER_STATUS.AVAILABLE,
       engine: DB_CLUSTER_ENGINE.MYSQL,
       syncStatus: DB_SYNC_STATUS.IN_PROGRESS,

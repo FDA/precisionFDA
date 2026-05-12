@@ -1,4 +1,3 @@
-import { DateTime, Duration, Interval } from 'luxon'
 import { config } from '../../config'
 import { Job } from './job.entity'
 import { ACTIVE_STATES, JOB_STATE, TERMINAL_STATES } from './job.enum'
@@ -15,13 +14,8 @@ export const buildIsOverMaxDuration = (terminateOrNotify: 'terminate' | 'notify'
     terminateOrNotify === 'terminate'
       ? config.workerJobs.syncJob.staleJobsTerminateAfter
       : config.workerJobs.syncJob.staleJobsEmailAfter
-  const maxDuration = Duration.fromObject({
-    seconds: typeof seconds === 'string' ? parseInt(seconds, 10) : seconds,
-  })
-  const current = DateTime.now()
+  const maxDurationMs = (typeof seconds === 'string' ? parseInt(seconds, 10) : seconds) * 1000
   return (job: Job): boolean => {
-    const createdAt = DateTime.fromJSDate(job.createdAt)
-    const currentJobInterval = Interval.fromDateTimes(createdAt, current)
-    return currentJobInterval.toDuration() >= maxDuration
+    return Date.now() - job.createdAt.getTime() >= maxDurationMs
   }
 }
