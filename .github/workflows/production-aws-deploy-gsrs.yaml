@@ -23,10 +23,17 @@ on:
         description: "Comma-separated list of services to force redeploy (e.g., gsrs-web, gsrs-nginx)"
         required: false
         default: ""
+      FORCE_REBUILD:
+        description: "Force a fresh Docker image build even if a matching image already exists in ECR"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: production-deploy-gsrs-ecs
   cancel-in-progress: false
+
+run-name: "PRODUCTION GSRS | branch=${{ inputs.GSRS_MAIN_BRANCH }} frontend=${{ inputs.FRONTEND_TAG }} db=${{ inputs.DATABASE_NAME }}"
 
 jobs:
   build-and-push-gsrs-images:
@@ -58,6 +65,7 @@ jobs:
           context: ${{ matrix.context }}
           gsrs-main-branch: ${{ inputs.GSRS_MAIN_BRANCH }}
           frontend-tag: ${{ inputs.FRONTEND_TAG }}
+          force-rebuild: ${{ inputs.FORCE_REBUILD }}
 
       - name: Set matrix job output
         id: set_output

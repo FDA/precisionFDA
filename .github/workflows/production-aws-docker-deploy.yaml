@@ -13,6 +13,11 @@ on:
           pfda-pfda-db-migrate, pfda-docs, pfda-nodejs-api, pfda-nodejs-api-internal, pfda-nodejs-worker, pfda-nodejs-admin-platform-client, pfda-web, pfda-nginx
         required: false
         default: ""
+      FORCE_REBUILD:
+        description: "Force a fresh Docker image build even if a matching image already exists in ECR"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: production-deploy-ecs
@@ -54,6 +59,7 @@ jobs:
           package: ${{ matrix.package }}
           dockerfile: ${{ matrix.dockerfile }}
           context: ${{ matrix.context }}
+          force-rebuild: ${{ inputs.FORCE_REBUILD }}
 
 
       - name: Set matrix job output
