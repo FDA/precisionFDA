@@ -1,10 +1,12 @@
 FROM python:3.11-alpine
 
-RUN apk add --no-cache \
+RUN apk update && apk upgrade --no-cache && \
+    apk add --no-cache \
     mariadb-client \
     bash
 
-RUN pip install --no-cache-dir boto3
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir boto3
 
 WORKDIR /app
 

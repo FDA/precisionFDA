@@ -24,6 +24,11 @@ on:
         description: Skip Index Update
         type: boolean
         default: false
+      FORCE_REBUILD:
+        description: "Force a fresh Docker image build even if a matching image already exists in ECR"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: ${{inputs.ENVIRONMENT}}-gsrs-data-update
@@ -55,6 +60,7 @@ jobs:
           orchestration-account-id: ${{ vars.ORCHESTRATION_ACCOUNT_ID }}
           package: ${{ matrix.package }}
           context: ${{ matrix.context }}
+          force-rebuild: ${{ inputs.FORCE_REBUILD }}
 
       - name: Set matrix job output
         id: set_output
