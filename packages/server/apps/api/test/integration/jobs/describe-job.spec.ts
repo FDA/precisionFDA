@@ -1,6 +1,5 @@
 import { EntityManager } from '@mikro-orm/core'
 import { expect } from 'chai'
-import { DateTime } from 'luxon'
 import { repeat } from 'ramda'
 import supertest from 'supertest'
 import { database } from '@shared/database'
@@ -58,7 +57,11 @@ describe.skip('GET /jobs/:id', () => {
     })
     // test timestamps separately, just to make sure timezones are ok
     expect(body).to.include.keys(['createdAt'])
-    expect(DateTime.fromISO(body.createdAt).hasSame(DateTime.fromJSDate(job.createdAt), 'hour')).to.be.true()
+    const responseCreatedAt = new Date(body.createdAt)
+    expect(responseCreatedAt.getUTCFullYear()).to.equal(job.createdAt.getUTCFullYear())
+    expect(responseCreatedAt.getUTCMonth()).to.equal(job.createdAt.getUTCMonth())
+    expect(responseCreatedAt.getUTCDate()).to.equal(job.createdAt.getUTCDate())
+    expect(responseCreatedAt.getUTCHours()).to.equal(job.createdAt.getUTCHours())
     // todo: keep it or leave it out?
     // expect(body).to.include.keys(['createdAt', 'updatedAt'])
     // expect(

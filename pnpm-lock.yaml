@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  server>html-minifier: npm:html-minifier-terser@^6.1.0
+  server>html-minifier: npm:html-minifier-terser@6.1.0
 
 importers:
 
