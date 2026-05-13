@@ -1,15 +1,10 @@
-import React, { useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { SelectInstance } from 'react-select'
-import styled from 'styled-components'
-import { Select } from '../../../components/Select'
+import { useRef } from 'react'
+import type { SelectInstance } from 'react-select'
+import { Select } from '@/components/Select'
+import { getSpaceIdFromScope } from '@/utils'
 import { spacesMembersListRequest } from '../../spaces/members/members.api'
-import { NoteScope } from '../api'
-import { getSpaceIdFromScope } from '../../../utils'
-
-const StyledSelect = styled(Select)`
-  --slect-height: none;
-`
+import type { NoteScope } from '../api'
 
 // ATM only used for fetching active space members, won't work for public discussions
 const useFetchNotifyMembersQuery = (spaceId: string) =>
@@ -43,7 +38,7 @@ export const NotifyMembersSelect = ({
   scope: NoteScope
 }) => {
   const spaceId = getSpaceIdFromScope(scope)
-  const ref = useRef<SelectInstance>(null)
+  const ref = useRef<SelectInstance<{ label: string; value: string }, true>>(null)
   const { data: options, isLoading } = useFetchNotifyMembersQuery(spaceId!)
   options?.unshift({ value: 'author', label: 'Author Only' }, { value: 'all', label: 'All Space Members' })
 
@@ -57,8 +52,7 @@ export const NotifyMembersSelect = ({
   }
 
   return (
-    <StyledSelect
-      // @ts-expect-error ref not compatible with styled-components
+    <Select
       ref={ref}
       options={options}
       placeholder="Members to notify..."

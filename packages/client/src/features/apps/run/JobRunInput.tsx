@@ -10,14 +10,13 @@ import {
   type UseFormSetError,
   useFormContext,
 } from 'react-hook-form'
-import Select, { components, type SingleValueProps } from 'react-select'
-import CreatableSelect from 'react-select/creatable'
-import styled from 'styled-components'
+import { components, type SingleValueProps } from 'react-select'
+import { BoolButton, BoolButtonGroup } from '@/components/Button/BoolButtons'
+import { FieldInfo } from '@/components/form/FieldInfo'
+import { InputText } from '@/components/InputText'
+import { CreatableSelect, Select } from '@/components/Select'
 import { FieldError } from '@/components/ui/field'
 import type { RunWorkflowFormType } from '@/features/workflows/run/RunWorkflowForm'
-import { BoolButton, BoolButtonGroup } from '../../../components/Button/BoolButtons'
-import { FieldInfo } from '../../../components/form/FieldInfo'
-import { InputText } from '../../../components/InputText'
 import { noAccessText } from '../../files/file.utils'
 import type { InputSpec, IOSpec, RunJobFormType } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
@@ -29,12 +28,6 @@ const getDefaultValue = val => {
   if (val === null || val === undefined || val.length === 0) return undefined
   return Array.isArray(val) ? val.map(value => ({ value, label: value })) : { value: val, label: val }
 }
-
-const StyledMenuMessage = styled.div`
-  padding: 8px;
-  display: flex;
-  gap: 16px;
-`
 
 const Msg = ({
   sclass,
@@ -80,9 +73,9 @@ const Menu = ({ children, ...props }: SingleValueProps) => {
 
   return (
     <components.Menu {...props}>
-      <StyledMenuMessage>
+      <div className="flex gap-4 p-2">
         <Msg inputValue={inputValue} value={value} sclass={sclass} />
-      </StyledMenuMessage>
+      </div>
     </components.Menu>
   )
 }
