@@ -1,0 +1,118 @@
+/* --select-height can be overridden via CSS custom property */
+.container {
+  --height: var(--select-height, 32px);
+  min-height: var(--height);
+  min-width: 200px;
+}
+
+.container .singleValue {
+  font-weight: 500;
+  color: var(--c-text-600);
+}
+
+.container .valueContainer {
+  font-size: 14px;
+  height: var(--height);
+  padding-top: 0;
+}
+
+.container .indicatorsContainer {
+  height: var(--height);
+}
+
+/* Scrollbar styles for the menu list */
+.container .listbox {
+  font-size: 14px;
+}
+
+.container .listbox::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 20px;
+  border: solid 5px transparent;
+  box-sizing: border-box;
+}
+
+.container .listbox::-webkit-scrollbar {
+  width: 18px;
+  height: 18px;
+}
+
+.container .listbox::-webkit-scrollbar-thumb {
+  background-color: var(--c-scrollbar);
+  border-radius: 20px;
+  border: solid 5px transparent;
+  background-clip: content-box;
+  min-height: 30px;
+}
+
+.container .listbox::-webkit-scrollbar-thumb:hover {
+  background-color: var(--c-scrollbar-2);
+  border-radius: 20px;
+  border: solid 5px transparent;
+  background-clip: content-box;
+}
+
+.container .control {
+  min-height: var(--height);
+  height: var(--height);
+  background: var(--background);
+  border-color: var(--c-input-border);
+  color: var(--base);
+}
+
+/* controlDisabled must come after control so it wins */
+.container .controlDisabled {
+  background: var(--tertiary-100);
+}
+
+.container .menu {
+  background: var(--c-dropdown-bg);
+  box-sizing: content-box;
+  border: 1px solid var(--c-layout-border-200);
+}
+
+.container .option {
+  height: var(--height);
+  font-weight: 500;
+  font-size: 14px;
+  background: var(--c-dropdown-bg);
+  color: var(--base);
+}
+
+.container .option:hover {
+  background: var(--c-dropdown-hover-bg);
+}
+
+/* optionSelected must come after option so it wins */
+.container .optionSelected {
+  background: var(--primary-600);
+  color: white;
+}
+
+.container .optionSelected:hover {
+  background: var(--primary-500);
+}
+
+.container .multiValue {
+  background: var(--c-dropdown-bg);
+  border: 1px solid var(--c-layout-border-200);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.container .multiValueLabel {
+  color: var(--base);
+}
+
+/* Target react-select's own internal class names, scoped to our container */
+.container :global([class*="-indicatorSeparator"]) {
+  background-color: var(--c-layout-border);
+}
+
+.container :global([class*="-indicatorContainer"]) {
+  color: var(--c-layout-border);
+}
+
+.container :global([class*="-Svg"]) {
+  height: 16px;
+}
