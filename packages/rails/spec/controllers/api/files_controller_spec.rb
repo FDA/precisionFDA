@@ -65,65 +65,6 @@ RSpec.describe Api::FilesController, type: :controller do
     end
   end
 
-  describe "GET download" do
-    context "when user is authenticated" do
-      let(:redirect_url) { "https://url" }
-
-      before do
-        authenticate!(user)
-
-        allow(UserFile).to receive(:accessible_found_by).and_return(file)
-        allow(HttpsAppsClient).to receive(:new).and_return(node_client)
-        allow(node_client).to receive(:get_file_download_link).and_return(redirect_url)
-        allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(false)
-      end
-
-      it "redirects to a file download url" do
-        stub_request(:get, %r{\Ahttps://localhost:3001/files/.+/download-link\z}).
-          to_return(status: 200, body: "", headers: {})
-
-        get :download, params: { uid: file.uid }
-
-        expect(response).to redirect_to(redirect_url)
-      end
-
-      context "when file is not in the closed state" do
-        before do
-          file.update!(state: UserFile::STATE_OPEN)
-        end
-
-        it "responds with an error" do
-          get :download, params: { uid: file.uid }
-
-          expect(response).to be_unprocessable
-        end
-      end
-
-      context "when file license is not accepted by a user" do
-        before do
-          license = instance_double(License)
-
-          allow(file).to receive(:license).and_return(license)
-          allow(file).to receive(:licensed_by?).and_return(false)
-        end
-
-        it "responds with an error" do
-          get :download, params: { uid: file.uid }
-
-          expect(response).to be_unprocessable
-        end
-      end
-    end
-
-    context "when user is not authenticated" do
-      before do
-        get :download, params: { uid: file.uid }
-      end
-
-      it_behaves_like "unauthenticated"
-    end
-  end
-
   describe "PUT feature files and folders" do
     context "when user is authenticated" do
       let(:folder_one) { create(:folder, :public, user: admin) }

@@ -323,8 +323,6 @@ Rails.application.routes.draw do
 
       resources :files, param: :uid, only: %i(index update show) do
         get :download, on: :member
-        get :describe, on: :member # for CLI
-        get ":file_name", on: :member, action: :download_file, constraints: { file_name: %r{[^/]+} }
 
         collection do
           get :featured

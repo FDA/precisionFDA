@@ -292,7 +292,7 @@ export const useFilesSelectActions = ({
       func: () => {
         if (selected.length === 1) {
           const file = selected[0]
-          const win = window.open(`/api/files/${file.uid}/${sanitizeFileName(file.name)}?inline=true`, '_blank')
+          const win = window.open(`/api/v2/files/${file.uid}/${sanitizeFileName(file.name)}?inline=true`, '_blank')
           win?.focus()
         } else {
           setOpenFileModal(true)
@@ -498,7 +498,7 @@ export const useFilesSelectActions = ({
       isDisabled: selected.length !== 1 || !selected[0].tags.includes('GSRS'),
       link:
         selected.length === 1
-          ? `/ginas/app/ui/substances/register?action=pfda-file-import&file-uri=${encodeURIComponent(`/api/files/${selected[0].uid}/${sanitizeFileName(selected[0].name)}?inline=true`)}`
+          ? `/ginas/app/ui/substances/register?action=pfda-file-import&file-uri=${encodeURIComponent(`/api/v2/files/${selected[0].uid}/${sanitizeFileName(selected[0].name)}?inline=true`)}`
           : '',
     },
   ]

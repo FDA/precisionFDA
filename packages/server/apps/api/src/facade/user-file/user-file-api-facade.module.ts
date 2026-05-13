@@ -2,6 +2,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Module } from '@nestjs/common'
 import { EntityModule } from '@shared/domain/entity/entity.module'
 import { EventModule } from '@shared/domain/event/event.module'
+import { LicenseModule } from '@shared/domain/license/license.module'
 import { NotificationModule } from '@shared/domain/notification/notification.module'
 import { SpaceModule } from '@shared/domain/space/space.module'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -20,6 +21,7 @@ import { UserFileResolverFacade } from './user-file-resolver.facade'
     NotificationModule,
     PlatformClientModule,
     EventModule,
+    LicenseModule,
   ],
   providers: [UserFileResolverFacade, UserFileDownloadFacade, UserFileBulkDownloadFacade],
   exports: [UserFileResolverFacade, UserFileDownloadFacade, UserFileBulkDownloadFacade],

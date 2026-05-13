@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
-import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
+import { DownloadLinkOptionsDTO } from '@shared/domain/entity/domain/download-link-options.dto'
 import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { DownloadableEntityType } from '@shared/domain/entity/entity-link/domain/downloadable-entity.type'
 import { UiLinkableEntityType } from '@shared/domain/entity/entity-link/domain/ui-linkable-entity.type'
@@ -47,7 +47,7 @@ export class EntityLinkService {
   async getDownloadLink(
     entity: EntityInstance<DownloadableEntityType>,
     fileName: string,
-    options?: DownloadLinkOptionsDto,
+    options?: DownloadLinkOptionsDTO,
   ): Promise<string> {
     const effectiveOptions = { ...EntityLinkService.DOWNLOAD_LINK_OPTIONS_DEFAULT, ...options }
     const url = await this.getDownloadLinkUrl(entity, fileName, effectiveOptions)
@@ -62,7 +62,7 @@ export class EntityLinkService {
   private async getDownloadLinkUrl(
     entity: EntityInstance<DownloadableEntityType>,
     fileName: string,
-    options: DownloadLinkOptionsDto,
+    options: DownloadLinkOptionsDTO,
   ): Promise<URL> {
     if (options.preauthenticated) {
       const link = await this.platformClient.fileDownloadLink({
@@ -76,8 +76,7 @@ export class EntityLinkService {
       return new URL(link.url)
     }
 
-    // TODO(PFDA-5831) - v2 endpoint
-    return new URL(`${config.api.railsHost}/api/files/${entity.uid}/${this.sanitizeFileName(fileName)}`)
+    return new URL(`${config.api.railsHost}/api/v2/files/${entity.uid}/${this.sanitizeFileName(fileName)}`)
   }
 
   private sanitizeFileName(name: string): string {

@@ -53,7 +53,7 @@ class UserFile extends Node {
   @Property({ persist: false })
   get links(): { download: string } {
     return {
-      download: `/api/files/${this.uid}/download`,
+      download: `/api/v2/files/${this.uid}/download`,
     }
   }
 

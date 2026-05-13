@@ -4,6 +4,7 @@ import { PropertyFacadeModule } from '@shared/facade/property/property-facade.mo
 import { CliApiFacadeModule } from '../facade/cli/cli-api-facade.module'
 import { CliDbClusterPasswordFacadeModule } from '../facade/db-cluster/password-facade/cli-db-cluster-password-facade.module'
 import { DiscussionApiFacadeModule } from '../facade/discussion/discussion-api-facade.module'
+import { UserFileApiFacadeModule } from '../facade/user-file/user-file-api-facade.module'
 import { CliController } from './cli.controller'
 import { CliAssetsController } from './cli-assets.controller'
 import { CliDbClustersController } from './cli-dbclusters.controller'
@@ -21,6 +22,7 @@ import { CliSpacesController } from './cli-spaces.controller'
     DiscussionApiFacadeModule,
     PropertyFacadeModule,
     CliExchangeFacadeModule,
+    UserFileApiFacadeModule,
   ],
   controllers: [
     CliAssetsController,

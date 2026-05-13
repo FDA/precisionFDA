@@ -1,18 +1,21 @@
 import { useQuery } from '@tanstack/react-query'
 import queryString from 'query-string'
-import React from 'react'
+import type React from 'react'
 import { Link, useLocation } from 'react-router'
-import { ActionsMenu } from '../../../components/Menu'
+import { Button } from '../../../components/Button'
 import { HomeLabel } from '../../../components/HomeLabel'
-import { Filler } from '../../../components/Page/styles'
-import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
-import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../../components/Tags'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { LockIcon } from '../../../components/icons/LockIcon'
+import { ActionsMenu } from '../../../components/Menu'
+import { Filler } from '../../../components/Page/styles'
+import { type ITab, TabsSwitch } from '../../../components/TabsSwitch'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../../components/Tags'
 import { theme } from '../../../styles/theme'
+import { sanitizeFileName } from '../../../utils/formatting'
 import { getBackPathNext } from '../../../utils/getBackPath'
 import { ActionsMenuContent } from '../../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
+import { defaultHomeContext, type HomeScopeContextValue } from '../../home/HomeScopeContext'
 import { StyledBackLink } from '../../home/home.styles'
 import {
   HeaderLeft,
@@ -29,17 +32,14 @@ import {
   Title,
   Topbox,
 } from '../../home/show.styles'
-import { HomeScope } from '../../home/types'
+import type { HomeScope } from '../../home/types'
 import { License } from '../../licenses/License'
-import { ISpace } from '../../spaces/spaces.types'
+import type { ISpace } from '../../spaces/spaces.types'
+import { FileBreadcrumb } from '../FileBreadcrumb'
 import { fetchFile } from '../files.api'
-import { IFile } from '../files.types'
+import type { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription, HeaderActions } from './styles'
-import { FileBreadcrumb } from '../FileBreadcrumb'
-import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
-import { Button } from '../../../components/Button'
-import { sanitizeFileName } from '../../../utils/formatting'
 
 const FileActionsDropdown = ({
   homeScope,
@@ -51,7 +51,7 @@ const FileActionsDropdown = ({
   space?: ISpace
   file: IFile
   folderId?: string
-}) => {
+}): React.ReactElement => {
   const { actions, modals } = useFilesSelectActions({
     homeScope,
     space,
@@ -76,10 +76,10 @@ export const FileShow = ({
   space,
   homeContext = defaultHomeContext,
 }: {
-  fileId: string,
-  space?: ISpace,
+  fileId: string
+  space?: ISpace
   homeContext?: HomeScopeContextValue
-}) => {
+}): React.ReactElement => {
   const { homeScope, setDisplayScope, isHome } = homeContext
   const location = useLocation()
   const { data, isLoading } = useQuery({
@@ -133,7 +133,13 @@ export const FileShow = ({
               <span data-testid="file-name">{file.name}</span>
               {file.show_license_pending && (
                 <div data-testid="file-license-pending">
-                  <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" className="" state={file.state ?? undefined} />
+                  <HomeLabel
+                    value="License Pending Approval"
+                    icon="fa-clock-o"
+                    type="warning"
+                    className=""
+                    state={file.state ?? undefined}
+                  />
                 </div>
               )}
             </Title>
@@ -142,7 +148,10 @@ export const FileShow = ({
             <Button
               type="button"
               onClick={() => {
-                const win = window.open(`/api/files/${file.uid}/${sanitizeFileName(file.name)}?inline=true`, '_blank')
+                const win = window.open(
+                  `/api/v2/files/${file.uid}/${sanitizeFileName(file.name)}?inline=true`,
+                  '_blank',
+                )
                 win?.focus()
               }}
               disabled={file.locked || !file.links.download || file.show_license_pending || file.state !== 'closed'}
@@ -150,12 +159,7 @@ export const FileShow = ({
             >
               Open
             </Button>
-            <FileActionsDropdown
-              homeScope={homeScope}
-              space={space}
-              file={file}
-              folderId={folderId}
-            />
+            <FileActionsDropdown homeScope={homeScope} space={space} file={file} folderId={folderId} />
           </HeaderActions>
         </ResourceHeader>
 
@@ -179,7 +183,9 @@ export const FileShow = ({
                     {file.location}
                   </Link>
                 ) : (
-                  <Link to={`/home/files${scopeParamLink}`}>{homeScope === 'featured' ? 'Featured' : file.location}</Link>
+                  <Link to={`/home/files${scopeParamLink}`}>
+                    {homeScope === 'featured' ? 'Featured' : file.location}
+                  </Link>
                 )}
               </MetadataVal>
             </MetadataItem>
@@ -202,7 +208,9 @@ export const FileShow = ({
               <MetadataKey>Origin</MetadataKey>
               <MetadataVal data-testid="file-origin">
                 {['Job', 'Comparison'].includes(file.links?.origin_object?.origin_type ?? '') &&
-                file.origin && typeof file.origin === 'object' && file.origin.href ? (
+                file.origin &&
+                typeof file.origin === 'object' &&
+                file.origin.href ? (
                   <Link target="_blank" to={file.origin.href}>
                     {file.origin.text || file.origin.href}
                   </Link>
