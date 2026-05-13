@@ -421,72 +421,7 @@ module Api
     # rubocop:enable Metrics/MethodLength
     # GET /api/files/download
     # Responds with a link to download a file.
-    def download
-      if called_by_cli
-        cli_download
-        return
-      end
-
-      file = UserFile.accessible_found_by(@context, params[:uid])
-      verify_nodes_for_protection([file], "download")
-
-      if file.state != UserFile::STATE_CLOSED
-        raise ApiError, "Files can only be downloaded if they are in the 'closed' state"
-      end
-
-      if file.license.present? && !file.licensed_by?(@context)
-        raise ApiError, "You must accept the license before you can download this"
-      end
-
-      file_url = https_apps_client.get_file_download_link(params[:uid])
-
-      respond_to do |format|
-        format.html do
-          redirect_to URI.parse(file_url).to_s
-        end
-
-        format.json do
-          render json: {
-            file_url: file_url,
-            file_size: file.file_size,
-          }, adapter: :json
-        end
-      end
-    end
-
-    def cli_download
-      options = {
-        duration: unsafe_params.fetch(:duration, 86_400),
-        preauthenticated: unsafe_params.fetch(:preauthenticated, false),
-        inline: unsafe_params.fetch(:inline, false),
-      }
-
-      match = request.headers["User-Agent"].match(/precisionFDA CLI\/([\d\.]+)/)
-      version = match[1]
-      # parse the version and if it's 2.6.0 or older, provide direct link
-      if Gem::Version.new(version) <= Gem::Version.new("2.6.0")
-        # if cli is 2.6.0 or older, provide direct link. Otherwise, provide proxy link.
-        options[:preauthenticated] = true
-      end
-
-      file = UserFile.accessible_found_by(@context, params[:uid])
-      url = https_apps_client.get_file_download_link(params[:uid], options)
-
-      render json: {
-        file_url: url,
-        file_size: file.file_size,
-      }, adapter: :json
-    end
-
-    # GET /api/files/:uid/:filename
-    def download_file
-      options = params[:inline] ? { inline: true } : {}
-
-      response = https_apps_client.file_download(params[:uid], params[:file_name], options)
-      response.each_header { |key, value| headers[key] = value unless %w[transfer-encoding connection].include?(key.downcase) }
-
-      render plain: response.body, status: response.code.to_i
-    end
+    def download; end
 
     # POST /api/files/bulk_download
     # Responds with an array of links to platform for download requested files - filters out only accessible files.

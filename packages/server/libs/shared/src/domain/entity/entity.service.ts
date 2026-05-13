@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
+import { DownloadLinkOptionsDTO } from '@shared/domain/entity/domain/download-link-options.dto'
 import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { EntityIconService } from '@shared/domain/entity/entity-icon/entity-icon.service'
 import { EntityWithIconType } from '@shared/domain/entity/entity-icon/entity-with-icon.type'
@@ -21,7 +21,7 @@ export class EntityService {
   getEntityDownloadLink(
     entity: EntityInstance<DownloadableEntityType>,
     fileName: string,
-    options?: DownloadLinkOptionsDto,
+    options?: DownloadLinkOptionsDTO,
   ): Promise<string> {
     return this.entityLinkService.getDownloadLink(entity, fileName, options)
   }

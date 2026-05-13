@@ -1,21 +1,22 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import type React from 'react'
+import { useState } from 'react'
 import styled from 'styled-components'
 import { Button } from '@/components/Button'
 import { FileIcon } from '@/components/icons/FileIcon'
 import { VerticalCenter } from '@/components/Page/styles'
 import { ResourceTable, StyledAction, StyledName } from '@/components/ResourceTable'
 import { pluralize, sanitizeFileName } from '@/utils/formatting'
-import { DownloadListResponse } from '../../home/types'
+import type { DownloadListResponse } from '../../home/types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { fetchFilesDownloadList } from '../files.api'
-import { IFile } from '../files.types'
+import type { IFile } from '../files.types'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
 import { DownloadIcon } from '@/components/icons/DownloadIcon'
 
-const StyledResourceTable = styled(ResourceTable)`
+const StyledResourceTable: typeof ResourceTable = styled(ResourceTable)`
   padding: 8px;
   min-width: 400px;
   ${StyledAction} {
@@ -28,10 +29,12 @@ interface OpenFileListProps {
   onSelectedLengthChange: (length: number) => void
 }
 
-const OpenFileList: React.FC<OpenFileListProps> = ({ selectedFiles, onSelectedLengthChange }) => {
-  const handleOpenClick = (item: DownloadListResponse) => {
-    // TODO(PFDA-5831) - v2 endpoint
-    const win = window.open(`/api/files/${item.uid}/${sanitizeFileName(item.name)}?inline=true`, '_blank')
+const OpenFileList: React.FC<OpenFileListProps> = ({
+  selectedFiles,
+  onSelectedLengthChange,
+}: OpenFileListProps): React.ReactElement => {
+  const handleOpenClick = (item: DownloadListResponse): void => {
+    const win = window.open(`/api/v2/files/${item.uid}/${sanitizeFileName(item.name)}?inline=true`, '_blank')
     win?.focus()
   }
 
@@ -83,9 +86,15 @@ const OpenFileList: React.FC<OpenFileListProps> = ({ selectedFiles, onSelectedLe
   )
 }
 
-export const useOpenFileModal = (selectedFiles: IFile[]) => {
+export const useOpenFileModal = (
+  selectedFiles: IFile[],
+): { modalComp: React.ReactElement; setShowModal: (show: boolean) => void; isShown: boolean } => {
   const { isShown, setShowModal } = useModal()
   const [seletedLength, setSelectedLength] = useState<number>(0)
+
+  const hideModal = (): void => {
+    setShowModal(false)
+  }
 
   const modalComp = (
     <ModalNext
@@ -93,15 +102,15 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
       data-testid="modal-files-organize"
       headerText={`Open ${seletedLength} ${pluralize('item', seletedLength)}`}
       isShown={isShown}
-      hide={() => setShowModal(false)}
+      hide={hideModal}
     >
-      <ModalHeaderTop headerText={`Open ${seletedLength} ${pluralize('item', seletedLength)}`} hide={() => setShowModal(false)} />
+      <ModalHeaderTop headerText={`Open ${seletedLength} ${pluralize('item', seletedLength)}`} hide={hideModal} />
       <ModalScroll>
         <OpenFileList selectedFiles={selectedFiles} onSelectedLengthChange={setSelectedLength} />
       </ModalScroll>
       <Footer>
         <ButtonRow>
-          <Button onClick={() => setShowModal(false)}>Cancel</Button>
+          <Button onClick={hideModal}>Cancel</Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

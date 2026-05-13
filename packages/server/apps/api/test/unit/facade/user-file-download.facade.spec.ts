@@ -1,9 +1,10 @@
 import { UserFileDownloadFacade } from 'apps/api/src/facade/user-file/user-file-download.facade'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
-import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
+import { DownloadLinkOptionsDTO } from '@shared/domain/entity/domain/download-link-options.dto'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityService } from '@shared/domain/entity/entity.service'
+import { LicenseService } from '@shared/domain/license/license.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -19,11 +20,16 @@ describe('UserFileDownloadFacade', () => {
   let getDownloadLinkStub: SinonStub
   let canUserDownloadFromStub: SinonStub
   const entityServiceGetEntityDownloadLinkStub = stub()
+  const findLicensesAndAcceptedLicensesByItemIdsStub = stub()
 
   beforeEach(() => {
     getUserFileOrAsset = stub().throws()
     getDownloadLinkStub = stub().resolves(DOWNLOAD_LINK)
     canUserDownloadFromStub = stub().resolves()
+
+    findLicensesAndAcceptedLicensesByItemIdsStub.reset()
+    findLicensesAndAcceptedLicensesByItemIdsStub.throws()
+    findLicensesAndAcceptedLicensesByItemIdsStub.resolves(new Map())
   })
 
   it('should generate download link for closed file in private scope', async () => {
@@ -33,10 +39,11 @@ describe('UserFileDownloadFacade', () => {
       .withArgs(file, file.name, { preauthenticated: false })
       .resolves(DOWNLOAD_LINK)
 
-    const options: DownloadLinkOptionsDto = { preauthenticated: false }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: false }
     const result = await getInstance().getDownloadLink(FILE_UID, options)
 
-    expect(result).to.equal(DOWNLOAD_LINK)
+    expect(result.url).to.equal(DOWNLOAD_LINK)
+    expect(result.size).to.equal(file.fileSize)
     expect(getUserFileOrAsset.calledOnceWith(FILE_UID)).to.be.true
     expect(getDownloadLinkStub.calledOnceWith(file, options)).to.be.true
     expect(canUserDownloadFromStub.called).to.be.false
@@ -49,10 +56,11 @@ describe('UserFileDownloadFacade', () => {
       .withArgs(file, file.name, { preauthenticated: false })
       .resolves(DOWNLOAD_LINK)
 
-    const options: DownloadLinkOptionsDto = { preauthenticated: false }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: false }
     const result = await getInstance().getDownloadLink(FILE_UID, options)
 
-    expect(result).to.equal(DOWNLOAD_LINK)
+    expect(result.url).to.equal(DOWNLOAD_LINK)
+    expect(result.size).to.equal(file.fileSize)
     expect(getUserFileOrAsset.calledOnceWith(FILE_UID)).to.be.true
     expect(getDownloadLinkStub.calledOnceWith(file, options)).to.be.true
     expect(canUserDownloadFromStub.called).to.be.false
@@ -64,10 +72,11 @@ describe('UserFileDownloadFacade', () => {
     canUserDownloadFromStub.withArgs(SPACE_ID).resolves(true)
     entityServiceGetEntityDownloadLinkStub.withArgs(file, file.name, { preauthenticated: true }).resolves(DOWNLOAD_LINK)
 
-    const options: DownloadLinkOptionsDto = { preauthenticated: true }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: true }
     const result = await getInstance().getDownloadLink(FILE_UID, options)
 
-    expect(result).to.equal(DOWNLOAD_LINK)
+    expect(result.url).to.equal(DOWNLOAD_LINK)
+    expect(result.size).to.equal(file.fileSize)
     expect(getUserFileOrAsset.calledOnceWith(FILE_UID)).to.be.true
     expect(canUserDownloadFromStub.calledOnceWith(SPACE_ID)).to.be.true
     expect(getDownloadLinkStub.calledOnceWith(file, options)).to.be.true
@@ -76,12 +85,13 @@ describe('UserFileDownloadFacade', () => {
   it('should not validate space access when preauthenticated is false for space file', async () => {
     const file = createMockFile({ state: FILE_STATE_DX.CLOSED, isInSpace: true, spaceId: SPACE_ID })
     getUserFileOrAsset.withArgs(FILE_UID).resolves(file)
-    const options: DownloadLinkOptionsDto = { preauthenticated: false }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: false }
     entityServiceGetEntityDownloadLinkStub.withArgs(file, file.name, options).resolves(DOWNLOAD_LINK)
 
     const result = await getInstance().getDownloadLink(FILE_UID, options)
 
-    expect(result).to.equal(DOWNLOAD_LINK)
+    expect(result.url).to.equal(DOWNLOAD_LINK)
+    expect(result.size).to.equal(file.fileSize)
     expect(getUserFileOrAsset.calledOnceWith(FILE_UID)).to.be.true
     expect(getDownloadLinkStub.calledOnceWith(file, options)).to.be.true
     expect(canUserDownloadFromStub.called).to.be.false
@@ -90,12 +100,13 @@ describe('UserFileDownloadFacade', () => {
   it('should not validate space access for private scope file even with preauthentication', async () => {
     const file = createMockFile({ state: FILE_STATE_DX.CLOSED, isInSpace: false })
     getUserFileOrAsset.withArgs(FILE_UID).resolves(file)
-    const options: DownloadLinkOptionsDto = { preauthenticated: true }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: true }
     entityServiceGetEntityDownloadLinkStub.withArgs(file, file.name, options).resolves(DOWNLOAD_LINK)
 
     const result = await getInstance().getDownloadLink(FILE_UID, options)
 
-    expect(result).to.equal(DOWNLOAD_LINK)
+    expect(result.url).to.equal(DOWNLOAD_LINK)
+    expect(result.size).to.equal(file.fileSize)
     expect(getUserFileOrAsset.calledOnceWith(FILE_UID)).to.be.true
     expect(getDownloadLinkStub.calledOnceWith(file, options)).to.be.true
     expect(canUserDownloadFromStub.called).to.be.false
@@ -104,7 +115,7 @@ describe('UserFileDownloadFacade', () => {
   it('should throw NotFoundError when file does not exist', async () => {
     getUserFileOrAsset.withArgs(FILE_UID).resolves(null)
 
-    const options: DownloadLinkOptionsDto = { preauthenticated: false }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: false }
 
     await expect(getInstance().getDownloadLink(FILE_UID, options)).to.be.rejectedWith(
       NotFoundError,
@@ -118,7 +129,7 @@ describe('UserFileDownloadFacade', () => {
     const file = createMockFile({ state: FILE_STATE_DX.OPEN, isInSpace: false })
     getUserFileOrAsset.withArgs(FILE_UID).resolves(file)
 
-    const options: DownloadLinkOptionsDto = { preauthenticated: false }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: false }
 
     await expect(getInstance().getDownloadLink(FILE_UID, options)).to.be.rejectedWith(
       ValidationError,
@@ -138,7 +149,7 @@ describe('UserFileDownloadFacade', () => {
     canUserDownloadFromStub.reset()
     canUserDownloadFromStub.withArgs(SPACE_ID).throws(error)
 
-    const options: DownloadLinkOptionsDto = { preauthenticated: true }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: true }
 
     await expect(getInstance().getDownloadLink(FILE_UID, options)).to.be.rejectedWith(
       PermissionError,
@@ -154,19 +165,36 @@ describe('UserFileDownloadFacade', () => {
     getUserFileOrAsset.reset()
     getUserFileOrAsset.throws(error)
 
-    const options: DownloadLinkOptionsDto = { preauthenticated: false }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: false }
 
     await expect(getInstance().getDownloadLink(FILE_UID, options)).to.be.rejectedWith(error)
   })
 
-  it('should not catch error from getDownloadLink', async () => {
+  it('should throw ValidationError when license is not accepted', async () => {
+    const file = createMockFile({ state: FILE_STATE_DX.CLOSED, isInSpace: false })
+    const license = { id: 'license-1', title: 'Test License' }
+    const licensesMap = new Map()
+    licensesMap.set(file.id, [{ license, userAcceptedLicensesCount: 0 }])
+
+    getUserFileOrAsset.withArgs(FILE_UID).resolves(file)
+    findLicensesAndAcceptedLicensesByItemIdsStub.withArgs('Node', [file.id]).resolves(licensesMap)
+
+    const options: DownloadLinkOptionsDTO = { preauthenticated: false }
+
+    await expect(getInstance().getDownloadLink(FILE_UID, options)).to.be.rejectedWith(
+      ValidationError,
+      'You must accept the license associated with this file before downloading',
+    )
+  })
+
+  it('should catch error from getDownloadLink', async () => {
     const file = createMockFile({ state: FILE_STATE_DX.CLOSED, isInSpace: false })
     const error = new NotFoundError()
 
     getUserFileOrAsset.withArgs(FILE_UID).resolves(file)
     entityServiceGetEntityDownloadLinkStub.throws(error)
 
-    const options: DownloadLinkOptionsDto = { preauthenticated: false }
+    const options: DownloadLinkOptionsDTO = { preauthenticated: false }
 
     await expect(getInstance().getDownloadLink(FILE_UID, options)).to.be.rejectedWith(error)
   })
@@ -180,11 +208,12 @@ describe('UserFileDownloadFacade', () => {
 
     // Test file
     getUserFileOrAsset.withArgs(FILE_UID).resolves(file)
-    const imageOptions: DownloadLinkOptionsDto = { preauthenticated: false }
+    const imageOptions: DownloadLinkOptionsDTO = { preauthenticated: false }
     entityServiceGetEntityDownloadLinkStub.withArgs(file, file.name, imageOptions).resolves(DOWNLOAD_LINK)
 
     const result1 = await getInstance().getDownloadLink(FILE_UID, imageOptions)
-    expect(result1).to.equal(DOWNLOAD_LINK)
+    expect(result1.url).to.equal(DOWNLOAD_LINK)
+    expect(result1.size).to.equal(file.fileSize)
   })
 
   function createMockFile(options: {
@@ -216,6 +245,10 @@ describe('UserFileDownloadFacade', () => {
       getEntityDownloadLink: entityServiceGetEntityDownloadLinkStub,
     } as unknown as EntityService
 
-    return new UserFileDownloadFacade(nodeService, spaceService, entityService)
+    const licenseService = {
+      findLicensesAndAcceptedLicensesByItemIds: findLicensesAndAcceptedLicensesByItemIdsStub,
+    } as unknown as LicenseService
+
+    return new UserFileDownloadFacade(nodeService, spaceService, entityService, licenseService)
   }
 })

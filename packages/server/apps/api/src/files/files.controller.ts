@@ -4,6 +4,7 @@ import {
   DefaultValuePipe,
   Get,
   Header,
+  Headers,
   Logger,
   Param,
   ParseArrayPipe,
@@ -18,8 +19,9 @@ import {
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger'
 import archiver from 'archiver'
 import axios from 'axios'
+import { compareVersions } from 'compare-versions'
 import { Response } from 'express'
-import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
+import { DownloadLinkOptionsDTO } from '@shared/domain/entity/domain/download-link-options.dto'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
@@ -35,7 +37,6 @@ import { UserFileDownloadFacade } from '../facade/user-file/user-file-download.f
 import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { DownloadLinkParamDto } from './model/download-link-param.dto'
 import { FileUidParamDTO } from './model/file-uid-param.dto'
 import { FilesValidateCopyingBodyDto } from './model/file-validate-copying-body.dto'
 import { GetUploadUrlQueryDTO } from './model/get-upload-url-query.dto'
@@ -186,9 +187,50 @@ export class FilesController {
     return this.nodeService.validateCopyFiles(body.uids, body.scope)
   }
 
-  @Get('/:uid/download-link')
-  getDownloadLink(@Param() params: DownloadLinkParamDto, @Query() options: DownloadLinkOptionsDto): Promise<string> {
-    return this.userFileDownloadFacade.getDownloadLink(params.uid, options)
+  @Get('/:uid/download')
+  async getDownloadLink(
+    @Param() params: FileUidParamDTO,
+    @Query() options: DownloadLinkOptionsDTO,
+    @Res() res: Response,
+  ): Promise<void> {
+    const result = await this.userFileDownloadFacade.getDownloadLink(params.uid, options)
+    res.redirect(result.url)
+    return
+  }
+
+  @ApiOperation({
+    summary: 'Legacy endpoint for generating file download links for pre-2.12.0 CLI versions and JupyterLab',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Download link and file size',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            file_url: { type: 'string', description: 'The URL to download the file' },
+            file_size: { type: 'number', description: 'The size of the file in bytes' },
+          },
+        },
+      },
+    },
+  })
+  @Get('/:uid/download/legacy')
+  async getLegacyDownloadLink(
+    @Param() params: FileUidParamDTO,
+    @Query() options: DownloadLinkOptionsDTO,
+    @Headers('user-agent') userAgent: string,
+  ): Promise<{ file_url: string; file_size: number }> {
+    const cliVersion = userAgent?.match(/^precisionFDA CLI\/([\d.]+)/)?.[1]
+    if (cliVersion && compareVersions(cliVersion, '2.6.0') <= 0) {
+      options.preauthenticated = true
+    }
+    const result = await this.userFileDownloadFacade.getDownloadLink(params.uid, options)
+    return {
+      file_url: result.url,
+      file_size: result.size,
+    }
   }
 
   @Get(':uid/:fileName')
@@ -197,12 +239,12 @@ export class FilesController {
     @Query('inline', new DefaultValuePipe(false), ParseBoolPipe) inline: boolean,
     @Res() res: Response,
   ): Promise<void> {
-    const link = await this.userFileDownloadFacade.getDownloadLink(uid, {
+    const result = await this.userFileDownloadFacade.getDownloadLink(uid, {
       preauthenticated: true,
       inline,
       duration: TimeUtils.minutesToSeconds(5),
     })
 
-    return res.redirect(link)
+    return res.redirect(result.url)
   }
 }

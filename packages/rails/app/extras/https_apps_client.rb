@@ -789,15 +789,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def get_file_download_link(uid, options = {})
-    request(
-      "/files/#{uid}/download-link",
-      {},
-      Net::HTTP::Get::METHOD,
-      options,
-    )
-  end
-
   def list_selected_files(ids)
     request(
       "/files/selected",

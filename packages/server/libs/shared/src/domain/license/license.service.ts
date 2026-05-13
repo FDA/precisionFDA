@@ -4,6 +4,7 @@ import { License } from '@shared/domain/license/license.entity'
 import { LicenseRepository } from '@shared/domain/license/license.repository'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { UserContext } from '../user-context/model/user-context'
 
 @Injectable()
 export class LicenseService {
@@ -11,6 +12,7 @@ export class LicenseService {
     private readonly licenseRepository: LicenseRepository,
     private readonly licensedItemRepo: LicensedItemRepository,
     private readonly nodeRepo: NodeRepository,
+    private readonly userContext: UserContext,
   ) {}
 
   async findLicenseRefsByLicenseableIds(
@@ -85,5 +87,41 @@ export class LicenseService {
 
   async findAccessibleByIds(ids: number[]): Promise<License[]> {
     return this.licenseRepository.findAccessible({ id: { $in: ids } })
+  }
+
+  async findLicensesAndAcceptedLicensesByItemIds(
+    licenseableType: string,
+    licenseableIds: number[],
+  ): Promise<Map<number, { license: License; userAcceptedLicensesCount: number }[]>> {
+    const result = new Map<number, { license: License; userAcceptedLicensesCount: number }[]>()
+
+    if (licenseableIds.length === 0) {
+      return result
+    }
+
+    const licensedItems = await this.licensedItemRepo.find(
+      {
+        licenseableType,
+        licenseableId: { $in: licenseableIds },
+      },
+      {
+        populate: ['license', 'license.acceptedLicenses'],
+        populateWhere: { license: { acceptedLicenses: { user: this.userContext.id } } },
+      },
+    )
+
+    for (const item of licensedItems) {
+      if (!result.has(item.licenseableId)) {
+        result.set(item.licenseableId, [])
+      }
+
+      const license = item.license.getEntity()
+      result.get(item.licenseableId).push({
+        license,
+        userAcceptedLicensesCount: license.acceptedLicenses.length,
+      })
+    }
+
+    return result
   }
 }

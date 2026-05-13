@@ -29,6 +29,22 @@ server {
     proxy_pass http://host.docker.internal:8080;
   }
 
+  location ~ ^/api/files/([^/]+)/download$ {
+    set $uid $1;
+    if ($http_authorization ~* "^Key ") {
+      return 301 $scheme://$http_host/api/v2/files/$uid/download/legacy$is_args$args;
+    }
+    return 301 $scheme://$http_host/api/v2/files/$uid/download$is_args$args;
+  }
+
+  location ~ ^/api/files/([^/]+)/describe$ {
+    return 301 $scheme://$http_host/api/v2/cli/$1/describe;
+  }
+
+  location ~ ^/api/files/([^/]+)/([^/]+)$ {
+    return 301 $scheme://$http_host/api/v2/files/$1/$2$is_args$args;
+  }
+
   location / {
     proxy_pass ${RUBY_API_URL};
     proxy_set_header Host $host:${PROXY_PORT};

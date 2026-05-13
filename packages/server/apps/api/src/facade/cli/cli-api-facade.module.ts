@@ -14,7 +14,6 @@ import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { UserFileApiFacadeModule } from '../user-file/user-file-api-facade.module'
 import { CliDescribeEntityFacade } from './cli-describe-entity.facade'
-import { CliFileDownloadFacade } from './cli-file-download.facade'
 import { CliFindNodesFacade } from './cli-find-nodes.facade'
 import { CliJobScopeFacade } from './cli-job-scope.facade'
 import { CliListAssetsFacade } from './cli-list-assets.facade'
@@ -55,7 +54,6 @@ import { CliTerminateJobFacade } from './cli-terminate-job.facade'
     CliListSpacesFacade,
     CliListAssetsFacade,
     CliListJobsFacade,
-    CliFileDownloadFacade,
   ],
   exports: [
     CliDescribeEntityFacade,
@@ -69,7 +67,6 @@ import { CliTerminateJobFacade } from './cli-terminate-job.facade'
     CliListSpacesFacade,
     CliListAssetsFacade,
     CliListJobsFacade,
-    CliFileDownloadFacade,
   ],
 })
 export class CliApiFacadeModule {}

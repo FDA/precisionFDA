@@ -142,19 +142,19 @@ describe('EntityLinkService', () => {
     it('should create PFDA link by default', async () => {
       const res = await getInstance().getDownloadLink(FILE, NAME)
 
-      expect(res).to.equal(`${config.api.railsHost}/api/files/FILE_UID/NAME`)
+      expect(res).to.equal(`${config.api.railsHost}/api/v2/files/FILE_UID/NAME`)
     })
 
     it('should correctly encode the file name into the url', async () => {
       const res = await getInstance().getDownloadLink(FILE, "Crazy&File *Name #123?='Yes'.jpg")
 
-      expect(res).to.equal(`${config.api.railsHost}/api/files/FILE_UID/Crazy%26File%20_Name%20%23123_%3D'Yes'.jpg`)
+      expect(res).to.equal(`${config.api.railsHost}/api/v2/files/FILE_UID/Crazy%26File%20_Name%20%23123_%3D'Yes'.jpg`)
     })
 
     it('should include the inline parameter when inline is set to true', async () => {
       const res = await getInstance().getDownloadLink(FILE, NAME, { inline: true })
 
-      expect(res).to.equal(`${config.api.railsHost}/api/files/FILE_UID/NAME?inline=true`)
+      expect(res).to.equal(`${config.api.railsHost}/api/v2/files/FILE_UID/NAME?inline=true`)
     })
 
     it('should get platform link for preauthenticated links', async () => {
