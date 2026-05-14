@@ -1,12 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
-import React from 'react'
 import { Link } from 'react-router'
-import { HomeLabel } from '../../components/HomeLabel'
-import { Markdown, MarkdownStyle } from '../../components/Markdown'
-import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
+import { CopyText } from '@/components/CopyText/CopyText'
+import { HomeLabel } from '@/components/HomeLabel'
+import { FileIcon } from '@/components/icons/FileIcon'
+import { Markdown, MarkdownStyle } from '@/components/Markdown'
+import { ActionsMenu } from '@/components/Menu'
+import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
+import { Filler } from '@/components/Page/styles'
+import { type ITab, TabsSwitch } from '@/components/TabsSwitch'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
+import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
+import { defaultHomeContext, type HomeScopeContextValue } from '../home/HomeScopeContext'
 import { StyledBackLink } from '../home/home.styles'
-import { License } from '../licenses/License'
 import {
   HeaderLeft,
   HomeLoader,
@@ -20,17 +26,12 @@ import {
   Title,
   Topbox,
 } from '../home/show.styles'
-import { HomeScope } from '../home/types'
+import type { HomeScope } from '../home/types'
+import { License } from '../licenses/License'
 import { ArchiveContents } from './ArchiveContents'
 import { fetchAsset } from './assets.api'
-import { IAsset } from './assets.types'
+import type { IAsset } from './assets.types'
 import { useAssetActions } from './useAssetSelectActions'
-import { ITab, TabsSwitch } from '../../components/TabsSwitch'
-import { FileIcon } from '../../components/icons/FileIcon'
-import { Filler } from '../../components/Page/styles'
-import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
-import { ActionsMenu } from '../../components/Menu'
-import { ActionsMenuContent } from '../home/ActionMenuContent'
 
 const AssetActions = ({ homeScope, asset }: { homeScope?: HomeScope; asset: IAsset }) => {
   const { actions, modals } = useAssetActions({
@@ -49,7 +50,13 @@ const AssetActions = ({ homeScope, asset }: { homeScope?: HomeScope; asset: IAss
   )
 }
 
-export const AssetShow = ({ assetUid, homeContext = defaultHomeContext }: { assetUid: string; homeContext?: HomeScopeContextValue }) => {
+export const AssetShow = ({
+  assetUid,
+  homeContext = defaultHomeContext,
+}: {
+  assetUid: string
+  homeContext?: HomeScopeContextValue
+}) => {
   const { homeScope, setDisplayScope, isHome } = homeContext
   const { data, isLoading } = useQuery({
     queryKey: ['asset', assetUid],
@@ -130,14 +137,24 @@ export const AssetShow = ({ assetUid, homeContext = defaultHomeContext }: { asse
                     {asset.location}
                   </Link>
                 ) : (
-                  <Link to={`/home/assets${scopeParamLink}`}>{homeScope === 'featured' ? 'Featured' : asset.location}</Link>
+                  <Link to={`/home/assets${scopeParamLink}`}>
+                    {homeScope === 'featured' ? 'Featured' : asset.location}
+                  </Link>
                 )}
               </MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
               <MetadataKey>ID</MetadataKey>
-              <MetadataVal>{asset.uid}</MetadataVal>
+              <MetadataVal>
+                <CopyText
+                  className="inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]"
+                  value={asset.uid}
+                  onCopy={() => toastInfo('Asset ID copied to clipboard')}
+                >
+                  <span>{asset.uid}</span>
+                </CopyText>
+              </MetadataVal>
             </MetadataItem>
 
             <MetadataItem>

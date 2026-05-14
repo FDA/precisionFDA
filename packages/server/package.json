@@ -71,7 +71,7 @@
     "json-schema": "0.4.0",
     "marked": "17.0.4",
     "mjml": "4.18.0",
-    "nanoid": "3.3.11",
+    "nanoid": "3.3.12",
     "nestjs-pino": "4.6.1",
     "nodemailer": "8.0.5",
     "pino": "10.3.1",

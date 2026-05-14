@@ -1,17 +1,20 @@
-import React from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
-import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
-import { HomeLabel } from '../../components/HomeLabel'
-import { ActionsMenu } from '../../components/Menu'
-import { RevisionMenu } from '../../components/Menu/RevisionMenu'
-import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
-import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
-import { CubeIcon } from '../../components/icons/CubeIcon'
-import { IChallenge } from '../../types/challenge'
-import { getSpaceIdFromScope } from '../../utils'
-import { getBackPathNext } from '../../utils/getBackPath'
+import { CloudResourcesHeaderButton } from '@/components/CloudResourcesHeaderButton'
+import { CopyText } from '@/components/CopyText/CopyText'
+import { HomeLabel } from '@/components/HomeLabel'
+import { CubeIcon } from '@/components/icons/CubeIcon'
+import { ActionsMenu } from '@/components/Menu'
+import { RevisionMenu } from '@/components/Menu/RevisionMenu'
+import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
+import { StyledTab, StyledTabList, StyledTabPanel } from '@/components/Tabs'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
+import type { IChallenge } from '@/types/challenge'
+import { getSpaceIdFromScope } from '@/utils'
+import { getBackPathNext } from '@/utils/getBackPath'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
+import { getHomeScopeFromServerScope } from '../home/getHomeScopeFromServerScope'
+import { defaultHomeContext, type HomeScopeContextValue } from '../home/HomeScopeContext'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   HeaderLeft,
@@ -27,14 +30,12 @@ import {
   Title,
   Topbox,
 } from '../home/show.styles'
-import { HomeScope } from '../home/types'
+import type { HomeScope } from '../home/types'
+import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
 import { getBasePath } from '../home/utils'
-import { IApp } from './apps.types'
+import type { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
-import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
-import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
-import { getHomeScopeFromServerScope } from '../home/getHomeScopeFromServerScope'
 
 export type AppShowOutletContext = {
   spaceId?: string
@@ -102,6 +103,16 @@ const renderOptions = (app: IApp, meta: { release: string }) => {
             {/* @ts-expect-error dynamic key */}
             {app[e.value]}
           </Link>
+        </MetadataVal>
+      ) : e.value === 'uid' ? (
+        <MetadataVal data-testid={e.dataTestId}>
+          <CopyText
+            className="inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]"
+            value={app.uid}
+            onCopy={() => toastInfo('App ID copied to clipboard')}
+          >
+            <span>{app.uid}</span>
+          </CopyText>
         </MetadataVal>
       ) : (
         // @ts-expect-error dynamic key
@@ -319,7 +330,9 @@ export const AppsShow = ({
         </StyledTab>
       </StyledTabList>
       <StyledTabPanel>
-        <Outlet context={{ spaceId, spec: meta.spec, readme: app.readme, appUid: app.uid } satisfies AppShowOutletContext} />
+        <Outlet
+          context={{ spaceId, spec: meta.spec, readme: app.readme, appUid: app.uid } satisfies AppShowOutletContext}
+        />
       </StyledTabPanel>
     </>
   )

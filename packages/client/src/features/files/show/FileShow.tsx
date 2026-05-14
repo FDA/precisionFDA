@@ -1,18 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import queryString from 'query-string'
-import type React from 'react'
 import { Link, useLocation } from 'react-router'
-import { Button } from '../../../components/Button'
-import { HomeLabel } from '../../../components/HomeLabel'
-import { FileIcon } from '../../../components/icons/FileIcon'
-import { LockIcon } from '../../../components/icons/LockIcon'
-import { ActionsMenu } from '../../../components/Menu'
-import { Filler } from '../../../components/Page/styles'
-import { type ITab, TabsSwitch } from '../../../components/TabsSwitch'
-import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../../components/Tags'
-import { theme } from '../../../styles/theme'
-import { sanitizeFileName } from '../../../utils/formatting'
-import { getBackPathNext } from '../../../utils/getBackPath'
+import { Button } from '@/components/Button'
+import { CopyText } from '@/components/CopyText/CopyText'
+import { HomeLabel } from '@/components/HomeLabel'
+import { FileIcon } from '@/components/icons/FileIcon'
+import { LockIcon } from '@/components/icons/LockIcon'
+import { ActionsMenu } from '@/components/Menu'
+import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
+import { Filler } from '@/components/Page/styles'
+import { type ITab, TabsSwitch } from '@/components/TabsSwitch'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
+import { theme } from '@/styles/theme'
+import { sanitizeFileName } from '@/utils/formatting'
+import { getBackPathNext } from '@/utils/getBackPath'
 import { ActionsMenuContent } from '../../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
 import { defaultHomeContext, type HomeScopeContextValue } from '../../home/HomeScopeContext'
@@ -192,7 +193,15 @@ export const FileShow = ({
 
             <MetadataItem>
               <MetadataKey>ID</MetadataKey>
-              <MetadataVal data-testid="file-uid">{file.uid}</MetadataVal>
+              <MetadataVal data-testid="file-uid">
+                <CopyText
+                  className="inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]"
+                  value={file.uid}
+                  onCopy={() => toastInfo('File ID copied to clipboard')}
+                >
+                  <span>{file.uid}</span>
+                </CopyText>
+              </MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
@@ -214,8 +223,10 @@ export const FileShow = ({
                   <Link target="_blank" to={file.origin.href}>
                     {file.origin.text || file.origin.href}
                   </Link>
+                ) : typeof file.origin === 'object' ? (
+                  file.origin?.text
                 ) : (
-                  <>{typeof file.origin === 'object' ? file.origin?.text : file.origin}</>
+                  file.origin
                 )}
               </MetadataVal>
             </MetadataItem>

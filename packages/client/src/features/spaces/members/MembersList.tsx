@@ -75,7 +75,6 @@ export const MembersList = ({ space }: { space: ISpace }) => {
   const [sortBy, setSortBy] = useState<ColumnSort[]>([])
   const [selectedRows, setSelectedRows] = useState<RowSelectionState>({})
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: space.id is a reset trigger, not a read value — when navigating to a different space, reset side role to undefined
   useEffect(() => {
     setSideRole(undefined)
   }, [space.id])

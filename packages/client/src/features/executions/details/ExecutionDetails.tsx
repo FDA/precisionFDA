@@ -1,8 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { type JSX, useEffect, useEffectEvent, useState } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router'
+import { CopyText } from '@/components/CopyText/CopyText'
 import { HomeLabel } from '@/components/HomeLabel'
 import { BoltIcon } from '@/components/icons/BoltIcon'
+import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
 import { StyledTab, StyledTabList, StyledTabPanel } from '@/components/Tabs'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
 import { useLastWSNotification } from '@/hooks/useLastWSNotification'
@@ -259,7 +261,15 @@ export const ExecutionDetails = ({
 
             <MetadataItem>
               <MetadataKey>ID</MetadataKey>
-              <MetadataVal data-testid="execution-uid">{execution.uid}</MetadataVal>
+              <MetadataVal data-testid="execution-uid">
+                <CopyText
+                  className="inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]"
+                  value={execution.uid}
+                  onCopy={() => toastInfo('Execution ID copied to clipboard')}
+                >
+                  <span>{execution.uid}</span>
+                </CopyText>
+              </MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
