@@ -56,7 +56,6 @@ export function useAccountEmailEditor({ profileEmail }: UseAccountEmailEditorArg
     }
   })
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: must re-run when profile/modal state changes; Biome treats Effect Events as making these redundant
   useEffect(() => {
     syncEmailDraftFromProfile()
   }, [profileEmail, emailEditModal.isShown, emailCredentialsModal.isShown, isSavingEmail])

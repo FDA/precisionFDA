@@ -47,7 +47,6 @@ export function useList<T extends ListType>({
     filters,
   })
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: we need reset on those value changes
   useEffect(() => {
     resetSelected()
   }, [JSON.stringify(filterQuery), JSON.stringify(pagination), JSON.stringify(sort), scope, params.spaceId])

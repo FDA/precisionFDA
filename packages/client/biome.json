@@ -11,7 +11,8 @@
         "useExplicitType": "off"
       },
       "correctness": {
-        "noUnusedVariables": "warn"
+        "noUnusedVariables": "warn",
+        "useExhaustiveDependencies": "off"
       },
       "suspicious": {
         "noExplicitAny": "warn",

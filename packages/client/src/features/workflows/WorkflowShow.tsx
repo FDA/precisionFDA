@@ -1,15 +1,18 @@
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router'
-import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
+import { CloudResourcesHeaderButton } from '@/components/CloudResourcesHeaderButton'
+import { CopyText } from '@/components/CopyText/CopyText'
+import { NetworkIcon } from '@/components/icons/NetworkIcon'
+import { Markdown, MarkdownStyle } from '@/components/Markdown'
+import { RevisionMenu } from '@/components/Menu/RevisionMenu'
+import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
+import { StyledTab, StyledTabList, StyledTabPanel } from '@/components/Tabs'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
+import { getBackPathNext } from '@/utils/getBackPath'
 import Menu from '../../components/Menu/Menu'
-import { RevisionMenu } from '../../components/Menu/RevisionMenu'
-import { Markdown, MarkdownStyle } from '../../components/Markdown'
-import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
-import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
-import { getBackPathNext } from '../../utils/getBackPath'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
+import { defaultHomeContext, type HomeScopeContextValue } from '../home/HomeScopeContext'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   ActionsButton,
@@ -26,16 +29,14 @@ import {
   Title,
   Topbox,
 } from '../home/show.styles'
-import { HomeScope } from '../home/types'
+import type { HomeScope } from '../home/types'
+import { getBasePath } from '../home/utils'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { WorkflowExecutionsList } from './WorkflowExecutionsList'
-import { fetchWorkflow } from './workflows.api'
-import { IWorkflow } from './workflows.types'
-import WorkflowsDiagram from './WorkflowsDiagram'
 import HomeWorkflowsSpec from './WorkflowSpec/WorkflowSpec'
-import { getBasePath } from '../home/utils'
-import { NetworkIcon } from '../../components/icons/NetworkIcon'
-import { defaultHomeContext, HomeScopeContextValue, HomeScopeProviderProps } from '../home/HomeScopeContext'
+import WorkflowsDiagram from './WorkflowsDiagram'
+import { fetchWorkflow } from './workflows.api'
+import type { IWorkflow } from './workflows.types'
 
 interface IColumn {
   header: string
@@ -83,7 +84,7 @@ const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
       {e.header === 'location' && !e.link ? (
         <MetadataVal>
           <Link to={`/home/workflows${scopeParamLink}`} data-testid={e.dataTestId}>
-            {homeScope === 'featured' ? 'Featured' : workflow[e.value] as string}
+            {homeScope === 'featured' ? 'Featured' : (workflow[e.value] as string)}
           </Link>
         </MetadataVal>
       ) : e.link ? (
@@ -91,6 +92,16 @@ const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
           <Link to={e.link} target="_blank" data-testid={e.dataTestId}>
             {workflow[e.value] as string}
           </Link>
+        </MetadataVal>
+      ) : e.value === 'uid' ? (
+        <MetadataVal data-testid={e.dataTestId}>
+          <CopyText
+            className="inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]"
+            value={workflow.uid}
+            onCopy={() => toastInfo('Workflow ID copied to clipboard')}
+          >
+            <span>{workflow.uid}</span>
+          </CopyText>
         </MetadataVal>
       ) : (
         <MetadataVal data-testid={e.dataTestId}>{workflow[e.value] as string}</MetadataVal>
@@ -122,10 +133,8 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         data-testid="workflow-show-actions-run"
         conditionType="all"
       >
-        <>
-          Run Workflow&nbsp;
-          <Pill>rev{workflow.revision}</Pill>
-        </>
+        Run Workflow&nbsp;
+        <Pill>rev{workflow.revision}</Pill>
       </CloudResourcesHeaderButton>
       <CloudResourcesHeaderButton
         data-turbolinks="false"
@@ -134,19 +143,11 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         data-testid="workflow-show-actions-run-batch"
         conditionType="all"
       >
-        <>
-          Run Batch Workflow&nbsp;
-          <Pill>rev{workflow.revision}</Pill>
-        </>
+        Run Batch Workflow&nbsp;
+        <Pill>rev{workflow.revision}</Pill>
       </CloudResourcesHeaderButton>
-      <Menu
-        trigger={
-          <ActionsButton as={Menu.Trigger} />
-        }
-      >
-        <ActionsMenuContent 
-          actions={actions.filter(action => !['Run', 'Run Batch'].includes(action.name))} 
-        />
+      <Menu trigger={<ActionsButton as={Menu.Trigger} />}>
+        <ActionsMenuContent actions={actions.filter(action => !['Run', 'Run Batch'].includes(action.name))} />
       </Menu>
 
       <ActionModalsRenderer modals={modals} />
@@ -157,7 +158,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
 export const WorkflowShow = ({
   workflowId,
   spaceId,
-  homeContext = defaultHomeContext
+  homeContext = defaultHomeContext,
 }: {
   workflowId: string
   spaceId?: number

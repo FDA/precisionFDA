@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
+import { useEffect } from 'react'
 import { Link, useLocation } from 'react-router'
+import { CopyText } from '@/components/CopyText/CopyText'
 import { DatabaseIcon } from '@/components/icons/DatabaseIcon'
 import { Loader } from '@/components/Loader'
 import { ActionsMenu } from '@/components/Menu'
+import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
 import { useLastWSNotification } from '@/hooks/useLastWSNotification'
 import { DATABASE_RESOURCE_LABELS } from '@/types/user'
@@ -12,8 +14,8 @@ import { getSpaceIdFromScope } from '@/utils'
 import { getBackPathNext } from '@/utils/getBackPath'
 import { ActionsMenuContent } from '../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
+import { defaultHomeContext, type HomeScopeContextValue } from '../home/HomeScopeContext'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
-import { defaultHomeContext, HomeScopeContextValue } from '../home/HomeScopeContext'
 import {
   Description,
   HeaderLeft,
@@ -29,10 +31,10 @@ import {
   Title,
   Topbox,
 } from '../home/show.styles'
-import { HomeScope, NOTIFICATION_ACTION } from '../home/types'
-import { fetchDatabaseRequest } from './databases.api'
-import { IDatabase } from './databases.types'
+import { type HomeScope, NOTIFICATION_ACTION } from '../home/types'
 import { DBStatus } from './DbStatus'
+import { fetchDatabaseRequest } from './databases.api'
+import type { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 
 const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
@@ -53,7 +55,15 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
         </MetadataItem>
         <MetadataItem>
           <MetadataKey>ID</MetadataKey>
-          <MetadataVal data-testid="db-id">{db.uid}</MetadataVal>
+          <MetadataVal data-testid="db-id">
+            <CopyText
+              className="inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]"
+              value={db.uid}
+              onCopy={() => toastInfo('Database ID copied to clipboard')}
+            >
+              <span>{db.uid}</span>
+            </CopyText>
+          </MetadataVal>
         </MetadataItem>
         <MetadataItem>
           <MetadataKey>Added By</MetadataKey>
