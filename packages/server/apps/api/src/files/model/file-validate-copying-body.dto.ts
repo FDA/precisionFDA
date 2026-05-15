@@ -3,7 +3,7 @@ import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.co
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityScope } from '@shared/types/common'
 
-export class FilesValidateCopyingBodyDto {
+export class FilesValidateCopyingBodyDTO {
   @IsValidUid({ entityType: 'file', each: true })
   uids: Uid<'file'>[]
   @IsValidScope({ allowPublic: false })

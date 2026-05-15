@@ -789,24 +789,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def list_selected_files(ids)
-    request(
-      "/files/selected",
-      {},
-      Net::HTTP::Get::METHOD,
-      { ids: },
-    )
-  end
-
-  def validate_copy(uids, scope)
-    request(
-      "/files/copy/validate",
-      { uids:, scope: },
-      Net::HTTP::Post::METHOD,
-      {},
-    )
-  end
-
   def file_download(uid, filename, options = {})
     request(
       "/files/#{uid}/#{URI.encode_www_form_component(filename)}",

@@ -5,6 +5,7 @@ import {
   Get,
   Header,
   Headers,
+  HttpCode,
   Logger,
   Param,
   ParseArrayPipe,
@@ -38,7 +39,7 @@ import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.f
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { FileUidParamDTO } from './model/file-uid-param.dto'
-import { FilesValidateCopyingBodyDto } from './model/file-validate-copying-body.dto'
+import { FilesValidateCopyingBodyDTO } from './model/file-validate-copying-body.dto'
 import { GetUploadUrlQueryDTO } from './model/get-upload-url-query.dto'
 
 @UseGuards(UserContextGuard)
@@ -182,8 +183,9 @@ export class FilesController {
     return this.nodeService.listSelectedFiles(ids)
   }
 
+  @HttpCode(200)
   @Post('/copy/validate')
-  async validateCopyFiles(@Body() body: FilesValidateCopyingBodyDto): Promise<ExistingFileSet> {
+  async validateCopyFiles(@Body() body: FilesValidateCopyingBodyDTO): Promise<ExistingFileSet> {
     return this.nodeService.validateCopyFiles(body.uids, body.scope)
   }
 
