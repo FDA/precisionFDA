@@ -145,12 +145,12 @@ export async function createFile(name: string, scope: string, folder_id: string 
 }
 
 export async function fetchSelectedFiles(ids: number[]): Promise<SelectedNode[]> {
-  return axios.get('/api/files/selected', { params: { ids: ids.join(',') } }).then(r => r.data)
+  return axios.get('/api/v2/files/selected', { params: { ids: ids.join(',') } }).then(r => r.data)
 }
 
 export async function validateCopyingFiles(uids: string[], scope: ServerScope): Promise<IExistingFileSet> {
   return axios
-    .post('/api/files/copy/validate', {
+    .post('/api/v2/files/copy/validate', {
       uids,
       scope,
     })

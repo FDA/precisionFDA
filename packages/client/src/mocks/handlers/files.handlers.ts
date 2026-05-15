@@ -1,7 +1,7 @@
-import { http, HttpResponse } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { indexBy } from 'ramda'
-import { FetchFilesQuery, FetchFolderChildrenResponse, FetchFileQuery } from '../../features/files/files.api'
-import { IFile, IFolder } from '../../features/files/files.types'
+import type { FetchFileQuery, FetchFilesQuery, FetchFolderChildrenResponse } from '../../features/files/files.api'
+import type { IFile, IFolder } from '../../features/files/files.types'
 
 export const mockExportInputFiles: IFile[] = [
   {
@@ -525,12 +525,12 @@ const existingFiles = {
 export const filesByUid = indexBy(s => s.uid, files)
 
 export const filesMocks = [
-  http.get('/api/files/selected', () =>
+  http.get('/api/v2/files/selected', () =>
     HttpResponse.json([...copyingNodes], {
       status: 200,
     }),
   ),
-  http.get('/api/files/:uid', ({ params: { uid }}) =>
+  http.get('/api/files/:uid', ({ params: { uid } }) =>
     HttpResponse.json<FetchFileQuery>({ files: filesByUid[uid as string], meta }, { status: 200 }),
   ),
   http.get('/api/files*', () =>
@@ -570,7 +570,7 @@ export const filesMocks = [
       { status: 200 },
     ),
   ),
-  http.post('/api/files/copy/validate', () =>
+  http.post('/api/v2/files/copy/validate', () =>
     HttpResponse.json(
       {
         ...existingFiles,
@@ -580,19 +580,17 @@ export const filesMocks = [
       },
     ),
   ),
-  
+
   // Handler for /api/list_files_by_uid (used by useExportInputsModal)
   http.post('/api/list_files_by_uid', () =>
     HttpResponse.json({
       files: mockExportInputFiles,
     }),
   ),
-  
+
   // Handler for /api/list_files (used by useCopyToPrivateModal)
-  http.post('/api/list_files', () =>
-    HttpResponse.json(mockCopyFiles),
-  ),
-  
+  http.post('/api/list_files', () => HttpResponse.json(mockCopyFiles)),
+
   // Handler for /api/files/copy (used by useCopyToPrivateModal)
   http.post('/api/files/copy', () =>
     HttpResponse.json({
