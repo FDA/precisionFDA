@@ -60,7 +60,6 @@ export const useFilesColumns = ({
                   data-tooltip-id={`fileNameTooltip${node.uid}`}
                   data-tooltip-content={`File is in ${node.state} state.`}
                   color={
-                    // TODO: Use css className or data attr
                     isIncompleteFile(node.state) ? 'var(--tertiary-600)' : 'var(--c-link)'
                   }
                   onClick={() => onFileClick(node.uid)}
@@ -113,26 +112,24 @@ export const useFilesColumns = ({
         )
       },
     },
-    // {
-    //   Header: 'Locked',
-    //   id: 'locked',
-    //   accessor: 'locked',
-    //   disableFilters: true,
-    //   disableSortBy: true,
-    //   width: 30,
-    //   Cell: ({ row, value }) => row.original.locked && (<LockIcon />),
-    // },
     {
       header: 'Location',
       accessorKey: 'location',
       filterFn: 'includesString',
       size: 250,
-      cell: ({ row, getValue }) => (
-        <StyledLinkCell to={`${row.original.links.space}/files`}>
-          <ObjectGroupIcon />
-          {getValue<string>()}
-        </StyledLinkCell>
-      ),
+      cell: ({ row, getValue }) => {
+        const spaceId = row.original.spaceId
+        const spaceLink = spaceId ? `/spaces/${spaceId.replace('space-', '')}/files` : null
+        if (spaceLink) {
+          return (
+            <StyledLinkCell to={spaceLink}>
+              <ObjectGroupIcon />
+              {getValue<string>()}
+            </StyledLinkCell>
+          )
+        }
+        return <>{getValue<string>()}</>
+      },
     },
     {
       header: 'Featured',
@@ -160,18 +157,13 @@ export const useFilesColumns = ({
     },
     {
       header: 'Added By',
-      accessorKey: 'added_by',
+      accessorKey: 'addedBy',
       filterFn: 'includesString',
       size: 198,
-      cell: ({ cell, getValue }) => (
-        <a data-turbolinks="false" href={cell.row.original.links.user || ''}>
-          {getValue<string>()}
-        </a>
-      ),
     },
     {
       header: 'Size',
-      accessorKey: 'file_size',
+      accessorKey: 'fileSize',
       size: 160,
       filterFn: numberRangeFilterFn as FilterFnOption<IFile>,
       meta: {
@@ -182,7 +174,7 @@ export const useFilesColumns = ({
     },
     {
       header: 'Created',
-      accessorKey: 'created_at_date_time',
+      accessorKey: 'createdAtDateTime',
       sortDescFirst: true,
       enableColumnFilter: false,
       size: 200,
@@ -195,21 +187,22 @@ export const useFilesColumns = ({
       size: 240,
       cell: ({ row }) => {
         const value = row.original.origin
+        const originType = row.original.originObject?.originType
         return (
           <>
-            {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Job' && (
+            {typeof value === 'object' && value !== null && originType === 'Job' && (
               <StyledLinkCell to={`${value.href}` || '#'}>
                 <CogsIcon height={14} />
                 {value.text}
               </StyledLinkCell>
             )}
-            {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Comparison' && (
+            {typeof value === 'object' && value !== null && originType === 'Comparison' && (
               <StyledLinkCell to={`/home${value.href}` }>
                 <AreaChartIcon height={16} />
                 {value.text}
               </StyledLinkCell>
             )}
-            {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'UserFile' && (
+            {typeof value === 'object' && value !== null && originType === 'UserFile' && (
               <StyledLinkCell to={`${value.href}`}>
                 <FileIcon height={16} />
                 {value.text}

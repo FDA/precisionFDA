@@ -81,7 +81,7 @@ const comparatorActionText = (actionType?: ComparatorActionTypes) => {
   }
 }
 
-export function useComparatorModal<T extends { uid?: string; dxid?: string; file_license?: FileLicense }>({
+export function useComparatorModal<T extends { uid?: string; dxid?: string; fileLicense?: FileLicense }>({
   actionType,
   selected,
   onSuccess,

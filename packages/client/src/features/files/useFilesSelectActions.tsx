@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { displayPayloadMessage, type Payload } from '@/utils/api'
@@ -16,11 +17,6 @@ import { useLicensesListQuery } from '../licenses/queries'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
-import {
-  isActionDisabledBasedOnLocked,
-  isActionDisabledBasedOnProtected,
-  isActionDisabledBasedOnRole,
-} from '../spaces/common'
 import type { ISpace } from '../spaces/spaces.types'
 import { useCopyFilesModal } from './actionModals/useCopyFilesModal'
 import { useDeleteFileModal } from './actionModals/useDeleteFileModal'
@@ -32,7 +28,8 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { isOpenable } from './file.utils'
 import { moveFilesRequest } from './files.api'
-import type { IFile, TreeOnSelectInfo } from './files.types'
+import type { IFile, NodePermissions, TreeOnSelectInfo } from './files.types'
+import { normalizePermissions } from './normalizePermissions'
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
   if (scope) {
@@ -277,6 +274,15 @@ export const useFilesSelectActions = ({
   const availableLicenses = Boolean(licenses?.licenses.length !== 0)
   const isFolder = selected.every(e => e.type === 'Folder')
   const selectedButNotClosed = selected.some(e => e.type === 'UserFile' && e.state !== 'closed')
+  const requestLicenseApprovalLink =
+    selected[0]?.fileLicense?.id != null
+      ? `/licenses/${selected[0].fileLicense.id}/request_approval`
+      : (selected[0]?.requestApprovalLicenseLink ?? '')
+
+  const perms: NodePermissions[] = useMemo(
+    () => selected.map(e => normalizePermissions(e, user, space)),
+    [selected, user, space],
+  )
 
   const actions: Action[] = [
     {
@@ -298,12 +304,7 @@ export const useFilesSelectActions = ({
           setOpenFileModal(true)
         }
       },
-      isDisabled:
-        selected.length === 0 ||
-        selected.some(e => e.locked) ||
-        isActionDisabledBasedOnProtected(user?.id as number, space) ||
-        selected.some(e => (e.type === 'UserFile' && !e.links.download) || e.show_license_pending) ||
-        selectedButNotClosed,
+      isDisabled: selected.length === 0 || perms.some(p => !p.canDownload),
       modal: openFileModal,
       showModal: isShownOpenFileModal,
       shouldHide: selected.some(e => e.type !== 'UserFile' || !isOpenable(e.name)),
@@ -312,12 +313,7 @@ export const useFilesSelectActions = ({
       name: 'Download',
       type: 'modal',
       func: () => setDownloadModal(true),
-      isDisabled:
-        selected.length === 0 ||
-        selected.some(e => e.locked) ||
-        isActionDisabledBasedOnProtected(user?.id as number, space) ||
-        selected.some(e => (e.type === 'UserFile' && !e.links.download) || e.show_license_pending) ||
-        selectedButNotClosed,
+      isDisabled: selected.length === 0 || perms.some(p => !p.canDownload),
       modal: downloadModal,
       showModal: isShownDownloadModal,
     },
@@ -326,11 +322,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setEditFileModal(true),
       modal: editFileModal,
-      isDisabled:
-        selected.length !== 1 ||
-        user?.full_name !== selected[0].added_by ||
-        selected.some(e => e.locked) ||
-        selected.some(e => e.resource),
+      isDisabled: selected.length !== 1 || !perms[0]?.canEdit,
       showModal: isShownEditFileModal,
       shouldHide: isFolder || selected.length !== 1 || homeScope === 'spaces' || selectedButNotClosed,
     },
@@ -350,7 +342,7 @@ export const useFilesSelectActions = ({
         selected[0]?.type === 'UserFile'
           ? `/publish?identifier=${selected[0]?.uid}&type=file`
           : `/publish?identifier=folder-${selected[0]?.id}&type=folder`,
-      isDisabled: !user?.allowed_to_publish,
+      isDisabled: selected.length !== 1 || !perms[0]?.canPublish,
       shouldHide: selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
     },
     {
@@ -362,9 +354,8 @@ export const useFilesSelectActions = ({
           uids: selected.map(f => (f.type === 'Folder' ? f.id : f.uid)),
         })
       },
-      isDisabled:
-        selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature) || selectedButNotClosed,
-      shouldHide: homeScope !== 'everybody' || selected.some(e => e.featured) || !isAdmin,
+      isDisabled: selected.length === 0 || !selected.every(e => !e.featured) || selectedButNotClosed,
+      shouldHide: homeScope !== 'everybody' || selected.some(e => e.featured) || !perms.every(p => p.canFeature),
     },
     {
       name: 'Unfeature',
@@ -375,19 +366,17 @@ export const useFilesSelectActions = ({
           uids: selected.map(f => (f.type === 'Folder' ? f.id : f.uid)),
         })
       },
-      isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature) || selectedButNotClosed,
+      isDisabled: selected.length === 0 || !selected.every(e => e.featured) || selectedButNotClosed,
       shouldHide:
-        selected.some(e => !e.featured) || (homeScope !== 'everybody' && homeScope !== 'featured') || !isAdmin,
+        selected.some(e => !e.featured) ||
+        (homeScope !== 'everybody' && homeScope !== 'featured') ||
+        !perms.every(p => p.canFeature),
     },
     {
       name: 'Delete',
       type: 'modal',
       func: () => setDeleteFileModal(true),
-      isDisabled:
-        selected.length === 0 ||
-        selected.some(e => e.resource) ||
-        isActionDisabledBasedOnProtected(user?.id, space) ||
-        selected.every(e => e.locked),
+      isDisabled: selected.length === 0 || perms.some(p => !p.canDelete),
       shouldHide: isViewer,
       modal: deleteFileModal,
       showModal: isShownDeleteFileModal,
@@ -397,7 +386,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setLockFileModal(true),
       isDisabled: false,
-      shouldHide: selectedButNotClosed || isActionDisabledBasedOnRole(user?.id, space) || selected.every(e => e.locked),
+      shouldHide: selectedButNotClosed || !perms.some(p => p.canLock),
       modal: lockFileModal,
       showModal: isShownLockFileModal,
     },
@@ -406,7 +395,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setUnlockFileModal(true),
       isDisabled: false,
-      shouldHide: isActionDisabledBasedOnRole(user?.id, space) || selected.every(e => !e.locked),
+      shouldHide: !perms.some(p => p.canUnlock),
       modal: unlockFileModal,
       showModal: isShownUnlockFileModal,
     },
@@ -414,11 +403,7 @@ export const useFilesSelectActions = ({
       name: 'Move',
       type: 'modal',
       func: () => setMoveFileModal(true),
-      isDisabled:
-        selected.length === 0 ||
-        selected.some(e => e.locked) ||
-        selected.some(e => !e.links.organize) ||
-        selectedButNotClosed,
+      isDisabled: selected.length === 0 || perms.some(p => !p.canMove),
       modal: moveFileModal,
       showModal: isShownMoveFileModal,
       shouldHide: !isAdmin && homeScope !== 'me' && isViewer,
@@ -427,8 +412,7 @@ export const useFilesSelectActions = ({
       name: 'Copy to...',
       type: 'modal',
       func: () => setCopyToModal(true),
-      isDisabled:
-        selected.length === 0 || selectedButNotClosed || isActionDisabledBasedOnLocked(selected, user?.id, space),
+      isDisabled: selected.length === 0 || perms.some(p => !p.canCopy),
       modal: copyToModal,
       showModal: isShownCopyToModal,
     },
@@ -439,7 +423,7 @@ export const useFilesSelectActions = ({
       isDisabled: selected.length !== 1 || !availableLicenses || selectedButNotClosed,
       modal: attachLicensesModal,
       showModal: isShownAttachLicensesModal,
-      shouldHide: selected.length !== 1 || !!selected[0]?.file_license?.id || !availableLicenses,
+      shouldHide: selected.length !== 1 || !!selected[0]?.fileLicense?.id || !availableLicenses,
     },
     {
       name: 'Detach License',
@@ -448,14 +432,14 @@ export const useFilesSelectActions = ({
       isDisabled: selected.length !== 1 || !availableLicenses || selectedButNotClosed,
       modal: detachLicenseModal,
       showModal: isShownDetachLicenseModal,
-      shouldHide: selected.length !== 1 || !selected[0]?.file_license?.id || !!selected[0]?.show_license_pending,
+      shouldHide: selected.length !== 1 || !selected[0]?.fileLicense?.id,
     },
     {
       name: 'Request license approval',
       type: 'link',
       isDisabled: selected.length !== 1 || selectedButNotClosed,
-      link: selected[0]?.links.request_approval_license || '',
-      shouldHide: !selected[0]?.links.request_approval_license,
+      link: requestLicenseApprovalLink,
+      shouldHide: !requestLicenseApprovalLink,
     },
     {
       name: 'Accept License',
@@ -463,8 +447,12 @@ export const useFilesSelectActions = ({
       func: () => setAcceptLicensesModal(true),
       modal: acceptLicensesModal,
       showModal: isShownAcceptLicensesModal,
-      isDisabled: false,
-      shouldHide: selected.length !== 1 || !selected[0]?.links.accept_license_action || selectedButNotClosed,
+      isDisabled: selectedButNotClosed,
+      shouldHide:
+        selected.length !== 1 ||
+        !selected[0]?.fileLicense?.id ||
+        selected[0]?.fileLicense?.acceptanceStatus === 'active' ||
+        selected[0]?.fileLicense?.acceptanceStatus === 'pending',
     },
     {
       name: 'Edit tags',
@@ -473,8 +461,7 @@ export const useFilesSelectActions = ({
       isDisabled: selectedButNotClosed || isFolder || selected.some(e => e.locked),
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide:
-        (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || homeScope === 'spaces',
+      shouldHide: !perms[0]?.canEdit || selected.length !== 1 || homeScope === 'spaces',
     },
     {
       name: 'Edit properties',
@@ -483,7 +470,7 @@ export const useFilesSelectActions = ({
       isDisabled: selectedButNotClosed || selected.length === 0 || selected.some(e => e.locked),
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || homeScope === 'spaces',
+      shouldHide: !perms[0]?.canEdit || homeScope === 'spaces',
     },
     {
       name: 'Comments',

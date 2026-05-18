@@ -1,14 +1,21 @@
 import { useMutation } from '@tanstack/react-query'
+import type { ReactElement } from 'react'
+import { Button } from '@/components/Button'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import type { APIResource } from '../home/types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, StyledModalContent } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import type { APIResource } from '../home/types'
 import { detachLicenseRequest } from './api'
-import { Button } from '@/components/Button'
-import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
-import { LicenseCarrier } from './license-carrier.types'
 
-export function useDetachLicenseModal<T extends LicenseCarrier>({
+export function useDetachLicenseModal<
+  T extends {
+    uid?: string
+    dxid?: string
+    fileLicense?: { id?: string; title?: string } | null
+    file_license?: { id?: string; title?: string } | null
+  },
+>({
   selected,
   resource,
   onSuccess,
@@ -16,19 +23,23 @@ export function useDetachLicenseModal<T extends LicenseCarrier>({
   selected: T
   resource: APIResource
   onSuccess?: (res: unknown) => void
-}) {
+}): {
+  modalComp: ReactElement
+  setShowModal: (value: boolean) => void
+  isShown: boolean
+} {
   const selectedLicenseRef = selected?.fileLicense ?? selected?.file_license
   const selectedId = selected?.uid || selected?.dxid
   const { isShown, setShowModal } = useModal()
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setShowModal(false)
   }
 
   const editFileMutation = useMutation({
     mutationKey: ['detach-license', resource],
     mutationFn: (payload: { licenseId: string; dxid: string }) => detachLicenseRequest(payload),
-    onSuccess: res => {
+    onSuccess: (res: unknown) => {
       if (onSuccess) onSuccess(res)
       handleClose()
       toastSuccess('Success: Detaching license.')
@@ -38,7 +49,7 @@ export function useDetachLicenseModal<T extends LicenseCarrier>({
     },
   })
 
-  const onSubmit = () => {
+  const onSubmit = (): void => {
     if (selectedLicenseRef?.id && selectedId) {
       editFileMutation.mutateAsync({ licenseId: selectedLicenseRef.id, dxid: selectedId })
     }

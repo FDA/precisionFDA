@@ -67,6 +67,7 @@ describe('UserFileService', () => {
   const fileRepoFindOneOrFailStub = stub()
   const fileRepoFindOneStub = stub()
   const fileRepoFindAccessibleStub = stub()
+  const fileRepoFindAccessibleOneStub = stub()
   const fileRepoFindStub = stub()
   const fileRepoCountStub = stub()
   const fileLoadIfAccessibleByUserStub = stub()
@@ -169,6 +170,7 @@ describe('UserFileService', () => {
     findOneOrFail: fileRepoFindOneOrFailStub,
     findOne: fileRepoFindOneStub,
     findAccessible: fileRepoFindAccessibleStub,
+    findAccessibleOne: fileRepoFindAccessibleOneStub,
     find: fileRepoFindStub,
     count: fileRepoCountStub,
     findEditable: findEditableStub,
@@ -759,6 +761,28 @@ describe('UserFileService', () => {
         }),
       ).to.equal(true)
       expect(result).to.equal(files)
+    })
+  })
+
+  describe('#getAccessibleFileByUid', () => {
+    it('queries accessible file by uid and excludes assets', async () => {
+      const file = { uid: 'file-G111-1' } as unknown as UserFile
+      const options = { populate: ['user'] as never[] }
+
+      fileRepoFindAccessibleOneStub
+        .withArgs({ uid: 'file-G111-1', stiType: { $ne: FILE_STI_TYPE.ASSET } }, options)
+        .resolves(file)
+
+      const userFileService = getInstance()
+      const result = await userFileService.getAccessibleFileByUid('file-G111-1', options)
+
+      expect(
+        fileRepoFindAccessibleOneStub.calledOnceWithExactly(
+          { uid: 'file-G111-1', stiType: { $ne: FILE_STI_TYPE.ASSET } },
+          options,
+        ),
+      ).to.equal(true)
+      expect(result).to.equal(file)
     })
   })
 

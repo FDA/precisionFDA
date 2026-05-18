@@ -59,6 +59,12 @@ export class SpaceMembershipFacadeModule {}
 
 One facade per action: `CreateDiscussionFacade`, `UpdateDiscussionFacade` (not `DiscussionFacade`).
 
+**Strict rules:**
+- Every facade class must have its own dedicated module file.
+- A facade module must provide/export exactly one facade class.
+- Do not group multiple facade providers in a single module.
+- Module name must match facade action naming (for example, `SpaceMembershipUpdateFacadeModule`).
+
 ### API Modules (`apps/api/src/<resource>/`)
 
 ```
@@ -72,6 +78,10 @@ Controller imports API facade module (or shared facade). **Never work with entit
 ### API Facades (`apps/api/src/facade/`)
 
 Optional layer when API needs extra orchestration beyond shared facades.
+
+**Strict rules:**
+- Every API facade class must be declared in its own API facade module.
+- API facade modules follow the same one-facade-per-module rule as shared facades.
 
 ```ts
 @Injectable()
@@ -175,6 +185,12 @@ export class SpaceMembershipsController {
 ```
 
 **Never return/accept entities.** Use DTOs.
+
+## Error Handling
+
+- Use shared error classes from `@shared/errors` (e.g. `NotFoundError`, `ValidationError`, `PermissionError`).
+- Do not throw Nest HTTP exceptions (`NotFoundException`, `BadRequestException`, etc.) from service/facade/domain code.
+- Keep error mapping consistent via shared error codes and filters.
 
 ## DTOs & Validation
 
@@ -326,6 +342,10 @@ describe('SpaceMembershipService', () => {
 ```
 
 ## Naming
+
+## Imports
+
+- Imports must be sorted according to Biome (`biome.json`), including organize-imports behavior.
 
 | Type | Convention | Example |
 |------|------------|---------|

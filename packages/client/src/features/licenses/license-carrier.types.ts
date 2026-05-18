@@ -1,6 +1,6 @@
 import { IFile } from '../files/files.types'
 
-export type LicenseRef = IFile['file_license']
+export type LicenseRef = IFile['fileLicense']
 
 export type LicenseCarrier = {
   uid?: string

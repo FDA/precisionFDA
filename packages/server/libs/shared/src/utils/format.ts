@@ -29,3 +29,25 @@ export const getPluralizedTerm = (itemCount: number, itemName: string): string =
 export const lowercaseAndDash = (str: string): string => {
   return str.toLowerCase().replace(/\s+/g, '-')
 }
+
+export const humanizeFileSize = (bytes: number | undefined | null): string => {
+  if (bytes == null || bytes === 0) return '0 Bytes'
+  const units = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+
+  if (bytes < 1024) {
+    return `${bytes} ${bytes === 1 ? 'Byte' : 'Bytes'}`
+  }
+
+  let index = 0
+  let size = bytes
+  while (size >= 1024 && index < units.length - 1) {
+    size /= 1024
+    index++
+  }
+
+  const digitsBeforeDecimal = Math.floor(Math.log10(size)) + 1
+  const decimals = Math.max(0, 3 - digitsBeforeDecimal)
+  const rounded = Number(size.toFixed(decimals))
+
+  return `${rounded.toString()} ${units[index]}`
+}

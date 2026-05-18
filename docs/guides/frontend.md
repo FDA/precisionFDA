@@ -60,6 +60,7 @@ Our frontend technology stack is built on:
 - **React 19**: Leverage modern React features like `useEffectEvent` for stable event handlers
 - **CSS Modules**: Prefer CSS Modules for component styling over styled-components
 - **Accessibility First**: Use Base UI components for accessible primitives
+- **Biome Import Order**: Imports must be sorted according to Biome (`biome.json`), including organize-imports behavior
 
 ---
 

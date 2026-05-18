@@ -66,6 +66,7 @@ describe('AcceptedLicenseService', () => {
       const acceptedLicenseService = getInstance()
       const result = await acceptedLicenseService.isLicenseAcceptedForUser(license.id)
 
+
       expect(result).to.be.false()
     })
   })

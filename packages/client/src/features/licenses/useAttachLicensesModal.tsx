@@ -1,6 +1,6 @@
+import type { ReactElement } from 'react'
 import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import styled from 'styled-components'
 import { CircleCheckIcon } from '@/components/icons/CircleCheckIcon'
 import { ResourceTable, StyledName } from '@/components/ResourceTable'
 import { useModal } from '../modal/useModal'
@@ -14,23 +14,15 @@ import { Button } from '@/components/Button'
 import { Empty } from '../home/home.styles'
 import type { IFile } from '../files/files.types'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
-import { LicenseCarrier } from './license-carrier.types'
 
-const HiddenElement = styled.div`
-  width: 16px;
-  height: 16px;
-`
-
-const StyledAction = styled.div<{ isCurrent: boolean }>`
-  color: var(--success-500);
-`
-
-const ScrollWrapper = styled(ModalScroll)`
-  padding-left: 12px;
-  padding-bottom: 12px;
-`
-
-export function useAttachLicensesModal<T extends LicenseCarrier>({
+export function useAttachLicensesModal<
+  T extends {
+    uid?: string
+    dxid?: string
+    fileLicense?: { id?: string; title?: string } | null
+    file_license?: { id?: string; title?: string } | null
+  },
+>({
   selected,
   resource,
   onSuccess,
@@ -38,7 +30,11 @@ export function useAttachLicensesModal<T extends LicenseCarrier>({
   selected: T
   resource: APIResource
   onSuccess?: (res: unknown) => void
-}) {
+}): {
+  modalComp: ReactElement
+  setShowModal: (value: boolean) => void
+  isShown: boolean
+} {
   const selectedLicenseRef = selected?.fileLicense ?? selected?.file_license
   const selectedId = selected?.uid || selected?.dxid
   const { isShown, setShowModal } = useModal()
@@ -47,19 +43,28 @@ export function useAttachLicensesModal<T extends LicenseCarrier>({
   useEffect(() => {
     setSelectedLicenses(selectedLicenseRef?.id)
   }, [selectedLicenseRef])
+
   const { data } = useLicensesListQuery()
 
-  const resetSelected = () => {
+  const resetSelected = (): void => {
     setSelectedLicenses(undefined)
   }
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     resetSelected()
     setShowModal(false)
   }
 
-  const handleClickLicense = (s: License) => {
+  const handleClickLicense = (s: License): void => {
     setSelectedLicenses(s.id)
+  }
+
+  const handleHeaderClose = (): void => {
+    setShowModal(false)
+  }
+
+  const handleAttachClick = (): void => {
+    handleSubmit(selectedLicense)
   }
 
   const licenses = data?.licenses
@@ -69,7 +74,7 @@ export function useAttachLicensesModal<T extends LicenseCarrier>({
     onError: () => {
       toastError('Error: Attaching licenses')
     },
-    onSuccess: res => {
+    onSuccess: (res: unknown) => {
       queryClient.invalidateQueries({
         queryKey: ['licenses'],
       })
@@ -80,7 +85,7 @@ export function useAttachLicensesModal<T extends LicenseCarrier>({
     },
   })
 
-  const handleSubmit = (selectedLicenseId?: string) => {
+  const handleSubmit = (selectedLicenseId?: string): void => {
     if (selectedId && selectedLicenseId) {
       mutation.mutateAsync({ dxid: selectedId, licenseId: selectedLicenseId })
     }
@@ -94,47 +99,47 @@ export function useAttachLicensesModal<T extends LicenseCarrier>({
       isShown={isShown}
       hide={handleClose}
     >
-      <ModalHeaderTop headerText="Select a license" hide={() => setShowModal(false)} />
+      <ModalHeaderTop headerText="Select a license" hide={handleHeaderClose} />
       {licenses && (
-        <ScrollWrapper>
-          <>
-            {licenses.length === 0 ? (
-              <Empty data-testid="attach-license-empty">You don&apos;t have any licenses.</Empty>
-            ) : (
-              <ResourceTable
-                rows={licenses.map(s => {
-                  const isCurrent = selectedLicense === s.id
-                  return {
-                    title: (
-                      <StyledName
-                        as="div"
-                        key={`${s.id}-name`}
-                        onClick={() => handleClickLicense(s)}
-                        isCurrent={isCurrent}
-                        data-testid={`attach-license-option-${s.id}`}
-                      >
-                        {s.title}
-                      </StyledName>
-                    ),
-                    action: (
-                      <StyledAction
-                        key={`${s.id}-action`}
-                        onClick={() => handleClickLicense(s)}
-                        isCurrent={isCurrent}
-                        data-testid={`attach-license-option-indicator-${s.id}`}
-                      >
-                        {isCurrent ? <CircleCheckIcon /> : <HiddenElement />}
-                      </StyledAction>
-                    ),
-                  }
-                })}
-              />
-            )}
-            {mutation.isError && mutation.error && (
-              <div style={{ color: 'red', padding: '12px' }}>{mutation.error.message || 'An error occurred'}</div>
-            )}
-          </>
-        </ScrollWrapper>
+        <ModalScroll className="pb-3 pl-3">
+          {licenses.length === 0 ? (
+            <Empty data-testid="attach-license-empty">You don&apos;t have any licenses.</Empty>
+          ) : (
+            <ResourceTable
+              rows={licenses.map(s => {
+                const isCurrent = selectedLicense === s.id
+                return {
+                  title: (
+                    <StyledName
+                      as="div"
+                      key={`${s.id}-name`}
+                      onClick={() => handleClickLicense(s)}
+                      isCurrent={isCurrent}
+                      data-testid={`attach-license-option-${s.id}`}
+                    >
+                      {s.title}
+                    </StyledName>
+                  ),
+                  action: (
+                    <button
+                      key={`${s.id}-action`}
+                      type="button"
+                      aria-label={`Select license ${s.title}`}
+                      onClick={() => handleClickLicense(s)}
+                      className="border-none bg-none p-0 text-success-500"
+                      data-testid={`attach-license-option-indicator-${s.id}`}
+                    >
+                      {isCurrent ? <CircleCheckIcon /> : <div className="h-4 w-4" />}
+                    </button>
+                  ),
+                }
+              })}
+            />
+          )}
+          {mutation.isError && mutation.error && (
+            <div className="p-3 text-red-500">{mutation.error.message || 'An error occurred'}</div>
+          )}
+        </ModalScroll>
       )}
       <Footer>
         <ButtonRow>
@@ -142,7 +147,7 @@ export function useAttachLicensesModal<T extends LicenseCarrier>({
           <Button
             data-variant="primary"
             data-testid="attach-license-submit"
-            onClick={() => handleSubmit(selectedLicense)}
+            onClick={handleAttachClick}
             disabled={!selectedLicense || selectedLicense === selectedLicenseRef?.id}
           >
             Attach

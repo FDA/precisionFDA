@@ -48,7 +48,7 @@ const AcceptLicenseModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
   const fileWithLicense = {
     uid: data?.files?.[0]?.uid || 'file-uid-1',
     dxid: data?.files?.[0]?.uid || 'file-dxid-1',
-    file_license: {
+    fileLicense: {
       id: '1',
       title: 'MIT License',
       uid: 'license-uid-1',
@@ -82,7 +82,7 @@ const AttachLicensesModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
   const fileForLicense = {
     uid: data?.files?.[0]?.uid || 'file-uid-1',
     dxid: data?.files?.[0]?.uid || 'file-dxid-1',
-    file_license: undefined as FileLicense | undefined,
+    fileLicense: undefined as FileLicense | undefined,
   }
 
   const { modalComp, setShowModal } = useAttachLicensesModal({
@@ -112,7 +112,7 @@ const DetachLicenseModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
   const fileWithLicense = {
     uid: data?.files?.[0]?.uid || 'file-uid-1',
     dxid: data?.files?.[0]?.uid || 'file-dxid-1',
-    file_license: {
+    fileLicense: {
       id: '1',
       title: 'MIT License',
       uid: 'license-uid-1',

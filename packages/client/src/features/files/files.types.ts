@@ -1,9 +1,21 @@
-import { TreeProps } from 'rc-tree'
-import { BasicDataNode } from 'rc-tree/es/interface'
-import { DataNode } from 'rc-tree/lib/interface'
-import { FileOrg, FileUser } from '../apps/apps.types'
-import { ServerScope } from '../home/types'
-import { FileLicense } from '../assets/assets.types'
+import type { TreeProps } from 'rc-tree'
+import type { BasicDataNode } from 'rc-tree/es/interface'
+import type { DataNode } from 'rc-tree/lib/interface'
+import type { FileOrg, FileUser } from '../apps/apps.types'
+import type { ServerScope } from '../home/types'
+import type { FileLicense } from '../assets/assets.types'
+
+export interface NodePermissions {
+  canDelete: boolean
+  canMove: boolean
+  canDownload: boolean
+  canCopy: boolean
+  canEdit: boolean
+  canFeature: boolean
+  canPublish: boolean
+  canLock: boolean
+  canUnlock: boolean
+}
 
 export type FileState = 'closed' | 'closing' | 'open' | 'removing'
 export type FileLocation = 'Public' | 'Private' | string
@@ -19,34 +31,9 @@ export interface FileOrigin {
   href?: string
 }
 
-export interface FileLinks {
-  origin_object?: {
-    origin_type?: OriginType
-    origin_uid?: string | null
-  }
-  show?: string
-  user?: string
-  track?: string
-  download_list?: string
-  rename_folder?: string
-  rename?: string
-  attach_to?: string
-  add_file?: string
-  add_folder?: string
-  publish?: string
-  update?: string
-  feature?: string
-  organize?: string
-  show_license?: string
-  space?: string
-  license?: string
-  children?: string
-  copy?: string
-  remove?: string
-  download?: string
-  request_approval_license?: string
-  accept_license_action?: string
-  detach_license?: string
+export interface OriginObject {
+  originType?: OriginType | null
+  originUid?: string | null
 }
 
 export interface IFile {
@@ -60,29 +47,33 @@ export interface IFile {
   locking?: boolean
   state: FileState | null
   location: FileLocation
-  added_by: string
-  created_at: string
+  addedBy: string
+  addedByDxuser?: string
+  createdAt: string
   featured: boolean
   scope: ServerScope
-  space_id: string | null
-  origin: FileOrigin | 'Uploaded'
+  spaceId: string | null
+  origin: FileOrigin | string | null
+  originObject?: OriginObject
   tags: string[]
   properties: {
     [key: string]: string
   }
   uid: string
-  file_size: string
-  created_at_date_time: string
+  fileSize: string
+  createdAtDateTime: string
   description: string | null
-  /** @deprecated create links from client side */
-  links: FileLinks
-  file_license?: FileLicense
-  show_license_pending: boolean
+  fileLicense?: FileLicense | null
+  show_license_pending?: boolean
+  folderPath?: { id: number; name: string }[]
   private?: boolean
   public?: boolean
   user?: FileUser
   org?: FileOrg
-  path: IFile[]
+  permissions?: NodePermissions
+  requestApprovalLicenseLink?: string
+  acceptLicenseActionLink?: string
+  downloadLink?: string
 }
 
 export interface IFolderPath {
@@ -92,7 +83,7 @@ export interface IFolderPath {
 
 export interface IFolder {
   path: IFolderPath[]
-  file_path?: string
+  filePath?: string
   state: null
   id: number
   name: string
@@ -103,22 +94,23 @@ export interface IFolder {
   locking?: boolean
   location: FileLocation
   origin: string | null
-  added_by: string
-  created_at: string
+  addedBy: string
+  addedByDxuser?: string
+  createdAt: string
   featured: boolean
   scope: ServerScope
-  space_id: string | null
+  spaceId: string | null
+  originObject?: OriginObject
   tags: string[]
   properties: {
     [key: string]: string
   }
-  created_at_date_time: string
-  /** @deprecated create links from client side */
-  links: FileLinks
+  createdAtDateTime: string
   private?: boolean
   public?: boolean
   user?: FileUser
   org?: FileOrg
+  permissions?: NodePermissions
 }
 
 export interface ISelectedNode {

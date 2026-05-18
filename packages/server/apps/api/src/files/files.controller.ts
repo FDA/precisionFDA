@@ -26,6 +26,7 @@ import { DownloadLinkOptionsDTO } from '@shared/domain/entity/domain/download-li
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
+import { FileGetDTO } from '@shared/domain/user-file/dto/file-get.dto'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
 import { ExistingFileSet, ResolvePath, SelectedNode } from '@shared/domain/user-file/user-file.types'
@@ -36,6 +37,7 @@ import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import { UserFileBulkDownloadFacade } from '../facade/user-file/user-file-bulk-download.facade'
 import { UserFileDownloadFacade } from '../facade/user-file/user-file-download.facade'
 import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
+import { UserFileGetFacade } from '../facade/user-file/user-file-get.facade'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { FileUidParamDTO } from './model/file-uid-param.dto'
@@ -51,6 +53,7 @@ export class FilesController {
     private readonly nodeService: NodeService,
     private readonly urlFetchService: UrlFetchService,
     private readonly userFileResolverFacade: UserFileResolverFacade,
+    private readonly userFileGetFacade: UserFileGetFacade,
     private readonly userFileDownloadFacade: UserFileDownloadFacade,
     private readonly userFileBulkDownloadFacade: UserFileBulkDownloadFacade,
   ) {}
@@ -151,7 +154,8 @@ export class FilesController {
           zip.append(response.data, { name: file.path })
         })
       } catch (error) {
-        res.status(500).send(`Error creating zip: ${error?.message}`)
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        res.status(500).send(`Error creating zip: ${errorMessage}`)
         break
       }
     }
@@ -233,6 +237,13 @@ export class FilesController {
       file_url: result.url,
       file_size: result.size,
     }
+  }
+
+  @ApiOperation({ summary: 'Get file details by uid' })
+  @HttpCode(200)
+  @Get(':uid')
+  async get(@Param('uid') uid: Uid<'file'>): Promise<FileGetDTO> {
+    return await this.userFileGetFacade.getFile(uid)
   }
 
   @Get(':uid/:fileName')

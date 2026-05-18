@@ -16,6 +16,7 @@ import { sanitizeFileName } from '@/utils/formatting'
 import { getBackPathNext } from '@/utils/getBackPath'
 import { ActionsMenuContent } from '../../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { defaultHomeContext, type HomeScopeContextValue } from '../../home/HomeScopeContext'
 import { StyledBackLink } from '../../home/home.styles'
 import {
@@ -35,10 +36,12 @@ import {
 } from '../../home/show.styles'
 import type { HomeScope } from '../../home/types'
 import { License } from '../../licenses/License'
+import type { License as ILicense } from '../../licenses/types'
 import type { ISpace } from '../../spaces/spaces.types'
 import { FileBreadcrumb } from '../FileBreadcrumb'
 import { fetchFile } from '../files.api'
 import type { IFile } from '../files.types'
+import { normalizePermissions } from '../normalizePermissions'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription, HeaderActions } from './styles'
 
@@ -82,19 +85,18 @@ export const FileShow = ({
   homeContext?: HomeScopeContextValue
 }): React.ReactElement => {
   const { homeScope, setDisplayScope, isHome } = homeContext
+  const user = useAuthUser()
   const location = useLocation()
-  const { data, isLoading } = useQuery({
+  const { data: file, isLoading } = useQuery({
     queryKey: ['file', fileId],
     queryFn: () =>
-      fetchFile(fileId!).then(d => {
+      fetchFile(fileId).then(d => {
         if (isHome) {
-          setDisplayScope(d.files.scope, d.files.featured)
+          setDisplayScope(d.scope, d.featured)
         }
         return d
       }),
   })
-  const file = data?.files
-  const meta = data?.meta
   const params = queryString.parse(location?.state?.fromSearch)
   const folderId = params?.folder_id as string | undefined
 
@@ -102,7 +104,7 @@ export const FileShow = ({
     return <HomeLoader />
   }
 
-  if (!file || !file.id)
+  if (!file?.id)
     return (
       <NotFound>
         <h1>File not found</h1>
@@ -110,16 +112,22 @@ export const FileShow = ({
       </NotFound>
     )
 
+  const licenseLink = file.fileLicense ? `/licenses/${file.fileLicense.id}` : undefined
   const tabsConfig = [
     {
-      header: `License: ${meta!.object_license && meta!.object_license.title}`,
-      tab: <License license={meta!.object_license!} link={file.links.show_license} />,
-      hide: !meta!.object_license || !meta!.object_license.uid,
+      header: `License: ${file.fileLicense?.title ?? ''}`,
+      tab: <License license={file.fileLicense as unknown as ILicense} link={licenseLink} />,
+      hide: !file.fileLicense?.uid,
     },
   ] as ITab[]
 
   const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
   const backPath = getBackPathNext({ spaceId: space?.id, location, resourceLocation: 'files', homeScope })
+
+  const spaceLink = file.spaceId ? `/spaces/${file.spaceId.replace('space-', '')}` : null
+  const userLink = file.addedByDxuser ? `/users/${file.addedByDxuser}` : '#'
+  const filePermissions = normalizePermissions(file, user, space)
+  const showLicensePending = file.fileLicense?.acceptanceStatus === 'pending'
 
   return (
     <>
@@ -132,7 +140,7 @@ export const FileShow = ({
             <Title>
               <FileIcon height={22} />
               <span data-testid="file-name">{file.name}</span>
-              {file.show_license_pending && (
+              {showLicensePending && (
                 <div data-testid="file-license-pending">
                   <HomeLabel
                     value="License Pending Approval"
@@ -155,7 +163,7 @@ export const FileShow = ({
                 )
                 win?.focus()
               }}
-              disabled={file.locked || !file.links.download || file.show_license_pending || file.state !== 'closed'}
+              disabled={!filePermissions.canDownload}
               data-testid="file-open-button"
             >
               Open
@@ -170,7 +178,7 @@ export const FileShow = ({
             basePath={`/${space ? `spaces/${space.id}` : 'home'}/files`}
             labelText="File Path:"
             scope={homeScope}
-            metaPath={data?.meta?.path}
+            metaPath={file.folderPath}
           />
         </PathSection>
 
@@ -179,8 +187,8 @@ export const FileShow = ({
             <MetadataItem>
               <MetadataKey>Location</MetadataKey>
               <MetadataVal data-testid="file-location">
-                {file.links.space ? (
-                  <Link target="_blank" to={file.links.space}>
+                {spaceLink ? (
+                  <Link target="_blank" to={spaceLink}>
                     {file.location}
                   </Link>
                 ) : (
@@ -207,8 +215,8 @@ export const FileShow = ({
             <MetadataItem>
               <MetadataKey>Added By</MetadataKey>
               <MetadataVal data-testid="file-added-by">
-                <Link target="_blank" to={file.links.user!}>
-                  {file.added_by}
+                <Link target="_blank" to={userLink}>
+                  {file.addedBy}
                 </Link>
               </MetadataVal>
             </MetadataItem>
@@ -216,7 +224,7 @@ export const FileShow = ({
             <MetadataItem>
               <MetadataKey>Origin</MetadataKey>
               <MetadataVal data-testid="file-origin">
-                {['Job', 'Comparison'].includes(file.links?.origin_object?.origin_type ?? '') &&
+                {['Job', 'Comparison'].includes(file.originObject?.originType ?? '') &&
                 file.origin &&
                 typeof file.origin === 'object' &&
                 file.origin.href ? (
@@ -233,12 +241,12 @@ export const FileShow = ({
 
             <MetadataItem>
               <MetadataKey>File Size</MetadataKey>
-              <MetadataVal data-testid="file-size">{file.file_size ?? 'N/A'}</MetadataVal>
+              <MetadataVal data-testid="file-size">{file.fileSize ?? 'N/A'}</MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
               <MetadataKey>Created On</MetadataKey>
-              <MetadataVal data-testid="file-created-on">{file.created_at_date_time}</MetadataVal>
+              <MetadataVal data-testid="file-created-on">{file.createdAtDateTime}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>

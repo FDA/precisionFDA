@@ -1,9 +1,10 @@
 import axios from 'axios'
-import { SpaceType } from '@/features/spaces/spaces.types'
-import { FileScope, FileState, IFile } from '../files/files.types'
-import { HomeScope, IFilter, MetaV2, ServerScope } from '../home/types'
-import { formatScopeQuery, Params, prepareListFetchV2 } from '../home/utils'
-import { IDatabase, MethodType } from './databases.types'
+import type { FileScope, FileState } from '../files/files.types'
+import type { FileOrg, FileUser } from '../apps/apps.types'
+import type { HomeScope, IFilter, MetaV2, ServerScope } from '../home/types'
+import { formatScopeQuery, type Params, prepareListFetchV2 } from '../home/utils'
+import type { IDatabase, MethodType } from './databases.types'
+import type { SpaceType } from '@/features/spaces/spaces.types'
 
 export interface FetchDatabaseListQuery {
   data: IDatabase[]
@@ -42,12 +43,30 @@ export async function fetchDatabaseRequest(uid: string): Promise<IDatabase> {
   return axios.get<IDatabase>(`/api/v2/dbclusters/${uid}`).then(r => r.data)
 }
 
-export interface IAccessibleFile extends IFile {
+// different shape from /api/list_files than IFile
+export interface IAccessibleFile {
+  id: number
+  uid: string
+  name: string
   title: string
+  type: string
+  state: FileState | null
+  scope: string
+  locked: boolean
+  resource?: boolean
+  description: string | null
+  tags: string[]
+  properties: Record<string, string>
+  file_size: string
+  file_path: string
   space_private: boolean
   space_public: boolean
   in_space: boolean
-  file_path: string
+  private?: boolean
+  public?: boolean
+  user?: FileUser
+  org?: FileOrg
+  path?: string
   spaceName?: string
   spaceType?: SpaceType
 }
@@ -68,10 +87,10 @@ interface FetchAccessibleFilesRequest {
   ignore_challenge_bot?: boolean
 }
 
-export async function fetchAccessibleFiles(body: FetchAccessibleFilesRequest) {
+export async function fetchAccessibleFiles(body: FetchAccessibleFilesRequest): Promise<FetchAccessibleFilesResponse> {
   return axios.post<FetchAccessibleFilesResponse>('/api/list_files', body).then(r => r.data)
 }
-export async function fetchAccessibleFilesByUID(body: FetchAccessibleFilesRequest) {
+export async function fetchAccessibleFilesByUID(body: FetchAccessibleFilesRequest): Promise<IAccessibleFile[]> {
   return axios.post<IAccessibleFile[]>('/api/list_files', body).then(r => r.data)
 }
 
@@ -99,14 +118,10 @@ export interface EditDatabasePayload {
   description: string
 }
 
-export async function editDatabaseRequest(payload: EditDatabasePayload, uid: string) {
+export async function editDatabaseRequest(payload: EditDatabasePayload, uid: string): Promise<void> {
   return axios.put(`/api/v2/dbclusters/${uid}`, payload).then(r => r.data)
 }
 
-export async function copyDatabasesRequest(scope: string, ids: string[]) {
-  return axios.post('/api/dbclusters/copy', { item_ids: ids, scope }).then(r => r.data)
-}
-
-export async function databaseMethodRequest(method: MethodType, dxids: string[]) {
+export async function databaseMethodRequest(method: MethodType, dxids: string[]): Promise<unknown> {
   return axios.post(`/api/v2/dbclusters/${method}`, { dxids }).then(r => r.data)
 }

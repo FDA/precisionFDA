@@ -15,11 +15,9 @@ export class AcceptedLicenseService {
   ) {}
 
   async acceptLicenseForUser(): Promise<AcceptedLicense[]> {
-    const acceptedLicenses = await this.acceptedLicenseRepository.find({
+    return await this.acceptedLicenseRepository.find({
       user: this.userContext.id,
     })
-
-    return acceptedLicenses
   }
 
   async isLicenseAcceptedForUser(licenseId: number): Promise<boolean> {
@@ -28,6 +26,15 @@ export class AcceptedLicenseService {
       license: licenseId,
     })
     return Boolean(acceptedLicense)
+  }
+
+  async getLicenseAcceptanceStatusForUser(licenseId: number): Promise<string | null> {
+    const acceptedLicense = await this.acceptedLicenseRepository.findOne({
+      user: this.userContext.id,
+      license: licenseId,
+    })
+
+    return acceptedLicense?.state ?? null
   }
 
   async acceptIfNotYetAccepted(licenses: License[], user: User): Promise<void> {

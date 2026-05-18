@@ -11,7 +11,6 @@ module Api
 
     before_action :init_parent_folder, only: %i(index featured everybody spaces cli)
     before_action :find_file, :can_edit?, only: %i(update)
-    before_action :find_user_file, only: %i(show)
     before_action :can_copy_to_scope?, only: %i(copy)
 
     DOWNLOAD_ACTION = "download".freeze
@@ -287,64 +286,6 @@ module Api
         render_files_list(files: files, folders: folders)
       end
     end
-
-    # GET /api/files/:id
-    # A fetch method for file by file :id, accessible by user.
-    # @param id [Integer] Param for file fetch.
-    # @return file UserFile UserFile object with arrays of assosiated objects:
-    #   notes, answers, comments, discussions, comparisons.
-    # rubocop:disable Metrics/MethodLength
-    def show
-      load_licenses(@file)
-
-      # TODO: move common data to common_concern.rb
-      comparison = if @file.parent_type == "Comparison"
-                     @file.parent.slice(:id, :user_id, :scope, :state)
-                   else
-                     synchronizer.sync_comparisons!(@context.user)
-                     @file.comparisons.accessible_by(@context).includes(:taggings)
-                   end
-
-      comments = if @file.in_space?
-                   Comment.where(commentable: @file.space_object, content_object: @file).
-                     order(id: :desc).page(params[:comments_page])
-                 else
-                   @file.root_comments.order(id: :desc).page(params[:comments_page])
-                 end
-
-      notes_ids = Attachment.file_attachments(@file.id).pluck(:note_id)
-      notes = Note.where(id: notes_ids).real_notes.
-        accessible_by(@context).select(:id, :user_id).order(id: :desc).page(params[:notes_page])
-
-      answers = @file.notes.
-        accessible_by(@context).
-        answers.order(id: :desc).page(params[:answers_page])
-
-      discussions = @file.notes.
-        accessible_by(@context).
-        discussions.order(id: :desc).page(params[:discussions_page])
-
-      path = if @file.parent_folder
-        build_path(@file.parent_folder, []).reverse
-      else
-        []
-      end
-
-      render json: @file, root: "files", adapter: :json,
-             meta: {
-               path: path,
-               user_licenses: @licenses,
-               object_license: @license,
-               comments: comments,
-               discussions: discussions,
-               answers: answers,
-               notes: notes,
-               comparisons: comparison,
-               links: meta_links(@file),
-             }
-    end
-
-    # rubocop:enable Metrics/MethodLength
 
     # Updates file name and description.
     # PUT /api/files/:uid

@@ -1,8 +1,10 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Module } from '@nestjs/common'
 import { config } from '@shared/config'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { EntityModule } from '@shared/domain/entity/entity.module'
 import { EventModule } from '@shared/domain/event/event.module'
+import { Job } from '@shared/domain/job/job.entity'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
 import { NotificationModule } from '@shared/domain/notification/notification.module'
 import { Resource } from '@shared/domain/resource/resource.entity'
@@ -50,6 +52,7 @@ import { Node } from './node.entity'
     SpaceModule,
     EventModule,
     MikroOrmModule.forFeature([Node, UserFile, Asset, Folder, User, Resource, ArchiveEntry, LicensedItem]),
+    MikroOrmModule.forFeature([Job, Comparison]),
   ],
   providers: [
     UserFileService,
@@ -66,6 +69,7 @@ import { Node } from './node.entity'
   ],
   exports: [
     UserFileService,
+    FolderService,
     NodeService,
     NodeHelper,
     ArchiveEntryService,
