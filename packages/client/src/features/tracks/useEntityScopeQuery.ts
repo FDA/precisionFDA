@@ -3,8 +3,8 @@ import { fetchApp } from '../apps/apps.api'
 import { fetchDatabaseRequest } from '../databases/databases.api'
 import { fetchExecution } from '../executions/executions.api'
 import { fetchFile } from '../files/files.api'
-import { ServerScope } from '../home/types'
-import { EntityType } from './TrackProvenanceContent'
+import type { ServerScope } from '../home/types'
+import type { EntityType } from './TrackProvenanceContent'
 
 interface EntityScopeData {
   scope: ServerScope
@@ -15,7 +15,7 @@ async function fetchEntityScope(identifier: string, entityType: EntityType): Pro
   switch (entityType) {
     case 'file': {
       const data = await fetchFile(identifier)
-      return { scope: data.files.scope, featured: data.files.featured }
+      return { scope: data.scope, featured: data.featured }
     }
     case 'app': {
       const data = await fetchApp(identifier)

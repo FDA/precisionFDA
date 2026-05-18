@@ -1,8 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import sanitize from 'sanitize-filename'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { JobRepository } from '@shared/domain/job/job.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -12,11 +14,16 @@ import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { FILE_STATE_DX, FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { FILE_STATE_DX, FILE_STI_TYPE, FileOrAsset, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
 
 interface FilesByFolder {
   [key: string]: Node[]
+}
+
+interface FolderPathEntry {
+  id: number
+  name: string
 }
 
 /**
@@ -30,6 +37,8 @@ export class NodeHelper {
     private readonly userCtx: UserContext,
     private readonly folderRepo: FolderRepository,
     private readonly nodeRepo: NodeRepository,
+    private readonly jobRepo: JobRepository,
+    private readonly comparisonRepo: ComparisonRepository,
   ) {}
 
   async generateUid(dxId: DxId<'file'>): Promise<Uid<'file'>> {
@@ -137,12 +146,74 @@ export class NodeHelper {
     wholeTree.push(folderWithChildren)
   }
 
-  async getFolderPath(folderId?: number): Promise<string> {
+  async getFolderPath(folderId?: number): Promise<string | null> {
     if (!folderId) {
       return null
     }
+
     const enclosingFolder = await this.nodeRepo.findOneOrFail({ id: folderId })
-    return await this.getNodePath(enclosingFolder)
+    return this.getNodePath(enclosingFolder)
+  }
+
+  async getFolderPathEntries(folderId?: number): Promise<FolderPathEntry[]> {
+    if (!folderId) {
+      return []
+    }
+
+    const enclosingFolder = await this.nodeRepo.findOneOrFail({ id: folderId })
+
+    const pathEntries: FolderPathEntry[] = []
+    let current: Node | null = enclosingFolder
+
+    while (current) {
+      pathEntries.unshift({ id: current.id, name: current.name })
+      const parent = this.getParentFolder(current)
+      current = parent ? ((await this.folderRepo.findOne({ id: parent.id })) as Node | null) : null
+    }
+
+    return pathEntries
+  }
+
+  async resolveOrigin(
+    file: UserFile,
+  ): Promise<{
+    origin: { text: string; href?: string } | string | null
+    parentType: string | null
+    parentUid: string | null
+  }> {
+    const parentType = file.parentType
+
+    if (parentType === PARENT_TYPE.USER) {
+      return { origin: 'Uploaded', parentType: 'User', parentUid: null }
+    }
+
+    if (parentType === PARENT_TYPE.NODE && !file.parentId) {
+      return { origin: 'Copied', parentType: 'Node', parentUid: null }
+    }
+
+    if (parentType === PARENT_TYPE.JOB && file.parentId) {
+      const job = await this.jobRepo.findOne({ id: file.parentId })
+      if (job) {
+        return {
+          origin: { text: job.name, href: `/jobs/${job.uid}` },
+          parentType: 'Job',
+          parentUid: job.uid,
+        }
+      }
+    }
+
+    if (parentType === PARENT_TYPE.COMPARISON && file.parentId) {
+      const comparison = await this.comparisonRepo.findOne({ id: file.parentId })
+      if (comparison) {
+        return {
+          origin: { text: comparison.name, href: `/comparisons/${comparison.id}` },
+          parentType: 'Comparison',
+          parentUid: String(comparison.id),
+        }
+      }
+    }
+
+    return { origin: null, parentType: parentType ?? null, parentUid: null }
   }
 
   async getNodePath(node: Node, folders: string[] | undefined = []): Promise<string> {

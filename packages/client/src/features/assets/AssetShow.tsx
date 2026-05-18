@@ -116,7 +116,7 @@ export const AssetShow = ({
               <FileIcon height={24} />
               {typeof asset?.origin === 'object' ? asset.origin.text : asset.name}
             </Title>
-            {asset.show_license_pending && (
+            {(asset.show_license_pending || asset.showLicensePending) && (
               <div data-testid="asset-license-pending">
                 <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" />
               </div>

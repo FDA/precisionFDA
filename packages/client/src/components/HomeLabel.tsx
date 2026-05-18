@@ -10,30 +10,32 @@ const StyledHomeLabel = styled.span`
   color: #ffffff;
   border-radius: 4px;
 
-  &--success {
+  &.home-label--success {
     background: #56d699;
   }
 
-  &--default {
+  &.home-label--default {
     background: #777777;
   }
 
-  &--warning {
+  &.home-label--warning {
     background: #f0ad4e;
   }
 
-  &__state-running, &__state-idle {
+  &.home-label__state-running,
+  &.home-label__state-idle {
 
     color: ${colors.stateRunningBackground};
     background-color: ${colors.stateRunningColor};
   }
 
-  &__state-done {
+  &.home-label__state-done {
     color: ${colors.stateDoneColor};
     background-color: ${colors.stateDoneBackground};
   }
 
-  &__state-failed, &__state-terminated {
+  &.home-label__state-failed,
+  &.home-label__state-terminated {
     color: ${colors.stateFailedColor};
     background-color: ${colors.stateFailedBackground};
   }

@@ -78,6 +78,10 @@ export class JobService implements SearchableByUid<'job'> {
     return this.jobCountService.count(context)
   }
 
+  getAccessibleEntityById(id: number): Promise<Job | null> {
+    return this.jobRepo.findAccessibleOne({ id })
+  }
+
   getAccessibleEntityByUid(uid: Uid<'job'>): Promise<Job | null> {
     return this.jobRepo.findAccessibleOne({ uid })
   }

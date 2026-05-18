@@ -15,15 +15,19 @@ const ScrollWrapper = styled.div`
   padding: 1rem;
 `
 
-export function useAcceptLicenseModal<T extends { uid?: string; dxid?: string; file_license?: IFile['file_license'] }>({
+export function useAcceptLicenseModal<
+  T extends { uid?: string; dxid?: string; fileLicense?: IFile['fileLicense']; file_license?: IFile['fileLicense'] }
+>({
   selected,
+  resource: _resource,
   onSuccess,
 }: {
   selected: T
   resource: APIResource
   onSuccess?: (res: unknown) => void
 }) {
-  const licenseId = selected?.file_license?.id
+  const selectedLicenseRef = selected?.fileLicense ?? selected?.file_license
+  const licenseId = selectedLicenseRef?.id
   const { isShown, setShowModal } = useModal()
 
   const mutation = useMutation({
@@ -66,7 +70,7 @@ export function useAcceptLicenseModal<T extends { uid?: string; dxid?: string; f
         <div>
           Are you sure you want to accept the license:{' '}
           <p>
-            <b data-testid="accept-license-name">{selected?.file_license?.title}</b>
+            <b data-testid="accept-license-name">{selectedLicenseRef?.title}</b>
           </p>
         </div>
         {mutation.isError && mutation.error && <div>{mutation.error.message}</div>}

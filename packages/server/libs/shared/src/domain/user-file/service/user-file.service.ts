@@ -1,4 +1,5 @@
-import { FilterQuery, FindOneOptions, SqlEntityManager } from '@mikro-orm/mysql'
+import { FindOneOptions, Loaded } from '@mikro-orm/core'
+import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -95,6 +96,13 @@ export class UserFileService {
       dxid: { $in: dxids },
       project,
     })
+  }
+
+  async getAccessibleFileByUid<Hint extends string = never>(
+    uid: Uid<'file'>,
+    options?: FindOneOptions<UserFile, Hint>,
+  ): Promise<Loaded<UserFile, Hint> | null> {
+    return this.fileRepo.findAccessibleOne<Hint>({ uid, stiType: { $ne: FILE_STI_TYPE.ASSET } }, options)
   }
 
   async lockFile(fileId: number): Promise<void> {

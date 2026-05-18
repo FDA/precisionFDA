@@ -23,6 +23,7 @@ describe('FolderService', () => {
 
   const nodeHelperGetNodePathStub = stub()
   const eventHelperCreateFolderEventStub = stub()
+  const folderRepoFindOneStub = stub()
 
   const nodeHelper = {
     getNodePath: nodeHelperGetNodePathStub,
@@ -32,7 +33,9 @@ describe('FolderService', () => {
     createFolderEvent: eventHelperCreateFolderEventStub,
   } as unknown as EventHelper
 
-  const folderRepo = {} as unknown as FolderRepository
+  const folderRepo = {
+    findOne: folderRepoFindOneStub,
+  } as unknown as FolderRepository
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -42,6 +45,9 @@ describe('FolderService', () => {
 
     nodeHelperGetNodePathStub.reset()
     nodeHelperGetNodePathStub.throws()
+
+    folderRepoFindOneStub.reset()
+    folderRepoFindOneStub.callsFake((query: { id: number }) => em.getRepository(Folder).findOne(query))
 
     eventHelperCreateFolderEventStub.reset()
     eventHelperCreateFolderEventStub.throws()
@@ -300,5 +306,21 @@ describe('FolderService', () => {
     expect(user1Folder).to.be.not.null()
     const user2Folder = loadedFolders.find(f => f.user.id === userId)
     expect(user2Folder).to.be.not.null()
+  })
+
+  it('Test getFolderById', async () => {
+    const folderService = new FolderService(em, userContext, folderRepo, nodeHelper, eventHelper)
+    const folderName = 'testFolder'
+    const createdFolder = create.filesHelper.createFolder(
+      em,
+      { user },
+      { name: folderName, scope: STATIC_SCOPE.PRIVATE },
+    )
+    await em.flush()
+
+    const retrievedFolder = await folderService.getFolderById(createdFolder.id)
+    expect(retrievedFolder).to.be.not.null()
+    expect(retrievedFolder?.id).to.be.equal(createdFolder.id)
+    expect(retrievedFolder?.name).to.be.equal(folderName)
   })
 })

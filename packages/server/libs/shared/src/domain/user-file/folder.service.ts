@@ -8,7 +8,7 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { STATIC_SCOPE } from '@shared/enums'
-import { FolderNotFoundError, ValidationError } from '@shared/errors'
+import { ValidationError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EntityScope, SCOPE } from '../../types/common'
 import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
@@ -30,31 +30,6 @@ export class FolderService {
     private readonly nodeHelper: NodeHelper,
     private readonly eventHelper: EventHelper,
   ) {}
-
-  async unlockFolder(folderId: number): Promise<void> {
-    this.logger.log(`Unlocking folder with id: ${folderId}`)
-
-    const folderToUnlock = await this.folderRepo.findOne(folderId)
-    if (!folderToUnlock) {
-      throw new FolderNotFoundError()
-    }
-    const currentUser = await this.userCtx.loadEntity()
-    await this.em.transactional(async () => {
-      const folderPath = await this.nodeHelper.getNodePath(folderToUnlock)
-
-      const folderEvent = await this.eventHelper.createFolderEvent(
-        EVENT_TYPES.FOLDER_UNLOCKED,
-        folderToUnlock,
-        folderPath,
-        currentUser,
-      )
-      folderToUnlock.locked = false
-      folderToUnlock.state = null
-
-      await this.em.persistAndFlush(folderEvent)
-      this.logger.log(`Unlocked folder name: ${folderToUnlock.name} id: ${folderToUnlock.id}`)
-    })
-  }
 
   /**
    * Creates folders on a path. If the folder already exists, it is not created and only returned.
@@ -111,6 +86,10 @@ export class FolderService {
 
   async getFolderEntity(folderId: number): Promise<Folder | null> {
     return await this.folderRepo.findEditableOne({ id: folderId })
+  }
+
+  async getFolderById(id: number): Promise<Folder | null> {
+    return this.folderRepo.findOne({ id })
   }
 
   private async createFolderInternal(

@@ -322,10 +322,8 @@ export const FilesListTable = ({
 
   function filterColsByScope(c: ColumnDefResolved<IFile>): boolean {
     return !(
-      // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
       (
-        (homeScope === 'me' && c.accessorKey === 'added_by') ||
-        // Hide 'location' for all homeScopes except 'spaces'.
+        (homeScope === 'me' && c.accessorKey === 'addedBy') ||
         (homeScope !== 'spaces' && c.accessorKey === 'location') ||
         // Hide 'featured' for all homeScopes except 'everybody'.
         (homeScope !== 'everybody' && c.accessorKey === 'featured') ||
