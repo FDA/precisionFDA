@@ -63,7 +63,8 @@ services:
           - name: common-sg
       command: ["pnpm", "run", "start:prod:admin-platform-client"]
       xray_enabled: true
-
+      secrets:
+        - ADMIN_TOKEN
 
     pfda-db-migrate:
       imageName: web
@@ -88,6 +89,8 @@ services:
         securityGroups:
           - name: web-sg
       xray_enabled: true
+      secrets:
+        - ADMIN_TOKEN
 
     pfda-docs:
       imageName: docs
