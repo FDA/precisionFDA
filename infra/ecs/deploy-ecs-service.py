@@ -618,7 +618,7 @@ class EcsDeployer:
         if not tag:
             raise ValueError(f"Image tag not found for key: {image_key}")
         image_uri = self.get_image_uri(image_key, tag)
-        ecs_secrets = self._get_ssm_secrets(service_name)
+        ecs_secrets = self._get_ssm_secrets(service_name, service_config)
         container_def = self._build_container_definition(service_name, service_config, image_uri, ecs_secrets)
         desired_count = service_config.get("desiredCount", 1)
         return container_def, desired_count
@@ -696,16 +696,30 @@ class EcsDeployer:
 
         return params
 
-    def _get_ssm_secrets(self, service_name):
-        """Retrieve SSM parameters for ECS secrets, skipping nginx."""
+    def _get_ssm_secrets(self, service_name, service_config):
+        """Retrieve SSM parameters for ECS secrets, skipping nginx.
 
+        Parameters under /pfda/<ENV>/app/secrets/ are opt-in: they are only
+        injected into a container when the service config explicitly lists the
+        <secret_name> under a `secrets` key.
+        """
         ecs_secrets = []
         exclusions = ["nginx", "docs"]
+        allowed_secrets = set(service_config.get("secrets") or [])
+        secrets_prefix = f"{self.ssm_prefix}/secrets/"
+
         for param in self._ssm_parameters:
             if self.deployment_type == "gsrs" and not (
                     "gsrs" in param["Name"].lower() or "HOST" in param["Name"]):
                 continue
-            elif param["Name"].endswith("/ssl_configuration/private_key"):
+
+            if param["Name"].startswith(secrets_prefix):
+                secret_name = param["Name"][len(secrets_prefix):]
+                if secret_name in allowed_secrets:
+                    ecs_secrets.append({"name": secret_name, "valueFrom": param["Name"]})
+                continue
+
+            if param["Name"].endswith("/ssl_configuration/private_key"):
                 ecs_secrets.append({"name": "SSL_KEY", "valueFrom": param["Name"]})
             elif param["Name"].endswith("/ssl_configuration/certificate"):
                 ecs_secrets.append({"name": "SSL_CERT", "valueFrom": param["Name"]})
