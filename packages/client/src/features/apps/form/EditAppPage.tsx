@@ -1,21 +1,26 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
+import type { AxiosError } from 'axios'
 import { useNavigate, useParams } from 'react-router'
-import { Loader } from '../../../components/Loader'
-import { NotAllowedPage } from '../../../components/NotAllowed'
-import { cleanObject } from '../../../utils/object'
+import { Loader } from '@/components/Loader'
+import { NotAllowedPage } from '@/components/NotAllowed'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { cleanObject } from '@/utils/object'
+import { defaultHomeContext, type HomeScopeContextValue } from '../../home/HomeScopeContext'
+import type { ApiErrorResponse } from '../../home/types'
+import { useHomeDisplayScope } from '../../home/useHomeDisplayScope'
 import { getBasePath } from '../../home/utils'
-import { ApiErrorResponse } from '../../home/types'
-import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
+import { type CreateAppPayload, type CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
-import { AxiosError } from 'axios'
-import { defaultHomeContext, HomeScopeContextValue } from '../../home/HomeScopeContext'
-import { useHomeDisplayScope } from '../../home/useHomeDisplayScope'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
-export const EditAppPage = ({ spaceId, homeContext = defaultHomeContext }: { spaceId?: string; homeContext?: HomeScopeContextValue }) => {
+export const EditAppPage = ({
+  spaceId,
+  homeContext = defaultHomeContext,
+}: {
+  spaceId?: string
+  homeContext?: HomeScopeContextValue
+}) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { appUid } = useParams<{ appUid: string }>()

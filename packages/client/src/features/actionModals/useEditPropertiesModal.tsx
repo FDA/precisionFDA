@@ -2,22 +2,23 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { get } from 'lodash'
-import React, { useMemo } from 'react'
-import { FieldErrors, useFieldArray, useForm } from 'react-hook-form'
+import type React from 'react'
+import { useMemo } from 'react'
+import { type FieldErrors, useFieldArray, useForm } from 'react-hook-form'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { Button, TransparentButton } from '../../components/Button'
-import { FieldGroup } from '../../components/form/styles'
-import { CrossIcon } from '../../components/icons/PlusIcon'
+import { Button, TransparentButton } from '@/components/Button'
+import { FieldGroup } from '@/components/form/styles'
+import { CrossIcon } from '@/components/icons/PlusIcon'
 import '../../utils/yupValidators'
+import { toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { InputTextS } from '../apps/form/Fields'
+import type { ServerScope } from '../home/types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import { InputTextS } from '../apps/form/Fields'
-import { ServerScope } from '../home/types'
-import { RequestResponse } from './useFeatureMutation'
-import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import type { RequestResponse } from './useFeatureMutation'
 
 const StyledForm = styled.form`
   min-width: 450px;
@@ -102,7 +103,7 @@ const mergeAndUpdateProperties = (
 ): Properties => {
   const mergedProperties = { ...itemProperties, ...newPropertiesObject }
   commonPropertiesKeys.forEach(key => {
-    if (!newPropertiesObject.hasOwnProperty(key) && commonPropertiesKeys.includes(key)) {
+    if (!Object.hasOwn(newPropertiesObject, key) && commonPropertiesKeys.includes(key)) {
       delete mergedProperties[key]
     }
   })
@@ -145,10 +146,12 @@ const EditPropertiesForm = ({
     return acc
   }, {})
 
-  const propertiesArr = Object.entries(selected.length == 1 ? selected[0].properties : commonProperties).map(([key, value]) => ({
-    key,
-    value,
-  }))
+  const propertiesArr = Object.entries(selected.length == 1 ? selected[0].properties : commonProperties).map(
+    ([key, value]) => ({
+      key,
+      value,
+    }),
+  )
 
   const {
     register,
@@ -190,7 +193,7 @@ const EditPropertiesForm = ({
           : mergeAndUpdateProperties(item.properties, newProperties, Object.keys(commonProperties))
 
       await mutation.mutateAsync({
-        targetId: item.uid ?? 'folder-' + item.id,
+        targetId: item.uid ?? `folder-${item.id}`,
         properties: propertiesToUse,
       })
     }
@@ -218,7 +221,8 @@ const EditPropertiesForm = ({
           <StyledFieldGroup>
             {fields.length === 0 && (
               <NoProperties>
-                No properties have been added <StyledButtonText onClick={handleAppendProperty}>Add a property</StyledButtonText>
+                No properties have been added{' '}
+                <StyledButtonText onClick={handleAppendProperty}>Add a property</StyledButtonText>
               </NoProperties>
             )}
             {fields.map((field, index) => {
@@ -245,7 +249,11 @@ const EditPropertiesForm = ({
         </ModalScroll>
       </StyledForm>
       <StyledFooter>
-        {fields.length > 0 ? <StyledButtonText onClick={handleAppendProperty}>Add another property</StyledButtonText> : <div />}
+        {fields.length > 0 ? (
+          <StyledButtonText onClick={handleAppendProperty}>Add another property</StyledButtonText>
+        ) : (
+          <div />
+        )}
         <ButtonRow>
           <Button type="button" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel

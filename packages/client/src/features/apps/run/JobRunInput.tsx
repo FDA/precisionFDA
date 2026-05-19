@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { isSafeInteger } from 'lodash'
 import { useEffect } from 'react'
 import {
   type ControllerRenderProps,
@@ -179,7 +178,7 @@ const SingleFileInput = ({
     enabled: !!fileUid && fileUid.length > 0 && !isSuccessfullyPreValidated,
   })
 
-  const error = hasValue && fileListQuery.isSuccess && !(isSuccessfullyPreValidated || fileListQuery?.data === true)
+  const error = hasValue && fileListQuery.isSuccess && !(isSuccessfullyPreValidated || fileListQuery?.data)
 
   useEffect(() => {
     if (error) {
@@ -330,7 +329,7 @@ export const JobRunInput = ({
           <InputSelect
             value={getDefaultValue(field.value)}
             isDisabled={disabled}
-            isValidNewOption={n => isSafeInteger(parseInt(n, 10))}
+            isValidNewOption={n => Number.isSafeInteger(parseInt(n, 10))}
             isMulti
             options={choices?.map(value => ({
               value: `${value}`,

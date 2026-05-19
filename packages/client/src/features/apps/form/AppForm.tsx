@@ -1,33 +1,32 @@
-/* eslint-disable react/jsx-props-no-spreading */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import React, { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Button } from '../../../components/Button'
-import { InputText } from '../../../components/InputText'
-import { Loader } from '../../../components/Loader'
+import { Button } from '@/components/Button'
+import { FieldGroup, InputError } from '@/components/form/styles'
+import { InputText } from '@/components/InputText'
+import { ArrowLeftIcon } from '@/components/icons/ArrowLeftIcon'
+import { Loader } from '@/components/Loader'
+import { PageTitle } from '@/components/Page/styles'
+import { ButtonRow } from '@/components/Public/styles'
+import { Select } from '@/components/Select'
+import { PfTabContent } from '@/components/Tabs/PfTab'
+import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '@/constants'
+import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '@/constants/consts'
+import { type ComputeResourceKey, RESOURCE_LABELS } from '@/types/user'
+import { getSpaceIdFromScope } from '@/utils'
 import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
-import { PageTitle } from '../../../components/Page/styles'
-import { ButtonRow } from '../../../components/Public/styles'
-import { Select } from '../../../components/Select'
-import { PfTabContent } from '../../../components/Tabs/PfTab'
-import { FieldGroup, InputError } from '../../../components/form/styles'
-import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
-import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
-import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../../constants/consts'
-import { getSpaceIdFromScope } from '../../../utils'
 import { useConfirmModal } from '../../files/actionModals/useConfirmModal'
 import { StyledBackLink } from '../../home/home.styles'
-import { CreateAppPayload } from '../apps.api'
-import { CreateAppForm, FileType, IApp, InputSpec } from '../apps.types'
+import type { CreateAppPayload } from '../apps.api'
+import type { CreateAppForm, FileType, IApp, InputSpec } from '../apps.types'
 import { getBaseLink } from '../run/utils'
+import { useComputeInstances } from '../useComputeInstances'
 import { useUploadAppConfigFile } from '../useUploadAppConfigFile'
+import { getChoicesValueFromForm, getDefaultValueFromForm, handleSnakeNameChange, validationSchema } from './common'
 import { Inputs } from './Inputs'
 import { Outputs } from './Outputs'
 import { ReadMeInput } from './ReadMeInput'
-import { VmEnvTab } from './VmEnvTab'
-import { getChoicesValueFromForm, getDefaultValueFromForm, handleSnakeNameChange, validationSchema } from './common'
 import {
   FormFields,
   FormSectionTop,
@@ -43,8 +42,24 @@ import {
   TopFieldGroupTarget,
   TopFieldGroupUbuntu,
 } from './styles'
+import { VmEnvTab } from './VmEnvTab'
 
 type SelectedSection = 'io' | 'vm' | 'script' | 'readme'
+
+type InstanceTypeFallback = {
+  requested: string
+  appliedLabel: string
+}
+
+const InstanceTypeFallbackNotice = ({ fallback }: { fallback: InstanceTypeFallback }) => (
+  <div
+    role="status"
+    className="max-w-125 rounded-md border border-(--highlight-200) bg-(--highlight-50) px-2 py-1 text-left text-xs leading-relaxed text-(--highlight-700)"
+  >
+    <span className="font-semibold">{fallback.requested}</span> is not available for your account; defaulted to{' '}
+    <span className="font-semibold">{fallback.appliedLabel}</span>.
+  </div>
+)
 
 const ubuntuReleasesOptions = [
   { value: '16.04', label: '16.04', disabled: true },
@@ -71,15 +86,7 @@ const initialFormValues: CreateAppForm = {
   scope: 'private',
 }
 
-export const AppForm = ({
-  isEdit = false,
-  isFork = false,
-  onSubmit,
-  defaultVals,
-  isSubmitting,
-  app,
-  targetScopeName,
-}: {
+type AppFormProps = {
   isEdit?: boolean
   isFork?: boolean
   onSubmit: (vals: CreateAppPayload) => Promise<void>
@@ -87,11 +94,44 @@ export const AppForm = ({
   isSubmitting: boolean
   app?: IApp
   targetScopeName?: string
-}) => {
+}
+
+export const AppForm = (props: AppFormProps) => {
+  const { computeInstances, isLoading } = useComputeInstances()
+  if (isLoading) return <Loader className="pageloader" />
+  return <AppFormInner {...props} computeInstances={computeInstances} />
+}
+
+const AppFormInner = ({
+  isEdit = false,
+  isFork = false,
+  onSubmit,
+  defaultVals,
+  isSubmitting,
+  app,
+  targetScopeName,
+  computeInstances,
+}: AppFormProps & { computeInstances: ReturnType<typeof useComputeInstances>['computeInstances'] }) => {
   const spaceId = getSpaceIdFromScope(app?.scope)
   const [selectedSection, setSelectedSection] = useState<SelectedSection>('io')
   const [selectedFileType, setSelectedFileType] = useState<FileType>('cwl')
   const modal = useUploadAppConfigFile({ filetype: selectedFileType })
+
+  const baseDefaults = defaultVals ?? initialFormValues
+  const requested = baseDefaults.instance_type
+  const isAllowed = computeInstances.some(i => i.value === requested)
+  const hasFallbackTarget = !isAllowed && computeInstances.length > 0
+
+  const resolvedDefaults: CreateAppForm = hasFallbackTarget
+    ? { ...baseDefaults, instance_type: computeInstances[0].value as ComputeResourceKey }
+    : baseDefaults
+
+  const instanceTypeFallback = hasFallbackTarget
+    ? {
+        requested: RESOURCE_LABELS[requested as ComputeResourceKey] ?? requested,
+        appliedLabel: RESOURCE_LABELS[computeInstances[0].value as ComputeResourceKey] ?? computeInstances[0].value,
+      }
+    : null
 
   const {
     register,
@@ -105,7 +145,7 @@ export const AppForm = ({
   } = useForm<CreateAppForm>({
     resolver: yupResolver(validationSchema),
     mode: 'onBlur',
-    defaultValues: defaultVals || initialFormValues,
+    defaultValues: resolvedDefaults,
   })
 
   const handleOpenAppConfigUpload = (ftype: FileType) => {
@@ -142,37 +182,36 @@ export const AppForm = ({
     },
   )
 
-  const performSubmit = useCallback(async (createAppSeries: boolean, createAppRevision: boolean) => {
-    const vals = getValues()
-    const formatted: CreateAppPayload = {
-      ...vals,
-      is_new: false,
-      ordered_assets: vals.ordered_assets?.map(asset => asset.uid),
-      input_spec: vals.input_spec.map(i => ({
-        ...i,
-        default: getDefaultValueFromForm(i.class, i.default) as InputSpec['default'],
-        choices: i?.choices && getChoicesValueFromForm(i.class, i.choices) as InputSpec['choices'],
-      })),
-    }
-
-    formatted.createAppSeries = createAppSeries
-    formatted.createAppRevision = createAppRevision
-    try {
-      await onSubmit(formatted)
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { error?: { code?: string } } } }
-      const code = error.response?.data?.error?.code
-      if (code === APP_SERIES_CREATION_NOT_REQUESTED) {
-        setShowAppSeriesConfirmModal(true)
-      } else if (code === APP_REVISION_CREATION_NOT_REQUESTED) {
-        setShowAppRevisionConfirmModal(true)
-      } else {
-        // Optional: re-throw or handle other errors if needed
-        // console.error("Submission error:", err);
+  const performSubmit = useCallback(
+    async (createAppSeries: boolean, createAppRevision: boolean) => {
+      const vals = getValues()
+      const formatted: CreateAppPayload = {
+        ...vals,
+        is_new: false,
+        ordered_assets: vals.ordered_assets?.map(asset => asset.uid),
+        input_spec: vals.input_spec.map(i => ({
+          ...i,
+          default: getDefaultValueFromForm(i.class, i.default) as InputSpec['default'],
+          choices: i?.choices && (getChoicesValueFromForm(i.class, i.choices) as InputSpec['choices']),
+        })),
       }
-    }
-  }, [getValues, onSubmit, setShowAppSeriesConfirmModal, setShowAppRevisionConfirmModal])
 
+      formatted.createAppSeries = createAppSeries
+      formatted.createAppRevision = createAppRevision
+      try {
+        await onSubmit(formatted)
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { error?: { code?: string } } } }
+        const code = error.response?.data?.error?.code
+        if (code === APP_SERIES_CREATION_NOT_REQUESTED) {
+          setShowAppSeriesConfirmModal(true)
+        } else if (code === APP_REVISION_CREATION_NOT_REQUESTED) {
+          setShowAppRevisionConfirmModal(true)
+        }
+      }
+    },
+    [getValues, onSubmit, setShowAppSeriesConfirmModal, setShowAppRevisionConfirmModal],
+  )
 
   const backLink = isEdit || isFork ? `/${getBaseLink(spaceId)}/apps/${app?.uid}` : `/${getBaseLink(spaceId)}/apps`
   const backLabel = isEdit || isFork ? 'Back to App' : 'Back to Apps'
@@ -197,19 +236,27 @@ export const AppForm = ({
             </Button>
           </SubmitRow>
         </Row>
-        <ButtonRow>
-          <Button type="button" onClick={() => handleOpenAppConfigUpload('cwl')}>
-            Import from .cwl file
-          </Button>
-          <Button type="button" onClick={() => handleOpenAppConfigUpload('wdl')}>
-            Import from .wdl file
-          </Button>
+        <ButtonRow className="flex-wrap items-start">
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" onClick={() => handleOpenAppConfigUpload('cwl')}>
+              Import from .cwl file
+            </Button>
+            <Button type="button" onClick={() => handleOpenAppConfigUpload('wdl')}>
+              Import from .wdl file
+            </Button>
+          </div>
+          {instanceTypeFallback && (
+            <div className="ml-auto">
+              <InstanceTypeFallbackNotice fallback={instanceTypeFallback} />
+            </div>
+          )}
         </ButtonRow>
         {modal.modalComp}
         <FormSectionTop>
           <TopFieldGroup>
-            <label>Name</label>
+            <label htmlFor="app-name">Name</label>
             <InputText
+              id="app-name"
               {...register('name', {
                 required: 'Name is required.',
                 onChange: handleSnakeNameChange,
@@ -220,8 +267,12 @@ export const AppForm = ({
           </TopFieldGroup>
 
           <TopFieldGroup>
-            <label>Title</label>
-            <InputText {...register('title', { required: 'Title is required.' })} disabled={isSubmitting} />
+            <label htmlFor="app-title">Title</label>
+            <InputText
+              id="app-title"
+              {...register('title', { required: 'Title is required.' })}
+              disabled={isSubmitting}
+            />
             <ErrorMessage errors={errors} name="title" render={({ message }) => <InputError>{message}</InputError>} />
           </TopFieldGroup>
 
@@ -241,15 +292,19 @@ export const AppForm = ({
                     isOptionDisabled={option => (option as { disabled: boolean }).disabled}
                     inputId="app-ubuntu-release"
                   />
-                  <ErrorMessage errors={errors} name="release" render={({ message }) => <InputError>{message}</InputError>} />
+                  <ErrorMessage
+                    errors={errors}
+                    name="release"
+                    render={({ message }) => <InputError>{message}</InputError>}
+                  />
                 </TopFieldGroupUbuntu>
               )}
             />
           </FieldGroup>
           {isFork && (
             <TopFieldGroupTarget>
-              <label>Target</label>
-              <InputText value={targetScopeName} disabled={true} />
+              <label htmlFor="app-target">Target</label>
+              <InputText id="app-target" value={targetScopeName} disabled={true} />
             </TopFieldGroupTarget>
           )}
         </FormSectionTop>
@@ -282,8 +337,22 @@ export const AppForm = ({
                 Learn more about app inputs and outputs
               </a>
             </Help>
-            <Inputs control={control} errors={errors} watch={watch} register={register} trigger={trigger} setValue={setValue} />
-            <Outputs control={control} errors={errors} watch={watch} register={register} trigger={trigger} setValue={setValue} />
+            <Inputs
+              control={control}
+              errors={errors}
+              watch={watch}
+              register={register}
+              trigger={trigger}
+              setValue={setValue}
+            />
+            <Outputs
+              control={control}
+              errors={errors}
+              watch={watch}
+              register={register}
+              trigger={trigger}
+              setValue={setValue}
+            />
           </PfTabContent>
 
           <PfTabContent $isShown={selectedSection === 'vm'}>

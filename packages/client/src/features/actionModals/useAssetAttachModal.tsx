@@ -1,22 +1,22 @@
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
-import { Button, TransparentButton } from '../../components/Button'
-import { InputText } from '../../components/InputText'
-import { Loader } from '../../components/Loader'
-import { CrossIcon } from '../../components/icons/PlusIcon'
-import { SearchIcon } from '../../components/icons/SearchIcon'
+import { Button, TransparentButton } from '@/components/Button'
+import { InputText } from '@/components/InputText'
+import { CrossIcon } from '@/components/icons/PlusIcon'
+import { SearchIcon } from '@/components/icons/SearchIcon'
+import { Loader } from '@/components/Loader'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, HeaderText, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import { LeftBar, ModalLoader, NoteContainer, NotesMarkdown, SearchInput, StyledAttachToModal } from './AttachToModal/styles'
-import { Asset, useListAssetsQuery } from './AttachToModal/useListAssetsQuery'
-
-const AssetHeaderText = () => (
-  <>
-    <HeaderText>Selected Assets for your VM Environment</HeaderText>
-    <span>Manage your assets</span>
-  </>
-)
+import {
+  LeftBar,
+  ModalLoader,
+  NoteContainer,
+  NotesMarkdown,
+  SearchInput,
+  StyledAttachToModal,
+} from './AttachToModal/styles'
+import { type Asset, useListAssetsQuery } from './AttachToModal/useListAssetsQuery'
 
 interface AssetAttachModalProps {
   hideAction: () => void
@@ -60,23 +60,20 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: Asse
     })
 
     return (
-      <li 
-        key={item.uid} 
-        className={classes}
-      >
+      <li key={item.uid} className={classes}>
         <div>
-          <button 
+          <button
             type="button"
-            className="__menu-item_label-wrapper" 
+            className="__menu-item_label-wrapper"
             onClick={() => {
               setSelectedItem(item)
               onCheckboxClick(item)
             }}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              padding: 0, 
-              width: '100%', 
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              width: '100%',
               textAlign: 'left',
               cursor: 'pointer',
             }}
@@ -92,7 +89,10 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: Asse
 
   return (
     <ModalNext hide={hideAction} isShown={isShown} id="modal-attachto-asset">
-      <ModalHeaderTop headerText={<AssetHeaderText />} hide={hideAction} />
+      <ModalHeaderTop
+        headerText={<HeaderText>Manage you Assets for your VM Environment</HeaderText>}
+        hide={hideAction}
+      />
       {isLoading ? (
         <ModalLoader>
           <Loader />
@@ -102,7 +102,12 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: Asse
           <StyledAttachToModal>
             <LeftBar>
               <SearchInput>
-                <InputText name="search" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+                <InputText
+                  name="search"
+                  placeholder="Search..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
                 <span className="__menu-item_search-icons">
                   {search ? (
                     <TransparentButton onClick={() => setSearch('')}>

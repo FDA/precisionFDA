@@ -45,11 +45,7 @@ export const ComputeInstanceSelect = ({
       name={name}
       disabled={disabled}
     >
-      <SelectTrigger
-        className={cn('w-full min-w-0 max-w-full', triggerClassName)}
-        onBlur={onBlur}
-        ref={ref}
-      >
+      <SelectTrigger className={cn('w-full min-w-56 max-w-full', triggerClassName)} onBlur={onBlur} ref={ref}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

@@ -1,74 +1,54 @@
-import { useRef } from 'react'
+import { type KeyboardEventHandler, type ReactNode, useRef } from 'react'
 import { type Control, Controller } from 'react-hook-form'
 import { Link } from 'react-router'
-import styled from 'styled-components'
-import { Button, TransparentButton } from '@/components/Button'
 import { Checkbox } from '@/components/CheckboxNext'
 import { FieldGroup, FieldLabelRow, SelectFieldLabel } from '@/components/form/styles'
 import { ArrowLeftIcon } from '@/components/icons/ArrowLeftIcon'
 import { CrossIcon } from '@/components/icons/PlusIcon'
-import { Svg } from '@/components/icons/Svg'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import { useAssetAttachModal } from '../../actionModals/useAssetAttachModal'
 import type { CreateAppForm } from '../apps.types'
-import { InputTextS } from './Fields'
 import { InstanceTypeSelect } from './InstanceTypeSelect'
 import { FormFields, Help } from './styles'
 
-const AssetList = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-top: 16px;
-  a {
-    margin-left: 16px;
-    line-height: 40px;
-  }
-`
+const SectionLabelRow = ({
+  label,
+  htmlFor,
+  learnMoreHref,
+}: {
+  label: string
+  htmlFor?: string
+  learnMoreHref?: string
+}) => (
+  <div className="flex items-end justify-between gap-3">
+    <label htmlFor={htmlFor} className="text-sm font-semibold text-(--c-text-700)">
+      {label}
+    </label>
+    {learnMoreHref && (
+      <a
+        href={learnMoreHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-xs text-primary underline-offset-2 hover:underline"
+      >
+        Learn more
+      </a>
+    )}
+  </div>
+)
 
-const Box = styled.div`
-  padding: 10px 10px;
-  margin-bottom: -1px;
-  background-color: var(--tertiary-70);
-  border: 1px solid var(--c-layout-border-200);
-  border-radius: 3px;
-`
+const Tip = ({ children }: { children: ReactNode }) => (
+  <p className="text-xs leading-relaxed text-muted-foreground">{children}</p>
+)
 
-const Label = styled.label`
-  font-size: 14px;
-  line-height: 14px;
-`
-
-const Area = styled.div`
-  max-width: 500px;
-`
-const LearnMoreLink = styled.a`
-  font-size: 12px;
-  max-width: fit-content;
-`
-const LabelRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-`
-
-const AssetButtonRow = styled.div`
-  ${Button} {
-    width: 200px;
-    justify-content: center;
-  }
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  a {
-    display: flex;
-    gap: 8px;
-    font-size: 14px;
-    align-items: center;
-  }
-
-  ${Svg} {
-    transform: rotate(180deg);
-  }
-`
+const InfoTip = ({ children }: { children: ReactNode }) => (
+  <Tip>
+    <span className="font-semibold text-(--c-text-700)">TIP: </span>
+    {children}
+  </Tip>
+)
 
 const AssetSelect = ({
   onChange,
@@ -80,74 +60,42 @@ const AssetSelect = ({
   const { modalComp, setShowModal } = useAssetAttachModal(value, onChange)
 
   return (
-    <Area>
-      <LabelRow>
-        <Label>Assets</Label>
-        <LearnMoreLink href="/docs/guides/assets#creating-new-assets" target="_blank">
-          Learn More
-        </LearnMoreLink>
-      </LabelRow>
-      <Box>
-        <AssetButtonRow>
-          <Button type="button" onClick={() => setShowModal(true)}>
+    <div className="flex max-w-125 flex-col gap-1.5">
+      <SectionLabelRow label="Assets" learnMoreHref="/docs/guides/assets#creating-new-assets" />
+      <div className="rounded-md border border-(--c-layout-border-200) bg-tertiary-muted p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Button type="button" variant="outline" className="min-w-45" onClick={() => setShowModal(true)}>
             Manage App Assets
           </Button>
-          <Link to="/home/assets" target="_blank">
-            Manage your Assets <ArrowLeftIcon />
+          <Link
+            to="/home/assets"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-2 hover:underline"
+          >
+            Manage your Assets
+            <ArrowLeftIcon right height={12} />
           </Link>
-        </AssetButtonRow>
+        </div>
         {modalComp}
         {value.length > 0 && (
-          <AssetList>
+          <ul className="mt-3 flex flex-col divide-y divide-(--c-layout-border-200)/60 rounded-md border border-(--c-layout-border-200) bg-background">
             {value.map(item => (
-              <Link key={item.uid} to={`/home/assets/${item.uid}`} target="_blank">
-                {item.name}
-              </Link>
+              <li key={item.uid} className="px-3 py-2 text-sm">
+                <Link
+                  to={`/home/assets/${item.uid}`}
+                  target="_blank"
+                  className="text-primary underline-offset-2 hover:underline"
+                >
+                  {item.name}
+                </Link>
+              </li>
             ))}
-          </AssetList>
+          </ul>
         )}
-      </Box>
-    </Area>
+      </div>
+    </div>
   )
 }
-
-const PackagesInputRow = styled.div`
-  display: flex;
-
-  button {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-  }
-
-  input {
-    max-width: 300px;
-    border-right: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-`
-
-const Tip = styled.div`
-  color: #777777;
-  text-align: left;
-  font-size: 12px;
-  margin-top: 4px;
-`
-
-const PackageRow = styled.div`
-  display: flex;
-  align-items: center;
-`
-
-const PackageList = styled.ul`
-  list-style: none;
-  button {
-    margin-left: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-`
 
 const UbuntuPackageSelect = ({ onChange, value }: { onChange: (p: string[]) => void; value: string[] }) => {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -160,41 +108,61 @@ const UbuntuPackageSelect = ({ onChange, value }: { onChange: (p: string[]) => v
     inputRef.current.value = ''
   }
 
+  const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addItem()
+    }
+  }
+
   const handleDeleteClick = (index: number) => {
     const newVals = value.filter((_, i) => i !== index)
     onChange(newVals)
   }
 
   return (
-    <Area>
-      <Label>Ubuntu Packages</Label>
-      <Box>
-        <PackagesInputRow>
-          <InputTextS ref={inputRef} placeholder="Package name" />
-          <Button data-variant="primary" type="button" onClick={addItem}>
+    <div className="flex max-w-125 flex-col gap-1.5">
+      <SectionLabelRow label="Ubuntu Packages" htmlFor="ubuntu-package-input" />
+      <div className="rounded-md border border-(--c-layout-border-200) bg-tertiary-muted p-3">
+        <div className="flex max-w-100 items-stretch">
+          <Input
+            id="ubuntu-package-input"
+            ref={inputRef}
+            placeholder="Package name"
+            onKeyDown={handleKeyDown}
+            className="rounded-r-none border-r-0 focus-visible:z-10"
+          />
+          <Button type="button" onClick={addItem} className="rounded-l-none">
             Add
           </Button>
-        </PackagesInputRow>
-        <Tip>
-          <b>TIP:</b> Find packages within the distribution using{' '}
-          <ExternalLink to="http://packages.ubuntu.com/">Ubuntu Package Search</ExternalLink>
-        </Tip>
+        </div>
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          <span className="font-semibold text-(--c-text-700)">TIP: </span>
+          Find packages within the distribution using{' '}
+          <ExternalLink to="https://packages.ubuntu.com/">Ubuntu Package Search</ExternalLink>
+        </p>
         {value.length > 0 && (
-          <PackageList>
+          <ul className="mt-3 flex flex-wrap gap-1.5">
             {value.map((item, i) => (
-              <li key={item}>
-                <PackageRow>
-                  {item}
-                  <TransparentButton type="button" onClick={() => handleDeleteClick(i)}>
-                    <CrossIcon height={12} />
-                  </TransparentButton>
-                </PackageRow>
+              <li
+                key={item}
+                className="inline-flex items-center gap-1.5 rounded-md border border-(--c-layout-border-200) bg-background px-2 py-1 text-xs"
+              >
+                <span className="font-mono">{item}</span>
+                <button
+                  type="button"
+                  aria-label={`Remove ${item}`}
+                  onClick={() => handleDeleteClick(i)}
+                  className="inline-flex size-4 cursor-pointer items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <CrossIcon height={10} />
+                </button>
               </li>
             ))}
-          </PackageList>
+          </ul>
         )}
-      </Box>
-    </Area>
+      </div>
+    </div>
   )
 }
 
@@ -208,6 +176,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
           Learn more about the virtual machine environment
         </a>
       </Help>
+
       <FieldGroup>
         <Controller
           name="internet_access"
@@ -219,9 +188,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
             </FieldLabelRow>
           )}
         />
-        <Tip>
-          <b>TIP:</b> The precisionFDA CLI is only available when internet access is enabled
-        </Tip>
+        <InfoTip>The precisionFDA CLI is only available when internet access is enabled</InfoTip>
       </FieldGroup>
 
       <FieldGroup>
@@ -229,15 +196,20 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
           name="instance_type"
           control={control}
           render={({ field }) => (
-            <SelectFieldLabel htmlFor="instance_type" className="self-start w-fit">
+            <SelectFieldLabel htmlFor="instance_type" className="w-fit self-start">
               Instance Type
               <InstanceTypeSelect id="instance_type" field={field} />
             </SelectFieldLabel>
           )}
         />
-        <LearnMoreLink href="/docs/guides/creating-apps#available-instance-types" target="_blank">
-          See full list
-        </LearnMoreLink>
+        <a
+          href="/docs/guides/creating-apps#available-instance-types"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-fit text-xs text-primary underline-offset-2 hover:underline"
+        >
+          See full list of instance types
+        </a>
       </FieldGroup>
 
       <FieldGroup>
