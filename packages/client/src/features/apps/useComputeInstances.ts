@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useAuthUser } from '@/features/auth/useAuthUser'
 import { ComputeResourcePricingMap, isComputeResource, RESOURCE_LABELS } from '@/types/user'
-import { ComputeInstance } from './apps.types'
+import type { ComputeInstance } from './apps.types'
 
 export const useComputeInstances = (): { computeInstances: ComputeInstance[]; isLoading: boolean } => {
   const { user, loading } = useAuthUser(true)

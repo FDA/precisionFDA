@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { isSafeInteger, uniq } from 'lodash'
 import type React from 'react'
 import { useEffect } from 'react'
 import type { UseFormSetValue } from 'react-hook-form'
@@ -86,7 +85,7 @@ export const prepareValidationsForInputs = (inputSpec: InputSpec[]) => {
           })
           .test('is-safe', 'The field must contain valid safe integer', value => {
             if (value == null || value === '') return true
-            return isSafeInteger(parseInt(value, 10))
+            return Number.isSafeInteger(parseInt(value, 10))
           }),
         i,
       ).nullable()
@@ -207,7 +206,7 @@ export function getFileUIDsFromAppRun(inputVals: RunJobFormType['inputs'], input
     }
   }
 
-  return uniq(uids)
+  return [...new Set(uids)]
 }
 
 export const createRequestObject = (
