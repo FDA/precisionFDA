@@ -1,7 +1,8 @@
-import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
-import { useAuthUser } from '../features/auth/useAuthUser'
-import { toastError } from '../components/NotificationCenter/ToastHelper'
+import axios from 'axios'
+import React from 'react'
+import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { useAuthUser } from '@/features/auth/useAuthUser'
 
 export type CloudResourcesResponse = {
   computeCharges: number
@@ -54,11 +55,23 @@ export const useCloudResourcesCondition = (condition: CloudResourcesConditionTyp
       ] as const
       const isAllowed = state.every(({ isUserAllowed }) => isUserAllowed)
       const messages = state.filter(({ isUserAllowed }) => !isUserAllowed).map(({ errorMessage }) => errorMessage)
-      const finalMessage = (messages.length > 1 ? ['Following errors were encountered'].concat(messages) : messages).join(
-        '\n---\n',
-      )
       const onViolation = () => {
-        toastError(finalMessage, { toastId: `Cloud resources exceeded - condition "${condition}"` })
+        const content =
+          messages.length > 1
+            ? React.createElement(
+                'div',
+                null,
+                React.createElement('p', null, 'Following errors were encountered:'),
+                React.createElement(
+                  'ul',
+                  { className: 'list-disc pl-5' },
+                  ...messages.map((msg, i) =>
+                    React.createElement('li', { key: i, className: 'whitespace-pre-wrap' }, msg),
+                  ),
+                ),
+              )
+            : messages[0]
+        toastError(content, { toastId: `Cloud resources exceeded - condition "${condition}"` })
       }
       return {
         query,
@@ -66,8 +79,7 @@ export const useCloudResourcesCondition = (condition: CloudResourcesConditionTyp
         onViolation,
       }
     }
-    case 'totalLimitCheck':
-    default: {
+    case 'totalLimitCheck': {
       const isAllowed = isUsageAvailable
       const onViolation = () => {
         toastError(TOTAL_LIMIT_EXCEEDED_TEXT, { toastId: `Cloud resources exceeded - condition "${condition}"` })

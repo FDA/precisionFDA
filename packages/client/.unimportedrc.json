@@ -6,7 +6,6 @@
     "src/test/**",
     "src/components/Avatar.tsx",
     "src/components/Button/ButtonGroup.tsx",
-    "src/components/ConditionalLink.tsx",
     "src/components/Table/useDebounce.tsx",
     "src/features/auth/SessionExpiration.tsx",
     "src/features/challenges/form/ChallengeOrderSelect.tsx",
