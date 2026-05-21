@@ -1,7 +1,6 @@
 import type { Column, Row } from '@tanstack/react-table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/utils/cn'
-import { Select } from '../../Select'
-import styles from './SelectFilter.module.css'
 
 export type SelectOption = { label: string; option: string | number }
 
@@ -14,22 +13,41 @@ const SelectFilter = <T = unknown>({ column, options }: { column: Column<T>; opt
   const v = column.getFilterValue()
   const isActive = v !== undefined && v !== ''
 
+  const items = [{ label: '--', value: '' }, ...options.map(o => ({ label: o.label, value: String(o.option) }))]
+
+  const selectedValue =
+    v !== undefined && v !== '' && options.some(o => o.option === v) ? String(v as string | number) : null
+
   return (
     <Select
-      placeholder=""
-      options={[{ label: '--', option: '' }, ...options]}
-      value={options.find(o => o.option === v)}
-      onChange={(newValue: unknown) => {
-        const val = newValue as SelectOption | null
-        column.setFilterValue(val == null || val.option === '' ? undefined : val.option)
+      items={items}
+      value={selectedValue}
+      onValueChange={next => {
+        if (next == null || next === '') {
+          column.setFilterValue(undefined)
+          return
+        }
+        const chosen = options.find(o => String(o.option) === next)
+        column.setFilterValue(chosen?.option)
       }}
-      isOptionSelected={(option: unknown) => {
-        const o = option as SelectOption
-        return o.option === v
-      }}
-      menuPosition="fixed"
-      className={cn(styles.filter, isActive && styles.active)}
-    />
+    >
+      <SelectTrigger
+        className={cn(
+          'h-7! min-h-7! py-0! pl-2! pr-1! min-w-[30px] w-full justify-between rounded-md border-(--c-input-border) text-sm font-normal transition-colors duration-150 ease-out [&_svg]:size-3.5!',
+          'hover:border-(--primary-400)',
+        )}
+        size="sm"
+      >
+        <SelectValue placeholder="" />
+      </SelectTrigger>
+      <SelectContent align="start">
+        {items.map(item => (
+          <SelectItem key={item.value === '' ? '__clear' : item.value} value={item.value}>
+            {item.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
 

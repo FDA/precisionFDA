@@ -1,21 +1,34 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { XIcon } from 'lucide-react'
+import type { RefCallback } from 'react'
+import { useEffect, useState } from 'react'
 import {
-  type ControllerRenderProps,
   type FieldErrors,
   type FieldPath,
   type FieldValues,
-  type UseFormRegister,
   type UseFormSetError,
   useFormContext,
 } from 'react-hook-form'
-import { components, type SingleValueProps } from 'react-select'
 import { BoolButton, BoolButtonGroup } from '@/components/Button/BoolButtons'
 import { FieldInfo } from '@/components/form/FieldInfo'
 import { InputText } from '@/components/InputText'
-import { CreatableSelect, Select } from '@/components/Select'
+import { Button } from '@/components/ui/button'
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+  useComboboxAnchor,
+} from '@/components/ui/combobox'
 import { FieldError } from '@/components/ui/field'
-import type { RunWorkflowFormType } from '@/features/workflows/run/RunWorkflowForm'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/utils/cn'
 import { noAccessText } from '../../files/file.utils'
 import type { InputSpec, IOSpec, RunJobFormType } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
@@ -23,59 +36,256 @@ import { SelectMultiFileInput } from '../SelectMultiFileInput'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { validateFile } from './utils'
 
-const getDefaultValue = val => {
-  if (val === null || val === undefined || val.length === 0) return undefined
-  return Array.isArray(val) ? val.map(value => ({ value, label: value })) : { value: val, label: val }
+type SelectOption = { label: string; value: string }
+type ControlledField = {
+  name: FieldPath<RunJobFormType>
+  value: unknown
+  onChange: (...event: unknown[]) => void
+  onBlur: () => void
+  ref: RefCallback<HTMLInputElement>
 }
 
-const Msg = ({
-  sclass,
-  inputValue,
-  value,
-}: {
-  inputValue: string
-  value: { label: string; value: string }[]
-  sclass: IOSpec['class']
-}) => {
-  const allVals = value?.map(v => v.value) ?? []
-  const isDuplicate = allVals.includes(inputValue)
-  let err = null
+const getChoiceOptions = (choices: InputSpec['choices']) =>
+  Array.isArray(choices) ? choices.map(value => ({ value: String(value), label: String(value) })) : []
+
+const getStringValue = (value: unknown) => {
+  if (value === null || value === undefined || value === '') return null
+  return String(value)
+}
+
+const getArrayValues = (value: unknown) =>
+  Array.isArray(value) ? value.map(item => getStringValue(item)).filter((item): item is string => item !== null) : []
+
+const getArrayInputError = (sclass: IOSpec['class'], inputValue: string, currentValues: string[]) => {
+  if (inputValue.length === 0) {
+    return null
+  }
+
   switch (sclass) {
     case 'array:float':
-      if (inputValue && !isFloatValid(inputValue)) {
-        err = 'The value provided must be of type float'
+      if (!isFloatValid(inputValue)) {
+        return 'The value provided must be of type float'
       }
       break
     case 'array:int':
-      if (inputValue && !isStrictlyInteger(inputValue)) {
-        err = 'The value provided must be of type int'
+      if (!isStrictlyInteger(inputValue)) {
+        return 'The value provided must be of type int'
       }
       break
     default:
       break
   }
-  if (!err) {
-    if (isDuplicate) {
-      return <span>The current value is already provided in the list</span>
-    }
-    if (inputValue.length > 0) {
-      return <span>Press enter to add value</span>
-    }
-    return <span>Type to add new value</span>
+
+  if (currentValues.includes(inputValue)) {
+    return 'The current value is already provided in the list'
   }
-  return <span>{err}</span>
+
+  return null
 }
 
-const Menu = ({ children, ...props }: SingleValueProps) => {
-  const sclass = props.selectProps.sclass as IOSpec['class']
-  const { inputValue, value } = props.selectProps
+const getArrayInputMessage = (sclass: IOSpec['class'], inputValue: string, currentValues: string[]) => {
+  const error = getArrayInputError(sclass, inputValue, currentValues)
+  if (error) {
+    return error
+  }
+  if (inputValue.length > 0) {
+    return 'Press enter to add value'
+  }
+  return 'Type to add new value'
+}
+
+const ChoiceInput = ({
+  disabled,
+  field,
+  options,
+}: {
+  disabled: boolean
+  field: ControlledField
+  options: SelectOption[]
+}) => {
+  const currentValue = getStringValue(field.value)
+  const currentOption = currentValue
+    ? (options.find(option => option.value === currentValue) ?? { value: currentValue, label: currentValue })
+    : null
+  const items =
+    currentOption && !options.some(option => option.value === currentOption.value)
+      ? [currentOption, ...options]
+      : options
 
   return (
-    <components.Menu {...props}>
-      <div className="flex gap-4 p-2">
-        <Msg inputValue={inputValue} value={value} sclass={sclass} />
+    <Combobox<SelectOption>
+      id={field.name}
+      name={field.name}
+      items={items}
+      value={currentOption}
+      onValueChange={next => {
+        field.onChange(next?.value ?? null)
+        field.onBlur()
+      }}
+      isItemEqualToValue={(a, b) => a.value === b.value}
+      disabled={disabled}
+      inputRef={field.ref}
+    >
+      <ComboboxInput placeholder="Choose..." disabled={disabled} onBlur={field.onBlur} />
+      <ComboboxContent side="bottom" align="start">
+        <ComboboxEmpty>No options match.</ComboboxEmpty>
+        <ComboboxList>
+          {(item: SelectOption) => (
+            <ComboboxItem key={item.value} value={item}>
+              {item.label}
+            </ComboboxItem>
+          )}
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
+  )
+}
+
+const ChoiceArrayInput = ({
+  disabled,
+  field,
+  options,
+}: {
+  disabled: boolean
+  field: ControlledField
+  options: SelectOption[]
+}) => {
+  const anchorRef = useComboboxAnchor()
+  const currentValues = getArrayValues(field.value)
+  const currentOptions = currentValues.map(
+    value => options.find(option => option.value === value) ?? { value, label: value },
+  )
+  const items = [...options]
+  for (const option of currentOptions) {
+    if (!items.some(item => item.value === option.value)) {
+      items.push(option)
+    }
+  }
+
+  return (
+    <Combobox<SelectOption, true>
+      multiple
+      id={field.name}
+      name={field.name}
+      items={items}
+      value={currentOptions}
+      onValueChange={next => {
+        field.onChange(next.map(item => item.value))
+        field.onBlur()
+      }}
+      isItemEqualToValue={(a, b) => a.value === b.value}
+      disabled={disabled}
+    >
+      <ComboboxChips ref={anchorRef} className="w-full">
+        <ComboboxValue>
+          {(selectedOptions: SelectOption[]) => (
+            <>
+              {selectedOptions.map(option => (
+                <ComboboxChip key={option.value}>{option.label}</ComboboxChip>
+              ))}
+              <ComboboxChipsInput
+                ref={field.ref}
+                placeholder={selectedOptions.length === 0 ? 'Choose...' : undefined}
+                disabled={disabled}
+                onBlur={field.onBlur}
+              />
+            </>
+          )}
+        </ComboboxValue>
+      </ComboboxChips>
+      <ComboboxContent side="bottom" align="start" anchor={anchorRef}>
+        <ComboboxEmpty>No options match.</ComboboxEmpty>
+        <ComboboxList>
+          {(item: SelectOption) => (
+            <ComboboxItem key={item.value} value={item}>
+              {item.label}
+            </ComboboxItem>
+          )}
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
+  )
+}
+
+const FreeformArrayInput = ({
+  disabled,
+  field,
+  sclass,
+}: {
+  disabled: boolean
+  field: ControlledField
+  sclass: Extract<IOSpec['class'], 'array:string' | 'array:int' | 'array:float'>
+}) => {
+  const [inputValue, setInputValue] = useState('')
+  const currentValues = getArrayValues(field.value)
+  const error = getArrayInputError(sclass, inputValue, currentValues)
+  const canAddValue = inputValue.length > 0 && !error
+
+  const addValue = () => {
+    if (!canAddValue) {
+      return
+    }
+
+    field.onChange([...currentValues, inputValue])
+    field.onBlur()
+    setInputValue('')
+  }
+
+  return (
+    <>
+      <div
+        className={cn(
+          'rounded-md border border-input bg-transparent px-2.5 py-2 shadow-xs transition-[color,box-shadow] focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/30 dark:bg-input/30',
+          disabled && 'cursor-not-allowed opacity-50',
+        )}
+      >
+        {currentValues.length > 0 ? (
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {currentValues.map(value => (
+              <span
+                key={value}
+                className="inline-flex items-center gap-1 rounded-sm bg-muted px-1.5 py-1 text-xs font-medium text-foreground"
+              >
+                <span>{value}</span>
+                <button
+                  type="button"
+                  className="rounded-xs opacity-60 transition-opacity hover:opacity-100 focus-visible:outline-none"
+                  onClick={() => {
+                    field.onChange(currentValues.filter(item => item !== value))
+                    field.onBlur()
+                  }}
+                  disabled={disabled}
+                  aria-label={`Remove ${value}`}
+                >
+                  <XIcon className="size-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        ) : null}
+        <div className="flex items-center gap-2">
+          <Input
+            ref={field.ref}
+            value={inputValue}
+            disabled={disabled}
+            onChange={e => setInputValue(e.target.value)}
+            onBlur={field.onBlur}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                addValue()
+              }
+            }}
+            placeholder={currentValues.length > 0 ? 'Add another value' : 'Type a value'}
+            className="h-auto min-w-20 flex-1 border-0 bg-transparent px-0 py-0 shadow-none focus-visible:border-0 focus-visible:ring-0 dark:bg-transparent"
+          />
+          <Button type="button" size="xs" variant="outline" disabled={disabled || !canAddValue} onClick={addValue}>
+            Add
+          </Button>
+        </div>
       </div>
-    </components.Menu>
+      <p className="mt-2 text-sm text-muted-foreground">{getArrayInputMessage(sclass, inputValue, currentValues)}</p>
+    </>
   )
 }
 
@@ -92,8 +302,8 @@ const enhanceScope = (scope: string) => {
 /** Reads validation for this path via RHF context (works for nested paths like inputs.0.fields.x). Requires FormProvider. */
 function FileFieldMessage({ name }: { name: FieldPath<FieldValues> }) {
   const { getFieldState, formState } = useFormContext<FieldValues>()
-  const { error } = getFieldState(name, formState)
-  return error?.message ? <FieldError>{error.message}</FieldError> : null
+  const { error, isTouched } = getFieldState(name, formState)
+  return error?.message && (isTouched || formState.isSubmitted) ? <FieldError>{error.message}</FieldError> : null
 }
 
 const ArrayFileInput = ({
@@ -105,14 +315,14 @@ const ArrayFileInput = ({
   validatedFilesCache,
 }: {
   inputSpec: InputSpec
-  field: ControllerRenderProps<RunJobFormType, any>
+  field: ControlledField
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
   scope: string
   validatedFilesCache: Record<string, boolean>
 }) => {
   const { setValue } = useFormContext<FieldValues>()
-  const fileUids: string[] = field?.value || []
+  const fileUids = getArrayValues(field.value)
   const areAllFilesPreValidated = fileUids.every(fileUid => validatedFilesCache[fileUid])
 
   const fileListQuery = useQuery({
@@ -142,7 +352,7 @@ const ArrayFileInput = ({
             shouldTouch: true,
           })
         }}
-        value={field?.value ?? null}
+        value={fileUids.length > 0 ? fileUids : undefined}
         scopes={enhanceScope(scope)}
       />
 
@@ -161,19 +371,19 @@ const SingleFileInput = ({
   validatedFilesCache,
 }: {
   inputSpec: InputSpec
-  field: ControllerRenderProps<RunJobFormType, any>
+  field: ControlledField
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
   scope: string
   validatedFilesCache: Record<string, boolean>
 }) => {
   const { setValue } = useFormContext<FieldValues>()
-  const fileUid = field?.value
+  const fileUid = getStringValue(field.value)
   const hasValue = !!fileUid && fileUid.length > 0
-  const isSuccessfullyPreValidated = validatedFilesCache[fileUid]
+  const isSuccessfullyPreValidated = fileUid ? validatedFilesCache[fileUid] : false
 
   const fileListQuery = useQuery({
-    queryFn: () => validateFile(fileUid),
+    queryFn: () => (fileUid ? validateFile(fileUid) : Promise.resolve(false)),
     queryKey: ['user-list-files', fileUid],
     enabled: !!fileUid && fileUid.length > 0 && !isSuccessfullyPreValidated,
   })
@@ -198,7 +408,7 @@ const SingleFileInput = ({
           })
         }}
         dialogType="radio"
-        value={field.value && [field.value]}
+        value={fileUid ? [fileUid] : undefined}
         scopes={enhanceScope(scope)}
       />
 
@@ -213,23 +423,20 @@ export const JobRunInput = ({
   field,
   errors,
   disabled,
-  register,
   scope,
   setError,
   validatedFilesCache,
 }: {
   inputSpec: InputSpec
-  field: ControllerRenderProps<RunJobFormType, any>
+  field: ControlledField
   errors: FieldErrors<Record<string, unknown>>
   disabled: boolean
-  register: UseFormRegister<RunJobFormType> | UseFormRegister<RunWorkflowFormType>
   setError: UseFormSetError<RunJobFormType>
   scope: string
   validatedFilesCache?: Record<string, boolean>
 }) => {
   const choices = Array.isArray(inputSpec?.choices) ? inputSpec.choices : null
-
-  const InputSelect = choices ? Select : CreatableSelect
+  const choiceOptions = getChoiceOptions(choices)
 
   switch (inputSpec.class) {
     case 'file': {
@@ -260,19 +467,17 @@ export const JobRunInput = ({
       return (
         <>
           {choices ? (
-            <InputSelect
-              defaultValue={getDefaultValue(field.value)}
-              isDisabled={disabled}
-              isMulti={false}
-              onBlur={field.onBlur}
-              options={choices?.map(value => ({ value, label: value }))}
-              onChange={val => {
-                field.onBlur()
-                field.onChange(val?.value)
-              }}
-            />
+            <ChoiceInput disabled={disabled} field={field} options={choiceOptions} />
           ) : (
-            <InputText type="text" disabled={disabled} {...register(field.name)} />
+            <InputText
+              type="text"
+              name={field.name}
+              value={getStringValue(field.value) ?? ''}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              ref={field.ref}
+              disabled={disabled}
+            />
           )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
@@ -282,19 +487,11 @@ export const JobRunInput = ({
     case 'array:string': {
       return (
         <>
-          <InputSelect
-            defaultValue={getDefaultValue(field.value)}
-            isDisabled={disabled}
-            isMulti
-            onBlur={field.onBlur}
-            sclass={inputSpec.class}
-            components={!choices ? { Menu } : undefined}
-            options={choices?.map(value => ({ value, label: value }))}
-            onChange={val => {
-              field.onBlur()
-              field.onChange(val.map(v => v.value))
-            }}
-          />
+          {choices ? (
+            <ChoiceArrayInput disabled={disabled} field={field} options={choiceOptions} />
+          ) : (
+            <FreeformArrayInput disabled={disabled} field={field} sclass={inputSpec.class} />
+          )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
         </>
@@ -304,19 +501,17 @@ export const JobRunInput = ({
       return (
         <>
           {choices ? (
-            <InputSelect
-              defaultValue={getDefaultValue(field.value)}
-              isDisabled={disabled}
-              isMulti={false}
-              onBlur={field.onBlur}
-              options={choices?.map(value => ({ value, label: value }))}
-              onChange={val => {
-                field.onBlur()
-                field.onChange(val?.value)
-              }}
-            />
+            <ChoiceInput disabled={disabled} field={field} options={choiceOptions} />
           ) : (
-            <InputText type="text" disabled={disabled} {...register(field.name)} />
+            <InputText
+              type="text"
+              name={field.name}
+              value={getStringValue(field.value) ?? ''}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              ref={field.ref}
+              disabled={disabled}
+            />
           )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
@@ -326,23 +521,11 @@ export const JobRunInput = ({
     case 'array:int': {
       return (
         <>
-          <InputSelect
-            value={getDefaultValue(field.value)}
-            isDisabled={disabled}
-            isValidNewOption={n => Number.isSafeInteger(parseInt(n, 10))}
-            isMulti
-            options={choices?.map(value => ({
-              value: `${value}`,
-              label: `${value}`,
-            }))}
-            sclass={inputSpec.class}
-            components={!choices ? { Menu } : undefined}
-            onBlur={field.onBlur}
-            onChange={val => {
-              field.onBlur()
-              field.onChange(val.map(v => v.value))
-            }}
-          />
+          {choices ? (
+            <ChoiceArrayInput disabled={disabled} field={field} options={choiceOptions} />
+          ) : (
+            <FreeformArrayInput disabled={disabled} field={field} sclass={inputSpec.class} />
+          )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
         </>
@@ -352,19 +535,17 @@ export const JobRunInput = ({
       return (
         <>
           {choices ? (
-            <InputSelect
-              defaultValue={getDefaultValue(field.value)}
-              isDisabled={disabled}
-              isMulti={false}
-              onBlur={field.onBlur}
-              options={choices?.map(value => ({ value, label: value }))}
-              onChange={val => {
-                field.onBlur()
-                field.onChange(val?.value)
-              }}
-            />
+            <ChoiceInput disabled={disabled} field={field} options={choiceOptions} />
           ) : (
-            <InputText type="text" disabled={disabled} {...register(field.name)} />
+            <InputText
+              type="text"
+              name={field.name}
+              value={getStringValue(field.value) ?? ''}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              ref={field.ref}
+              disabled={disabled}
+            />
           )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
@@ -374,23 +555,11 @@ export const JobRunInput = ({
     case 'array:float': {
       return (
         <>
-          <InputSelect
-            defaultValue={getDefaultValue(field.value)}
-            isDisabled={disabled}
-            isValidNewOption={n => isFloatValid(n)}
-            isMulti
-            options={choices?.map(value => ({
-              value: `${value}`,
-              label: `${value}`,
-            }))}
-            onBlur={field.onBlur}
-            onChange={val => {
-              field.onBlur()
-              field.onChange(val.map(v => v.value))
-            }}
-            sclass={inputSpec.class}
-            components={!choices ? { Menu } : undefined}
-          />
+          {choices ? (
+            <ChoiceArrayInput disabled={disabled} field={field} options={choiceOptions} />
+          ) : (
+            <FreeformArrayInput disabled={disabled} field={field} sclass={inputSpec.class} />
+          )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
         </>

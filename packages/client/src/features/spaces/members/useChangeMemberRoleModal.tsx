@@ -1,17 +1,18 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import React from 'react'
+import type React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import * as Yup from 'yup'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/utils/cn'
 import { Button } from '../../../components/Button'
 import { Callout } from '../../../components/Callout'
-import { InputText } from '../../../components/InputText'
-import { Select } from '../../../components/Select'
 import { ErrorHint, FieldGroup, Hint, InputError } from '../../../components/form/styles'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { InputText } from '../../../components/InputText'
+import { ModalHeaderTop, ModalNext, useModalFloatingPortalHost } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'
 import { StyledFields, StyledFooter } from './members.styles'
-import { MemberRole, SpaceMembership, UpdateRolesFormValues } from './members.types'
+import type { MemberRole, SpaceMembership, UpdateRolesFormValues } from './members.types'
 import { useUpdateMemberRolesMutation } from './useUpdateMemberRolesMutation'
 
 const LABEL: Record<MemberRole, string> = {
@@ -41,6 +42,7 @@ interface ChangeMemberRoleFormProps {
 }
 
 const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, member, onClose }) => {
+  const floatingPortalHost = useModalFloatingPortalHost()
   const {
     handleSubmit,
     control,
@@ -55,12 +57,14 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
   }
   const mutation = useUpdateMemberRolesMutation(spaceId, [member], onMutationSuccess)
 
-  const roleOptions = [
-    { value: 'admin' as MemberRole, label: LABEL.admin },
-    { value: 'contributor' as MemberRole, label: LABEL.contributor },
-    { value: 'viewer' as MemberRole, label: LABEL.viewer },
-    { value: 'lead' as MemberRole, label: LABEL.lead },
-  ].filter(r => member.to_roles.includes(r.value))
+  const roleOptions: { value: MemberRole; label: string }[] = (
+    [
+      { value: 'admin', label: LABEL.admin },
+      { value: 'contributor', label: LABEL.contributor },
+      { value: 'viewer', label: LABEL.viewer },
+      { value: 'lead', label: LABEL.lead },
+    ] as { value: MemberRole; label: string }[]
+  ).filter(r => member.to_roles.includes(r.value))
 
   const onSubmit = (data: UpdateRolesFormValues) => mutation.mutate(data)
   const onCancel = () => {
@@ -80,27 +84,57 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
     <form onSubmit={handleSubmit(onSubmit)}>
       <StyledFields>
         <FieldGroup>
-          <label>Username</label>
-          <InputText value={member.user_name} disabled />
+          <label htmlFor="change-member-role-username">Username</label>
+          <InputText id="change-member-role-username" value={member.user_name} disabled />
         </FieldGroup>
         <FieldGroup>
-          <label>Current role</label>
-          <InputText value={isMemberDisabled ? `${member.role} (disabled)` : member.role} disabled />
+          <label htmlFor="change-member-role-current">Current role</label>
+          <InputText
+            id="change-member-role-current"
+            value={isMemberDisabled ? `${member.role} (disabled)` : member.role}
+            disabled
+          />
         </FieldGroup>
         <FieldGroup>
-          <label>Change to role</label>
+          <label htmlFor="select_member_role">Change to role</label>
           <Controller
             name="role"
             control={control}
-            render={({ field }) => (
-              <Select
-                options={roleOptions}
-                {...field}
-                isLoading={isSubmitting}
-                isDisabled={isSubmitting || isMemberDisabled}
-                inputId="select_member_role"
-              />
-            )}
+            render={({ field }) => {
+              const disabled = isSubmitting || isMemberDisabled
+              return (
+                <Select
+                  id="select_member_role"
+                  name={String(field.name)}
+                  modal={false}
+                  items={roleOptions}
+                  value={field.value?.value ?? null}
+                  onOpenChange={open => {
+                    if (!open) field.onBlur()
+                  }}
+                  onValueChange={v => {
+                    const chosen = roleOptions.find(o => o.value === v)
+                    field.onChange(chosen ?? null)
+                  }}
+                  disabled={disabled}
+                >
+                  <SelectTrigger
+                    className={cn('w-full min-w-0 justify-between')}
+                    ref={field.ref}
+                    aria-invalid={errors.role ? true : undefined}
+                  >
+                    <SelectValue placeholder="Choose…" />
+                  </SelectTrigger>
+                  <SelectContent side="bottom" align="start" container={floatingPortalHost ?? undefined}>
+                    {roleOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )
+            }}
           />
           <Hint>{member.active === 'Active' && 'Select the members role.'}</Hint>
           <ErrorHint>
@@ -112,8 +146,8 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
         </FieldGroup>
         {isLeadSelected && (
           <Callout data-variant="warning">
-            Changing this user to Lead role will make you admin in this space. The new Lead will assume billing for this Space,
-            including storage costs for files and run costs for App Executions.
+            Changing this user to Lead role will make you admin in this space. The new Lead will assume billing for this
+            Space, including storage costs for files and run costs for App Executions.
           </Callout>
         )}
       </StyledFields>

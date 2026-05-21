@@ -126,14 +126,23 @@ export const TableStyles = styled.div`
       background-color: var(--tertiary-30);
       border: 1px solid var(--c-input-border);
       padding: 2px 4px;
+      min-height: 28px;
 
-      border-radius: 2px; 
-      border-width: 1px; 
-      width: 9rem; 
+      border-radius: var(--radius-md);
+      border-width: 1px;
+      width: 9rem;
       width: 100%;
 
+      transition:
+        border-color 150ms ease,
+        background-color 150ms ease;
+
+      &:hover {
+        border-color: var(--primary-400);
+      }
+
       &:focus-visible {
-        outline:  1px solid var(--primary-200);
+        outline: 1px solid var(--primary-200);
       }
     }
   }
@@ -143,9 +152,6 @@ export const TableStyles = styled.div`
     outline-style: auto;
   }
 
-  .filter-input {
-    border-radius: 2px;
-  }
   .filter-input-wrap {
     padding: 4px 0;
   }

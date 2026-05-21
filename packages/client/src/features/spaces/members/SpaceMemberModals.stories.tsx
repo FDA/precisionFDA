@@ -1,8 +1,8 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useEffect } from 'react'
 import { mockMembers } from '../../../mocks/handlers/spaces.handlers'
 import { StorybookProviders } from '../../../stories/StorybookProviders'
-import { MemberRole, SpaceMembership } from './members.types'
+import type { MemberRole, SpaceMembership } from './members.types'
 import { useAddMembersModal } from './useAddMembersModal'
 import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
 
@@ -24,7 +24,11 @@ type AddMembersStory = StoryObj<AddMembersProps>
 
 const AddMembersModalWrapper = ({ spaceType }: AddMembersProps) => {
   const spaceId =
-    spaceType === 'verification' ? 'space-verification-123' : spaceType === 'review' ? 'space-review-456' : 'space-groups-789'
+    spaceType === 'verification'
+      ? 'space-verification-123'
+      : spaceType === 'review'
+        ? 'space-review-456'
+        : 'space-groups-789'
 
   const { modalComp, setShowModal } = useAddMembersModal({ spaceId })
 

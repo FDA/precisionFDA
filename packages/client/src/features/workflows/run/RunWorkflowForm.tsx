@@ -143,7 +143,6 @@ const WorkflowStage = ({
   errors,
   isSubmitting,
   control,
-  register,
   setError,
 }: {
   app: App
@@ -151,7 +150,6 @@ const WorkflowStage = ({
   errors: any
   isSubmitting: boolean
   control: Control<any>
-  register: UseFormRegister<any>
   setError: UseFormSetError<RunWorkflowFormType>
 }) => {
   return (
@@ -177,7 +175,6 @@ const WorkflowStage = ({
                       inputSpec={inputSpec}
                       errors={errors}
                       disabled={isSubmitting}
-                      register={register}
                       setError={setError}
                       scope={app.scope}
                     />
@@ -344,7 +341,6 @@ const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: 
                     errors={errors}
                     app={apps.find(app => app.dxid === stage.app_dxid)}
                     control={control}
-                    register={register}
                     setError={setError}
                     isSubmitting={isSubmitting}
                   />

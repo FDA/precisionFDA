@@ -1,8 +1,8 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Share, XIcon } from 'lucide-react'
 import type React from 'react'
-import { useState } from 'react'
-import { Controller, type FieldErrors, FormProvider, useFieldArray, useForm } from 'react-hook-form'
+import { useEffect, useMemo, useState } from 'react'
+import { Controller, type FieldErrors, FormProvider, type Resolver, useFieldArray, useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/Button'
 import { FieldGroup } from '@/components/form/FieldGroup'
@@ -21,7 +21,7 @@ import { SavingModal } from '../../modal/SavingModal'
 import { fetchLicensesOnApp } from '../apps.api'
 import type { AppSpec, BatchInput, IApp, RunJobFormType } from '../apps.types'
 import { getDefaultValueFromServer } from '../form/common'
-import { useComputeInstances } from '../useComputeInstances'
+import { useApplyDefaultRunJobInstanceTypes, useInstanceTypeAvailability } from '../instanceTypeAvailability'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { JobRunInput } from './JobRunInput'
 import { SelectContext } from './SelectContext'
@@ -42,7 +42,6 @@ import {
   getLicensesToAccept,
   mapInputKeyVals,
   prepareValidations,
-  useDefaultInstanceType,
   useDefaultScopeSelection,
   useSelectableContexts,
   useSelectableSpaces,
@@ -74,6 +73,7 @@ const getDefaults = (
       : [
           {
             id: 1,
+            instanceType: null,
             fields: Object.fromEntries(
               opts.spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
             ),
@@ -171,7 +171,11 @@ export const RunJobForm = ({
   spec: AppSpec
   userJobLimit: IUser['job_limit']
 }) => {
-  const { computeInstances, isLoading: computeInstancesLoading } = useComputeInstances()
+  const {
+    computeInstances,
+    isLoading: computeInstancesLoading,
+    allowedComputeResourceIds,
+  } = useInstanceTypeAvailability()
   const { data: selectableContexts } = useSelectableContexts(app.scope, app.entity_type)
   const { data: selectableSpaces } = useSelectableSpaces(app.scope)
   const { hash, pathname } = useLocation()
@@ -189,18 +193,21 @@ export const RunJobForm = ({
     navigate(pathname, { replace: true })
   }
 
-  const validationSchema = prepareValidations(spec.input_spec, userJobLimit, app.scope)
+  const validationSchema = useMemo(
+    () => prepareValidations(spec.input_spec, userJobLimit, app.scope, allowedComputeResourceIds),
+    [spec.input_spec, userJobLimit, app.scope, allowedComputeResourceIds],
+  )
 
   const form = useForm<RunJobFormType>({
     mode: 'onBlur',
-    resolver: yupResolver(validationSchema),
+    resolver: yupResolver(validationSchema) as unknown as Resolver<RunJobFormType>,
     defaultValues,
   })
   const {
     control,
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, dirtyFields },
     getValues,
     trigger,
     setValue,
@@ -208,6 +215,11 @@ export const RunJobForm = ({
     watch,
     reset,
   } = form
+
+  useEffect(() => {
+    if (computeInstancesLoading) return
+    void trigger('inputs')
+  }, [computeInstancesLoading, allowedComputeResourceIds, trigger])
 
   const { modalComp: selectFolderModal, setShowModal: setSelectFolderModal } = useSelectFolderModal({
     headerText: 'Select output folder',
@@ -219,7 +231,17 @@ export const RunJobForm = ({
     },
   })
 
-  useDefaultInstanceType(getValues(), computeInstances, spec.instance_type, setValue)
+  const watchedInputs = watch('inputs')
+
+  useApplyDefaultRunJobInstanceTypes(
+    watchedInputs,
+    computeInstances,
+    computeInstancesLoading,
+    spec.instance_type,
+    setValue,
+    dirtyFields,
+  )
+
   useDefaultScopeSelection(getValues(), selectableSpaces, app.scope, setValue)
 
   const inputs = useFieldArray({
@@ -283,7 +305,7 @@ export const RunJobForm = ({
               isBatchRun ? `${vals.jobName} (${index + 1} of ${vals.inputs.length})` : vals.jobName,
               vals.jobLimit,
               vals.outputFolderPath,
-              batchInput.instanceType.value,
+              batchInput.instanceType?.value,
               vals.scope.value as ServerScope,
               batchInput.fields,
               app,
@@ -340,7 +362,13 @@ export const RunJobForm = ({
 
   return (
     <FormProvider {...form}>
-      <form id="submitJobForm" autoComplete="off" data-testid="run-app-form" className="min-w-0 max-w-full pb-16">
+      <form
+        id="submitJobForm"
+        autoComplete="off"
+        data-testid="run-app-form"
+        className="min-w-0 max-w-full pb-16"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         {exportModal?.modalComp}
         <div className="min-w-0 max-w-full">
           <div className="flex min-w-0 flex-wrap items-center gap-2 py-3 text-left text-sm text-(--c-text-600)">
@@ -378,7 +406,7 @@ export const RunJobForm = ({
                 <FieldGroup label="Execution Cost Limit ($)" required>
                   <InputNumber
                     min="0"
-                    step="10"
+                    step="0.1"
                     {...register('jobLimit', { valueAsNumber: true })}
                     disabled={isSubmitting}
                     data-testid="run-app-job-limit"
@@ -495,7 +523,6 @@ export const RunJobForm = ({
                               inputSpec={inputSpec}
                               errors={errors as FieldErrors<Record<string, unknown>>}
                               disabled={isSubmitting}
-                              register={register}
                               setError={setError}
                               scope={app.entity_type === 'https' ? watch().scope?.value : app.scope}
                               validatedFilesCache={validatedFilesCache}
@@ -522,10 +549,9 @@ export const RunJobForm = ({
           <Button
             data-variant="primary"
             data-testid="run-app-submit-button"
-            disabled={isSubmitting || Object.keys(errors).length > 0}
-            type="button"
+            disabled={isSubmitting}
+            type="submit"
             form="submitJobForm"
-            onClick={handleSubmit(onSubmit)}
           >
             {isSubmitting ? runningButtonText : runButtonText}
           </Button>

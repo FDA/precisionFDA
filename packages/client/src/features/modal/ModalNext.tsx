@@ -1,17 +1,28 @@
-import React, { PropsWithChildren } from 'react'
+import React, { type PropsWithChildren } from 'react'
 import ReactDOM from 'react-dom'
 import { CSSTransition } from 'react-transition-group'
-
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { useKeyPress } from '../../hooks/useKeyPress'
 import { CloseButton, HeaderText, HeaderTop } from './styles'
+
+/**
+ * Full-screen layer inside the modal where portaled popups (Combobox, etc.) can mount above the panel
+ * while staying clickable. See https://github.com/mui/base-ui/issues/2854
+ */
+export const ModalFloatingPortalHostContext = React.createContext<HTMLDivElement | null>(null)
+
+export function useModalFloatingPortalHost(): HTMLDivElement | null {
+  return React.useContext(ModalFloatingPortalHostContext)
+}
 
 export const ModalContent = styled.div`
   --modal-padding-LR: 1.5rem;
   --modal-padding-TB: 1rem;
   --modal-border-radius: 0.5rem;
 
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   background: var(--background);
@@ -79,7 +90,13 @@ export const ModalHeaderTop = ({
     <HeaderTop>
       <HeaderText>{headerText}</HeaderText>
       {!disableClose && (
-        <CloseButton data-testid="modal-close-button" type="button" data-dismiss="modal" aria-label="Close" onClick={hide}>
+        <CloseButton
+          data-testid="modal-close-button"
+          type="button"
+          data-dismiss="modal"
+          aria-label="Close"
+          onClick={hide}
+        >
           <PlusIcon height={16} />
         </CloseButton>
       )}
@@ -87,7 +104,26 @@ export const ModalHeaderTop = ({
   )
 }
 
-const StyledSuperModal = styled.div<{ 'data-blur': 'true' | 'false' }>`
+/** Catches “click outside the panel” only — not a parent of portaled popups (Combobox, etc.). */
+const ModalBackdrop = styled.button<{ $blur: boolean }>`
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+
+  ${({ $blur }) =>
+    $blur &&
+    css`
+    backdrop-filter: blur(6px);
+  `}
+`
+
+const StyledSuperModal = styled.div`
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -99,11 +135,7 @@ const StyledSuperModal = styled.div<{ 'data-blur': 'true' | 'false' }>`
   right: 0;
   z-index: 500;
   padding: 16px;
-  background-color: rgba(0, 0, 0, 0.3);
 
-  [data-blur] {
-    backdrop-filter: blur(6px);
-  }
   &.modal-enter {
     opacity: 0;
   }
@@ -157,28 +189,42 @@ const SuperModalPortal = (props: PropsWithChildren<Omit<SuperModalProps, 'isShow
   // @ts-expect-error disableClose needs to be extracted from props
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { nodeRef, variant, headerText, hide, children, blur = false, disableClose, zIndex, ...rest } = props
+  const [floatingPortalHost, setFloatingPortalHost] = React.useState<HTMLDivElement | null>(null)
   useKeyPress('Escape', () => hide())
   return ReactDOM.createPortal(
-    <StyledSuperModal
-      onClick={hide}
-      ref={nodeRef}
-      data-blur={blur.toString() as BooleanString}
-      style={{ zIndex }}
-      {...rest}
-    >
-      <ModalContent
-        aria-modal
-        aria-label={headerText}
-        tabIndex={-1}
-        role="dialog"
-        data-variant={variant}
-        className="modalContent"
-        onClick={e => e.stopPropagation()}
-      >
-        {children}
-      </ModalContent>
-    </StyledSuperModal>,
-    document.getElementById('modal-root')!,
+    <ModalFloatingPortalHostContext.Provider value={floatingPortalHost}>
+      <StyledSuperModal ref={nodeRef} style={{ zIndex }} {...rest}>
+        <ModalBackdrop
+          type="button"
+          $blur={blur}
+          aria-label="Close dialog"
+          data-testid="modal-backdrop"
+          onClick={hide}
+        />
+        <ModalContent
+          aria-modal
+          aria-label={headerText}
+          tabIndex={-1}
+          role="dialog"
+          data-variant={variant}
+          className="modalContent"
+        >
+          {children}
+        </ModalContent>
+        <div
+          ref={setFloatingPortalHost}
+          data-modal-floating-host
+          aria-hidden
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 600,
+            pointerEvents: 'none',
+          }}
+        />
+      </StyledSuperModal>
+    </ModalFloatingPortalHostContext.Provider>,
+    document.getElementById('modal-root') ?? document.body,
     rest.id,
   )
 }

@@ -1,8 +1,9 @@
+import { ErrorMessage } from '@hookform/error-message'
 import { type KeyboardEventHandler, type ReactNode, useRef } from 'react'
-import { type Control, Controller } from 'react-hook-form'
+import { type Control, Controller, type FieldErrors, type UseFormTrigger } from 'react-hook-form'
 import { Link } from 'react-router'
 import { Checkbox } from '@/components/CheckboxNext'
-import { FieldGroup, FieldLabelRow, SelectFieldLabel } from '@/components/form/styles'
+import { FieldGroup, FieldLabelRow, InputError, SelectFieldLabel } from '@/components/form/styles'
 import { ArrowLeftIcon } from '@/components/icons/ArrowLeftIcon'
 import { CrossIcon } from '@/components/icons/PlusIcon'
 import { Button } from '@/components/ui/button'
@@ -166,7 +167,15 @@ const UbuntuPackageSelect = ({ onChange, value }: { onChange: (p: string[]) => v
   )
 }
 
-export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
+export const VmEnvTab = ({
+  control,
+  errors,
+  trigger,
+}: {
+  control: Control<CreateAppForm>
+  errors: FieldErrors<CreateAppForm>
+  trigger: UseFormTrigger<CreateAppForm>
+}) => {
   return (
     <FormFields>
       <Help>
@@ -198,9 +207,18 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
           render={({ field }) => (
             <SelectFieldLabel htmlFor="instance_type" className="w-fit self-start">
               Instance Type
-              <InstanceTypeSelect id="instance_type" field={field} />
+              <InstanceTypeSelect
+                id="instance_type"
+                field={field}
+                onValueChange={() => queueMicrotask(() => void trigger('instance_type'))}
+              />
             </SelectFieldLabel>
           )}
+        />
+        <ErrorMessage
+          errors={errors}
+          name="instance_type"
+          render={({ message }) => <InputError>{message}</InputError>}
         />
         <a
           href="/docs/guides/creating-apps#available-instance-types"

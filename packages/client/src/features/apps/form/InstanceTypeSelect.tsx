@@ -1,8 +1,9 @@
+import { Loader2Icon } from 'lucide-react'
 import type { ControllerRenderProps, FieldValues, Path, PathValue } from 'react-hook-form'
-import { Loader } from '@/components/Loader'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/utils/cn'
 import type { ComputeInstance } from '../apps.types'
+import { getVisibleComputeInstances } from '../instanceTypeAvailability'
 import { useComputeInstances } from '../useComputeInstances'
 
 export type ComputeInstanceSelectProps = {
@@ -32,8 +33,6 @@ export const ComputeInstanceSelect = ({
   placeholder = 'Select instance type',
   triggerClassName,
 }: ComputeInstanceSelectProps) => {
-  if (isLoading) return <Loader />
-
   return (
     <Select
       id={id}
@@ -41,12 +40,28 @@ export const ComputeInstanceSelect = ({
       value={value}
       onValueChange={v => {
         onChange(v ?? '')
+        onBlur()
       }}
       name={name}
-      disabled={disabled}
+      disabled={disabled || isLoading}
     >
-      <SelectTrigger className={cn('w-full min-w-56 max-w-full', triggerClassName)} onBlur={onBlur} ref={ref}>
-        <SelectValue placeholder={placeholder} />
+      <SelectTrigger
+        className={cn(
+          'relative w-full min-w-[220px] max-w-full',
+          triggerClassName,
+          isLoading && '**:data-[slot=select-value]:opacity-0',
+        )}
+        onBlur={onBlur}
+        ref={ref}
+        disabled={disabled || isLoading}
+        aria-busy={isLoading}
+      >
+        {isLoading ? (
+          <span className="pointer-events-none absolute inset-y-0 left-2.5 z-10 flex items-center">
+            <Loader2Icon aria-hidden className="size-3.5 shrink-0 animate-spin text-muted-foreground" />
+          </span>
+        ) : null}
+        <SelectValue placeholder={isLoading ? '' : placeholder} />
       </SelectTrigger>
       <SelectContent>
         {options.map(option => (
@@ -62,21 +77,31 @@ export const ComputeInstanceSelect = ({
 type InstanceTypeSelectProps<T extends FieldValues = FieldValues> = {
   field: ControllerRenderProps<T, Path<T>>
   id: string
+  onValueChange?: (instanceId: string) => void
 }
 
-export const InstanceTypeSelect = <T extends FieldValues = FieldValues>({ id, field }: InstanceTypeSelectProps<T>) => {
+export const InstanceTypeSelect = <T extends FieldValues = FieldValues>({
+  id,
+  field,
+  onValueChange,
+}: InstanceTypeSelectProps<T>) => {
   const { computeInstances, isLoading } = useComputeInstances()
+  const rawString = field.value == null || field.value === '' ? null : String(field.value)
+  const options = getVisibleComputeInstances(computeInstances, rawString)
+  const selectValue = rawString
+
   return (
     <ComputeInstanceSelect
       id={id}
       name={field.name}
-      value={field.value == null || field.value === '' ? null : String(field.value)}
+      value={selectValue}
       onChange={instanceId => {
         field.onChange(instanceId as PathValue<T, Path<T>>)
+        onValueChange?.(instanceId)
       }}
       onBlur={field.onBlur}
       ref={field.ref}
-      options={computeInstances}
+      options={options}
       isLoading={isLoading}
     />
   )

@@ -1,27 +1,34 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
+import type { AxiosError } from 'axios'
+import type React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import * as Yup from 'yup'
-import { InputText } from '../../../components/InputText'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/utils/cn'
+import { Button } from '../../../components/Button'
 import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
+import { InputText } from '../../../components/InputText'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import type { ApiRailsError } from '../../home/types'
+import { ModalHeaderTop, ModalNext, useModalFloatingPortalHost } from '../../modal/ModalNext'
 import { ButtonRow } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { addMembersToSpaceRequest } from './members.api'
-import { MemberRole } from './members.types'
 import { StyledFields, StyledFooter } from './members.styles'
-import { Select } from '../../../components/Select'
-import { Button } from '../../../components/Button'
-import { ModalNext, ModalHeaderTop } from '../../modal/ModalNext'
-import { AxiosError } from 'axios'
-import { ApiRailsError } from '../../home/types'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import type { MemberRole } from './members.types'
 
 interface FormValues {
   invitees_role: { label: string; value: MemberRole }
   invitees: string
 }
+
+const MEMBER_ROLE_OPTIONS: { value: MemberRole; label: string }[] = [
+  { value: 'admin', label: 'Admin' },
+  { value: 'contributor', label: 'Contributor' },
+  { value: 'viewer', label: 'Viewer' },
+]
 
 const validationSchema = Yup.object().shape({
   invitees: Yup.string().required('Username(s) required'),
@@ -32,9 +39,14 @@ const validationSchema = Yup.object().shape({
     .required('Required'),
 })
 
-export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
+interface AddMembersFormProps {
+  spaceId: string
+  onClose: () => void
+}
+
+const AddMembersForm: React.FC<AddMembersFormProps> = ({ spaceId, onClose }) => {
+  const floatingPortalHost = useModalFloatingPortalHost()
   const queryClient = useQueryClient()
-  const { isShown, setShowModal } = useModal()
   const {
     register,
     handleSubmit,
@@ -65,7 +77,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
       queryClient.invalidateQueries({
         queryKey: ['space', spaceId.toString()],
       })
-      setShowModal(false)
+      onClose()
       toastSuccess('Success: Adding members')
     },
     onError: (e: AxiosError<ApiRailsError>) => {
@@ -77,7 +89,103 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
     mutation.mutateAsync({ invitees, invitees_role })
   }
 
-  const modalComp = (
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <StyledFields>
+        <FieldGroup>
+          <label htmlFor="modal-add-members-invitees">Username List</label>
+          <InputText
+            {...register('invitees')}
+            id="modal-add-members-invitees"
+            placeholder=""
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+            disabled={mutation.isPending}
+          />
+          <Hint>
+            Enter usernames or emails seperated by commas. For example: first_user, second_user, third_user@email.com
+          </Hint>
+          <ErrorMessage errors={errors} name="invitees" render={({ message }) => <InputError>{message}</InputError>} />
+        </FieldGroup>
+        <FieldGroup>
+          <label htmlFor="modal-add-members-role">Role</label>
+          <Controller
+            name="invitees_role"
+            control={control}
+            render={({ field }) => {
+              const disabled = mutation.isPending
+              return (
+                <Select
+                  id="modal-add-members-role"
+                  name={String(field.name)}
+                  modal={false}
+                  items={MEMBER_ROLE_OPTIONS}
+                  value={field.value?.value ?? null}
+                  onOpenChange={open => {
+                    if (!open) field.onBlur()
+                  }}
+                  onValueChange={v => {
+                    const chosen = MEMBER_ROLE_OPTIONS.find(o => o.value === v)
+                    field.onChange(chosen ?? null)
+                  }}
+                  disabled={disabled}
+                >
+                  <SelectTrigger
+                    className={cn('w-full min-w-0 justify-between')}
+                    ref={field.ref}
+                    aria-invalid={errors.invitees_role ? true : undefined}
+                  >
+                    <SelectValue placeholder="Choose…" />
+                  </SelectTrigger>
+                  <SelectContent side="bottom" align="start" container={floatingPortalHost ?? undefined}>
+                    {MEMBER_ROLE_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )
+            }}
+          />
+          <Hint>Select the new members role</Hint>
+          <ErrorMessage
+            errors={errors}
+            name="invitees_role"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
+        </FieldGroup>
+      </StyledFields>
+      <StyledFooter>
+        <ButtonRow>
+          <Button
+            type="button"
+            onClick={() => {
+              reset()
+              onClose()
+            }}
+            disabled={mutation.isPending}
+            aria-label="Close modal"
+          >
+            Cancel
+          </Button>
+          <Button
+            data-variant="primary"
+            type="submit"
+            disabled={Object.keys(errors).length > 0 || mutation.isPending}
+            aria-label="Submit add members"
+          >
+            Add Members
+          </Button>
+        </ButtonRow>
+      </StyledFooter>
+    </form>
+  )
+}
+
+export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
+  const { isShown, setShowModal } = useModal()
+  const modalComp = isShown && (
     <ModalNext
       id="modal-add-members"
       data-testid="modal-add-members"
@@ -85,79 +193,17 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
       hide={() => setShowModal(false)}
       variant="medium"
     >
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <ModalHeaderTop
-          disableClose={false}
-          headerText="Add members to space"
-          hide={() => {
-            setShowModal(false)
-          }}
-        />
-        <StyledFields>
-          <FieldGroup>
-            <label>Username List</label>
-            <InputText
-              {...register('invitees')}
-              placeholder=""
-              // eslint-disable-next-line jsx-a11y/no-autofocus
-              autoFocus
-              disabled={mutation.isPending}
-            />
-            <Hint>Enter usernames or emails seperated by commas. For example: first_user, second_user, third_user@email.com</Hint>
-            <ErrorMessage errors={errors} name="invitees" render={({ message }) => <InputError>{message}</InputError>} />
-          </FieldGroup>
-          <FieldGroup>
-            <label>Role</label>
-            <Controller
-              name="invitees_role"
-              control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
-                <Select
-                  options={[
-                    { value: 'admin', label: 'Admin' },
-                    { value: 'contributor', label: 'Contributor' },
-                    { value: 'viewer', label: 'Viewer' },
-                  ]}
-                  onChange={onChange}
-                  isLoading={mutation.isPending}
-                  onBlur={onBlur}
-                  value={value}
-                  isDisabled={mutation.isPending}
-                />
-              )}
-            />
-            <Hint>Select the new members role</Hint>
-            <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
-          </FieldGroup>
-        </StyledFields>
-        <StyledFooter>
-          <ButtonRow>
-            <Button
-              type="button"
-              onClick={() => {
-                reset()
-                setShowModal(false)
-              }}
-              disabled={mutation.isPending}
-              aria-label="Close modal"
-            >
-              Cancel
-            </Button>
-            <Button
-              data-variant="primary"
-              type="submit"
-              disabled={Object.keys(errors).length > 0 || mutation.isPending}
-              aria-label="Submit add members"
-            >
-              Add Members
-            </Button>
-          </ButtonRow>
-        </StyledFooter>
-      </form>
+      <ModalHeaderTop
+        disableClose={false}
+        headerText="Add members to space"
+        hide={() => setShowModal(false)}
+      />
+      <AddMembersForm spaceId={spaceId} onClose={() => setShowModal(false)} />
     </ModalNext>
   )
   return {
     modalComp,
     setShowModal,
+    isShown,
   }
 }

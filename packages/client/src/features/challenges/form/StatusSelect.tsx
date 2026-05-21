@@ -1,5 +1,5 @@
-import React from 'react'
-import { Select } from '../../../components/Select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/utils/cn'
 
 export const StatusSelect = ({
   isEditing = false,
@@ -8,33 +8,45 @@ export const StatusSelect = ({
   isSubmitting,
   onChange,
 }: {
-  isEditing?: boolean,
-  value: {label: string, value: string} | null
+  isEditing?: boolean
+  value: { label: string; value: string } | null
   onBlur: () => void
   isSubmitting: boolean
-  onChange: (v:any) => void
+  onChange: (v: unknown) => void
 }) => {
-  const statusOptions = ['setup', 'pre-registration']
-  if(isEditing) {
-    statusOptions.push('open', 'paused', 'archived', 'result_announced')
+  const statusKeys = ['setup', 'pre-registration']
+  if (isEditing) {
+    statusKeys.push('open', 'paused', 'archived', 'result_announced')
   }
-  const options = statusOptions.map(option => ({
+  const options = statusKeys.map(option => ({
     label: option,
     value: option,
   }))
+
   return (
     <div data-testid="challenge-status-select">
       <Select
-        options={options}
-        placeholder="Choose..."
-        onChange={onChange}
-        isClearable
-        isSearchable
-        onBlur={onBlur}
-        value={value}
-        isDisabled={isSubmitting}
-        inputId="challenge_status"
-      />
+        id="challenge_status"
+        items={options}
+        value={value?.value ?? null}
+        onValueChange={v => {
+          const chosen = options.find(o => o.value === v)
+          onChange(chosen ?? null)
+          onBlur()
+        }}
+        disabled={isSubmitting}
+      >
+        <SelectTrigger className={cn('w-full min-w-0 justify-between')} onBlur={onBlur}>
+          <SelectValue placeholder="Choose…" />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(option => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 }

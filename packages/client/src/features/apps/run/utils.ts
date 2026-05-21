@@ -24,6 +24,7 @@ import type {
   SelectableSpace,
 } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
+import { getComputeInstanceSelectionKey, INSTANCE_TYPE_UNAVAILABLE_MESSAGE } from '../instanceTypeAvailability'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
 
 export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
@@ -32,17 +33,17 @@ export const getSchema = (schema: Yup.Schema, input: InputSpec) => {
   if (input.optional) {
     return schema.optional().nullable()
   }
-  return schema.required(`${getLabel(input)} is required`)
+  return schema.nullable().required(`${getLabel(input)} is required`)
 }
 
 export const prepareValidationsForInputs = (inputSpec: InputSpec[]) => {
   const inputs: Record<string, Yup.Schema> = {}
   inputSpec.forEach(i => {
     if (i.class === 'boolean') {
-      inputs[i.name] = getSchema(Yup.boolean(), i).nullable()
+      inputs[i.name] = getSchema(Yup.boolean(), i)
     }
     if (i.class === 'string') {
-      inputs[i.name] = getSchema(Yup.string(), i).nullable()
+      inputs[i.name] = getSchema(Yup.string(), i)
     }
     if (i.class === 'file') {
       // Nullable must come before required so cleared/null values fail required validation reliably.
@@ -59,13 +60,22 @@ export const prepareValidationsForInputs = (inputSpec: InputSpec[]) => {
         : Yup.array(Yup.string()).nullable().required(reqMsg).min(1, reqMsg)
     }
     if (i.class === 'array:string') {
-      inputs[i.name] = getSchema(Yup.array(Yup.string()), i)
+      const reqMsg = `${getLabel(i)} is required`
+      inputs[i.name] = i.optional
+        ? Yup.array(Yup.string()).nullable().optional()
+        : Yup.array(Yup.string()).nullable().required(reqMsg).min(1, reqMsg)
     }
     if (i.class === 'array:int') {
-      inputs[i.name] = getSchema(Yup.array(Yup.number()), i)
+      const reqMsg = `${getLabel(i)} is required`
+      inputs[i.name] = i.optional
+        ? Yup.array(Yup.number()).nullable().optional()
+        : Yup.array(Yup.number()).nullable().required(reqMsg).min(1, reqMsg)
     }
     if (i.class === 'array:float') {
-      inputs[i.name] = getSchema(Yup.array(Yup.number()), i)
+      const reqMsg = `${getLabel(i)} is required`
+      inputs[i.name] = i.optional
+        ? Yup.array(Yup.number()).nullable().optional()
+        : Yup.array(Yup.number()).nullable().required(reqMsg).min(1, reqMsg)
     }
     if (i.class === 'float') {
       inputs[i.name] = getSchema(
@@ -74,7 +84,7 @@ export const prepareValidationsForInputs = (inputSpec: InputSpec[]) => {
           return isFloatValid(value)
         }),
         i,
-      ).nullable()
+      )
     }
     if (i.class === 'int') {
       inputs[i.name] = getSchema(
@@ -88,7 +98,7 @@ export const prepareValidationsForInputs = (inputSpec: InputSpec[]) => {
             return Number.isSafeInteger(parseInt(value, 10))
           }),
         i,
-      ).nullable()
+      )
     }
   })
   return inputs
@@ -100,13 +110,29 @@ export const prepareSpaceValidations = (scope?: IApp['scope']) => {
     : Yup.object().nullable().required('Scope is required')
 }
 
-export const prepareValidations = (inputSpec: InputSpec[], userJobLimit: IUser['job_limit'], scope?: IApp['scope']) => {
+export const prepareValidations = (
+  inputSpec: InputSpec[],
+  userJobLimit: IUser['job_limit'],
+  scope?: IApp['scope'],
+  allowedComputeResourceIds: readonly string[] | null = null,
+) => {
   const inputs = prepareValidationsForInputs(inputSpec)
   const spaceValidations = prepareSpaceValidations(scope)
 
   const batchInputSchema = Yup.object().shape({
     id: Yup.number().optional(),
-    instanceType: Yup.object().nullable().required('Instance type is required'),
+    instanceType: Yup.mixed()
+      .test(
+        'required',
+        'Instance type is required',
+        value => value != null && typeof value === 'object' && 'value' in (value as object),
+      )
+      .test('allowed-for-account', INSTANCE_TYPE_UNAVAILABLE_MESSAGE, value => {
+        if (allowedComputeResourceIds == null) return true
+        const key = getComputeInstanceSelectionKey(value)
+        if (!key) return true
+        return allowedComputeResourceIds.includes(key)
+      }),
     fields: Yup.object().shape(inputs),
   })
 
@@ -314,24 +340,6 @@ export const useSelectableSpaces = (appScope: ServerScope) => {
         throw e
       }),
   })
-}
-
-export const useDefaultInstanceType = (
-  formValues: RunJobFormType,
-  computeInstances: ComputeInstance[],
-  instanceType: string,
-  setValue: UseFormSetValue<RunJobFormType>,
-) => {
-  useEffect(() => {
-    if (formValues?.inputs?.[0]?.instanceType || computeInstances.length === 0) {
-      return
-    }
-
-    setValue(
-      'inputs.0.instanceType',
-      computeInstances.find(instance => instance.value === instanceType) ?? computeInstances[0],
-    )
-  }, [computeInstances, instanceType, setValue])
 }
 
 export const useDefaultScopeSelection = (
