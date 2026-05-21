@@ -1,10 +1,10 @@
-node_modules
-dist
 .git
-*.log
-.vite
+log
+tmp
 coverage
-.turbo
+node_modules
+public/packs
+*.log
 
 # Local env files — never bake into images
 .env
@@ -14,8 +14,3 @@ coverage
 # Editor / IDE
 .vscode
 .idea
-
-# Test artifacts
-playwright-report
-test-results
-storybook-static

@@ -40,7 +40,7 @@ applyTo: '**'
 
 - **CLI**: `packages/cli` holds the Go uploader with `build-dist.sh`; coordinate changes with `infra/deploy.sh` to keep automation aligned.
 
-- **Docker workflow**: the root `Makefile` drives setup (`make repo-env-files-init`, `make prepare-db`, `make run`); set `PFDA_ROLE` and generate `cert.pem` / `key.pem` via `docs/DOCKER_BASED_SETUP.md`.
+- **Docker workflow**: the root `Makefile` drives setup (`make repo-env-files-init`, `make prepare-db`, `make run`); generate `cert.pem` / `key.pem` and configure local overrides via `docs/DOCKER_BASED_SETUP.md`.
 
 - **Reverse proxy**: `docker/base.services.yml` binds certs and ports (nginx on 3000, Rails internal 3000, Nest API 3001); wire new services here and extend nginx templates.
 

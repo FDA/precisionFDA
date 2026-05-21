@@ -5,7 +5,7 @@ The main React frontend for the precisionFDA project.
 ## Tech Stack
 
 - **Build Tool**: [Vite](https://vitejs.dev/) (v7+)
-- **Package Manager**: [pnpm](https://pnpm.io/) (v10.29.3)
+- **Package Manager**: [pnpm](https://pnpm.io/) (v11.1.1)
 - **Framework**: React 19 with TypeScript
 - **Routing**: React Router v7
 - **Styling**: styled-components, CSS Modules
@@ -20,7 +20,7 @@ The main React frontend for the precisionFDA project.
 ## Prerequisites
 
 - Node.js 24+
-- pnpm 10.29.3 (`npm i -g pnpm@10.29.3`)
+- pnpm 11.1.1 (`npm i -g pnpm@11.1.1`)
 - SSL certificates for HTTPS development (see below)
 
 ## Getting Started
@@ -54,10 +54,10 @@ The client can be built and run using Docker Compose. From the repository root:
 
 ```bash
 # Start the full development stack
-docker compose -f docker/dev.docker-compose.yml up
+make run
 
 # Build only the frontend (outputs to rails/public/packs)
-docker compose -f docker/dev.docker-compose.yml up frontend
+docker compose -p precision-fda --env-file docker/.env -f docker/dev.docker-compose.yml up frontend
 ```
 
 ### Docker Services
@@ -69,7 +69,7 @@ docker compose -f docker/dev.docker-compose.yml up frontend
 | `nodejs-api`    | Node.js API server    | 3001                 |
 | `nodejs-worker` | Background worker     | -                    |
 | `nginx`         | Reverse proxy         | 3000 (HTTPS)         |
-| `db`            | MySQL 8.0             | 32800                |
+| `db`            | MySQL 8.4 LTS         | 32800                |
 | `redis`         | Redis cache           | 6379                 |
 
 ## Available Scripts

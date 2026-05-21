@@ -12,6 +12,7 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
+    "preserveWatchOutput": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,

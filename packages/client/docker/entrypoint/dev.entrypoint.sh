@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Check if args were provided
 if [[ "$#" -eq 0 ]]; then
@@ -6,7 +7,7 @@ if [[ "$#" -eq 0 ]]; then
     exit 1
 fi
 
-if [[ ! $SKIP_FRONTEND_DEPS_SETUP || $SKIP_FRONTEND_DEPS_SETUP = 0 ]]; then
+if [[ "${SKIP_FRONTEND_DEPS_SETUP:-0}" == "0" ]]; then
     pnpm i --frozen-lockfile
 fi
 

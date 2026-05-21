@@ -13,7 +13,7 @@ prepare-venv:
 
 start-dbs:
 	docker run --rm --name pfda_postgres_test -d -p 5433:5432 -e POSTGRES_PASSWORD=$(DB_PASSWORD) postgres:12.9
-	docker run --rm --name pfda_mysql_test -p 3333:3306 -e MYSQL_ROOT_PASSWORD=$(DB_PASSWORD) -d mysql:8.0
+	docker run --rm --name pfda_mysql_test -p 3333:3306 -e MYSQL_ROOT_PASSWORD=$(DB_PASSWORD) -d mysql:8.4.9
 
 stop-dbs:
 	docker stop pfda_postgres_test

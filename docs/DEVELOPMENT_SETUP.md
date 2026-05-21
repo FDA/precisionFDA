@@ -52,13 +52,13 @@ You can skip any section if you have already installed the dependencies.
 * Clone repo
     * `git clone git@github.com:dnanexus/precision-fda.git`
 
-* Create database config file
-    * `cp config/database.sample.yml config/database.yml`
+* Create database config file for Rails if you are not using the Docker entrypoint
+    * `cp packages/rails/config/database.sample.yml packages/rails/config/database.yml`
 
-* Create environment config file
-    * `cp .env.example .env`
+* Create environment config files
+    * `make repo-env-files-init`
 
-* Ask Dev team for additional parameters to add into `.env` file
+* Fill any required local-only parameters in the generated `.env` files
 
 
 # Certificate and dev account
@@ -100,9 +100,6 @@ with your account, access your profile on the upper right.
 - Click the link to confirm.
 
 
-# Continue setup either using Docker or OS
+# Continue setup using Docker
 
-[Docker-based setup (preferred)](DOCKER_BASED_SETUP.md) will require to install docker into your system. Dependencies MySQL and required gems will be installed into docker containers to minimize conflicts in the host system with other projects.
-
-[OS-based setup](OS_BASED_SETUP.md) will require to install some additional software 
-like MySQL, RVM and required gems directly into your OS.
+[Docker-based setup](DOCKER_BASED_SETUP.md) requires Docker on your system. Dependencies such as MySQL, Redis, Ruby gems, and Node packages run in containers to minimize conflicts with other host projects.

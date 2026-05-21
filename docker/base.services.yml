@@ -1,10 +1,9 @@
 services:
   base_ruby:
-    platform: linux/x86_64
     env_file: ../packages/rails/.env
     build:
       context: ../packages/rails
-      dockerfile: ./docker/images/isolation.Dockerfile
+      dockerfile: ./docker/images/dev.Dockerfile
       args:
         - RUBY_IMAGE_TAG=3.2.2
         - COFFEE_MAJOR_NODE_VERSION=22
@@ -12,17 +11,13 @@ services:
       - BUNDLER_VERSION=2.4.10
       - LOG_REQUESTS=1
       - NO_FIPS=1
-      - REDIS_WORKER_URL=redis://redis:6379/0
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
   base_nodejs:
-    build:
-      context: ../packages/server
-      dockerfile: ./docker/images/node.isolated-qa.Dockerfile
-      args:
-        - NODEJS_IMAGE_TAG=24.13.1-slim
     environment:
       - NODEJS_DB_POLLING_INTERVAL=${NODEJS_DB_POLLING_INTERVAL:-5}
       - NODE_REDIS_URL=redis://redis:6379/0
       - NODE_ADMIN_PLATFORM_CLIENT_URL=http://nodejs-admin-platform-client:3002
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
 
   web:
     extends:
@@ -35,18 +30,20 @@ services:
       - ../key.pem:/key.pem
     working_dir: /precision-fda
     ports:
-      - 5012:3000
+      - "5012:3000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    entrypoint: ./docker/entrypoint/isolation.docker-entrypoint.sh
+    entrypoint: ./docker/entrypoint/dev.entrypoint.sh
+    # tini forwards signals so Ctrl-C / docker compose down don't wait stop_grace_period.
+    init: true
     stop_grace_period: 30s
 
   frontend:
     build:
       context: ../packages/client
-      dockerfile: ./docker/images/isolation.Dockerfile
+      dockerfile: ./docker/images/build.Dockerfile
       args:
-        - FRONTEND_IMAGE_TAG=24.13.1-slim
+        - FRONTEND_IMAGE_TAG=24.15.0-slim
     environment:
       - VITE_OUT_DIR=dist
       - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
@@ -56,63 +53,67 @@ services:
         target: /precision-fda/dist
     working_dir: /precision-fda
     command: pnpm run build
+    # Lets Ctrl-C interrupt an in-progress `pnpm run build` cleanly.
+    init: true
   docs:
-    container_name: docs
     build:
       context: ../packages/docs
-      dockerfile: ./docker/images/isolation.Dockerfile
+      dockerfile: ./docker/images/dev.Dockerfile
       args:
-        - FRONTEND_IMAGE_TAG=24.13.1-slim
+        - FRONTEND_IMAGE_TAG=24.15.0-slim
     ports:
-      - 4040:4040
+      - "4040:4040"
     volumes:
       - ../cert.pem:/keys/cert.pem
       - ../key.pem:/keys/key.pem
-    stop_grace_period: 10s
   nodejs-api:
     environment:
       - NODE_PATH_CERT=/keys/cert.pem
       - NODE_PATH_KEY_CERT=/keys/key.pem
     extends:
       service: base_nodejs
-    command: ["make", "run-dist"]
     volumes:
       - ../cert.pem:/keys/cert.pem
       - ../key.pem:/keys/key.pem
     ports:
-      - 3001:3001
+      - "3001:3001"
     # tini forwards signals to the main process (node/make) so shutdown is reliable
     init: true
-    stop_grace_period: 15s
   nodejs-worker:
     extends:
       service: base_nodejs
-    command: ["make", "run-worker-dist"]
     init: true
-    stop_grace_period: 15s
   nodejs-admin-platform-client:
     extends:
       service: base_nodejs
-    command: ["make", "run-admin-platform-client-dist"]
     ports:
-      - 3002:3002
+      - "3002:3002"
     init: true
   db:
-    image: mysql:8.0
+    image: mysql:8.4.9
     environment:
-      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
     ports:
-      - 32800:3306
+      - "32800:3306"
+    # Dependents gate on this via `depends_on: { db: { condition: service_healthy } }`,
+    # replacing per-container `mysqladmin ping` loops in entrypoints. Aggressive
+    # `start_interval` keeps boot snappy; `interval` stays calm afterward since
+    # nothing reads the status once the gate has fired.
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      start_period: 30s
+      start_interval: 2s
+      interval: 30s
+      timeout: 3s
+      retries: 5
 
   redis:
-    image: redis:6.2.11
+    image: redis:8.6.3
     ports:
-      - 6379:6379
+      - "6379:6379"
   nginx:
-    image: nginx:1.27.0
-    container_name: nginx
+    image: nginx:1.30.0
     environment:
-      - PROXY_PORT=3000
       - NODE_API_URL=${NODE_API_URL}
       - DOCS_URL=${DOCS_URL}
       - RUBY_API_URL=${RUBY_API_URL}
@@ -121,4 +122,4 @@ services:
       - ../key.pem:/keys/key.pem
       - ../packages/nginx:/etc/nginx/templates
     ports:
-      - 3000:443
+      - "3000:443"

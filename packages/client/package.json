@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "type": "module",
-  "packageManager": "pnpm@10.29.3",
+  "packageManager": "pnpm@11.1.1",
   "scripts": {
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
@@ -106,11 +106,11 @@
     "yup": "1.7.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.12",
+    "@biomejs/biome": "2.4.15",
     "@rolldown/plugin-babel": "0.2.3",
     "@storybook/react-vite": "10.3.5",
-    "@tanstack/devtools-vite": "^0.7.0",
-    "@tanstack/react-devtools": "^0.10.5",
+    "@tanstack/devtools-vite": "0.7.0",
+    "@tanstack/react-devtools": "0.10.5",
     "@types/lodash": "4.17.24",
     "@types/node": "24.0.0",
     "@types/ramda": "0.31.1",
@@ -140,6 +140,10 @@
   "pnpm": {
     "overrides": {
       "server>html-minifier": "npm:html-minifier-terser@6.1.0"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "msw"
+    ]
   }
 }

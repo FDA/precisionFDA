@@ -3,8 +3,8 @@ FROM tomcat:10.1.10-jdk11
 ARG gsrs_branch=gsrs_241201
 ENV GSRS_BRANCH=$gsrs_branch
 
-ENV CATALINA_HOME /usr/local/tomcat
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME=/usr/local/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
 
 # Install Node.js
 RUN mkdir /nodeInstall

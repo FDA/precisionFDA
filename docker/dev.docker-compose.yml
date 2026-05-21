@@ -1,20 +1,29 @@
+# Volumes must be declared in leaf compose files; `extends` does not inherit them.
 volumes:
   bundler-deps-cache-ruby:
   db-pfda-mysql-volume:
   vite-cache-client:
+  # pnpm's content-addressed store — safe to share across all Node services.
+  pnpm-store-cache:
+  # node_modules trees must stay per-service (project-specific symlink layout).
+  pnpm-deps-cache-client:
+  pnpm-deps-cache-nodejs-api:
+  pnpm-deps-cache-nodejs-worker:
+  pnpm-deps-cache-nodejs-admin-platform-client:
+  pnpm-deps-cache-docs:
 
 services:
   web:
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     extends:
       file: ./base.services.yml
       service: web
-    build:
-      context: ../packages/rails
-      dockerfile: ./docker/images/isolation.Dockerfile
     environment:
+      - PFDA_LOCAL_DOCKER_FILE_WATCHER_PATCH=1
       - RAILS_ENV=development
       - SKIP_RUBY_DEPS_SETUP=${SKIP_RUBY_DEPS_SETUP}
       - SKIP_DB_SETUP=${SKIP_DB_SETUP}
@@ -22,79 +31,102 @@ services:
       - type: volume
         source: bundler-deps-cache-ruby
         target: /usr/local/bundle
-      - db-pfda-mysql-volume:/var/lib/mysql
   frontend:
     extends:
       file: ./base.services.yml
       service: frontend
     build:
       context: ../packages/client
-      dockerfile: ./docker/images/isolation.Dockerfile
+      dockerfile: ./docker/images/dev.Dockerfile
+    environment:
+      - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
     volumes:
       - type: volume
         source: vite-cache-client
         target: /precision-fda/node_modules/.vite/
-    command: pnpm run build
+      - type: bind
+        source: ../packages/client/src
+        target: /precision-fda/src
+      - pnpm-store-cache:/root/.local/share/pnpm/store
+      - pnpm-deps-cache-client:/precision-fda/node_modules
+  docs:
+    extends:
+      file: ./base.services.yml
+      service: docs
+    volumes:
+      - type: bind
+        source: ../packages/docs
+        target: /app
+      - pnpm-store-cache:/root/.local/share/pnpm/store
+      - pnpm-deps-cache-docs:/app/node_modules
   nodejs-api:
-    depends_on:
-      - db
-      - redis
     extends:
       file: ./base.services.yml
       service: nodejs-api
     build:
       context: ../packages/server
-      dockerfile: ./docker/images/node.isolated-dev.Dockerfile
+      dockerfile: ./docker/images/dev.Dockerfile
     command: ["pnpm", "run", "start:dev:api"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - NODE_ENV=development
       - NODE_DATABASE_NAME=precision-fda
-      - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
+      - NODE_DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD:-password}@db:3306/precision-fda
       - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
-      - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
       - NODE_DEV_WATCH=${NODE_DEV_WATCH:-1}
     volumes:
       - type: bind
         source: ../packages/server
         target: /app
+      - pnpm-store-cache:/root/.local/share/pnpm/store
+      - pnpm-deps-cache-nodejs-api:/app/node_modules
+
   nodejs-worker:
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     extends:
       file: ./base.services.yml
       service: nodejs-worker
     build:
       context: ../packages/server
-      dockerfile: ./docker/images/node.isolated-dev.Dockerfile
+      dockerfile: ./docker/images/dev.Dockerfile
     command: ["pnpm", "run", "start:dev:worker"]
     environment:
       - NODE_ENV=development
       - NODE_DATABASE_NAME=precision-fda
-      - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
+      - NODE_DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD:-password}@db:3306/precision-fda
       - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
-      - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
       - NODE_DEV_WATCH=${NODE_DEV_WATCH:-1}
     volumes:
       - type: bind
         source: ../packages/server
         target: /app
+      - pnpm-store-cache:/root/.local/share/pnpm/store
+      - pnpm-deps-cache-nodejs-worker:/app/node_modules
   nodejs-admin-platform-client:
     extends:
       file: ./base.services.yml
       service: nodejs-admin-platform-client
     build:
       context: ../packages/server
-      dockerfile: ./docker/images/node.isolated-dev.Dockerfile
+      dockerfile: ./docker/images/dev.Dockerfile
     command: ["pnpm", "run", "start:dev:admin-platform-client"]
     environment:
       - NODE_ENV=development
-      - SKIP_NODEJS_DB_WAITING=1
       - NODE_DEV_WATCH=${NODE_DEV_WATCH:-1}
     volumes:
       - type: bind
         source: ../packages/server
         target: /app
+      - pnpm-store-cache:/root/.local/share/pnpm/store
+      - pnpm-deps-cache-nodejs-admin-platform-client:/app/node_modules
   db:
     extends:
       file: ./base.services.yml

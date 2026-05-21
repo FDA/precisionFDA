@@ -37,6 +37,12 @@ $ make run-dev # runs the API
 $ make run-worker-dev # runs the worker process
 ```
 
+#### Stale `dist/` in watch mode
+
+`nest-cli.json` sets `deleteOutDir: false` and the dev entrypoint runs `nest start <app> --watch` without a clean step. This is intentional: the host's `packages/server/dist` is bind-mounted into all three Node containers (`nodejs-api`, `nodejs-worker`, `nodejs-admin-platform-client`), so a global wipe on startup would race between parallel boots.
+
+Consequence: renaming or deleting a `.ts` source can leave an orphan `.js` under `dist/apps/<app>/`. NestJS module wiring here is explicit (`imports: [...]`), so orphans are inert at runtime, but if you suspect a stale-file issue run `pnpm run clean` from `packages/server` (or `rm -rf packages/server/dist`) and restart the affected container. The production path is unaffected — `npm run build` runs `npm run clean` first.
+
 ### Run tests
 
 Tests should use the configuration environment specified in `@shared/config/envs`.

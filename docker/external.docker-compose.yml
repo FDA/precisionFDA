@@ -10,7 +10,8 @@ services:
       - GSRS_ENABLED=true
   gsrs:
     depends_on:
-      - gsrsdb
+      gsrsdb:
+        condition: service_healthy
     extends:
       file: ./external.services.yml
       service: gsrs
@@ -20,4 +21,3 @@ services:
       service: gsrsdb
     volumes:
       - db-gsrs-mariadb-volume:/var/lib/mariadb
-

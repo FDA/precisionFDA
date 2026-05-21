@@ -1,0 +1,20 @@
+# Local-to-this-package allowlist for pnpm 11 build scripts.
+# Required at runtime inside Docker (nodejs-api / worker / admin), where this
+# directory is the cwd and the root pnpm-workspace.yaml is not visible.
+# The root workspace file is the source of truth — keep these two in sync.
+
+# Lets pnpm purge a stale node_modules without a TTY prompt. The per-service
+# pnpm-deps-cache-* volumes outlive image rebuilds, so a pnpm major upgrade
+# leaves them stamped with the old version; without this, the entrypoint
+# aborts with ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY.
+confirmModulesPurge: false
+
+allowBuilds:
+  '@nestjs/core': true
+  '@scarf/scarf': true
+  '@swc/core': true
+  esbuild: true
+  msgpackr-extract: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
