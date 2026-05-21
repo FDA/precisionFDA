@@ -1,61 +1,85 @@
 # Useful commands
 
-If you use [OS-based setup](OS_BASED_SETUP.md), remove from each command the
-`docker compose exec <container_name>` portion of the command when applicable.
+The examples below assume the Docker-based setup from [Docker-based setup](./DOCKER_BASED_SETUP.md). For Makefile targets, see [Summary of Makefile commands](./SUMMARY_OF_MAKEFILE_COMMANDS.md).
 
-## Ruby client
+For commands that are easier to run directly through Docker Compose, define a helper that matches the Makefile configuration. Run `make repo-env-files-init` first so `docker/.env` exists, or omit `--env-file docker/.env` from the helper.
 
-Get to rails console
-`docker compose exec web bundle exec rails c`
+```bash
+export PFDA_COMPOSE='docker compose -p precision-fda --env-file docker/.env -f docker/dev.docker-compose.yml'
+```
 
-Run database migration
-`docker compose exec web bundle exec rake db:migrate`
+Use `PFDA_SHOULD_RUN_GSRS=1 make run` when you need GSRS services.
 
-Run all Ruby tests
-`docker compose exec web bundle exec rspec`
+## Rails
 
-Run specific test
-`docker compose exec web bundle exec rspec spec/<path_to_spec>`
+Open a Rails container shell:
 
-Run rubocop
-`docker compose exec web bundle exec rubocop`
+```bash
+$PFDA_COMPOSE exec web bash
+```
 
-Run brakeman
-`docker compose exec web brakeman -A --parser-timeout 30 -w2`
+Run common Rails commands:
 
-#### A couple commands that don't work in a docker container:
+```bash
+$PFDA_COMPOSE exec web bundle exec rails c
+$PFDA_COMPOSE exec web bundle exec rake db:migrate
+$PFDA_COMPOSE exec web bundle exec rspec
+$PFDA_COMPOSE exec web bundle exec rspec spec/<path_to_spec>
+$PFDA_COMPOSE exec web bundle exec rubocop
+$PFDA_COMPOSE exec web bundle exec brakeman -A --parser-timeout 30 -w2
+```
 
-Run tests with Rspec Guard (doesn't work in docker container)
-`bundle exec guard`
+Open coverage output from the host:
 
-* To exit from Guard mode (doesn't work in docker container)
-    * `exit`
+```bash
+open packages/rails/coverage/index.html
+```
 
-* Check current code coverage
-    * `open coverage/index.html`
+## React client
 
+```bash
+$PFDA_COMPOSE exec frontend pnpm lint
+$PFDA_COMPOSE exec frontend pnpm tsc
+$PFDA_COMPOSE exec frontend pnpm test:run
+$PFDA_COMPOSE exec frontend pnpm test:run -- -t Challenge
+```
 
-## React Frontend
+## Node.js backend
 
-Run lint
-`docker compose exec frontend yarn lint .`
+```bash
+$PFDA_COMPOSE exec nodejs-api pnpm run lint
+$PFDA_COMPOSE exec nodejs-api make test-api
+$PFDA_COMPOSE exec nodejs-api make test-worker
+$PFDA_COMPOSE exec nodejs-api make test-shared
+$PFDA_COMPOSE exec nodejs-api pnpm run build
+```
 
-Run all unit tests
-`docker compose exec frontend yarn test`
+Restart individual Node.js services after configuration changes:
 
-Run specific unit tests
-`docker compose exec frontend yarn test --testNamePattern=Challenge`
+```bash
+$PFDA_COMPOSE restart nodejs-api
+$PFDA_COMPOSE restart nodejs-worker
+$PFDA_COMPOSE restart nodejs-admin-platform-client
+```
+
+## Docs site
+
+```bash
+$PFDA_COMPOSE exec docs pnpm lint
+$PFDA_COMPOSE exec docs pnpm run build
+```
 
 ## Database
 
+Open a database shell:
+
 ```bash
-# Hook into db container
-docker compose exec -it db bash
-# Log in
-mysql -uroot -p
-# You should be able to find the password depending on your configuration
+$PFDA_COMPOSE exec db mysql -uroot -ppassword
 ```
 
-## TODO - missing
+Recreate local database volumes:
 
-mention remaining rake tasks in this doc
+```bash
+make db-wipe
+make prepare-db
+```

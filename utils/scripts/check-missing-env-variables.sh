@@ -5,6 +5,16 @@
 # comm -13 <(grep -v '^#\|^\s*$' "$dotenv_file" | awk -F = '{print $1}' | sort)
 # Reason for this bash script
 
+# Colors (only when stderr/stdout is a TTY)
+if [[ -t 1 ]]; then
+    C_GREEN=$'\033[32m'
+    C_RED=$'\033[31m'
+    C_DIM=$'\033[2m'
+    C_RESET=$'\033[0m'
+else
+    C_GREEN=""; C_RED=""; C_DIM=""; C_RESET=""
+fi
+
 # Formatting util
 function print_missing_env_list() {
     max_len=$(awk 'BEGIN {max=0} {if (length>(max + 0)) max=length fi} END {print max}' <(echo "$1"))
@@ -36,8 +46,9 @@ fi
 # This is done for both files
 comparison_result=$(comm -13 <(grep -v '^#\|^\s*$' "$dotenv_file" | awk -F = '{print $1}' | sort) <(grep -v '^#\|^\s*$' "$spec_file" | awk -F = '{print $1}' | sort))
 if [[ $comparison_result ]]; then
-    echo "WARNING: Following env variables missing in \"$dotenv_file\" according to \"$spec_file\"" >&2
+    missing_count=$(echo "$comparison_result" | wc -l | tr -d ' ')
+    echo "  ${C_RED}✗${C_RESET} ${dotenv_file} ${C_DIM}— missing ${missing_count} variable(s) from ${spec_file}${C_RESET}" >&2
     print_missing_env_list "$comparison_result"
     exit 1
 fi
-echo "OK: \"$dotenv_file\" matches \"$spec_file\", no missing config"
+echo "  ${C_GREEN}✓${C_RESET} ${dotenv_file}"

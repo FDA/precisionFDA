@@ -1,81 +1,63 @@
 # Docker-based setup
 
+This guide covers the Docker-based local development environment for Apple Silicon Macs. There are also a few _optional_ sections that are recommended for full-stack development.
 
-This guide covers all the steps required to get docker based
-development environment. There are also a few _optional_ sections, that are recommended to use for full-stack developer roles
+_Last updated: 19.05.2026_
 
-_Last updated: 25.11.2022_
+## Installing Docker and Docker Compose
 
-## Installing docker and docker-compose
+> If you already have Docker installed on your system, you can skip this step.
 
-> If you already have docker installed in your system, you can skip this step.
+Install [Docker Desktop](https://docs.docker.com/install/) on your workstation. The Makefile uses the Docker Compose v2 plugin (`docker compose`).
 
-The first step you have to do is to install [docker](https://docs.docker.com/install/) on your workstation. Instructions are **platform-specific**
+## Local Docker configurations
 
-## Platform differences
+Local Docker uses [`docker/dev.docker-compose.yml`](../docker/dev.docker-compose.yml) as its compose file. Apple Silicon-specific behavior is already included — no separate architecture overlay is needed.
 
-Because of [platform differences](./MACOS_ARCHITECTURE_DIFFERENCES.md) between M1-silicon and Intel MacOS CPUs and technologies used in our stack, the docker environment setup is **platform-specific**.
+The normal local workflow is:
 
-For this reason localhost docker stack is maintained for two different architectures
+```bash
+make prepare-db
+make run
+make stop
+make db-wipe
+```
 
-* MacOS intel
-* MacOS M1-sillicon (`arm64v8`)
+`make prepare-db` starts the database dependencies if needed, runs the Rails database setup in a temporary web container, then stops the containers once setup is done. The temporary web container is removed and database data remains in Docker volumes.
 
-Docker stack contains performance differences for different roles - for instance QA engineers are in higher need to drop volumes because of frequent branch changes. These changes shouldn't have impact on business logic of application code, instead they modify image build and container runtime.
+GSRS is optional and is enabled with `PFDA_SHOULD_RUN_GSRS=1`.
 
-That produces in total 4 different configurations
-
-* `dev` (MacOS intel)
-* `qa` (MacOS intel)
-* `arm64v8.dev` (M1-sillicon)
-* `arm64v8.qa` (M1-sillicon)
-
-(Optional) to learn more about the `docker-compose.yml` files, feel free to look at [Docker compose guide](./DOCKER_COMPOSE_GUIDE.md)
+(Optional) To learn more about the compose files, see the [Docker compose guide](./DOCKER_COMPOSE_GUIDE.md).
 
 ## Makefile
 
-Make sure that you understand your role (dev, qa)
+Most development/testing use cases are documented in the [Makefile](../Makefile).
 
-You can also find out architecture of your workstation by running `uname -m` (unless it's windows)
-
-
-
-Most of the developemnt/testing use cases are documented in this [Makefile]
-(../Makefile)
-
-If you'd like to understand more about [Makefile](../Makefile), feel free to look at these resources
+If you'd like to understand more about Makefiles, see:
 
 * [Makefile tutorial](https://makefiletutorial.com/)
 * [Makefile built-in functions](https://www.gnu.org/software/make/manual/html_node/Functions.html)
 
-In order not to duplicate every [Makefile](../Makefile) target, user role (`dev`, `qa`) is defined as environment variable
-
-```bash
-# Add following into ~/.bashrc or ~/.zshrc as dev
-export PFDA_ROLE=dev
-# Add following into ~/.bashrc or ~/.zshrc as qa
-export PFDA_ROLE=qa
-```
-
 ## Setup before running
 
-Environment files are needed. You can either copy `.env.example` files to `.env` in directories `./docker`, `./packages/rails` and `./packages./server` to tweak the values or to keep the defaults, simply run
+You need `.env` files in `./docker`, `./packages/rails`, and `./packages/server`. Copy the `.env.example` file in each, or run:
 
 ```bash
 make repo-env-files-init
 ```
 
-What remains to be done, is ask a colleague for secrets to fill missing `.env` variables. Migration to [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/getting-started.html) is in progress
+The Makefile passes `docker/.env` to Docker Compose when that file exists. Put local Docker-only overrides there instead of in your shell profile. Common overrides include:
 
+* backend URLs such as `NODE_API_URL`, `RUBY_API_URL`, and `DOCS_URL`
+* startup shortcuts such as `SKIP_RUBY_DEPS_SETUP`, `SKIP_FRONTEND_DEPS_SETUP`, `SKIP_NODEJS_DEPS_SETUP`, `SKIP_DB_SETUP`, and `NODE_DEV_WATCH`
 
-To get summary of all [Makefile](../Makefile) commands, take a look at [this doc](./SUMMARY_OF_MAKEFILE_COMMANDS.md)
+Fill in any local `.env` variables that aren't checked into the repo. Never commit secrets — keep them out of compose files and out of `.env` files that are tracked by git.
 
+For a summary of Makefile commands, see [Summary of Makefile commands](./SUMMARY_OF_MAKEFILE_COMMANDS.md).
 
-### Githooks - use cases and troubleshooting
+### Githooks troubleshooting
 
-
-
-If you happen to encounter blocking issues with githooks you can roll-back to initial state (with no adjustments) with following command
+If a githook is preventing you from committing, you can remove all hooks with:
 
 ```bash
 find ./utils/githooks -type f -exec sh -c 'rm ".git/hooks/$(basename {})"' \;
@@ -83,31 +65,26 @@ find ./utils/githooks -type f -exec sh -c 'rm ".git/hooks/$(basename {})"' \;
 
 ## (Optional) Account setup
 
-To use your own account to log-in to the system, run the command to
-create database with the environment variables set with your account's data (if you don't have
-an account yet, please refer to
-[New account registration](DEVELOPMENT_SETUP.md#new-account-registration)):
+To log in with your own account, seed the database with your details. If you do not have an account yet, see [New account registration](DEVELOPMENT_SETUP.md#new-account-registration).
 
 ```bash
-# TODO refactor this into Makefile as well
-docker compose exec \
-    -e PFDA_USER_FIRST_NAME=Florante \
-    -e PFDA_USER_LAST_NAME=DelaCruz \
-    -e PFDA_USER_EMAIL=fdelacruz+pfdalocal@dnanexus.com \
-    -e PFDA_USER_ORG_HANDLE=floranteorg \
-    -e PFDA_USER_DXUSER=fdelacruz \
-    web bundle exec rake {db:setup,db:migrate,db:generate_mock_data,user:generate_test_users}
-# ! Don't forget to add respective flags before running this command
-# For instance, dev with "arm64v8"
-# docker compose 
-#     -f docker/arm64v8.dev.docker-compose.yml \
-#     exec \
-#     -e PFDA_USER_FIRST_NAME=Florante \
-#     -e PFDA_USER_LAST_NAME=DelaCruz \
-#     -e PFDA_USER_EMAIL=fdelacruz+pfdalocal@dnanexus.com \
-#     -e PFDA_USER_ORG_HANDLE=floranteorg \
-#     -e PFDA_USER_DXUSER=fdelacruz \
-#     web bundle exec rake {db:setup,db:migrate,db:generate_mock_data,user:generate_test_users}
+# Initialize the database first.
+make prepare-db
+
+# Start the app stack.
+make run
+
+# In another terminal, open a shell in the running web container.
+# (Define $PFDA_COMPOSE first - see ./USEFUL_COMMANDS.md)
+$PFDA_COMPOSE exec web bash
+
+# Then run inside the web container.
+PFDA_USER_FIRST_NAME=Florante \
+PFDA_USER_LAST_NAME=DelaCruz \
+PFDA_USER_EMAIL=fdelacruz+pfdalocal@dnanexus.com \
+PFDA_USER_ORG_HANDLE=floranteorg \
+PFDA_USER_DXUSER=fdelacruz \
+bundle exec rake db:setup db:migrate db:generate_mock_data user:generate_test_users
 ```
 
 ## Running application
@@ -116,81 +93,69 @@ docker compose exec \
 make run
 ```
 
-Once the application is correctly installed & configured, you should be able to access the portal at `https://localhost:3000/`.
-In order to log in to the system, ask for shared DEV credentials (ask some1 from the team)
+Once the application is correctly installed and configured, you should be able to access the portal at `https://localhost:3000/` by default. To log in, ask the team for shared DEV credentials.
+
+Stop the stack with:
+
+```bash
+make stop
+```
 
 ### Running application with external services (GSRS)
 
-To run PFDA with external integration part of local stack, set up the following env variable in your `.rc` file
+To include GSRS in the local stack, set `PFDA_SHOULD_RUN_GSRS=1` for the command or export it in your shell profile:
 
 ```bash
-# Add following into ~/.bashrc or ~/.zshrc to run GSRS
-export PFDA_SHOULD_RUN_GSRS=1
-```
-
-Run in the same way with
-
-```bash
-make run
+PFDA_SHOULD_RUN_GSRS=1 make run
 ```
 
 #### Switch GSRS version running in the container
-1. Connect to the running container
-2. Run script _run-version.sh_
-3. Upon request paste required GSRS version branch name as in [gsrs-play-dist repo](https://github.com/dnanexus/gsrs-play-dist)
+
+1. Connect to the running container.
+2. Run script _run-version.sh_.
+3. When prompted, paste the required GSRS version branch name from the [gsrs-play-dist repo](https://github.com/dnanexus/gsrs-play-dist).
 
 #### GSRS frontend development live update
-Once you have the _gsrs_ container running, you can use it for GSRS frontend development:
-1. Clone [GSRSFrontend repo](https://github.com/ncats/GSRSFrontend/tree/precision_new), branch _precision_new_.
-2. Create env _GSRS_FRONTEND_PATH_ (eg. in your `~/.zshrc`) with an absolute path to the repo (eg. _/Users/pbarta@dnanexus.com/ncats/GSRSFrontend_)
-3. Restart _gsrs_ container
-4. Edit several config files in the cloned repo (these changes are not supposed to be committed):
- - `angular.json` - add line `"baseHref": "/ginas/app/ui/",` under `projects.gsrs-client.architect.options`
- - `src/app/fda/config/config.json` - add line `"customToolbarComponent": "precisionFDA",`
- - `src/environments/environment.fda.local.ts` - set following variables:
-    ```bash
-    environment.apiBaseUrl = 'https://localhost:3000/ginas/app/';
-    environment.baseHref = '/ginas/app/ui/';
-    ```
-5. Connect to the running _gsrs_ container, run script `switch-frontend.sh` (located in root) and follow the instructions.
-    ```bash
-    docker exec -it <GSRS_CONTAINER_ID> bash
-    cd /
-    ./switch-frontend.sh
-    ```
 
-## (Optional) Setup for impatient personalities
+Once the _gsrs_ container is running, you can use it for GSRS frontend development:
 
-There are a few [docker-related](../docker/arm64v8.dev..docker-compose.yml) [env variables](../docker/.env.example), that are used in `docker-compose.yml` files, such as `SKIP_RUBY_SETUP`
-After you run your docker setup successfully, and want to save some time by skipping dependency checks and reinstallations (assuming you've got them correct)
+1. Clone the [GSRSFrontend repo](https://github.com/ncats/GSRSFrontend/tree/precision_new), branch _precision_new_.
+2. Create `GSRS_FRONTEND_PATH` (for example in `~/.zshrc`) with an absolute path to the repo, such as _/Users/pbarta@dnanexus.com/ncats/GSRSFrontend_.
+3. Restart the _gsrs_ container.
+4. Edit several config files in the cloned repo. These changes are not supposed to be committed:
+   * `angular.json` - add line `"baseHref": "/ginas/app/ui/",` under `projects.gsrs-client.architect.options`
+   * `src/app/fda/config/config.json` - add line `"customToolbarComponent": "precisionFDA",`
+   * `src/environments/environment.fda.local.ts` - set the following variables:
+     ```bash
+     environment.apiBaseUrl = 'https://localhost:3000/ginas/app/';
+     environment.baseHref = '/ginas/app/ui/';
+     ```
+5. Connect to the running _gsrs_ container, run script `switch-frontend.sh` (located in root), and follow the instructions.
+   ```bash
+   docker exec -it <GSRS_CONTAINER_ID> bash
+   cd /
+   ./switch-frontend.sh
+   ```
 
-For obvious reasons these settings aren't versioned, and therefore are kept in separate [docker/.env](../docker/.env.example) file. Feel free to setup according your own need
+## (Optional) Skip cache rebuilds for faster startup
 
+After the Docker setup runs successfully, you can save startup time by using [`docker/.env.example`](../docker/.env.example) as a reference and setting skip flags in `docker/.env`. These flags only work if the relevant deps and caches have already been built by a previous successful startup.
 
-## (Alternative) Symlink docker-compose.yml for less typing
-
-If you want to use `docker compose` command with minimum of typing, you can symlink your preconfigured `docker-compose.yml` (for instance `docker/arm64v8.dev.docker-compose.yml`) into `docker/docker-compose.yml`. It is `.gitignore`d for this purposed
-
-For instance
+Common options include:
 
 ```bash
-# Run in 'precision-fda' root directory
-# intel dev
-ln -s docker/dev.docker-compose.yml docker/docker-compose.yml
-# intel qa
-ln -s docker/qa.docker-compose.yml docker/docker-compose.yml
-# arm64v8 (Apple M1 Silicon) dev
-ln -s docker/arm64v8.dev.docker-compose.yml docker/docker-compose.yml
-# arm64v8 (Apple M1 Silicon) qa
-ln -s docker/arm64v8.qa.docker-compose.yml docker/docker-compose.yml
+SKIP_RUBY_DEPS_SETUP=1
+SKIP_FRONTEND_DEPS_SETUP=1
+SKIP_NODEJS_DEPS_SETUP=1
+SKIP_DB_SETUP=1
+NODE_DEV_WATCH=0
 ```
 
-This should make use of docker compose pretty trivial as you can start it simply by running - in most cases you should be fine without GSRS
+These flags aren't checked into the repo — set them for your local workflow only.
 
-```bash
-# PWD=./docker
-docker compose up --build
-```
+## macOS notes
+
+On macOS, the default Rails file watcher doesn't reliably detect changes inside Docker bind-mounts. To work around this, [`docker/dev.docker-compose.yml`](../docker/dev.docker-compose.yml) sets `PFDA_LOCAL_DOCKER_FILE_WATCHER_PATCH=1`, which forces Rails to use a polling-based watcher in the local Docker stack. See [`packages/rails/config/environments/development.rb`](../packages/rails/config/environments/development.rb).
 
 ## Further reading
 

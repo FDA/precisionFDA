@@ -1,11 +1,14 @@
 # ! BEFORE EDITING: Reflect changes to `docs/SUMMARY_OF_MAKEFILE_COMMANDS.md`
 # ! BEFORE EDITING: Reflect changes to confluence as well - namely https://confluence.internal.dnanexus.com/display/XVGEN/Docker+troubleshooting+guide
 
+SHELL := /bin/bash
+DOCKER_COMPOSE ?= docker compose
+
 repo-env-files-init:
 	echo Setting up .env files
-	cp -n docker/.env.example docker/.env || echo Skipping docker .env
-	cp -n packages/server/.env.example packages/server/.env || echo Skipping server .env
-	cp -n packages/rails/.env.example packages/rails/.env || echo Skipping root directory .env
+	cp -n docker/.env.example docker/.env
+	cp -n packages/server/.env.example packages/server/.env
+	cp -n packages/rails/.env.example packages/rails/.env
 
 # ┌─────────────────┐
 # │                 │
@@ -14,14 +17,20 @@ repo-env-files-init:
 # └─────────────────┘
 
 check-missing-env-variables:
-	./utils/scripts/check-missing-env-variables.sh packages/rails/.env packages/rails/.env.example
-	./utils/scripts/check-missing-env-variables.sh docker/.env docker/.env.example
-	./utils/scripts/check-missing-env-variables.sh packages/server/.env packages/server/.env.example
+	@echo "Checking for env variables missing from .env files..."
+	@status=0; \
+	./utils/scripts/check-missing-env-variables.sh packages/rails/.env packages/rails/.env.example || status=1; \
+	./utils/scripts/check-missing-env-variables.sh docker/.env docker/.env.example || status=1; \
+	./utils/scripts/check-missing-env-variables.sh packages/server/.env packages/server/.env.example || status=1; \
+	exit $$status
 
 check-unpublished-env-variables:
-	./utils/scripts/check-unpublished-env-variables.sh packages/rails/.env packages/rails/.env.example
-	./utils/scripts/check-unpublished-env-variables.sh docker/.env docker/.env.example
-	./utils/scripts/check-unpublished-env-variables.sh packages/server/.env packages/server/.env.example
+	@echo "Checking for env variables not published in .env.example files..."
+	@status=0; \
+	./utils/scripts/check-unpublished-env-variables.sh packages/rails/.env packages/rails/.env.example || status=1; \
+	./utils/scripts/check-unpublished-env-variables.sh docker/.env docker/.env.example || status=1; \
+	./utils/scripts/check-unpublished-env-variables.sh packages/server/.env packages/server/.env.example || status=1; \
+	exit $$status
 
 
 # ┌───────────────────────┐
@@ -30,7 +39,6 @@ check-unpublished-env-variables:
 # │                       │
 # └───────────────────────┘
 
-PFDA_ROLE ?= dev
 PFDA_SHOULD_RUN_GSRS ?= 0
 
 # ┌───────────┐
@@ -39,40 +47,34 @@ PFDA_SHOULD_RUN_GSRS ?= 0
 # │           │
 # └───────────┘
 
-DOCKER_CONFIGURATION := $(PFDA_ROLE)
 EXTERNAL_DOCKER_COMPOSE_FILE := docker/external.docker-compose.yml
-# Conditionally defined for M1-sillicon
-ifeq (arm64,$(shell uname -m))
-DOCKER_CONFIGURATION := arm64v8.$(DOCKER_CONFIGURATION)
-EXTERNAL_DOCKER_COMPOSE_FILE := docker/external.arm64v8.docker-compose.yml
-endif
 
-DOCKER_COMPOSE_FILE := docker/$(DOCKER_CONFIGURATION).docker-compose.yml
-DOCKER_COMPOSE_FILE_FLAGS= -f $(DOCKER_COMPOSE_FILE)
+DOCKER_COMPOSE_FILE := docker/dev.docker-compose.yml
+DOCKER_ENV_FILE := docker/.env
+DOCKER_ENV_FILE_FLAGS := $(if $(wildcard $(DOCKER_ENV_FILE)),--env-file $(DOCKER_ENV_FILE),)
+DOCKER_COMPOSE_FILE_FLAGS= $(DOCKER_ENV_FILE_FLAGS) -f $(DOCKER_COMPOSE_FILE)
 
-# Conditionally define for role
-# for dev - precision-fda
-# for qa - precision-fda-qa
-DOCKER_COMPOSE_PREFIX := precision-fda$(subst -dev,,-$(PFDA_ROLE))
+DOCKER_COMPOSE_PREFIX := precision-fda
 
-SERVICES := web frontend nodejs-api nodejs-worker db redis
-PREPARE_DB_SERVICES := web db
+SERVICES := web frontend nodejs-api nodejs-worker nodejs-admin-platform-client db redis nginx docs
+# Rails dev entrypoint only waits on db (mysqladmin ping) for migrations.
+# Redis is unused at db:prepare time, so it's intentionally not in this list.
+PREPARE_DB_DEPENDENCY_SERVICES := db
 PREPARE_DB_TEST_SERVICES := web db nodejs-api nodejs-worker nodejs-admin-platform-client nginx redis
-# NOTE - web container needs to be stopped as well as db volume is mounted in web container for some reason
-# TODO - investigate if it can be removed
-DB_WIPE_SERVICES := web db
+DB_WIPE_SERVICES := db
 DB_WIPE_VOLUMES := db-pfda-mysql-volume
 
 # Conditionally defined if gsrs should be included in the stack
-ifneq (0,$(PFDA_SHOULD_RUN_GSRS))
-ifneq (,$(PFDA_SHOULD_RUN_GSRS))
+ifneq (,$(filter-out 0,$(PFDA_SHOULD_RUN_GSRS)))
 DOCKER_COMPOSE_FILE_FLAGS := $(DOCKER_COMPOSE_FILE_FLAGS) -f $(EXTERNAL_DOCKER_COMPOSE_FILE)
 SERVICES := $(SERVICES) gsrs gsrsdb
-PREPARE_DB_SERVICES := $(PREPARE_DB_SERVICES) gsrs gsrsdb
 DB_WIPE_SERVICES := $(DB_WIPE_SERVICES) gsrsdb
-DB_WIPE_VOLUMES := $(DB_WIPE_VOLUMES) db-gsrs-mysql-volume
+DB_WIPE_VOLUMES := $(DB_WIPE_VOLUMES) db-gsrs-mariadb-volume
 endif
-endif
+
+# Recursive `=` so DOCKER_COMPOSE_FILE_FLAGS is re-expanded at every call
+# site — needed because the GSRS block above appends to it conditionally.
+COMPOSE = $(DOCKER_COMPOSE) -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS)
 
 # ┌─────────────────────────────────┐
 # │                                 │
@@ -80,19 +82,20 @@ endif
 # │                                 │
 # └─────────────────────────────────┘
 
-# NOTE(samuel) run, run-qa (or build, build-qa) are basically same, as I haven't done any of optimizations for Intel workstations
-# NOTE(samuel) prepare-db is a temporary command mostly useful for QAs, until db waiting for nodejs-api containers is implemented
 prepare-db:
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build $(PREPARE_DB_SERVICES)
+	@set -e; \
+	cleanup() { status=$$?; $(COMPOSE) down; exit $$status; }; \
+	trap cleanup EXIT; \
+	$(COMPOSE) up -d --build --wait $(PREPARE_DB_DEPENDENCY_SERVICES); \
+	$(COMPOSE) run -T --rm --no-deps --build -e PFDA_DB_INIT_ONLY=1 web
 prepare-db-test:
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build $(PREPARE_DB_TEST_SERVICES)
+	$(COMPOSE) up --build $(PREPARE_DB_TEST_SERVICES)
 run:
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build
+	$(COMPOSE) up --build
 stop:
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
-	echo Stopped
+	$(COMPOSE) down
 run-spec:
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) -f docker/spec.docker-compose.yml up
+	$(DOCKER_COMPOSE) -p $(DOCKER_COMPOSE_PREFIX) -f docker/spec.docker-compose.yml up
 
 # ┌───────────────────────────────────┐
 # │                                   │
@@ -100,23 +103,22 @@ run-spec:
 # │                                   │
 # └───────────────────────────────────┘
 
-define DYNAMIC__SERVICE_RESTART
-restart-$(1):
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) restart $(1)
-endef
-define DYNAMIC__SERVICE_HOOK_INTO
-hook-into-$(1):
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) exec -it $(1) bash
-endef
-
 debug-config:
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) config
+	$(COMPOSE) config
 
-$(foreach service,$(SERVICES),$(eval $(call DYNAMIC__SERVICE_RESTART,$(service))))
-$(foreach service,$(SERVICES),$(eval $(call DYNAMIC__SERVICE_HOOK_INTO,$(service))))
+# Per-service fan-out: generates an image-cleanup-X target for every entry
+# in SERVICES. Use `$(COMPOSE) restart <svc>` or `$(COMPOSE) exec <svc> bash`
+# directly when you need to restart or shell into a single service.
+define DYNAMIC__SERVICE_TARGETS
+image-cleanup-$(1):
+	$(COMPOSE) stop $(1)
+	$(COMPOSE) rm -f $(1)
+endef
+
+$(foreach service,$(SERVICES),$(eval $(call DYNAMIC__SERVICE_TARGETS,$(service))))
 
 restart-full:
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) restart
+	$(COMPOSE) restart
 
 # ┌─────────────────────────────────────────┐
 # │                                         │
@@ -124,29 +126,11 @@ restart-full:
 # │                                         │
 # └─────────────────────────────────────────┘
 
-# Dynamic macro for service cleanup
-
-define DYNAMIC__IMAGE_CLEANUP
-image-cleanup-$(1):
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) stop $(1)
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) rm -f $(1)
-	docker image prune
-	docker builder prune
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
-	echo Image cleanup complete
-endef
-
-# Dynamic macro for service restart
-
-
-$(foreach service,$(SERVICES),$(eval $(call DYNAMIC__IMAGE_CLEANUP,$(service))))
-
 image-cleanup-full:
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
-	docker container prune
-	docker image prune
-	docker builder prune
-	echo Image cleanup complete
+	$(COMPOSE) down
+	docker container prune -f
+	docker image prune -f
+	docker builder prune -f
 
 # ┌─────────────────────────────────────────┐
 # │                                         │
@@ -158,52 +142,60 @@ WEB_SIDEKIQ__TARGET_SUFFIX := ruby-sidekiq
 WEB_SIDEKIQ__SERVICES := web
 WEB_SIDEKIQ__VOLUME_CLEANUPS := BUNDLER_DEPS
 WEB_SIDEKIQ__BUNDLER_DEPS__VOLUME := bundler-deps-cache-ruby
-WEB_SIDEKIQ__BUNDLER_DEPS__ALLOWED_CONFIGURATIONS := dev qa arm64v8.dev arm64v8.qa
 
+# Note: the pnpm content-addressed store is shared across all Node services
+# (single `pnpm-store-cache` volume). It's cleaned by `make cache-cleanup-pnpm-store`
+# below — per-service cache cleanups only nuke that service's node_modules tree.
 FRONTEND__TARGET_SUFFIX := frontend
 FRONTEND__SERVICES := frontend
-FRONTEND__VOLUME_CLEANUPS := WEBPACK_CACHE YARN_DEPS
-FRONTEND__WEBPACK_CACHE__VOLUME := webpack-cache-client
-FRONTEND__WEBPACK_CACHE__ALLOWED_CONFIGURATIONS := dev qa arm64v8.dev arm64v8.qa
-FRONTEND__YARN_DEPS__VOLUME := yarn-deps-cache-client
-FRONTEND__YARN_DEPS__ALLOWED_CONFIGURATIONS := arm64v8.dev
+FRONTEND__VOLUME_CLEANUPS := VITE_CACHE PNPM_DEPS
+FRONTEND__VITE_CACHE__VOLUME := vite-cache-client
+FRONTEND__PNPM_DEPS__VOLUME := pnpm-deps-cache-client
 
 NODEJS_API__TARGET_SUFFIX := nodejs-api
 NODEJS_API__SERVICES := nodejs-api
-NODEJS_API__VOLUME_CLEANUPS := YARN_DEPS
-NODEJS_API__YARN_DEPS__VOLUME := yarn-deps-cache-nodejs-api
-NODEJS_API__YARN_DEPS__ALLOWED_CONFIGURATIONS := arm64v8.dev
+NODEJS_API__VOLUME_CLEANUPS := PNPM_DEPS
+NODEJS_API__PNPM_DEPS__VOLUME := pnpm-deps-cache-nodejs-api
 
 NODEJS_WORKER__TARGET_SUFFIX := nodejs-worker
 NODEJS_WORKER__SERVICES := nodejs-worker
-NODEJS_WORKER__VOLUME_CLEANUPS := YARN_DEPS
-NODEJS_WORKER__YARN_DEPS__VOLUME := yarn-deps-cache-nodejs-worker
-NODEJS_WORKER__YARN_DEPS__ALLOWED_CONFIGURATIONS := arm64v8.dev
+NODEJS_WORKER__VOLUME_CLEANUPS := PNPM_DEPS
+NODEJS_WORKER__PNPM_DEPS__VOLUME := pnpm-deps-cache-nodejs-worker
+
+NODEJS_ADMIN__TARGET_SUFFIX := nodejs-admin-platform-client
+NODEJS_ADMIN__SERVICES := nodejs-admin-platform-client
+NODEJS_ADMIN__VOLUME_CLEANUPS := PNPM_DEPS
+NODEJS_ADMIN__PNPM_DEPS__VOLUME := pnpm-deps-cache-nodejs-admin-platform-client
+
+DOCS__TARGET_SUFFIX := docs
+DOCS__SERVICES := docs
+DOCS__VOLUME_CLEANUPS := PNPM_DEPS
+DOCS__PNPM_DEPS__VOLUME := pnpm-deps-cache-docs
 
 define FRAGMENT__VOLUME_CLEANUP
-	if [[ "$($(1)__ALLOWED_CONFIGURATIONS)" == *"$(DOCKER_CONFIGURATION)"* ]]; then \
-	docker volume rm -f $(foreach volume,$($(1)__VOLUME),$(DOCKER_COMPOSE_PREFIX)_$(volume)); \
-	else \
-	echo Skipping volume $($(1)__VOLUME) for "$(DOCKER_CONFIGURATION)" configuration; \
-	fi;
+	docker volume rm -f $(foreach volume,$($(1)__VOLUME),$(DOCKER_COMPOSE_PREFIX)_$(volume));
 endef
 
 define FRAGMENT__CACHE_CLEANUP
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) stop $($($1)__SERVICES)
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) rm -f $($($1)__SERVICES)
+	$(COMPOSE) stop $($(1)__SERVICES)
+	$(COMPOSE) rm -f $($(1)__SERVICES)
 	$(foreach volume_cleanup,$($(1)__VOLUME_CLEANUPS),$(call FRAGMENT__VOLUME_CLEANUP,$(1)__$(volume_cleanup)))
 endef
 
 define DYNAMIC__CACHE_CLEANUP
 cache-cleanup-$($(1)__TARGET_SUFFIX):
 	$(call FRAGMENT__CACHE_CLEANUP,$(1))
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
-	echo Cache cleanup complete
+	$(COMPOSE) down
 endef
 
-POSSIBLE_CACHE_CLEANUPS := WEB_SIDEKIQ FRONTEND NODEJS_API NODEJS_WORKER
+POSSIBLE_CACHE_CLEANUPS := WEB_SIDEKIQ FRONTEND NODEJS_API NODEJS_WORKER NODEJS_ADMIN DOCS
 
 $(foreach cache_cleanup,$(POSSIBLE_CACHE_CLEANUPS),$(eval $(call DYNAMIC__CACHE_CLEANUP,$(cache_cleanup))))
+
+# Clears the shared pnpm content-addressed store used by all Node services.
+# Safe to run any time — pnpm will re-download tarballs on the next install.
+cache-cleanup-pnpm-store:
+	docker volume rm -f $(DOCKER_COMPOSE_PREFIX)_pnpm-store-cache
 
 # ┌───────────────────────────────────┐
 # │                                   │
@@ -213,36 +205,24 @@ $(foreach cache_cleanup,$(POSSIBLE_CACHE_CLEANUPS),$(eval $(call DYNAMIC__CACHE_
 
 # Fragment with DB wipe snippet
 define FRAGMENT__DB_WIPE
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) stop $(DB_WIPE_SERVICES)
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) rm -f $(DB_WIPE_SERVICES)
+	$(COMPOSE) stop $(DB_WIPE_SERVICES)
+	$(COMPOSE) rm -f $(DB_WIPE_SERVICES)
 	docker volume rm -f $(foreach db_wipe_volume,$(DB_WIPE_VOLUMES),$(DOCKER_COMPOSE_PREFIX)_$(db_wipe_volume))
 endef
 
 db-wipe:
 	$(call FRAGMENT__DB_WIPE)
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
-	echo Db wipe complete
+	$(COMPOSE) down
 
 
 define DYNAMIC__CACHE_CLEANUP_WITH_DB_WIPE
 cache-cleanup-$($(1)__TARGET_SUFFIX)-with-db-wipe:
 	$(call FRAGMENT__CACHE_CLEANUP,$(1))
 	$(call FRAGMENT__DB_WIPE)
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
-	echo Cache cleanup with db wipe complete
+	$(COMPOSE) down
 endef
 
-
-define DYNAMIC__CACHE_CLEANUP_WITH_DB_WIPE
-cache-cleanup-$($(1)__TARGET_SUFFIX)-with-db-wipe:
-	$(call FRAGMENT__CACHE_CLEANUP,$(1))
-	$(call FRAGMENT__DB_WIPE)
-	docker-compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
-	echo Cache cleanup with db wipe complete
-endef
-
-# Dictionary workaroud
+# Dictionary workaround
 # Inspiration - https://stackoverflow.com/questions/62005888/key-value-pair-in-makefile
 
 $(foreach cache_cleanup,$(POSSIBLE_CACHE_CLEANUPS),$(eval $(call DYNAMIC__CACHE_CLEANUP_WITH_DB_WIPE,$(cache_cleanup))))
-

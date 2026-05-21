@@ -5,11 +5,11 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "packageManager": "pnpm@10.32.1",
+  "packageManager": "pnpm@11.1.1",
   "scripts": {
     "format": "biome format --write apps libs",
     "format:check": "biome format apps libs",
-    "build": "npm run build:api && npm run build:worker && npm run build:admin-platform-client",
+    "build": "npm run clean && npm run build:api && npm run build:worker && npm run build:admin-platform-client",
     "build:api": "nest build api",
     "start:api": "nest start api",
     "start:dev:api": "nest start api --watch",
@@ -85,7 +85,7 @@
     "ws": "8.19.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.13",
+    "@biomejs/biome": "2.4.15",
     "@nestjs/cli": "11.0.21",
     "@nestjs/schematics": "11.1.0",
     "@nestjs/testing": "11.1.19",
@@ -131,7 +131,16 @@
   "pnpm": {
     "overrides": {
       "html-minifier": "npm:html-minifier-terser@6.1.0"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@scarf/scarf",
+      "@swc/core",
+      "esbuild",
+      "msgpackr-extract",
+      "protobufjs",
+      "unrs-resolver"
+    ]
   },
   "jest": {
     "moduleFileExtensions": [

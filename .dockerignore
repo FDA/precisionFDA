@@ -1,8 +1,0 @@
-.gems/
-.git/
-.idea/
-log/
-tmp/
-# exclude subfolders with given name on any level
-**/node_modules
-**/dist

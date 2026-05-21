@@ -1,0 +1,12 @@
+# pnpm 11 requires explicit build approval for packages with postinstall scripts.
+# This file is bind-mounted into the docs container at runtime, giving pnpm a
+# workspace context so --frozen-lockfile doesn't block esbuild/sharp/unrs-resolver.
+
+# Lets pnpm purge a stale node_modules without a TTY prompt. See the matching
+# note in packages/server/pnpm-workspace.yaml.
+confirmModulesPurge: false
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

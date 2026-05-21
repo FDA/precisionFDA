@@ -2,3 +2,20 @@ packages:
   - 'packages/client'
   - 'packages/server'
   - 'packages/docs'
+
+sharedWorkspaceLockfile: false
+
+# pnpm 11 requires explicit approval for packages with install/postinstall scripts.
+# This covers the workspace install. The same allowlist is mirrored into each
+# package.json's pnpm.onlyBuiltDependencies, because per-package Docker build
+# contexts don't see this file.
+allowBuilds:
+  '@nestjs/core': true
+  '@scarf/scarf': true
+  '@swc/core': true
+  esbuild: true
+  msgpackr-extract: true
+  msw: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true

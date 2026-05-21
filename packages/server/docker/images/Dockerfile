@@ -1,4 +1,4 @@
-ARG NODEJS_IMAGE_TAG=24.13.1-alpine
+ARG NODEJS_IMAGE_TAG=24.15.0-alpine
 FROM node:${NODEJS_IMAGE_TAG} AS builder
 
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN apk update && apk upgrade --no-cache && \
 
 
 # Install pnpm globally
-RUN npm install -g pnpm@10.29.3
+RUN npm install -g pnpm@11.1.1
 
 # Copy package files and install all dependencies
 COPY packages/server/ ./
@@ -27,7 +27,7 @@ FROM node:${NODEJS_IMAGE_TAG} AS runtime
 
 WORKDIR /app
 
-RUN npm install -g pnpm@10.29.3
+RUN npm install -g pnpm@11.1.1
 
 # Upgrade packages and install runtime dependencies
 RUN set -eux && \
