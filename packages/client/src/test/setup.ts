@@ -1,4 +1,4 @@
-import { vi, beforeAll, afterEach, afterAll } from 'vitest'
+/// <reference types="vitest/globals" />
 import { setupWorker } from 'msw/browser'
 import { handlers } from '../mocks/handlers'
 

@@ -1,9 +1,10 @@
 import type React from 'react'
 import * as Yup from 'yup'
-import { csvToArray } from '@/utils/csvToArray'
-import { stringToSnakeCase } from '@/utils/stringToSnakeCase'
+import { csvToArray } from '../../../utils/csvToArray'
+import { stringToSnakeCase } from '../../../utils/stringToSnakeCase'
 import type { InputSpec, InputSpecForm, IOSpec } from '../apps.types'
 import '../../../utils/yupValidators'
+import { type AppInstanceTypeValidationContext, INSTANCE_TYPE_UNAVAILABLE_MESSAGE } from '../instanceTypeAvailability'
 
 export const formatCSVStringToArray = (csvVal: string | null) => {
   if (csvVal === null || csvVal.length === 0) {
@@ -156,6 +157,8 @@ const IOName = Yup.string()
   })
 
 export const validationSchema = Yup.object().shape({
+  createAppSeries: Yup.boolean().required(),
+  createAppRevision: Yup.boolean().required(),
   is_new: Yup.boolean().required(),
   forked_from: Yup.string().nullable().optional(),
   name: Yup.string().required('App Name field is required'),
@@ -281,7 +284,28 @@ export const validationSchema = Yup.object().shape({
       }),
     ),
   internet_access: Yup.boolean().optional(),
-  instance_type: Yup.string().required('Instance Type is required'),
+  instance_type: Yup.string()
+    .test('instance-type', function (value) {
+      const context = this.options.context as AppInstanceTypeValidationContext | undefined
+      const allowed = context?.allowedComputeResourceIds
+
+      const v = value ?? ''
+
+      if (allowed == null) {
+        if (v === '') return this.createError({ message: 'Instance Type is required' })
+        return true
+      }
+
+      if (v === '') {
+        return this.createError({ message: 'Instance Type is required' })
+      }
+
+      if (!allowed.includes(v)) {
+        return this.createError({ message: INSTANCE_TYPE_UNAVAILABLE_MESSAGE })
+      }
+
+      return true
+    }),
   packages: Yup.array().of(Yup.string()).optional(),
   code: Yup.string(),
   ordered_assets: Yup.array().of(Yup.object()).optional(),

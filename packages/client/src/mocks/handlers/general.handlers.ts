@@ -26,4 +26,6 @@ export const generalHandlers = [
       { status: 200 },
     ),
   ),
+
+  http.get('/api/v2/notifications/unread', () => HttpResponse.json([], { status: 200 })),
 ]

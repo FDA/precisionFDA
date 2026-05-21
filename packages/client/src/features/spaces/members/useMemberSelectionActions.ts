@@ -1,7 +1,7 @@
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Action } from '../../home/action-types'
-import { ISpace } from '../spaces.types'
-import { SpaceMembership } from './members.types'
+import type { Action } from '../../home/action-types'
+import type { ISpace } from '../spaces.types'
+import type { SpaceMembership } from './members.types'
 import { useBulkChangeMemberRolesModal } from './useBulkChangeMemberRolesModal'
 import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
 
@@ -33,10 +33,11 @@ export const useMemberSelectionActions = ({
     member: selected?.[0],
   })
 
-  const { modalComp: bulkChangeMemberRoleModal, setShowModal: setBulkChangeMemberRoleModal } = useBulkChangeMemberRolesModal({
-    spaceId: spaceId,
-    members: selected,
-  })
+  const { modalComp: bulkChangeMemberRoleModal, setShowModal: setBulkChangeMemberRoleModal } =
+    useBulkChangeMemberRolesModal({
+      spaceId: spaceId,
+      members: selected,
+    })
 
   const actions: Action[] = [
     {
@@ -82,7 +83,9 @@ export const useMemberSelectionActions = ({
     },
   ]
 
-  const filterdActions = isLeadOrAdmin ? actions : actions.filter(action => !['Edit Role', 'JSON Export'].includes(action.name))
+  const filterdActions = isLeadOrAdmin
+    ? actions
+    : actions.filter(action => !['Edit Role', 'JSON Export'].includes(action.name))
 
   const modals = {
     'Edit Role': changeMemberRoleModal,

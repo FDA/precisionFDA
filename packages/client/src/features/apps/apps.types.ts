@@ -135,11 +135,12 @@ export type FormInput =
   | FileUid
   | FileUid[]
   | ComputeInstance
+  | null
   | undefined
 
 export interface BatchInput {
   id?: number
-  instanceType: ComputeInstance
+  instanceType: ComputeInstance | null
   fields: { [key: string]: FormInput }
 }
 

@@ -1,7 +1,8 @@
-import { useEffect, useMemo } from 'react'
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Controller, Resolver, useForm } from 'react-hook-form'
+import { useEffect, useMemo } from 'react'
+import type { Resolver } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useLocation } from 'react-router'
 import * as Yup from 'yup'
 import { useCreateDatabaseMutation } from '@/api/mutations/database'
@@ -11,13 +12,14 @@ import { RadioButtonGroup } from '@/components/form/RadioButtonGroup'
 import { InputError } from '@/components/form/styles'
 import { InputText } from '@/components/InputText'
 import { Loader } from '@/components/Loader'
-import { Select } from '@/components/Select'
+import { SelectContent, SelectItem, SelectTrigger, SelectValue, Select as UiSelect } from '@/components/ui/select'
 import { useAuthUser } from '@/features/auth/useAuthUser'
 import { DatabaseInstancePricingMap, isDatabaseResource, RESOURCE_LABELS } from '@/types/user'
+import { cn } from '@/utils/cn'
 import { StyledBackLink } from '../../home/home.styles'
 import { NotFound } from '../../home/show.styles'
 import styles from './CreateDatabase.module.css'
-import { DatabaseEngineType, versionsOptions } from './options'
+import { type DatabaseEngineType, versionsOptions } from './options'
 
 const engineOptions: { value: DatabaseEngineType; label: string }[] = [
   { value: 'aurora-mysql', label: 'MySQL' },
@@ -28,27 +30,29 @@ interface CreateDatabaseForm {
   name: string
   description: string
   engine: DatabaseEngineType
-  dxInstanceClass: { label: string; value: string } | null
-  engineVersion: { label: string; value: string } | null
+  dxInstanceClass: string | null
+  engineVersion: string | null
 }
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Database name is required'),
   description: Yup.string().defined(),
   engine: Yup.string().required('Database engine is required'),
-  dxInstanceClass: Yup.object({
-    label: Yup.string().required(),
-    value: Yup.string().required('Database instance is required'),
-  })
+  dxInstanceClass: Yup.string()
     .nullable()
     .required('Database instance is required'),
-  engineVersion: Yup.object({
-    label: Yup.string().required(),
-    value: Yup.string().required('Engine version is required'),
-  })
+  engineVersion: Yup.string()
     .nullable()
     .required('Engine version is required'),
 })
+
+const reconcileSelection = (currentValue: string | null, options: { value: string }[]) => {
+  if (currentValue && options.some(option => option.value === currentValue)) {
+    return currentValue
+  }
+
+  return options.length === 1 ? options[0].value : null
+}
 
 export const CreateDatabase = ({ spaceId }: { spaceId?: number }) => {
   const location = useLocation()
@@ -87,13 +91,23 @@ export const CreateDatabase = ({ spaceId }: { spaceId?: number }) => {
 
   const engine = watch('engine')
   const dxInstanceClass = watch('dxInstanceClass')
+  const engineVersion = watch('engineVersion')
+  const versionOptions = useMemo(() => versionsOptions(engine, dxInstanceClass ?? undefined), [engine, dxInstanceClass])
 
   const createDatabaseMutation = useCreateDatabaseMutation({ backPath, spaceId })
 
   useEffect(() => {
-    setValue('dxInstanceClass', null)
-    setValue('engineVersion', null)
-  }, [engine])
+    const nextInstanceClass = reconcileSelection(dxInstanceClass, dbInstanceOptions)
+    const nextEngineVersion = reconcileSelection(engineVersion, versionsOptions(engine, nextInstanceClass ?? undefined))
+
+    if (nextInstanceClass !== dxInstanceClass) {
+      setValue('dxInstanceClass', nextInstanceClass)
+    }
+
+    if (nextEngineVersion !== engineVersion) {
+      setValue('engineVersion', nextEngineVersion)
+    }
+  }, [dbInstanceOptions, dxInstanceClass, engine, engineVersion, setValue])
 
   const onSubmit = () => {
     const vals = getValues()
@@ -102,8 +116,8 @@ export const CreateDatabase = ({ spaceId }: { spaceId?: number }) => {
       name: vals.name,
       description: vals.description,
       engine: vals.engine,
-      dxInstanceClass: vals.dxInstanceClass ? vals.dxInstanceClass.value : '',
-      engineVersion: vals.engineVersion ? vals.engineVersion.value : '',
+      dxInstanceClass: vals.dxInstanceClass ?? '',
+      engineVersion: vals.engineVersion ?? '',
     })
   }
 
@@ -159,20 +173,40 @@ export const CreateDatabase = ({ spaceId }: { spaceId?: number }) => {
           <Controller
             name="dxInstanceClass"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Select
-                id="db_instance_type"
-                options={engine ? dbInstanceOptions : []}
-                placeholder="Choose instance..."
-                onChange={onChange}
-                defaultValue={null}
-                isClearable
-                isSearchable
-                onBlur={onBlur}
-                value={value}
-                isDisabled={isSubmitting}
-              />
-            )}
+            render={({ field }) => {
+              const instanceOptions = engine ? dbInstanceOptions : []
+              const disabled = isSubmitting
+              return (
+                <UiSelect
+                  id="db_instance_type"
+                  name={String(field.name)}
+                  items={instanceOptions}
+                  value={field.value}
+                  onOpenChange={open => {
+                    if (!open) field.onBlur()
+                  }}
+                  onValueChange={v => {
+                    field.onChange(v || null)
+                  }}
+                  disabled={disabled}
+                >
+                  <SelectTrigger
+                    className={cn('w-full max-w-full justify-between')}
+                    ref={field.ref}
+                    aria-invalid={errors.dxInstanceClass ? true : undefined}
+                  >
+                    <SelectValue placeholder="Choose instance…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {instanceOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </UiSelect>
+              )
+            }}
           />
           <ErrorMessage
             errors={errors}
@@ -184,21 +218,41 @@ export const CreateDatabase = ({ spaceId }: { spaceId?: number }) => {
           <Controller
             name="engineVersion"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Select
-                id="db_engine_version"
-                options={versionsOptions(engine, dxInstanceClass?.value ?? '')}
-                placeholder="Choose version..."
-                onChange={onChange}
-                noOptionsMessage={() => 'Select instance first'}
-                defaultValue={null}
-                isClearable
-                isSearchable
-                onBlur={onBlur}
-                value={value}
-                isDisabled={isSubmitting}
-              />
-            )}
+            render={({ field }) => {
+              const disabled = isSubmitting || versionOptions.length === 0
+              return (
+                <UiSelect
+                  id="db_engine_version"
+                  name={String(field.name)}
+                  items={versionOptions}
+                  value={field.value}
+                  onOpenChange={open => {
+                    if (!open) field.onBlur()
+                  }}
+                  onValueChange={v => {
+                    field.onChange(v || null)
+                  }}
+                  disabled={disabled}
+                >
+                  <SelectTrigger
+                    className={cn('w-full max-w-full justify-between')}
+                    ref={field.ref}
+                    aria-invalid={errors.engineVersion ? true : undefined}
+                  >
+                    <SelectValue
+                      placeholder={versionOptions.length === 0 ? 'Select instance first' : 'Choose version…'}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {versionOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </UiSelect>
+              )
+            }}
           />
           <ErrorMessage
             errors={errors}

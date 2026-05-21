@@ -1,13 +1,14 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import React from 'react'
+import type React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Tooltip } from 'react-tooltip'
 import * as Yup from 'yup'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/utils/cn'
 import { Button } from '../../../components/Button'
-import { Select } from '../../../components/Select'
 import { ErrorHint, FieldGroup, Hint, InputError } from '../../../components/form/styles'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { ModalHeaderTop, ModalNext, useModalFloatingPortalHost } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'
 import {
   MemberItem,
@@ -18,7 +19,7 @@ import {
   StyledFields,
   StyledFooter,
 } from './members.styles'
-import { MemberRole, SpaceMembership } from './members.types'
+import type { MemberRole, SpaceMembership } from './members.types'
 import { useUpdateMemberRolesMutation } from './useUpdateMemberRolesMutation'
 
 type BulkChangeSupportedRoles = Exclude<MemberRole, 'lead'>
@@ -53,6 +54,7 @@ interface ChangeBulkMemberRolesFormProps {
 }
 
 const BulkChangeMemberRolesForm: React.FC<ChangeBulkMemberRolesFormProps> = ({ spaceId, members, onClose }) => {
+  const floatingPortalHost = useModalFloatingPortalHost()
   const changeableMembers = members.filter(m => m.active !== 'Account deactivated' && m.role !== 'lead')
   const {
     handleSubmit,
@@ -78,10 +80,10 @@ const BulkChangeMemberRolesForm: React.FC<ChangeBulkMemberRolesFormProps> = ({ s
     ? 'Cannot change roles while there are inactive members in the selection. Please enable all members first.'
     : ''
 
-  const roleOptions = [
-    { value: 'admin' as MemberRole, label: LABEL.admin },
-    { value: 'contributor' as MemberRole, label: LABEL.contributor },
-    { value: 'viewer' as MemberRole, label: LABEL.viewer },
+  const roleOptions: { value: BulkChangeSupportedRoles; label: string }[] = [
+    { value: 'admin', label: LABEL.admin },
+    { value: 'contributor', label: LABEL.contributor },
+    { value: 'viewer', label: LABEL.viewer },
   ]
   const onSubmit = (data: BulkUpdateRolesFormValues) => {
     mutation.mutateAsync(data)
@@ -99,26 +101,56 @@ const BulkChangeMemberRolesForm: React.FC<ChangeBulkMemberRolesFormProps> = ({ s
     <form onSubmit={handleSubmit(onSubmit)}>
       <StyledFields>
         <FieldGroup>
-          <label>Change to role</label>
+          <label htmlFor="select_member_role">Change to role</label>
           <Controller
             name="role"
             control={control}
-            render={({ field }) => (
-              <Select
-                options={roleOptions}
-                {...field}
-                isLoading={mutation.isPending}
-                isDisabled={mutation.isPending || hasInactiveMembers || changeableMembers.length === 0}
-                inputId="select_member_role"
-              />
-            )}
+            render={({ field }) => {
+              const disabled = mutation.isPending || hasInactiveMembers || changeableMembers.length === 0
+              return (
+                <Select
+                  id="select_member_role"
+                  name={String(field.name)}
+                  modal={false}
+                  items={roleOptions}
+                  value={field.value?.value ?? null}
+                  onOpenChange={open => {
+                    if (!open) field.onBlur()
+                  }}
+                  onValueChange={v => {
+                    const chosen = roleOptions.find(o => o.value === v)
+                    field.onChange(chosen ?? null)
+                  }}
+                  disabled={disabled}
+                >
+                  <SelectTrigger
+                    className={cn('w-full min-w-0 justify-between')}
+                    ref={field.ref}
+                    aria-invalid={errors.role ? true : undefined}
+                  >
+                    <SelectValue placeholder="Choose…" />
+                  </SelectTrigger>
+                  <SelectContent side="bottom" align="start" container={floatingPortalHost ?? undefined}>
+                    {roleOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )
+            }}
           />
           <Hint>Select the members role.</Hint>
           <ErrorHint>
-            {hasLeadMembers && <p>Bulk changes apply to all except leads; lead role can only be updated individually.</p>}
+            {hasLeadMembers && (
+              <p>Bulk changes apply to all except leads; lead role can only be updated individually.</p>
+            )}
             {hasInactiveMembers && <p>Enable the inactive member(s) first to change their role.</p>}
             {hasAccountDeactivatedMembers && (
-              <p>Deactivated accounts in precisionFDA cannot be modified. An admin must reactivate the accounts first.</p>
+              <p>
+                Deactivated accounts in precisionFDA cannot be modified. An admin must reactivate the accounts first.
+              </p>
             )}
           </ErrorHint>
           <ErrorMessage errors={errors} name="role" render={({ message }) => <InputError>{message}</InputError>} />
@@ -133,7 +165,10 @@ const BulkChangeMemberRolesForm: React.FC<ChangeBulkMemberRolesFormProps> = ({ s
             </MemberItemHeader>
             <MemberItemsWrapper>
               {members.map((member, index) => (
-                <MemberItem key={index} $isDisabled={member.active === 'Account deactivated' || member.role === 'lead'}>
+                <MemberItem
+                  key={member.user_name}
+                  $isDisabled={member.active === 'Account deactivated' || member.role === 'lead'}
+                >
                   <div>{member.title}</div>
                   <div>{member.user_name}</div>
                   <div>{member.role}</div>
@@ -176,7 +211,9 @@ const BulkChangeMemberRolesForm: React.FC<ChangeBulkMemberRolesFormProps> = ({ s
           <Button
             data-variant="primary"
             type="submit"
-            disabled={!selectedRole?.value || Object.keys(errors).length > 0 || mutation.isPending || hasInactiveMembers}
+            disabled={
+              !selectedRole?.value || Object.keys(errors).length > 0 || mutation.isPending || hasInactiveMembers
+            }
             aria-label="Change member roles"
             data-tooltip-id="change-role-tooltip"
             data-tooltip-content={tooltipMsg}
@@ -190,7 +227,13 @@ const BulkChangeMemberRolesForm: React.FC<ChangeBulkMemberRolesFormProps> = ({ s
   )
 }
 
-export const useBulkChangeMemberRolesModal = ({ spaceId, members }: { spaceId: number; members: SpaceMembership[] }) => {
+export const useBulkChangeMemberRolesModal = ({
+  spaceId,
+  members,
+}: {
+  spaceId: number
+  members: SpaceMembership[]
+}) => {
   const { isShown, setShowModal } = useModal()
   const modalComp = isShown && (
     <ModalNext

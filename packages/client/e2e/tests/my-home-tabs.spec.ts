@@ -12,9 +12,7 @@ import { Page } from 'playwright/test'
 
 // Helper function to search in the name filter input
 async function searchInNameFilter(page: Page, searchText: string) {
-  // The filter input is in the table header row, using the class .filter-input
-  // We target the first one which is the Name column filter
-  const filterInput = page.locator('input.filter-input').first()
+  const filterInput = page.getByTestId('table-filter-name').getByRole('textbox')
   await filterInput.clear()
   await filterInput.fill(searchText)
   // Wait for network idle instead of fixed timeout

@@ -2,7 +2,7 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import * as Yup from 'yup'
 import { getBackendErrorMessage } from '@/api/types'
@@ -10,8 +10,15 @@ import { Button } from '@/components/Button'
 import { FieldGroup, InputError } from '@/components/form/styles'
 import { InputText } from '@/components/InputText'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
-import { Select } from '@/components/Select'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@/components/ui/combobox'
+import { ModalHeaderTop, ModalNext, useModalFloatingPortalHost } from '../../modal/ModalNext'
 import { Footer } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { fetchSpaceMemberships } from '../../spaces/members/members.api'
@@ -35,21 +42,16 @@ const validationSchema = Yup.object().shape({
     }),
 })
 
+type CurrentLeadOption = { label: string; value: number }
+
 interface RecoverLeadFormValues {
-  currentLead: { label: string; value: number }
+  currentLead: CurrentLeadOption
   newLeadDxuser: string
 }
 
 const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: () => void }): React.JSX.Element => {
-  const [leadOptions, setLeadOptions] = useState<{ label: string; value: number }[]>([])
+  const floatingPortalHost = useModalFloatingPortalHost()
   const queryClient = useQueryClient()
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-    reset,
-    register,
-  } = useForm<RecoverLeadFormValues>({ resolver: yupResolver(validationSchema), context: { leadOptions } })
   const { data: spaceMemberships = [], isLoading } = useQuery({
     queryKey: ['space-memberships', space.id],
     queryFn: () => fetchSpaceMemberships(space.id),
@@ -61,15 +63,21 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
     }
     return side
   }
-  useEffect(() => {
+  const leadOptions = useMemo(() => {
     const leadUsers = spaceMemberships.filter((member: SpaceMembershipV2) => member.role === 'LEAD')
-    setLeadOptions(
-      leadUsers.map((member: SpaceMembershipV2) => ({
-        value: member.id,
-        label: `${member.username} (${getMembershipSide(member.side)})`,
-      })),
-    )
-  }, [spaceMemberships])
+    return leadUsers.map((member: SpaceMembershipV2) => ({
+      value: member.id,
+      label: `${member.username} (${getMembershipSide(member.side)})`,
+    }))
+  }, [spaceMemberships, space])
+
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+    register,
+  } = useForm<RecoverLeadFormValues>({ resolver: yupResolver(validationSchema), context: { leadOptions } })
 
   const mutation = useMutation({
     mutationFn: ({
@@ -109,27 +117,58 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
     <form onSubmit={handleSubmit(onSubmit)}>
       <StyledFields>
         <FieldGroup>
-          <label>Space name</label>
-          <InputText value={space.name} disabled />
+          <label htmlFor="recover-space-lead-space-name">Space name</label>
+          <InputText id="recover-space-lead-space-name" value={space.name} disabled />
         </FieldGroup>
         <FieldGroup>
-          <label>Space type</label>
-          <InputText value={space.type} disabled />
+          <label htmlFor="recover-space-lead-space-type">Space type</label>
+          <InputText id="recover-space-lead-space-type" value={space.type} disabled />
         </FieldGroup>
         <FieldGroup>
-          <label>Current Lead user</label>
+          <label htmlFor="select_current_lead">Current Lead user</label>
           <Controller
             name="currentLead"
             control={control}
-            render={({ field }) => (
-              <Select
-                options={leadOptions}
-                {...field}
-                isLoading={isSubmitting}
-                isDisabled={isSubmitting}
-                inputId="select_current_lead"
-              />
-            )}
+            render={({ field }) => {
+              const current = field.value ?? null
+              return (
+                <div data-testid="recover-space-current-lead-combobox">
+                  <Combobox<CurrentLeadOption>
+                    name={String(field.name)}
+                    required
+                    items={leadOptions}
+                    value={current}
+                    onValueChange={next => {
+                      if (next != null) {
+                        field.onChange(next)
+                      }
+                      field.onBlur()
+                    }}
+                    isItemEqualToValue={(a, b) => a.value === b.value}
+                    disabled={isSubmitting}
+                    inputRef={field.ref}
+                  >
+                    <ComboboxInput
+                      id="select_current_lead"
+                      placeholder="Choose…"
+                      className="relative max-w-full"
+                      disabled={isSubmitting}
+                      onBlur={field.onBlur}
+                    />
+                    <ComboboxContent side="bottom" align="start" container={floatingPortalHost ?? undefined}>
+                      <ComboboxEmpty>No leads match.</ComboboxEmpty>
+                      <ComboboxList>
+                        {(item: CurrentLeadOption) => (
+                          <ComboboxItem key={item.value} value={item}>
+                            {item.label}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
+                </div>
+              )
+            }}
           />
           <ErrorMessage
             errors={errors}
@@ -138,8 +177,13 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
           />
         </FieldGroup>
         <FieldGroup>
-          <label>New Lead user</label>
-          <InputText {...register('newLeadDxuser')} placeholder="" disabled={isSubmitting} />
+          <label htmlFor="recover-space-lead-new-user">New Lead user</label>
+          <InputText
+            id="recover-space-lead-new-user"
+            {...register('newLeadDxuser')}
+            placeholder=""
+            disabled={isSubmitting}
+          />
           <ErrorMessage
             errors={errors}
             name="newLeadDxuser"

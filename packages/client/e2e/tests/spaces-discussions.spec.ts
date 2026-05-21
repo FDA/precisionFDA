@@ -176,7 +176,7 @@ test.describe('Spaces - Discussions in Spaces', () => {
     await RunAppForm.prepare(page)
     
     // Set space scope
-    await page.locator('#select_context').click()
+    await page.getByTestId('select-space-scope').click()
     await page.waitForTimeout(1000)
     await page.keyboard.type(spaceName)
     await page.waitForTimeout(2000)

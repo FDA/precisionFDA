@@ -2,14 +2,16 @@ import fs from 'fs'
 import path from 'path'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
-import { inspectorServer } from '@react-dev-inspector/vite-plugin'
+import { devtools } from '@tanstack/devtools-vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const isProduction = mode === 'production'
+  const isTest = mode === 'test'
+  const enableSourceInspector = command === 'serve' && !isTest
   const fontAssetPattern = /\.(woff2?|ttf|otf|eot)$/i
 
   // Check if certs exist for HTTPS (dev server only)
@@ -17,10 +19,9 @@ export default defineConfig(({ mode }) => {
   const certPath = path.resolve(__dirname, '../../cert.pem')
   const hasHttpsCerts = fs.existsSync(keyPath) && fs.existsSync(certPath)
 
-  const devOnlyPlugins = isProduction
+  const devOnlyPlugins = isProduction || isTest
     ? []
     : [
-        inspectorServer(),
         babel({
           plugins: [
             [
@@ -30,7 +31,6 @@ export default defineConfig(({ mode }) => {
                 ssr: false,
               },
             ],
-            '@react-dev-inspector/babel-plugin',
           ],
         }),
       ]
@@ -44,8 +44,13 @@ export default defineConfig(({ mode }) => {
     },
 
     plugins: [
-      react(),
+      devtools({
+        injectSource: {
+          enabled: enableSourceInspector,
+        },
+      }),
       ...devOnlyPlugins,
+      react(),
       viteStaticCopy({
         targets: [
           {
@@ -87,7 +92,7 @@ export default defineConfig(({ mode }) => {
             groups: [
               {
                 name: 'vendor',
-                test: /node_modules[\\/](react|react-dom|react-router|react-dev-inspector)([\\/]|$)/,
+                test: /node_modules[\\/](react|react-dom|react-router)([\\/]|$)/,
               },
             ],
           },

@@ -7,12 +7,12 @@ export const useComputeInstances = (): { computeInstances: ComputeInstance[]; is
   const { user, loading } = useAuthUser(true)
 
   const computeInstances = useMemo(() => {
-    if (!user) return []
+    if (!user?.resources) return []
     return user.resources.filter(isComputeResource).map(r => ({
       value: r,
       label: `${RESOURCE_LABELS[r]}\xa0 \u2014 \xa0$${ComputeResourcePricingMap[r]}\xa0/\xa0hour`,
     }))
-  }, [user])
+  }, [user?.resources])
 
   return { computeInstances, isLoading: loading }
 }

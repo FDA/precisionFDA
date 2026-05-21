@@ -1,5 +1,5 @@
-import React from 'react'
-import { Select } from '../../../components/Select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/utils/cn'
 
 export const StatusSelect = ({
   value,
@@ -12,22 +12,35 @@ export const StatusSelect = ({
   isDisabled: boolean
   onChange: (v: unknown) => void
 }) => {
-  const statusOptions = ['open', 'closed']
-  const options = statusOptions.map(option => ({
+  const options = ['open', 'closed'].map(option => ({
     label: option,
     value: option,
   }))
+
   return (
-    <Select
-      options={options}
-      placeholder="Choose..."
-      onChange={onChange}
-      isClearable
-      isSearchable
-      onBlur={onBlur}
-      value={value}
-      isDisabled={isDisabled}
-      inputId="data-portal_status"
-    />
+    <div data-testid="data-portal-status-select">
+      <Select
+        id="data-portal_status"
+        items={options}
+        value={value?.value ?? null}
+        onValueChange={v => {
+          const chosen = options.find(o => o.value === v)
+          onChange(chosen ?? null)
+          onBlur()
+        }}
+        disabled={isDisabled}
+      >
+        <SelectTrigger className={cn('w-full min-w-0 justify-between')} onBlur={onBlur}>
+          <SelectValue placeholder="Choose…" />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(option => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   )
 }
