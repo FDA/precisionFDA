@@ -128,20 +128,6 @@
     "typescript": "5.9.3",
     "wds": "0.24.2"
   },
-  "pnpm": {
-    "overrides": {
-      "html-minifier": "npm:html-minifier-terser@6.1.0"
-    },
-    "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "@scarf/scarf",
-      "@swc/core",
-      "esbuild",
-      "msgpackr-extract",
-      "protobufjs",
-      "unrs-resolver"
-    ]
-  },
   "jest": {
     "moduleFileExtensions": [
       "js",

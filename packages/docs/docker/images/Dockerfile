@@ -8,7 +8,8 @@ RUN npm install -g pnpm@11.1.1  # Install pnpm globally so it's available in all
 WORKDIR /app
 
 FROM base AS deps
-COPY package.json pnpm-lock.yaml* source.config.ts ./
+ENV CI=true
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml source.config.ts ./
 RUN pnpm install --frozen-lockfile --prefer-offline
 
 FROM base AS builder
@@ -21,6 +22,8 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+# pnpm 11+ verifies deps before running scripts. In earlier versions, verify-deps-before-run was false by default.
+ENV PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
 
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
 
@@ -35,5 +38,4 @@ EXPOSE 4040
 ENV PORT=4040
 ENV HOSTNAME=0.0.0.0
 
-# Start Next.js in production mode
 CMD ["pnpm", "start"]

@@ -1,0 +1,7 @@
+# Lets pnpm purge a stale node_modules without a TTY prompt. See the matching
+# note in packages/server/pnpm-workspace.yaml.
+confirmModulesPurge: false
+
+allowBuilds:
+  esbuild: true
+  msw: true

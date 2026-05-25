@@ -8,13 +8,8 @@ RUN npm i -g pnpm@11.1.1
 
 COPY package.json \
     pnpm-lock.yaml \
+    pnpm-workspace.yaml \
     /precision-fda/
-
-# pnpm 11 requires explicit build approval via pnpm-workspace.yaml when running
-# --frozen-lockfile outside a workspace (Docker build context has no root workspace file).
-# `confirmModulesPurge: false` lets pnpm purge a stale node_modules without a TTY prompt
-RUN printf 'confirmModulesPurge: false\nallowBuilds:\n  esbuild: true\n  msw: true\n' \
-    > /precision-fda/pnpm-workspace.yaml
 
 RUN pnpm i --frozen-lockfile
 
