@@ -13,10 +13,5 @@
   "license": "ISC",
   "devDependencies": {
     "@biomejs/biome": "2.4.15"
-  },
-  "pnpm": {
-    "overrides": {
-      "server>html-minifier": "npm:html-minifier-terser@6.1.0"
-    }
   }
 }
