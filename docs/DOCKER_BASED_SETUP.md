@@ -53,6 +53,8 @@ The Makefile passes `docker/.env` to Docker Compose when that file exists. Put l
 
 Fill in any local `.env` variables that aren't checked into the repo. Never commit secrets — keep them out of compose files and out of `.env` files that are tracked by git.
 
+Run `make check-missing-env-variables` after updating `.env` files.
+
 For a summary of Makefile commands, see [Summary of Makefile commands](./SUMMARY_OF_MAKEFILE_COMMANDS.md).
 
 ### Githooks troubleshooting
