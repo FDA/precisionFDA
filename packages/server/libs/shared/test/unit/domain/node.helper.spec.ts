@@ -139,7 +139,7 @@ describe('NodeHelper', () => {
 
       expect(findOneWhere).to.deep.equal({ id: 42 })
       expect(result).to.deep.equal({
-        origin: { text: 'Job Name', href: '/jobs/job-123' },
+        origin: { text: 'Job Name' },
         parentType: 'Job',
         parentUid: 'job-123',
       })
@@ -195,7 +195,7 @@ describe('NodeHelper', () => {
 
       expect(findOneWhere).to.deep.equal({ id: 55 })
       expect(result).to.deep.equal({
-        origin: { text: 'Comparison Name', href: '/comparisons/55' },
+        origin: { text: 'Comparison Name' },
         parentType: 'Comparison',
         parentUid: '55',
       })

@@ -40,6 +40,7 @@ import type { License as ILicense } from '../../licenses/types'
 import type { ISpace } from '../../spaces/spaces.types'
 import { FileBreadcrumb } from '../FileBreadcrumb'
 import { fetchFile } from '../files.api'
+import { getOriginHref } from '../file.utils'
 import type { IFile } from '../files.types'
 import { normalizePermissions } from '../normalizePermissions'
 import { useFilesSelectActions } from '../useFilesSelectActions'
@@ -128,6 +129,8 @@ export const FileShow = ({
   const userLink = file.addedByDxuser ? `/users/${file.addedByDxuser}` : '#'
   const filePermissions = normalizePermissions(file, user, space)
   const showLicensePending = file.fileLicense?.acceptanceStatus === 'pending'
+  const originHref = getOriginHref(file.originObject)
+  const originText = typeof file.origin === 'object' && file.origin ? file.origin.text : undefined
 
   return (
     <>
@@ -224,12 +227,9 @@ export const FileShow = ({
             <MetadataItem>
               <MetadataKey>Origin</MetadataKey>
               <MetadataVal data-testid="file-origin">
-                {['Job', 'Comparison'].includes(file.originObject?.originType ?? '') &&
-                file.origin &&
-                typeof file.origin === 'object' &&
-                file.origin.href ? (
-                  <Link target="_blank" to={file.origin.href}>
-                    {file.origin.text || file.origin.href}
+                {originHref && originText != null ? (
+                  <Link target="_blank" to={originHref}>
+                    {originText || originHref}
                   </Link>
                 ) : typeof file.origin === 'object' ? (
                   file.origin?.text

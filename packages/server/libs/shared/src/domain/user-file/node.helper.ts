@@ -8,7 +8,6 @@ import { JobRepository } from '@shared/domain/job/job.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -174,9 +173,7 @@ export class NodeHelper {
     return pathEntries
   }
 
-  async resolveOrigin(
-    file: UserFile,
-  ): Promise<{
+  async resolveOrigin(file: UserFile): Promise<{
     origin: { text: string; href?: string } | string | null
     parentType: string | null
     parentUid: string | null
@@ -187,7 +184,20 @@ export class NodeHelper {
       return { origin: 'Uploaded', parentType: 'User', parentUid: null }
     }
 
-    if (parentType === PARENT_TYPE.NODE && !file.parentId) {
+    if (parentType === PARENT_TYPE.NODE) {
+      if (!file.parentId) {
+        return { origin: 'Copied', parentType: 'Node', parentUid: null }
+      }
+
+      const parentNode = await this.nodeRepo.findOne({ id: file.parentId })
+      if (parentNode) {
+        return {
+          origin: { text: parentNode.name },
+          parentType: 'Node',
+          parentUid: parentNode.uid,
+        }
+      }
+
       return { origin: 'Copied', parentType: 'Node', parentUid: null }
     }
 
@@ -195,7 +205,7 @@ export class NodeHelper {
       const job = await this.jobRepo.findOne({ id: file.parentId })
       if (job) {
         return {
-          origin: { text: job.name, href: `/jobs/${job.uid}` },
+          origin: { text: job.name },
           parentType: 'Job',
           parentUid: job.uid,
         }
@@ -206,7 +216,7 @@ export class NodeHelper {
       const comparison = await this.comparisonRepo.findOne({ id: file.parentId })
       if (comparison) {
         return {
-          origin: { text: comparison.name, href: `/comparisons/${comparison.id}` },
+          origin: { text: comparison.name },
           parentType: 'Comparison',
           parentUid: String(comparison.id),
         }
@@ -263,12 +273,11 @@ export class NodeHelper {
    * Sanitizes the names of the nodes.
    * @param nodes
    */
-  sanitizeNodeNames(nodes: (Asset | UserFile)[]): (Asset | UserFile)[] {
-    return nodes.map(node => {
-      const sanitizedNode = { ...node } as Asset | UserFile
-      sanitizedNode.name = sanitize(node.name)
-      return sanitizedNode
-    })
+  sanitizeNodeNames<T extends Node>(nodes: T[]): T[] {
+    return nodes.map(node => ({
+      ...node,
+      name: sanitize(node.name),
+    }))
   }
 
   private renameFile: (name: string, index: number) => string = (name: string, index: number) => {
@@ -286,9 +295,11 @@ export class NodeHelper {
    * Second file is renamed to "name 1", third to "name 2" and so on.
    * @param nodes
    */
-  renameDuplicateFiles(nodes: (Asset | UserFile)[]): (Asset | UserFile)[] {
+  renameDuplicateFiles<T extends Node>(nodes: T[]): T[] {
+    const clonedNodes = nodes.map(node => ({ ...node })) as T[]
+
     // Group files by their parentFolderId
-    const filesByFolder = nodes.reduce<FilesByFolder>((acc, node) => {
+    const filesByFolder = clonedNodes.reduce<FilesByFolder>((acc, node) => {
       if (node.stiType === FILE_STI_TYPE.FOLDER) {
         return acc
       }
@@ -321,6 +332,6 @@ export class NodeHelper {
       })
     })
 
-    return nodes
+    return clonedNodes
   }
 }

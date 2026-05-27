@@ -23,7 +23,7 @@ export type FileType = 'UserFile' | 'Folder' | 'File' | 'Asset'
 export type FileScope = 'public' | 'private' | string
 export type FileUid = `file-${string}-${number}`
 
-export type OriginType = 'User' | 'Job' | 'Comparison' | 'UserFile' | 'Folder'
+export type OriginType = 'User' | 'Job' | 'Comparison' | 'UserFile' | 'Folder' | 'Node'
 
 export interface FileOrigin {
   text?: string

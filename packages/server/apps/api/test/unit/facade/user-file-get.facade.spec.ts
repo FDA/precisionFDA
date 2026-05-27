@@ -69,7 +69,7 @@ describe('UserFileGetFacade', () => {
     nodeHelperGetParentFolderStub.returns({ id: 21 })
     nodeHelperGetFolderPathEntriesStub.withArgs(21).resolves([{ id: 21, name: 'parent-folder' }])
     nodeHelperResolveOriginStub.resolves({
-      origin: { text: 'job-name', href: '/jobs/job-G111-1' },
+      origin: { text: 'job-name' },
       parentType: 'Job',
       parentUid: 'job-G111-1',
     })

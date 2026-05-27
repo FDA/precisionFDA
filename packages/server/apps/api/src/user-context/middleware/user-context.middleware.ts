@@ -23,7 +23,9 @@ export class UserContextMiddleware implements NestMiddleware {
   constructor(private readonly em: SqlEntityManager) {}
 
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const clientIp = req.headers[config.api.nginxIpHeader]
+    const headerClientIp = req.headers[config.api.nginxIpHeader]
+    const normalizedHeaderClientIp = Array.isArray(headerClientIp) ? headerClientIp[0] : headerClientIp
+    const clientIp = normalizedHeaderClientIp ?? req.ip ?? req.socket?.remoteAddress ?? 'unknown'
     // req.url is / by default
     const standardizedUrl = req.url?.length > 0 ? req.url.substring(1) : ''
     this.logger.log(
