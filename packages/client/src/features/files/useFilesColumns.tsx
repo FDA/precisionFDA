@@ -18,6 +18,7 @@ import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
 import { IFile } from './files.types'
 import { CopyText } from '../../components/CopyText/CopyText'
 import styles from './FileList.module.css'
+import { getOriginHref } from './file.utils'
 
 const StyledLocked = styled.div<{ $isLocked: boolean }>`
   flex: 1 0 auto;
@@ -188,22 +189,23 @@ export const useFilesColumns = ({
       cell: ({ row }) => {
         const value = row.original.origin
         const originType = row.original.originObject?.originType
+        const originHref = getOriginHref(row.original.originObject)
         return (
           <>
-            {typeof value === 'object' && value !== null && originType === 'Job' && (
-              <StyledLinkCell to={`${value.href}` || '#'}>
+            {typeof value === 'object' && value !== null && originType === 'Job' && originHref && (
+              <StyledLinkCell to={originHref}>
                 <CogsIcon height={14} />
                 {value.text}
               </StyledLinkCell>
             )}
-            {typeof value === 'object' && value !== null && originType === 'Comparison' && (
-              <StyledLinkCell to={`/home${value.href}` }>
+            {typeof value === 'object' && value !== null && originType === 'Comparison' && originHref && (
+              <StyledLinkCell to={originHref}>
                 <AreaChartIcon height={16} />
                 {value.text}
               </StyledLinkCell>
             )}
-            {typeof value === 'object' && value !== null && originType === 'UserFile' && (
-              <StyledLinkCell to={`${value.href}`}>
+            {typeof value === 'object' && value !== null && ['UserFile', 'Node'].includes(originType ?? '') && originHref && (
+              <StyledLinkCell to={originHref}>
                 <FileIcon height={16} />
                 {value.text}
               </StyledLinkCell>

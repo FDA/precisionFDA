@@ -45,8 +45,8 @@ export function normalizePermissions(
     canDelete:
       !item.locked && !isResource && !isProtectedAndNotLead && (isOwner || isAdmin || (inSpace && hasEditRole)),
     canMove: !item.locked && isClosed && !isProtectedAndNotLead && (isOwner || isAdmin || (inSpace && hasEditRole)),
-    canDownload: !isFolder && isClosed && !item.locked && canDownloadWithLicense && !isProtectedAndNotLead,
-    canCopy: !isFolder && isClosed && (!item.locked || isSpaceLead),
+    canDownload: (isFolder || isClosed) && !item.locked && canDownloadWithLicense && !isProtectedAndNotLead,
+    canCopy: isClosed && (!item.locked || isSpaceLead),
     canEdit: (isOwner || isAdmin) && !item.locked && !isResource,
     canFeature: isAdmin,
     canPublish: isAdmin && item.scope === 'private' && (isFolder || isClosed),

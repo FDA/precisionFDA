@@ -6,13 +6,14 @@ import { NotificationService } from '@shared/domain/notification/services/notifi
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { BulkDownloadFiles, FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { PermissionError } from '@shared/errors'
+import { BulkDownloadFiles, FILE_STATE_DX, FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
+import { InvalidRequestError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { TimeUtils } from '@shared/utils/time.utils'
@@ -41,7 +42,8 @@ export class UserFileBulkDownloadFacade {
   async composeFilesForBulkDownload(fileIds: number[], folderId?: number): Promise<BulkDownloadFiles> {
     this.logger.log(`composing files for bulk download fileIds ${fileIds}, folderId ${folderId}`)
     const loadedUser = await this.userCtx.loadEntity()
-    let nodes = await this.getAccessibleNodes(fileIds)
+    const nodes = await this.getAccessibleNodes(fileIds)
+    const scope = nodes[0]?.scope ?? STATIC_SCOPE.PRIVATE
 
     const warnings = this.nodeHelper.getWarningsForUnclosedFiles(nodes)
     if (warnings) {
@@ -52,21 +54,21 @@ export class UserFileBulkDownloadFacade {
         userId: this.userCtx.id,
       })
     }
-    nodes = nodes.filter(node => node.state === 'closed')
-    nodes = this.nodeHelper.sanitizeNodeNames(nodes)
-    nodes = this.nodeHelper.renameDuplicateFiles(nodes)
+    let downloadableNodes = nodes.filter(
+      (node): node is UserFile => node.stiType === FILE_STI_TYPE.USERFILE && node.state === FILE_STATE_DX.CLOSED,
+    )
+    downloadableNodes = this.nodeHelper.sanitizeNodeNames<UserFile>(downloadableNodes)
+    downloadableNodes = this.nodeHelper.renameDuplicateFiles<UserFile>(downloadableNodes)
     const enclosingFolderPath = await this.nodeHelper.getFolderPath(folderId)
 
     return {
       files: await this.em.transactional(async tm => {
-        const filePromises = nodes
-          .filter(node => node.stiType === FILE_STI_TYPE.USERFILE)
-          .map(async node => {
-            return await this.processFile(tm, node, loadedUser, enclosingFolderPath)
-          })
+        const filePromises = downloadableNodes.map(async node => {
+          return await this.processFile(tm, node, loadedUser, enclosingFolderPath)
+        })
         return Promise.all(filePromises)
       }),
-      scope: nodes[0].scope,
+      scope,
     }
   }
 
@@ -99,13 +101,31 @@ export class UserFileBulkDownloadFacade {
     }
   }
 
-  private async getAccessibleNodes(fileIDs: number[]): Promise<(Asset | UserFile)[]> {
-    const nodes = (await this.nodeService.loadNodes(fileIDs, {})) as (Asset | UserFile)[]
-    const idsToCheck = nodes.filter(node => node.stiType === FILE_STI_TYPE.USERFILE).map(node => node.id)
-    const accessibleNodes = await this.nodeRepo.findAccessible({ id: idsToCheck })
-    if (idsToCheck.length != accessibleNodes.length) {
+  private async getAccessibleNodes(fileIDs: number[]): Promise<Node[]> {
+    const nodes = await this.nodeService.loadNodes(fileIDs, {})
+
+    const nodeIds = nodes.map(node => node.id)
+    await this.validateAccessibleNodeIds(nodeIds)
+    this.validateSingleScope(nodes)
+
+    return nodes
+  }
+
+  private validateSingleScope(nodes: Node[]): void {
+    const scopes = new Set(nodes.map(node => node.scope ?? STATIC_SCOPE.PRIVATE))
+    if (scopes.size > 1) {
+      throw new InvalidRequestError('Bulk download requires all selected items to be in the same scope')
+    }
+  }
+
+  private async validateAccessibleNodeIds(nodeIds: number[]): Promise<void> {
+    if (nodeIds.length === 0) {
+      return
+    }
+
+    const accessibleNodes = await this.nodeRepo.findAccessible({ id: nodeIds })
+    if (nodeIds.length !== accessibleNodes.length) {
       throw new PermissionError('You do not have permission to download all of these files')
     }
-    return nodes
   }
 }

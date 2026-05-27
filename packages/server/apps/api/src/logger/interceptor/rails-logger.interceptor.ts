@@ -25,7 +25,9 @@ export class RailsLoggerInterceptor implements NestInterceptor {
     const startDate = new Date()
     const method = request.method
     const url = request.url
-    const clientIp = request.headers[config.api.nginxIpHeader]
+    const headerClientIp = request.headers[config.api.nginxIpHeader]
+    const normalizedHeaderClientIp = Array.isArray(headerClientIp) ? headerClientIp[0] : headerClientIp
+    const clientIp = normalizedHeaderClientIp ?? request.ip ?? request.socket?.remoteAddress ?? 'unknown'
     const pid = process.pid
     const atTime = TimeUtils.formatAtTime(startDate)
 

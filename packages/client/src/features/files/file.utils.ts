@@ -1,5 +1,8 @@
 import * as React from 'react'
 import { DataNode } from 'rc-tree/lib/interface'
+import type { OriginObject } from './files.types'
+
+const assertNever = (_value: never): string | null => null
 
 export function findById(tree: DataNode[], nodeId: React.Key): DataNode | null {
   for (let i = 0; i < tree.length; i++) {
@@ -63,3 +66,25 @@ export const isOpenable = (fileName: string): boolean => {
   const ext = fileName.split('.').pop()?.toLowerCase()
   return ext ? openableExtensions.has(ext) : false
 }
+
+export const getOriginHref = (originObject?: OriginObject): string | null => {
+  if (originObject?.originType == null || !originObject.originUid) {
+    return null
+  }
+
+  switch (originObject.originType) {
+    case 'Job':
+      return `/jobs/${originObject.originUid}`
+    case 'Comparison':
+      return `/home/comparisons/${originObject.originUid}`
+    case 'UserFile':
+    case 'Node':
+      return `/home/files/${originObject.originUid}`
+    case 'User':
+    case 'Folder':
+      return null
+    default:
+      return assertNever(originObject.originType)
+  }
+}
+
