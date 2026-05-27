@@ -6,6 +6,12 @@ FROM tomcat:10.1-jdk17 AS builder
 ARG GSRS3_MAIN_BRANCH=GSRSv3.1.2PUB
 ARG FRONTEND_TAG=pfda
 
+# Optional: set these to build dependencies from source instead of using Maven SNAPSHOTs.
+# e.g. for 3.2.0 prerelease: --build-arg GSRS_STARTER_REF=master --build-arg GSRS_SUBSTANCES_REF=master
+# When left empty (default), the build relies on SNAPSHOT artifacts in Maven Central / Sonatype.
+ARG GSRS_STARTER_REF=""
+ARG GSRS_SUBSTANCES_REF=""
+
 # Install build dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -22,9 +28,40 @@ RUN apt-get update && \
 
 WORKDIR /build
 
-# Clone source
+# Clone the main deployment repo
 RUN git clone --depth=1 --branch ${GSRS3_MAIN_BRANCH} \
     https://github.com/ncats/gsrs3-main-deployment.git source-repo
+
+# ============================================================
+# Optionally build dependency repos from source.
+# When GSRS_STARTER_REF / GSRS_SUBSTANCES_REF are set, the repos
+# are cloned and `mvn install`-ed so that SNAPSHOT artifacts are
+# available in the local Maven cache. When empty, Maven resolves
+# them from remote repositories as before.
+# ============================================================
+
+# ---------- Build gsrs-spring-starter (core library) ----------
+RUN if [ -n "${GSRS_STARTER_REF}" ]; then \
+      echo ">>> Building gsrs-spring-starter from source (${GSRS_STARTER_REF})"; \
+      git clone --depth=1 --branch ${GSRS_STARTER_REF} \
+        https://github.com/ncats/gsrs-spring-starter.git /build/gsrs-spring-starter && \
+      cd /build/gsrs-spring-starter && \
+      mvn install -DskipTests -q; \
+    else \
+      echo ">>> Skipping gsrs-spring-starter source build (using Maven SNAPSHOTs)"; \
+    fi
+
+# ---------- Build gsrs-spring-module-substances ----------
+RUN if [ -n "${GSRS_SUBSTANCES_REF}" ]; then \
+      echo ">>> Building gsrs-spring-module-substances from source (${GSRS_SUBSTANCES_REF})"; \
+      git clone --depth=1 --branch ${GSRS_SUBSTANCES_REF} \
+        https://github.com/ncats/gsrs-spring-module-substances.git /build/gsrs-spring-module-substances && \
+      cd /build/gsrs-spring-module-substances && \
+      chmod +x installExtraJars.sh && ./installExtraJars.sh && \
+      mvn install -DskipTests -q; \
+    else \
+      echo ">>> Skipping gsrs-spring-module-substances source build (using Maven SNAPSHOTs)"; \
+    fi
 
 # ---------- Frontend ----------
 WORKDIR /build/source-repo/frontend
