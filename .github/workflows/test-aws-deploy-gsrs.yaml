@@ -15,6 +15,14 @@ on:
         description: "Tag/Branch for ncats/GSRSFrontend"
         required: true
         default: "pfda"
+      GSRS_STARTER_REF:
+        description: "Branch/tag for ncats/gsrs-spring-starter (if empty -> snapshot build mode)"
+        required: false
+        default: ""
+      GSRS_SUBSTANCES_REF:
+        description: "Branch/tag for ncats/gsrs-spring-module-substances (if empty -> snapshot build mode)"
+        required: false
+        default: ""
       DATABASE_NAME:
         description: GSRS Database and Index Name
         type: string
@@ -65,6 +73,8 @@ jobs:
           context: ${{ matrix.context }}
           gsrs-main-branch: ${{ inputs.GSRS_MAIN_BRANCH }}
           frontend-tag: ${{ inputs.FRONTEND_TAG }}
+          gsrs-starter-ref: ${{ inputs.GSRS_STARTER_REF }}
+          gsrs-substances-ref: ${{ inputs.GSRS_SUBSTANCES_REF }}
           force-rebuild: ${{ inputs.FORCE_REBUILD }}
 
       - name: Set matrix job output
