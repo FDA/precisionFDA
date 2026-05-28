@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { Footer } from '../../modal/styles'
+import { Footer } from '../../modal/modal.styles'
 
 export const StyledFields = styled.div`
   display: flex;

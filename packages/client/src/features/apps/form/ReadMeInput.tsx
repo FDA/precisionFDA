@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Markdown } from '../../../components/Markdown'
-import { FormFields, Help, StyledMarkdownAppShow } from './styles'
+import { FormFields, Help, StyledMarkdownAppShow } from './apps-form.styles'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
 

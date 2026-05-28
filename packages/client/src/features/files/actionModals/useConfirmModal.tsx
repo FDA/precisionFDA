@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { useModal } from '../../modal/useModal'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer } from '../../modal/styles'
+import { ButtonRow, Footer } from '../../modal/modal.styles'
 import { Button } from '../../../components/Button'
 
 const StyledMessage = styled.div`

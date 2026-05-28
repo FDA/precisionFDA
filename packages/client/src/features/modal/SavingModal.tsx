@@ -1,6 +1,6 @@
 import React from 'react'
 import { ModalHeaderTop, ModalNext } from './ModalNext'
-import { Content } from './styles'
+import { Content } from './modal.styles'
 
 // TODO how about a different name for this? like Processing modal, because it doesn't have to be just saving
 export const SavingModal = ({

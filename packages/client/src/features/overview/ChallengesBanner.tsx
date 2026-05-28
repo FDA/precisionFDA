@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import challengesBannerLeft from '../../assets/ChallengesBannerBackground-Left.png'
 import challengesBannerRight from '../../assets/ChallengesBannerBackground-Right.png'
 import { colors } from '../../styles/theme'
-import { ViewAllButton } from './styles'
+import { ViewAllButton } from './overview.styles'
 
 const StyledChallengesBanner = styled.div`
   display: flex;

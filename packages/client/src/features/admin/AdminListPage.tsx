@@ -4,7 +4,7 @@ import { HoverDNAnexusLogo } from '@/components/icons/DNAnexusLogo'
 import { hidePagination, Pagination } from '@/components/Pagination'
 import { Button } from '@/components/ui/button'
 import type { MetaV2 } from '@/features/home/types'
-import { AdminContentFooter, AdminStyledPageTable, Title, Topbox } from './styles'
+import { AdminContentFooter, AdminStyledPageTable, Title, Topbox } from './admin.styles'
 import { AdminTablePlaceholderLoader, getAdminTableLoadingState } from './tableLoading'
 
 type ListShape = { data: unknown[]; meta: MetaV2 }

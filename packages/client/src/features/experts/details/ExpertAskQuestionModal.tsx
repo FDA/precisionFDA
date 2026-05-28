@@ -6,7 +6,7 @@ import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
 import { theme } from '../../../styles/theme'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer as ModalFooter } from '../../modal/styles'
+import { ButtonRow, Footer as ModalFooter } from '../../modal/modal.styles'
 
 const Asking = styled.div`
   display: flex;

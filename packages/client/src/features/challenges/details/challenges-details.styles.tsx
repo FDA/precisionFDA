@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 import styled, { css } from 'styled-components'
-import { PageContainer, pagePaddingLR } from '../../../components/Page/styles'
+import { PageContainer, pagePaddingLR } from '../../../components/Page/page.styles'
 import { breakPoints, colors, theme } from '../../../styles/theme'
 import { TimeStatus } from '../types'
 import { Button } from '../../../components/Button'

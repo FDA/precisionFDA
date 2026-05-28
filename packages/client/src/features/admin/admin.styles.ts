@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { BreadcrumbDivider, StyledBreadcrumbs } from '@/components/Breadcrumb'
 import { Svg } from '@/components/icons/Svg'
 import { ContentFooter } from '@/components/Page/ContentFooter'
-import { StyledPageTable } from '@/components/Table/components/styles'
+import { StyledPageTable } from '@/components/Table/components/table.styles'
 
 export const Title = styled.div`
   display: flex;

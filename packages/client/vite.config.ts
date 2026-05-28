@@ -71,6 +71,7 @@ export default defineConfig(({ command, mode }) => {
     },
 
     build: {
+      target: 'es2022',
       assetsInlineLimit: filePath => (fontAssetPattern.test(filePath) ? false : undefined),
       outDir: env.VITE_OUT_DIR || (isProduction ? '../rails/public/packs' : 'dist'),
       emptyOutDir: true,
@@ -83,16 +84,129 @@ export default defineConfig(({ command, mode }) => {
           entryFileNames: 'bundle-[hash].js',
           chunkFileNames: '[name]-[hash].js',
           assetFileNames: assetInfo => {
-            if (assetInfo.name?.endsWith('.css')) {
-              return 'bundle-[hash].css'
+            // names is always a single-element array here
+            if (assetInfo.names[0]?.endsWith('.css')) {
+              return '[name]-[hash][extname]'
             }
             return '[name][extname]'
           },
           codeSplitting: {
+            minSize: 10_000,
             groups: [
               {
-                name: 'vendor',
+                name: 'vendor-react',
                 test: /node_modules[\\/](react|react-dom|react-router)([\\/]|$)/,
+                priority: 50,
+              },
+              {
+                name: 'vendor-tanstack',
+                test: /node_modules[\\/]@tanstack[\\/]/,
+                priority: 40,
+              },
+              {
+                name: 'vendor-forms',
+                test: /node_modules[\\/](react-hook-form|yup|@hookform)([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-styled',
+                test: /node_modules[\\/]styled-components([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-axios',
+                test: /node_modules[\\/]axios([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-select',
+                test: /node_modules[\\/]react-select([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-charts',
+                test: /node_modules[\\/]recharts([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-dnd',
+                test: /node_modules[\\/]@dnd-kit[\\/]/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-fp',
+                test: /node_modules[\\/](lodash|ramda|effect|immer|use-immer)([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-date',
+                test: /node_modules[\\/](date-fns|@date-fns)([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-icons',
+                test: /node_modules[\\/]lucide-react([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-ui',
+                test: /node_modules[\\/](@base-ui|clsx|tailwind-merge|class-variance-authority|dompurify|react-toastify|react-tooltip|react-modal|react-transition-group)([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-prettier',
+                test: /node_modules[\\/]prettier([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-lexical',
+                test: /node_modules[\\/](@lexical|lexical)([\\/]|$)/,
+                priority: 30,
+              },
+              {
+                name: 'vendor-markdown',
+                test: /node_modules[\\/](react-markdown|rehype-.*|remark-.*|unified|hast-.*|mdast-.*|micromark.*|vfile|unist-.*)([\\/]|$)/,
+                priority: 30,
+              },
+
+              // ── App source groups ────────────────────────────────
+              {
+                name: 'app-icons',
+                test: /src[\\/]components[\\/]icons[\\/]/,
+                priority: 25,
+              },
+              // Shared components (excluding icons and Markdown, handled separately)
+              {
+                name: 'app-components',
+                test: /src[\\/]components[\\/](?!icons[\\/]|Markdown[\\/])/,
+                priority: 22,
+              },
+              // Shared utils, hooks, services, constants
+              {
+                name: 'app-utilities',
+                test: /src[\\/](utils|hooks|services|constants)[\\/]/,
+                priority: 20,
+              },
+              // Feature API files — three patterns, all excluding admin (which stays in app-admin):
+              //   1. dot-prefixed: *.api.ts / *.types.ts  (e.g. apps.api.ts, spaces.types.ts)
+              //   2. plain api.ts:  features/*/api.ts     (e.g. challenges/api.ts)
+              //   3. query hooks:   use*Query.ts           (e.g. useFetchAppQuery.ts)
+              {
+                name: 'app-api-layer',
+                test: /src[\\/]features[\\/](?!admin[\\/]).+\.(api|types)\.(ts|tsx)$|src[\\/]features[\\/](?!admin[\\/]).*[\\/]api\.(ts|tsx)$|src[\\/]features[\\/](?!admin[\\/]).+use\w+Query\.(ts|tsx)$/,
+                priority: 18,
+              },
+              // Admin-only features — never loaded by regular users
+              {
+                name: 'app-admin',
+                test: /src[\\/]features[\\/]admin[\\/]/,
+                priority: 15,
+              },
+              // Lexical rich text editor — large feature, lazy-loaded
+              {
+                name: 'app-lexi',
+                test: /src[\\/]features[\\/]lexi[\\/]/,
+                priority: 15,
               },
             ],
           },
@@ -109,128 +223,25 @@ export default defineConfig(({ command, mode }) => {
           cert: fs.readFileSync(certPath),
         }
         : undefined,
-      proxy: {
-        '/docs': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/logout': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/return_from_login': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/login': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/api': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/pdfs': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/assets': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/discussions': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/apps': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/workflows/new': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/notes': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/comparisons': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/licenses': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/users': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/profile': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/guidelines': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '^/workflows/.+/edit$': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '^/experts/.+/edit$': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/experts/new': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/admin/comparator_settings': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/admin/org_action_requests': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/admin/participants': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/admin/admin_memberships': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-        '/admin/activity_reports': {
-          target: 'https://localhost:3000',
-          secure: false,
-          changeOrigin: true,
-        },
-      },
+      proxy: (() => {
+        const toRails = { target: 'https://localhost:3000', secure: false, changeOrigin: true }
+        const routes = [
+          // Auth / session
+          '/login', '/logout', '/return_from_login',
+          // Rails-rendered pages still served by Rails
+          '/docs', '/pdfs', '/assets', '/guidelines', '/profile',
+          '/users', '/licenses', '/notes', '/comparisons',
+          '/discussions', '/apps', '/workflows/new', '/experts/new',
+          // Admin pages (Rails-rendered)
+          '/admin/comparator_settings', '/admin/org_action_requests',
+          '/admin/participants', '/admin/admin_memberships', '/admin/activity_reports',
+          // API
+          '/api',
+          // Regex routes (Rails edit forms)
+          '^/workflows/.+/edit$', '^/experts/.+/edit$',
+        ]
+        return Object.fromEntries(routes.map(r => [r, toRails]))
+      })(),
     },
 
     publicDir: 'public',

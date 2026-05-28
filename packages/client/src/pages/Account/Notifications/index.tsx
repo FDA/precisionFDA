@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, type Path, type PathValue, useForm } from 'react-hook-form'
 import { Button } from '@/components/Button'
 import { Checkbox } from '@/components/CheckboxNext'
-import { FieldLabelRow } from '@/components/form/styles'
+import { FieldLabelRow } from '@/components/form/form.styles'
 import { Loader } from '@/components/Loader'
 import { toastSuccess } from '@/components/NotificationCenter/ToastHelper'
-import { PageActions, PageHeader, PageTitle } from '@/components/Page/styles'
+import { PageActions, PageHeader, PageTitle } from '@/components/Page/page.styles'
 import { usePageMeta } from '@/hooks/usePageMeta'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
 import {
@@ -16,7 +16,7 @@ import {
   SectionTitleSmall,
   StyledNotifications,
   StyledPageContainer,
-} from './styles'
+} from './notifications.styles'
 import type { AllNotification, NotificationPreferences } from './types'
 
 type NotificationLabelType = Record<string, string>

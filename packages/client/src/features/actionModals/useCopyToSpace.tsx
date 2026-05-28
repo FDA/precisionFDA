@@ -12,10 +12,10 @@ import { displayPayloadMessage, type Payload } from '@/utils/api'
 import { useConfirmModal } from '../files/actionModals/useConfirmModal'
 import type { APIResource, ApiErrorResponse, ApiResponse } from '../home/types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { SpaceSelectionList } from '../spaces/SpaceSelectionList'
-import { ModalSearchBar } from './styles'
+import { ModalSearchBar } from './action-modals.styles'
 
 export interface CopyToSpaceProperties {
   createAppRevision?: boolean

@@ -1,7 +1,7 @@
 import React from 'react'
 import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
 import Menu from '../../../components/Menu/Menu'
-import { StyledEditButton } from '../../discussions/styles'
+import { StyledEditButton } from '../../discussions/discussions.styles'
 import { SpaceMembership } from './members.types'
 import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
 

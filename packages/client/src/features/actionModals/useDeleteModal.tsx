@@ -6,7 +6,7 @@ import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastH
 import { ResourceTable } from '@/components/ResourceTable'
 import { itemsCountString } from '@/utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 
 export interface DeleteResponse {

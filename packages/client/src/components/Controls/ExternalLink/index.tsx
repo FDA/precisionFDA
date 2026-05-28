@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState } from 'react'
 import styled from 'styled-components'
 import { ModalHeaderTop, ModalNext } from '../../../features/modal/ModalNext'
-import { ButtonRow, Footer } from '../../../features/modal/styles'
+import { ButtonRow, Footer } from '../../../features/modal/modal.styles'
 import { Button } from '../../Button'
 
 const StyledLink = styled.a`

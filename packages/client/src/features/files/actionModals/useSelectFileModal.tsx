@@ -38,13 +38,13 @@ import {
   SyledFilterWrapper,
   SyledUid,
   TabContent,
-} from '../../actionModals/styles'
+} from '../../actionModals/action-modals.styles'
 import { fetchFilteredFiles } from '../../apps/apps.api'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { IAccessibleFile } from '../../databases/databases.api'
 import { DialogType } from '../../home/types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer } from '../../modal/styles'
+import { ButtonRow, Footer } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
 import { noAccessText } from '../file.utils'
 import { useFetchFilesByUIDQuery } from '../query/useFetchFilesByUIDQuery'

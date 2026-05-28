@@ -10,7 +10,7 @@ import { Tabs } from '../../../components/Tabs/Tabs'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
 import {
   ButtonBadge,
@@ -22,7 +22,7 @@ import {
   StyledRow,
   StyledSubtitle,
   Tab,
-} from '../../actionModals/styles'
+} from '../../actionModals/action-modals.styles'
 import { DialogType, ServerScope } from '../../home/types'
 import { fetchFilteredApps } from '../apps.api'
 import { IApp } from '../apps.types'

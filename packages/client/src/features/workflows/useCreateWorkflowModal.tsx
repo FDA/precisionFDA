@@ -5,7 +5,7 @@ import { Button } from '@/components/Button'
 import { FieldGroup } from '@/components/form/FieldGroup'
 import { InputText } from '@/components/InputText'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer } from '../modal/styles'
+import { ButtonRow, Footer } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { createWorkflowRequest } from './workflows.api'
 

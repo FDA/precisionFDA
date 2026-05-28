@@ -1,19 +1,19 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { Link, Route, Routes } from 'react-router'
 import { Button } from '../../../components/Button'
-import { ListItem, NoContent } from '../../../components/Public/styles'
+import { ListItem, NoContent } from '../../../components/Public/public-layout.styles'
 import { DataPortalCard } from '../DataPortalCard'
 import { DataPortal } from '../types'
 import { AlertText } from './DataPortalNotFound'
 
 import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
-import { Filler } from '../../../components/Page/styles'
-import { StyledInnerHTML } from '../../lexi/styles'
+import { Filler } from '../../../components/Page/page.styles'
+import { StyledInnerHTML } from '../../lexi/lexi.styles'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import { IToCItem, ToC } from '../../markdown/TocNext'
 import { useDataPortalResourceModal } from '../../resources/useDataPortalResourceModal'
 import DataPortalContentEditPage from '../form/DataPortalContentEditPage'
-import { BodyContent, DataPortalPageMainBody, DPSettings, PageWrap, RightSideItem, RightSideScroll, Row } from './styles'
+import { BodyContent, DataPortalPageMainBody, DPSettings, PageWrap, RightSideItem, RightSideScroll, Row } from './data-portals-details.styles'
 
 export const DataPortalDetails = ({
   portal,

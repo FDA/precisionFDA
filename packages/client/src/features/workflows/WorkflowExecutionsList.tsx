@@ -10,7 +10,7 @@ import type {
 import { useEffect, useState } from 'react'
 import { ContentFooter } from '@/components/Page/ContentFooter'
 import { hidePagination, Pagination } from '@/components/Pagination'
-import { StyledPageTable } from '@/components/Table/components/styles'
+import { StyledPageTable } from '@/components/Table/components/table.styles'
 import { useColumnWidthLocalStorage } from '@/hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '@/hooks/useHiddenColumnLocalStorage'
 import { useLastWSNotification } from '@/hooks/useLastWSNotification'

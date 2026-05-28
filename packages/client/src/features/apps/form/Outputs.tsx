@@ -21,7 +21,7 @@ import {
   StyledInputOutputBox,
   StyledRemove,
   TableStyles,
-} from './styles'
+} from './apps-form.styles'
 import { CreateAppForm, IOSpec } from '../apps.types'
 import { removeArrayStringFromClassType, setClassVal } from './common'
 

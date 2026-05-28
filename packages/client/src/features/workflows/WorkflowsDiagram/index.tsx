@@ -4,7 +4,7 @@ import Xarrow from 'react-xarrows'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { Loader } from '../../../components/Loader'
 import type { InputOutput, Stage as WorkflowStage } from '../workflows.types'
-import { StyledWorkflowDiagram } from './styles'
+import { StyledWorkflowDiagram } from './workflows-diagram.styles'
 import { useWorkflowDiagramQuery } from './useWorkflowDiagramQuery'
 
 const NoData = () => {

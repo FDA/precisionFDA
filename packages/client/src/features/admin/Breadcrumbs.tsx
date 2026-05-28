@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
-import { AdminSectionBreadcrumbDivider, AdminSectionBreadcrumbs } from './styles'
+import { AdminSectionBreadcrumbDivider, AdminSectionBreadcrumbs } from './admin.styles'
 
 export type BreadcrumbItem = {
   path: string

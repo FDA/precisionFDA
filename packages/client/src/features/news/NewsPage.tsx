@@ -7,7 +7,7 @@ import ExternalLink from '../../components/Controls/ExternalLink'
 import { InlineError } from '../../components/Error'
 import { Loader } from '../../components/Loader'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
-import { PageContainerMargin } from '../../components/Page/styles'
+import { PageContainerMargin } from '../../components/Page/page.styles'
 import { hidePagination, Pagination } from '../../components/Pagination'
 import {
   ButtonRow,
@@ -23,13 +23,13 @@ import {
   RightSideItem,
   SectionTitle,
   Title,
-} from '../../components/Public/styles'
+} from '../../components/Public/public-layout.styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { usePaginationParamsV2 } from '../../hooks/usePaginationState'
 import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { newsYearsListRequest } from './api'
-import { ItemBody, ItemDate, NewsListItem } from './styles'
+import { ItemBody, ItemDate, NewsListItem } from './news.styles'
 import { useNewsListQuery } from './useNewsListQuery'
 
 const NewsPage = () => {

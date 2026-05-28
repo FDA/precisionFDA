@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { PageMainBody, SectionTitle } from '../../components/Public/styles'
+import { PageMainBody, SectionTitle } from '../../components/Public/public-layout.styles'
 
 export const InfoRow = styled.div`
   display: flex;

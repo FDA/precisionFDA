@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
 import { ISpace } from '../spaces.types'
-import { Tab, Tabs } from './styles'
+import { Tab, Tabs } from './spaces-show.styles'
 import { ResourceTypeUrlNames } from '../../home/types'
 
 const privateTextShort = 'Only you can view and edit resources.'

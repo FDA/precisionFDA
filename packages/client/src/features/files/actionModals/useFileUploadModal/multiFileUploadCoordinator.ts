@@ -9,7 +9,7 @@
 import { Micro } from 'effect'
 import type { HomeScope } from '@/features/home/types'
 import { MAX_UPLOAD_WORKER_CONCURRENCY, type PauseReason } from './constants'
-import { createFileUpload, FileUploadController, type FileUploadConfig, type UploadState } from './fileUpload'
+import { createFileUpload, type FileUploadConfig, type FileUploadController, type UploadState } from './fileUpload'
 import { extractDirectory, RemoteFolderManager, RemoteRootFolderExistsError } from './remoteFolderManager'
 
 export interface UploadFileDescriptor {
@@ -48,7 +48,6 @@ export class MultiFileUploadCoordinator {
   private disposed = false
   private readonly maxConcurrency: number
   private readonly isSingleFileUpload: boolean
-  private uploadEffect: Micro.Micro<void, unknown, never> | null = null
   private uploadAbortController: AbortController | null = null
 
   constructor(private readonly config: MultiFileUploadConfig) {
@@ -130,8 +129,6 @@ export class MultiFileUploadCoordinator {
       )
     })
 
-    this.uploadEffect = uploadProgram
-
     let caughtError: unknown = null
 
     try {
@@ -140,7 +137,6 @@ export class MultiFileUploadCoordinator {
       caughtError = error
       console.error('Coordinator encountered an error:', error)
     } finally {
-      this.uploadEffect = null
       this.uploadAbortController = null
     }
 

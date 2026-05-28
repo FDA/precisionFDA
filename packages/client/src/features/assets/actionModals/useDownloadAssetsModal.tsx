@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { DownloadIcon } from '../../../components/icons/DownloadIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
-import { VerticalCenter } from '../../../components/Page/styles'
+import { VerticalCenter } from '../../../components/Page/page.styles'
 import {
   ResourceTable,
   StyledAction,
@@ -11,7 +11,7 @@ import {
 } from '../../../components/ResourceTable'
 import { itemsCountString } from '../../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
 import { IAsset } from '../assets.types'
 

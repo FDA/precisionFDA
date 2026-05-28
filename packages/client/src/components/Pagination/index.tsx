@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { inputFocus, InputSelect } from '../form/styles'
+import { inputFocus, InputSelect } from '../form/form.styles'
 import { Button } from '../Button'
 
 export const StyledInputJumpTo = styled.input`

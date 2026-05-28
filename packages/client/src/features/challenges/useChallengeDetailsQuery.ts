@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
-import { challengeByID, challengeDetailsRequest, ContentType } from './api'
-import { Challenge, ChallengeOld } from './types'
-import { ApiErrorResponse } from '../home/types'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
+import type { AxiosError } from 'axios'
+import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import type { ApiErrorResponse } from '../home/types'
+import { type ContentType, challengeByID, challengeDetailsRequest } from './api'
+import type { Challenge, ChallengeOld } from './types'
 
 export const useChallengeDetailsQuery = (id: string) =>
   useQuery<ChallengeOld, AxiosError<ApiErrorResponse>>({

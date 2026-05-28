@@ -1,6 +1,6 @@
 import React from 'react'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { Content, Footer } from '../modal/styles'
+import { Content, Footer } from '../modal/modal.styles'
 import { UseModal } from '../modal/useModal'
 import {
   onLogInWithSSO, useSiteSettingsQuery,

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import { InputSelect } from '@/components/form/styles'
-import { ButtonRow } from '../../modal/styles'
+import { InputSelect } from '@/components/form/form.styles'
+import { ButtonRow } from '../../modal/modal.styles'
 
 export const Form = styled.form`
   align-self: center;

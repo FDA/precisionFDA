@@ -1,7 +1,7 @@
 import React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, StyledModalContent } from '../modal/styles'
+import { ButtonRow, Footer, StyledModalContent } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { FileLicense } from '../assets/assets.types'
 import { Button } from '../../components/Button'

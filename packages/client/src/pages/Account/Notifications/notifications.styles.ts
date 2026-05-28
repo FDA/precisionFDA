@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { PageContainer, pagePadding } from '../../../components/Page/styles'
+import { PageContainer, pagePadding } from '../../../components/Page/page.styles'
 
 export const StyledNotifications = styled.div`
   display: flex;

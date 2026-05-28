@@ -5,7 +5,7 @@ import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import { IUser } from '../../../types/user'
 import { ExpertDetails } from '../types'
 import { ExpertColumnRight } from './ExpertColumnRight'
-import { ExpertPageRow } from './styles'
+import { ExpertPageRow } from './experts-details.styles'
 import { useMarkdownToc } from '../../markdown/Toc'
 
 const ExpertName = styled.span`

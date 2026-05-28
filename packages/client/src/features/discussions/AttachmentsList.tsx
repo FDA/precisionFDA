@@ -11,7 +11,7 @@ import { FolderIcon } from '../../components/icons/FolderIcon'
 import { TrashIcon } from '../../components/icons/TrashIcon'
 import { Attachment, AttachmentKey, AttachmentType, FormAttachments } from './discussions.types'
 import { areAttachmentsEmpty, typeAttachmentKey } from './helpers'
-import { AttachmentsLabel } from './styles'
+import { AttachmentsLabel } from './discussions.styles'
 
 const StyledAttachmentsContainer = styled.div``
 

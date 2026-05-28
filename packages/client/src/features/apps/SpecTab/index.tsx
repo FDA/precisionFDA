@@ -3,7 +3,7 @@ import { COMPUTE_RESOURCE_LABELS } from '@/types/user'
 import { MetadataKey } from '../../home/show.styles'
 import { AppSpec } from '../apps.types'
 import { SpecTable } from './SpecTable'
-import { StyledSpecTab } from './styles'
+import { StyledSpecTab } from './apps-spec-tab.styles'
 
 export const SpecTab = ({ spec, spaceId }: { spec: AppSpec; spaceId?: string }): React.JSX.Element => {
   if (!spec) {

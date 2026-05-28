@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { Loader } from '../../../components/Loader'
 import { usePaginationState } from '../../../hooks/usePaginationState'
 import { pluralize } from '../../../utils/formatting'
-import { ExpertImageCircleSmall, ExpertMeta, ExpertRow, StyledCondensedList } from './styles'
+import { ExpertImageCircleSmall, ExpertMeta, ExpertRow, StyledCondensedList } from './experts-condensed-list.styles'
 import { useExpertsListCondensedQuery } from '../useExpertsListQuery'
 
 export const ExpertsCondensedList = ({ pick }: { pick?: number }) => {

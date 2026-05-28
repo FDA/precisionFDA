@@ -8,7 +8,7 @@ import { FileIcon } from '@/components/icons/FileIcon'
 import { LockIcon } from '@/components/icons/LockIcon'
 import { ActionsMenu } from '@/components/Menu'
 import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
-import { Filler } from '@/components/Page/styles'
+import { Filler } from '@/components/Page/page.styles'
 import { type ITab, TabsSwitch } from '@/components/TabsSwitch'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
 import { theme } from '@/styles/theme'
@@ -44,7 +44,7 @@ import { getOriginHref } from '../file.utils'
 import type { IFile } from '../files.types'
 import { normalizePermissions } from '../normalizePermissions'
 import { useFilesSelectActions } from '../useFilesSelectActions'
-import { FileDescription, HeaderActions } from './styles'
+import { FileDescription, HeaderActions } from './files-show.styles'
 
 const FileActionsDropdown = ({
   homeScope,

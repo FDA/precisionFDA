@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import styled from 'styled-components'
-import { FieldGroup as StyledFieldGroup } from './styles'
+import { FieldGroup as StyledFieldGroup } from './form.styles'
 
 const Row = styled.div`
   display: flex;

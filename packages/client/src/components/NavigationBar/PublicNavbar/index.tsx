@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router'
 import { onLogInWithSSO, useSiteSettingsQuery } from '../../../features/auth/useSiteSettingsQuery'
 import { Button } from '../../Button'
 import { PFDALogoDark, PFDALogoLight } from '../PFDALogo'
-import { MobileMenuOverlay, PageContainer, StyledPublicNavbar } from './styles'
+import { MobileMenuOverlay, PageContainer, StyledPublicNavbar } from './public-navbar.styles'
 
 type PublicNavbarProps = {
   shouldShowLogo?: boolean

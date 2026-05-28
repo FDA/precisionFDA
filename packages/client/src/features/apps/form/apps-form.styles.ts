@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { FieldGroup } from '../../../components/form/styles'
+import { FieldGroup } from '../../../components/form/form.styles'
 import { PfTab } from '../../../components/Tabs/PfTab'
 import { StyledMarkdown } from '../../../styles/commonStyles'
 

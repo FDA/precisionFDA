@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { Callout } from '../../components/Callout'
-import { PageContainer, pagePadding } from '../../components/Page/styles'
+import { PageContainer, pagePadding } from '../../components/Page/page.styles'
 
 export const StyledPageContainer = styled(PageContainer)`
   ${pagePadding}

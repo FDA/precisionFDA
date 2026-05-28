@@ -1,7 +1,7 @@
-import React, { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import styled from 'styled-components'
-import { ButtonRow } from '../styles'
-import { Button } from '../../../components/Button'
+import { Button } from '@/components/Button'
+import { ButtonRow } from '../modal.styles'
 
 export const StyledConfirmDialog = styled.div`
   padding: 12px 12px 12px 24px;
@@ -29,7 +29,9 @@ export const Dialog = (props: IDialogProps) => {
       {body}
       <StyledButtonRow>
         <Button onClick={cancel}>{cancelText || 'Cancel'}</Button>
-        <Button data-variant={dataVariant} onClick={ok}>{okText || 'Ok'}</Button>
+        <Button data-variant={dataVariant} onClick={ok}>
+          {okText || 'Ok'}
+        </Button>
       </StyledButtonRow>
     </StyledConfirmDialog>
   )

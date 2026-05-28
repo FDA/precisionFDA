@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { compactScrollBarV2 } from '../../../components/Page/styles'
+import { compactScrollBarV2 } from '../../../components/Page/page.styles'
 
 export const RightSideItem = styled.div`
   display: flex;

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import {
   PageContainerMargin,
-} from '../../../components/Page/styles'
+} from '../../../components/Page/page.styles'
 
 export const Warning = styled.div`
   border: solid 1px #f0ad4e;

@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components'
 import { Svg } from '../../components/icons/Svg'
 import { NavLink } from '../../components/NavLink'
 import { BackLink } from '../../components/Page/PageBackLink'
-import { compactScrollBarV2 } from '../../components/Page/styles'
+import { compactScrollBarV2 } from '../../components/Page/page.styles'
 
 export const StyledBackLink = styled(BackLink)`
   margin: 16px 16px;

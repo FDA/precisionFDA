@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { MailButton, StyledSocialMediaButtons } from '../SocialMediaButtons'
 import { PublicNavbar } from '../PublicNavbar'
 import { MainBanner } from '../../Banner'
-import { PageContainerMargin } from '../../Page/styles'
+import { PageContainerMargin } from '../../Page/page.styles'
 import { IUser } from '../../../types/user'
 
 const NavigationBarBanner = styled(PageContainerMargin)`

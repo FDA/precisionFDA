@@ -6,13 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { type ComputeResourceKey, RESOURCE_LABELS } from '@/types/user'
 import { cn } from '@/utils/cn'
 import { Button } from '../../../components/Button'
-import { FieldGroup, InputError } from '../../../components/form/styles'
+import { FieldGroup, InputError } from '../../../components/form/form.styles'
 import { InputText } from '../../../components/InputText'
 import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
 import { Loader } from '../../../components/Loader'
 import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
-import { PageTitle } from '../../../components/Page/styles'
-import { ButtonRow } from '../../../components/Public/styles'
+import { PageTitle } from '../../../components/Page/page.styles'
+import { ButtonRow } from '../../../components/Public/public-layout.styles'
 import { PfTabContent } from '../../../components/Tabs/PfTab'
 import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
 import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../../constants/consts'
@@ -43,7 +43,7 @@ import {
   TopFieldGroup,
   TopFieldGroupTarget,
   TopFieldGroupUbuntu,
-} from './styles'
+} from './apps-form.styles'
 import { VmEnvTab } from './VmEnvTab'
 
 type SelectedSection = 'io' | 'vm' | 'script' | 'readme'

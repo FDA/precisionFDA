@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Refresh } from '../../../components/Page/styles'
+import { Refresh } from '../../../components/Page/page.styles'
 
 export const StyledRefresh = styled(Refresh)`
   margin-right: 16px;

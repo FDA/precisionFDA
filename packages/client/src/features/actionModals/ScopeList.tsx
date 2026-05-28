@@ -5,12 +5,12 @@ import { Button } from '@/components/Button'
 import { InputText } from '@/components/InputText'
 import { HomeIcon } from '@/components/icons/HomeIcon'
 import { Col, ColBody, HeaderRow, Table, TableRow } from '../modal/ModalCheckList'
-import { ModalScroll } from '../modal/styles'
-import { FdaRestrictedIcon } from '../spaces/FdaRestrictedIcon'
-import { ProtectedIcon } from '../spaces/ProtectedIcon'
+import { ModalScroll } from '../modal/modal.styles'
+import { FdaRestrictedIcon } from '@/components/icons/FdaRestrictedIcon'
+import { ProtectedIcon } from '@/components/icons/ProtectedIcon'
 import { type EditableSpace, fetchEditableSpacesList } from '../spaces/spaces.api'
 import { findSpaceTypeIcon } from '../spaces/useSpacesColumns'
-import { ColScopeTitle, ModalSearchBar, ScopeIcon } from './styles'
+import { ColScopeTitle, ModalSearchBar, ScopeIcon } from './action-modals.styles'
 
 export const MY_HOME = {
   title: 'My Home',

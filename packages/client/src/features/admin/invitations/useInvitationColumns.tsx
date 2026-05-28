@@ -5,7 +5,7 @@ import { selectColumnDef } from '@/components/Table/selectColumnDef'
 import { convertDateToUserTime } from '@/utils/datetime'
 import DateTimeRangeFilter, { dateRangeFilterFn } from '../../../components/Table/components/DateTimeRangeFilter'
 import SelectFilter, { selectFilterFn } from '../../../components/Table/components/SelectFilter'
-import { StateLabel } from '../styles'
+import { StateLabel } from '../admin.styles'
 import type { Invitation } from '../users/api'
 
 export const ProvisionStateCell = ({ provisionState }: { provisionState: string }) => {

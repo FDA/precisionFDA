@@ -5,7 +5,7 @@ import { pluralize } from '../../utils/formatting'
 import type { IAccessibleFile } from '../databases/databases.api'
 import { useSelectFileModal } from '../files/actionModals/useSelectFileModal'
 import type { DialogType } from '../home/types'
-import { ButtonRow } from '../modal/styles'
+import { ButtonRow } from '../modal/modal.styles'
 
 const StyledButtonRow = styled(ButtonRow)`
   justify-content: flex-start;

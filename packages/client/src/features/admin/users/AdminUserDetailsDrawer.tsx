@@ -12,7 +12,7 @@ import { relativeTimeAgo } from '@/utils/datetime'
 import { formatDate } from '@/utils/formatting'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { formatNumberUS } from '../../home/utils'
-import { ModalScroll } from '../../modal/styles'
+import { ModalScroll } from '../../modal/modal.styles'
 import { useConfirm } from '../../modal/useConfirm'
 import {
   bulkDeactivate,

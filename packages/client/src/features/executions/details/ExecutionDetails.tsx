@@ -36,7 +36,7 @@ import { getUserLink } from '../executions.util'
 import { InputsAndOutputs } from '../InputsAndOutputs'
 import { Logs } from '../Log'
 import { StateCell } from '../StateCell'
-import { FailureMessage, TitleLeft } from './styles'
+import { FailureMessage, TitleLeft } from './executions-details.styles'
 
 const calculateCost = (durationInSeconds: number, instanceType: string): string => {
   const runtimeHours = durationInSeconds / 3600

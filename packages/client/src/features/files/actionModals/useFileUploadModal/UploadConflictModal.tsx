@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button } from '@/components/Button'
 import { ModalHeaderTop, ModalNext } from '@/features/modal/ModalNext'
-import { ButtonRow, Footer } from '@/features/modal/styles'
+import { ButtonRow, Footer } from '@/features/modal/modal.styles'
 
 interface UploadConflictModalProps {
   isShown: boolean

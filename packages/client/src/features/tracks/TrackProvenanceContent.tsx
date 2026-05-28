@@ -7,7 +7,7 @@ import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { SitemapIcon } from '../../components/icons/SitemapIcon'
 import { StickyNoteIcon } from '../../components/icons/StickyNote'
-import { Help } from '../apps/form/styles'
+import { Help } from '../apps/form/apps-form.styles'
 import { NotFound } from '../home/show.styles'
 
 export type EntityType = 'file' | 'app' | 'execution' | 'database' | 'comparison' | 'note'

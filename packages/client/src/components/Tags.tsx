@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { compactScrollBar } from './Page/styles'
+import { compactScrollBar } from './Page/page.styles'
 
 export const StyledTags = styled.div`
   display: flex;

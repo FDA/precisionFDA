@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { UserLayout } from '../../layouts/UserLayout'
-import { PageContainerMargin } from '../../components/Page/styles'
+import { PageContainerMargin } from '../../components/Page/page.styles'
 
 const Text = styled.div`
   text-align: center;

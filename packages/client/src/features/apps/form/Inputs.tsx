@@ -21,7 +21,7 @@ import {
   SpecProps,
   StringInput,
 } from './Fields'
-import { SectionTitle, SectionTitleRow, StyledClassTd, StyledInputOutputBox, StyledRemove, TableStyles } from './styles'
+import { SectionTitle, SectionTitleRow, StyledClassTd, StyledInputOutputBox, StyledRemove, TableStyles } from './apps-form.styles'
 import { CreateAppForm, IOSpec } from '../apps.types'
 import { removeArrayStringFromClassType, setClassVal } from './common'
 import { useSkipFirstRenderUseEffect } from '../../../hooks/useSkipFirstRender'

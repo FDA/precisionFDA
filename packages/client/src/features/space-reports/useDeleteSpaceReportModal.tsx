@@ -7,7 +7,7 @@ import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastH
 import { StyledTable, StyledTD } from '@/components/ResourceTable'
 import { formatDate, itemsCountString } from '@/utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { ISpaceReport } from './space-report.types'
 import { deleteReports } from './space-reports.api'

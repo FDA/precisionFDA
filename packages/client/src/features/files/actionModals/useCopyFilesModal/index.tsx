@@ -15,7 +15,7 @@ import { copyFilesRequest, fetchSelectedFiles, validateCopyingFiles } from '../.
 import { IExistingFileSet, ISelectedFile, ISelectedFolder, SelectedNode } from '../../files.types'
 import { ScopeAndFolderSelection } from './ScopeAndFolderSelection'
 import styles from './CopyFilesModal.module.css'
-import { Footer } from '../../../modal/styles'
+import { Footer } from '../../../modal/modal.styles'
 import { toastError, toastSuccess } from '../../../../components/NotificationCenter/ToastHelper'
 
 interface FileListItemContentProps {

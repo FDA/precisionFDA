@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { Footer, ModalScroll } from '../modal/styles'
+import { Footer, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { Item, useUploadResource } from './useUploadResource'
 

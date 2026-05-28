@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-table'
 import React from 'react'
 import Table from '../../../components/Table'
-import { StyledPageTable } from '../../../components/Table/components/styles'
+import { StyledPageTable } from '../../../components/Table/components/table.styles'
 import { SpaceMembership } from './members.types'
 import { ISpace } from '../spaces.types'
 import { useMembersColumns } from './useMembersColumns'
