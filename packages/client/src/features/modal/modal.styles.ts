@@ -1,7 +1,7 @@
 import styled from 'styled-components'
-import { TransparentButton } from '../../components/Button'
-import { compactScrollBarV2 } from '../../components/Page/styles'
-import { Svg } from '../../components/icons/Svg'
+import { TransparentButton } from '@/components/Button'
+import { Svg } from '@/components/icons/Svg'
+import { compactScrollBarV2 } from '@/components/Page/page.styles'
 
 export const HeaderTop = styled.div`
   border-radius: 8px 8px 0 0;
@@ -108,18 +108,4 @@ export const ModalLoaderWrapper = styled.div`
   justify-content: center;
   align-items: center;
   min-height: 200px;
-`
-
-export const ModalPageRow = styled.div`
-  display: grid;
-  grid-template-columns: auto auto;
-`
-
-export const ModalPageCol = styled.div`
-  align-self: stretch;
-  min-width: 350px;
-  width: 50vw;
-  &:last-child {
-    border: 0;
-  }
 `

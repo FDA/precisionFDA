@@ -3,7 +3,7 @@ import { type KeyboardEventHandler, type ReactNode, useRef } from 'react'
 import { type Control, Controller, type FieldErrors, type UseFormTrigger } from 'react-hook-form'
 import { Link } from 'react-router'
 import { Checkbox } from '@/components/CheckboxNext'
-import { FieldGroup, FieldLabelRow, InputError, SelectFieldLabel } from '@/components/form/styles'
+import { FieldGroup, FieldLabelRow, InputError, SelectFieldLabel } from '@/components/form/form.styles'
 import { ArrowLeftIcon } from '@/components/icons/ArrowLeftIcon'
 import { CrossIcon } from '@/components/icons/PlusIcon'
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,7 @@ import ExternalLink from '../../../components/Controls/ExternalLink'
 import { useAssetAttachModal } from '../../actionModals/useAssetAttachModal'
 import type { CreateAppForm } from '../apps.types'
 import { InstanceTypeSelect } from './InstanceTypeSelect'
-import { FormFields, Help } from './styles'
+import { FormFields, Help } from './apps-form.styles'
 
 const SectionLabelRow = ({
   label,

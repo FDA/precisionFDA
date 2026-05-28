@@ -9,7 +9,7 @@ import { deleteDiscussionRequest } from '../api'
 import { Attachment, Discussion } from '../discussions.types'
 import { EditNoteEntity } from '../form/EditNoteEntity'
 import { groupByAttachmentType } from '../helpers'
-import { StyledCommentCard, StyledReplyButton } from '../styles'
+import { StyledCommentCard, StyledReplyButton } from '../discussions.styles'
 import { CardHeader } from './CardHeader'
 
 export function DiscussionCard({

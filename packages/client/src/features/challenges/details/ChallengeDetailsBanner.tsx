@@ -6,7 +6,7 @@ import { Link } from 'react-router'
 import styled from 'styled-components'
 import { Button, OutlineButton } from '../../../components/Button'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
-import { PageContainer, pagePadding } from '../../../components/Page/styles'
+import { PageContainer, pagePadding } from '../../../components/Page/page.styles'
 import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
 import { CogsIcon } from '../../../components/icons/Cogs'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
@@ -28,7 +28,7 @@ import {
   RightColumn,
   StartEnd,
   StyledChallengeDetailsBanner,
-} from './styles'
+} from './challenges-details.styles'
 
 const ChallengeActionRow = styled(PageContainer)`
   ${pagePadding}

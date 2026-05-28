@@ -1,7 +1,7 @@
 import React, { useId } from 'react'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
-import { LockIcon } from '../../components/icons/LockIcon'
+import { LockIcon } from './LockIcon'
 
 const StyledProtectedIcon = styled.span`
   flex-shrink: 0;

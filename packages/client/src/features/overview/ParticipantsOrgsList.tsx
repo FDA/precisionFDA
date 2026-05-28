@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
-import { compactScrollBar } from '../../components/Page/styles'
+import { compactScrollBar } from '../../components/Page/page.styles'
 import { useParticipantsQuery } from './useParticipantsQuery'
 
 const StyledParticipantsList = styled.ul`

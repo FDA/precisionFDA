@@ -28,7 +28,7 @@ import { SelectContext } from './SelectContext'
 import { SelectInstanceType } from './SelectInstanceType'
 import { SelectSpaceScope } from './SelectSpaceScope'
 import { SetOutputFolder } from './SetOutputFolder'
-import { RightGroup, StyledActionsContainer, StyledGrid, StyledJobName } from './styles'
+import { RightGroup, StyledActionsContainer, StyledGrid, StyledJobName } from './apps-run.styles'
 import { useExportInputsModal } from './useExportInputsModal'
 import { useRunJobMutation } from './useRunJobMutation'
 import {

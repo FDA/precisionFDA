@@ -2,11 +2,11 @@ import React from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
-import { SectionTitle } from '../../components/Public/styles'
+import { SectionTitle } from '../../components/Public/public-layout.styles'
 import { ChallengeListItem } from '../challenges/list/ChallengeListItem'
 import { useChallengesListQuery } from '../challenges/list/useChallengesListQuery'
 import { getTimeStatusColor } from '../challenges/util'
-import { ViewAllButton } from './styles'
+import { ViewAllButton } from './overview.styles'
 
 const StyledChallengesOverview = styled.div`
   margin-bottom: 64px;

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import { compactScrollBarV2 } from '../../components/Page/styles'
-import { SearchBar } from '../resources/styles'
+import { compactScrollBarV2 } from '../../components/Page/page.styles'
+import { SearchBar } from '../resources/resources.styles'
 
 export const StyledSubtitle = styled.div`
   color: var(--c-text-500);

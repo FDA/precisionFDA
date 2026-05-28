@@ -7,7 +7,7 @@ import { Controller, useForm } from 'react-hook-form'
 import * as Yup from 'yup'
 import { getBackendErrorMessage } from '@/api/types'
 import { Button } from '@/components/Button'
-import { FieldGroup, InputError } from '@/components/form/styles'
+import { FieldGroup, InputError } from '@/components/form/form.styles'
 import { InputText } from '@/components/InputText'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import {
@@ -19,7 +19,7 @@ import {
   ComboboxList,
 } from '@/components/ui/combobox'
 import { ModalHeaderTop, ModalNext, useModalFloatingPortalHost } from '../../modal/ModalNext'
-import { Footer } from '../../modal/styles'
+import { Footer } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
 import { fetchSpaceMemberships } from '../../spaces/members/members.api'
 import { StyledFields } from '../../spaces/members/members.styles'

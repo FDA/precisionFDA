@@ -1,15 +1,18 @@
-/* eslint-disable no-nested-ternary */
-import React, { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Link, Navigate, Route, Routes, useParams } from 'react-router'
-import { Loader } from '../../../components/Loader'
-import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
-import { PageContainerMargin } from '../../../components/Page/styles'
-import { usePageMeta } from '../../../hooks/usePageMeta'
-import { cleanObject } from '../../../utils/object'
+import { Loader } from '@/components/Loader'
+import { AddIdsToHeaders } from '@/components/Markdown/AddIdsToHeaders'
+import { MDStyles } from '@/components/Markdown/markdown.styles'
+import { PageContainerMargin } from '@/components/Page/page.styles'
+import { usePageMeta } from '@/hooks/usePageMeta'
+import { cleanObject } from '@/utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { IToCItem, ToC } from '../../markdown/TocNext'
+import { type IToCItem, ToC } from '../../markdown/TocNext'
+import type { Meta } from '../types'
 import { useChallengeByIDQuery } from '../useChallengeDetailsQuery'
 import { ChallengeDetailsBanner } from './ChallengeDetailsBanner'
+import { ChallengeMyEntriesTable } from './ChallengeMyEntriesTable'
+import { ChallengeSubmissionsTable } from './ChallengeSubmissionsTable'
 import {
   ChallengePageRow,
   ChallengeRightSide,
@@ -18,17 +21,12 @@ import {
   NoInfo,
   StyledChallengeNavigation,
   StyledChallengeNavigationItem,
-} from './styles'
-import { ChallengeSubmissionsTable } from './ChallengeSubmissionsTable'
-import { ChallengeMyEntriesTable } from './ChallengeMyEntriesTable'
-import { useNumberParams } from '../../../utils/useNumberParams'
-import { MDStyles } from '../../../components/Markdown/styles'
-import { Meta } from '../types'
+} from './challenges-details.styles'
 
 export const ChallengeDetails = () => {
   usePageMeta({ title: 'Challenge - precisionFDA' })
 
-  const { challengeId } = useNumberParams()
+  const { challengeId } = useParams<{ challengeId: string }>()
 
   const user = useAuthUser()
   const { data: challenge, isLoading, error } = useChallengeByIDQuery(challengeId!)
@@ -70,7 +68,8 @@ export const ChallengeDetails = () => {
 
   const userIsChallengeAdmin = isLoggedIn && canCreate
 
-  const userCanSeePreRegistration = challengePreRegistration || (userIsChallengeAdmin && challengeSetupOrPreRegistration)
+  const userCanSeePreRegistration =
+    challengePreRegistration || (userIsChallengeAdmin && challengeSetupOrPreRegistration)
 
   // Introduction is visible to:
   //  - everyone when a challenge is not in pre-registration phase
@@ -84,7 +83,8 @@ export const ChallengeDetails = () => {
   // Results are visible to:
   //  - challenge admins
   //  - everyone when results are announced or challenge is archived
-  const userCanSeeResults = userIsChallengeAdmin || challenge.status === 'result_announced' || challenge.status === 'archived'
+  const userCanSeeResults =
+    userIsChallengeAdmin || challenge.status === 'result_announced' || challenge.status === 'archived'
 
   let regions: { intro: string; results: string; preReg: string }
   if (challenge.meta) {
@@ -150,13 +150,23 @@ export const ChallengeDetails = () => {
         <Routes>
           <Route
             path="submissions"
-            element={<ChallengeSubmissionsTable user={user} challengeId={challenge.id} isSpaceMember={challenge.isSpaceMember} />}
+            element={
+              <ChallengeSubmissionsTable
+                user={user}
+                challengeId={challenge.id}
+                isSpaceMember={challenge.isSpaceMember}
+              />
+            }
           />
           <Route
             path="my-entries"
             element={
               isLoggedIn && (
-                <ChallengeMyEntriesTable user={user} challengeId={challenge.id} isSpaceMember={challenge.isSpaceMember} />
+                <ChallengeMyEntriesTable
+                  user={user}
+                  challengeId={challenge.id}
+                  isSpaceMember={challenge.isSpaceMember}
+                />
               )
             }
           />

@@ -7,14 +7,14 @@ import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
-import { Divider, FieldLabelRow, InputError } from '../../../components/form/styles'
+import { Divider, FieldLabelRow, InputError } from '../../../components/form/form.styles'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useConfirm } from '../../modal/useConfirm'
 import { CreateSpacePayload, CreateSpaceResponse } from '../spaces.api'
 import { getSpaceTypeOptions, SPACE_TYPE_HINT, validationSchema } from './helpers'
-import { HintText, Row, StyledForm } from './styles'
+import { HintText, Row, StyledForm } from './spaces-form.styles'
 
 export interface ISpaceForm {
   mutation: UseMutationResult<CreateSpaceResponse, unknown, CreateSpacePayload, unknown>

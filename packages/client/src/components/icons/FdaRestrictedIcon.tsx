@@ -1,7 +1,7 @@
 import React, { useId } from 'react'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
-import { FdaIcon } from '../../components/icons/FdaIcon'
+import { FdaIcon } from './FdaIcon'
 
 const StyledFdaRestrictedIcon = styled.span`
   flex-shrink: 0;

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/utils/cn'
 import { Button } from '../../../components/Button'
 import { Callout } from '../../../components/Callout'
-import { ErrorHint, FieldGroup, Hint, InputError } from '../../../components/form/styles'
+import { ErrorHint, FieldGroup, Hint, InputError } from '../../../components/form/form.styles'
 import { InputText } from '../../../components/InputText'
 import { ModalHeaderTop, ModalNext, useModalFloatingPortalHost } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'

@@ -1,13 +1,12 @@
 import React from 'react'
 import { Navigate, useLocation, useOutletContext, useParams, useSearchParams } from 'react-router'
-import { Markdown } from '@/components/Markdown'
-import { AppShowOutletContext } from '@/features/apps/AppsShow'
-import { StyledMarkdownAppShow } from '@/features/apps/form/styles'
+import type { AppShowOutletContext } from '@/features/apps/AppsShow'
+import { StyledMarkdownAppShow } from '@/features/apps/form/apps-form.styles'
 import { useAuthUser } from '@/features/auth/useAuthUser'
-import { HomeScopeContextValue, useHomeScope } from '@/features/home/HomeScopeContext'
+import { type HomeScopeContextValue, useHomeScope } from '@/features/home/HomeScopeContext'
 import { isContributorOrHigherRole } from '@/features/spaces/common'
-import { ISpace } from '@/features/spaces/spaces.types'
-import { SpaceOutletContext } from './spaces'
+import type { ISpace } from '@/features/spaces/spaces.types'
+import type { SpaceOutletContext } from './spaces'
 
 const MembersList = React.lazy(() =>
   import('../features/spaces/members/MembersList').then(m => ({ default: m.MembersList })),
@@ -63,6 +62,7 @@ const SpaceReportList = React.lazy(() =>
 const TrackInHome = React.lazy(() => import('../features/tracks/TrackInHome').then(m => ({ default: m.TrackInHome })))
 const FileList = React.lazy(() => import('../features/files/FileList').then(m => ({ default: m.FileList })))
 const FileShow = React.lazy(() => import('../features/files/show/FileShow').then(m => ({ default: m.FileShow })))
+const Markdown = React.lazy(() => import('@/components/Markdown').then(m => ({ default: m.Markdown })))
 
 /**
  * Result of useUnifiedRouteContext when in home context.

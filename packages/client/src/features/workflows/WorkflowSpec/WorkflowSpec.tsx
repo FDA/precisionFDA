@@ -1,6 +1,6 @@
 import React from 'react'
 import { COMPUTE_RESOURCE_LABELS } from '@/types/user'
-import { StyledSpecTab } from '../../apps/SpecTab/styles'
+import { StyledSpecTab } from '../../apps/SpecTab/apps-spec-tab.styles'
 import { MetadataKey, MetadataVal } from '../../home/show.styles'
 import { Spec, Stage } from '../workflows.types'
 import { WorkflowSpecTable } from './WorkflowSpecTable'

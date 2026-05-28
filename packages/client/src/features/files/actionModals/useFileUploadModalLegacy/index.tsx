@@ -1,5 +1,5 @@
 import { Button } from '@/components/Button'
-import { InputError } from '@/components/form/styles'
+import { InputError } from '@/components/form/form.styles'
 import { Done, Failed, Running } from '@/components/icons/StateIcons'
 import { TrashIcon } from '@/components/icons/TrashIcon'
 import { UploadIcon } from '@/components/icons/UploadIcon'
@@ -13,7 +13,7 @@ import { useDropzone } from 'react-dropzone'
 import { useImmer } from 'use-immer'
 import { HomeScope } from '../../../home/types'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../../../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../../../modal/modal.styles'
 import { useConditionalModal } from '../../../modal/useModal'
 import { FILE_STATUS, FilesMeta, FileStatusTypes, IUploadInfo, MAX_UPLOADABLE_FILES } from './constants'
 import { multiFileUpload } from './multiFileUpload'
@@ -31,7 +31,7 @@ import {
   StatusWrapper,
   UploadFilesContainer,
   UploadFilesHeader,
-} from './styles'
+} from './file-upload-legacy.styles'
 
 interface FileUploadTableProps {
   filesMeta: FilesMeta[]

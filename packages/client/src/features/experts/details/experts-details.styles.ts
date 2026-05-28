@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { PageContainer, PageLeftColumn, PageRightColumn, pagePadding, PageContainerMargin } from '../../../components/Page/styles'
+import { PageContainer, PageLeftColumn, PageRightColumn, pagePadding, PageContainerMargin } from '../../../components/Page/page.styles'
 import { breakPoints } from '../../../styles/theme'
 import { StyledToC } from '../../markdown/Toc'
 

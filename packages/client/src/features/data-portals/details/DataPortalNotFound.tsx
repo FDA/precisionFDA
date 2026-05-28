@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { PageContainerMargin } from '../../../components/Page/styles'
+import { PageContainerMargin } from '../../../components/Page/page.styles'
 
 export const Warning = styled.div`
   border: solid 1px #f0ad4e;

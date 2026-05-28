@@ -7,7 +7,7 @@ import * as Yup from 'yup'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/utils/cn'
 import { Button } from '../../../components/Button'
-import { ErrorHint, FieldGroup, Hint, InputError } from '../../../components/form/styles'
+import { ErrorHint, FieldGroup, Hint, InputError } from '../../../components/form/form.styles'
 import { ModalHeaderTop, ModalNext, useModalFloatingPortalHost } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'
 import {

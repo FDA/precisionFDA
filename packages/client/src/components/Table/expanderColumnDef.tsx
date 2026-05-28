@@ -1,7 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
 import { TransparentButton } from '../Button'
-import { ExpandArrowIcon } from './components/styles'
+import { ExpandArrowIcon } from './components/table.styles'
 
 export function expanderColumnDef<T extends { id: string | number }>(): ColumnDef<T> {
   return {

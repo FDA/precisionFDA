@@ -26,7 +26,7 @@ import { ReplyCard } from './card/ReplyCard'
 import { Attachment } from './discussions.types'
 import { CreateReplyEntity } from './form/CreateReplyEntity'
 import { EditDiscussionTitle } from './form/EditDiscussionTitle'
-import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
+import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './discussions.styles'
 
 interface DiscussionContextType {
   attachments: Record<number, Attachment[]>

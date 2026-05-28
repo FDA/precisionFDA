@@ -1,6 +1,6 @@
 import React from 'react'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { Content } from '../../modal/styles'
+import { Content } from '../../modal/modal.styles'
 
 export const ChallengeCreateUpdateModal = ({
   isEditMode,

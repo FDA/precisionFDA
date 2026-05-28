@@ -23,7 +23,7 @@ import {
 import React, { type DragEventHandler, useMemo } from 'react'
 
 import CustomTable from './components/CustomTable'
-import { TableStyles } from './components/styles'
+import { TableStyles } from './components/table.styles'
 import { useComponentWidth } from './useComponentWidth'
 
 function Table<T extends { id: number | string }>({

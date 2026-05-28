@@ -1,11 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
-import { PageContainerMargin } from '../../components/Page/styles'
+import { PageContainerMargin } from '../../components/Page/page.styles'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
-import { RichText } from '../styles'
+import { RichText } from '../pages.styles'
 
 const StyledRichText = styled(RichText)`
   padding-top: 32px;

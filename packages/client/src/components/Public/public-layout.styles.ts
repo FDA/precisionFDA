@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import styled, { css } from 'styled-components'
 import { breakPoints } from '../../styles/theme'
-import { compactScrollBarV2 } from '../Page/styles'
+import { compactScrollBarV2 } from '../Page/page.styles'
 
 export const ButtonRow = styled.div`
   display: flex;

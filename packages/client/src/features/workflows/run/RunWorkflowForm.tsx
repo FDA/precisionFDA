@@ -17,7 +17,7 @@ import { CubeIcon } from '@/components/icons/CubeIcon'
 import { GearIcon } from '@/components/icons/GearIcon'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
 import { BackLink } from '@/components/Page/PageBackLink'
-import { FormPageContainer } from '@/components/Page/styles'
+import { FormPageContainer } from '@/components/Page/page.styles'
 import type { IUser } from '@/types/user'
 import { getSpaceIdFromScope } from '@/utils'
 import type { AcceptedLicense, IApp, InputSpec, SelectType } from '../../apps/apps.types'
@@ -25,7 +25,7 @@ import { getDefaultValueFromServer } from '../../apps/form/common'
 import { ErrorMessageForField } from '../../apps/run/ErrorMessageForField'
 import { JobRunInput } from '../../apps/run/JobRunInput'
 import { SelectSpaceScope } from '../../apps/run/SelectSpaceScope'
-import { Section, SectionBody, SectionHeader, StyledGrid, Topbox, TopboxItem } from '../../apps/run/styles'
+import { Section, SectionBody, SectionHeader, StyledGrid, Topbox, TopboxItem } from '../../apps/run/apps-run.styles'
 import { extractFileUids, getValue, useDefaultScopeSelection, useSelectableSpaces } from '../../apps/run/utils'
 import { useAuthUser } from '../../auth/useAuthUser'
 import type { FileUid } from '../../files/files.types'
@@ -42,7 +42,7 @@ import {
   runWorkflow,
 } from '../workflows.api'
 import type { App, InputOutput, IWorkflow, Stage, WorkflowMeta } from '../workflows.types'
-import { StyledAnalysisName, StyledStageHeader, WorkflowConfiguration } from './styles'
+import { StyledAnalysisName, StyledStageHeader, WorkflowConfiguration } from './workflows-run.styles'
 
 export interface RunWorkflowFormType {
   analysisName: string

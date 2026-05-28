@@ -1,6 +1,6 @@
 import React from 'react'
 import { ActionText, AlertText, Col, Warning } from '../../../components/NotAllowed'
-import { PageContainer } from '../../../components/Page/styles'
+import { PageContainer } from '../../../components/Page/page.styles'
 
 export function SpaceNotAllowed() {
   return (

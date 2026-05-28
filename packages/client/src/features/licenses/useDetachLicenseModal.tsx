@@ -4,7 +4,7 @@ import { Button } from '@/components/Button'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import type { APIResource } from '../home/types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, StyledModalContent } from '../modal/styles'
+import { ButtonRow, Footer, StyledModalContent } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { detachLicenseRequest } from './api'
 

@@ -3,7 +3,7 @@ import { NoteScope } from './api'
 import { ReplyCard } from './card/ReplyCard'
 import { Answer } from './discussions.types'
 import { CreateReplyEntity } from './form/CreateReplyEntity'
-import { StyledCardList } from './styles'
+import { StyledCardList } from './discussions.styles'
 
 export const DiscussionAnswer = ({
   canEdit,

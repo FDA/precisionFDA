@@ -7,9 +7,9 @@ import * as Yup from 'yup'
 import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { InputDate } from '../../../components/form/InputDate'
-import { CheckboxLabel, FieldGroup, InputError } from '../../../components/form/styles'
+import { CheckboxLabel, FieldGroup, InputError } from '../../../components/form/form.styles'
 import { InputText, InputTextArea } from '../../../components/InputText'
-import { ButtonRow } from '../../modal/styles'
+import { ButtonRow } from '../../modal/modal.styles'
 import { NewsItemPayload } from '../types'
 
 const StyledForm = styled.form`

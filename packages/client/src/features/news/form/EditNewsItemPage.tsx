@@ -3,12 +3,12 @@ import { useNavigate, useParams } from 'react-router'
 import { Loader } from '@/components/Loader'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { BackLinkMargin } from '@/components/Page/PageBackLink'
-import { PageTitle } from '@/components/Page/styles'
+import { PageTitle } from '@/components/Page/page.styles'
 import { AdminWrapper } from '../../admin/AdminWrapper'
 import { deleteNewsItemRequest, editNewsItemRequest, newsItemRequest } from '../api'
 import { NewsItem, NewsItemPayload } from '../types'
 import { NewsItemForm } from './NewsItemForm'
-import { FormPageContainer } from './styles'
+import { FormPageContainer } from './news-form.styles'
 
 const useNewsItemRequest = (id: string) => {
   return useQuery({

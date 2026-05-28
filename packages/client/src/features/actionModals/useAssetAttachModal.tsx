@@ -6,7 +6,7 @@ import { CrossIcon } from '@/components/icons/PlusIcon'
 import { SearchIcon } from '@/components/icons/SearchIcon'
 import { Loader } from '@/components/Loader'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, HeaderText, ModalScroll } from '../modal/styles'
+import { ButtonRow, Footer, HeaderText, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import {
   LeftBar,
@@ -15,7 +15,7 @@ import {
   NotesMarkdown,
   SearchInput,
   StyledAttachToModal,
-} from './AttachToModal/styles'
+} from './AttachToModal/attach-to-modal.styles'
 import { type Asset, useListAssetsQuery } from './AttachToModal/useListAssetsQuery'
 
 interface AssetAttachModalProps {

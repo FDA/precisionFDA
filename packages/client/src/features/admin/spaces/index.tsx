@@ -12,7 +12,7 @@ import { type Params, prepareListFetchV2 } from '../../home/utils'
 import { type ISpaceV2, columnFilters as spaceListColumnFilters } from '../../spaces/spaces.types'
 import { useSpacesColumns } from '../../spaces/useSpacesColumns'
 import { AdminListErrorState } from '../AdminListPage'
-import { AdminContentFooter, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
+import { AdminContentFooter, AdminStyledPageTable, Title, Topbox, TopLeft } from '../admin.styles'
 import { AdminTablePlaceholderLoader, getAdminTableLoadingState } from '../tableLoading'
 import { SpacesListActionRow } from './SpacesListActionRow'
 

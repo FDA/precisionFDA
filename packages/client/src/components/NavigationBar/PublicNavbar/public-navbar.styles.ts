@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { PageContainerMargin } from '../../Page/styles'
+import { PageContainerMargin } from '../../Page/page.styles'
 import { fallback } from './fallback.styles'
 
 export const PageContainer = styled(PageContainerMargin)`

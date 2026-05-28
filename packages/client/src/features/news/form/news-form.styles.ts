@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { StyledBackLink } from '../../../components/Page/PageBackLink'
-import { PageContainerMargin, PageTitle } from '../../../components/Page/styles'
+import { PageContainerMargin, PageTitle } from '../../../components/Page/page.styles'
 
 export const FormPageContainer = styled(PageContainerMargin)`
   --container-width: 600px;

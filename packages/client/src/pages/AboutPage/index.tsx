@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Button } from '../../components/Button'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
-import { PageContainerMargin } from '../../components/Page/styles'
+import { PageContainerMargin } from '../../components/Page/page.styles'
 import { PfTab, PfTabContent, PfTabRow, PfTabTitle } from '../../components/Tabs/PfTab'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import PublicLayout from '../../layouts/PublicLayout'
-import { RichText } from '../styles'
+import { RichText } from '../pages.styles'
 
 //TODO JIRI: TO BE DELETED COMPLETELY
 

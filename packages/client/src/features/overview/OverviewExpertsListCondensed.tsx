@@ -10,7 +10,7 @@ import {
   Name,
   StyledCondensedList,
   StyledPreview,
-} from '../experts/ExpertsCondensedList/styles'
+} from '../experts/ExpertsCondensedList/experts-condensed-list.styles'
 import { useExpertsListCondensedQuery } from '../experts/useExpertsListQuery'
 
 export const OverviewExpertsCondensedList = ({ pick }: { pick?: number }) => {

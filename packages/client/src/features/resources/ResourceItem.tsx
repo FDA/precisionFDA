@@ -1,7 +1,7 @@
 import React from 'react'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { Resource } from '../data-portals/resources/resources.types'
-import { FileThumbSmall, ImageContainer, ItemName, StyledResourceItem } from './styles'
+import { FileThumbSmall, ImageContainer, ItemName, StyledResourceItem } from './resources.styles'
 import { getExt, isImageFromExt } from './util'
 
 

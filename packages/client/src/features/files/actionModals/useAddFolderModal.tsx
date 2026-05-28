@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { FieldGroup, InputError } from '../../../components/form/styles'
+import { FieldGroup, InputError } from '../../../components/form/form.styles'
 import { InputText } from '../../../components/InputText'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import type { HomeScope } from '../../home/types'

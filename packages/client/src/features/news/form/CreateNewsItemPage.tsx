@@ -2,12 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { BackLink } from '@/components/Page/PageBackLink'
-import { PageTitle } from '@/components/Page/styles'
+import { PageTitle } from '@/components/Page/page.styles'
 import { AdminWrapper } from '../../admin/AdminWrapper'
 import { createNewsItemRequest } from '../api'
 import { NewsItemPayload } from '../types'
 import { NewsItemForm } from './NewsItemForm'
-import { FormPageContainer } from './styles'
+import { FormPageContainer } from './news-form.styles'
 
 const CreateNewsItemPage = () => {
   const navigate = useNavigate()

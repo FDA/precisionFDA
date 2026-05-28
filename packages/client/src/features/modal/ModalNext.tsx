@@ -4,7 +4,7 @@ import { CSSTransition } from 'react-transition-group'
 import styled, { css } from 'styled-components'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { useKeyPress } from '../../hooks/useKeyPress'
-import { CloseButton, HeaderText, HeaderTop } from './styles'
+import { CloseButton, HeaderText, HeaderTop } from './modal.styles'
 
 /**
  * Full-screen layer inside the modal where portaled popups (Combobox, etc.) can mount above the panel

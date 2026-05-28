@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import styled from 'styled-components'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer } from '../modal/styles'
+import { ButtonRow, Footer } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import type { APIResource } from '../home/types'
 import { acceptLicenseRequest } from './api'

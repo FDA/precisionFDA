@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 import { Callout } from '../../components/Callout'
-import { PageContainer } from '../../components/Page/styles'
+import { PageContainer } from '../../components/Page/page.styles'
 
 export const LogoBar = styled.div`
   display: flex;

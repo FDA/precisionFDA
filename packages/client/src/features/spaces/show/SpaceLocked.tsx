@@ -2,9 +2,9 @@ import React from 'react'
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
 import { AlertText, Col, Warning } from '../../../components/NotAllowed'
-import { PageContainer } from '../../../components/Page/styles'
+import { PageContainer } from '../../../components/Page/page.styles'
 import { ISpace } from '../spaces.types'
-import { ActionButton } from './styles'
+import { ActionButton } from './spaces-show.styles'
 
 
 export const ButtonWrapper = styled.div`

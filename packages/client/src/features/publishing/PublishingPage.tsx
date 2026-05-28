@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
-import { EntityIcon } from '../../components/EntityIcon'
+import { EntityIcon } from '../../components/icons/EntityIcon'
 import { UserLayout } from '../../layouts/UserLayout'
 import { HomeLoader, NotFound } from '../home/show.styles'
 import { getEntityTypeFromIdentifier } from '../tracks/TrackProvenanceContent'
@@ -21,7 +21,7 @@ import {
   PublishingWrapper,
   StyledCallout,
   StyledPageContainer,
-} from './styles'
+} from './publishing.styles'
 import { usePublishingTreeRootQuery } from './usePublishingTreeQuery'
 import { AxiosError } from 'axios'
 import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'

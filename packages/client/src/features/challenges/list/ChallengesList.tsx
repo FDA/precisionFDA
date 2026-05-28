@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
-import { PageContainerMargin } from '../../../components/Page/styles'
+import { PageContainerMargin } from '../../../components/Page/page.styles'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import {
   ButtonRow,
@@ -20,7 +20,7 @@ import {
   RightSide,
   RightSideItem,
   SectionTitle,
-} from '../../../components/Public/styles'
+} from '../../../components/Public/public-layout.styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { usePaginationParamsV2 } from '../../../hooks/usePaginationState'
 import { useLastWSNotification } from '../../../hooks/useLastWSNotification'

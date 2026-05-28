@@ -5,7 +5,7 @@ import { Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
 import { Loader } from '../../components/Loader'
 import { NotAllowedPage } from '../../components/NotAllowed'
-import { NoContent } from '../../components/Public/styles'
+import { NoContent } from '../../components/Public/public-layout.styles'
 import { CopyIcon } from '../../components/icons/CopyIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { useAuthUser } from '../auth/useAuthUser'
@@ -15,7 +15,7 @@ import { RemovePayload, Resource } from '../data-portals/resources/resources.typ
 import { canEditResources } from '../data-portals/utils'
 import { NOTIFICATION_ACTION } from '../home/types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ModalLoaderWrapper } from '../modal/styles'
+import { ModalLoaderWrapper } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { CreateResource } from './CreateResource'
 import ResourceItem from './ResourceItem'
@@ -37,7 +37,7 @@ import {
   StyledSide,
   TopCol,
   TopRow,
-} from './styles'
+} from './resources.styles'
 import { getExt, isImageFromExt } from './util'
 import { useLastWSNotification } from '../../hooks/useLastWSNotification'
 import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'

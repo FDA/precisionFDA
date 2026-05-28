@@ -2,9 +2,9 @@ import { format } from 'date-fns'
 import React from 'react'
 import { Link } from 'react-router'
 import { Button } from '../../../components/Button'
-import { Content, ItemBody, Title } from '../../../components/Public/styles'
+import { Content, ItemBody, Title } from '../../../components/Public/public-layout.styles'
 import { Expert } from '../types'
-import { ExpertButtonRow, ExpertButtonRowWrap, Info, ItemImage, Name, StyledExpertListItem } from './styles'
+import { ExpertButtonRow, ExpertButtonRowWrap, Info, ItemImage, Name, StyledExpertListItem } from './experts-list.styles'
 
 export const ExpertListItem = ({ expert, isAdmin = false }: { expert: Expert, isAdmin?: boolean }) => (
   <StyledExpertListItem>

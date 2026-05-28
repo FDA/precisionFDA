@@ -7,7 +7,7 @@ import { cn } from '@/utils/cn'
 import type { ComputeInstance, RunJobFormType } from '../apps.types'
 import { getVisibleComputeInstances } from '../instanceTypeAvailability'
 import { ErrorMessageForField } from './ErrorMessageForField'
-import { StyledMaxRuntime } from './styles'
+import { StyledMaxRuntime } from './apps-run.styles'
 
 export const SelectInstanceType = ({
   control,

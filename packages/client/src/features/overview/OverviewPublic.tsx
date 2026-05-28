@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Button } from '@/components/Button'
-import { PageContainerMargin } from '@/components/Page/styles'
-import { OverviewCenterSection, PageRow } from '@/components/Public/styles'
+import { PageContainerMargin } from '@/components/Page/page.styles'
+import { OverviewCenterSection, PageRow } from '@/components/Public/public-layout.styles'
 import { usePageMeta } from '@/hooks/usePageMeta'
 import NavigationBar, {
   NavigationBarBanner,
@@ -10,7 +10,7 @@ import NavigationBar, {
 } from '../../components/NavigationBar/NavigationBar'
 import MailButton from '../../components/NavigationBar/SocialMediaButtons'
 import PublicLayout from '../../layouts/PublicLayout'
-import { PageOverviewMainBody } from './styles'
+import { PageOverviewMainBody } from './overview.styles'
 
 const HeroContent = styled.div`
   text-align: center;

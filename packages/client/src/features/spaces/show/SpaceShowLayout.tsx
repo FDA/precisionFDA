@@ -18,8 +18,8 @@ import { ErrorBoundary } from '@/utils/ErrorBoundary'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../../home/home.styles'
 import type { ApiErrorResponse } from '../../home/types'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
-import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
-import { ProtectedIcon } from '../ProtectedIcon'
+import { FdaRestrictedIcon } from '@/components/icons/FdaRestrictedIcon'
+import { ProtectedIcon } from '@/components/icons/ProtectedIcon'
 import { fixGuestPermissions } from '../spaces.api'
 import { useSpaceActions } from '../useSpaceActions'
 import { SpaceTypeTabs } from './SpaceTypeTabs'
@@ -34,7 +34,7 @@ import {
   SpaceMainInfo,
   SpaceTopRight,
   TopSpaceHeader,
-} from './styles'
+} from './spaces-show.styles'
 
 export const SpaceShowLayout = () => {
   const context = useOutletContext<SpaceOutletContext | undefined>()

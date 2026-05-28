@@ -11,7 +11,7 @@ import { InputFile, InputNumber, InputText } from '../../../components/InputText
 import { Loader } from '../../../components/Loader'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { FieldInfo } from '../../../components/form/FieldInfo'
-import { InputError } from '../../../components/form/styles'
+import { InputError } from '../../../components/form/form.styles'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ApiErrorResponse } from '../../home/types'
 import { SavingModal } from '../../modal/SavingModal'

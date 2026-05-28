@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import 'react-tooltip/dist/react-tooltip.css'
-import { TanStackDevtools } from '@tanstack/react-devtools'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { AlertDismissedProvider } from '@/features/admin/alerts/useAlertDismissedLocalStorage'
@@ -17,15 +15,25 @@ import queryClientInstance, { setAuthFailureCallback } from '@/utils/queryClient
 import { ThemeProvider } from '@/utils/ThemeContext'
 import AuthWall from '../AuthWall'
 import Header from '../components/Header/Header'
-import HomeShowLayout from '../features/home/HomeShowLayout'
-import RequestAccessPage from '../features/request-access/RequestAccessPage'
 import NoFoundPage from '../pages/NoFoundPage'
 import GlobalStyle from '../styles/global'
 import accountRoutes from './account'
 import { homeRoutes } from './home'
 import spacesRoutes from './spaces'
 
+const Noop = (): null => null
+
+const TanStackDevtools = import.meta.env.DEV
+  ? React.lazy(() => import('@tanstack/react-devtools').then(m => ({ default: m.TanStackDevtools })))
+  : Noop
+
+const ReactQueryDevtoolsPanel = import.meta.env.DEV
+  ? React.lazy(() => import('@tanstack/react-query-devtools').then(m => ({ default: m.ReactQueryDevtoolsPanel })))
+  : Noop
+
 const DataPortalRoutes = React.lazy(() => import('../features/data-portals/routes'))
+const HomeShowLayout = React.lazy(() => import('../features/home/HomeShowLayout'))
+const RequestAccessPage = React.lazy(() => import('../features/request-access/RequestAccessPage'))
 const ExpertsSinglePage = React.lazy(() => import('../features/experts/details/index'))
 const EditChallengePage = React.lazy(() => import('../features/challenges/form/EditChallengePage'))
 const ChallengeDetailsLayout = React.lazy(() => import('../features/challenges/details/ChallengeDetailsLayout'))
@@ -89,14 +97,16 @@ const RootComponent = () => {
               <PFDAToastContainer />
               <SessionExpiredModal {...sessionExpiredModal} />
               <ExpiringSessionModal modal={expiringSessionModal} />
-              <TanStackDevtools
-                plugins={[
-                  {
-                    name: 'TanStack Query',
-                    render: <ReactQueryDevtoolsPanel />,
-                  },
-                ]}
-              />
+              <React.Suspense fallback={null}>
+                <TanStackDevtools
+                  plugins={[
+                    {
+                      name: 'TanStack Query',
+                      render: <ReactQueryDevtoolsPanel />,
+                    },
+                  ]}
+                />
+              </React.Suspense>
             </AlertDismissedProvider>
           </FileUploadModalProvider>
         </OnlineStatusProvider>
