@@ -201,7 +201,7 @@ export class UserService {
     if (user.extras.sso_enabled === null || user.extras.sso_enabled === undefined) {
       try {
         const response = await this.platformClient.getSSOId({ id: user.dxid })
-        user.extras.sso_enabled = Boolean(response.SSoId)
+        user.extras.sso_enabled = Boolean(response.SSOId)
         await this.em.flush()
       } catch (error) {
         this.logger.warn(`Failed to fetch SSO id for user ${user.dxuser}: ${error}`)

@@ -442,7 +442,7 @@ describe('user service tests', () => {
     it('lazy-backfills sso_enabled when null and persists', async () => {
       const user = buildUser({ sso_enabled: null })
       userRepoFindOneOrFailStub.resolves(user)
-      platformClientGetSSOIdStub.resolves({ SSoId: 'idp-okta-123' })
+      platformClientGetSSOIdStub.resolves({ SSOId: 'idp-okta-123' })
 
       const userService = createUserService()
       const dto = await userService.getAdminUserDetails(99)
@@ -453,10 +453,10 @@ describe('user service tests', () => {
       expect(dto.isSSO).to.equal(true)
     })
 
-    it('records non-SSO users when platform returns empty SSoId', async () => {
+    it('records non-SSO users when platform returns empty SSOId', async () => {
       const user = buildUser({ sso_enabled: null })
       userRepoFindOneOrFailStub.resolves(user)
-      platformClientGetSSOIdStub.resolves({ SSoId: '' })
+      platformClientGetSSOIdStub.resolves({ SSOId: '' })
 
       const userService = createUserService()
       const dto = await userService.getAdminUserDetails(99)
