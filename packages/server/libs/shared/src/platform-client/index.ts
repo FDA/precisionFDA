@@ -764,7 +764,7 @@ export class PlatformClient {
    * Outputs:
    *   - {SSOId: string} Identity provider ID from Okta, or empty string for non-SSO users
    */
-  async getSSOId(data: GetSsoIdData): Promise<{ SSoId: string }> {
+  async getSSOId(data: GetSsoIdData): Promise<{ SSOId: string }> {
     const url = `${config.platform.apiUrl}/user/getSSOId`
 
     const options: AxiosRequestConfig = {
