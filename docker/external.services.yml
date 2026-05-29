@@ -1,24 +1,45 @@
 services:
   gsrs:
     build:
-      context: ../packages/rails
-      dockerfile: docker/images/gsrs.Dockerfile
-    ports:
-      - "8080:8080"
+      context: ../packages/gsrs/web
+      dockerfile: Dockerfile
+      args:
+        GSRS3_MAIN_BRANCH: ${GSRS3_MAIN_BRANCH:-GSRSv3.1.2PUB}
+        FRONTEND_TAG: ${GSRS_FRONTEND_TAG:-pfda}
+    # Alias as gsrs-web so gsrs-nginx config works unchanged (matches cloud service name)
+    networks:
+      default:
+        aliases:
+          - gsrs-web
+    environment:
+      - HOST=${GSRS_HOST:-https://localhost:3000}
+      - GSRS_DATABASE_HOST=${GSRS_DATABASE_HOST:-gsrsdb:3306}
+      - GSRS_DATABASE_NAME=${GSRS_DATABASE_NAME:-ixginas_local}
+      - GSRS_DATABASE_USERNAME=${GSRS_DATABASE_USERNAME:-root}
+      - GSRS_DATABASE_PASSWORD=${GSRS_DATABASE_PASSWORD:-${GSRS_DB_ROOT_PASSWORD:-password}}
+      - GSRS_LOCAL_MODE=${GSRS_LOCAL_MODE:-true}
     volumes:
+      # Lucene index; entrypoint symlinks this to /opt/gsrs/ginas.ix
       - type: bind
-        source: ${GSRS_FRONTEND_PATH:-/dev/null}
-        target: /usr/local/GSRSFrontend
-      - type: bind
-        source: ${GSRS_INDEX_PATH:-/dev/null}
-        target: /ginas.ix
+        source: ${GSRS_INDEX_PATH:-../packages/gsrs/seed-data/ginas.ix}
+        target: /tmp/read-only-base
+
+  gsrs-nginx:
+    build:
+      context: ../packages/gsrs/nginx
+    depends_on:
+      - gsrs
+    environment:
+      - GSRS_FRONTEND_DEV=${GSRS_FRONTEND_DEV:-false}
+    ports:
+      - 8081:80
 
   gsrsdb:
     image: "mariadb:10.6.15"
     tmpfs:
       - /tmp
     environment:
-      MYSQL_DATABASE: ixginas
+      MYSQL_DATABASE: ixginas_local
       MYSQL_ROOT_PASSWORD: ${GSRS_DB_ROOT_PASSWORD:-password}
     ports:
       - "32900:3306"
@@ -30,4 +51,23 @@ services:
       start_period: 20s
     volumes:
       # Script for the DB initialization (creating the tables)
-      - ../packages/rails/docker/misc/gsrs-db-init:/docker-entrypoint-initdb.d
+      - ./misc/gsrs-db-init:/docker-entrypoint-initdb.d
+  gsrsdb_emulated:
+    extends:
+      service: gsrsdb
+    image: amd64/mariadb:10.6.15
+
+  gsrs-frontend-dev:
+    profiles:
+      - frontend-dev
+    build:
+      context: ../packages/gsrs/frontend-dev
+    mem_limit: 6g
+    volumes:
+      - type: bind
+        source: ${GSRS_FRONTEND_PATH:-.}
+        target: /app
+      # Separate node_modules to avoid overwriting host's (different platform)
+      - gsrs-frontend-node-modules:/app/node_modules
+    ports:
+      - 4200:4200

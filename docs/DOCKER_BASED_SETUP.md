@@ -105,39 +105,94 @@ make stop
 
 ### Running application with external services (GSRS)
 
-To include GSRS in the local stack, set `PFDA_SHOULD_RUN_GSRS=1` for the command or export it in your shell profile:
+GSRS runs as part of the local Docker stack. A schema-only database is included in the repo so GSRS can start empty without any downloads. For a fully populated instance (substance data + Lucene search index), run `make gsrs-seed-data` first — this downloads the data from S3 and requires the AWS CLI to be installed and configured:
 
 ```bash
-PFDA_SHOULD_RUN_GSRS=1 make run
+# Install the AWS CLI (macOS)
+brew install awscli
+
+# Configure credentials (use your access key from the AWS console)
+aws configure
 ```
 
-#### Switch GSRS version running in the container
+#### Quick start
 
-1. Connect to the running container.
-2. Run script _run-version.sh_.
-3. When prompted, paste the required GSRS version branch name from the [gsrs-play-dist repo](https://github.com/dnanexus/gsrs-play-dist).
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+export PFDA_SHOULD_RUN_GSRS=1
+```
 
-#### GSRS frontend development live update
+Then run as usual:
 
-Once the _gsrs_ container is running, you can use it for GSRS frontend development:
+```bash
+make run
+```
 
-1. Clone the [GSRSFrontend repo](https://github.com/ncats/GSRSFrontend/tree/precision_new), branch _precision_new_.
-2. Create `GSRS_FRONTEND_PATH` (for example in `~/.zshrc`) with an absolute path to the repo, such as _/Users/pbarta@dnanexus.com/ncats/GSRSFrontend_.
-3. Restart the _gsrs_ container.
-4. Edit several config files in the cloned repo. These changes are not supposed to be committed:
-   * `angular.json` - add line `"baseHref": "/ginas/app/ui/",` under `projects.gsrs-client.architect.options`
-   * `src/app/fda/config/config.json` - add line `"customToolbarComponent": "precisionFDA",`
-   * `src/environments/environment.fda.local.ts` - set the following variables:
-     ```bash
+To populate with full substance data and search index:
+
+```bash
+make gsrs-seed-data
+make run
+```
+
+This starts the GSRS backend, MariaDB (schema from `docker/misc/gsrs-db-init/01-gsrsdb-schema.sql`), and nginx sidecar. If you ran `make gsrs-seed-data`, the full data dump and Lucene index are also loaded.
+
+GSRS UI is available at `https://localhost:3000/ginas/app/ui/`.
+
+#### Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PFDA_SHOULD_RUN_GSRS` | _(unset)_ | Set to `1` to include GSRS containers |
+| `GSRS_LOCAL_MODE` | `true` | Symlinks index directly (required for macOS) |
+| `GSRS_INDEX_PATH` | `packages/gsrs/seed-data/ginas.ix` | Path to Lucene index directory |
+| `GSRS_FRONTEND_DEV` | `false` | Set to `true` to enable live frontend dev server |
+| `GSRS_FRONTEND_PATH` | _(unset)_ | Absolute path to GSRSFrontend repo (required when `GSRS_FRONTEND_DEV=true`) |
+
+#### Resetting GSRS data
+
+To start fresh (wipe DB and index):
+
+```bash
+make stop
+docker volume rm precision-fda_db-gsrs-mariadb-volume
+```
+
+Then `make run` again to recreate with seed data.
+
+#### GSRS frontend development (live hot reload)
+
+A dedicated container runs the Angular dev server with hot reload. No manual config edits needed.
+
+1. Clone [GSRSFrontend repo](https://github.com/ncats/GSRSFrontend), branch `pfda`:
+   ```bash
+   git clone -b pfda https://github.com/ncats/GSRSFrontend.git ~/Projects/GSRSFrontend
+   ```
+
+2. Edit several config files in the cloned repo (these changes are not supposed to be committed):
+   - `angular.json` - add line `"baseHref": "/ginas/app/ui/",` under `projects.gsrs-client.architect.options`
+   - `src/app/fda/config/config.json` - add lines `"customToolbarComponent": "precisionFDA",` and `"isPfdaVersion": true,`
+   - `src/environments/environment.fda.local.ts` - set following variables:
+     ```typescript
      environment.apiBaseUrl = 'https://localhost:3000/ginas/app/';
      environment.baseHref = '/ginas/app/ui/';
      ```
-5. Connect to the running _gsrs_ container, run script `switch-frontend.sh` (located in root), and follow the instructions.
+
+3. Set environment variables (e.g., in `~/.zshrc`):
    ```bash
-   docker exec -it <GSRS_CONTAINER_ID> bash
-   cd /
-   ./switch-frontend.sh
+   export PFDA_SHOULD_RUN_GSRS=1
+   export GSRS_FRONTEND_DEV=true
+   export GSRS_FRONTEND_PATH=~/Projects/GSRSFrontend
    ```
+
+4. Run:
+   ```bash
+   make run
+   ```
+
+The frontend dev container installs dependencies and runs `ng serve` with the `fda.local` configuration. Changes to source files in your local GSRSFrontend repo are picked up automatically via polling.
+
+> **Note:** The first startup takes a few minutes while Angular compiles. Subsequent starts reuse the cached `node_modules` volume.
 
 ## (Optional) Skip cache rebuilds for faster startup
 

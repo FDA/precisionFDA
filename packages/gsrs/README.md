@@ -55,7 +55,33 @@ Some parameters need to be specified to run this container. These are typically 
 | `GSRS_DATABASE_PASSWORD` | (database password) |
 | `GSRS_DATABASE_NAME` | (database name) |
 
+## Local Development Setup
 
+Before running GSRS locally, you can download the seed data (Lucene index + DB dump) from S3, but the GSRS runs without populated db and index as well:
+
+```bash
+make gsrs-seed-data
+```
+
+This downloads:
+- **Lucene index** → `packages/gsrs/seed-data/ginas.ix/`
+- **DB data dump** → `docker/misc/gsrs-db-init/02-gsrsdb-data.sql`
+
+The repo already ships a schema-only file (`docker/misc/gsrs-db-init/01-gsrsdb-schema.sql`), so GSRS can start with an empty DB even without running this script. The seed data adds ~18 substances for a fully populated local instance.
+
+**Prerequisites**: AWS CLI configured with access to the `gsrs-database-dumps-dev` bucket.
+
+You can override the S3 source with environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GSRS_SEED_S3_BUCKET` | `gsrs-database-dumps-dev` | S3 bucket name |
+| `GSRS_SEED_INDEX_KEY` | `local/ginas_ix.tar.gz` | S3 key for the Lucene index archive |
+| `GSRS_SEED_DB_DUMP_KEY` | `local/gsrsdb.sql.gz` | S3 key for the gzipped SQL dump |
+
+The script is idempotent — it skips downloads if the files already exist. Delete the local files to force a re-download.
+
+---
 ## Database & Index Restore Workflow
 
 Within the data_update folder, we have the dockerfile and script for restoring the database and index.

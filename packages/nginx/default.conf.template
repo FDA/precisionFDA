@@ -23,10 +23,14 @@ server {
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
   }
-  
-  # This is a simulation of AWS ALB rule for GSRS static assets
+
+  # GSRS static assets served directly via gsrs-nginx (no auth needed, faster)
+  # All other /ginas/* requests fall through to Rails (location /) which injects
+  # AUTHENTICATION_USERNAME/EMAIL headers and reverse-proxies to GSRS
   location ~ ^/ginas/.*((\.(js|css|png|jpg|jpeg|gif))|(manifest\.json))$ {
-    proxy_pass http://host.docker.internal:8080;
+    resolver 127.0.0.11 valid=10s;
+    set $gsrs_upstream http://gsrs-nginx:80;
+    proxy_pass $gsrs_upstream;
   }
 
   location ~ ^/api/files/([^/]+)/download$ {

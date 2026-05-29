@@ -15,6 +15,11 @@ _Last updated: 17.12.2024_
 ## Start Colima
 - `colima start -f --cpu 4 --memory 10 --disk 30 --arch aarch64 --vz-rosetta --mount-type=virtiofs`
 
+> **Note:** If you also run GSRS locally (`PFDA_SHOULD_RUN_GSRS=1`), increase the disk to at least 50 GiB:
+> ```
+> colima start -f --cpu 4 --memory 10 --disk 50 --arch aarch64 --vz-rosetta --mount-type=virtiofs
+> ```
+
 ## Run PFDA
 - From inside the project root `make run`
 
