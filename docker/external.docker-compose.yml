@@ -1,13 +1,17 @@
 volumes:
   db-gsrs-mariadb-volume:
+  gsrs-frontend-node-modules:
 
 services:
   web:
     depends_on:
-      - gsrs
+      - gsrs-nginx
     environment:
-      - GSRS_URL=http://gsrs:8080
+      - GSRS_URL=http://gsrs-nginx:80
       - GSRS_ENABLED=true
+  nginx:
+    depends_on:
+      - gsrs-nginx
   gsrs:
     depends_on:
       gsrsdb:
@@ -15,9 +19,19 @@ services:
     extends:
       file: ./external.services.yml
       service: gsrs
+  gsrs-nginx:
+    depends_on:
+      - gsrs
+    extends:
+      file: ./external.services.yml
+      service: gsrs-nginx
+  gsrs-frontend-dev:
+    extends:
+      file: ./external.services.yml
+      service: gsrs-frontend-dev
   gsrsdb:
     extends:
       file: ./external.services.yml
       service: gsrsdb
     volumes:
-      - db-gsrs-mariadb-volume:/var/lib/mariadb
+      - db-gsrs-mariadb-volume:/var/lib/mysql

@@ -40,6 +40,7 @@ check-unpublished-env-variables:
 # └───────────────────────┘
 
 PFDA_SHOULD_RUN_GSRS ?= 0
+GSRS_FRONTEND_DEV ?= false
 
 # ┌───────────┐
 # │           │
@@ -67,9 +68,12 @@ DB_WIPE_VOLUMES := db-pfda-mysql-volume
 # Conditionally defined if gsrs should be included in the stack
 ifneq (,$(filter-out 0,$(PFDA_SHOULD_RUN_GSRS)))
 DOCKER_COMPOSE_FILE_FLAGS := $(DOCKER_COMPOSE_FILE_FLAGS) -f $(EXTERNAL_DOCKER_COMPOSE_FILE)
-SERVICES := $(SERVICES) gsrs gsrsdb
+SERVICES := $(SERVICES) gsrs gsrs-nginx gsrsdb
 DB_WIPE_SERVICES := $(DB_WIPE_SERVICES) gsrsdb
 DB_WIPE_VOLUMES := $(DB_WIPE_VOLUMES) db-gsrs-mariadb-volume
+ifeq (true,$(GSRS_FRONTEND_DEV))
+DOCKER_COMPOSE_FILE_FLAGS := $(DOCKER_COMPOSE_FILE_FLAGS) --profile frontend-dev
+endif
 endif
 
 # Recursive `=` so DOCKER_COMPOSE_FILE_FLAGS is re-expanded at every call
@@ -90,7 +94,14 @@ prepare-db:
 	$(COMPOSE) run -T --rm --no-deps --build -e PFDA_DB_INIT_ONLY=1 web
 prepare-db-test:
 	$(COMPOSE) up --build $(PREPARE_DB_TEST_SERVICES)
+gsrs-seed-data:
+	./packages/gsrs/scripts/fetch-seed-data.sh
 run:
+ifneq (0,$(PFDA_SHOULD_RUN_GSRS))
+ifneq (,$(PFDA_SHOULD_RUN_GSRS))
+	@mkdir -p packages/gsrs/seed-data/ginas.ix
+endif
+endif
 	$(COMPOSE) up --build
 stop:
 	$(COMPOSE) down
