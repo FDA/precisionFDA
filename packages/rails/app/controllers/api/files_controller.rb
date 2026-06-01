@@ -395,7 +395,7 @@ module Api
       files = nodes.map do |item|
         {
           uid: item[:uid],
-          url: https_apps_client.get_file_download_link(item[:uid], options)
+          url: https_apps_client.get_file_download_link(item[:uid], options)[:file_url],
         }
       end.compact
 

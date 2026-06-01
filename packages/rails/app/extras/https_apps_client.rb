@@ -789,6 +789,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def get_file_download_link(uid, options = {})
+    request(
+      "/files/#{uid}/download/legacy",
+      {},
+      Net::HTTP::Get::METHOD,
+      options,
+    )
+  end
+
   def file_download(uid, filename, options = {})
     request(
       "/files/#{uid}/#{URI.encode_www_form_component(filename)}",
