@@ -117,6 +117,62 @@ describe('NodeHelper', () => {
       })
     })
 
+    it('renders node origin link when parent node exists', async () => {
+      let findOneWhere: { id: number } | null = null
+      const nodeRepo = {
+        findOne: async (where: { id: number }) => {
+          findOneWhere = where
+          return { uid: 'file-G222-1', name: 'Source File' }
+        },
+      }
+
+      const helper = new NodeHelper(
+        {} as never,
+        {} as never,
+        {} as never,
+        nodeRepo as never,
+        { findOne: async () => null } as never,
+        { findOne: async () => null } as never,
+      )
+
+      const result = await helper.resolveOrigin({ parentType: PARENT_TYPE.NODE, parentId: 42 } as UserFile)
+
+      expect(findOneWhere).to.deep.equal({ id: 42 })
+      expect(result).to.deep.equal({
+        origin: { text: 'Source File' },
+        parentType: 'Node',
+        parentUid: 'file-G222-1',
+      })
+    })
+
+    it('returns Copied origin for node parent type when parentId does not resolve', async () => {
+      let findOneWhere: { id: number } | null = null
+      const nodeRepo = {
+        findOne: async (where: { id: number }) => {
+          findOneWhere = where
+          return null
+        },
+      }
+
+      const helper = new NodeHelper(
+        {} as never,
+        {} as never,
+        {} as never,
+        nodeRepo as never,
+        { findOne: async () => null } as never,
+        { findOne: async () => null } as never,
+      )
+
+      const result = await helper.resolveOrigin({ parentType: PARENT_TYPE.NODE, parentId: 99 } as UserFile)
+
+      expect(findOneWhere).to.deep.equal({ id: 99 })
+      expect(result).to.deep.equal({
+        origin: 'Copied',
+        parentType: 'Node',
+        parentUid: null,
+      })
+    })
+
     it('renders job origin link when parent job exists', async () => {
       let findOneWhere: { id: number } | null = null
       const jobRepo = {

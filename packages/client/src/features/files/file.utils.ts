@@ -2,8 +2,6 @@ import * as React from 'react'
 import { DataNode } from 'rc-tree/lib/interface'
 import type { OriginObject } from './files.types'
 
-const assertNever = (_value: never): string | null => null
-
 export function findById(tree: DataNode[], nodeId: React.Key): DataNode | null {
   for (let i = 0; i < tree.length; i++) {
     const node = tree[i]
@@ -74,7 +72,7 @@ export const getOriginHref = (originObject?: OriginObject): string | null => {
 
   switch (originObject.originType) {
     case 'Job':
-      return `/jobs/${originObject.originUid}`
+      return `/home/executions/${originObject.originUid}`
     case 'Comparison':
       return `/home/comparisons/${originObject.originUid}`
     case 'UserFile':
@@ -83,8 +81,8 @@ export const getOriginHref = (originObject?: OriginObject): string | null => {
     case 'User':
     case 'Folder':
       return null
-    default:
-      return assertNever(originObject.originType)
+    default: {
+      return originObject.originType
+    }
   }
 }
-
