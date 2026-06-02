@@ -49,7 +49,6 @@ const getEnv = (): ENVS => {
 const env: ENVS = getEnv()
 
 const defaultConfig = {
-  appName: 'https-apps-worker',
   env,
   api: {
     port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
@@ -57,7 +56,6 @@ const defaultConfig = {
     enableSsl: parseBooleanFromProcess(process.env.NODE_ENABLE_SSL, true),
     certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
-    url: process.env.NODE_URL ?? 'https://nodejs-api',
     railsHost: process.env.HOST ?? 'https://localhost:3000',
     // TODO - refactor to boolean
     allowErrorTestingRoutes: parseBooleanFromProcess(process.env.NODE_ALLOW_ERROR_TESTING_ROUTES, true),

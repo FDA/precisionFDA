@@ -21,29 +21,47 @@ export class QueueEventListener {
     this.init()
   }
 
-  private init() {
+  private init(): void {
     this.queues.forEach(queue => {
       queue.on('failed', (job: Job, error: Error) => {
         try {
-          this.logger.error({ job: this.getJobInfo(job), error }, 'Job failed')
-        } catch (error) {
-          console.error('error during queue failed handling', { error })
+          const attempts = job.opts.attempts ?? 1
+          const isTerminalFailure = job.attemptsMade >= attempts
+          const context = {
+            job: this.getJobInfo(job),
+            error,
+            attemptsMade: job.attemptsMade,
+            attempts,
+          }
+
+          if (isTerminalFailure) {
+            this.logger.error(context, 'Job failed')
+          } else {
+            this.logger.warn(context, 'Job attempt failed, retry scheduled by Bull')
+          }
+        } catch (eventHandlerError) {
+          console.error('error during queue failed handling', { error: eventHandlerError })
         }
       })
 
-      queue.on('waiting', async (jobId: number) => {
+      queue.on('waiting', async (jobId: number | string) => {
         try {
           const job = await queue.getJob(jobId)
 
           this.logger.debug(this.getJobInfo(job), 'Job waiting in queue')
-        } catch (error) {
-          console.error('error during queue waiting handling', { error })
+        } catch (eventHandlerError) {
+          console.error('error during queue waiting handling', { error: eventHandlerError })
         }
       })
     })
   }
 
-  private getJobInfo(job: Job<TaskWithAuth>) {
+  private getJobInfo(job: Job<TaskWithAuth> | null): {
+    type: TaskWithAuth['type'] | undefined
+    payload: TaskWithAuth['payload'] | undefined
+    userId: number | undefined
+    jobId: string | number | undefined
+  } {
     return {
       type: job?.data?.type,
       payload: job?.data?.payload,

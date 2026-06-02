@@ -15,6 +15,7 @@ import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
 import { SpaceMemberNotificationFacade } from '@shared/facade/space-member-notification/space-member-notification.facade'
 import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { createRunFollowUpActionJobTask } from '@shared/queue'
 import {
   NotifyNewDiscussionJob,
@@ -27,8 +28,10 @@ import { ProcessWithContext } from '../decorator/process-with-context'
 
 @Processor(config.workerJobs.queues.default.name)
 export class MainQueueProcessor {
+  @ServiceLogger()
+  private readonly logger: Logger
+
   constructor(
-    private readonly logger: Logger,
     private readonly user: UserContext,
     private readonly nodeService: NodeService,
     private readonly challengeService: ChallengeService,
@@ -71,7 +74,12 @@ export class MainQueueProcessor {
     this.logger.log(`synchronizeFile result: ${result}`)
 
     if (!result) {
-      throw new Error(`File ${input.fileUid} not ready for synchronizing, trigger repeat of the job by throwing error`)
+      this.logger.log(
+        `File ${input.fileUid} is not ready yet. Deferring via Bull retry/backoff (${job.attemptsMade + 1}/${job.opts.attempts ?? 'n/a'}).`,
+      )
+
+      await job.moveToFailed(new Error(`File ${input.fileUid} is not ready on platform to be synchronized`), true)
+      return
     } else {
       const followUpAction = await this.followUpDecider.decideNextAction(input.fileUid)
       if (followUpAction) {

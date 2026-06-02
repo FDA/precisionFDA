@@ -3,7 +3,6 @@ import { ConfigOverride, parseBooleanFromProcess, parseIntFromProcess } from '..
 
 export const config: ConfigOverride = () => ({
   // NOTE(samuel) copied from "staging.ts" configuration, so to avoid breaking changes, left unchanged
-  appName: 'https-apps-worker-stg',
   api: {
     railsHost: process.env.HOST,
     fdaSubnet: {

@@ -2,7 +2,6 @@ import { parseIpv4Cidr } from '@shared/validation/parsers'
 import { ConfigOverride, parseBooleanFromProcess, parseIntFromProcess } from '..'
 
 export const config: ConfigOverride = () => ({
-  appName: 'https-apps-worker-test',
   api: {
     railsHost: process.env.HOST,
     fdaSubnet: {
