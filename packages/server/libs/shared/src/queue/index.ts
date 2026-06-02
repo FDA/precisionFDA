@@ -164,11 +164,8 @@ const createRunFollowUpActionJobTask = async (payload: UidAndFollowUpInput, user
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createFileSynchronizeJobTask = async (
-  payload: SyncFileJobInput,
-  user?: UserCtx,
-  delayInMs?: number,
-): Promise<void> => mainJobProducer.createFileSynchronizeJobTask(payload, user, delayInMs)
+const createFileSynchronizeJobTask = async (payload: SyncFileJobInput, user?: UserCtx): Promise<void> =>
+  mainJobProducer.createFileSynchronizeJobTask(payload, user)
 
 /**
  * @deprecated Use the job producer directly within the DI

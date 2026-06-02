@@ -82,7 +82,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
     await this.addToQueue(wrapped, options)
   }
 
-  async createFileSynchronizeJobTask(payload: SyncFileJobInput, user?: UserCtx, delayInMs?: number): Promise<void> {
+  async createFileSynchronizeJobTask(payload: SyncFileJobInput, user?: UserCtx): Promise<void> {
     const wrapped = {
       type: TASK_TYPE.SYNC_FILE_STATE as const,
       payload,
@@ -91,7 +91,6 @@ export class MainQueueJobProducer extends QueueJobProducer {
 
     const options: JobOptions = {
       jobId: `${wrapped.type}.${payload.fileUid}`,
-      delay: delayInMs ?? 0,
     }
 
     await this.addToQueue(wrapped, options)

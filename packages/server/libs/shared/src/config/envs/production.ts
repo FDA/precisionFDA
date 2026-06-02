@@ -3,7 +3,6 @@ import { ConfigOverride, defaultConfig, parseBooleanFromProcess, parseIntFromPro
 import { MAX_JOB_DURATION_SECONDS } from '../constants'
 
 export const config: ConfigOverride = () => ({
-  appName: 'https-apps-worker-prod',
   api: {
     railsHost: process.env.HOST,
     allowErrorTestingRoutes: false,
