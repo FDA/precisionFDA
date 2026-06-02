@@ -147,3 +147,10 @@
     padding: 16px 12px;
     color: var(--c-text-500);
 }
+
+.spaceSelectionMatch {
+    background-color: var(--highlight-100);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+}
