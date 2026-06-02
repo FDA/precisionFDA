@@ -12,6 +12,21 @@ interface MyHomeProps {
   onSelect: () => void
 }
 
+const highlightMatch = (text: string, query: string): React.ReactNode => {
+  if (!query) return text
+  const lower = text.toLowerCase()
+  const q = query.toLowerCase()
+  const idx = lower.indexOf(q)
+  if (idx === -1) return text
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className={styles.spaceSelectionMatch}>{text.slice(idx, idx + q.length)}</mark>
+      {text.slice(idx + q.length)}
+    </>
+  )
+}
+
 interface SpaceSelectionListProps {
   excludeScopes?: string[]
   filterString?: string
@@ -34,7 +49,11 @@ export const SpaceSelectionList = ({
 
   const spaces = data
     .filter(s => !excludeScopes.includes(s.scope))
-    .filter(s => !filterString || s.title.toLowerCase().includes(filterString.toLowerCase()))
+    .filter(s => {
+      if (!filterString) return true
+      const q = filterString.toLowerCase()
+      return s.title.toLowerCase().includes(q) || s.scope.toLowerCase().includes(q)
+    })
 
   if (isLoading) {
     return <div className={styles.spaceSelectionEmptyMessage}>Loading...</div>
@@ -80,9 +99,9 @@ export const SpaceSelectionList = ({
               {s.protected && <ProtectedIcon />}
               {s.restrictedReviewer && <FdaRestrictedIcon />}
             </span>
-            <span className={styles.spaceSelectionTitle} title={s.title}>{s.title}</span>
+            <span className={styles.spaceSelectionTitle} title={s.title}>{highlightMatch(s.title, filterString)}</span>
           </div>
-          <span className={styles.spaceSelectionScopeLabel}>{s.scope}</span>
+          <span className={styles.spaceSelectionScopeLabel}>{highlightMatch(s.scope, filterString)}</span>
         </div>
       ))}
     </div>
