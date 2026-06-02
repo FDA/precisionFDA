@@ -14,9 +14,9 @@ import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from
 import { theme } from '@/styles/theme'
 import { sanitizeFileName } from '@/utils/formatting'
 import { getBackPathNext } from '@/utils/getBackPath'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsMenuContent } from '../../home/ActionMenuContent'
 import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
-import { useAuthUser } from '../../auth/useAuthUser'
 import { defaultHomeContext, type HomeScopeContextValue } from '../../home/HomeScopeContext'
 import { StyledBackLink } from '../../home/home.styles'
 import {
@@ -39,8 +39,8 @@ import { License } from '../../licenses/License'
 import type { License as ILicense } from '../../licenses/types'
 import type { ISpace } from '../../spaces/spaces.types'
 import { FileBreadcrumb } from '../FileBreadcrumb'
-import { fetchFile } from '../files.api'
 import { getOriginHref } from '../file.utils'
+import { fetchFile } from '../files.api'
 import type { IFile } from '../files.types'
 import { normalizePermissions } from '../normalizePermissions'
 import { useFilesSelectActions } from '../useFilesSelectActions'
@@ -74,6 +74,10 @@ const FileActionsDropdown = ({
       <ActionModalsRenderer modals={modals} />
     </>
   )
+}
+
+const getOriginLinkText = (file: IFile): string | undefined => {
+  return typeof file.origin === 'object' && file.origin ? file.origin.text : undefined
 }
 
 export const FileShow = ({
@@ -130,7 +134,7 @@ export const FileShow = ({
   const filePermissions = normalizePermissions(file, user, space)
   const showLicensePending = file.fileLicense?.acceptanceStatus === 'pending'
   const originHref = getOriginHref(file.originObject)
-  const originText = typeof file.origin === 'object' && file.origin ? file.origin.text : undefined
+  const originLinkText = getOriginLinkText(file)
 
   return (
     <>
@@ -227,9 +231,9 @@ export const FileShow = ({
             <MetadataItem>
               <MetadataKey>Origin</MetadataKey>
               <MetadataVal data-testid="file-origin">
-                {originHref && originText != null ? (
+                {originHref ? (
                   <Link target="_blank" to={originHref}>
-                    {originText || originHref}
+                    {originLinkText || originHref}
                   </Link>
                 ) : typeof file.origin === 'object' ? (
                   file.origin?.text
