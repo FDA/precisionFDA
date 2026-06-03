@@ -36,8 +36,7 @@ describe AssetSerializer do
         expect(asset_serialized["links"]["update"]).to eq(api_files_path(asset))
       end
 
-      it "links[add_file, add_folder] exist" do
-        expect(asset_serialized["links"]["add_file"]).to eq(api_create_file_path)
+      it "links[add_folder] exist" do
         expect(asset_serialized["links"]["add_folder"]).to eq(create_folder_api_files_path)
       end
 

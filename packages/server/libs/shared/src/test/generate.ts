@@ -546,6 +546,7 @@ const userFile = {
       stiType: FILE_STI_TYPE.USERFILE,
     }
   },
+  fileId: (): string => `file-${random.dxstr()}`,
 }
 
 const asset = {

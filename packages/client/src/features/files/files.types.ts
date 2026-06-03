@@ -2,8 +2,8 @@ import type { TreeProps } from 'rc-tree'
 import type { BasicDataNode } from 'rc-tree/es/interface'
 import type { DataNode } from 'rc-tree/lib/interface'
 import type { FileOrg, FileUser } from '../apps/apps.types'
-import type { ServerScope } from '../home/types'
 import type { FileLicense } from '../assets/assets.types'
+import type { ServerScope } from '../home/types'
 
 export interface NodePermissions {
   canDelete: boolean

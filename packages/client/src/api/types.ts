@@ -49,3 +49,7 @@ export function getBackendErrorMessage(error: unknown, fallback: string, statusM
   }
   return fallback
 }
+
+export type EntityUidResponse = {
+  uid: string
+}

@@ -1,6 +1,6 @@
-import { http, HttpResponse } from 'msw'
-import { IAsset } from '../../features/assets/assets.types'
-import { Asset } from '../../features/actionModals/AttachToModal/useListAssetsQuery'
+import { HttpResponse, http } from 'msw'
+import type { Asset } from '../../features/actionModals/AttachToModal/useListAssetsQuery'
+import type { IAsset } from '../../features/assets/assets.types'
 
 // Mock asset data for useSelectAssetModal (IAsset interface)
 export const mockSelectAssets: IAsset[] = [
@@ -191,7 +191,8 @@ export const mockAttachAssets: Asset[] = [
     prefix: 'asset',
     description: 'A comprehensive guide for project documentation',
     file_paths: ['/assets/documentation-guide.md'],
-    content: '# Documentation Guide\n\nThis is a comprehensive guide for creating and maintaining project documentation.\n\n## Getting Started\n\n1. Create clear headings\n2. Use bullet points for lists\n3. Include code examples\n\n```javascript\nconst example = "Hello World";\nconsole.log(example);\n```\n\n## Best Practices\n\n- Keep it simple and clear\n- Update regularly\n- Include examples',
+    content:
+      '# Documentation Guide\n\nThis is a comprehensive guide for creating and maintaining project documentation.\n\n## Getting Started\n\n1. Create clear headings\n2. Use bullet points for lists\n3. Include code examples\n\n```javascript\nconst example = "Hello World";\nconsole.log(example);\n```\n\n## Best Practices\n\n- Keep it simple and clear\n- Update regularly\n- Include examples',
   },
   {
     id: 2,
@@ -215,7 +216,8 @@ export const mockAttachAssets: Asset[] = [
     prefix: 'asset',
     description: 'Complete API documentation and reference',
     file_paths: ['/assets/api-reference.md'],
-    content: '# API Reference\n\n## Authentication\n\nAll API requests require authentication using an API key.\n\n```bash\ncurl -H "Authorization: Bearer YOUR_API_KEY" https://api.example.com/endpoint\n```\n\n## Endpoints\n\n### GET /api/users\n\nRetrieve a list of users.\n\n**Response:**\n```json\n{\n  "users": [\n    {\n      "id": 1,\n      "name": "John Doe",\n      "email": "john@example.com"\n    }\n  ]\n}\n```',
+    content:
+      '# API Reference\n\n## Authentication\n\nAll API requests require authentication using an API key.\n\n```bash\ncurl -H "Authorization: Bearer YOUR_API_KEY" https://api.example.com/endpoint\n```\n\n## Endpoints\n\n### GET /api/users\n\nRetrieve a list of users.\n\n**Response:**\n```json\n{\n  "users": [\n    {\n      "id": 1,\n      "name": "John Doe",\n      "email": "john@example.com"\n    }\n  ]\n}\n```',
   },
   {
     id: 3,
@@ -239,7 +241,8 @@ export const mockAttachAssets: Asset[] = [
     prefix: 'asset',
     description: 'Template for application configuration files',
     file_paths: ['/assets/configuration-template.md'],
-    content: '# Configuration Template\n\nUse this template to configure your application.\n\n## Environment Variables\n\n```env\nDATABASE_URL=postgresql://localhost:5432/mydb\nAPP_SECRET=your-secret-key\nPORT=3000\n```\n\n## Configuration File\n\n```yaml\nserver:\n  port: 3000\n  host: localhost\n\ndatabase:\n  url: postgresql://localhost:5432/mydb\n  pool_size: 10\n\nlogging:\n  level: info\n  format: json\n```',
+    content:
+      '# Configuration Template\n\nUse this template to configure your application.\n\n## Environment Variables\n\n```env\nDATABASE_URL=postgresql://localhost:5432/mydb\nAPP_SECRET=your-secret-key\nPORT=3000\n```\n\n## Configuration File\n\n```yaml\nserver:\n  port: 3000\n  host: localhost\n\ndatabase:\n  url: postgresql://localhost:5432/mydb\n  pool_size: 10\n\nlogging:\n  level: info\n  format: json\n```',
   },
   {
     id: 4,
@@ -263,7 +266,8 @@ export const mockAttachAssets: Asset[] = [
     prefix: 'asset',
     description: 'Basic tutorial for new users',
     file_paths: ['/assets/tutorial-basics.md'],
-    content: '# Getting Started Tutorial\n\nWelcome to our platform! This tutorial will guide you through the basics.\n\n## Step 1: Setup\n\nFirst, make sure you have all the prerequisites installed:\n\n- Node.js (v16 or higher)\n- npm or yarn\n- Git\n\n## Step 2: Installation\n\n```bash\nnpm install\nnpm start\n```\n\n## Step 3: Your First Project\n\nCreate your first project by following these steps...',
+    content:
+      '# Getting Started Tutorial\n\nWelcome to our platform! This tutorial will guide you through the basics.\n\n## Step 1: Setup\n\nFirst, make sure you have all the prerequisites installed:\n\n- Node.js (v16 or higher)\n- npm or yarn\n- Git\n\n## Step 2: Installation\n\n```bash\nnpm install\nnpm start\n```\n\n## Step 3: Your First Project\n\nCreate your first project by following these steps...',
   },
 ]
 
@@ -291,7 +295,11 @@ export const assetsHandlers = [
             scope: 'private',
             space_id: null,
             locked: false,
-            origin: { href: '/home/assets/file-GBKx2kj0JqyZgZGbK9bVZ7jJ-1', fa: 'fa fa-file-zip-o fa-fw', text: '  shoudFail' },
+            origin: {
+              href: '/home/assets/file-GBKx2kj0JqyZgZGbK9bVZ7jJ-1',
+              fa: 'fa fa-file-zip-o fa-fw',
+              text: '  shoudFail',
+            },
             tags: ['tags', 'are', 'cool'],
             uid: 'file-GBKx2kj0JqyZgZGbK9bVZ7jJ-1',
             file_size: '190 Bytes',
@@ -303,7 +311,6 @@ export const assetsHandlers = [
               user: '/users/minch.yoda',
               track: '/track?id=file-GBKx2kj0JqyZgZGbK9bVZ7jJ-1',
               download_list: '/api/files/download_list',
-              add_file: '/api/create_file',
               add_folder: '/api/files/create_folder',
               update: '/api/assets/file-GBKx2kj0JqyZgZGbK9bVZ7jJ-1',
               download: '/api/files/file-GBKx2kj0JqyZgZGbK9bVZ7jJ-1/download',
@@ -340,14 +347,14 @@ export const assetsHandlers = [
             uid: 'file-GBPj0980JqyVVyk9699jY41p-1',
             file_size: '10 KB',
             created_at_date_time: '2022-06-07 18:43:17 CEST',
-            description: '# Testing asset content\nThis content was created for testing purposes.\n\nThanks for reaching out!\n',
+            description:
+              '# Testing asset content\nThis content was created for testing purposes.\n\nThanks for reaching out!\n',
             links: {
               origin_object: { origin_type: 'Asset', origin_uid: 'file-GBPj0980JqyVVyk9699jY41p-1' },
               show: '/api/assets/file-GBPj0980JqyVVyk9699jY41p-1',
               user: '/users/minch.yoda',
               track: '/track?id=file-GBPj0980JqyVVyk9699jY41p-1',
               download_list: '/api/files/download_list',
-              add_file: '/api/create_file',
               add_folder: '/api/files/create_folder',
               update: '/api/assets/file-GBPj0980JqyVVyk9699jY41p-1',
               download: '/api/files/file-GBPj0980JqyVVyk9699jY41p-1/download',
@@ -373,20 +380,20 @@ export const assetsHandlers = [
       { status: 200 },
     ),
   ),
-  
+
   // Handler for /api/list_assets (used by useSelectAssetModal and useAssetAttachModal)
   http.post('/api/list_assets', async ({ request }) => {
-    const body = await request.json().catch(() => ({})) as Record<string, unknown>
-    
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+
     // If request has scopes/search_string/states, return IAsset[] format (useSelectAssetModal)
     if (body && ('scopes' in body || 'search_string' in body || 'states' in body)) {
       return HttpResponse.json(mockSelectAssets)
     }
-    
+
     // Otherwise return Asset[] format (useAssetAttachModal)
     return HttpResponse.json(mockAttachAssets)
   }),
-  
+
   // Handler for /api/assets/delete (used by useDeleteModal)
   http.post('/api/assets/delete', () =>
     HttpResponse.json({

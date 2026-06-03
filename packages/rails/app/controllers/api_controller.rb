@@ -18,8 +18,7 @@ class ApiController < ApplicationController
   before_action :require_api_login, except: %i(destroy)
   before_action :validate_create_asset, only: :create_asset
   before_action :check_total_and_job_charges_limit, only: %i(run_workflow)
-  before_action :check_total_charges_limit, only: %i(create_file create_asset)
-  before_action :validate_create_file, only: :create_file
+  before_action :check_total_charges_limit, only: %i(create_asset)
   before_action :validate_get_upload_url, only: :get_upload_url
 
   rescue_from ApiError, with: :render_error_method
@@ -715,45 +714,6 @@ class ApiController < ApplicationController
     end
 
     render json: { license_id: license_id, items_licensed: items_licensed }
-  end
-
-  # Inputs:
-  #
-  # name (string, required, nonempty)
-  # description (string, optional)
-  # scope (string, optional) 'public' | 'private' | <SPACE_ID>
-  #
-  # Outputs:
-  #
-  # id (string, "file-xxxx")
-  #
-  def create_file
-    fail "User is not allowed to create public files" if params[:scope] == "public" && !current_user.site_admin?
-
-    project = UserFile.publication_project!(current_user, @scope)
-
-    parent = current_user
-    # file could be uploaded by CLI inside job; fall back to current_user if job is not found
-    if params[:parent_type] == "Job" && params[:parent_id] != ""
-      parent = Job.find_by(dxid: params[:parent_id]) || current_user
-    end
-
-    api = DNAnexusAPI.new(RequestContext.instance.token)
-    file_dxid = api.file_new(params[:name], project)["id"]
-
-    file = UserFile.create!(
-      dxid: file_dxid,
-      project: project,
-      name: params[:name],
-      state: "open",
-      description: params[:description],
-      user: current_user,
-      parent: parent,
-      scope: @scope,
-      UserFile.scope_column_name(@scope) => @folder&.id,
-    )
-
-    render json: { id: file.uid }
   end
 
   # Creates a challenge logo - to be visible as a challenge card image
@@ -1561,61 +1521,6 @@ class ApiController < ApplicationController
     end
   end
 
-  # Validates and initializes parameters for a file creation.
-  # rubocop:todo Metrics/MethodLength
-  def validate_create_file
-    folder_id = params[:folder_id].presence
-    @folder =
-      begin
-        folder_id && Folder.find(folder_id)
-      rescue ActiveRecord::RecordNotFound
-        raise_api_error "The folder doesn't exist."
-      end
-
-    # If folder is present, its scope rules everything
-    params[:scope] = @folder.scope if @folder
-
-    if @folder && !@folder.editable_by?(@context)
-      raise_api_error "You don't have permissions to add files to the folder."
-    end
-
-    if @folder && @folder.state == "removing"
-      raise_api_error "The target folder is being removed."
-    end
-
-    # user specified only folder id, but the folder is in space - set it for him
-    if @folder && (@folder.scope.match(/^space-(\d+)$/)) && !params[:space_id]
-      params[:scope] = @folder.scope
-    end
-
-    file_name = params[:name].presence
-    if file_name.blank? || !file_name.is_a?(String)
-      raise_api_error "File name needs to be a non-empty String"
-    end
-
-    description = params[:description].presence
-    if description && !description.is_a?(String)
-      raise_api_error "File description needs to be a String"
-    end
-
-    @scope = if ActiveModel::Type::Boolean.new.cast(params[:public_scope])
-      Scopes::SCOPE_PUBLIC
-    else
-      params[:scope].presence || Scopes::SCOPE_PRIVATE
-    end
-
-    unless [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE].include?(@scope) || Space.valid_scope?(@scope)
-      raise_api_error "Scope is invalid"
-    end
-
-    if Space.valid_scope?(@scope) && !Space.from_scope(@scope).editable_by?(current_user)
-      raise_api_error "You don't have permissions to add files to the space."
-    end
-
-    return if @folder.nil? || @folder.scope == @scope
-
-    raise_api_error "The folder doesn't belong to a scope #{@scope}."
-  end
   # rubocop:enable Metrics/MethodLength
 
   # rubocop:enable Style/SignalException

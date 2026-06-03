@@ -62,8 +62,6 @@ class UserFileSerializer < NodeSerializer
 
       # POST download_list files
       links[:download_list] = download_list_api_files_path
-      # POST: Add file
-      links[:add_file] = api_create_file_path
       # POST: Add folder
       links[:add_folder] = create_folder_api_files_path
       # PUT edit a single file

@@ -203,6 +203,10 @@ export class NodeService {
     })) as FileOrAsset | null
   }
 
+  async getEditableFolder(id: number): Promise<Folder | null> {
+    return this.nodeRepository.findEditableOne({ id, stiType: FILE_STI_TYPE.FOLDER }) as Promise<Folder | null>
+  }
+
   /**
    * Loads the whole tree that is filtered by parameters and returns
    * it sorted with leaves first

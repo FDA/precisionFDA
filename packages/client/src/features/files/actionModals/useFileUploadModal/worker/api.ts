@@ -34,7 +34,7 @@ export async function createFileRequest(session: WorkerSession): Promise<void> {
   session.currentControllers.add(controller)
 
   try {
-    const response = await fetch('/api/create_file', {
+    const response = await fetch('/api/v2/files', {
       method: 'POST',
       headers: buildRequestHeaders(session.csrfToken),
       body: JSON.stringify(data),

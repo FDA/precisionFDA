@@ -16,6 +16,7 @@ import {
   Query,
   Res,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common'
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger'
 import archiver from 'archiver'
@@ -24,20 +25,24 @@ import { compareVersions } from 'compare-versions'
 import { Response } from 'express'
 import { DownloadLinkOptionsDTO } from '@shared/domain/entity/domain/download-link-options.dto'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { EntityUidResponseDTO } from '@shared/domain/entity/dto/entity-uid-response.dto'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
 import { FileGetDTO } from '@shared/domain/user-file/dto/file-get.dto'
+import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
+import { UserFileCreateDTO } from '@shared/domain/user-file/dto/user-file-create.dto'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
 import { ExistingFileSet, ResolvePath, SelectedNode } from '@shared/domain/user-file/user-file.types'
+import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { GetUploadURLResponse } from '@shared/platform-client/platform-client.responses'
 import { createCloseFileJobTask } from '@shared/queue'
 import { TimeUtils } from '@shared/utils/time.utils'
+import { SnakeToCamelPipe } from '@shared/validation/pipes/snake-to-camel.pipe'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import { UserFileBulkDownloadFacade } from '../facade/user-file/user-file-bulk-download.facade'
 import { UserFileDownloadFacade } from '../facade/user-file/user-file-download.facade'
-import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
 import { UserFileGetFacade } from '../facade/user-file/user-file-get.facade'
+import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { FileUidParamDTO } from './model/file-uid-param.dto'
@@ -56,7 +61,23 @@ export class FilesController {
     private readonly userFileGetFacade: UserFileGetFacade,
     private readonly userFileDownloadFacade: UserFileDownloadFacade,
     private readonly userFileBulkDownloadFacade: UserFileBulkDownloadFacade,
+    private readonly userFileCreateFacade: UserFileCreateFacade,
   ) {}
+
+  @Post()
+  @UsePipes(new SnakeToCamelPipe())
+  async createFile(
+    @Body() input: UserFileCreateDTO,
+    @Res({ passthrough: true }) res: Response,
+    @Headers('user-agent') userAgent?: string,
+  ): Promise<EntityUidResponseDTO> {
+    const result = await this.userFileCreateFacade.createFile(input)
+
+    // Keep returning 200 for JupyterLab client
+    if (userAgent?.includes('python-requests')) res.status(200)
+
+    return result
+  }
 
   @Get('/:uid/upload-url')
   async getUploadUrl(

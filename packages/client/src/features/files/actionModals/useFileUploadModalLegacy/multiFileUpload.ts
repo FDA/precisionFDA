@@ -1,7 +1,7 @@
+import sparkMD5 from 'spark-md5'
 import { closeFile, createFile, getUploadURL, uploadChunk } from '@/api/files'
 import { HTTP_STATUS } from '@/constants'
-import sparkMD5 from 'spark-md5'
-import { CHUNK_SIZE, FILE_STATUS, FilesMeta, IUploadFile, IUploadInfo } from './constants'
+import { CHUNK_SIZE, FILE_STATUS, type FilesMeta, type IUploadFile, type IUploadInfo } from './constants'
 
 const filterFiles = (filesBlob: any[], filesMeta: any[]) =>
   filesBlob.filter(b => {
@@ -14,7 +14,7 @@ const filterFiles = (filesBlob: any[], filesMeta: any[]) =>
   })
 
 const throwIfError = (status: number, payload?: any) => {
-  if (status !== HTTP_STATUS.OK) {
+  if (![HTTP_STATUS.OK, HTTP_STATUS.CREATED].includes(status)) {
     const errorMessage = payload?.error?.message ?? 'Unknown upload failure'
     throw new Error(errorMessage)
   }
@@ -29,7 +29,14 @@ interface IMultiFileUpload {
   folderId?: string
 }
 
-export const multiFileUpload = async ({ filesBlob, filesMeta, updateFileStatus, spaceId, scope, folderId }: IMultiFileUpload) => {
+export const multiFileUpload = async ({
+  filesBlob,
+  filesMeta,
+  updateFileStatus,
+  spaceId,
+  scope,
+  folderId,
+}: IMultiFileUpload) => {
   const scopeToUpload = scope || `space-${spaceId}`
 
   const filteredFiles: IUploadFile[] = filterFiles(filesBlob, filesMeta)

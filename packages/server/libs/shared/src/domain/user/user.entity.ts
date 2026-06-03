@@ -13,6 +13,8 @@ import { SPACE_STATE } from '@shared/domain/space/space.enum'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { ADMIN_LEAD_ROLES, CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
 import { UserExtras } from '@shared/domain/user/user-extras'
+import { EntityScope } from '@shared/types/common'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { config } from '../../config'
 import { BaseEntity } from '../../database/base.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
@@ -141,6 +143,8 @@ export const DEFAULT_USER_EXTRAS: UserExtras = {
   has_seen_guidelines: true,
   sso_enabled: null,
 }
+
+export type SpaceMembershipMode = 'leadable' | 'manageable' | 'editable' | 'accessible'
 
 @Entity({ tableName: 'users', repository: () => UserRepository })
 export class User extends BaseEntity {
@@ -277,15 +281,30 @@ export class User extends BaseEntity {
     return this.dxuser
   }
 
+  private spaceMembershipWhere(mode?: SpaceMembershipMode, spaceId?: number): Record<string, unknown> {
+    let roleFilter = {}
+    if (mode === 'leadable') {
+      roleFilter = { role: SPACE_MEMBERSHIP_ROLE.LEAD }
+    } else if (mode === 'manageable') {
+      roleFilter = { role: { $in: ADMIN_LEAD_ROLES } }
+    } else if (mode === 'editable') {
+      roleFilter = { role: { $in: CAN_EDIT_ROLES } }
+    }
+
+    return {
+      active: true,
+      ...roleFilter,
+      spaces: {
+        ...(spaceId !== undefined ? { id: spaceId } : {}),
+        state: { $ne: SPACE_STATE.DELETED },
+      },
+    }
+  }
+
   async accessibleSpaces(): Promise<Space[]> {
     await this.spaceMemberships.load({
       populate: ['spaces'],
-      where: {
-        active: true,
-        spaces: {
-          state: { $ne: SPACE_STATE.DELETED },
-        },
-      },
+      where: this.spaceMembershipWhere('accessible'),
     })
 
     return Array.from(this.spaceMemberships).flatMap(spaceMembership => Array.from(spaceMembership.spaces))
@@ -299,13 +318,7 @@ export class User extends BaseEntity {
   async editableSpaces(): Promise<Space[]> {
     await this.spaceMemberships.load({
       populate: ['spaces'],
-      where: {
-        active: true,
-        role: { $in: CAN_EDIT_ROLES },
-        spaces: {
-          state: { $ne: SPACE_STATE.DELETED },
-        },
-      },
+      where: this.spaceMembershipWhere('editable'),
     })
 
     return Array.from(this.spaceMemberships).flatMap(membership => Array.from(membership.spaces))
@@ -317,13 +330,7 @@ export class User extends BaseEntity {
   async manageableSpaces(): Promise<Space[]> {
     await this.spaceMemberships.load({
       populate: ['spaces'],
-      where: {
-        active: true,
-        role: { $in: ADMIN_LEAD_ROLES },
-        spaces: {
-          state: { $ne: SPACE_STATE.DELETED },
-        },
-      },
+      where: this.spaceMembershipWhere('manageable'),
     })
 
     return Array.from(this.spaceMemberships).flatMap(membership => Array.from(membership.spaces))
@@ -332,13 +339,7 @@ export class User extends BaseEntity {
   async leadableSpaces(): Promise<Space[]> {
     await this.spaceMemberships.load({
       populate: ['spaces'],
-      where: {
-        active: true,
-        role: SPACE_MEMBERSHIP_ROLE.LEAD,
-        spaces: {
-          state: { $ne: SPACE_STATE.DELETED },
-        },
-      },
+      where: this.spaceMembershipWhere('leadable'),
     })
     return Array.from(this.spaceMemberships).flatMap(membership => Array.from(membership.spaces))
   }
@@ -387,5 +388,26 @@ export class User extends BaseEntity {
 
   isJobExecutionEnabled(): boolean {
     return this.cloudResourceSettings.job_limit > 0
+  }
+
+  async getDestinationProjectId(scope: EntityScope, mode?: SpaceMembershipMode): Promise<DxId<'project'> | null> {
+    if (EntityScopeUtils.isPublic(scope)) {
+      return this.publicFilesProject
+    } else if (EntityScopeUtils.isPrivate(scope)) {
+      return this.privateFilesProject
+    } else if (EntityScopeUtils.isSpaceScope(scope)) {
+      const spaceId = EntityScopeUtils.getSpaceIdFromScope(scope)
+      const spaceMembership = await this.spaceMemberships
+        .loadItems({
+          where: this.spaceMembershipWhere(mode, spaceId),
+        })
+        .then(memberships => memberships[0])
+      if (!spaceMembership) {
+        return null
+      }
+      await spaceMembership.spaces.load()
+      const space = spaceMembership.spaces[0]
+      return spaceMembership.isHost ? space.hostProject : space.guestProject
+    }
   }
 }

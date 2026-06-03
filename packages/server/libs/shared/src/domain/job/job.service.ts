@@ -90,6 +90,10 @@ export class JobService implements SearchableByUid<'job'> {
     return this.jobRepo.findEditableOne({ uid })
   }
 
+  getEditableOne(where: FilterQuery<Job>): Promise<Job | null> {
+    return this.jobRepo.findEditableOne(where)
+  }
+
   async synchronizeJob(jobDxid: DxId<'job'>, bullJob: BullJob): Promise<Maybe<Job>> {
     return await this.jobSyncService.synchronizeJob(jobDxid, bullJob)
   }

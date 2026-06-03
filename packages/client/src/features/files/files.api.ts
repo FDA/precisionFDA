@@ -1,8 +1,8 @@
 import axios from 'axios'
+import type { EntityUidResponse } from '@/api/types'
 import { cleanObject } from '@/utils/object'
 import type { DownloadListResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
-import type { Params } from '../home/utils'
-import { formatScopeQ, prepareListFetch } from '../home/utils'
+import { formatScopeQ, type Params, prepareListFetch } from '../home/utils'
 import type { FileType, IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
 
 interface RailsFileLinks {
@@ -106,7 +106,8 @@ function mapRailsFile(raw: RailsFile): IFile {
     show_license_pending: raw.show_license_pending,
     requestApprovalLicenseLink:
       typeof raw.links?.request_approval_license === 'string' ? raw.links.request_approval_license : undefined,
-    acceptLicenseActionLink: typeof raw.links?.accept_license_action === 'string' ? raw.links.accept_license_action : undefined,
+    acceptLicenseActionLink:
+      typeof raw.links?.accept_license_action === 'string' ? raw.links.accept_license_action : undefined,
     downloadLink: raw.links?.download,
   }
 }
@@ -289,8 +290,8 @@ export const moveFilesRequest = async (
   return axios.post(url, body).then(res => res.data as MoveFilesResponse)
 }
 
-export async function createFile(name: string, scope: string, folder_id: string | null): Promise<unknown> {
-  return axios.post('/api/create_file', { name, scope, folder_id }).then(r => r.data)
+export async function createFile(name: string, scope: string, folder_id: string | null): Promise<EntityUidResponse> {
+  return axios.post('/api/v2/files', { name, scope, folderId: folder_id }).then(r => r.data)
 }
 
 export async function fetchSelectedFiles(ids: number[]): Promise<SelectedNode[]> {

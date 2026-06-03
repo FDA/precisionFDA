@@ -70,6 +70,7 @@ describe('UserFileService', () => {
   const fileRepoFindAccessibleOneStub = stub()
   const fileRepoFindStub = stub()
   const fileRepoCountStub = stub()
+  const fileRepoPersistAndFlushStub = stub()
   const fileLoadIfAccessibleByUserStub = stub()
   const folderRepoFindOneStub = stub()
   const nodeRepoFindOneOrFailStub = stub()
@@ -174,6 +175,7 @@ describe('UserFileService', () => {
     find: fileRepoFindStub,
     count: fileRepoCountStub,
     findEditable: findEditableStub,
+    persistAndFlush: fileRepoPersistAndFlushStub,
   } as unknown as UserFileRepository
   const licensedItemRepo = {
     getLicenseItemsForNode: getLicenseItemsForNodeStub,
@@ -243,6 +245,9 @@ describe('UserFileService', () => {
 
     fileRepoFindStub.reset()
     fileRepoFindStub.throws()
+
+    fileRepoPersistAndFlushStub.reset()
+    fileRepoPersistAndFlushStub.throws()
 
     folderRepoFindOneStub.reset()
     folderRepoFindOneStub.throws()
@@ -377,6 +382,8 @@ describe('UserFileService', () => {
     })
 
     it('should create the correct UserFile', async () => {
+      fileRepoPersistAndFlushStub.resolves()
+
       const res = await getInstance().createFile(FILE_CREATE)
 
       expect(res.dxid).to.eq(DXID)

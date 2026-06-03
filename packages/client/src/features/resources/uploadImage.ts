@@ -1,8 +1,7 @@
 import axios from 'axios'
 import sparkMD5 from 'spark-md5'
-import { GetUploadURLResponse } from './resources.types'
-import { HTTP_STATUS } from '../../constants'
 import { getUploadURL } from '../../api/files'
+import { HTTP_STATUS } from '../../constants'
 
 export const CHUNK_SIZE = 100 * 1024 ** 2 // 100Mb
 
@@ -13,14 +12,12 @@ const throwIfError = (status: number, payload?: any) => {
   }
 }
 
-const uploadChunk = (url: string, chunk: ArrayBuffer, headers: HeadersInit) => (
-
+const uploadChunk = (url: string, chunk: ArrayBuffer, headers: HeadersInit) =>
   fetch(url, {
     method: 'PUT',
     body: chunk,
     headers,
   })
-)
 
 const closeFile = (uid: string, followUpAction?: string) =>
   axios.post('/api/close_file', {
@@ -32,7 +29,13 @@ function getNumChunks(file: File) {
   return Math.ceil(file.size / CHUNK_SIZE)
 }
 
-async function processChunk(file: File, fileUid: string, chunkIndex: number, reader: FileReader, spark: sparkMD5.ArrayBuffer) {
+async function processChunk(
+  file: File,
+  fileUid: string,
+  chunkIndex: number,
+  reader: FileReader,
+  spark: sparkMD5.ArrayBuffer,
+) {
   const firstByte = chunkIndex * CHUNK_SIZE
   const lastByte = (chunkIndex + 1) * CHUNK_SIZE
 
@@ -56,7 +59,9 @@ function readAndProcessFile(file: File, fileUid: string) {
     const spark = new sparkMD5.ArrayBuffer()
 
     reader.onload = async () => {
-      const promises = Array.from({ length: getNumChunks(file) }, (_, i) => processChunk(file, fileUid, i, reader, spark))
+      const promises = Array.from({ length: getNumChunks(file) }, (_, i) =>
+        processChunk(file, fileUid, i, reader, spark),
+      )
 
       try {
         await Promise.all(promises)
