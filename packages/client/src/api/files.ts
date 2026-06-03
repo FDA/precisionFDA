@@ -1,12 +1,14 @@
 import axios from 'axios'
-import { ServerScope } from '../features/home/types'
+import type { ServerScope } from '../features/home/types'
 
 export const createFile = (name: string, scope?: ServerScope, folderId?: string | number) =>
-  axios.post('/api/create_file', { name, scope, folder_id: folderId }).then(response => ({ status: response.status, payload: response.data }))
+  axios
+    .post('/api/v2/files', { name, scope, folderId })
+    .then(response => ({ status: response.status, payload: response.data }))
 
 export const getUploadURL = (uid: string | number, index: number, size: number, md5: string) =>
   axios
-    .get(`/api/v2/files/${uid}/upload-url`, { params: { index, size, md5 }})
+    .get(`/api/v2/files/${uid}/upload-url`, { params: { index, size, md5 } })
     .then(response => ({ status: response.status, payload: response.data }))
 
 export const uploadChunk = (url: string, chunk: Blob | ArrayBuffer | string, headers?: Record<string, string>) => {

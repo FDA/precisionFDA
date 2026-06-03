@@ -33,6 +33,7 @@ const fakes = {
     fileStatesFake: sinon.stub(),
     filesListFake: sinon.stub(),
     filesDescFake: sinon.stub(),
+    fileCreateFake: sinon.stub(),
     foldersListFake: sinon.stub(),
     folderRenameFake: sinon.stub(),
     folderRemoveFake: sinon.stub(),
@@ -123,6 +124,7 @@ const mocksSetDefaultBehaviour = (): void => {
   fakes.client.filesMoveFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.filesListFake.callsFake(() => FILES_LIST_RES_ROOT)
   fakes.client.filesDescFake.callsFake(() => FILES_DESC_RES)
+  fakes.client.fileCreateFake.callsFake(() => ({ id: generate.userFile.fileId() }))
   fakes.client.foldersListFake.callsFake(() => FOLDERS_LIST_RES)
   fakes.client.orgFindMembersFake.callsFake(() => FIND_MEMBERS_RES)
 
@@ -203,6 +205,12 @@ const mocksSetDefaultBehaviour = (): void => {
     const data = stub ? stub(...(body.params ?? [])) : undefined
     return of({ data })
   })
+  fakes.client.userCloudResourcesFake.callsFake(() => ({
+    computeCharges: 0,
+    storageCharges: 0,
+    dataEgressCharges: 0,
+  }))
+  ;(fakes.bull.isReadyFake as sinon.SinonStub).callsFake(() => Promise.resolve(true))
 
   mockServiceFactory.reset()
 }
@@ -217,6 +225,7 @@ const mocksSetup = (): void => {
   sandbox.replace(PlatformClient.prototype, 'fileDescribe', fakes.client.fileDescribeFake)
   sandbox.replace(PlatformClient.prototype, 'fileStates', fakes.client.fileStatesFake)
   sandbox.replace(PlatformClient.prototype, 'filesList', fakes.client.filesListFake)
+  sandbox.replace(PlatformClient.prototype, 'fileCreate', fakes.client.fileCreateFake)
   sandbox.replace(PlatformClient.prototype, 'folderCreate', fakes.client.folderCreateFake)
   sandbox.replace(PlatformClient.prototype, 'filesMoveToFolder', fakes.client.filesMoveFake)
   // sandbox.replace(PlatformClient.prototype, 'filesDescribe', fakes.client.filesDescFake)
@@ -280,6 +289,7 @@ const mocksReset = (): void => {
   fakes.client.fileStatesFake.reset()
   fakes.client.filesListFake.reset()
   fakes.client.filesDescFake.reset()
+  fakes.client.fileCreateFake.reset()
   fakes.client.foldersListFake.reset()
   fakes.client.folderRenameFake.reset()
   fakes.client.folderRemoveFake.reset()
@@ -299,6 +309,7 @@ const mocksReset = (): void => {
   fakes.client.userDescribeFake.reset()
   fakes.client.userResetMfaFake.reset()
   fakes.client.userUpdateEmailFake.reset()
+  fakes.client.userCloudResourcesFake.reset()
   fakes.client.fileDownloadLinkFake.reset()
   fakes.client.userCloudResourcesFake.reset()
 

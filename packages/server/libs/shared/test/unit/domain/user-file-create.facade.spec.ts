@@ -1,7 +1,10 @@
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { JobService } from '@shared/domain/job/job.service'
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { UserService } from '@shared/domain/user/service/user.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -9,11 +12,10 @@ import { InternalError } from '@shared/errors'
 import { FileCreate } from '@shared/facade/file-create/model/file-create'
 import { FileCreateWithContent } from '@shared/facade/file-create/model/file-create-with-content'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
-import { UserCtx } from '@shared/types'
 
 describe('UserFileCreateFacade', () => {
   const USER_ID = 0
-  const USER_CTX = { id: USER_ID } as UserCtx
+  const USER_CTX = { id: USER_ID } as UserContext
 
   const FILE_PARENT_TYPE = PARENT_TYPE.USER
   const FILE_SCOPE = STATIC_SCOPE.PRIVATE
@@ -58,6 +60,8 @@ describe('UserFileCreateFacade', () => {
         project: PROJECT,
         dxid: DXID,
         description: DESCRIPTION,
+        parentFolderId: undefined,
+        scopedParentFolderId: undefined,
       })
       .resolves(SERVICE_RESULT)
 
@@ -69,13 +73,13 @@ describe('UserFileCreateFacade', () => {
     uploadFileContentStub.throws()
   })
 
-  describe('#createFile', () => {
+  describe('#saveFileToDB', () => {
     it('should not catch error from platformCreateFile', async () => {
       const error = new Error('my error')
       platformCreateFileStub.reset()
       platformCreateFileStub.throws(error)
 
-      await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(error)
+      await expect(getInstance().saveFileToDB(FILE_CREATE)).to.be.rejectedWith(error)
     })
 
     it('should not catch error from serviceCreateFile', async () => {
@@ -83,13 +87,13 @@ describe('UserFileCreateFacade', () => {
       serviceCreateFileStub.reset()
       serviceCreateFileStub.throws(error)
 
-      await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(error)
+      await expect(getInstance().saveFileToDB(FILE_CREATE)).to.be.rejectedWith(error)
     })
 
     it('should reject if platform returns a null dxid', async () => {
       platformCreateFileStub.withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION }).returns({ id: null })
 
-      await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(
+      await expect(getInstance().saveFileToDB(FILE_CREATE)).to.be.rejectedWith(
         InternalError,
         'Failed to create the file on the platform',
       )
@@ -98,14 +102,14 @@ describe('UserFileCreateFacade', () => {
     it('should reject if platform returns an empty response', async () => {
       platformCreateFileStub.withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION }).returns(undefined)
 
-      await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(
+      await expect(getInstance().saveFileToDB(FILE_CREATE)).to.be.rejectedWith(
         InternalError,
         'Failed to create the file on the platform',
       )
     })
 
     it('should return correctly created file', async () => {
-      const res = await getInstance().createFile(FILE_CREATE)
+      const res = await getInstance().saveFileToDB(FILE_CREATE)
 
       expect(res).to.eq(SERVICE_RESULT)
     })
@@ -150,11 +154,13 @@ describe('UserFileCreateFacade', () => {
       createFile: platformCreateFileStub,
       uploadFileContent: uploadFileContentStub,
     } as unknown as PlatformFileService
-    const userFileService = {
+    const nodeService = {
       createFile: serviceCreateFileStub,
       closeFile: serviceCloseFileStub,
-    } as unknown as UserFileService
+    } as unknown as NodeService
+    const jobService = {} as unknown as JobService
+    const userService = {} as unknown as UserService
 
-    return new UserFileCreateFacade(USER_CTX, platformFileService, userFileService)
+    return new UserFileCreateFacade(USER_CTX, platformFileService, nodeService, jobService, userService)
   }
 })

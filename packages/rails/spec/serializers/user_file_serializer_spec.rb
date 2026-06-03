@@ -37,8 +37,7 @@ describe UserFileSerializer do
         expect(user_file_serialized["links"]["download_list"]).to eq(download_list_api_files_path)
       end
 
-      it "links[add_file, add_folder, update] exist" do
-        expect(user_file_serialized["links"]["add_file"]).to eq(api_create_file_path)
+      it "links[add_folder, update] exist" do
         expect(user_file_serialized["links"]["add_folder"]).to eq(create_folder_api_files_path)
         expect(user_file_serialized["links"]["update"]).to eq(api_files_path)
       end

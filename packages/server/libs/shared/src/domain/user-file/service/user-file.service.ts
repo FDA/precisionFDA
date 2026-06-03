@@ -303,7 +303,7 @@ export class UserFileService {
     file.uid = `${fileCreate.dxid}-1`
 
     this.logger.log(`Creating file ${JSON.stringify(fileCreate)}`)
-    await this.em.persistAndFlush(file)
+    await this.fileRepo.persistAndFlush(file)
 
     return file
   }

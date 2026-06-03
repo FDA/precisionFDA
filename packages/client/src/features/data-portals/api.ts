@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { createFile } from '../files/files.api'
 import { processFile } from '../resources/uploadImage'
-import { CreateDataPortalData, DataPortal, UpdateDataPortalData } from './types'
+import type { CreateDataPortalData, DataPortal, UpdateDataPortalData } from './types'
 
 export async function fetchGovUsers(): Promise<[]> {
   return axios.get('/api/v2/users/government').then(r => r.data)

@@ -16,7 +16,7 @@ import { ValidationError } from '@shared/errors'
  **/
 @Injectable()
 export class CustomValidationPipe extends ValidationPipe {
-  async transform(value: unknown, metadata: ArgumentMetadata) {
+  async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown> {
     try {
       return await super.transform(value, metadata)
     } catch (error) {

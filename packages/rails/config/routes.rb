@@ -393,7 +393,6 @@ Rails.application.routes.draw do
         end
       end
 
-      post "create_file"
       post "create_challenge_card_image"
       post "create_image_file"
       post "get_upload_url"

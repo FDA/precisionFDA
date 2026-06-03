@@ -386,9 +386,7 @@ export const filesMocks = [
     }),
   ),
 
-  http.post('/api/list_files', () =>
-    HttpResponse.json(mockCopyFiles),
-  ),
+  http.post('/api/list_files', () => HttpResponse.json(mockCopyFiles)),
   http.post('/api/files/copy', () =>
     HttpResponse.json({
       meta: {
