@@ -14,7 +14,7 @@ import { UpdateLicenseDto } from './model/update-license.dto'
 @ApiCookieAuth()
 @UseGuards(UserContextGuard)
 @Controller('/licenses')
-export class LicenseController {
+export class LicensesController {
   constructor(
     private readonly licenseService: LicenseService,
     private readonly acceptedLicenseService: AcceptedLicenseService,

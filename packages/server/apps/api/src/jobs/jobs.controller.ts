@@ -18,7 +18,7 @@ import { DxidValidationPipe } from '../validation/pipes/dxid.pipe'
 
 @UseGuards(UserContextGuard)
 @Controller('/jobs')
-export class JobController {
+export class JobsController {
   constructor(
     private readonly jobSynchronizationService: JobSynchronizationService,
     private readonly jobService: JobService,

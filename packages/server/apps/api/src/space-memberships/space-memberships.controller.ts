@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common'
 import { ApiOperation } from '@nestjs/swagger'
-import { SpaceMembershipListApiFacade } from 'apps/api/src/facade/space-membership/space-membership-list-api.facade'
+import { SpaceMembershipsListApiFacade } from 'apps/api/src/facade/space-membership/space-memberships-list-api.facade'
 import { SpaceLeadRecoverDTO } from '@shared/domain/space-membership/dto/space-lead-recover.dto'
 import { SpaceMemberDTO } from '@shared/domain/space-membership/dto/space-member.dto'
 import { UpdateSpaceMembershipDTO } from '@shared/domain/space-membership/dto/update-space-membership.dto'
@@ -13,12 +13,12 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 export class SpaceMembershipsController {
   constructor(
     private readonly spaceMembershipUpdateApiFacade: SpaceMembershipUpdateApiFacade,
-    private readonly spaceMembershipListApiFacade: SpaceMembershipListApiFacade,
+    private readonly spaceMembershipsListApiFacade: SpaceMembershipsListApiFacade,
   ) {}
 
   @Get('/')
   async listMembers(@Param('spaceId', ParseIntPipe) spaceId: number): Promise<SpaceMemberDTO[]> {
-    return this.spaceMembershipListApiFacade.listSpaceMembers(spaceId)
+    return this.spaceMembershipsListApiFacade.listSpaceMembers(spaceId)
   }
 
   @ApiOperation({ summary: 'Recover space lead for orphaned spaces' })

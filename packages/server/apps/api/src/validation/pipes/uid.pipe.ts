@@ -16,7 +16,7 @@ type UidValidationPipeOptions = {
  * is thrown and the request is rejected.
  *
  * @example usage can be found in
- * DbClusterController#updateDbCluster
+ * DbClustersController#updateDbCluster
  *
  * @example with entity type
  * @Param('uid', new UidValidationPipe({ entityType: 'job' })) uid: Uid<'job'>

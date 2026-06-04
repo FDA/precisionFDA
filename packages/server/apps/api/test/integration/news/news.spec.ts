@@ -181,8 +181,8 @@ describe('/news', () => {
       .expect(201)
     expect(body).to.deep.eq({ id: body.id })
 
-    const newsRepo = em.getRepository(NewsItem)
-    const newsItemFromDb = await newsRepo.findOne({ id: body.id })
+    const newsItemRepo = em.getRepository(NewsItem)
+    const newsItemFromDb = await newsItemRepo.findOne({ id: body.id })
     expect(newsItemFromDb.title).to.be.eq(data.title)
     expect(newsItemFromDb.content).to.be.eq(data.content)
     expect(newsItemFromDb.link).to.be.eq(data.link)

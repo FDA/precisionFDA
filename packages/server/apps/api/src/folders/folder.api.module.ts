@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
-import { FolderController } from './folder.controller'
+import { FoldersController } from './folders.controller'
 
 @Module({
   imports: [UserFileModule],
-  controllers: [FolderController],
+  controllers: [FoldersController],
 })
 export class FolderApiModule {}

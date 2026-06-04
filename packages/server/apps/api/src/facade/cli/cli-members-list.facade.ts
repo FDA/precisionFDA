@@ -3,7 +3,7 @@ import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/cli-space-member.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 
 @Injectable()
-export class CliListMembersFacade {
+export class CliMembersListFacade {
   constructor(private readonly spaceService: SpaceService) {}
 
   async listSpaceMembers(spaceId: number): Promise<CliSpaceMemberDTO[]> {

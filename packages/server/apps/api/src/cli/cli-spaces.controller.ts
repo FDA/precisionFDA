@@ -1,40 +1,40 @@
 import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common'
 import { CliCreateDiscussionDTO } from '@shared/domain/cli/dto/cli-create-discussion.dto'
 import { CliDiscussionDTO } from '@shared/domain/cli/dto/cli-discussion.dto'
-import { CliListSpaceDTO } from '@shared/domain/cli/dto/cli-list-spaces.dto'
-import { CliListSpacesQueryDTO } from '@shared/domain/cli/dto/cli-list-spaces-query.dto'
+import { CliSpaceListDTO } from '@shared/domain/cli/dto/cli-spaces-list.dto'
+import { CliSpacesListQueryDTO } from '@shared/domain/cli/dto/cli-spaces-list-query.dto'
 import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/cli-space-member.dto'
 import { CliCreateDiscussionFacade } from '../facade/cli/cli-create-discussion.facade'
-import { CliListDiscussionsFacade } from '../facade/cli/cli-list-discussions.facade'
-import { CliListMembersFacade } from '../facade/cli/cli-list-members.facade'
-import { CliListSpacesFacade } from '../facade/cli/cli-list-spaces.facade'
+import { CliDiscussionsListFacade } from '../facade/cli/cli-discussions-list.facade'
+import { CliMembersListFacade } from '../facade/cli/cli-members-list.facade'
+import { CliSpacesListFacade } from '../facade/cli/cli-spaces-list.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @Controller('/cli/spaces')
 export class CliSpacesController {
   constructor(
-    private readonly cliListSpacesFacade: CliListSpacesFacade,
-    private readonly cliListMembersFacade: CliListMembersFacade,
-    private readonly cliListDiscussionsFacade: CliListDiscussionsFacade,
+    private readonly cliSpacesListFacade: CliSpacesListFacade,
+    private readonly cliMembersListFacade: CliMembersListFacade,
+    private readonly cliDiscussionsListFacade: CliDiscussionsListFacade,
     private readonly cliCreateDiscussionFacade: CliCreateDiscussionFacade,
   ) {}
 
   @UseGuards(UserContextGuard)
   @Get()
-  async listSpaces(@Query() query: CliListSpacesQueryDTO): Promise<CliListSpaceDTO[]> {
-    return this.cliListSpacesFacade.listSpaces(query)
+  async listSpaces(@Query() query: CliSpacesListQueryDTO): Promise<CliSpaceListDTO[]> {
+    return this.cliSpacesListFacade.listSpaces(query)
   }
 
   @UseGuards(UserContextGuard)
   @Get('/:id/members')
   async listMembers(@Param('id', ParseIntPipe) spaceId: number): Promise<CliSpaceMemberDTO[]> {
-    return this.cliListMembersFacade.listSpaceMembers(spaceId)
+    return this.cliMembersListFacade.listSpaceMembers(spaceId)
   }
 
   @UseGuards(UserContextGuard)
   @Get('/:id/discussions')
   async listDiscussions(@Param('id', ParseIntPipe) spaceId: number): Promise<CliDiscussionDTO[]> {
-    return this.cliListDiscussionsFacade.listDiscussions(spaceId)
+    return this.cliDiscussionsListFacade.listDiscussions(spaceId)
   }
 
   @UseGuards(UserContextGuard)

@@ -5,7 +5,7 @@ import { DiscussionService } from '@shared/domain/discussion/services/discussion
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
-export class CliListDiscussionsFacade {
+export class CliDiscussionsListFacade {
   constructor(private readonly discussionService: DiscussionService) {}
 
   async listDiscussions(spaceId: number): Promise<CliDiscussionDTO[]> {

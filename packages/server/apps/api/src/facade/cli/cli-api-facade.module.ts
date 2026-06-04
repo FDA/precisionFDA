@@ -16,11 +16,11 @@ import { UserFileApiFacadeModule } from '../user-file/user-file-api-facade.modul
 import { CliDescribeEntityFacade } from './cli-describe-entity.facade'
 import { CliFindNodesFacade } from './cli-find-nodes.facade'
 import { CliJobScopeFacade } from './cli-job-scope.facade'
-import { CliListAssetsFacade } from './cli-list-assets.facade'
-import { CliListDiscussionsFacade } from './cli-list-discussions.facade'
-import { CliListJobsFacade } from './cli-list-jobs.facade'
-import { CliListMembersFacade } from './cli-list-members.facade'
-import { CliListSpacesFacade } from './cli-list-spaces.facade'
+import { CliAssetsListFacade } from './cli-assets-list.facade'
+import { CliDiscussionsListFacade } from './cli-discussions-list.facade'
+import { CliJobsListFacade } from './cli-jobs-list.facade'
+import { CliMembersListFacade } from './cli-members-list.facade'
+import { CliSpacesListFacade } from './cli-spaces-list.facade'
 import { CliNodeRemoveFacade } from './cli-node-remove.facade'
 import { CliRunAppFacade } from './cli-run-app.facade'
 import { CliTerminateJobFacade } from './cli-terminate-job.facade'
@@ -46,27 +46,27 @@ import { CliTerminateJobFacade } from './cli-terminate-job.facade'
     CliDescribeEntityFacade,
     CliJobScopeFacade,
     CliNodeRemoveFacade,
-    CliListMembersFacade,
-    CliListDiscussionsFacade,
+    CliMembersListFacade,
+    CliDiscussionsListFacade,
     CliFindNodesFacade,
     CliRunAppFacade,
     CliTerminateJobFacade,
-    CliListSpacesFacade,
-    CliListAssetsFacade,
-    CliListJobsFacade,
+    CliSpacesListFacade,
+    CliAssetsListFacade,
+    CliJobsListFacade,
   ],
   exports: [
     CliDescribeEntityFacade,
     CliJobScopeFacade,
     CliNodeRemoveFacade,
-    CliListMembersFacade,
-    CliListDiscussionsFacade,
+    CliMembersListFacade,
+    CliDiscussionsListFacade,
     CliFindNodesFacade,
     CliRunAppFacade,
     CliTerminateJobFacade,
-    CliListSpacesFacade,
-    CliListAssetsFacade,
-    CliListJobsFacade,
+    CliSpacesListFacade,
+    CliAssetsListFacade,
+    CliJobsListFacade,
   ],
 })
 export class CliApiFacadeModule {}

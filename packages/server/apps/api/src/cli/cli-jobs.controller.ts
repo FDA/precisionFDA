@@ -1,11 +1,11 @@
 import { Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common'
-import { CliListJobDTO } from '@shared/domain/cli/dto/cli-list-jobs.dto'
+import { CliJobListDTO } from '@shared/domain/cli/dto/cli-jobs-list.dto'
 import { CliScopeQueryDTO } from '@shared/domain/cli/dto/cli-scope-query.dto'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityScope } from '@shared/types/common'
 import { CliJobScopeFacade } from '../facade/cli/cli-job-scope.facade'
-import { CliListJobsFacade } from '../facade/cli/cli-list-jobs.facade'
+import { CliJobsListFacade } from '../facade/cli/cli-jobs-list.facade'
 import { CliTerminateJobFacade } from '../facade/cli/cli-terminate-job.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { UidValidationPipe } from '../validation/pipes/uid.pipe'
@@ -16,7 +16,7 @@ export class CliJobsController {
   constructor(
     private readonly cliJobScopeFacade: CliJobScopeFacade,
     private readonly cliTerminateJobFacade: CliTerminateJobFacade,
-    private readonly cliListJobsFacade: CliListJobsFacade,
+    private readonly cliJobsListFacade: CliJobsListFacade,
   ) {}
 
   @UseGuards(UserContextGuard)
@@ -29,8 +29,8 @@ export class CliJobsController {
 
   @UseGuards(UserContextGuard)
   @Get()
-  async listJobs(@Query() query: CliScopeQueryDTO): Promise<CliListJobDTO[]> {
-    return this.cliListJobsFacade.listJobs(query.scope)
+  async listJobs(@Query() query: CliScopeQueryDTO): Promise<CliJobListDTO[]> {
+    return this.cliJobsListFacade.listJobs(query.scope)
   }
 
   @UseGuards(UserContextGuard)

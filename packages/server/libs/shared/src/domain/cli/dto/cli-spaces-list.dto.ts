@@ -3,7 +3,7 @@ import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 
-export class CliListSpaceDTO {
+export class CliSpaceListDTO {
   id: number
   title: string
   type: string
@@ -14,7 +14,7 @@ export class CliListSpaceDTO {
 
   // membership may be undefined for site admins: SpaceRepository.getAccessibleWhere()
   // grants visibility to all spaces including ones they have no membership in.
-  static fromEntity(space: Space, membership?: SpaceMembership): CliListSpaceDTO {
+  static fromEntity(space: Space, membership?: SpaceMembership): CliSpaceListDTO {
     return {
       id: space.id,
       title: space.name,

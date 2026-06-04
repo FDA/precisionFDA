@@ -15,7 +15,7 @@ import { ChallengeFacade } from '../facade/challenge/challenge.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @Controller('/challenges')
-export class ChallengeController {
+export class ChallengesController {
   constructor(
     private readonly challengeService: ChallengeService,
     private readonly challengeFacade: ChallengeFacade,

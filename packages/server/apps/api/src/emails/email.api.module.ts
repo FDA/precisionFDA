@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
 import { EmailModule } from '@shared/domain/email/email.module'
-import { EmailController } from './email.controller'
+import { EmailsController } from './emails.controller'
 
 @Module({
   imports: [EmailModule],
-  controllers: [EmailController],
+  controllers: [EmailsController],
 })
 export class EmailApiModule {}

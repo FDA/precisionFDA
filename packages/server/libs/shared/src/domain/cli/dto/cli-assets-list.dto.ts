@@ -1,7 +1,7 @@
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 
-export class CliListAssetDTO {
+export class CliAssetListDTO {
   id: number
   uid: Uid<'file'>
   name: string
@@ -15,7 +15,7 @@ export class CliListAssetDTO {
   archiveContent: string[]
   properties: Record<string, string>
 
-  static fromEntity(asset: Asset): CliListAssetDTO {
+  static fromEntity(asset: Asset): CliAssetListDTO {
     const props: Record<string, string> = {}
     asset.properties.getItems().forEach(p => {
       props[p.propertyName] = p.propertyValue

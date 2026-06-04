@@ -12,7 +12,7 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { DbClusterActionFacade } from '../facade/db-cluster/action-facade/db-cluster-action.facade'
 import { DbClusterCreateFacade } from '../facade/db-cluster/create-facade/db-cluster-create.facade'
 import { DbClusterGetFacade } from '../facade/db-cluster/get-facade/db-cluster-get.facade'
-import { DbClusterListFacade } from '../facade/db-cluster/list-facade/db-cluster-list.facade'
+import { DbClustersListFacade } from '../facade/db-cluster/list-facade/db-clusters-list.facade'
 import { DbClusterSynchronizeFacade } from '../facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
 import { DbClusterUpdateFacade } from '../facade/db-cluster/update-facade/db-cluster-update.facade'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
@@ -22,21 +22,21 @@ import { DbClusterUidParamDto } from './model/dbcluster-uid-param.dto'
 @ApiTags('dbclusters')
 @UseGuards(UserContextGuard)
 @Controller('/dbclusters')
-export class DbClusterController {
+export class DbClustersController {
   constructor(
     private readonly dbClusterSynchronizeFacade: DbClusterSynchronizeFacade,
     private readonly dbClusterCreateFacade: DbClusterCreateFacade,
     private readonly dbClusterUpdateFacade: DbClusterUpdateFacade,
     private readonly dbClusterActionFacade: DbClusterActionFacade,
     private readonly dbClusterGetFacade: DbClusterGetFacade,
-    private readonly dbClusterListFacade: DbClusterListFacade,
+    private readonly dbClustersListFacade: DbClustersListFacade,
   ) {}
 
   @ApiOperation({ summary: 'List db clusters' })
   @ApiOkResponse({ description: 'Paginated list of db clusters' })
   @Get()
   async list(@Query() query: DbClusterPaginationDTO): Promise<PaginatedResult<DbClusterDTO>> {
-    return await this.dbClusterListFacade.listDbClusters(query)
+    return await this.dbClustersListFacade.listDbClusters(query)
   }
 
   @ApiOperation({ summary: 'Get db cluster by uid' })

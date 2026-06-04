@@ -5,12 +5,12 @@ import { SpaceMembershipModule } from '@shared/domain/space-membership/space-mem
 import { UserModule } from '@shared/domain/user/user.module'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { CreateAdminMembershipFacade } from './create-admin-membership.facade'
-import { ListAdminMembershipFacade } from './list-admin-membership.facade'
+import { AdminMembershipsListFacade } from './admin-memberships-list.facade'
 import { RemoveAdminMembershipFacade } from './remove-admin-membership.facade'
 
 @Module({
   imports: [AdminMembershipModule, SpaceMembershipModule, SpaceModule, UserModule, PlatformClientModule],
-  providers: [ListAdminMembershipFacade, CreateAdminMembershipFacade, RemoveAdminMembershipFacade],
-  exports: [ListAdminMembershipFacade, CreateAdminMembershipFacade, RemoveAdminMembershipFacade],
+  providers: [AdminMembershipsListFacade, CreateAdminMembershipFacade, RemoveAdminMembershipFacade],
+  exports: [AdminMembershipsListFacade, CreateAdminMembershipFacade, RemoveAdminMembershipFacade],
 })
 export class AdminMembershipFacadeModule {}
