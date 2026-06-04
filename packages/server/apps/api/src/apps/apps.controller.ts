@@ -11,7 +11,7 @@ import { AppUidParamDto } from './model/app-uid-param.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/apps')
-export class AppController {
+export class AppsController {
   constructor(
     private readonly licensesForAppFacade: LicensesForAppFacade,
     private readonly appRunFacade: AppRunFacade,

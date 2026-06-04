@@ -5,7 +5,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError } from '@shared/errors'
-import { CliListAssetsFacade } from '../../../src/facade/cli/cli-list-assets.facade'
+import { CliAssetsListFacade } from '../../../src/facade/cli/cli-assets-list.facade'
 
 const USER_ID = 42
 const DXUSER = 'user-test'
@@ -19,7 +19,7 @@ function createUserContext(overrides?: Partial<UserContext>): UserContext {
   } as unknown as UserContext
 }
 
-describe('CliListAssetsFacade', () => {
+describe('CliAssetsListFacade', () => {
   let listAccessibleAssetsStub: SinonStub
   let loadEntityStub: SinonStub
   let spaceGetAccessibleByIdStub: SinonStub
@@ -30,7 +30,7 @@ describe('CliListAssetsFacade', () => {
     spaceGetAccessibleByIdStub = stub().resolves(null)
   })
 
-  function getInstance(): CliListAssetsFacade {
+  function getInstance(): CliAssetsListFacade {
     const nodeService = {
       listAccessibleAssets: listAccessibleAssetsStub,
     } as unknown as NodeService
@@ -38,7 +38,7 @@ describe('CliListAssetsFacade', () => {
     const spaceService = {
       getAccessibleById: spaceGetAccessibleByIdStub,
     } as unknown as SpaceService
-    return new CliListAssetsFacade(nodeService, user, spaceService)
+    return new CliAssetsListFacade(nodeService, user, spaceService)
   }
 
   it('queries with scope: PUBLIC when scope is STATIC_SCOPE.PUBLIC', async () => {

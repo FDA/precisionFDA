@@ -1,13 +1,13 @@
 import { expect } from 'chai'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
-import { CliListSpacesQueryDTO } from '@shared/domain/cli/dto/cli-list-spaces-query.dto'
+import { CliSpacesListQueryDTO } from '@shared/domain/cli/dto/cli-spaces-list-query.dto'
 import { CliScopeQueryDTO } from '@shared/domain/cli/dto/cli-scope-query.dto'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 
-describe('CliListSpacesQueryDTO', () => {
-  const toInstance = (plain: Record<string, unknown>): CliListSpacesQueryDTO =>
-    plainToInstance(CliListSpacesQueryDTO, plain, { enableImplicitConversion: false })
+describe('CliSpacesListQueryDTO', () => {
+  const toInstance = (plain: Record<string, unknown>): CliSpacesListQueryDTO =>
+    plainToInstance(CliSpacesListQueryDTO, plain, { enableImplicitConversion: false })
 
   describe('state', () => {
     it('transforms "active" to SPACE_STATE.ACTIVE', async () => {

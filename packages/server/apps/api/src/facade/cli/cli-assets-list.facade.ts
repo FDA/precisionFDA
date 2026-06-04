@@ -1,6 +1,6 @@
 import { FilterQuery } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { CliListAssetDTO } from '@shared/domain/cli/dto/cli-list-assets.dto'
+import { CliAssetListDTO } from '@shared/domain/cli/dto/cli-assets-list.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
@@ -11,14 +11,14 @@ import { EntityScope } from '@shared/types/common'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
-export class CliListAssetsFacade {
+export class CliAssetsListFacade {
   constructor(
     private readonly nodeService: NodeService,
     private readonly user: UserContext,
     private readonly spaceService: SpaceService,
   ) {}
 
-  async listAssets(scope: EntityScope): Promise<CliListAssetDTO[]> {
+  async listAssets(scope: EntityScope): Promise<CliAssetListDTO[]> {
     let where: FilterQuery<Asset>
 
     if (EntityScopeUtils.isSpaceScope(scope)) {
@@ -40,6 +40,6 @@ export class CliListAssetsFacade {
       orderBy: { createdAt: 'DESC' } as const,
     })
 
-    return assets.map(asset => CliListAssetDTO.fromEntity(asset))
+    return assets.map(asset => CliAssetListDTO.fromEntity(asset))
   }
 }

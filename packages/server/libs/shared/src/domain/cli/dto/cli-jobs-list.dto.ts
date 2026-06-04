@@ -2,7 +2,7 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { Job } from '@shared/domain/job/job.entity'
 
-export class CliListJobDTO {
+export class CliJobListDTO {
   id: number
   uid: Uid<'job'>
   dxid: DxId<'job'>
@@ -30,7 +30,7 @@ export class CliListJobDTO {
   runInputData: RunDataItem[]
   runOutputData: RunDataItem[]
 
-  static fromEntity(job: Job): CliListJobDTO {
+  static fromEntity(job: Job): CliJobListDTO {
     let appTitle: string | null = null
     let appUid: Uid<'app'> | null = null
     let appRevision: number | null = null
@@ -56,11 +56,11 @@ export class CliListJobDTO {
       .map(t => t.tag?.name)
       .filter(Boolean) as string[]
 
-    const runtime = CliListJobDTO.getRuntime(job)
-    const energy = CliListJobDTO.getEnergy(job)
+    const runtime = CliJobListDTO.getRuntime(job)
+    const energy = CliJobListDTO.getEnergy(job)
 
-    const runInputData = CliListJobDTO.buildRunData(job.runData?.run_inputs)
-    const runOutputData = CliListJobDTO.buildRunData(job.runData?.run_outputs)
+    const runInputData = CliJobListDTO.buildRunData(job.runData?.run_inputs)
+    const runOutputData = CliJobListDTO.buildRunData(job.runData?.run_outputs)
     return {
       id: job.id,
       uid: job.uid,

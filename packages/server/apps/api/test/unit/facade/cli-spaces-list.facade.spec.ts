@@ -4,7 +4,7 @@ import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { CliListSpacesFacade } from '../../../src/facade/cli/cli-list-spaces.facade'
+import { CliSpacesListFacade } from '../../../src/facade/cli/cli-spaces-list.facade'
 
 const USER_ID = 42
 const DXUSER = 'user-test'
@@ -18,19 +18,19 @@ function createUserContext(overrides?: Partial<UserContext>): UserContext {
   } as unknown as UserContext
 }
 
-describe('CliListSpacesFacade', () => {
+describe('CliSpacesListFacade', () => {
   let listAccessibleStub: SinonStub
 
   beforeEach(() => {
     listAccessibleStub = stub().resolves([])
   })
 
-  function getInstance(): CliListSpacesFacade {
+  function getInstance(): CliSpacesListFacade {
     const user = createUserContext()
     const spaceService = {
       listAccessible: listAccessibleStub,
     } as unknown as SpaceService
-    return new CliListSpacesFacade(user, spaceService)
+    return new CliSpacesListFacade(user, spaceService)
   }
 
   it('calls spaceService.listAccessible with SPACE_STATE.ACTIVE when state is not provided in query', async () => {
@@ -85,7 +85,7 @@ describe('CliListSpacesFacade', () => {
     expect(where).to.not.have.property('type')
   })
 
-  it('maps results using CliListSpaceDTO.fromEntity', async () => {
+  it('maps results using CliSpaceListDTO.fromEntity', async () => {
     const mockMembership = {
       user: { id: USER_ID },
       active: true,

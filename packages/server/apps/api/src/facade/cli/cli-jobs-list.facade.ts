@@ -1,6 +1,6 @@
 import { FilterQuery } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { CliListJobDTO } from '@shared/domain/cli/dto/cli-list-jobs.dto'
+import { CliJobListDTO } from '@shared/domain/cli/dto/cli-jobs-list.dto'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobService } from '@shared/domain/job/job.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
@@ -11,14 +11,14 @@ import { EntityScope } from '@shared/types/common'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
-export class CliListJobsFacade {
+export class CliJobsListFacade {
   constructor(
     private readonly user: UserContext,
     private readonly jobService: JobService,
     private readonly spaceService: SpaceService,
   ) {}
 
-  async listJobs(scope: EntityScope): Promise<CliListJobDTO[]> {
+  async listJobs(scope: EntityScope): Promise<CliJobListDTO[]> {
     let where: FilterQuery<Job>
 
     if (EntityScopeUtils.isSpaceScope(scope)) {
@@ -43,6 +43,6 @@ export class CliListJobsFacade {
       orderBy: { createdAt: 'DESC' },
     })
 
-    return jobs.map(job => CliListJobDTO.fromEntity(job))
+    return jobs.map(job => CliJobListDTO.fromEntity(job))
   }
 }

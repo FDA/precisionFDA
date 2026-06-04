@@ -7,16 +7,16 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { NewsItemDTO } from '../dto/news-item.dto'
 import { NewsListDTO, PUBLICATION_TYPE } from '../dto/news-list.dto'
 import { NewsItem } from '../news-item.entity'
-import { NewsRepository } from '../news-item.repository'
+import { NewsItemRepository } from '../news-item.repository'
 
 @Injectable()
-export class NewsService {
+export class NewsItemService {
   @ServiceLogger()
   private readonly logger: Logger
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
-    private readonly newsRepo: NewsRepository,
+    private readonly newsItemRepo: NewsItemRepository,
   ) {}
 
   async listNews(query: NewsListDTO): Promise<PaginatedResult<NewsItem>> {
@@ -34,7 +34,7 @@ export class NewsService {
       typeWhere = { isPublication: query.type !== PUBLICATION_TYPE.ARTICLE }
     }
 
-    return await this.newsRepo.paginate(query, {
+    return await this.newsItemRepo.paginate(query, {
       ...whereYear,
       ...typeWhere,
       published: true,
@@ -46,15 +46,15 @@ export class NewsService {
     if (query.type === PUBLICATION_TYPE.ARTICLE) whereType = { isPublication: false }
     if (query.type === PUBLICATION_TYPE.PUBLICATION) whereType = { isPublication: true }
 
-    return this.newsRepo.find(whereType, { orderBy: { createdAt: -1 } })
+    return this.newsItemRepo.find(whereType, { orderBy: { createdAt: -1 } })
   }
 
   async listYears(): Promise<number[]> {
-    return await this.newsRepo.getDistinctYears()
+    return await this.newsItemRepo.getDistinctYears()
   }
 
   async getNews(id: number): Promise<NewsItem> {
-    return await this.newsRepo.findOne({ id })
+    return await this.newsItemRepo.findOne({ id })
   }
 
   async deleteNews(id: number): Promise<void> {
@@ -79,7 +79,7 @@ export class NewsService {
   }
 
   async updateNews(id: number, body: NewsItemDTO): Promise<void> {
-    const existing = await this.newsRepo.findOneOrFail({ id })
+    const existing = await this.newsItemRepo.findOneOrFail({ id })
     const toSave = wrap(existing).assign(body, { mergeObjectProperties: true })
     await this.em.persistAndFlush(toSave)
   }

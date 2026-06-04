@@ -6,7 +6,7 @@ import { FetchChildrenDTO } from './model/fetch-children.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/folders')
-export class FolderController {
+export class FoldersController {
   constructor(private readonly nodeService: NodeService) {}
 
   @Get('/children')

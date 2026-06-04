@@ -4,7 +4,7 @@ import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { TransformAndValidateBoolean } from '@shared/utils/transformers/is-valid-boolean'
 import { TransformEnumKey } from '@shared/utils/transformers/transform-enum-key.decorator'
 
-export class CliListSpacesQueryDTO {
+export class CliSpacesListQueryDTO {
   @IsOptional()
   @TransformEnumKey(SPACE_STATE)
   @IsEnum(SPACE_STATE)

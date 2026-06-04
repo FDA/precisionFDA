@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/mysql'
-import { DbClusterListFacade } from 'apps/api/src/facade/db-cluster/list-facade/db-cluster-list.facade'
+import { DbClustersListFacade } from 'apps/api/src/facade/db-cluster/list-facade/db-clusters-list.facade'
 import { expect } from 'chai'
 import { match, stub } from 'sinon'
 import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
@@ -16,7 +16,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
 
-describe('DbClusterListFacade', () => {
+describe('DbClustersListFacade', () => {
   const USER_ID = 0
   const accessibleSpaces = stub()
   const USER = {
@@ -267,7 +267,7 @@ describe('DbClusterListFacade', () => {
     expect(result.data).to.have.length(0)
   })
 
-  function getInstance(): DbClusterListFacade {
+  function getInstance(): DbClustersListFacade {
     const em = {} as unknown as EntityManager
     const dbClusterRepo = {
       paginate: paginateStub,
@@ -291,6 +291,6 @@ describe('DbClusterListFacade', () => {
       findLicenseRefsByLicenseableIds: findLicenseRefsByLicenseableIdsStub,
     } as unknown as LicenseService
 
-    return new DbClusterListFacade(dbClusterService, userContext, spaceService, spaceMembershipService, licenseService)
+    return new DbClustersListFacade(dbClusterService, userContext, spaceService, spaceMembershipService, licenseService)
   }
 })

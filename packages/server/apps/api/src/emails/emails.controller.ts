@@ -6,7 +6,7 @@ import { InternalRouteGuard } from '../internal/guard/internal.guard'
 
 @UseGuards(InternalRouteGuard)
 @Controller('/emails')
-export class EmailController {
+export class EmailsController {
   constructor(private readonly emailService: EmailService) {}
 
   @HttpCode(200)

@@ -367,6 +367,29 @@ Examples:
 - `entity.type.ts` exports `EntityType`
 - `entity-instance.ts` exports `EntityInstance`
 
+### File Naming Convention
+
+General rule for files that act on a domain (facades, DTOs, services, etc.):
+
+> **`<domain-name>-<specifics>.<suffix>.ts`** — domain name first (preferably **plural**), then the specifics (action, role, etc.), then the suffix.
+
+The exported class/symbol must be the PascalCase form of the file name without the suffix (e.g. `cli-assets-list.facade.ts` exports `CliAssetsListFacade`).
+
+| Component | Pattern | Examples |
+|-----------|---------|----------|
+| **Facade** | `<domain-plural>-<action>[-<qualifier>].facade.ts` | `user-files-list.facade.ts`, `db-clusters-list.facade.ts`, `space-memberships-update-api.facade.ts`, `cli-assets-list.facade.ts` (CLI prefix counts as the qualifier; the domain stays plural and `-list` stays last) |
+| **Controller** | `<domain-plural>.controller.ts` (use a qualifier suffix only when one controller per domain is not enough, e.g. CLI vs. web) | `space-memberships.controller.ts`, `cli-jobs.controller.ts` |
+| **Service** | `<domain-singular>.service.ts` for the main domain service; `<domain-singular>-<action>.service.ts` for additional internal services | `space-membership.service.ts`, `job-synchronization.service.ts` |
+| **Repository** | `<domain-singular>.repository.ts` (one repository per entity) | `user.repository.ts`, `setting.repository.ts` |
+| **Entity** | `<domain-singular>.entity.ts` | `space-membership.entity.ts` |
+| **Module** | `<domain-singular>.module.ts` for domain modules; `<facade-base>.module.ts` for facade modules (matches the facade file) | `space-membership.module.ts`, `cli-assets-list-facade.module.ts` |
+| **DTO** | `<domain-singular>-<action>.dto.ts` (action describes the operation/shape, not pluralized) | `app-get.dto.ts`, `update-space-membership.dto.ts`, `pending-user.dto.ts` |
+| **Enum** | `<domain-singular>.enum.ts` | `space-membership.enum.ts` |
+
+**Rationale for plural on facades/controllers:** facades and controllers operate on collections/resources, so the plural domain name reads naturally with the action suffix (`db-clusters-list`, `user-files-bulk-download`). Services, repositories, entities, and DTOs describe a single domain concept, so they remain singular.
+
+**Action verb position:** the action goes **after** the domain (`admin-memberships-list.facade.ts`, not `list-admin-memberships.facade.ts`). This keeps related files sorted together alphabetically by domain.
+
 ## Types
 
 - **interface** - default choice

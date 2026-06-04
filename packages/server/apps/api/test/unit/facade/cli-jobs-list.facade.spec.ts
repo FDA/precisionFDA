@@ -5,7 +5,7 @@ import { SpaceService } from '@shared/domain/space/service/space.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError } from '@shared/errors'
-import { CliListJobsFacade } from '../../../src/facade/cli/cli-list-jobs.facade'
+import { CliJobsListFacade } from '../../../src/facade/cli/cli-jobs-list.facade'
 
 const USER_ID = 42
 const DXUSER = 'user-test'
@@ -19,7 +19,7 @@ function createUserContext(overrides?: Partial<UserContext>): UserContext {
   } as unknown as UserContext
 }
 
-describe('CliListJobsFacade', () => {
+describe('CliJobsListFacade', () => {
   let jobListAccessibleStub: SinonStub
   let spaceGetAccessibleByIdStub: SinonStub
   let loadEntityStub: SinonStub
@@ -30,7 +30,7 @@ describe('CliListJobsFacade', () => {
     loadEntityStub = stub().resolves({ id: USER_ID })
   })
 
-  function getInstance(): CliListJobsFacade {
+  function getInstance(): CliJobsListFacade {
     const user = createUserContext({ loadEntity: loadEntityStub })
     const jobService = {
       listAccessible: jobListAccessibleStub,
@@ -38,7 +38,7 @@ describe('CliListJobsFacade', () => {
     const spaceService = {
       getAccessibleById: spaceGetAccessibleByIdStub,
     } as unknown as SpaceService
-    return new CliListJobsFacade(user, jobService, spaceService)
+    return new CliJobsListFacade(user, jobService, spaceService)
   }
 
   it('queries with scope: space-123 when scope is a space scope and space exists', async () => {

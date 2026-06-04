@@ -5,7 +5,7 @@ import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { UserService } from '@shared/domain/user/service/user.service'
 
 @Injectable()
-export class ListAdminMembershipFacade {
+export class AdminMembershipsListFacade {
   constructor(private readonly userService: UserService) {}
 
   async listUsersWithRoles(query: AdminMembershipPaginationDTO): Promise<PaginatedResult<UserWithAdminRolesDTO>> {

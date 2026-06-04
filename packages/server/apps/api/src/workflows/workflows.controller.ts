@@ -6,7 +6,7 @@ import { WorkflowUidParamDto } from './model/workflow-uid-param.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/workflows')
-export class WorkflowController {
+export class WorkflowsController {
   constructor(private readonly licensesForWorkflowFacade: LicensesForWorkflowFacade) {}
 
   @Get('/:workflowUid/licenses-to-accept')

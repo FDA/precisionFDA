@@ -4,7 +4,7 @@ import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SpaceMemberDTO } from '@shared/domain/space-membership/dto/space-member.dto'
 
 @Injectable()
-export class SpaceMembershipListApiFacade {
+export class SpaceMembershipsListApiFacade {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly spaceService: SpaceService,

@@ -1,11 +1,11 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Module } from '@nestjs/common'
 import { NewsItem } from './news-item.entity'
-import { NewsService } from './service/new-item.service'
+import { NewsItemService } from './service/news-item.service'
 
 @Module({
   imports: [MikroOrmModule.forFeature([NewsItem])],
-  providers: [NewsService],
-  exports: [NewsService],
+  providers: [NewsItemService],
+  exports: [NewsItemService],
 })
-export class NewsModule {}
+export class NewsItemModule {}

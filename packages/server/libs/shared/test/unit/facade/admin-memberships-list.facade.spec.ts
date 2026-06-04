@@ -4,9 +4,9 @@ import { AdminMembershipPaginationDTO } from '@shared/domain/admin-membership/dt
 import { UserWithAdminRolesDTO } from '@shared/domain/admin-membership/dto/user-with-admin-roles.dto'
 import { UserService } from '@shared/domain/user/service/user.service'
 import { User } from '@shared/domain/user/user.entity'
-import { ListAdminMembershipFacade } from '@shared/facade/admin-membership/list-admin-membership.facade'
+import { AdminMembershipsListFacade } from '@shared/facade/admin-membership/admin-memberships-list.facade'
 
-describe('ListAdminMembershipFacade', () => {
+describe('AdminMembershipsListFacade', () => {
   const paginateUsersWithAdminRolesStub = stub()
   let fromEntityStub: SinonStub
 
@@ -26,8 +26,8 @@ describe('ListAdminMembershipFacade', () => {
     fromEntityStub.restore()
   })
 
-  function getInstance(): ListAdminMembershipFacade {
-    return new ListAdminMembershipFacade(userService)
+  function getInstance(): AdminMembershipsListFacade {
+    return new AdminMembershipsListFacade(userService)
   }
 
   describe('#listUsersWithRoles', () => {

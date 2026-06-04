@@ -7,7 +7,7 @@ import { DiscussionApiFacadeModule } from '../facade/discussion/discussion-api-f
 import { UserFileApiFacadeModule } from '../facade/user-file/user-file-api-facade.module'
 import { CliController } from './cli.controller'
 import { CliAssetsController } from './cli-assets.controller'
-import { CliDbClustersController } from './cli-dbclusters.controller'
+import { CliDbClustersController } from './cli-db-clusters.controller'
 import { CliDescribeController } from './cli-describe.controller'
 import { CliDiscussionsController } from './cli-discussions.controller'
 import { CliFilesController } from './cli-files.controller'

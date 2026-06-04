@@ -15,7 +15,7 @@ import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
-export class DbClusterListFacade {
+export class DbClustersListFacade {
   @ServiceLogger()
   private readonly logger: Logger
 
