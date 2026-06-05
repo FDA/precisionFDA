@@ -3,7 +3,7 @@ class ExpertsEditView
     @modalUploader = new window.Precision.ModalImageUploader(
       params.imageUrl,
       params.fileId,
-      { public_scope: true }
+      { scope: 'public' }
     )
 
 #########################################################
