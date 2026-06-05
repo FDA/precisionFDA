@@ -74,6 +74,10 @@ runs:
           SHA_CLIENT=$(git rev-parse HEAD:packages/client)
           SHA_RAILS=$(git rev-parse HEAD:packages/rails)
           SHORT_SHA=$(echo "${SHA_CLIENT}_${SHA_RAILS}" | sha1sum | cut -c1-7)
+        elif [ "${{ inputs.package }}" == "nginx" ]; then
+          SHA_CLIENT=$(git rev-parse HEAD:packages/client)
+          SHA_NGINX=$(git rev-parse HEAD:packages/nginx)
+          SHORT_SHA=$(echo "${SHA_CLIENT}_${SHA_NGINX}" | sha1sum | cut -c1-7)
         else
           SHORT_SHA=$(git rev-parse --short HEAD:packages/${{ inputs.package }})
         fi

@@ -1,10 +1,11 @@
 import axios from 'axios'
-import { toastError, toastSuccess, toastWarning } from '../components/NotificationCenter/ToastHelper'
+import { toastError, toastInfo, toastSuccess, toastWarning } from '../components/NotificationCenter/ToastHelper'
 
 export enum MESSAGE_TYPE {
   SUCCESS = 'success',
   WARNING = 'warning',
   ERROR = 'error',
+  INFO = 'info',
 }
 
 interface PayloadMessage {
@@ -23,6 +24,35 @@ export interface Payload {
   }
 }
 
+const getMessageTexts = (message: PayloadMessage): string[] => {
+  const text = message.text ?? message.message
+  if (Array.isArray(text)) return text.filter(Boolean)
+  return text ? [text] : []
+}
+
+const displayMessage = (message: PayloadMessage) => {
+  const texts = getMessageTexts(message)
+
+  texts.forEach(text => {
+    switch (message.type) {
+      case MESSAGE_TYPE.SUCCESS:
+        toastSuccess(text)
+        break
+      case MESSAGE_TYPE.WARNING:
+        toastWarning(text)
+        break
+      case MESSAGE_TYPE.INFO:
+        toastInfo(text)
+        break
+      case MESSAGE_TYPE.ERROR:
+        toastError(text)
+        break
+      default:
+        break
+    }
+  })
+}
+
 export const displayPayloadMessage = (payload: Payload) => {
   // The response messaging from the API is a bit eclectic, as seen with the following scenarios that
   // we've seen (so far). Thus this function needs to be able to handle the delivery of messages to
@@ -34,31 +64,13 @@ export const displayPayloadMessage = (payload: Payload) => {
 
   // TODO: consolidate backend message format, perhaps making messages a string[] for all responses
 
-  const message = Array.isArray(payload.meta?.messages) ? payload.meta.messages[0] : payload.message
-  if (message) {
-    const errorMessage = Array.isArray(message.text) ? message.text[0] : (message.text ?? message.message)
-    console.log(errorMessage)
-    switch (message.type) {
-      case MESSAGE_TYPE.SUCCESS:
-        toastSuccess(errorMessage)
-        break
-      case MESSAGE_TYPE.WARNING:
-        toastWarning(errorMessage)
-        break
-      case MESSAGE_TYPE.ERROR:
-        toastError(errorMessage)
-        break
-      default:
-        break
-    }
+  if (Array.isArray(payload.meta?.messages) && payload.meta.messages.length > 0) {
+    payload.meta.messages.forEach(displayMessage)
+  } else if (payload.message) {
+    displayMessage(payload.message)
   } else if (payload.error) {
     toastError(payload.error.message)
   }
-}
-
-export const getAuthenticityToken = () => {
-  const CSRFHolder = document.getElementsByName('csrf-token')[0] as HTMLMetaElement
-  return CSRFHolder ? CSRFHolder.content : null
 }
 
 export const refreshSession = async (): Promise<void> => {

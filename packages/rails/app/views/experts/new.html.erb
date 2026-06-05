@@ -10,7 +10,7 @@
 </div>
 
 <div class="container-fluid container-padded">
-  <%= form_for @expert, url: experts_path, html: {class: 'form form-horizontal'} do |f| %>
+  <%= form_for @expert, url: create_experts_path, html: {class: 'form form-horizontal'} do |f| %>
 
     <%= render "experts/form_fields", f: f %>
 

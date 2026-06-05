@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import betaReleaseTimeline from '../../assets/beta-release.png'
 import { Button } from '../../components/Button'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import { PageContainerMargin } from '../../components/Page/page.styles'
@@ -73,7 +74,7 @@ const AboutPage = () => {
             </RichText>
             <div>
               <p>
-                <img src="/assets/beta-release.png" alt="Beta release Timeline: Beta launch on Dec 2015" />
+                <img src={betaReleaseTimeline} alt="Beta release Timeline: Beta launch on Dec 2015" />
               </p>
             </div>
           </div>

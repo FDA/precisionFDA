@@ -1,8 +1,3 @@
-map $uri $proxy_uri {
-  default "";
-  ~^/api/create_file$ /files;
-}
-
 server {
   listen 443 ssl;
   listen [::]:443 ssl;
@@ -11,6 +6,9 @@ server {
   server_name localhost;
   ssl_certificate /keys/cert.pem;
   ssl_certificate_key /keys/key.pem;
+
+  root /usr/share/nginx/html;
+  index index.html;
 
   location /docs {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -54,16 +52,13 @@ server {
     return 301 $scheme://$http_host/api/v2/files/$1/$2$is_args$args;
   }
 
-  location / {
-    proxy_set_header Host $http_host;
+  location = /api/create_file {
+    proxy_pass ${NODE_API_URL}/files;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
     proxy_http_version 1.1;
-    resolver 127.0.0.11 valid=30s;
-    set $pfda_upstream ${RUBY_API_URL};
-    if ($proxy_uri) {
-      set $pfda_upstream ${NODE_API_URL}$proxy_uri;
-    }
-    proxy_pass $pfda_upstream;
+    proxy_redirect off;
   }
 
   # Redirect deprecated singular /job/ path to plural /jobs/
@@ -74,6 +69,163 @@ server {
   location /api/v2/ {
     proxy_pass ${NODE_API_URL}/;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
     proxy_http_version 1.1;
+  }
+
+  location /api/docs/ {
+    proxy_pass ${NODE_API_URL}/api/docs/;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location ~ ^/(logout|return_from_login|login|pdfs|notes|comparisons|licenses|users|profile|guidelines|jobs|set_tags|presskit)(/|$) {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+    proxy_redirect off;
+  }
+
+  location ~ ^/(apps|workflows|jobs|files|assets|comparisons|notes)/.+/comments(/.*)?$ {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location = /experts/new {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location = /experts/create {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location ~ ^/experts/.+/(edit|qa)/?$ {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location ~ ^/challenges/.+/(editor/resources|challenge_resources/new)/?$ {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location = /workflows/new {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location ~ ^/workflows/.+/(edit|fork)/?$ {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location ~ ^/workflows/.+/(batch_workflow|run_batch|terminate_batch|output_folders_list|output_folder_create|output_folder_update)/?$ {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location = /workflows/convert_file_with_strings {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location ~ ^/apps/.+/(export|cwl_export|wdl_export)/?$ {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location ~ ^/workflows/.+/(cwl_export|wdl_export)/?$ {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location ~ ^/admin/(comparator_settings|org_action_requests)(/|$) {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+    proxy_redirect off;
+  }
+
+  location ~ ^/admin/activity_reports(/|$) {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+    proxy_redirect off;
+  }
+
+  location = /admin/users_list {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  # Client build ships /assets/participants/* etc.; Rails asset pipeline serves the rest.
+  location /assets/ {
+    try_files $uri @rails_assets;
+  }
+
+  location @rails_assets {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+  }
+
+  location /api/ {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_http_version 1.1;
+    proxy_redirect off;
+  }
+
+  location / {
+    try_files $uri $uri/ /index.html;
   }
 }

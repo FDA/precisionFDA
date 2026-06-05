@@ -1,8 +1,3 @@
 <%= render '_partials/head_common' %>
 
 <%= javascript_include_tag 'next_application' %>
-
-<% vite_css_paths("src/index.tsx").each do |css_path| %>
-  <link rel="stylesheet" href="<%= css_path %>">
-<% end %>
-<script type="module" src="<%= vite_asset_path("src/index.tsx") %>"></script>

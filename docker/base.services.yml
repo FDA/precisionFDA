@@ -30,7 +30,7 @@ services:
       - ../key.pem:/key.pem
     working_dir: /precision-fda
     ports:
-      - "5012:3000"
+      - "3005:3000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     entrypoint: ./docker/entrypoint/dev.entrypoint.sh
@@ -45,11 +45,10 @@ services:
       args:
         - FRONTEND_IMAGE_TAG=24.15.0-slim
     environment:
-      - VITE_OUT_DIR=dist
       - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
     volumes:
       - type: bind
-        source: ../packages/rails/public/packs
+        source: ../packages/client/dist
         target: /precision-fda/dist
     working_dir: /precision-fda
     command: pnpm run build
@@ -121,5 +120,6 @@ services:
       - ../cert.pem:/keys/cert.pem
       - ../key.pem:/keys/key.pem
       - ../packages/nginx:/etc/nginx/templates
+      - ../packages/client/dist:/usr/share/nginx/html:ro
     ports:
       - "3000:443"

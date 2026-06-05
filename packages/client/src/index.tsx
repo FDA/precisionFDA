@@ -6,8 +6,9 @@ import { loadRuntimeEnv } from '@/utils/runtimeEnv'
 import './styles/tailwind.css'
 import './styles/variables.css'
 import './styles/app-globals.css'
+import { applyPageMeta } from '@/lib/pageMeta'
 import Root from './routes/root'
-import { getAuthenticityToken } from './utils/api'
+import { getCsrfToken } from './utils/csrf'
 
 async function enableMocking() {
   if (!ENABLE_DEV_MSW) {
@@ -26,20 +27,34 @@ async function enableMocking() {
   })
 }
 
-Axios.defaults.headers.common['X-CSRF-Token'] = getAuthenticityToken()
+Axios.interceptors.request.use(async config => {
+  const method = config.method?.toLowerCase()
+  if (method && !['get', 'head', 'options'].includes(method)) {
+    const token = await getCsrfToken()
+    if (token) {
+      config.headers['X-CSRF-Token'] = token
+    }
+  }
+  return config
+})
 
 const renderApp = () => {
-  const container = document.getElementById('app-root')
-  const root = createRoot(container!)
+  applyPageMeta()
 
-  if (container) {
-    ReactModal.setAppElement('#app-root')
-    loadRuntimeEnv().then(() => {
+  const container = document.getElementById('app-root')
+  if (!container) {
+    return
+  }
+
+  const root = createRoot(container)
+  ReactModal.setAppElement('#app-root')
+  loadRuntimeEnv().then(() => {
+    getCsrfToken().then(() => {
       enableMocking().then(() => {
         root.render(<Root />)
       })
     })
-  }
+  })
 }
 document.addEventListener('DOMContentLoaded', renderApp)
 document.addEventListener('page:load', renderApp)

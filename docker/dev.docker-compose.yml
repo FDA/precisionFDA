@@ -40,6 +40,7 @@ services:
       dockerfile: ./docker/images/dev.Dockerfile
     environment:
       - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
+      - VITE_OUT_DIR=dist
     volumes:
       - type: volume
         source: vite-cache-client
@@ -141,3 +142,10 @@ services:
     extends:
       file: ./base.services.yml
       service: nginx
+    depends_on:
+      nodejs-api:
+        condition: service_started
+      web:
+        condition: service_started
+      docs:
+        condition: service_started

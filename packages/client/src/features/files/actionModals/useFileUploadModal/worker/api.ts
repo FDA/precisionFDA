@@ -2,20 +2,16 @@
  * API request functions for file upload operations
  */
 
+import { buildCsrfHeaders, fetchCsrfToken } from '@/utils/csrf'
 import { ChunkUploadError, CreateFileError } from './errors'
 import type { UploadUrlResponse, WorkerSession } from './types'
 import { cleanObject, toError } from './utils'
 
 function buildRequestHeaders(csrfToken?: string): Record<string, string> {
-  const headers: Record<string, string> = {
+  return {
     'Content-Type': 'application/json',
+    ...buildCsrfHeaders(csrfToken),
   }
-
-  if (csrfToken) {
-    headers['X-CSRF-Token'] = csrfToken
-  }
-
-  return headers
 }
 
 /**
@@ -134,10 +130,14 @@ export async function requestUploadUrl(
 /**
  * Close a file after all chunks are uploaded
  */
-export async function closeFileRequest(uid: string, csrfToken?: string): Promise<void> {
+export async function closeFileRequest(uid: string, _csrfToken?: string): Promise<void> {
+  // Always fetch a fresh CSRF token before closing — the original token may
+  // have been null at the start of the upload, or may have been rotated
+  // during a long-running upload.
+  const freshToken = (await fetchCsrfToken()) ?? _csrfToken ?? undefined
   const response = await fetch(`/api/v2/files/${uid}/close`, {
     method: 'PATCH',
-    headers: buildRequestHeaders(csrfToken),
+    headers: buildRequestHeaders(freshToken),
   })
 
   if (!response.ok) {

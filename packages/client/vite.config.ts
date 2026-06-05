@@ -36,8 +36,8 @@ export default defineConfig(({ command, mode }) => {
       ]
 
   return {
-    // Base path for rails production - chunks will be loaded from /packs/
-    base: isProduction ? '/packs/' : '/',
+    // Base path: defaults to '/'. Set VITE_BASE_PATH='/packs/' when building for Rails.
+    base: env.VITE_BASE_PATH || '/',
 
     resolve: {
       tsconfigPaths: true,
@@ -73,12 +73,16 @@ export default defineConfig(({ command, mode }) => {
     build: {
       target: 'es2022',
       assetsInlineLimit: filePath => (fontAssetPattern.test(filePath) ? false : undefined),
-      outDir: env.VITE_OUT_DIR || (isProduction ? '../rails/public/packs' : 'dist'),
+      outDir: env.VITE_OUT_DIR || 'dist',
+      assetsDir: 'static',
       emptyOutDir: true,
       manifest: true,
       sourcemap: !isProduction,
       rolldownOptions: {
-        input: path.resolve(__dirname, 'src/index.tsx'),
+        // Temporary adding input for transitioning to hosting through nginx.
+        ...(env.VITE_BASE_PATH && {
+          input: path.resolve(__dirname, 'src/index.tsx'),
+        }),
         output: {
           format: 'es',
           entryFileNames: 'bundle-[hash].js',
