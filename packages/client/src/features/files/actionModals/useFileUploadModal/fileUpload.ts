@@ -6,7 +6,7 @@
  *
  */
 
-import { getAuthenticityToken } from '@/utils/api'
+import { getCsrfToken } from '@/utils/csrf'
 import type { HomeScope } from '../../../home/types'
 import {
   DEFAULT_CHUNK_CONCURRENCY,
@@ -75,6 +75,8 @@ export class FileUploadController {
       throw new Error('Upload already in progress')
     }
 
+    const csrfToken = (await getCsrfToken()) ?? undefined
+
     return new Promise((resolve, reject) => {
       this.resolveStart = resolve
       this.rejectStart = reject
@@ -107,7 +109,7 @@ export class FileUploadController {
           baseDelayMs: this.config.retryBackoffMs ?? DEFAULT_RETRY_BACKOFF_MS,
         },
         concurrency: this.config.concurrency ?? DEFAULT_CHUNK_CONCURRENCY,
-        csrfToken: getAuthenticityToken() ?? undefined,
+        csrfToken: csrfToken,
       }
 
       this.worker.postMessage({

@@ -1,8 +1,9 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query'
+import { type UseQueryResult, useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { IUser } from '@/types/user'
+import type { IUser } from '@/types/user'
 import { getCookie } from '@/utils/cookies'
-import { SiteSettingsResponse } from './useSiteSettingsQuery'
+import { clearCsrfToken } from '@/utils/csrf'
+import type { SiteSettingsResponse } from './useSiteSettingsQuery'
 
 /**
  * Do not use directly - use the `useAuthUser` hook from './useAuthUser' instead.
@@ -34,8 +35,10 @@ export function useAuthUserQuery(): UseQueryResult<{ user: IUser; meta: any }, E
   })
 }
 
-export function logout() {
-  return axios.delete('/logout')
+export async function logout() {
+  const response = await axios.delete('/logout')
+  clearCsrfToken()
+  return response
 }
 
 export type CDMHKey = 'cdmhPortal' | 'cdrBrowser' | 'cdrAdmin' | 'connectPortal'

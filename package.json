@@ -6,7 +6,8 @@
   "packageManager": "pnpm@11.1.1",
   "scripts": {
     "build": "turbo run build",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "compose:up": "docker compose --env-file docker/.env -p precision-fda -f docker/arm64v8.dev.docker-compose.yml up --build"
   },
   "repository": {},
   "author": "",

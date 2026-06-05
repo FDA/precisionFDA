@@ -162,6 +162,7 @@ Rails.application.routes.draw do
     # API
     namespace "api" do
       get "auth_key" => "base#auth_key"
+      get "flash_messages" => "base#flash_messages"
       get "update_active", to: "base#update_active"
 
       resource :user, only: %i(show)
@@ -586,6 +587,9 @@ Rails.application.routes.draw do
             as: "request_approval",
             via: %i(get post)
     end
+
+    post "/experts/create", to: "experts#create", as: :create_experts
+    post "/experts/:id/edit", to: "experts#update", as: :update_expert
 
     resources :experts do
       post "ask_question", on: :member

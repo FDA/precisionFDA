@@ -2,9 +2,23 @@ module Api
   class BaseController < ApplicationController
     skip_before_action :require_login
     before_action :require_api_login
+    skip_before_action :require_api_login, only: :flash_messages
 
     def update_active
       render json: {}, status: :no_content
+    end
+
+    def flash_messages
+      messages = flash.to_hash.map do |type, message|
+        {
+          type: normalize_flash_type(type),
+          text: message,
+        }
+      end
+
+      flash.discard if messages.any?
+
+      render json: { meta: { messages: messages } }
     end
 
     def check_admin
@@ -22,6 +36,21 @@ module Api
     def auth_key
       key = generate_auth_key
       render json: { Key: key }
+    end
+
+    private
+
+    def normalize_flash_type(type)
+      case type.to_s
+      when "success"
+        "success"
+      when "alert", "warning"
+        "warning"
+      when "notice"
+        "info"
+      else
+        "error"
+      end
     end
   end
 end

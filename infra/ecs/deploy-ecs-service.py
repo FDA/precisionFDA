@@ -73,7 +73,8 @@ class EcsDeployer:
         self.stages = [
             ["pfda-db-migrate"],
             ["pfda-nodejs-api", "pfda-nodejs-api-internal", "pfda-nodejs-worker",
-             "pfda-nodejs-admin-platform-client", "pfda-web", "pfda-docs", "pfda-nginx"]
+             "pfda-nodejs-admin-platform-client", "pfda-docs", "pfda-nginx"],
+            ["pfda-web"]
         ]
 
         if self.deployment_type == "gsrs":
@@ -725,6 +726,8 @@ class EcsDeployer:
                 ecs_secrets.append({"name": "SSL_CERT", "valueFrom": param["Name"]})
             elif param["Name"].endswith("/environment/UNII_HOST"):
                 ecs_secrets.append({"name": "UNII_HOST", "valueFrom": param["Name"]})
+            elif param["Name"].endswith("RECAPTCHA_SITE_KEY"):
+                ecs_secrets.append({"name": "RECAPTCHA_SITE_KEY", "valueFrom": param["Name"]})
             elif not any(excl in service_name.lower() for excl in exclusions):
                 # Include other parameters only if service is not Nginx
                 ecs_secrets.append({"name": param["Name"].split("/")[-1], "valueFrom": param["Name"]})

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import 'react-tooltip/dist/react-tooltip.css'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router'
@@ -8,6 +8,7 @@ import { ExpiringSessionModal } from '@/features/auth/ExpiringSessionModal'
 import { SessionExpiredModal } from '@/features/auth/SessionExpiredModal'
 import { FileUploadModalProvider } from '@/features/files/actionModals/useFileUploadModal'
 import { useModal } from '@/features/modal/useModal'
+import { useRailsFlashMessages } from '@/hooks/useRailsFlashMessages'
 import { LayoutLoader, UserLayout } from '@/layouts/UserLayout'
 import { OnlineStatusProvider } from '@/utils/OnlineStatusContext'
 import { PFDAToastContainer } from '@/utils/PFDAToastContainer'
@@ -69,23 +70,16 @@ const AdminRouteRedirect = () => {
 const RootComponent = () => {
   const sessionExpiredModal = useModal()
   const expiringSessionModal = useModal()
-  const [railsAlertHeight, setRailsAlertHeight] = useState(0)
 
   useEffect(() => {
     setAuthFailureCallback(() => sessionExpiredModal.setShowModal(true))
   }, [])
 
-  useEffect(() => {
-    // Calculate the height of the rails-alert element
-    const alertElement = document.querySelector('.rails-alert')
-    if (alertElement) {
-      setRailsAlertHeight(alertElement.clientHeight as number)
-    }
-  }, [])
+  useRailsFlashMessages()
 
   return (
     <ThemeProvider>
-      <GlobalStyle railsAlertHeight={railsAlertHeight} />
+      <GlobalStyle railsAlertHeight={0} />
       <QueryClientProvider client={queryClientInstance}>
         <OnlineStatusProvider>
           <FileUploadModalProvider>

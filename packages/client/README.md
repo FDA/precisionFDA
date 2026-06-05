@@ -65,7 +65,7 @@ docker compose -p precision-fda --env-file docker/.env -f docker/dev.docker-comp
 | Service         | Description           | Port                 |
 |-----------------|-----------------------|----------------------|
 | `frontend`      | Vite build for client | -                    |
-| `web`           | Rails API server      | 5012 (internal 3000) |
+| `web`           | Rails API server      | 3005 (internal 3000) |
 | `nodejs-api`    | Node.js API server    | 3001                 |
 | `nodejs-worker` | Background worker     | -                    |
 | `nginx`         | Reverse proxy         | 3000 (HTTPS)         |

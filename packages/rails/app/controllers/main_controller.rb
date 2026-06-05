@@ -480,7 +480,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   end
 
   def oauth2_redirect_url
-    URI.join(request.base_url, "/return_from_login").to_s
+    URI.join(HOST, "/return_from_login").to_s
   end
 
   # Concat item path with '/home' to create a link to Home - for specific items

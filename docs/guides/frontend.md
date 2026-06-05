@@ -438,11 +438,7 @@ export async function deleteItem(id: number) {
 }
 ```
 
-CSRF tokens are set globally in `src/index.tsx`:
-
-```tsx
-Axios.defaults.headers.common['X-CSRF-Token'] = getAuthenticityToken()
-```
+CSRF tokens are attached per request in `src/index.tsx` via an axios interceptor that calls `getCsrfToken()` from `@/utils/csrf` for non-GET requests. Fetch-based code (e.g. upload workers) should import helpers from the same module.
 
 ---
 

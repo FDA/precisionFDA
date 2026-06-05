@@ -69,25 +69,6 @@ RUN chmod +x ./docker/entrypoint/prod.entrypoint.sh
 RUN chmod +x ./docker/entrypoint/runtime-env.sh
 RUN chmod +x ./docker/entrypoint/robots-txt.sh
 
-# =========================
-# Build frontend assets
-# =========================
-
-# Copy only dependency files for caching Node modules
-WORKDIR $APP_DIR/frontend
-COPY packages/client/package.json $APP_DIR/frontend/package.json
-COPY packages/client/pnpm-lock.yaml $APP_DIR/frontend/pnpm-lock.yaml
-COPY packages/client/pnpm-workspace.yaml $APP_DIR/frontend/pnpm-workspace.yaml
-RUN pnpm install --frozen-lockfile
-
-# Copy the rest of the frontend code and build
-COPY packages/client/ $APP_DIR/frontend
-# Override VITE_OUT_DIR since the default '../rails/public/packs' is relative to packages/client
-# but in Docker, frontend is at /precision-fda/frontend and Rails is at /precision-fda
-ENV VITE_OUT_DIR=$APP_DIR/public/packs
-ENV CI=true
-RUN pnpm run build
-
 WORKDIR $APP_DIR
 RUN mv .env.do_not_delete .env
 RUN mv config/database.do_not_delete.yml config/database.yml
