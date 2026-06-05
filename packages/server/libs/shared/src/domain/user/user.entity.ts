@@ -397,17 +397,21 @@ export class User extends BaseEntity {
       return this.privateFilesProject
     } else if (EntityScopeUtils.isSpaceScope(scope)) {
       const spaceId = EntityScopeUtils.getSpaceIdFromScope(scope)
-      const spaceMembership = await this.spaceMemberships
-        .loadItems({
-          where: this.spaceMembershipWhere(mode, spaceId),
-        })
-        .then(memberships => memberships[0])
+
+      const spaceMemberships = await this.spaceMemberships.loadItems({
+        where: this.spaceMembershipWhere(mode, spaceId),
+        refresh: true,
+      })
+      if (spaceMemberships.length > 1) {
+        throw new Error(`Data integrity error: user ${this.dxuser} has multiple memberships for space ${spaceId}`)
+      }
+      const spaceMembership = spaceMemberships[0]
       if (!spaceMembership) {
         return null
       }
       await spaceMembership.spaces.load()
-      const space = spaceMembership.spaces[0]
-      return spaceMembership.isHost ? space.hostProject : space.guestProject
+      const space = spaceMembership.spaces.find(space => space.id === spaceId)
+      return spaceMembership.isHost() ? space.hostProject : space.guestProject
     }
   }
 }

@@ -265,6 +265,17 @@ describe('POST /files', () => {
     })
 
     it('should create file in scope folder if folderId is provided and scope is space', async () => {
+      const newSpace = create.spacesHelper.create(em, {
+        type: SPACE_TYPE.GROUPS,
+        hostProject: 'project-host2',
+        guestProject: 'project-guest2',
+      })
+      create.spacesHelper.addMember(
+        em,
+        { space: newSpace, user },
+        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.GUEST },
+      )
+      await em.flush()
       const folder = create.filesHelper.createFolder(
         em,
         {
@@ -272,7 +283,7 @@ describe('POST /files', () => {
           parentFolder: null,
         },
         {
-          scope: `space-${space.id}`,
+          scope: newSpace.scope,
         },
       )
       await em.flush()
@@ -283,13 +294,15 @@ describe('POST /files', () => {
         .send({
           name: 'test_file.txt',
           folderId: folder.id,
-          scope: `space-${space.id}`,
+          scope: newSpace.scope,
         })
         .expect(201)
 
       const file = await fileRepo.findOne({ uid: result.body.uid })
       expect(file.parentFolderId).to.be.null()
       expect(file.scopedParentFolderId).to.equal(folder.id)
+      expect(file.scope).to.equal(newSpace.scope)
+      expect(file.project).to.equal(newSpace.guestProject)
     })
   })
 

@@ -431,7 +431,7 @@ export class CopyNodesFacade {
       const spaceId = EntityScopeUtils.getSpaceIdFromScope(scope)
       const membership = await this.spaceMembershipRepo.getMembership(spaceId, user.id)
       await membership.spaces.load()
-      return membership.isHost ? membership.spaces[0].hostProject : membership.spaces[0].guestProject
+      return membership.isHost() ? membership.spaces[0].hostProject : membership.spaces[0].guestProject
     }
   }
 }
