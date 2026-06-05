@@ -357,7 +357,7 @@ describe('CopyNodesFacade', () => {
       spacesCollection.load = stub().resolves()
 
       const spaceMembership = {
-        isHost: true,
+        isHost: () => true,
         spaces: spacesCollection,
       } as unknown as SpaceMembership
 
@@ -366,7 +366,7 @@ describe('CopyNodesFacade', () => {
         spaceMemberships: [
           {
             spaces: [{ id: spaceId, hostProject: 'project-host' }],
-            isHost: true,
+            isHost: () => true,
           },
         ],
       })
