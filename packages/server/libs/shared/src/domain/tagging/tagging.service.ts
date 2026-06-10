@@ -1,6 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { Tag } from '@shared/domain/tag/tag.entity'
 import { TagRepository } from '@shared/domain/tag/tag.repository'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { TaggingRepository } from '@shared/domain/tagging/tagging.repository'
@@ -28,28 +27,24 @@ export class TaggingService {
     this.logger.log(
       `Adding tag ${name} for entity with id: ${taggableId}, type ${taggableType}, taggerId: ${taggerId}, taggerType: ${taggerType}`,
     )
-    let tag = await this.tagRepo.findOne({ name })
+    let activeTag = await this.tagRepo.findOne({ name })
+    if (!activeTag) {
+      activeTag = this.tagRepo.create({ name })
+      await this.em.persist(activeTag).flush()
+    }
 
-    return this.em.transactional(async em => {
-      if (!tag) {
-        tag = new Tag()
-        tag.name = name
-        await em.persistAndFlush(tag)
-      }
+    const existingTagging = await this.taggingRepo.findOne({ tag: activeTag, taggableType, taggableId })
+    if (existingTagging) return
 
-      const existingTagging = await this.taggingRepo.findOne({ tag, taggableType, taggableId })
-      if (existingTagging) return
+    const tagging = new Tagging()
+    tagging.tagId = activeTag.id
+    tagging.taggableType = taggableType
+    tagging.taggableId = taggableId
+    tagging.taggerType = taggerType
+    tagging.taggerId = taggerId
+    tagging.context = 'tags'
 
-      const tagging = new Tagging()
-      tagging.tagId = tag.id
-      tagging.taggableType = taggableType
-      tagging.taggableId = taggableId
-      tagging.taggerType = taggerType
-      tagging.taggerId = taggerId
-      tagging.context = 'tags'
-
-      em.persist(tagging)
-    })
+    await this.em.persist(tagging).flush()
   }
 
   /**
@@ -72,5 +67,9 @@ export class TaggingService {
         this.em.remove(tagging)
       }
     })
+  }
+
+  async getTaggingsForEntity(id: number, type: TAGGABLE_TYPE): Promise<Tagging[]> {
+    return this.taggingRepo.findForTaggable(id, type)
   }
 }
