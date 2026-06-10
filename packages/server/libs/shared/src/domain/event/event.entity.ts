@@ -25,6 +25,7 @@ export enum EVENT_TYPES {
   JOB_RUN = 'Event::JobRun',
   SUBMISSION_CREATED = 'Event::SubmissionCreated',
   SIGNED_UP_FOR_CHALLENGE = 'Event::SignedUpForChallenge',
+  USER_DEACTIVATED = 'Event::UserDeactivated',
 }
 
 @Entity({ tableName: 'events' })

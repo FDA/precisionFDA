@@ -1,19 +1,19 @@
-import { EntityManager } from '@mikro-orm/mysql';
-import { expect } from 'chai';
-import { stub } from 'sinon';
-import { OrgActionRequestService } from '@shared/domain/org-action-request/org-action-request.service';
-import { Organization } from '@shared/domain/org/organization.entity';
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User, USER_STATE } from '@shared/domain/user/user.entity';
-import { UserService } from '@shared/domain/user/service/user.service';
-import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors';
-import { OrgMemberActionFacade } from '@shared/facade/profile/org-member-action.facade';
 import { Ref } from '@mikro-orm/core'
-
+import { EntityManager } from '@mikro-orm/mysql'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { Organization } from '@shared/domain/org/organization.entity'
+import { OrgActionRequestService } from '@shared/domain/org-action-request/org-action-request.service'
+import { UserService } from '@shared/domain/user/service/user.service'
+import { USER_STATE, User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
+import { OrgMemberActionFacade } from '@shared/facade/profile/org-member-action.facade'
 
 describe('OrgMemberActionFacade', () => {
   const populateStub = stub()
   const flushStub = stub()
+  const persistStub = stub().returnsThis()
   const loadEntityStub = stub()
   const getUserInOrganizationStub = stub()
   const findPendingRemoveMemberRequestStub = stub()
@@ -22,6 +22,12 @@ describe('OrgMemberActionFacade', () => {
   const em = {
     populate: populateStub,
     flush: flushStub,
+    persist: persistStub,
+    transactional: async (cb: (...args: unknown[]) => Promise<unknown>) => {
+      const result = await cb(em)
+      await flushStub()
+      return result
+    },
   } as unknown as EntityManager
 
   const userCtx = {
@@ -41,11 +47,16 @@ describe('OrgMemberActionFacade', () => {
     id: 10,
     singular: false,
     admin: { id: 1 },
+    handle: 'test-org',
   } as Organization
 
   const ADMIN_USER = {
     id: 1,
-    organization: { getEntity: (): Organization => ORG },
+    dxuser: 'admin-user',
+    organization: {
+      getEntity: (): Organization => ORG,
+      load: async () => ORG,
+    },
   }
 
   beforeEach(() => {
@@ -53,6 +64,8 @@ describe('OrgMemberActionFacade', () => {
     populateStub.resolves()
     flushStub.reset()
     flushStub.resolves()
+    persistStub.reset()
+    persistStub.returnsThis()
     loadEntityStub.reset()
     loadEntityStub.resolves(ADMIN_USER)
     getUserInOrganizationStub.reset()
@@ -68,7 +81,7 @@ describe('OrgMemberActionFacade', () => {
 
   describe('#deactivateOrgUser', () => {
     it('deactivates an enabled member', async () => {
-      const targetUser = { id: 5, userState: USER_STATE.ENABLED }
+      const targetUser = { id: 5, dxuser: 'target-user', userState: USER_STATE.ENABLED }
       getUserInOrganizationStub.resolves(targetUser)
 
       const facade = getInstance()
@@ -123,7 +136,7 @@ describe('OrgMemberActionFacade', () => {
       const nonAdminUser = {
         id: 2,
         organization: {
-          getEntity: (): Organization => ({ id: 10, singular: false, admin: { id: 1 } as Ref<User> } as Organization),
+          getEntity: (): Organization => ({ id: 10, singular: false, admin: { id: 1 } as Ref<User> }) as Organization,
         },
       }
       loadEntityStub.resolves(nonAdminUser)
@@ -144,7 +157,7 @@ describe('OrgMemberActionFacade', () => {
       const singularUser = {
         id: 1,
         organization: {
-          getEntity: (): Organization => ({ id: 20, singular: true, admin: { id: 1 } as Ref<User> } as Organization),
+          getEntity: (): Organization => ({ id: 20, singular: true, admin: { id: 1 } as Ref<User> }) as Organization,
         },
       }
       loadEntityStub.resolves(singularUser)
@@ -220,7 +233,7 @@ describe('OrgMemberActionFacade', () => {
       const nonAdminUser = {
         id: 2,
         organization: {
-          getEntity: (): Organization => ({ id: 10, singular: false, admin: { id: 1 } as Ref<User> } as Organization),
+          getEntity: (): Organization => ({ id: 10, singular: false, admin: { id: 1 } as Ref<User> }) as Organization,
         },
       }
       loadEntityStub.resolves(nonAdminUser)

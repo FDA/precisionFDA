@@ -1,7 +1,9 @@
 import { Inject, Logger } from '@nestjs/common'
+import { EntityManager } from '@mikro-orm/mysql'
 import { DNANEXUS_INVALID_EMAIL, ORG_EVERYONE } from '@shared/config/consts'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { createUserDeactivated } from '@shared/domain/event/event.helper'
 import { PendingUserDTO } from '@shared/domain/user/dto/pending-user.dto'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { Resource, USER_STATE, User } from '@shared/domain/user/user.entity'
@@ -17,6 +19,7 @@ export class UserManagementService {
   private readonly logger: Logger
 
   constructor(
+    private readonly em: EntityManager,
     private readonly user: UserContext,
     private readonly userRepo: UserRepository,
     @Inject(ADMIN_PLATFORM_CLIENT)
@@ -144,8 +147,10 @@ export class UserManagementService {
     const encodeEmail = (email: string): string =>
       Buffer.from(email, 'utf8').toString('base64').replace('\n', '') + DNANEXUS_INVALID_EMAIL
 
+    const actor = await this.user.loadEntity()
+
     await this.userRepo.transactional(async () => {
-      users.forEach(user => {
+      for (const user of users) {
         user.disableMessage = `Deactivated by admin: ${this.user.dxuser}`
         user.userState = USER_STATE.DEACTIVATED
 
@@ -155,7 +160,10 @@ export class UserManagementService {
         if (user.normalizedEmail) {
           user.normalizedEmail = encodeEmail(user.normalizedEmail)
         }
-      })
+
+        const event = await createUserDeactivated(actor, user)
+        this.em.persist(event)
+      }
     })
   }
 
