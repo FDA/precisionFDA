@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { EntityManager } from '@mikro-orm/mysql'
 import { ORG_EVERYONE } from '@shared/config/consts'
+import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { UserManagementService } from '@shared/domain/user/service/user-management.service'
 import { USER_STATE, User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
@@ -11,8 +13,16 @@ import { createRepositoryStub } from '../../factory/repository'
 describe('user-management service tests', () => {
   const userUnlockStub = stub()
   const userResetMfaStub = stub()
+  const emPersistStub = stub()
+  const emPopulateStub = stub()
+  const loadEntityStub = stub()
 
   const userRepo = createRepositoryStub<User>()
+
+  const em = {
+    persist: emPersistStub,
+    populate: emPopulateStub,
+  } as unknown as EntityManager
 
   const getInstance = (): UserManagementService => {
     const platformClient = {
@@ -21,11 +31,12 @@ describe('user-management service tests', () => {
     } as unknown as PlatformClient
 
     return new UserManagementService(
+      em,
       {
         id: 666,
         dxuser: 'user1',
         accessToken: 'access_token',
-        loadEntity: () => null,
+        loadEntity: loadEntityStub,
       },
       userRepo as unknown as UserRepository,
       platformClient,
@@ -36,8 +47,17 @@ describe('user-management service tests', () => {
     userRepo.stubs.reset()
     userUnlockStub.reset()
     userResetMfaStub.reset()
+    emPersistStub.reset()
+    emPopulateStub.reset()
+    loadEntityStub.reset()
     userUnlockStub.throws()
     userResetMfaStub.throws()
+    emPopulateStub.resolves()
+    loadEntityStub.resolves({
+      id: 666,
+      dxuser: 'user1',
+      organization: { load: stub().resolves({ handle: 'test-org' }) },
+    })
   })
 
   describe('#deactivateUsers', () => {
@@ -51,6 +71,27 @@ describe('user-management service tests', () => {
 
       await instance.deactivateUsers([1, 2])
       expect(userRepo.stubs.find.calledOnceWithExactly({ id: { $in: [1, 2] } })).to.be.true()
+    })
+
+    it('persists a UserDeactivated event per user', async () => {
+      const instance = getInstance()
+
+      userRepo.stubs.find.resolves([
+        { id: 1, userState: USER_STATE.ENABLED, dxuser: 'userA' },
+        { id: 2, userState: USER_STATE.ENABLED, dxuser: 'userB' },
+      ])
+
+      await instance.deactivateUsers([1, 2])
+
+      expect(emPersistStub.callCount).to.equal(2)
+      const event1 = emPersistStub.firstCall.firstArg
+      expect(event1.type).to.equal(EVENT_TYPES.USER_DEACTIVATED)
+      expect(event1.param1).to.equal('userA')
+      expect(event1.dxuser).to.equal('user1')
+
+      const event2 = emPersistStub.secondCall.firstArg
+      expect(event2.type).to.equal(EVENT_TYPES.USER_DEACTIVATED)
+      expect(event2.param1).to.equal('userB')
     })
 
     it('fails for themself', async () => {

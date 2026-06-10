@@ -166,4 +166,18 @@ const createJobClosed = async (user: User, job: Job, platformJobData: JobDescrib
   return event
 }
 
-export { createAppCreated, createAppPublished, createDbClusterPasswordRotated, createJobClosed }
+const createUserDeactivated = async (actor: User, targetUser: User): Promise<Event> => {
+  const event = new Event()
+  const organization = await actor.organization.load()
+  wrap(event).assign({
+    type: EVENT_TYPES.USER_DEACTIVATED,
+    orgHandle: organization.handle,
+    dxuser: actor.dxuser,
+    param1: targetUser.dxuser,
+    param2: targetUser.id.toString(),
+    data: JSON.stringify({}),
+  })
+  return event
+}
+
+export { createAppCreated, createAppPublished, createDbClusterPasswordRotated, createJobClosed, createUserDeactivated }
