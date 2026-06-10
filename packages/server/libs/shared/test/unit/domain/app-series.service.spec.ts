@@ -49,24 +49,6 @@ describe('AppSeriesService', () => {
     })
   })
 
-  context('createAppSeries', () => {
-    it('should create a new app series', async () => {
-      const appSeriesService = getInstance()
-      const appName = 'Test App Series'
-      const scope = 'private'
-      const appSeries = await appSeriesService.createAppSeries(appName, user, scope)
-
-      expect(appSeries).to.be.instanceOf(AppSeries)
-      expect(appSeries.name).to.equal(appName)
-      expect(appSeries.scope).to.equal(scope)
-      expect(appSeries.user?.id).to.equal(user.id)
-
-      const foundAppSeries = await em.findOne(AppSeries, { id: appSeries.id })
-      expect(foundAppSeries).to.not.be.null
-      expect(foundAppSeries?.name).to.equal(appName)
-    })
-  })
-
   function getInstance(): AppSeriesService {
     return new AppSeriesService(userCtx, appSeriesRepository, appSeriesCountService)
   }

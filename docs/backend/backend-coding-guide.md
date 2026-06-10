@@ -145,6 +145,11 @@ await this.spaceMembershipRepository.transactional(async () => {
 })
 ```
 
+- Do not pass transaction-scoped `EntityManager` instances between service/facade methods.
+- Start transaction boundaries in the owning service/facade (`this.em.transactional(...)` or repository `.transactional(...)`) and use `this.em` plus constructor-injected repositories inside called methods.
+- Prefer repository reads/writes over direct `em.find*` calls for domain entities.
+
+
 **Persist pattern:**
 ```ts
 // Stage + flush separately (preferred - easy to mock)

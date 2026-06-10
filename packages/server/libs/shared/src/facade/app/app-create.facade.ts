@@ -7,6 +7,7 @@ import { App, AppSpec, Internal } from '@shared/domain/app/app.entity'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import {
   APPKIT_LATEST_VERSION,
+  constructDxid,
   constructDxName,
   getCLIKeyInputSpec,
   getEntityType,
@@ -22,6 +23,10 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { createAppCreated } from '@shared/domain/event/event.helper'
 import { allowedInstanceTypes } from '@shared/domain/job/job.enum'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
@@ -48,6 +53,7 @@ export class AppCreateFacade {
     private readonly nodeService: NodeService,
     private readonly appService: AppService,
     private readonly appSeriesService: AppSeriesService,
+    private readonly taggingService: TaggingService,
   ) {}
 
   /**
@@ -65,23 +71,20 @@ export class AppCreateFacade {
 
     await this.validateAppInput(appInput, assets)
     await this.validateScopeAndUser(user, appInput.scope)
-    await this.validateForkedApp(appInput.forked_from as Uid<'app'>)
+    const forkedApp = await this.validateForkedApp(appInput.forked_from as Uid<'app'>)
     // - create app series
     let appSeries = await this.appSeriesService.getAppSeriesByName(appInput.name, appInput.scope)
+    const appSeriesCreated = !appSeries
     this.validateAppSeriesCreation(appSeries, appInput.createAppSeries)
     this.validateAppRevisionCreation(appSeries, appInput.createAppRevision)
 
     const previousVersionAppDxid = appSeries ? (await this.getLatestRevisionApp(appSeries)).dxid : null
-    if (!appSeries && appInput.createAppSeries) {
-      appSeries = await this.appSeriesService.createAppSeries(appInput.name, user, appInput.scope)
-      this.logger.log(`App series for dxid ${appSeries.dxid} did not exist and user requested its creation`)
-    }
 
     // - get release
     const release = appInput.release ? appInput.release : UBUNTU_20
 
     // - find the latest revision and increase it by one
-    const revision = await this.getAppRevision(appSeries.latestRevisionAppId)
+    const revision = appSeries ? await this.getAppRevision(appSeries.latestRevisionAppId) : 1
 
     // - create new applet in platform
     const appletId = await this.createApplet(user, appInput, release)
@@ -105,28 +108,43 @@ export class AppCreateFacade {
       await this.publishAppInSpace(user, EntityScopeUtils.getSpaceIdFromScope(appInput.scope), platformAppId)
     }
 
-    await this.em.begin()
-    try {
+    return this.em.transactional(async () => {
+      if (!appSeries && appInput.createAppSeries) {
+        const appSeriesDxid = constructDxid(this.user.dxuser, appInput.name, appInput.scope)
+        appSeries = new AppSeries(user)
+        appSeries.name = appInput.name
+        appSeries.dxid = appSeriesDxid
+        appSeries.scope = appInput.scope
+        await this.em.persist(appSeries).flush()
+        this.logger.log(`App series for dxid ${appSeries.dxid} did not exist and user requested its creation`)
+      }
+
+      if (!appSeries) {
+        throw new ValidationError('App series is missing and cannot proceed with app creation.', {
+          code: ErrorCodes.APP_SERIES_CREATION_NOT_REQUESTED,
+        })
+      }
+
       // - store app in a database
-      const app = await this.saveAppInDB(user, platformAppId, revision, release, assets, appInput, appSeries.id)
+      const app = this.buildApp(user, platformAppId, revision, release, assets, appInput, appSeries.id)
+      await this.em.persist(app).flush()
 
       // - update app series (version, revision, deleted - why?)
-      await this.updateAppSeries(appSeries, appInput, app)
+      this.updateAppSeries(appSeries, appInput, app)
+
+      // - copy tags from forked app
+      if (appSeriesCreated && forkedApp) {
+        await this.copyForkedAppTags(forkedApp, appSeries)
+      }
 
       // - store app event
       await this.createAppEvent(user, app)
 
-      await this.em.commit()
-
       return app.uid
-    } catch (error) {
-      this.logger.error('Error creating an app', error)
-      await this.em.rollback()
-      throw error
-    }
+    })
   }
 
-  private async publishAppInSpace(user: User, spaceId: number, appDxid): Promise<void> {
+  private async publishAppInSpace(user: User, spaceId: number, appDxid: DxId<'app'>): Promise<void> {
     const space = (await user.editableSpaces()).find(space => space.id === spaceId)
 
     if (!space) {
@@ -147,11 +165,11 @@ export class AppCreateFacade {
 
   private async createAppEvent(user: User, app: App): Promise<void> {
     this.logger.log(`Creating app event for app ${app.uid} and user ${user.id}`)
-    const createAppEvent = await createAppCreated(user, app)
-    await this.em.persist(createAppEvent).flush()
+    const event = await createAppCreated(user, app)
+    await this.em.persist(event).flush()
   }
 
-  private async updateAppSeries(appSeries: AppSeries, appInput: SaveAppDTO, app: App): Promise<void> {
+  private updateAppSeries(appSeries: AppSeries, appInput: SaveAppDTO, app: App): void {
     this.logger.log(`Updating app series ${appSeries.dxid}`)
     appSeries.latestRevisionAppId = app.id
     if (appInput.scope && appInput.scope !== STATIC_SCOPE.PRIVATE) {
@@ -165,7 +183,7 @@ export class AppCreateFacade {
     }
   }
 
-  private async saveAppInDB(
+  private buildApp(
     user: User,
     platformAppId: DxId<'app'>,
     revision: number,
@@ -173,7 +191,7 @@ export class AppCreateFacade {
     assets: Asset[],
     appInput: SaveAppDTO,
     appSeriesId: number,
-  ): Promise<App> {
+  ): App {
     this.logger.log(`Saving app in DB with platformAppId: ${platformAppId}`)
     const app = new App(user)
     app.dxid = platformAppId
@@ -200,7 +218,6 @@ export class AppCreateFacade {
 
     assets.forEach(asset => app.assets.add(asset))
     app.release = release
-    await this.em.persist(app).flush()
     return app
   }
 
@@ -313,18 +330,67 @@ export class AppCreateFacade {
     }
   }
 
-  private async validateForkedApp(forkFrom?: Uid<'app'>): Promise<void> {
-    if (forkFrom) {
-      const forkedApp = await this.appService.getAccessibleEntityByUid(forkFrom)
-
-      if (!forkedApp) {
-        throw new NotFoundError('Forked app does not exist or is not accessible.')
-      }
-
-      if (forkedApp.entityType === ENTITY_TYPE.HTTPS) {
-        throw new InvalidRequestError('Forking from this app is not allowed.')
-      }
+  private async validateForkedApp(forkFrom?: Uid<'app'>): Promise<App | null> {
+    if (!forkFrom) {
+      return null
     }
+
+    const forkedApp = await this.appService.getAccessibleEntityByUid(forkFrom)
+
+    if (!forkedApp) {
+      throw new NotFoundError('Forked app does not exist or is not accessible.')
+    }
+
+    if (forkedApp.entityType === ENTITY_TYPE.HTTPS) {
+      throw new InvalidRequestError('Forking from this app is not allowed.')
+    }
+
+    return forkedApp
+  }
+
+  private async copyForkedAppTags(forkedApp: App, targetAppSeries: AppSeries): Promise<void> {
+    if (!forkedApp.appSeriesId) {
+      return
+    }
+
+    const sourceTaggings = await this.taggingService.getTaggingsForEntity(
+      forkedApp.appSeriesId,
+      TAGGABLE_TYPE.APP_SERIES,
+    )
+    if (!sourceTaggings.length) {
+      return
+    }
+
+    for (const sourceTagging of sourceTaggings) {
+      if (!sourceTagging.tag?.name) {
+        continue
+      }
+
+      let activeTag = await this.em.findOne(Tag, { name: sourceTagging.tag.name })
+      if (!activeTag) {
+        activeTag = new Tag()
+        activeTag.name = sourceTagging.tag.name
+        await this.em.persist(activeTag).flush()
+      }
+
+      const existingTagging = await this.em.findOne(Tagging, {
+        tag: activeTag,
+        taggableType: TAGGABLE_TYPE.APP_SERIES,
+        taggableId: targetAppSeries.id,
+      })
+      if (existingTagging) continue
+
+      const tagging = new Tagging()
+      tagging.tagId = activeTag.id
+      tagging.taggableType = TAGGABLE_TYPE.APP_SERIES
+      tagging.taggableId = targetAppSeries.id
+      tagging.taggerType = sourceTagging.taggerType
+      tagging.taggerId = sourceTagging.taggerId
+      tagging.context = 'tags'
+      this.em.persist(tagging)
+    }
+
+    await this.em.flush()
   }
 
   private async validateScopeAndUser(user: User, scope: EntityScope): Promise<void> {

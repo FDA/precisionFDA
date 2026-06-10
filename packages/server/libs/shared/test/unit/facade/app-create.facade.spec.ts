@@ -14,13 +14,22 @@ import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { AppSeriesRepository } from '@shared/domain/app-series/app-series.repository'
 import { AppSeriesCountService } from '@shared/domain/app-series/app-series-count.service'
 import { AppSeriesService } from '@shared/domain/app-series/service/app-series.service'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 import { EVENT_TYPES, Event } from '@shared/domain/event/event.entity'
 import { allowedInstanceTypes } from '@shared/domain/job/job.enum'
+import { JobRepository } from '@shared/domain/job/job.repository'
 import { Organization } from '@shared/domain/org/organization.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { TagRepository } from '@shared/domain/tag/tag.repository'
+import { AppSeriesTagging } from '@shared/domain/tagging/app-series-tagging.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { TaggingRepository } from '@shared/domain/tagging/tagging.repository'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -69,8 +78,11 @@ describe('AppCreateFacade', () => {
   let nodeService: NodeService
   let appService: AppService
   let appSeriesService: AppSeriesService
+  let taggingService: TaggingService
   let appRepository: AppRepository
   let appSeriesRepository: AppSeriesRepository
+  let taggingRepository: TaggingRepository
+  let tagRepository: TagRepository
   let folderRepository: FolderRepository
   let nodeRepository: NodeRepository
   let spaceRepository: SpaceRepository
@@ -91,6 +103,8 @@ describe('AppCreateFacade', () => {
 
     appRepository = em.getRepository(App)
     appSeriesRepository = em.getRepository(AppSeries)
+    taggingRepository = em.getRepository(Tagging)
+    tagRepository = em.getRepository(Tag)
     folderRepository = em.getRepository(Folder)
     nodeRepository = em.getRepository(Node)
     spaceRepository = em.getRepository(Space)
@@ -112,7 +126,14 @@ describe('AppCreateFacade', () => {
     ;(nodeRepository as unknown as { user: UserContext }).user = userCtx
     ;(appRepository as unknown as { user: UserContext }).user = userCtx
 
-    nodeHelper = new NodeHelper(em, userCtx, folderRepository, nodeRepository)
+    nodeHelper = new NodeHelper(
+      em,
+      userCtx,
+      folderRepository,
+      nodeRepository,
+      {} as unknown as JobRepository,
+      {} as unknown as ComparisonRepository,
+    )
 
     nodeService = new NodeService(
       em,
@@ -131,6 +152,20 @@ describe('AppCreateFacade', () => {
 
     appService = new AppService(appRepository)
     appSeriesService = new AppSeriesService(userCtx, appSeriesRepository, {} as unknown as AppSeriesCountService)
+    taggingService = new TaggingService(em, taggingRepository, tagRepository)
+
+    // Mock transactional to execute the callback directly using the same em (no forking)
+    stub(em, 'transactional').callsFake(async (cb) => {
+      await em.begin()
+      try {
+        const result = await (cb as (...args: unknown[]) => Promise<unknown>)(em)
+        await em.commit()
+        return result
+      } catch (e) {
+        await em.rollback()
+        throw e
+      }
+    })
 
     appletCreateStub.reset()
     appletCreateStub.throws()
@@ -159,6 +194,22 @@ describe('AppCreateFacade', () => {
     appPublishStub.reset()
     appPublishStub.throws()
     appPublishStub.resolves()
+  })
+
+  afterEach(async () => {
+    // Ensure any pending transactions are rolled back so locks are released
+    try {
+      const connection = em.getConnection()
+      await connection.execute('ROLLBACK')
+    } catch {
+      // ignore if no transaction is active
+    }
+    // Restore transactional stub
+    const transactionalStub = em.transactional as ReturnType<typeof stub>
+    if (transactionalStub.restore) {
+      transactionalStub.restore()
+    }
+    em.clear()
   })
 
   const getDefaultApp = (): SaveAppDTO => {
@@ -348,6 +399,102 @@ describe('AppCreateFacade', () => {
       expect([asset1.uid, asset2.uid].includes(loadedApp.assets[1].uid)).to.be.true()
       expect(loadedApp.internal.ordered_assets?.length).to.equal(2)
       expect(loadedApp.internal.ordered_assets).to.contain.members([asset1.uid, asset2.uid])
+    })
+
+    it('copies app series tags when creating a forked app', async () => {
+      const sourceAppSeries = create.appSeriesHelper.create(em, { user }, { name: 'source-app-series', scope: 'private' })
+      await em.flush()
+
+      const sourceApp = create.appHelper.createRegular(
+        em,
+        { user },
+        { title: 'source app', scope: 'private', appSeriesId: sourceAppSeries.id },
+      )
+      await em.flush()
+
+      const sourceTag = new Tag()
+      sourceTag.name = 'genomics'
+      em.persist(sourceTag)
+      await em.flush()
+
+      const sourceTagging = new AppSeriesTagging()
+      sourceTagging.tagId = sourceTag.id
+      sourceTagging.taggableType = TAGGABLE_TYPE.APP_SERIES
+      sourceTagging.taggableId = sourceAppSeries.id
+      sourceTagging.taggerId = user.id
+      sourceTagging.taggerType = 'User'
+      sourceTagging.context = 'tags'
+      em.persist(sourceTagging)
+      await em.flush()
+
+      const appCreateFacade = getInstance()
+      const appInput = getDefaultApp()
+      appInput.name = 'forked-app-with-tags'
+      appInput.forked_from = sourceApp.uid
+
+      await appCreateFacade.create(appInput)
+      em.clear()
+
+      const forkedAppSeries = await em.findOneOrFail(
+        AppSeries,
+        { name: appInput.name, scope: appInput.scope },
+        { populate: ['taggings.tag'] },
+      )
+
+      expect(forkedAppSeries.taggings.length).to.equal(1)
+      expect(forkedAppSeries.taggings[0].tag.name).to.equal(sourceTag.name)
+    })
+
+    it('rolls back copied tags when app creation fails after tag copying', async () => {
+      const sourceAppSeries = create.appSeriesHelper.create(em, { user }, { name: 'rollback-source', scope: 'private' })
+      await em.flush()
+
+      const sourceApp = create.appHelper.createRegular(
+        em,
+        { user },
+        { title: 'rollback source app', scope: 'private', appSeriesId: sourceAppSeries.id },
+      )
+      await em.flush()
+
+      const sourceTag = new Tag()
+      sourceTag.name = 'rollback-tag'
+      em.persist(sourceTag)
+      await em.flush()
+
+      const sourceTagging = new AppSeriesTagging()
+      sourceTagging.tagId = sourceTag.id
+      sourceTagging.taggableType = TAGGABLE_TYPE.APP_SERIES
+      sourceTagging.taggableId = sourceAppSeries.id
+      sourceTagging.taggerId = user.id
+      sourceTagging.taggerType = 'User'
+      sourceTagging.context = 'tags'
+      em.persist(sourceTagging)
+      await em.flush()
+
+      const appCreateFacade = getInstance()
+      // Sabotage: fail after tag copying to verify tx rollback semantics.
+      const createAppEventStub = stub(appCreateFacade as unknown as { createAppEvent: () => Promise<void> }, 'createAppEvent')
+      createAppEventStub.rejects(new Error('Simulated event creation failure'))
+
+      const appInput = getDefaultApp()
+      appInput.name = 'forked-app-rollback-test'
+      appInput.forked_from = sourceApp.uid
+
+      await expect(appCreateFacade.create(appInput)).to.be.rejectedWith(Error)
+
+      createAppEventStub.restore()
+      em.clear()
+
+      // AppSeries and transactional app/tagging writes must all be rolled back.
+      const forkedAppSeries = await em.findOne(AppSeries, { name: appInput.name })
+      expect(forkedAppSeries).to.be.null()
+
+      // Verify no orphaned taggings were left behind
+      const allTaggings = await em.find(Tagging, { taggerId: user.id })
+      const orphanedTaggings = allTaggings.filter(
+        t => t.taggableType === TAGGABLE_TYPE.APP_SERIES && t.taggableId !== sourceAppSeries.id,
+      )
+      expect(orphanedTaggings).to.have.length(0)
     })
 
     it('new revision of an app', async () => {
@@ -687,11 +834,11 @@ describe('AppCreateFacade', () => {
       label,
       optional,
       default: defaultValue,
-      choices,
+      choices: choices as AppInputSpecItem['choices'],
     }
   }
 
   function getInstance(userContext: UserContext = userCtx): AppCreateFacade {
-    return new AppCreateFacade(em, userContext, platformClient, nodeService, appService, appSeriesService)
+    return new AppCreateFacade(em, userContext, platformClient, nodeService, appService, appSeriesService, taggingService)
   }
 })
