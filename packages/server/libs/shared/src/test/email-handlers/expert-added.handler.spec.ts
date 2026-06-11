@@ -22,7 +22,7 @@ describe('ExpertAddedHandler', () => {
     findOneOrFail: expertRepoFindOneOrFailStub,
   } as unknown as ExpertRepository
 
-  const getHandler = () => {
+  const getHandler = (): ExpertAddedHandler => {
     return new ExpertAddedHandler(expertRepo, emailClient)
   }
 

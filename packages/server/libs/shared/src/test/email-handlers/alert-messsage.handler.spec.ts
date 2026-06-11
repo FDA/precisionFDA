@@ -27,7 +27,7 @@ describe('AlertMessageHandler', () => {
     emailClientSendEmailStub.throws()
   })
 
-  const getAlertMessageHandler = () => {
+  const getAlertMessageHandler = (): AlertMessageHandler => {
     return new AlertMessageHandler(emailClient, userRepo)
   }
 

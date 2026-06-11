@@ -2,7 +2,7 @@ import * as errors from '../errors'
 import { aggregateSchemaErrors, formatAggregatedError } from '../utils/aggregate-error'
 import { validateDefined } from './validators'
 
-export const parseNonEmptyString = (value: string | undefined) => {
+export const parseNonEmptyString = (value: string | undefined): string => {
   if (!value) {
     const errorMsg = `Value expected to be non-empty, got ${value}`
     throw new errors.ValidationError(errorMsg)
@@ -24,7 +24,10 @@ export const parseEnumValueFromString =
     return nonEmptyValue as T
   }
 
-export const parseNumberFromString = (value: string | undefined, errorFormatter?: (value: string) => string) => {
+export const parseNumberFromString = (
+  value: string | undefined,
+  errorFormatter?: (value: string) => string,
+): number => {
   const nonEmptyValue = parseNonEmptyString(value)
   const numericValue = parseInt(nonEmptyValue, 10)
   if (Number.isNaN(numericValue)) {
@@ -36,7 +39,7 @@ export const parseNumberFromString = (value: string | undefined, errorFormatter?
 
 export const parseBoundedNumberFromString =
   (lowerBound: number, upperBound: number) =>
-  (value: string | undefined, errorFormatter?: (value: string) => string) => {
+  (value: string | undefined, errorFormatter?: (value: string) => string): number => {
     const numericValue = parseNumberFromString(value, errorFormatter)
     if (numericValue < lowerBound) {
       throw new errors.ValidationError(`Expected value greater than ${lowerBound}, got ${value}`)
@@ -49,12 +52,12 @@ export const parseBoundedNumberFromString =
 
 export const wrapMaybeUndefined =
   <T>(wrappedParser: (value: string | undefined) => T) =>
-  (value: string | undefined) =>
+  (value: string | undefined): T =>
     value !== undefined ? wrappedParser(value) : null
 
 export const wrapMaybeEmpty =
   <T>(wrappedParser: (value: string | undefined) => T) =>
-  (value: string | undefined) =>
+  (value: string | undefined): T =>
     value ? wrappedParser(value) : null
 
 export const wrapTuple =
@@ -64,7 +67,7 @@ export const wrapTuple =
     tupleDelimiter?: string,
     errorFormatter?: (value: string) => string,
   ) =>
-  (value: string | undefined) => {
+  (value: string | undefined): TupleT => {
     const nonEmptyString = parseNonEmptyString(value)
     const arrayValues = nonEmptyString.split(tupleDelimiter ?? ',').map(v => v.trim())
     if (arrayValues.length !== size) {
@@ -73,7 +76,7 @@ export const wrapTuple =
     }
     const parsers = Array<ReturnType<typeof wrapMaybeUndefined>>(size).fill(wrappedParser)
     const { result, errors: caughtErrors } = aggregateSchemaErrors(
-      arrayValues.map((v, i) => () => {
+      arrayValues.map((v, i) => (): unknown => {
         return parsers[i](v)
       }),
     )
@@ -87,7 +90,7 @@ export const wrapTuple =
     return result as TupleT
   }
 
-export const parseNumericRange = (value: string | undefined) => {
+export const parseNumericRange = (value: string | undefined): { $lte?: number; $gte?: number } => {
   const [$gte, $lte] = wrapTuple(2, wrapMaybeEmpty(parseNumberFromString))(value)
   const gtePresent = validateDefined($gte)
   const ltePresent = validateDefined($lte)
@@ -108,7 +111,7 @@ export const parseNumericRange = (value: string | undefined) => {
 
 export const parseIpv4Address = wrapTuple(4, parseBoundedNumberFromString(0, 255), '.')
 
-export const parseIpv4Cidr = (value: string | undefined) => {
+export const parseIpv4Cidr = (value: string | undefined): { ipv4Quadruple: number[]; maskSize: number } => {
   const [ipv4String, maskString] = wrapTuple(2, parseNonEmptyString, '/')(value)
   const ipv4Quadruple = parseIpv4Address(ipv4String)
   const maskSize = parseBoundedNumberFromString(0, 32)(maskString)

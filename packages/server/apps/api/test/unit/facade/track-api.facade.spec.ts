@@ -9,6 +9,7 @@ import { Note } from '@shared/domain/note/note.entity'
 import { NoteRepository } from '@shared/domain/note/note.repository'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { EntityUtils } from '@shared/utils/entity.utils'
 
@@ -37,7 +38,7 @@ describe('TrackApiFacade', () => {
   })
 
   it('should call getAccessibleByUid and getProvenance with correct args', async () => {
-    const file = { id: 1, name: FILE_NAME } as unknown as UserFile
+    const file = { id: 1, name: FILE_NAME, stiType: FILE_STI_TYPE.USERFILE } as unknown as UserFile
     findAccessibleOne.withArgs({ uid: FILE_UID }).resolves(file)
     getEntityNameStub.withArgs(file).returns(FILE_NAME)
 

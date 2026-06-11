@@ -48,7 +48,6 @@ describe('user service tests', () => {
       },
     },
   } as unknown as User
-
   const createUserService = (): UserService => {
     const em = {
       transactional: emTransactionalStub,

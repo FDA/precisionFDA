@@ -166,7 +166,7 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     }
   }> {
     const membership = updatedMembership
-    if (!membership || !membership.user.unwrap()) {
+    if (!membership?.user.unwrap()) {
       throw new NotFoundError(`New space member id ${input.updatedMembershipId.toString()} not found`, {
         code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND,
       })

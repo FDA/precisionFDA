@@ -35,7 +35,7 @@ export class ExpertQuestion extends BaseEntity {
 
   @OneToMany({
     entity: () => ExpertQuestionComment,
-    mappedBy: dc => dc.commentableId,
+    mappedBy: (dc: ExpertQuestionComment) => dc.commentableId,
     cascade: [Cascade.REMOVE],
   })
   comments = new Collection<ExpertQuestionComment>(this)

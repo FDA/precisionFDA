@@ -7,7 +7,7 @@ import { ServiceFactory, setServiceFactory } from '../services/service-factory'
 class MockServiceFactory extends ServiceFactory {
   emailService = {
     sendEmail: sinon.stub(),
-    reset: () => {
+    reset: (): void => {
       this.emailService.sendEmail.resolves()
       this.emailService.sendEmail.resetHistory()
     },
@@ -15,7 +15,7 @@ class MockServiceFactory extends ServiceFactory {
 
   notificationService = {
     createNotification: sinon.stub(),
-    reset: () => {
+    reset: (): void => {
       this.notificationService.createNotification.callsFake(() => {})
       this.notificationService.createNotification.resetHistory()
     },
@@ -24,7 +24,7 @@ class MockServiceFactory extends ServiceFactory {
   platformAuthClient = {
     newAuthToken: sinon.stub(),
     userResetMfa: sinon.stub(),
-    reset: () => {
+    reset: (): void => {
       this.platformAuthClient.newAuthToken.callsFake(() => ({ authorization_code: '12345678' }))
       this.platformAuthClient.newAuthToken.resetHistory()
 
@@ -39,7 +39,7 @@ class MockServiceFactory extends ServiceFactory {
     setAPIKey: sinon.stub(),
     setPFDAConfig: sinon.stub(),
     snapshot: sinon.stub(),
-    reset: () => {
+    reset: (): void => {
       this.workstationClient.oauthAccess.callsFake(() => {})
       this.workstationClient.oauthAccess.resetHistory()
 
@@ -69,7 +69,7 @@ class MockServiceFactory extends ServiceFactory {
     return this.workstationClient as unknown as IWorkstationClient
   }
 
-  reset() {
+  reset(): void {
     this.notificationService.reset()
     this.platformAuthClient.reset()
     this.workstationClient.reset()
@@ -77,7 +77,7 @@ class MockServiceFactory extends ServiceFactory {
   }
 }
 
-export const createMockServiceFactory = () => {
+export const createMockServiceFactory = (): MockServiceFactory => {
   const mockServiceFactory = new MockServiceFactory()
   setServiceFactory(mockServiceFactory)
   return mockServiceFactory

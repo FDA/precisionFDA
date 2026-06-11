@@ -11,6 +11,12 @@ import { fakes, mocksReset } from '@shared/test/mocks'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
+type AdminMembershipUserListItem = {
+  id: number
+  dxuser: string
+  adminRoles: ADMIN_GROUP_ROLES[]
+}
+
 describe('/admin/memberships', () => {
   let em: EntityManager
   let siteAdmin: User
@@ -43,10 +49,11 @@ describe('/admin/memberships', () => {
         .get('/admin/memberships/users')
         .set(getDefaultHeaderData(siteAdmin))
         .expect(200)
+      const users = body.data as AdminMembershipUserListItem[]
 
       expect(body.meta).to.exist()
-      expect(body.data).to.be.an('array')
-      expect(body.data.some((u: any) => u.id === siteAdmin.id)).to.be.true()
+      expect(users).to.be.an('array')
+      expect(users.some((u: AdminMembershipUserListItem) => u.id === siteAdmin.id)).to.be.true()
     })
 
     it('filters results by dxuser', async () => {
@@ -70,10 +77,11 @@ describe('/admin/memberships', () => {
         .get(`/admin/memberships/users?role=${ADMIN_GROUP_ROLES.ROLE_REVIEW_SPACE_ADMIN}`)
         .set(getDefaultHeaderData(siteAdmin))
         .expect(200)
+      const users = body.data as AdminMembershipUserListItem[]
 
-      expect(body.data).to.be.an('array')
-      expect(body.data.some((u: any) => u.id === rsaUser.id)).to.be.true()
-      const rsaUserInResult = body.data.find((u: any) => u.id === rsaUser.id)
+      expect(users).to.be.an('array')
+      expect(users.some((u: AdminMembershipUserListItem) => u.id === rsaUser.id)).to.be.true()
+      const rsaUserInResult = users.find((u: AdminMembershipUserListItem) => u.id === rsaUser.id)
       expect(rsaUserInResult.adminRoles).to.include(ADMIN_GROUP_ROLES.ROLE_REVIEW_SPACE_ADMIN)
     })
   })

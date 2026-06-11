@@ -3,7 +3,7 @@ import crypto from 'node:crypto'
 export class HashUtils {
   private static ID_VERSION = 2
 
-  static hashSessionId(sessionId: string) {
+  static hashSessionId(sessionId: string): string {
     return `${this.ID_VERSION}::${crypto.createHash('sha256').update(sessionId).digest('hex')}`
   }
 }

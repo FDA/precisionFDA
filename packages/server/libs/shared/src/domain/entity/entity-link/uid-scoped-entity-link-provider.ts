@@ -10,8 +10,8 @@ type UIdScopedLinkEntityType = Extends<EntityType, 'job' | 'asset' | 'file' | 'a
 type UIdScopedLinkEntity = EntityInstance<UIdScopedLinkEntityType>
 
 @Injectable()
-export class UIdScopedEntityLinkProvider extends EntityLinkProvider<UIdScopedLinkEntityType> {
-  protected async getRelativeLink(entity: UIdScopedLinkEntity) {
+export class UidScopedEntityLinkProvider extends EntityLinkProvider<UIdScopedLinkEntityType> {
+  protected async getRelativeLink(entity: UIdScopedLinkEntity): Promise<`/${string}`> {
     const scope = entity.scope
 
     if (this.MY_HOME_SCOPES.includes(scope)) {
@@ -21,11 +21,11 @@ export class UIdScopedEntityLinkProvider extends EntityLinkProvider<UIdScopedLin
     return this.getSpaceLink(entity, getIdFromScopeName(scope))
   }
 
-  protected getHomeLink(entity: UIdScopedLinkEntity) {
+  protected getHomeLink(entity: UIdScopedLinkEntity): `/${string}` {
     return `/home/${this.getUrlSegment(entity)}/${entity.uid}` as const
   }
 
-  protected getSpaceLink(entity: UIdScopedLinkEntity, spaceId: number) {
+  protected getSpaceLink(entity: UIdScopedLinkEntity, spaceId: number): `/${string}` {
     const urlSegment = this.getUrlSegment(entity)
 
     return `/spaces/${spaceId}/${urlSegment}/${entity.uid}` as const

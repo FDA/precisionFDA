@@ -11,7 +11,7 @@ export class SpaceReportResultJsonProvider extends SpaceReportResultProvider<'JS
     super()
   }
 
-  async provide(spaceReport: SpaceReport<'JSON'>) {
+  async provide(spaceReport: SpaceReport<'JSON'>): Promise<string> {
     const result = {
       createdAt: spaceReport.createdAt,
       createdBy: spaceReport.createdBy.getEntity().fullName,
@@ -25,7 +25,12 @@ export class SpaceReportResultJsonProvider extends SpaceReportResultProvider<'JS
     return JSON.stringify(result)
   }
 
-  private async getSpace(spaceReport: SpaceReport<'JSON'>) {
+  private async getSpace(spaceReport: SpaceReport<'JSON'>): Promise<{
+    title: string
+    entities: Record<string, unknown>
+    id?: number
+    description?: string
+  }> {
     if (EntityScopeUtils.isSpaceScope(spaceReport.scope)) {
       const space = await this.em.findOneOrFail(Space, EntityScopeUtils.getSpaceIdFromScope(spaceReport.scope))
 
@@ -43,7 +48,7 @@ export class SpaceReportResultJsonProvider extends SpaceReportResultProvider<'JS
     }
   }
 
-  private getEntities(spaceReport: SpaceReport<'JSON'>) {
+  private getEntities(spaceReport: SpaceReport<'JSON'>): Record<string, unknown> {
     const parts = this.getReportPartsMap(spaceReport)
 
     return Object.entries(parts).reduce((acc, [sourceType, parts]) => {

@@ -3,7 +3,8 @@
   "root": false,
   "extends": "//",
   "files": {
-    "includes": ["apps/**", "libs/**", "biome.json"]
+    "includes": ["apps/**", "libs/**", "biome.json"],
+    "maxSize": 4194304
   },
   "javascript": {
     "parser": {
@@ -16,7 +17,7 @@
         "useImportType": "off"
       },
       "nursery": {
-        "useExplicitType": "warn"
+        "useExplicitType": "error"
       }
     }
   }

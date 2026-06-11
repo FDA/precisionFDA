@@ -4,12 +4,14 @@ import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-lin
 
 @Injectable()
 export class DiscussionEntityLinkProvider extends EntityLinkProvider<'discussion'> {
-  protected async getRelativeLink(discussion: Discussion) {
+  protected async getRelativeLink(discussion: Discussion): Promise<`/${string}`> {
     const note = await discussion.note.load()
     const scope = note.scope
 
     if (this.MY_HOME_SCOPES.includes(scope)) {
       return `/home/discussions/${discussion.id}` as const
-    } else return `/spaces/${note.getSpaceId()}/discussions/${discussion.id}` as const
+    }
+
+    return `/spaces/${note.getSpaceId()}/discussions/${discussion.id}` as const
   }
 }

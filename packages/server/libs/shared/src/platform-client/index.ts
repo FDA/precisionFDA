@@ -966,17 +966,16 @@ export class PlatformClient {
    * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-describe
    * @param {string} projectDxid - ProjectDxID.
    * @param {object} body - OPTIONAL - Inputs.
-   * @return {any}
+   * @return {unknown}
    */
-  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
-  async projectDescribe(projectDxid: DxId<'project'>, body?: unknown): Promise<any> {
+  async projectDescribe<TResponse = unknown>(projectDxid: DxId<'project'>, body?: unknown): Promise<TResponse> {
     const url = `${config.platform.apiUrl}/${projectDxid}/describe`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: body ?? {},
       url,
     }
-    return await this.sendRequest(options)
+    return await this.sendRequest<TResponse>(options)
   }
 
   /**

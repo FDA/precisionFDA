@@ -4,6 +4,7 @@ import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { PublishApiFacade } from '../facade/publish/publish.facade'
 import { PublisherFacade } from '../facade/publish/publisher.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { PublishTreeRootDTO } from '../facade/publish/model/publish-tree-root.dto'
 
 @UseGuards(UserContextGuard, SiteAdminGuard)
 @Controller('/publish')
@@ -14,7 +15,7 @@ export class PublishController {
   ) {}
 
   @Get('/tree-root')
-  async getTreeRoot(@Query() query: EntityIdentifierQueryDTO) {
+  async getTreeRoot(@Query() query: EntityIdentifierQueryDTO): Promise<PublishTreeRootDTO> {
     return this.publishApiFacade.getPublishedTreeRoot(query.identifier, query.type)
   }
 

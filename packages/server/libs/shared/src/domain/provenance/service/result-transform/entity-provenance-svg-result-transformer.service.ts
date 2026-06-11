@@ -12,7 +12,7 @@ import { EntityProvenanceResultTransformerService } from './entity-provenance-re
 // Because of that, it is not possible to compile and successfully start the app with a static import statement
 // To get around this issue, we keep CJS during the compilation step and use dynamic import for D3 to have the
 // dependency resolved by nodejs as ESM at runtime
-const d3 = import('d3')
+const d3: Promise<typeof import('d3')> = import('d3')
 
 // TODO(PFDA-4835) - use import after introducing bundler with nestjs
 const assetsPath = path.join(__dirname, '../../../../../../../../../../libs/shared/src/domain/provenance/assets')
@@ -127,7 +127,7 @@ export class EntityProvenanceSvgResultTransformerService implements EntityProven
     })
   }
 
-  async getStyles() {
+  async getStyles(): Promise<string> {
     return await css
   }
 

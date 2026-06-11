@@ -14,6 +14,10 @@ import { NoteProvenanceDataService } from '../service/entity-data/note-provenanc
 
 export const ENTITY_TYPE_TO_PARENT_RESOLVER_MAP = 'ENTITY_TYPE_TO_PARENT_RESOLVER_MAP'
 
+type EntityTypeToParentResolverMap = {
+  [T in EntityWithProvenanceType]: EntityProvenanceDataService<T>
+}
+
 export const entityTypeToParentResolverMapProvider: Provider = {
   provide: ENTITY_TYPE_TO_PARENT_RESOLVER_MAP,
   inject: [
@@ -28,8 +32,16 @@ export const entityTypeToParentResolverMapProvider: Provider = {
     WorkflowProvenanceDataService,
     FolderProvenanceDataService,
   ],
-  useFactory: (app, asset, comparison, dbcluster, file, job, note, user, workflow, folder) =>
-    ({ file, job, user, comparison, dbcluster, note, asset, app, workflow, folder }) satisfies {
-      [T in EntityWithProvenanceType]: EntityProvenanceDataService<T>
-    },
+  useFactory: (
+    app: AppProvenanceDataService,
+    asset: AssetProvenanceDataService,
+    comparison: ComparisonProvenanceDataService,
+    dbcluster: DBClusterProvenanceDataService,
+    file: FileProvenanceDataService,
+    job: JobProvenanceDataService,
+    note: NoteProvenanceDataService,
+    user: UserProvenanceDataService,
+    workflow: WorkflowProvenanceDataService,
+    folder: FolderProvenanceDataService,
+  ): EntityTypeToParentResolverMap => ({ file, job, user, comparison, dbcluster, note, asset, app, workflow, folder }),
 }

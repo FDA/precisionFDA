@@ -8,7 +8,7 @@ export const UBUNTU_14 = '14.04'
 export const UBUNTU_16 = '16.04'
 export const UBUNTU_20 = '20.04'
 export const UBUNTU_24 = '24.04'
-export const UBUNTU_RELEASES = [UBUNTU_14, UBUNTU_16, UBUNTU_20, UBUNTU_24]
+export const UBUNTU_RELEASES: string[] = [UBUNTU_14, UBUNTU_16, UBUNTU_20, UBUNTU_24]
 
 export const VALID_IO_CLASSES = [
   'file',

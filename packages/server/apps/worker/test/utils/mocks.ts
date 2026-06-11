@@ -1,27 +1,35 @@
 import { mockHandler } from '@worker-test/utils/handler-mock'
 import Bull, { Job } from 'bull'
-import sinon from 'sinon'
+import sinon, { SinonSandbox, SinonStub } from 'sinon'
 
-const sandbox = sinon.createSandbox()
+const sandbox: SinonSandbox = sinon.createSandbox()
+
+type QueueMocks = {
+  addToQueueStub: SinonStub
+  getJobStub: SinonStub
+  getJobCountsStub: SinonStub
+  getRepeatableJobsStub: SinonStub
+  removeJobsStub: SinonStub
+  removeRepeatableStub: SinonStub
+}
 
 // LOCAL stubs for queue handling
-const fakes = {
+const fakes: QueueMocks = {
   // add to queue triggers execution immediately
-  addToQueueStub: sinon.stub().callsFake(async (...args) => {
-    console.log(args)
+  addToQueueStub: sinon.stub().callsFake(async (...args: unknown[]): Promise<void> => {
     await mockHandler({ data: args[1] } as Job)
   }),
   getJobStub: sinon.stub(),
   getJobCountsStub: sinon.stub(),
   // Stubbing getRepeatableJobs to avoid jobs clearing code crashing during tests
-  getRepeatableJobsStub: sinon.stub().callsFake(() => {
+  getRepeatableJobsStub: sinon.stub().callsFake((): unknown[] => {
     return []
   }),
   removeJobsStub: sinon.stub(),
   removeRepeatableStub: sinon.stub(),
 }
 
-const mocksSetup = () => {
+const mocksSetup = (): void => {
   sandbox.replace(Bull.prototype, 'add', fakes.addToQueueStub)
   sandbox.replace(Bull.prototype, 'getJob', fakes.getJobStub)
   sandbox.replace(Bull.prototype, 'getJobCounts', fakes.getJobCountsStub)
@@ -30,7 +38,7 @@ const mocksSetup = () => {
   sandbox.replace(Bull.prototype, 'removeRepeatable', fakes.removeRepeatableStub)
 }
 
-const mocksReset = () => {
+const mocksReset = (): void => {
   fakes.addToQueueStub.resetHistory()
   fakes.getJobStub.resetHistory()
   fakes.getJobCountsStub.resetHistory()
@@ -39,7 +47,7 @@ const mocksReset = () => {
   fakes.removeRepeatableStub.resetHistory()
 }
 
-const mocksRestore = () => {
+const mocksRestore = (): void => {
   sandbox.restore()
 }
 

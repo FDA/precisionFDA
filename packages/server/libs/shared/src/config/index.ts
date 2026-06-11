@@ -48,6 +48,7 @@ const getEnv = (): ENVS => {
 
 const env: ENVS = getEnv()
 
+// biome-ignore lint/nursery/useExplicitType: explicit type here is too large; keep readability and export inferred type below.
 const defaultConfig = {
   env,
   api: {
@@ -255,6 +256,7 @@ const envOverride = overrides[env] ? overrides[env]() : {}
 const config = mergeDeepRight(defaultConfig, envOverride) as typeof defaultConfig
 Object.freeze(config)
 
-export type ConfigOverride = () => DeepPartial<typeof defaultConfig>
+export type DefaultConfig = typeof defaultConfig
+export type ConfigOverride = () => DeepPartial<DefaultConfig>
 
 export { config, defaultConfig }

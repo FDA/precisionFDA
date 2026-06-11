@@ -21,7 +21,7 @@ import { DB_SYNC_STATUS, ENGINE, STATUS } from './db-cluster.enum'
 import { DbClusterRepository } from './db-cluster.repository'
 
 @Entity({ tableName: 'dbclusters', repository: () => DbClusterRepository })
-@Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
+@Filter({ name: 'ownedBy', cond: (args: { userId: number }) => ({ user: { id: args.userId } }) })
 @Filter({
   name: 'isNonTerminal',
   cond: {

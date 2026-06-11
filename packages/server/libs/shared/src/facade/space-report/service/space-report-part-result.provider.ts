@@ -20,7 +20,7 @@ export abstract class SpaceReportPartResultProvider<T extends SpaceReportPartSou
   private formatFunctionMap: {
     [F in SpaceReportFormat]: (entity: EntityInstance<T>, space: Space) => Promise<SpaceReportPartResult<T, F>>
   } = {
-    JSON: (e, s) => this.getJsonResult(e, s),
-    HTML: (e, s) => this.getHtmlResult(e, s),
+    JSON: (e: EntityInstance<T>, s: Space): Promise<SpaceReportPartResult<T, 'JSON'>> => this.getJsonResult(e, s),
+    HTML: (e: EntityInstance<T>, s: Space): Promise<SpaceReportPartResult<T, 'HTML'>> => this.getHtmlResult(e, s),
   }
 }

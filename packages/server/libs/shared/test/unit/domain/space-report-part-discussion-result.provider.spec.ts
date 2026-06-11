@@ -4,6 +4,7 @@ import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
 import { AttachmentRetrieveFacade } from '@shared/facade/discussion/attachment-retrieve.facade'
 import { SpaceReportPartDiscussionResultProviderService } from '@shared/facade/space-report/service/space-report-part-discussion-result-provider.service'
 
@@ -149,7 +150,7 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
     testResults('JSON')
   })
 
-  function testResults(format): void {
+  function testResults(format: SpaceReportFormat): void {
     it('should provide correct result', async () => {
       const res = await getInstance().getResult(DISCUSSION_ENTITY, null, format)
 

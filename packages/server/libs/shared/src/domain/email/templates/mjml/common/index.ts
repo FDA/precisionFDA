@@ -46,7 +46,7 @@ const header = `
         <mj-section css-class="header-section">
           <mj-text>
             <a href="${config.api.railsHost}" title="precisionFDA">
-              <img src="${config.api.railsHost}/assets/precisionFDA.email.dark.png" />
+              <img src="${config.api.railsHost}/assets/precisionFDA.email.dark.png" alt="precisionFDA" />
             </a>
           </mj-text>
         </mj-section>
@@ -78,8 +78,10 @@ const generateChallengeDetailLink = (challengeId: IDType): string =>
 const generateChallengePreregPageLink = (challengeId: IDType): string =>
   `${config.api.railsHost}/challenges/${challengeId.toString()}`
 
-const ctoButton = (text: string, generateLinkFn: (spaceId: IDType) => string) => (id: IDType) =>
-  `
+const ctoButton =
+  (text: string, generateLinkFn: (spaceId: IDType) => string): ((id: IDType) => string) =>
+  (id: IDType): string =>
+    `
   <mj-button
     background-color="#1F70B5"
     line-weight="30px"

@@ -5,7 +5,7 @@ import { ProcessInUserContext } from '@shared/domain/user-context/decorator/proc
 import { ProcessWithTracingContext } from './process-with-tracing-context'
 
 export function ProcessWithContext(jobName: string): MethodDecorator {
-  return function (target: unknown, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyKey: string | symbol, descriptor: PropertyDescriptor): void {
     ProcessWithTracingContext(jobName)(descriptor)
     ProcessInUserContext(descriptor)
     CreateRequestContext(() => database.orm())(target, propertyKey, descriptor)

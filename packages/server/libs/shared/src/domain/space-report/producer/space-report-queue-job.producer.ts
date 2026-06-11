@@ -1,10 +1,10 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
-import { Queue } from 'bull'
+import { Job, Queue } from 'bull'
 import { config } from '@shared/config'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
-import { TASK_TYPE } from '@shared/queue/task.input'
+import { GenerateSpaceReportBatchJob, GenerateSpaceReportResultJob, TASK_TYPE } from '@shared/queue/task.input'
 
 @Injectable()
 export class SpaceReportQueueJobProducer extends QueueJobProducer {
@@ -15,7 +15,7 @@ export class SpaceReportQueueJobProducer extends QueueJobProducer {
     super()
   }
 
-  async createBatchTasks(batches: number[][], user: UserContext) {
+  async createBatchTasks(batches: number[][], user: UserContext): Promise<Job<GenerateSpaceReportBatchJob>[]> {
     const wrapped = batches.map(b => ({
       data: {
         type: TASK_TYPE.GENERATE_SPACE_REPORT_BATCH as const,
@@ -27,7 +27,7 @@ export class SpaceReportQueueJobProducer extends QueueJobProducer {
     return await this.addBulkToQueue(wrapped)
   }
 
-  async createResultTask(reportId: number, user: UserContext) {
+  async createResultTask(reportId: number, user: UserContext): Promise<Job<GenerateSpaceReportResultJob>> {
     const wrapped = {
       type: TASK_TYPE.GENERATE_SPACE_REPORT_RESULT as const,
       payload: reportId,

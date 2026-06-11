@@ -1,11 +1,11 @@
-import { AdminDataConsistencyReportOutput } from '@shared/debug/admin-data-consistency-report.service'
+import { AdminDataConsistencyReportOutput } from '@shared/debug/model/admin-data-consistency-report-output'
 import { footer, header } from './common'
 
 export type AdminDataConsistencyReportTemplateInput = {
   content: AdminDataConsistencyReportOutput
 }
 
-const createSection = (title: string, count: number | undefined, content: unknown[]) => {
+const createSection = (title: string, count: number | undefined, content: unknown[]): string => {
   return `
     <mj-column width="100%">
       <mj-raw>
@@ -13,7 +13,7 @@ const createSection = (title: string, count: number | undefined, content: unknow
           <h4 style="font-size: 16px">${title}</h4>
           ${
             count === 0
-              ? `<p style="color: #666; align: center;">No ${title} found</p>`
+              ? `<p style="color: #666; text-align: center;">No ${title} found</p>`
               : `<div style="width: 100%; overflow: auto; border: 1px solid #ccc; font-size: 14px; padding: 8px; box-sizing: border-box">
                   <pre style="white-space: pre-wrap; word-wrap: break-word;">${JSON.stringify(content, undefined, 2)}</pre>
                 </div>`

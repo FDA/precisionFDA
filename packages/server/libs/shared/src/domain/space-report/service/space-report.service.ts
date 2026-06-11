@@ -83,7 +83,15 @@ export class SpaceReportService {
     return await this.em.find(SpaceReport, ids, { populate: ['createdBy'] })
   }
 
-  async getReportsForScope(scope: EntityScope) {
+  async getReportsForScope(scope: EntityScope): Promise<
+    Array<{
+      id: number
+      createdAt: Date
+      state: SpaceReport['state']
+      resultFile: SpaceReport['resultFile']
+      format: SpaceReportFormat
+    }>
+  > {
     return await this.em.transactional(async () => {
       if (EntityScopeUtils.isSpaceScope(scope)) {
         await this.getSpaceForUserValidated(EntityScopeUtils.getSpaceIdFromScope(scope))
@@ -121,7 +129,7 @@ export class SpaceReportService {
     return reports.map(r => r.id)
   }
 
-  async completePartsBatch(batches: BatchComplete[]) {
+  async completePartsBatch(batches: BatchComplete[]): Promise<SpaceReportPart[]> {
     return this.spaceReportPartService.completeBatch(batches)
   }
 

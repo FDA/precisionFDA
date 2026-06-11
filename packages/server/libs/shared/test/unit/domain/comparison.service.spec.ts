@@ -7,7 +7,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 describe('ComparisonService', () => {
   const findComparisonsByUserFileStub = stub()
 
-  const createComparisonService = () => {
+  const createComparisonService = (): ComparisonService => {
     const comparisonRepository = {
       findComparisonsByUserFile: findComparisonsByUserFileStub,
     } as unknown as ComparisonRepository

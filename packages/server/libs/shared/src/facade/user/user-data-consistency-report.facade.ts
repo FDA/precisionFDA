@@ -145,7 +145,7 @@ export class UserDataConsistencyReportFacade {
         if (!projectDxid) return 'Does not exist'
 
         try {
-          const projectDescribe = await this.platformClient.projectDescribe(projectDxid, {})
+          const projectDescribe = await this.platformClient.projectDescribe<{ billTo?: string }>(projectDxid, {})
 
           const correctBillTo = projectDescribe.billTo === user.billTo()
           const status = correctBillTo
@@ -293,7 +293,7 @@ export class UserDataConsistencyReportFacade {
       for (const space of membership.spaces) {
         const errors: string[] = []
         const projectDxid = isHostSide ? space.hostProject : space.guestProject
-        const projectInfo = await this.platformClient.projectDescribe(projectDxid, {})
+        const projectInfo = await this.platformClient.projectDescribe<{ id?: string; billTo?: string }>(projectDxid, {})
         if (user.billTo() !== projectInfo.billTo) {
           errors.push(
             `[space-${space.id} (type: ${SPACE_TYPE[space.type]})] Project billTo (${projectInfo.id} - ${projectInfo.billTo}) does not match lead's org (${user.billTo()})`,
@@ -321,7 +321,7 @@ export class UserDataConsistencyReportFacade {
             hostProject: space.hostProject,
             guestProject: space.guestProject,
             hostDxOrg: space.hostDxOrg,
-            guestDxtOrg: space.guestDxOrg,
+            guestDxOrg: space.guestDxOrg,
             side: SPACE_MEMBERSHIP_SIDE[membership.side],
             errors: errors,
           })

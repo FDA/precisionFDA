@@ -39,8 +39,8 @@ export class AcceptedLicenseService {
 
   async acceptIfNotYetAccepted(licenses: License[], user: User): Promise<void> {
     const licenseIds = licenses.map(l => l.id)
-    
-    await this.em.transactional(async (em) => {
+
+    await this.em.transactional(async em => {
       const existing = await em.find(AcceptedLicense, {
         license: { $in: licenseIds },
         user: user.id,

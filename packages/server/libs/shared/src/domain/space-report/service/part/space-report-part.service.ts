@@ -9,11 +9,11 @@ import type { SpaceReportPartSource } from '../../model/space-report-part-source
 export class SpaceReportPartService {
   constructor(private readonly em: SqlEntityManager) {}
 
-  createReportParts(sources: SpaceReportPartSource[]) {
+  createReportParts(sources: SpaceReportPartSource[]): SpaceReportPart[] {
     return sources?.map(f => this.createReportPart(f))
   }
 
-  async completeBatch(batches: BatchComplete[]) {
+  async completeBatch(batches: BatchComplete[]): Promise<SpaceReportPart[]> {
     if (ArrayUtils.isEmpty(batches)) {
       return []
     }

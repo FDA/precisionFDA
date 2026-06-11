@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios'
 import { Logger } from '@nestjs/common'
+import { Provider } from '@nestjs/common'
 import { firstValueFrom } from 'rxjs'
 import { WebSocket } from 'ws'
 import { config } from '@shared/config'
@@ -23,11 +24,11 @@ const streamJobLogs: (jobDxId: string) => WebSocket = (jobDxId: string) => {
 
 export const ADMIN_PLATFORM_CLIENT = 'ADMIN_PLATFORM_CLIENT'
 
-export const adminPlatformClientProvider = {
+export const adminPlatformClientProvider: Provider = {
   provide: ADMIN_PLATFORM_CLIENT,
-  useFactory: (httpService: HttpService) => {
+  useFactory: (httpService: HttpService): PlatformClient => {
     return new Proxy(new PlatformClient({ accessToken: 'dummy' }), {
-      get(target: PlatformClient, prop: string) {
+      get(target: PlatformClient, prop: string): unknown {
         if (typeof target[prop] !== 'function') {
           return target[prop]
         }
@@ -36,7 +37,7 @@ export const adminPlatformClientProvider = {
           return streamJobLogs
         }
 
-        return async (...args: unknown[]) => {
+        return async (...args: unknown[]): Promise<unknown> => {
           const stackTrace = new Error().stack?.split('\n').slice(1).join('\n')
           logger.log(
             { stackTrace },

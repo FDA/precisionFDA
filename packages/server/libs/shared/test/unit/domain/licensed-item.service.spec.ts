@@ -9,7 +9,7 @@ describe('LicensedItemService', () => {
   const emTransactionalStub = stub().callsArg(0)
   const emRemoveStub = stub()
 
-  const createLicensedItemService = () => {
+  const createLicensedItemService = (): LicensedItemService => {
     const em = {
       transactional: emTransactionalStub,
       remove: emRemoveStub,

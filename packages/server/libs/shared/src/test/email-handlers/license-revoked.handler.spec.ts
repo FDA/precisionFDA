@@ -31,7 +31,7 @@ describe('LicenseRevokedHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): LicenseRevokedHandler => {
     return new LicenseRevokedHandler(acceptedLicenseRepo, userRepo, emailClient)
   }
 

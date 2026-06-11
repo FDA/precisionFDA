@@ -654,7 +654,7 @@ describe('SpaceMembershipService', () => {
       const result = await getInstance().findActiveLeadMembershipsInAdminSpaces(hostLead.id)
       expect(result).to.have.length(1)
       expect(result[0].role).to.equal(SPACE_MEMBERSHIP_ROLE.LEAD)
-      expect(result[0].spaces.getItems().some((s) => s.id === adminSpace.id)).to.be.true()
+      expect(result[0].spaces.getItems().some(s => s.id === adminSpace.id)).to.be.true()
     })
 
     it('returns empty array when user has no lead memberships in admin spaces', async () => {

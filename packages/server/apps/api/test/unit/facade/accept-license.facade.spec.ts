@@ -46,9 +46,7 @@ describe('AcceptLicenseFacade', () => {
 
       const facade = getInstance()
 
-      await expect(facade.accept(LICENSE_ID)).to.be.rejectedWith(
-        'License with id 42 not found or not accessible',
-      )
+      await expect(facade.accept(LICENSE_ID)).to.be.rejectedWith('License with id 42 not found or not accessible')
     })
   })
 

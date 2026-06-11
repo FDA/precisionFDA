@@ -4,16 +4,16 @@ const ORG_PREFIX = 'org-'
 const PFDA_PREFIX = 'pfda..'
 const ORG_HANDLE_MAX_LENGTH = 33
 
-const constructDxOrg = (handle: string) => {
+const constructDxOrg = (handle: string): DxId<'org'> => {
   // TODO maybe some validation?
   return (ORG_PREFIX + PFDA_PREFIX + handle) as DxId<'org'>
 }
 
-const getHandle = (id: string) => {
+const getHandle = (id: string): string => {
   return id.slice(id.indexOf(ORG_PREFIX) + ORG_PREFIX.length)
 }
 
-const getBaseHandle = (id: DxId<'org'>) => {
+const getBaseHandle = (id: DxId<'org'>): string => {
   const pattern = `${ORG_PREFIX}${PFDA_PREFIX}`
   return id.slice(id.indexOf(pattern) + pattern.length)
 }

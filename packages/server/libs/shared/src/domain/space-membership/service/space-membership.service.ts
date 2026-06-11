@@ -295,7 +295,7 @@ export class SpaceMembershipService {
       const project = leadMembership.isHost() ? space.hostProject : space.guestProject
       if (project) {
         // project is null if confidential space is different from the lead side
-        const projectDescribe = await this.adminClient.projectDescribe(project)
+        const projectDescribe = await this.adminClient.projectDescribe<{ billTo?: string }>(project)
         const leadBillTo = leadMembership.user.getEntity().billTo()
         if (projectDescribe.billTo !== leadBillTo) {
           await this.adminClient.projectUpdate(project, { billTo: leadBillTo })

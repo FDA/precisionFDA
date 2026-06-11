@@ -27,7 +27,7 @@ describe('SpaceActivationHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): SpaceActivationEmailHandler => {
     return new SpaceActivationEmailHandler(spaceMembershipRepo, emailClient)
   }
 

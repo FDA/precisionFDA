@@ -63,7 +63,7 @@ export class FileProvenanceDataService extends EntityProvenanceDataService<'file
     return []
   }
 
-  private async findParentEntity<T extends PARENT_TYPE>(parentId: number, parentType: T) {
+  private async findParentEntity<T extends PARENT_TYPE>(parentId: number, parentType: T): Promise<unknown | null> {
     const repo = this.parentTypeToRepositoryMap[parentType]
 
     return repo.findOne(parentId)

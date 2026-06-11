@@ -107,7 +107,7 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
   }
 
   private async updateSpaceBillTo(projectDxid: DxId<'project'>, billTo: DxId<'org'>): Promise<ClassIdResponse> {
-    const projectDescribe = await this.adminClient.projectDescribe(projectDxid)
+    const projectDescribe = await this.adminClient.projectDescribe<{ billTo?: string }>(projectDxid)
     if (projectDescribe.billTo === billTo) {
       return {
         id: projectDxid,

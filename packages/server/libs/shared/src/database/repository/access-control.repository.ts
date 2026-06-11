@@ -10,7 +10,7 @@ import { userContextStorage } from '@shared/domain/user-context/storage/user-con
 import { createUserContextManager } from '@shared/domain/user-context/storage/user-context-storage.manager'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
-const EMPTY_PAGEABLE_RESULT = {
+const EMPTY_PAGEABLE_RESULT: PaginatedResult<never> = {
   data: [],
   meta: {
     total: 0,
@@ -19,7 +19,7 @@ const EMPTY_PAGEABLE_RESULT = {
     page: 1,
   },
 }
-const EMPTY_FIND_RESULT = []
+const EMPTY_FIND_RESULT: never[] = []
 const EMPTY_FIND_ONE_RESULT = null
 
 export abstract class AccessControlRepository<Entity extends BaseEntity> extends PaginatedRepository<Entity> {

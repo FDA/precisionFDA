@@ -34,7 +34,7 @@ describe('JobFinishedEmailHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): JobFinishedEmailHandler => {
     return new JobFinishedEmailHandler(em, userRepo, jobRepo, emailClient)
   }
 

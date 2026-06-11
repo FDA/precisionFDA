@@ -25,7 +25,7 @@ export type SpaceInfo = {
   hostProject: string
   guestProject: string
   hostDxOrg: string
-  guestDxtOrg: string
+  guestDxOrg: string
   side: string
   errors: string[]
 }

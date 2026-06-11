@@ -8,7 +8,7 @@ import { createQueues } from '@shared/queue'
 import { QueueModule } from '@shared/queue/queue.module'
 import { QueueProxy } from '@shared/queue/queue.proxy'
 
-export async function setupNestApp(app: INestApplicationContext) {
+export async function setupNestApp(app: INestApplicationContext): Promise<void> {
   app.enableShutdownHooks()
 
   app.useLogger(app.get(Logger))
@@ -20,22 +20,22 @@ export async function setupNestApp(app: INestApplicationContext) {
  * Used to expose NestJs DI integrated modules to the parts of the codebase, that are not integrated into the DI yet.
  * Should be removed when everything is DI integrated
  */
-async function exposeModules(app: INestApplicationContext) {
+async function exposeModules(app: INestApplicationContext): Promise<void> {
   exposeOrm(app)
   await exposeBull(app.select(QueueModule))
 }
 
-export function exposeOrm(app: INestApplicationContext) {
+export function exposeOrm(app: INestApplicationContext): void {
   const mainORM: MikroORM<MySqlDriver> = app.get(MikroORM)
   database.init(mainORM)
 }
 
-async function exposeBull(app: INestApplicationContext) {
+async function exposeBull(app: INestApplicationContext): Promise<void> {
   const queueProvider = app.get(QueueProxy)
   await createQueues(queueProvider)
 }
 
-export function setupSwagger(app: INestApplication) {
+export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('precisionFDA API')
     .setDescription('OpenAPI documentation for precisionFDA API')

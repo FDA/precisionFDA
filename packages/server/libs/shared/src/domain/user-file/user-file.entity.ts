@@ -21,7 +21,7 @@ import { FILE_STATE_DX, FILE_STATE_PFDA, FILE_STI_TYPE } from './user-file.types
 })
 @Filter({
   name: 'accessibleBy',
-  cond: args => ({
+  cond: (args: { userId: number; spaceScopes: string[] }) => ({
     $or: [{ user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE }, { scope: { $in: args.spaceScopes } }],
   }),
 })

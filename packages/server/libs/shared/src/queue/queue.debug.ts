@@ -10,7 +10,9 @@ export interface DebugQueueJobResult {
 }
 
 // Queue debugging functions
-export const debugQueueJobs = async () => {
+export const debugQueueJobs = async (): Promise<
+  { name: string; jobs: Bull.Job<unknown>[]; jobCounts: Bull.JobCounts; repeatableJobs: Bull.JobInformation[] }[]
+> => {
   const queues = getQueues()
   return Promise.all(
     queues.map(async q => {

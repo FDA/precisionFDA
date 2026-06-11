@@ -5,14 +5,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 
 describe('NodeHelper', () => {
-  const nodeHelper = new NodeHelper(
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-  )
+  const nodeHelper = new NodeHelper({} as never, {} as never, {} as never, {} as never, {} as never, {} as never)
 
   describe('getWarningsForUnclosedFiles', () => {
     it('should return null if all files are closed', () => {

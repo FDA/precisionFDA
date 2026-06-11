@@ -5,12 +5,12 @@ import { EntityIdentifier } from '@shared/domain/entity/domain/entity-identifier
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NoteRepository } from '@shared/domain/note/note.repository'
-import { EntityProvenance } from '@shared/domain/provenance/model/entity-provenance'
 import { EntityProvenanceSourceUnion } from '@shared/domain/provenance/model/entity-provenance-source-union'
 import { EntityWithProvenanceType } from '@shared/domain/provenance/model/entity-with-provenance.type'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { PublishTreeRootDTO } from './model/publish-tree-root.dto'
 
 @Injectable()
 export class PublishApiFacade {
@@ -22,7 +22,11 @@ export class PublishApiFacade {
     private readonly noteRepository: NoteRepository,
     private readonly comparisonRepository: ComparisonRepository,
   ) {}
-  async getPublishedTreeRoot(identifier: EntityIdentifier, type: EntityWithProvenanceType) {
+
+  async getPublishedTreeRoot(
+    identifier: EntityIdentifier,
+    type: EntityWithProvenanceType,
+  ): Promise<PublishTreeRootDTO> {
     let entity = null
 
     switch (type) {
@@ -68,25 +72,6 @@ export class PublishApiFacade {
     const entityProvenanceSource = { type, entity } as EntityProvenanceSourceUnion
     const treeRoot = await this.entityProvenanceService.getEntityProvenance(entityProvenanceSource, 'raw')
 
-    return this.processPublishedTreeRoot(treeRoot)
-  }
-
-  private processPublishedTreeRoot(item: EntityProvenance) {
-    if (!item.parents || !item.parents.length) {
-      return { data: item.data }
-    }
-
-    const newParents = []
-    for (const parent of item.parents) {
-      if (parent.data.type === 'user') {
-        continue
-      }
-      newParents.push(this.processPublishedTreeRoot(parent))
-    }
-
-    return {
-      data: item.data,
-      parents: newParents,
-    }
+    return PublishTreeRootDTO.fromProvenance(treeRoot)
   }
 }

@@ -4,7 +4,7 @@ import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-lin
 
 @Injectable()
 export class ComparisonEntityLinkProvider extends EntityLinkProvider<'comparison'> {
-  protected async getRelativeLink(comparison: Comparison) {
+  protected async getRelativeLink(comparison: Comparison): Promise<`/${string}`> {
     return `/comparisons/${comparison.id}` as const
   }
 }

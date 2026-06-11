@@ -52,7 +52,7 @@ export class JobLogService {
     })
   }
 
-  private async isJobAccessible(jobDxId): Promise<boolean> {
+  private async isJobAccessible(jobDxId: DxId<'job'>): Promise<boolean> {
     try {
       await this.userClient.jobDescribe({ jobDxId: jobDxId })
       return true

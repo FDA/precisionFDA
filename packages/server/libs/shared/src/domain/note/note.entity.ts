@@ -7,10 +7,15 @@ import { STATIC_SCOPE } from '@shared/enums'
 
 export type NoteType = 'Discussion' | 'Answer' | 'Comment'
 
+type AccessibleByFilterArgs = {
+  userId: number
+  spaceScopes: string[]
+}
+
 @Entity({ tableName: 'notes', repository: () => NoteRepository })
 @Filter({
   name: 'accessibleBy',
-  cond: args => ({
+  cond: (args: AccessibleByFilterArgs) => ({
     $or: [{ user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE }, { scope: { $in: args.spaceScopes } }],
   }),
 })

@@ -13,7 +13,7 @@ export class SpaceReportErrorFacade {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async setSpaceReportError(id: number) {
+  async setSpaceReportError(id: number): Promise<void> {
     const report = await this.em.transactional(async () => {
       const spaceReport = await this.em.findOneOrFail(SpaceReport, id)
 
@@ -37,7 +37,7 @@ export class SpaceReportErrorFacade {
     })
   }
 
-  async setSpaceReportPartsError(ids: number[]) {
+  async setSpaceReportPartsError(ids: number[]): Promise<void> {
     if (ArrayUtils.isEmpty(ids)) {
       return
     }

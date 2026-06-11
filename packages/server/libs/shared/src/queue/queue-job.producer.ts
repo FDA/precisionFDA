@@ -75,7 +75,7 @@ export abstract class QueueJobProducer {
   }
 
   private getTaskInfo(task: Task, payloadFn?: (payload: unknown) => unknown): Record<string, unknown> {
-    const whitelistPayloadFn = payloadFn ?? (payload => payload)
+    const whitelistPayloadFn = payloadFn ?? ((payload: unknown): unknown => payload)
 
     return {
       type: task.type,

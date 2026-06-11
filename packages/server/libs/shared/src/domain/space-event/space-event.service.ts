@@ -14,7 +14,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { getEnumKeyByValue } from '@shared/utils/enum-utils'
 import { getEntityType, getObjectType } from '@shared/utils/object-utils'
 
-const CONTENT_TYPES = [
+const CONTENT_TYPES: SPACE_EVENT_ACTIVITY_TYPE[] = [
   SPACE_EVENT_ACTIVITY_TYPE.file_added,
   SPACE_EVENT_ACTIVITY_TYPE.note_added,
   SPACE_EVENT_ACTIVITY_TYPE.app_added,
@@ -25,14 +25,14 @@ const CONTENT_TYPES = [
   SPACE_EVENT_ACTIVITY_TYPE.file_deleted,
   SPACE_EVENT_ACTIVITY_TYPE.asset_deleted,
 ]
-const COMMENT_TYPES = [SPACE_EVENT_ACTIVITY_TYPE.comment_added]
-const MEMBERSHIP_TYPES = [
+const COMMENT_TYPES: SPACE_EVENT_ACTIVITY_TYPE[] = [SPACE_EVENT_ACTIVITY_TYPE.comment_added]
+const MEMBERSHIP_TYPES: SPACE_EVENT_ACTIVITY_TYPE[] = [
   SPACE_EVENT_ACTIVITY_TYPE.membership_added,
   SPACE_EVENT_ACTIVITY_TYPE.membership_disabled,
   SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
   SPACE_EVENT_ACTIVITY_TYPE.membership_enabled,
 ]
-const SPACE_TYPES = [
+const SPACE_TYPES: SPACE_EVENT_ACTIVITY_TYPE[] = [
   SPACE_EVENT_ACTIVITY_TYPE.space_locked,
   SPACE_EVENT_ACTIVITY_TYPE.space_unlocked,
   SPACE_EVENT_ACTIVITY_TYPE.space_deleted,

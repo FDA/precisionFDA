@@ -69,7 +69,10 @@ class IsValidScopeConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function IsValidScope(options?: Partial<ConstraintOptions>, validationOptions?: ValidationOptions) {
+export function IsValidScope(
+  options?: Partial<ConstraintOptions>,
+  validationOptions?: ValidationOptions,
+): PropertyDecorator {
   const defaultOptions: ConstraintOptions = {
     allowPrivate: true,
     allowPublic: true,
@@ -78,11 +81,11 @@ export function IsValidScope(options?: Partial<ConstraintOptions>, validationOpt
   }
   const effectiveOptions = { ...defaultOptions, ...options }
 
-  return function (object: object, propertyName: string): void {
+  return function (object: object, propertyName: string | symbol): void {
     registerDecorator({
       name: 'isValidScope',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName: String(propertyName),
       constraints: [effectiveOptions],
       options: validationOptions,
       validator: IsValidScopeConstraint,

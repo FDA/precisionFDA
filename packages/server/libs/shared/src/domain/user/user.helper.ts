@@ -14,11 +14,11 @@ const getProjectToRunApp = (user: User): DxId<'project'> => {
   return projectId
 }
 
-const constructUsername = (first: string, last: string) => {
+const constructUsername = (first: string, last: string): string => {
   return `${first.toLowerCase().replace(/[^a-z]/g, '')}.${last.toLowerCase().replace(/[^a-z]/g, '')}`
 }
 
-const constructOrgFromUsername = (username: string) => {
+const constructOrgFromUsername = (username: string): { orgName: string; orgBaseHandle: string } => {
   const RESERVED_SIZE = 4 // 3 digits plus 1 dot
   return {
     orgName: username.replace(/\./g, ' ').replace(/\b\w/g, char => char.toUpperCase()),

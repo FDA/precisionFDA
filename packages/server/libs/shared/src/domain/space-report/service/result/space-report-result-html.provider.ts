@@ -45,7 +45,10 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     super()
   }
 
-  async provide(spaceReport: SpaceReport<'HTML'>, { styles }: SpaceReportFormatToResultOptionsMap['HTML']) {
+  async provide(
+    spaceReport: SpaceReport<'HTML'>,
+    { styles }: SpaceReportFormatToResultOptionsMap['HTML'],
+  ): Promise<string> {
     const domContainer = new JSDOM(await html)
     const document = domContainer.window.document
 
@@ -107,7 +110,7 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     id: string,
     reportParts: SpaceReportPart<SpaceReportPartSourceType, 'HTML'>[],
     document: Document,
-  ) {
+  ): Promise<HTMLDivElement> {
     const container = document.createElement('div')
     container.appendChild(this.getReportSegmentHeader(title, id, document))
 
@@ -125,7 +128,7 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     return container
   }
 
-  private getReportSegmentHeader(title: string, id: string, document: Document) {
+  private getReportSegmentHeader(title: string, id: string, document: Document): HTMLDivElement {
     const container = document.createElement('div')
 
     const spacer = document.createElement('div')
@@ -147,7 +150,7 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
   private async getReportPartItemList(
     reportParts: SpaceReportPart<SpaceReportPartSourceType, 'HTML'>[],
     document: Document,
-  ) {
+  ): Promise<HTMLDivElement> {
     const container = document.createElement('div')
     container.classList.add('item-list')
 
@@ -161,7 +164,7 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
   private async getReportPartContent<T extends SpaceReportPartSourceType>(
     reportPart: SpaceReportPart<T, 'HTML'>,
     document: Document,
-  ) {
+  ): Promise<HTMLDivElement> {
     const wrapper = document.createElement('div')
     wrapper.classList.add('item-wrapper')
 
@@ -173,7 +176,10 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     return wrapper
   }
 
-  private async getReportSegmentForMembers(reportParts: SpaceReportPart<'user', 'HTML'>[], document: Document) {
+  private async getReportSegmentForMembers(
+    reportParts: SpaceReportPart<'user', 'HTML'>[],
+    document: Document,
+  ): Promise<HTMLDivElement> {
     const title = 'Members'
     const id = this.USERS_HEADER_ID
 
@@ -210,7 +216,10 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     return container
   }
 
-  private async getSidebar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
+  private async getSidebar(
+    items: Record<SpaceReportPartSourceType, SpaceReportPart[]>,
+    document: Document,
+  ): Promise<HTMLElement> {
     const container = document.createElement('aside')
     container.id = 'sidebar'
     container.style.width = '250px'
@@ -231,7 +240,12 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     return container
   }
 
-  private async getResourceItem(title: string, anchor: string, reportParts: SpaceReportPart[], document: Document) {
+  private async getResourceItem(
+    title: string,
+    anchor: string,
+    reportParts: SpaceReportPart[],
+    document: Document,
+  ): Promise<HTMLDivElement> {
     const section = document.createElement('div')
     section.classList.add('navbar-item')
 
@@ -259,7 +273,7 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     return section
   }
 
-  private getResourceLink(reportPart: SpaceReportPart, document: Document) {
+  private getResourceLink(reportPart: SpaceReportPart, document: Document): HTMLAnchorElement {
     const container = document.createElement('a')
     container.href = `#${this.REPORT_PART_ID_PREFIX}${reportPart.id}`
     container.textContent = reportPart.result.title
@@ -267,7 +281,7 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     return container
   }
 
-  private async getHeader(report: SpaceReport<'HTML'>, document: Document) {
+  private async getHeader(report: SpaceReport<'HTML'>, document: Document): Promise<HTMLDivElement> {
     const container = document.createElement('div')
     container.classList.add('header')
 
@@ -333,7 +347,12 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     return container
   }
 
-  private getHeaderInfoPart(titleText: string, descriptionText: string, document: Document, classes: string[] = []) {
+  private getHeaderInfoPart(
+    titleText: string,
+    descriptionText: string,
+    document: Document,
+    classes: string[] = [],
+  ): HTMLDivElement {
     const container = document.createElement('div')
     container.classList.add('group', ...classes)
 

@@ -1,6 +1,7 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { DynamicModule, Module } from '@nestjs/common'
 import { InjectionToken } from '@nestjs/common/interfaces/modules/injection-token.interface'
+import type { ModuleMetadata } from '@nestjs/common/interfaces/modules/module-metadata.interface'
 import { EmailModule } from '@shared/domain/email/email.module'
 import { EventModule } from '@shared/domain/event/event.module'
 import { Job } from '@shared/domain/job/job.entity'
@@ -18,7 +19,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { JobLogService } from './services/job-log.service'
 
-const imports = [
+const imports: NonNullable<ModuleMetadata['imports']> = [
   MikroOrmModule.forFeature([Job, Space, SpaceMembership]),
   UserModule,
   PlatformClientModule,

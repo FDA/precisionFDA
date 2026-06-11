@@ -3,7 +3,7 @@ import { config } from '@shared/config'
 
 const tableNamesToOmit = ['ar_internal_metadata', 'schema_migrations']
 
-const generateTruncateStatements = () => `
+const generateTruncateStatements = (): string => `
   SELECT CONCAT('TRUNCATE TABLE ', table_name, ';')
   FROM information_schema.tables
   WHERE table_schema = '${config.database.dbName}'

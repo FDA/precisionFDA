@@ -263,7 +263,7 @@ describe('SpaceReportResultGenerateFacade', () => {
     expect(createFileWithContentStub.calledOnce).to.be.true()
   })
 
-  function stubForReport(report): void {
+  function stubForReport(report: SpaceReport): void {
     findOneStub.reset()
     findOneStub.throws()
     findOneStub.withArgs(SpaceReport, REPORT_ID, { lockMode: LockMode.PESSIMISTIC_WRITE }).resolves(report)

@@ -21,7 +21,7 @@ describe('InvitationHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): InvitationHandler => {
     return new InvitationHandler(invitationRepo, emailClient)
   }
 

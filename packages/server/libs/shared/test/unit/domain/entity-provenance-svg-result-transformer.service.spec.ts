@@ -152,7 +152,7 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
     assertNodeRecursive(svg, PROVENANCE)
   })
 
-  function assertNodeRecursive(svg: SVGSVGElement, node: EntityProvenance, parentYCoordinate?: number) {
+  function assertNodeRecursive(svg: SVGSVGElement, node: EntityProvenance, parentYCoordinate?: number): void {
     const nodeElements = svg.querySelectorAll(`a[href="${node.data.url}"]`)
     // there is exactly one link with the provided url
     expect(nodeElements).to.have.length(1)

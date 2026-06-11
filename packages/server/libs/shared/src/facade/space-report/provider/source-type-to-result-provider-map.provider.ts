@@ -11,6 +11,10 @@ import { SpaceReportPartWorkflowResultProvider } from '@shared/facade/space-repo
 
 export const SOURCE_TYPE_TO_RESULT_PROVIDER_MAP = 'SOURCE_TYPE_TO_META_PROVIDER_MAP'
 
+type SourceTypeToResultProviderMap = {
+  [T in SpaceReportPartSourceType]: SpaceReportPartResultProvider<T>
+}
+
 export const sourceTypeToResultProviderMapProvider: Provider = {
   provide: SOURCE_TYPE_TO_RESULT_PROVIDER_MAP,
   inject: [
@@ -22,8 +26,13 @@ export const sourceTypeToResultProviderMapProvider: Provider = {
     SpaceReportPartUserResultProvider,
     SpaceReportPartDiscussionResultProviderService,
   ],
-  useFactory: (app, asset, file, job, workflow, user, discussion) =>
-    ({ app, asset, file, job, workflow, user, discussion }) satisfies {
-      [T in SpaceReportPartSourceType]: SpaceReportPartResultProvider<T>
-    },
+  useFactory: (
+    app: SpaceReportPartAppResultProvider,
+    asset: SpaceReportPartAssetResultProvider,
+    file: SpaceReportPartFileResultProvider,
+    job: SpaceReportPartJobResultProvider,
+    workflow: SpaceReportPartWorkflowResultProvider,
+    user: SpaceReportPartUserResultProvider,
+    discussion: SpaceReportPartDiscussionResultProviderService,
+  ): SourceTypeToResultProviderMap => ({ app, asset, file, job, workflow, user, discussion }),
 }

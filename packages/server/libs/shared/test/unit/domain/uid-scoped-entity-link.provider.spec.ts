@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { match, SinonStub, stub } from 'sinon'
 import { config } from '@shared/config'
 import { App } from '@shared/domain/app/app.entity'
-import { UIdScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/u-id-scoped-entity-link-provider'
+import { UidScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/uid-scoped-entity-link-provider'
 import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -11,7 +11,7 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { EntityUtils } from '@shared/utils/entity.utils'
 
-describe('UIdScopedEntityLinkProvider', () => {
+describe('UidScopedEntityLinkProvider', () => {
   const UID = 'UID'
 
   let getEntityTypeForEntityStub: SinonStub
@@ -57,7 +57,7 @@ describe('UIdScopedEntityLinkProvider', () => {
     })
   })
 
-  function assertStaticScope(scope: SCOPE) {
+  function assertStaticScope(scope: SCOPE): void {
     it(`should provide correct relative link`, async () => {
       const cases = prepareTestCases(scope)
 
@@ -79,7 +79,7 @@ describe('UIdScopedEntityLinkProvider', () => {
     })
   }
 
-  function prepareTestCases(scope: SCOPE) {
+  function prepareTestCases(scope: SCOPE): { entity: App | Asset | Job | UserFile | Workflow; urlSegment: string }[] {
     const APP = { uid: UID, scope } as unknown as App
     const ASSET = { uid: UID, scope } as unknown as Asset
     const JOB = { uid: UID, scope } as unknown as Job
@@ -101,7 +101,7 @@ describe('UIdScopedEntityLinkProvider', () => {
     ]
   }
 
-  function getInstance(): UIdScopedEntityLinkProvider {
-    return new UIdScopedEntityLinkProvider()
+  function getInstance(): UidScopedEntityLinkProvider {
+    return new UidScopedEntityLinkProvider()
   }
 })

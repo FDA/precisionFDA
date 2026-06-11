@@ -5,7 +5,6 @@ import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { DiscussionReplyComment } from '@shared/domain/discussion-reply/discussion-reply-comment.entity'
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { ExpertAnswer } from '@shared/domain/expert-answer/entity/expert-answer.entity'
 import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
@@ -18,7 +17,28 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 
-export const entityTypeToEntityMap = {
+type EntityTypeToEntityMap = {
+  asset: typeof Asset
+  comparison: typeof Comparison
+  job: typeof Job
+  file: typeof UserFile
+  folder: typeof Folder
+  user: typeof User
+  app: typeof App
+  workflow: typeof Workflow
+  discussion: typeof Discussion
+  resource: typeof Resource
+  note: typeof Note
+  dbcluster: typeof DbCluster
+  answer: typeof Answer
+  comment: typeof DiscussionReplyComment
+  challenge: typeof Challenge
+  expertQuestion: typeof ExpertQuestion
+  expertAnswer: typeof ExpertAnswer
+  expert: typeof Expert
+}
+
+export const entityTypeToEntityMap: EntityTypeToEntityMap = {
   asset: Asset,
   comparison: Comparison,
   job: Job,
@@ -37,4 +57,4 @@ export const entityTypeToEntityMap = {
   expertQuestion: ExpertQuestion,
   expertAnswer: ExpertAnswer,
   expert: Expert,
-} satisfies Record<EntityType, object>
+}

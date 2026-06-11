@@ -49,7 +49,7 @@ export class SpaceReportBatchResultGenerateFacade {
     } satisfies Record<SpaceReportPartSourceType, object>
   }
 
-  async generate(ids: number[]) {
+  async generate(ids: number[]): Promise<void> {
     const reportId = await this.generateAndSaveResults(ids)
 
     if (reportId == null) {
@@ -63,7 +63,7 @@ export class SpaceReportBatchResultGenerateFacade {
     await this.spaceReportQueueJobProducer.createResultTask(reportId, this.currentUser)
   }
 
-  private async generateAndSaveResults(ids: number[]) {
+  private async generateAndSaveResults(ids: number[]): Promise<number> {
     return await this.em.transactional(async () => {
       const reportParts = await this.em.find(SpaceReportPart, ids, { populate: ['spaceReport'] })
 
@@ -130,7 +130,7 @@ export class SpaceReportBatchResultGenerateFacade {
     )
   }
 
-  private deletePartsWithMissingSources(sourcesIds: number[], reportParts: SpaceReportPart[]) {
+  private deletePartsWithMissingSources(sourcesIds: number[], reportParts: SpaceReportPart[]): void {
     const entityIdsSet = new Set(sourcesIds)
 
     const partsWithoutSources = reportParts.filter(rps => !entityIdsSet.has(rps.sourceId))

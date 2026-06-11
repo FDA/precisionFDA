@@ -3,12 +3,18 @@ import { MySqlDriver } from '@mikro-orm/mysql'
 
 let mainORM: MikroORM<MySqlDriver>
 
-const init = (main: MikroORM<MySqlDriver>) => {
+const init = (main: MikroORM<MySqlDriver>): void => {
   mainORM = main
 }
 
-export const database = {
+interface DatabaseManager {
+  init: (main: MikroORM<MySqlDriver>) => void
+  orm: () => MikroORM<MySqlDriver>
+  connection: () => Connection
+}
+
+export const database: DatabaseManager = {
   init,
-  orm: () => mainORM,
+  orm: (): MikroORM<MySqlDriver> => mainORM,
   connection: (): Connection => mainORM.em.getConnection(),
 }

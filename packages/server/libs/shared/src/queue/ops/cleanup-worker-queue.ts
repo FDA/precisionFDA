@@ -119,7 +119,8 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
 // TODO - insert this into the maintanence queue on startup just like
 //        checking db clusters status
 export class CleanupWorkerQueueOperation extends BaseOperation<OpsCtx, undefined, boolean> {
-  async run() {
-    return await cleanupWorkerQueue(this.ctx.em, this.ctx.log)
+  async run(): Promise<boolean> {
+    await cleanupWorkerQueue(this.ctx.em, this.ctx.log)
+    return true
   }
 }

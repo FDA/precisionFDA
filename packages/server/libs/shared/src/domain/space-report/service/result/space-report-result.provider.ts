@@ -13,7 +13,7 @@ type SpaceReportPartSourceMap<F extends SpaceReportFormat> = {
 export abstract class SpaceReportResultProvider<F extends SpaceReportFormat> {
   abstract provide(report: SpaceReport<F>, options: SpaceReportFormatToResultOptionsMap[F]): Promise<string>
 
-  protected getReportPartsMap(spaceReport: SpaceReport<F>) {
+  protected getReportPartsMap(spaceReport: SpaceReport<F>): SpaceReportPartSourceMap<F> {
     return spaceReport.reportParts.getItems().reduce<SpaceReportPartSourceMap<F>>(
       <T extends SpaceReportPartSourceType>(acc: SpaceReportPartSourceMap<F>, rp: SpaceReportPart<T, F>) => {
         acc[rp.sourceType].push(rp)
@@ -23,7 +23,7 @@ export abstract class SpaceReportResultProvider<F extends SpaceReportFormat> {
     )
   }
 
-  protected getTitleText(user: User, space?: Space) {
+  protected getTitleText(user: User, space?: Space): string {
     if (!space) {
       return `Private area of user ${user.fullName}`
     }

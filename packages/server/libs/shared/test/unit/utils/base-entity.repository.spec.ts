@@ -6,7 +6,7 @@ import { BaseEntityRepository } from '@shared/database/repository/base-entity.re
 type TestEntity = { id: number }
 
 describe('BaseEntityRepository', () => {
-  const makeRepo = (em: object) => {
+  const makeRepo = (em: object): BaseEntityRepository<TestEntity> => {
     return {
       getEntityManager: stub().returns(em),
     } as unknown as BaseEntityRepository<TestEntity>

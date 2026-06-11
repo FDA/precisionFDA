@@ -13,7 +13,7 @@ describe('ChallengeProposalReceivedHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): ChallengeProposalReceivedHandler => {
     return new ChallengeProposalReceivedHandler(emailClient)
   }
 

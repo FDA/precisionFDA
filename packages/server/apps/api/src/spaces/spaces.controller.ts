@@ -151,11 +151,14 @@ export class SpacesController {
       throw new PermissionError('Permissions are already corrected for guest side.')
     } else {
       // check project first.
-      const res = await platformClient.projectDescribe(spaceToFix.hostProject, {
-        fields: {
-          permissions: true,
+      const res = await platformClient.projectDescribe<{ permissions: Record<string, unknown> }>(
+        spaceToFix.hostProject,
+        {
+          fields: {
+            permissions: true,
+          },
         },
-      })
+      )
 
       if (spaceToFix.guestDxOrg in res.permissions) {
         throw new PermissionError('Permissions are already corrected for guest side.')

@@ -13,8 +13,8 @@ export enum JOB_DB_ENTITY_TYPE {
   HTTPS = 1,
 }
 
-export const TERMINAL_STATES = [JOB_STATE.DONE, JOB_STATE.FAILED, JOB_STATE.TERMINATED]
-export const ACTIVE_STATES = [JOB_STATE.IDLE, JOB_STATE.RUNNING]
+export const TERMINAL_STATES: JOB_STATE[] = [JOB_STATE.DONE, JOB_STATE.FAILED, JOB_STATE.TERMINATED]
+export const ACTIVE_STATES: JOB_STATE[] = [JOB_STATE.IDLE, JOB_STATE.RUNNING]
 
 export const allowedInstanceTypes = {
   'baseline-2': 'mem1_ssd1_x2_fedramp',
@@ -36,8 +36,9 @@ export const allowedInstanceTypes = {
 } as const
 
 export type JobInstanceType = keyof typeof allowedInstanceTypes
+export type JobInstanceClass = (typeof allowedInstanceTypes)[JobInstanceType]
 
-export const DEFAULT_INSTANCE_TYPE = allowedInstanceTypes['baseline-2']
+export const DEFAULT_INSTANCE_TYPE: JobInstanceClass = allowedInstanceTypes['baseline-2']
 
 export const allowedFeatures = {
   PYTHON_R: 'PYTHON_R',

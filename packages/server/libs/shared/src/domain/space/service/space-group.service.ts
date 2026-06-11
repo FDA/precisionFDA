@@ -99,7 +99,7 @@ export class SpaceGroupService {
     }
 
     const spaces = await this.spaceRepo.find({ id: { $in: spaceIds } })
-    if (!spaces || !spaces.length) {
+    if (!spaces?.length) {
       throw new NotFoundError(`None of the spaces was found`)
     }
 

@@ -12,14 +12,14 @@ import { ExpertQuestionEntityLinkProvider } from '@shared/domain/entity/entity-l
 import { FolderEntityLinkProvider } from '@shared/domain/entity/entity-link/folder-entity-link.provider'
 import { NoteEntityLinkProvider } from '@shared/domain/entity/entity-link/note-entity-link.provider'
 import { entityTypeToLinkProviderMapProvider } from '@shared/domain/entity/entity-link/provider/entity-type-to-link-provider-map.provider'
-import { UIdScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/u-id-scoped-entity-link-provider'
+import { UidScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/uid-scoped-entity-link-provider'
 import { UserEntityLinkProvider } from '@shared/domain/entity/entity-link/user-entity-link.provider'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 
 @Module({
   imports: [PlatformClientModule],
   providers: [
-    UIdScopedEntityLinkProvider,
+    UidScopedEntityLinkProvider,
     UserEntityLinkProvider,
     ComparisonEntityLinkProvider,
     DBClusterEntityLinkProvider,

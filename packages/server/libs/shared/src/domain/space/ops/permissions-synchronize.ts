@@ -86,7 +86,11 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<UserOpsC
     }
   }
 
-  async checkPermissions(pfdaMembers: SpaceMembership[], platformMembers: PlatformMember[], space: Space) {
+  async checkPermissions(
+    pfdaMembers: SpaceMembership[],
+    platformMembers: PlatformMember[],
+    space: Space,
+  ): Promise<void> {
     if (pfdaMembers.length !== platformMembers.length) {
       const side: string = pfdaMembers.length > platformMembers.length ? 'PFDA' : 'PLATFORM'
       this.ctx.log.warn(

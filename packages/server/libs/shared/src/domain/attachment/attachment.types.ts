@@ -3,7 +3,14 @@ import { Comparison } from '../comparison/comparison.entity'
 import { Job } from '../job/job.entity'
 import { Node } from '../user-file/node.entity'
 
-export const discussionAttachmentTypeMap = {
+type DiscussionAttachmentTypeMap = {
+  Node: typeof Node
+  App: typeof App
+  Job: typeof Job
+  Comparison: typeof Comparison
+}
+
+export const discussionAttachmentTypeMap: DiscussionAttachmentTypeMap = {
   Node: Node,
   App: App,
   Job: Job,

@@ -202,6 +202,7 @@ export class SpaceMembershipsController {
 - DTO static mapping methods (e.g. `fromEntity`) must be synchronous
 - Do not perform database or platform calls in DTO static methods
 - Load required relations in service/facade before calling DTO mappers
+- NestJS DTOs must be declared as `class` (not `interface`) so runtime metadata is available for validation/Swagger
 
 ```ts
 export class UpdateSpaceMembershipDTO {
@@ -398,7 +399,7 @@ The exported class/symbol must be the PascalCase form of the file name without t
 ## Types
 
 - **interface** - default choice
-- **class** - runtime behavior (methods, getters)
+- **class** - runtime behavior (methods, getters), and all NestJS DTOs
 - **type** - unions, conditionals, mapped types
 
 ## Example: Full Flow

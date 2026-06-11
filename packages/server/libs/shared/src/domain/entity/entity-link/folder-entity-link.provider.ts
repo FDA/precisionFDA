@@ -4,7 +4,7 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 
 @Injectable()
 export class FolderEntityLinkProvider extends EntityLinkProvider<'folder'> {
-  protected async getRelativeLink(folder: Folder) {
+  protected async getRelativeLink(folder: Folder): Promise<`/${string}`> {
     const scope = folder.scope
 
     if (this.MY_HOME_SCOPES.includes(scope)) {
@@ -14,11 +14,11 @@ export class FolderEntityLinkProvider extends EntityLinkProvider<'folder'> {
     return this.getSpaceLink(folder, folder.getSpaceId())
   }
 
-  private getHomeLink(folder: Folder) {
+  private getHomeLink(folder: Folder): `/home/${string}` {
     return `/home/${this.getUrlSegment(folder)}` as const
   }
 
-  private getSpaceLink(folder: Folder, spaceId: number) {
+  private getSpaceLink(folder: Folder, spaceId: number): `/spaces/${number}/${string}` {
     return `/spaces/${spaceId}/${this.getUrlSegment(folder)}` as const
   }
 

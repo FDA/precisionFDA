@@ -12,7 +12,7 @@ import { ExpertEntityLinkProvider } from '@shared/domain/entity/entity-link/expe
 import { ExpertQuestionEntityLinkProvider } from '@shared/domain/entity/entity-link/expert-question-entity-link.provider'
 import { FolderEntityLinkProvider } from '@shared/domain/entity/entity-link/folder-entity-link.provider'
 import { NoteEntityLinkProvider } from '@shared/domain/entity/entity-link/note-entity-link.provider'
-import { UIdScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/u-id-scoped-entity-link-provider'
+import { UidScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/uid-scoped-entity-link-provider'
 import { UserEntityLinkProvider } from '@shared/domain/entity/entity-link/user-entity-link.provider'
 
 export const ENTITY_TYPE_TO_LINK_PROVIDER_MAP = 'ENTITY_TYPE_TO_LINK_PROVIDER_MAP'
@@ -20,7 +20,7 @@ export const ENTITY_TYPE_TO_LINK_PROVIDER_MAP = 'ENTITY_TYPE_TO_LINK_PROVIDER_MA
 export const entityTypeToLinkProviderMapProvider: Provider = {
   provide: ENTITY_TYPE_TO_LINK_PROVIDER_MAP,
   inject: [
-    UIdScopedEntityLinkProvider,
+    UidScopedEntityLinkProvider,
     UserEntityLinkProvider,
     ComparisonEntityLinkProvider,
     DBClusterEntityLinkProvider,
@@ -35,7 +35,7 @@ export const entityTypeToLinkProviderMapProvider: Provider = {
     ExpertAnswerEntityLinkProvider,
   ],
   useFactory: (
-    uidScoped: UIdScopedEntityLinkProvider,
+    uidScoped: UidScopedEntityLinkProvider,
     user: UserEntityLinkProvider,
     comparison: ComparisonEntityLinkProvider,
     dbcluster: DBClusterEntityLinkProvider,

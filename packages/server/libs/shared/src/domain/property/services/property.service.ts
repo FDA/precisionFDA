@@ -76,9 +76,8 @@ export class PropertyService {
     }
   }
 
-  private async getConditionByType(scope: string, targetType: PropertyType) {
-    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
-    const condition: FilterQuery<any> = {}
+  private async getConditionByType(scope: string, targetType: PropertyType): Promise<FilterQuery<GeneralProperty>> {
+    const condition: Record<string, unknown> = {}
     let scopes: string[] = []
 
     if (scope === HOME_SCOPE.SPACES) {
@@ -135,11 +134,13 @@ export class PropertyService {
 
     if (scope == STATIC_SCOPE.PRIVATE) {
       if (targetType == 'asset') {
-        condition.node = { ...condition.node, user: this.user.id }
+        const nodeCondition = (condition.node as Record<string, unknown> | undefined) ?? {}
+        condition.node = { ...nodeCondition, user: this.user.id }
       } else {
-        condition[targetType] = { ...condition[targetType], user: this.user.id }
+        const targetCondition = (condition[targetType] as Record<string, unknown> | undefined) ?? {}
+        condition[targetType] = { ...targetCondition, user: this.user.id }
       }
     }
-    return condition
+    return condition as FilterQuery<GeneralProperty>
   }
 }

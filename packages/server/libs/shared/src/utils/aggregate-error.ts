@@ -5,7 +5,10 @@ import { JsonPath } from './path'
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AggregateError/AggregateError
 // or polyfill with core-js
 export class CustomAggregateError extends BaseError {
-  private static appendNestedMessages(topMessage: string, nestedErrors: Array<{ error: BaseError; message: string }>) {
+  private static appendNestedMessages(
+    topMessage: string,
+    nestedErrors: Array<{ error: BaseError; message: string }>,
+  ): string {
     return [
       topMessage,
       ...nestedErrors.map(({ message, error: { stack } }) => `${message}\n${stack}`),
@@ -59,7 +62,9 @@ const resolveSchemaEffectsVisitor = <SchemaT>(
   return schema
 }
 
-export const aggregateSchemaErrors = <SchemaT>(schema: SchemaT) => {
+export const aggregateSchemaErrors = <SchemaT>(
+  schema: SchemaT,
+): { result: unknown; errors: AggregatedErrorEntry[] } => {
   const errors: AggregatedErrorEntry[] = []
   const result = resolveSchemaEffectsVisitor(schema, errors, [])
   return {
@@ -74,7 +79,7 @@ export const formatAggregatedError = (
   topMessage: string,
   caughtErrors: AggregatedErrorEntry[],
   props: ClientErrorProps,
-) =>
+): CustomAggregateError =>
   new CustomAggregateError(
     topMessage,
     caughtErrors.map(({ error, message, path }) => ({

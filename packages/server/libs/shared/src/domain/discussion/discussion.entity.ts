@@ -24,7 +24,7 @@ export class Discussion extends BaseEntity {
 
   @OneToMany({
     entity: () => DiscussionFollow,
-    mappedBy: dc => dc.followableId,
+    mappedBy: (dc: DiscussionFollow) => dc.followableId,
     cascade: [Cascade.REMOVE],
   })
   follows = new Collection<DiscussionFollow>(this)

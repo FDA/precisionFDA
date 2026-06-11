@@ -4,7 +4,7 @@ import type { SinonStub } from 'sinon'
 import { stub } from 'sinon'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
+import { BaseError, InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { SpaceReportDeleteFacade } from '../../../src/facade/space-report/space-report-delete.facade'
 
@@ -145,7 +145,7 @@ describe('SpaceReportDeleteFacade', () => {
     expect(await result).to.be.eq(SPACE_REPORT_IDS)
   })
 
-  async function expectReject(error: Error | ((...args: never) => unknown), message?: string, user?): Promise<void> {
+  async function expectReject(error: Error | typeof BaseError, message?: string, user?: { id: number }): Promise<void> {
     const result = getInstance(user).deleteSpaceReports(SPACE_REPORT_IDS)
 
     await expect(result).to.be.rejectedWith(error, message)

@@ -40,7 +40,7 @@ describe('IsSpaceReportOptionsValidConstraint', () => {
       expect(res).to.be.false()
     })
 
-    function validate(value: unknown, args: { object?: unknown }) {
+    function validate(value: unknown, args: { object?: unknown }): Promise<boolean> {
       return getInstance().validate(value, args as ValidationArguments)
     }
   })

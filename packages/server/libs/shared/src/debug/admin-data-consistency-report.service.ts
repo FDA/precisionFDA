@@ -5,7 +5,6 @@ import { buildEmailTemplate, getBullJobIdForEmailOperation } from '@shared/domai
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { Uid } from '@shared/domain/entity/domain/uid'
 import { Job } from '@shared/domain/job/job.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
@@ -16,7 +15,6 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { EntityScope } from '@shared/types/common'
 import { TimeUtils } from '@shared/utils/time.utils'
 import { EmailSendInput } from '../domain/email/email.config'
 import {
@@ -24,72 +22,14 @@ import {
   adminDataConsistencyReportTemplate,
 } from '../domain/email/templates/mjml/admin-data-consistency-report.template'
 import { JobRepository } from '../domain/job/job.repository'
-import { SPACE_STATE, SPACE_TYPE } from '../domain/space/space.enum'
-import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import { SPACE_TYPE } from '../domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import { AdminDataConsistencyReportEntityInfo } from './model/admin-data-consistency-report-entity-info'
+import { AdminDataConsistencyReportNodeWithParent } from './model/admin-data-consistency-report-node-with-parent'
+import { AdminDataConsistencyReportOutput } from './model/admin-data-consistency-report-output'
+import { AdminDataConsistencyReportRunningJobInfo } from './model/admin-data-consistency-report-running-job-info'
+import { AdminDataConsistencyReportSpaceInfo } from './model/admin-data-consistency-report-space-info'
 
-// biome-ignore-start lint/suspicious/noExplicitAny: Should be fixed
-export type AdminDataConsistencyReportOutput = {
-  pfdaOnlyFoldersCount?: number
-  pfdaOnlyFolders?: any
-  foldersWithParentCount?: number
-  foldersWithParent?: any
-  unclosedFilesCount?: number
-  unclosedFiles?: any
-  runningJobs?: any
-  runningJobsCount?: number
-  legacyOrgs?: any
-  legacyOrgsCount?: number
-  spaces?: any
-  spacesWithErrorsCount?: number
-}
-// biome-ignore-end lint/suspicious/noExplicitAny: Should be fixed
-
-export interface AdminDataConsistencyReportNodeWithParent {
-  id: number
-  name: string
-  parentFolderId: number
-  scopedParentFolderId: number
-  scope: EntityScope
-  state: FILE_STATE
-  stiType: FILE_STI_TYPE
-  errors: string
-}
-
-export interface AdminDataConsistencyReportSpaceInfo {
-  id: number
-  name: string
-  spaceType: string
-  spaceId: number
-  state: SPACE_STATE
-  hostDxOrg: DxId<'org'>
-  hostLead: string
-  guestDxtOrg: DxId<'org'>
-  guestLead: string
-  status: string
-}
-
-export interface AdminDataConsistencyReportRunningJobInfo {
-  dxid: DxId<'job'>
-  id: number
-  uid: Uid<'job'>
-  userId: number
-  userDxid: DxId<'user'>
-  scope: EntityScope
-  entityType: string
-  elapsedTime: string
-}
-
-// AdminDataConsistencyReportService is to be run by an admin to check on the overall
-// health and consistency of our database records
-//
-// Anything that requires the user token will be handled by UserDataConsistencyReportOperation instead
-//
-// Current checks
-//  - Unclosed files and how long they've been
-//  - Unterminated jobs and how long they've been running
-//  - Summary of PFDA Only (local) folders
-//  - Find any dxids that have multiple entries in nodes table
-//  - Find any spaces that have multiple leads per side
 @Injectable()
 export class AdminDataConsistencyReportService {
   @ServiceLogger()
@@ -106,16 +46,15 @@ export class AdminDataConsistencyReportService {
     this.logger.log('AdminDataConsistencyReportService: Starting createReport')
 
     try {
-      // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
-      const infoMapping = (f: any): any => {
+      const infoMapping = (file: AdminDataConsistencyReportMappableEntity): AdminDataConsistencyReportEntityInfo => {
         return {
-          id: f.id,
-          uid: f.uid,
-          dxuser: f.user.getEntity().dxuser,
-          state: f.state,
-          entityType: f.entityType,
-          createdAt: f.createdAt,
-          elapsedTimeSinceCreation: TimeUtils.elapsedTimeSinceStringFormatted(f.createdAt),
+          id: file.id,
+          uid: file.uid,
+          dxuser: file.user.getEntity().dxuser,
+          state: file.state,
+          entityType: file.entityType ?? file.stiType ?? 'unknown',
+          createdAt: file.createdAt,
+          elapsedTimeSinceCreation: TimeUtils.elapsedTimeSinceStringFormatted(file.createdAt),
         }
       }
 
@@ -170,7 +109,7 @@ export class AdminDataConsistencyReportService {
     const spaces = await spaceRepo.findAll({
       populate: ['spaceMemberships', 'spaceMemberships.user'],
     })
-    const leadMapping = (lead: SpaceMembership) => {
+    const leadMapping = (lead: SpaceMembership): AdminDataConsistencyLeadInfo => {
       const user: User = lead.user.getEntity()
       return {
         id: lead.id,
@@ -217,7 +156,7 @@ export class AdminDataConsistencyReportService {
           state: space.state,
           hostDxOrg: space.hostDxOrg,
           hostLead: hostLead?.dxuser,
-          guestDxtOrg: space.guestDxOrg,
+          guestDxOrg: space.guestDxOrg,
           guestLead: guestLead?.dxuser,
           status: errors.join('\n'),
         })
@@ -286,4 +225,30 @@ export class AdminDataConsistencyReportService {
     this.logger.log('Sending report email to admin')
     await this.emailsJobProducer.createSendEmailTask(email, null, jobId)
   }
+}
+
+interface AdminDataConsistencyReportMappableEntity {
+  id: number
+  uid: string
+  user: { getEntity: () => User }
+  state: FILE_STATE | null
+  createdAt: Date
+  entityType?: string
+  stiType?: FILE_STI_TYPE
+}
+
+interface AdminDataConsistencyLeadInfo {
+  id: number
+  side: SPACE_MEMBERSHIP_SIDE
+  role: SPACE_MEMBERSHIP_ROLE
+  userId: number
+  firstName: string
+  lastName: string
+  email: string
+  dxuser: string
+  lastDataCheckup: Date | null
+  privateFilesProject: DxId<'project'> | null
+  publicFilesProject: DxId<'project'> | null
+  privateComparisonsProject: DxId<'project'> | null
+  publicComparisonsProject: DxId<'project'> | null
 }

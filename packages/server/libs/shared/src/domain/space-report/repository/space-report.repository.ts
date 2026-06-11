@@ -3,7 +3,7 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 
 export class SpaceReportRepository extends BaseEntityRepository<SpaceReport> {
-  async findByResultFileUid(fileUid: Uid<'file'>) {
+  async findByResultFileUid(fileUid: Uid<'file'>): Promise<SpaceReport | null> {
     return await this.findOne({ resultFile: { uid: fileUid } })
   }
 }

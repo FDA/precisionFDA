@@ -8,10 +8,11 @@ import { Job } from '@shared/domain/job/job.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { HOME_SCOPE } from '@shared/enums'
+import { STATIC_SCOPE } from '@shared/enums'
 import { ErrorCodes } from '@shared/errors'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
+import { EntityScope } from '@shared/types/common'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
@@ -48,10 +49,11 @@ describe.skip('GET /jobs', () => {
     }
 
     // Create two each of Everybody / Featured / Me scopes
-    const getScope = (i: number) => {
-      if (i < 2) return HOME_SCOPE.EVERYBODY
-      else if (i < 4) return HOME_SCOPE.FEATURED
-      else return HOME_SCOPE.ME
+    const getScope = (i: number): EntityScope => {
+      if (i < 4) {
+        return STATIC_SCOPE.PUBLIC
+      }
+      return STATIC_SCOPE.PRIVATE
     }
 
     Object.keys(jobsCount).forEach(key => {

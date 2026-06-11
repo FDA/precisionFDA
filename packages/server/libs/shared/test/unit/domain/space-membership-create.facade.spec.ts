@@ -44,7 +44,7 @@ describe('SpaceMembershipCreateFacade', () => {
   let referenceCreateStub: SinonStub
   let collectionStub: SinonStub
 
-  const createSpaceMembershipCreateFacade = () => {
+  const createSpaceMembershipCreateFacade = (): SpaceMembershipCreateFacade => {
     const adminClient = {
       inviteUserToOrganization: adminClientInviteUserToOrganizationStub,
     } as unknown as PlatformClient

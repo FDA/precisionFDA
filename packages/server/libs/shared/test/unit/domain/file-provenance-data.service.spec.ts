@@ -153,7 +153,7 @@ describe('FileProvenanceDataService', () => {
     })
   })
 
-  function getFile(parentId?: number, parentType?: PARENT_TYPE) {
+  function getFile(parentId?: number, parentType?: PARENT_TYPE): UserFile {
     const file = {
       name: NAME,
       uid: UID,

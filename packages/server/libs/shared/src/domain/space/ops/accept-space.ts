@@ -170,9 +170,9 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
   }
 
   private async handleHostProjectAcceptTransfer(space: Space, admin: SpaceMembership): Promise<void> {
-    const project = await this.platformClient.projectDescribe(space.hostProject, {
+    const project = (await this.platformClient.projectDescribe(space.hostProject, {
       fields: { pendingTransfer: true },
-    })
+    })) as Record<string, unknown>
     if (project.pendingTransfer) {
       await this.platformClient.projectAcceptTransfer(
         space.hostProject,

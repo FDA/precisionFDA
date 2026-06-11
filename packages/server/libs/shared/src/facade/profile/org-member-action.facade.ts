@@ -48,9 +48,7 @@ export class OrgMemberActionFacade {
       this.em.persist(event)
     })
 
-    this.logger.log(
-      `User ${targetUserId} deactivated by org admin ${currentUser.id} in org ${org.id}`,
-    )
+    this.logger.log(`User ${targetUserId} deactivated by org admin ${currentUser.id} in org ${org.id}`)
   }
 
   /**
@@ -69,10 +67,7 @@ export class OrgMemberActionFacade {
       throw new PermissionError('Cannot remove the organization administrator')
     }
 
-    const existingRequest = await this.orgActionRequestService.findPendingRemoveMemberRequest(
-      org.id,
-      targetUserId,
-    )
+    const existingRequest = await this.orgActionRequestService.findPendingRemoveMemberRequest(org.id, targetUserId)
 
     if (existingRequest) {
       throw new InvalidStateError('A removal request for this user already exists')

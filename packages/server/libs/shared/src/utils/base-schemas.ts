@@ -66,7 +66,15 @@ const paginationSchema: JSONSchema7 = {
   additionalProperties: true,
 }
 
-const schemas = {
+const schemas: {
+  getDxidInputSchema: (paramName: string) => JSONSchema7
+  getDxidsInputSchema: (paramName: string) => JSONSchema7
+  idInputSchema: JSONSchema7
+  idProp: JSONSchema7
+  dxidProp: JSONSchema7
+  paginationSchema: JSONSchema7
+  uidInputSchema: JSONSchema7
+} = {
   getDxidInputSchema,
   getDxidsInputSchema,
   idInputSchema,

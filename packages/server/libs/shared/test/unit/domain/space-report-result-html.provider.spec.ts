@@ -264,7 +264,7 @@ describe('SpaceReportResultHtmlProvider', () => {
     })
   })
 
-  async function getResultDocument(styles?: string) {
+  async function getResultDocument(styles?: string): Promise<Document> {
     return new JSDOM(await getInstance().provide(REPORT, { styles })).window.document
   }
 

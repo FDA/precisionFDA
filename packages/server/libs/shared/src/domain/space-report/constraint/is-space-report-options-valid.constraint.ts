@@ -14,7 +14,7 @@ import { spaceReportFormatToOptionsDtoMap } from '@shared/domain/space-report/mo
 
 @ValidatorConstraint({ async: true })
 export class IsSpaceReportOptionsValidConstraint implements ValidatorConstraintInterface {
-  async validate(options: unknown, args: ValidationArguments) {
+  async validate(options: unknown, args: ValidationArguments): Promise<boolean> {
     const object = args.object as SpaceReportCreateDto
     const format: SpaceReportFormat = object.format
     const expectedType = spaceReportFormatToOptionsDtoMap[format]
@@ -37,14 +37,14 @@ export class IsSpaceReportOptionsValidConstraint implements ValidatorConstraintI
     return errors.length === 0
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     const format = (args.object as SpaceReportCreateDto)?.format
     return `Options do not satisfy constraints for the provided format "${format}"`
   }
 }
 
 export function IsSpaceReportOptionsValid(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
+  return function (object: object, propertyName: string): void {
     registerDecorator({
       name: 'isOptionsValid',
       target: object.constructor,

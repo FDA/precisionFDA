@@ -18,7 +18,7 @@ export class Folder extends Node {
    */
   @OneToMany({
     entity: () => Node,
-    mappedBy: n => n.parentFolder,
+    mappedBy: (n: Node) => n.parentFolder,
     hidden: true,
   })
   nonScopedChildren = new Collection<Node>(this)
@@ -29,7 +29,7 @@ export class Folder extends Node {
    */
   @OneToMany({
     entity: () => Node,
-    mappedBy: n => n.scopedParentFolder,
+    mappedBy: (n: Node) => n.scopedParentFolder,
     hidden: true,
   })
   scopedChildren = new Collection<Node>(this)

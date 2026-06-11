@@ -21,7 +21,7 @@ describe('NodeCopyHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): NodeCopyHandler => {
     return new NodeCopyHandler(userRepo, userEmail)
   }
 

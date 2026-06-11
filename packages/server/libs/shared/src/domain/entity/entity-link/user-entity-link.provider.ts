@@ -4,7 +4,7 @@ import { User } from '@shared/domain/user/user.entity'
 
 @Injectable()
 export class UserEntityLinkProvider extends EntityLinkProvider<'user'> {
-  protected async getRelativeLink(entity: User) {
+  protected async getRelativeLink(entity: User): Promise<`/users/${string}`> {
     return `/users/${entity.dxuser}` as const
   }
 }

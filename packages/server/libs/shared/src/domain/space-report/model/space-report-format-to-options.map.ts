@@ -1,7 +1,7 @@
 import { SpaceReportCreateJsonOptionsDto } from '@shared/domain/space-report/model/space-report-create-json-options.dto'
 import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
 
-export const spaceReportFormatToOptionsDtoMap = {
+export const spaceReportFormatToOptionsDtoMap: { JSON: typeof SpaceReportCreateJsonOptionsDto; HTML: null } = {
   JSON: SpaceReportCreateJsonOptionsDto,
   HTML: null as null,
 } satisfies Record<SpaceReportFormat, (new () => object) | never>

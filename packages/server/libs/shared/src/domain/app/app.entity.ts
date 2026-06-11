@@ -10,6 +10,7 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
+import type { Logger } from '@nestjs/common'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
@@ -24,7 +25,7 @@ import { ENTITY_TYPE } from './app.enum'
 import type { AppInputSpecItem, AppSpecItem } from './app.input'
 import { AppRepository } from './app.repository'
 
-const logger = getLogger('app.entity')
+const logger: Logger = getLogger('app.entity')
 
 export interface AppSpec {
   input_spec: AppInputSpecItem[]
@@ -43,7 +44,7 @@ export interface Internal {
 @Entity({ tableName: 'apps', repository: () => AppRepository })
 @Filter({
   name: 'accessibleBy',
-  cond: args => ({
+  cond: (args: { userId: number; spaceScopes: string[] }) => ({
     $or: [{ user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE }, { scope: { $in: args.spaceScopes } }],
   }),
 })

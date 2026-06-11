@@ -4,7 +4,7 @@ import { Note } from '@shared/domain/note/note.entity'
 
 @Injectable()
 export class NoteEntityLinkProvider extends EntityLinkProvider<'note'> {
-  protected async getRelativeLink(note: Note) {
+  protected async getRelativeLink(note: Note): Promise<`/notes/${number}`> {
     return `/notes/${note.id}` as const
   }
 }

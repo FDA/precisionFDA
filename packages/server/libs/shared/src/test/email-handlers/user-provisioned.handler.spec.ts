@@ -12,7 +12,7 @@ describe('UserProvisionedHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): UserProvisionedHandler => {
     return new UserProvisionedHandler(emailClient)
   }
 

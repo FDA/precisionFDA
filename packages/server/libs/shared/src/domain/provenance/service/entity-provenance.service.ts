@@ -35,7 +35,7 @@ export class EntityProvenanceService {
     throw new errors.InvalidStateError('Generate entity provenance - Unsupported format type.')
   }
 
-  async getSvgStyles() {
+  async getSvgStyles(): Promise<string> {
     return this.entityProvenanceSvgResultTransformerService.getStyles()
   }
 }

@@ -4,7 +4,7 @@ import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-lin
 
 @Injectable()
 export class DBClusterEntityLinkProvider extends EntityLinkProvider<'dbcluster'> {
-  protected async getRelativeLink(dbcluster: DbCluster) {
+  protected async getRelativeLink(dbcluster: DbCluster): Promise<`/${string}`> {
     return `/home/databases/${dbcluster.dxid}` as const
   }
 }

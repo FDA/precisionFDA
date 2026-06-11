@@ -29,7 +29,7 @@ describe('LicenseApprovalRequestHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): LicenseApprovalRequestHandler => {
     return new LicenseApprovalRequestHandler(licenseRepo, userRepo, emailClient)
   }
 

@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, Param, ParseArrayPipe, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  ParseArrayPipe,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common'
 import { ApiCookieAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { AcceptedLicenseService } from '@shared/domain/accepted-license/accepted-license.service'
@@ -49,9 +60,7 @@ export class LicensesController {
   @ApiResponse({ status: 401, description: 'Unauthorized – missing or invalid session' })
   @ApiResponse({ status: 404, description: 'Some licenses not found or not accessible' })
   @Patch()
-  async updateLicenses(
-    @Body() body: UpdateLicensesDto,
-  ): Promise<{ acceptedLicenses: number[] }> {
+  async updateLicenses(@Body() body: UpdateLicensesDto): Promise<{ acceptedLicenses: number[] }> {
     const result = await this.acceptLicenseFacade.acceptMany(body.ids)
     return { acceptedLicenses: result }
   }
@@ -69,7 +78,8 @@ export class LicensesController {
   @Patch('/:id')
   async updateLicense(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateLicenseDto,
+    // Used for validation only (enforces `accepted: true`); extensible for future update operations
+    @Body() _body: UpdateLicenseDto,
   ): Promise<void> {
     return this.acceptLicenseFacade.accept(id)
   }

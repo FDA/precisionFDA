@@ -2,6 +2,10 @@ import { expect } from 'chai'
 import { stub } from 'sinon'
 import { App } from '@shared/domain/app/app.entity'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
+import { EntityProvenanceFormatType } from '@shared/domain/provenance/model/entity-provenance-format.type'
+import { EntityProvenanceSvgOptions } from '@shared/domain/provenance/model/entity-provenance-svg-options'
+import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
+import { SpaceReportPartResult } from '@shared/domain/space-report/model/space-report-part-result'
 import { SpaceReportPartAppResultProvider } from '@shared/facade/space-report/service/space-report-part-app-result-provider.service'
 
 describe('SpaceReportPartAppResultProvider', () => {
@@ -67,7 +71,7 @@ describe('SpaceReportPartAppResultProvider', () => {
     })
   })
 
-  function assertCorrectResult(actual, expected) {
+  function assertCorrectResult(actual: SpaceReportPartResult<'app', SpaceReportFormat>, expected: object): void {
     expect(actual).to.deep.equal({
       title: `${TITLE} (revision ${REVISION})`,
       created: CREATED,
@@ -75,7 +79,12 @@ describe('SpaceReportPartAppResultProvider', () => {
     })
   }
 
-  async function assertNoRevisionTitle(reportFormat, provenanceFormat, provenanceOptions, provenanceResult) {
+  async function assertNoRevisionTitle(
+    reportFormat: SpaceReportFormat,
+    provenanceFormat: EntityProvenanceFormatType,
+    provenanceOptions: EntityProvenanceSvgOptions | undefined,
+    provenanceResult: string,
+  ): Promise<void> {
     const APP_NO_REVISION = {
       title: TITLE,
       revision: null,

@@ -27,7 +27,7 @@ export class ServiceFactory implements IServiceFactory {
 
 let serviceFactory: IServiceFactory = new ServiceFactory()
 
-export const setServiceFactory = (newFactory: IServiceFactory) => {
+export const setServiceFactory = (newFactory: IServiceFactory): void => {
   serviceFactory = newFactory
 }
 

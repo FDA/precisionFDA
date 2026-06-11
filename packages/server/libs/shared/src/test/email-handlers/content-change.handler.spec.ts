@@ -42,7 +42,7 @@ describe('ContentChangedEmailHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): ContentChangedEmailHandler => {
     return new ContentChangedEmailHandler(em, spaceEventRepo, spaceMembershipRepo, emailClient)
   }
 

@@ -1,6 +1,6 @@
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 
-export const spaceReportPartSourceTypes = [
+export const spaceReportPartSourceTypes: ('user' | 'job' | 'asset' | 'file' | 'app' | 'workflow' | 'discussion')[] = [
   'file',
   'app',
   'job',

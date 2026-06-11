@@ -65,7 +65,8 @@ class SQLQueryLogger extends DefaultLogger {
 export function getMikroOrmConfig(opts: MikroOrmConfigOptions): MikroOrmModuleSyncOptions {
   return {
     clientUrl: config.database.clientUrl,
-    loggerFactory: options => new SQLQueryLogger(config.database.printDBQueryValuesInLog, options),
+    loggerFactory: (options: LoggerOptions): SQLQueryLogger =>
+      new SQLQueryLogger(config.database.printDBQueryValuesInLog, options),
     metadataProvider: TsMorphMetadataProvider,
     entities: [getEntityGlob(opts.distPath, 'js')],
     entitiesTs: [

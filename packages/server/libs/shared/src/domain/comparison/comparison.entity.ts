@@ -14,10 +14,15 @@ enum COMPARISON_STATE {
   PENDING = 'pending',
 }
 
+type AccessibleByFilterArgs = {
+  userId: number
+  spaceScopes: string[]
+}
+
 @Entity({ tableName: 'comparisons', repository: () => ComparisonRepository })
 @Filter({
   name: 'accessibleBy',
-  cond: args => ({
+  cond: (args: AccessibleByFilterArgs) => ({
     $or: [{ user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE }, { scope: { $in: args.spaceScopes } }],
   }),
 })

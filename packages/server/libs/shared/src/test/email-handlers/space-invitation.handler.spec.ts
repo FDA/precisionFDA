@@ -33,7 +33,7 @@ describe('SpaceInvitationHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): SpaceInvitationHandler => {
     return new SpaceInvitationHandler(userRepo, spaceMembershipRepo, emailClient)
   }
 
