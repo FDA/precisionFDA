@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
 import { PageContainerMargin } from '../../components/Page/page.styles'
@@ -15,27 +14,27 @@ const StyledRichText = styled(RichText)`
 const Security = () => {
   const user = useAuthUser()
   return (
-    <PublicLayout mainScroll>
-      <NavigationBar title="Security of precisionFDA" subtitle="" user={!!user} />
+    <PublicLayout mainScroll={!!user}>
+      <NavigationBar title="Security of precisionFDA" subtitle="" user={user} />
       <PageContainerMargin>
         <StyledRichText>
           <h1>Security Statement</h1>
           <p>Last modified: March 15, 2025</p>
           <hr />
           <p>
-            This Portal and Platform have a FISMA &ldquo;Moderate&rdquo; authorization to operate as granted by the FDA. This
-            FISMA moderate authorization is dependent on DNAnexus&apos; FedRAMP &ldquo;Moderate&rdquo; authorization to operate
-            under the sponsorship of HHS as documented{' '}
+            This Portal and Platform have a FISMA &ldquo;Moderate&rdquo; authorization to operate as granted by the FDA.
+            This FISMA moderate authorization is dependent on DNAnexus&apos; FedRAMP &ldquo;Moderate&rdquo;
+            authorization to operate under the sponsorship of HHS as documented{' '}
             <a href="https://marketplace.fedramp.gov/products/FR1814557199" target="_blank" rel="noreferrer">
               here
             </a>
-            . The FISMA Moderate authorization enables you and your collaborators to securely manage data containing sensitive
-            information such as PHI and PII within the constraints of any data use agreements.
+            . The FISMA Moderate authorization enables you and your collaborators to securely manage data containing
+            sensitive information such as PHI and PII within the constraints of any data use agreements.
             <br />
-            Be aware that trade secret and commercial confidential information such as detailed product quality information (e.g.
-            formulations with amounts) is risk-categorized under FISMA as High and thus should NOT be managed by FDA staff or
-            contractors on precisionFDA. Always consult the relevant Security authorities for official guidance relevant to your
-            use case.
+            Be aware that trade secret and commercial confidential information such as detailed product quality
+            information (e.g. formulations with amounts) is risk-categorized under FISMA as High and thus should NOT be
+            managed by FDA staff or contractors on precisionFDA. Always consult the relevant Security authorities for
+            official guidance relevant to your use case.
           </p>
           <p>
             <Link
