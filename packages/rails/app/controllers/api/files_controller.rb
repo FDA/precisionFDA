@@ -287,6 +287,18 @@ module Api
       end
     end
 
+    # GET /api/files/:uid
+    # temporary proxy for JupyterLab
+    def show
+      file = https_apps_client.get_file(params[:uid])
+      file["created_at_date_time"] = Time.parse(file["createdAtDateTime"]).utc.strftime("%Y-%m-%d %H:%M:%S %Z")
+      file["file_size"] = file["fileSize"]
+      file["space_id"] = file["spaceId"]
+      file["added_by"] = file["addedBy"]
+
+      render json: { files: file }
+    end
+
     # Updates file name and description.
     # PUT /api/files/:uid
     def update

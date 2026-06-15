@@ -13,6 +13,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def get_file(file_uid)
+    request(
+      "/files/#{file_uid}",
+      {},
+      Net::HTTP::Get::METHOD,
+      {},
+    )
+  end
+
   # Start sync job
   # @param job_dxid [String] Job dxid to sync.
   def job_sync(job_dxid)

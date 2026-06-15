@@ -322,7 +322,7 @@ Rails.application.routes.draw do
               via: %i(get post)
       end
 
-      resources :files, param: :uid, only: %i(index update) do
+      resources :files, param: :uid, only: %i(index update show) do
         get :download, on: :member
 
         collection do
