@@ -1,15 +1,14 @@
 import { $generateHtmlFromNodes } from '@lexical/html'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { LexiContext } from '../../lexi'
 import Editor from '../../lexi/Editor'
-import { ContentType, UpdateChallengeContent, updateChallengeContentRequest } from '../api'
+import { type ContentType, type UpdateChallengeContent, updateChallengeContentRequest } from '../api'
 import { useChallengeByIDQuery } from '../useChallengeDetailsQuery'
 
 const SubmitRow = styled.div`
@@ -108,11 +107,12 @@ const ScrollBody = styled.div`
   line-height: 1.7;
 `
 
-export const ContentTypePage = ({ challengeId, contentType }: { challengeId: number | string; contentType: ContentType }) => {
-  const { data } = useChallengeByIDQuery(challengeId, contentType)
-  if (!data) return null
+export const ContentTypePage = ({ contentType }: { contentType: ContentType }) => {
+  const { challengeId } = useParams<{ challengeId: string }>()
+  const { data } = useChallengeByIDQuery(challengeId ?? '')
+  if (!challengeId || !data) return null
   return (
-    <LexiContext editorState={data[mapContentTypeToKey(contentType)]}>
+    <LexiContext key={contentType} editorState={data[mapContentTypeToKey(contentType)]}>
       <ScrollBody className="editor-shell" style={{ margin: 0 }}>
         <Editor insertImageType="uri" />
         <ButtonBar challengeId={challengeId} contentType={contentType} />

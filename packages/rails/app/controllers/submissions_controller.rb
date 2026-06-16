@@ -79,7 +79,7 @@ class SubmissionsController < ApplicationController
 
   def create
     unless unsafe_params[:submission] && unsafe_params[:submission][:inputs]
-      raise "Submission parameters not found in submission#create params."
+      return respond_with_error("Submission parameters not found in submission#create params.")
     end
 
     submission_inputs = JSON.parse(unsafe_params[:submission][:inputs])
@@ -90,21 +90,25 @@ class SubmissionsController < ApplicationController
     input_info = input_spec_preparer.run(challenge.app, submission_inputs)
 
     unless input_spec_preparer.valid?
-      input_spec_preparer.errors.each do |error_message|
-        flash[:error] = error_message
-      end
-      return
+      error_messages = input_spec_preparer.errors.to_a
+      error_messages.each { |msg| flash[:error] = msg }
+      return respond_with_error(error_messages.join(", "))
     end
 
     items = input_info.uniq_files
 
     unless items.all? { |item| item.editable_by?(@context) }
-      flash[:error] = "Item is not owned by you."
-      redirect_back(fallback_location: root_path) && return
+      return respond_with_error("Item is not owned by you.")
     end
 
     run_job_create_submission(unsafe_params, input_info)
-    redirect_to show_challenge_path(unsafe_params[:challenge_id], "my-entries")
+
+    respond_to do |format|
+      format.html { redirect_to show_challenge_path(unsafe_params[:challenge_id], "my-entries") }
+      format.json { render json: { success: true } }
+    end
+  rescue => e
+    respond_with_error(e.message)
   end
 
   def publish
@@ -304,11 +308,10 @@ class SubmissionsController < ApplicationController
     @app = App.find(@challenge.app_id)
 
     cloned_inputs = clone_inputs_to_space
-    job_run_inputs = cloned_inputs.copies.to_h { |copy| [copy.source.uid, copy.object.uid] } unless cloned_inputs.nil?
 
     input_info ||= input_spec_preparer.run(@app, @inputs)
 
-    input_info.run_inputs.each { |k, v| input_info.run_inputs[k] = job_run_inputs[v] } unless cloned_inputs.nil?
+    remap_inputs_to_cloned_files!(input_info, cloned_inputs) if cloned_inputs
 
     job = job_creator.create(
       app: @app,
@@ -363,6 +366,22 @@ class SubmissionsController < ApplicationController
     copied_files
   end
 
+  # Remaps file UIDs in `input_info.run_inputs` (persisted on Job#run_data)
+  # to the cloned UserFile UIDs in the challenge space. Non-file values are
+  # preserved as-is.
+  def remap_inputs_to_cloned_files!(input_info, cloned_inputs)
+    uid_map = cloned_inputs.copies.to_h { |copy| [copy.source.uid, copy.object.uid] }
+
+    input_info.run_inputs.each do |key, value|
+      input_info.run_inputs[key] =
+        if value.is_a?(Array)
+          value.map { |item| uid_map.fetch(item, item) }
+        else
+          uid_map.fetch(value, value)
+        end
+    end
+  end
+
   def challenge_bot_copy_service
     @challenge_bot_copy_service ||= CopyService.new(
       api: DIContainer.resolve("api.challenge_bot"),
@@ -377,6 +396,13 @@ class SubmissionsController < ApplicationController
       user: User.challenge_bot,
       project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
     )
+  end
+
+  def respond_with_error(message)
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: root_path, flash: { error: message }) }
+      format.json { render json: { error: message }, status: :unprocessable_entity }
+    end
   end
 
   def check_challenge_access

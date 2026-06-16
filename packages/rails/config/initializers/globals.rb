@@ -29,7 +29,7 @@ else # these values are for staging, dev, development and test environments
   CHALLENGE_BOT_TOKEN = ENV["CHALLENGE_BOT_TOKEN"]
   CHALLENGE_BOT_DX_USER = "challenge.bot.2".freeze
   CHALLENGE_BOT_PUBLIC_FILES_PROJECT = "project-F53j4F806B0v3GjVB81yQY8F".freeze
-  CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-F53j4F80PQGQ73yV87JKb0p3".freeze
+  CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-J8VFZk80809q73jJ515qy0Px".freeze
 end
 
 if Rails.env.production? || Rails.env.staging?

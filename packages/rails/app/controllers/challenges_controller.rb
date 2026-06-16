@@ -144,27 +144,6 @@ class ChallengesController < ApplicationController
     end
   end
 
-  def join
-    unless @context.logged_in?
-      flash[:alert] = "You need to log in or request access before participating in the challenge."
-      redirect_to request_access_path
-      return
-    end
-
-    challenge = Challenge.find_by!(id: unsafe_params[:id])
-
-    if !challenge.followed_by?(@context.user)
-      @context.user.follow(challenge)
-      Event::SignedUpForChallenge.create_for(challenge, @context.user)
-      flash[:success] = "You are now following the challenge! If you would like to participate " \
-                        "please submit an entry by the deadline."
-    else
-      flash[:success] = "You are already following the challenge! Remember to submit your " \
-                        "entries by the challenge deadline!"
-    end
-    redirect_to "/challenges/#{challenge.id}/intro"
-  end
-
   def edit_page
     @resources_grid = initialize_grid(@challenge.challenge_resources,
                                       name: "resources",

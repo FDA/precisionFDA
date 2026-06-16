@@ -11,6 +11,7 @@ import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.e
 import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { AssignScoringAppDTO } from '@shared/domain/challenge/dto/assign-scoring-app.dto'
 import { ChallengeDTO } from '@shared/domain/challenge/dto/challenge.dto'
+import { ChallengeAppDTO } from '@shared/domain/challenge/dto/challenge-app.dto'
 import { ChallengePaginationDto, FILTER_STATUS } from '@shared/domain/challenge/dto/challenge-pagination.dto'
 import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
 import { ProposeChallengeDTO } from '@shared/domain/challenge/dto/propose-challenge.dto'
@@ -23,9 +24,11 @@ import {
 import { Submission } from '@shared/domain/challenge/submission.entity'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { ChallengeFollow } from '@shared/domain/follow/challenge-follow.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { Space } from '@shared/domain/space/space.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { USER_STATE, User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -52,6 +55,7 @@ export class ChallengeService implements Searchable<Challenge> {
     private readonly challengeRepo: ChallengeRepository,
     private readonly challengeResourceRepo: ChallengeResourceRepository,
     private readonly captchaService: CaptchaService,
+    private readonly eventHelper: EventHelper,
   ) {}
 
   async createChallenge(dto: CreateChallengeDTO, spaceId: number): Promise<Challenge> {
@@ -68,7 +72,12 @@ export class ChallengeService implements Searchable<Challenge> {
         throw new NotFoundError('Scoring App user not found or is not active!')
       }
 
-      challenge.spaceId = spaceId
+      const space = await em.findOne(Space, { id: spaceId })
+      if (!space) {
+        throw new NotFoundError('Space not found!')
+      }
+
+      challenge.space = Reference.create(space)
       challenge.appOwner = Reference.create(appOwner)
       await em.persistAndFlush(challenge)
       // Set the specifiedOrder after the challenge is persisted
@@ -81,7 +90,7 @@ export class ChallengeService implements Searchable<Challenge> {
   async updateChallenge(id: number, body: UpdateChallengeDTO): Promise<Challenge> {
     const challenge = await this.challengeRepo.findOneOrFail(id)
 
-    if (![CHALLENGE_STATUS.SETUP, CHALLENGE_STATUS.PRE_REGISTRATION].includes(body.status) && challenge.appId == null) {
+    if (![CHALLENGE_STATUS.SETUP, CHALLENGE_STATUS.PRE_REGISTRATION].includes(body.status) && challenge.app == null) {
       throw new ValidationError('Scoring app must be assigned to the challenge!')
     }
 
@@ -150,27 +159,15 @@ export class ChallengeService implements Searchable<Challenge> {
   }
 
   async getChallenge(id: number): Promise<ChallengeDTO> {
-    const challenge = await this.challengeRepo.findAccessibleOne({ id })
+    const challenge = await this.challengeRepo.findAccessibleOne({ id }, { populate: ['app'] })
     if (!challenge) {
       throw new NotFoundError('Challenge not found!')
     }
 
-    const user = await this.em.findOne(User, { id: this.user.id })
-
-    let appUid = null
-    if (challenge.appId) {
-      const app = await this.em.findOne(
-        App,
-        {
-          id: challenge.appId,
-        },
-        { fields: ['uid'] },
-      )
-      appUid = app.uid
-    }
+    const user = await this.user.loadEntity()
 
     if (!user) {
-      return ChallengeDTO.mapToDTO(challenge, appUid, false, false, false)
+      return ChallengeDTO.mapToDTO(challenge, false, false, false)
     }
 
     const canEdit = await user.isSiteOrChallengeAdmin()
@@ -178,7 +175,7 @@ export class ChallengeService implements Searchable<Challenge> {
     const isSpaceMember =
       (await this.em.count(SpaceMembership, {
         user: { id: this.user.id },
-        spaces: { id: challenge.spaceId },
+        spaces: { id: challenge.space.id },
         active: true,
       })) === 1
 
@@ -189,7 +186,40 @@ export class ChallengeService implements Searchable<Challenge> {
         followerType: 'User',
       })) === 1
 
-    return ChallengeDTO.mapToDTO(challenge, appUid, follows, isSpaceMember, canEdit)
+    return ChallengeDTO.mapToDTO(challenge, follows, isSpaceMember, canEdit)
+  }
+
+  /**
+   * Records the current user joining (following) a challenge. Idempotent: if the
+   * user already follows the challenge, this is a no-op.
+   */
+  async joinChallenge(challengeId: number): Promise<void> {
+    await this.em.transactional(async () => {
+      const challenge = await this.challengeRepo.findAccessibleOne({ id: challengeId }, { populate: ['follows'] })
+      if (!challenge) {
+        throw new NotFoundError('Challenge not found!')
+      }
+
+      const user = await this.user.loadEntity()
+
+      const alreadyFollows = challenge.follows.exists(
+        follow => follow.followerId === user.id && follow.followerType === 'User',
+      )
+      if (alreadyFollows) {
+        return
+      }
+
+      const follow = new ChallengeFollow()
+      follow.followableId = Reference.create(challenge)
+      follow.followableType = 'Challenge'
+      follow.followerId = user.id
+      follow.followerType = 'User'
+      follow.blocked = false
+
+      challenge.follows.add(follow)
+      const event = await this.eventHelper.createSignedUpForChallengeEvent(user, challenge)
+      this.em.persist([challenge, event])
+    })
   }
 
   async getChallengeBotUser(): Promise<User> {
@@ -203,8 +233,7 @@ export class ChallengeService implements Searchable<Challenge> {
 
   async createChallengeResource(challengeId: number, userFileId: number): Promise<ChallengeResource> {
     const challengeResource = new ChallengeResource(this.user.id, challengeId, userFileId)
-
-    await this.em.persistAndFlush(challengeResource)
+    await this.em.persist(challengeResource).flush()
 
     return challengeResource
   }
@@ -227,7 +256,7 @@ export class ChallengeService implements Searchable<Challenge> {
       fileDxid: cardImage.dxid,
       filename: cardImage.name,
       project: cardImage.project,
-      duration: 9999999999,
+      duration: 9_999_999_999,
     })
 
     challenge.cardImageUrl = link.url
@@ -266,7 +295,7 @@ export class ChallengeService implements Searchable<Challenge> {
       fileDxid: userFile.dxid,
       filename: userFile.name,
       project: userFile.project,
-      duration: 9999999999,
+      duration: 9_999_999_999,
     })
 
     challengeResource.url = link.url
@@ -329,7 +358,7 @@ export class ChallengeService implements Searchable<Challenge> {
       throw new ValidationError('Cannot assign scoring app to challenge with this status!')
     }
 
-    if (challenge.appId === app.id) {
+    if (challenge.app?.id === app.id) {
       throw new ValidationError('This scoring app is already assigned to this challenge!')
     }
 
@@ -341,7 +370,7 @@ export class ChallengeService implements Searchable<Challenge> {
       developers: [challengeBot.dxid],
     })
 
-    challenge.appId = app.id
+    challenge.app = Reference.create(app)
     await this.em.flush()
   }
 
@@ -410,7 +439,7 @@ export class ChallengeService implements Searchable<Challenge> {
         break
     }
 
-    const response = await this.challengeRepo.paginateAccessible(pagination, where)
+    const response = await this.challengeRepo.paginateAccessible(pagination, where, { populate: ['app'] })
     const challenges = response.data.map(challenge => ChallengeDTO.mapToDTO(challenge))
     return { ...response, data: challenges }
   }
@@ -425,5 +454,27 @@ export class ChallengeService implements Searchable<Challenge> {
       ...(await this.challengeRepo.searchOpenPausedArchivedByNameAndDescriptionAndContents(query)),
       ...(await this.challengeRepo.searchResultAnnouncedByNameAndDescriptionAndContents(query)),
     ]
+  }
+
+  async getChallengeApp(id: number): Promise<ChallengeAppDTO> {
+    const challenge = await this.challengeRepo.findAccessibleOne({ id })
+    if (!challenge) {
+      throw new NotFoundError('Challenge not found!')
+    }
+
+    if (challenge.status !== CHALLENGE_STATUS.OPEN) {
+      throw new ValidationError('Challenge is not open!')
+    }
+
+    if (challenge.app == null) {
+      throw new NotFoundError('No app assigned to this challenge!')
+    }
+
+    const app = await challenge.app?.load()
+    if (!app || app.deleted) {
+      throw new NotFoundError('Challenge app not found!')
+    }
+
+    return ChallengeAppDTO.mapToDTO(app)
   }
 }

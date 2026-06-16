@@ -1,90 +1,35 @@
-import React from 'react'
-import { Link, Route, Routes, useMatch, useParams } from 'react-router'
-import styled from 'styled-components'
+import { Outlet, useParams } from 'react-router'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { ContentTypePage } from './ContentTypePage'
-
-const StyledChallengeHeader = styled.div`
-  max-width: 300px;
-  min-width: 226px;
-  flex: 1 1 auto;
-  border-right: 1px solid #e0e0e0;
-`
-const StyledRow = styled.div`
-  display: flex;
-  flex-grow: 1;
-  height: 0;
-`
-const NavItem = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  border-bottom: 1px solid #e0e0e0;
-  width: auto;
-  font-size: 14px;
-
-  &[data-active='true'] {
-    background-color: antiquewhite;
-  }
-
-  a {
-    flex-grow: 1;
-    padding: 12px 0;
-  }
-`
-
-const StyledTitle = styled.h1`
-  font-size: 24px;
-  font-weight: 500;
-  padding: 0 24px;
-  margin-top: 20px;
-`
-const NavItemResource = styled(NavItem)`
-  border-top: 1px solid #e0e0e0;
-`
-const NavItemBack = styled(NavItem)`
-  font-size: 14px;
-  height: 60px;
-  padding-bottom: 24px;
-`
+import { ContentEditorSidebar } from './ContentEditorSidebar'
 
 export default function ChallengeContentEditPage() {
   const user = useAuthUser()
-  const { challengeId } = useParams()
+  const { challengeId } = useParams<{ challengeId: string }>()
 
   if (!user?.can_create_challenges) {
     return <NotAllowedPage />
   }
 
+  if (!challengeId) {
+    return null
+  }
+
   return (
-    <StyledRow>
-      <StyledChallengeHeader>
-        <StyledTitle>Content Editor</StyledTitle>
-        <NavItemBack>
-          <Link to={`/challenges/${challengeId}`}>Back to Challenge</Link>
-        </NavItemBack>
-        <NavItem data-active={!!useMatch('/challenges/:challengeId/content/info')}>
-          <Link to={`/challenges/${challengeId}/content/info`}>Challenge Info</Link>
-        </NavItem>
-        <NavItem data-active={!!useMatch('/challenges/:challengeId/content/results')}>
-          <Link to={`/challenges/${challengeId}/content/results`}>Challenge Results</Link>
-        </NavItem>
-        <NavItem data-active={!!useMatch('/challenges/:challengeId/content/pre-registration')}>
-          <Link to={`/challenges/${challengeId}/content/pre-registration`}>Pre-Registration</Link>
-        </NavItem>
-        <br />
-        <NavItemResource>
-          <a data-turbolinks="false" href={`/challenges/${challengeId}/editor/resources`}>
-            Resources
-          </a>
-        </NavItemResource>
-      </StyledChallengeHeader>
-      <Routes>
-        <Route path="/info" element={<ContentTypePage challengeId={challengeId!} contentType="info" />} />
-        <Route path="/results" element={<ContentTypePage challengeId={challengeId!} contentType="results" />} />
-        <Route path="/pre-registration" element={<ContentTypePage challengeId={challengeId!} contentType="pre-registration" />} />
-      </Routes>
-    </StyledRow>
+    <div className="flex h-[calc(100vh-var(--spacing-below-header))] min-h-0 overflow-hidden">
+      <SidebarProvider contained className="min-h-0 flex-1">
+        <ContentEditorSidebar challengeId={challengeId} />
+        <SidebarInset className="min-h-0">
+          <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4 md:hidden">
+            <SidebarTrigger className="-ml-1" />
+            <span className="font-semibold">Content Editor</span>
+          </header>
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <Outlet />
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   )
 }

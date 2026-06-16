@@ -243,6 +243,10 @@ export default defineConfig(({ command, mode }) => {
           '/api',
           // Regex routes (Rails edit forms)
           '^/workflows/.+/edit$', '^/experts/.+/edit$',
+          // Challenge submissions (Rails legacy pages)
+          '^/challenges/[^/]+/submissions/create$',
+          '^/challenges/[^/]+/submissions/new$',
+          '^/challenges/[^/]+/submissions/[^/]+/edit$',
         ]
         return Object.fromEntries(routes.map(r => [r, toRails]))
       })(),

@@ -6,6 +6,7 @@ import { CreateChallengeResourceDTO } from '@shared/domain/challenge/dto/create-
 import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
@@ -104,7 +105,7 @@ export class ChallengeFacade {
     dto: CreateChallengeResourceDTO,
   ): Promise<{
     id: number
-    fileUid: `file-${string}-${number}`
+    fileUid: Uid<'file'>
   }> {
     const challenge = await this.challengeService.getChallenge(challengeId)
     const challengeBot = await this.challengeService.getChallengeBotUser()

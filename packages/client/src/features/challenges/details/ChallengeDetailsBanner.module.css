@@ -1,0 +1,8 @@
+/* Double-class selector boosts specificity above styled-components single-class rules */
+.outlineButton.outlineButton {
+  border-color: white;
+}
+
+.outlineButton:hover {
+  color: inherit;
+}

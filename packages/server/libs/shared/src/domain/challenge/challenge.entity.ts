@@ -1,6 +1,9 @@
 import { Collection, Entity, ManyToOne, OneToMany, OneToOne, Property, Ref } from '@mikro-orm/core'
 import { ScopedEntity } from '@shared/database/scoped.entity'
+import { App } from '@shared/domain/app/app.entity'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { ChallengeFollow } from '@shared/domain/follow/challenge-follow.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { CHALLENGE_STATUS } from './challenge.enum'
@@ -36,20 +39,17 @@ export class Challenge extends ScopedEntity {
   @Property()
   cardImageUrl: string
 
-  // Note: the value stored in cardImageId is actually the file's uid
   @Property()
   cardImageId: Uid<'file'>
 
   @Property()
   preRegistrationUrl: string
 
-  // todo: this is a FK
-  @Property()
-  spaceId: number
+  @ManyToOne(() => Space)
+  space!: Ref<Space>
 
-  // todo: this is a FK
-  @Property()
-  appId: number
+  @ManyToOne({ entity: () => App, nullable: true })
+  app?: Ref<App>
 
   @Property()
   infoContent: string
@@ -77,4 +77,7 @@ export class Challenge extends ScopedEntity {
 
   @OneToMany({ entity: () => ChallengeResource, mappedBy: 'challenge', orphanRemoval: true })
   challengeResources = new Collection<ChallengeResource>(this)
+
+  @OneToMany({ entity: () => ChallengeFollow, mappedBy: 'followableId' })
+  follows = new Collection<ChallengeFollow>(this)
 }

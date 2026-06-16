@@ -17,7 +17,7 @@
       <h4>About Your Submission</h4>
     </div>
     <div class="panel-body">
-      <%= form_for @submission, url: challenge_submissions_path, html: {class: 'form form-horizontal', id: "new_submission"} do |f| %>
+      <%= form_for @submission, url: create_challenge_submissions_path(challenge_id: @challenge), html: {class: 'form form-horizontal', id: "new_submission"} do |f| %>
         <%= render "_partials/form_errors", object: @submission %>
         <div class="form-group required">
           <%= f.label :name, "Name", class: 'control-label col-sm-2' %>

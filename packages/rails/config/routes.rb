@@ -534,18 +534,21 @@ Rails.application.routes.draw do
     get "old_challenges/treasure", to: "challenges#treasure_old"
     get "old_challenges/treasure(/:tab)", to: "challenges#treasure_old"
 
+    post "challenges/:challenge_id/submissions/create",
+         to: "submissions#create",
+         as: :create_challenge_submissions
+
     resources :challenges do
       get "consistency(/:tab)", on: :collection, action: :consistency, as: "consistency"
       get "truth(/:tab)", on: :collection, action: :truth, as: "truth"
       get "new", on: :collection, as: "new"
-      get "join", on: :member
       get "editor(/:tab)", on: :member, action: :edit_page, as: "edit_page"
       post "editor/save_page", on: :member, action: :save_page, as: "save_page"
       get "(/:tab)", on: :member, action: :show, as: "show"
       resources :challenge_resources, only: %i(new create destroy) do
         post "rename", on: :member
       end
-      resources :submissions, only: %i(new create edit) do
+      resources :submissions, only: %i(new edit) do
         post "publish", on: :collection, action: :publish
         get "log", on: :member
       end

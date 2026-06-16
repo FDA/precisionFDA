@@ -57,6 +57,56 @@ RSpec.describe SubmissionsController, type: :controller do
         }
         expect(Job).to be_any
       end
+
+      it "persists all input values and remaps file UIDs to cloned copies" do
+        cloned_file1 = create(
+          :user_file, :private,
+          dxid: file1.dxid, project: space.host_project,
+          parent_id: User.challenge_bot.id, user_id: User.challenge_bot.id
+        )
+        cloned_file2 = create(
+          :user_file, :private,
+          dxid: file2.dxid, project: space.host_project,
+          parent_id: User.challenge_bot.id, user_id: User.challenge_bot.id
+        )
+
+        copies = CopyService::Copies.new
+        copies.push(object: cloned_file1, source: file1)
+        copies.push(object: cloned_file2, source: file2)
+
+        allow_any_instance_of(described_class).to receive(:clone_inputs_to_space).and_return(copies)
+
+        captured_input_info = nil
+        allow_any_instance_of(JobCreator).to receive(:create) do |_creator, app:, name:, input_info:, **_kwargs|
+          captured_input_info = input_info
+          create(
+            :job,
+            app_series_id: app.app_series_id,
+            app_id: app.id,
+            name: name,
+            user_id: User.challenge_bot.id,
+            run_inputs: input_info.run_inputs,
+          )
+        end
+
+        post :create, params: {
+          challenge_id: challenge.id,
+          submission: { name: "1", desc: "1", inputs: valid_inputs.to_json },
+        }
+
+        expect(captured_input_info).not_to be_nil
+
+        # run_inputs should preserve every submitted value, with file UIDs
+        # remapped to the cloned UserFile UIDs (non-file values must NOT be
+        # nullified).
+        expect(captured_input_info.run_inputs).to eq(
+          "file1" => cloned_file1.uid,
+          "file2" => cloned_file2.uid,
+          "string1" => "123",
+          "boolean1" => true,
+          "int1" => 123,
+        )
+      end
     end
   end
 end

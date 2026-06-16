@@ -82,7 +82,7 @@
     "rxjs": "7.8.2",
     "sanitize-filename": "1.6.3",
     "tough-cookie": "6.0.1",
-    "ws": "8.20.1"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.15",
@@ -112,7 +112,7 @@
     "chai-as-promised": "7.1.2",
     "chance": "1.1.13",
     "dirty-chai": "2.0.1",
-    "esbuild": "0.27.4",
+    "esbuild": "0.28.1",
     "globals": "17.4.0",
     "jest": "30.3.0",
     "json-schema": "0.4.0",

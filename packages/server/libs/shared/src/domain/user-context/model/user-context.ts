@@ -14,6 +14,7 @@ export class UserContext {
   ) {}
 
   async loadEntity(): Promise<User | null> {
+    if (!this.id) return null
     return RequestContext.getEntityManager().findOne(User, this.id)
   }
 }

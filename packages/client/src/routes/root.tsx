@@ -9,7 +9,7 @@ import { SessionExpiredModal } from '@/features/auth/SessionExpiredModal'
 import { FileUploadModalProvider } from '@/features/files/actionModals/useFileUploadModal'
 import { useModal } from '@/features/modal/useModal'
 import { useRailsFlashMessages } from '@/hooks/useRailsFlashMessages'
-import { LayoutLoader, UserLayout } from '@/layouts/UserLayout'
+import { LayoutLoader } from '@/layouts/UserLayout'
 import { OnlineStatusProvider } from '@/utils/OnlineStatusContext'
 import { PFDAToastContainer } from '@/utils/PFDAToastContainer'
 import queryClientInstance, { setAuthFailureCallback } from '@/utils/queryClient'
@@ -19,6 +19,7 @@ import Header from '../components/Header/Header'
 import NoFoundPage from '../pages/NoFoundPage'
 import GlobalStyle from '../styles/global'
 import accountRoutes from './account'
+import { protectedChallengeRoutes, publicChallengeRoutes } from './challenges'
 import { homeRoutes } from './home'
 import spacesRoutes from './spaces'
 
@@ -36,14 +37,8 @@ const DataPortalRoutes = React.lazy(() => import('../features/data-portals/route
 const HomeShowLayout = React.lazy(() => import('../features/home/HomeShowLayout'))
 const RequestAccessPage = React.lazy(() => import('../features/request-access/RequestAccessPage'))
 const ExpertsSinglePage = React.lazy(() => import('../features/experts/details/index'))
-const EditChallengePage = React.lazy(() => import('../features/challenges/form/EditChallengePage'))
-const ChallengeDetailsLayout = React.lazy(() => import('../features/challenges/details/ChallengeDetailsLayout'))
-const ContentEditorPage = React.lazy(() => import('../features/challenges/content/ContentEditorPage'))
 const PublishingPage = React.lazy(() => import('../features/publishing/PublishingPage'))
 const TrackPage = React.lazy(() => import('../features/tracks/TrackPage'))
-const ChallengesList = React.lazy(() => import('../features/challenges/list/ChallengesList'))
-const CreateChallengePage = React.lazy(() => import('../features/challenges/form/CreateChallengePage'))
-const ProposeChallengePage = React.lazy(() => import('../features/challenges/form/ProposeChallengePage'))
 const NewsListPage = React.lazy(() => import('../features/news/NewsPage'))
 const LandingPage = React.lazy(() => import('../features/overview/OverviewPage'))
 const AboutPage = React.lazy(() => import('../pages/AboutPage'))
@@ -117,9 +112,7 @@ const router = createBrowserRouter([
       // Unprotected routes
       { index: true, element: <LandingPage /> },
       { path: 'about', element: <AboutPage /> },
-      { path: 'challenges', element: <ChallengesList /> },
-      { path: 'challenges/propose', element: <ProposeChallengePage /> },
-      { path: 'challenges/:challengeId/*', element: <ChallengeDetailsLayout /> },
+      ...publicChallengeRoutes,
       { path: 'news', element: <NewsListPage /> },
       { path: 'experts/:expertId/*', element: <ExpertsSinglePage /> },
       { path: 'experts', element: <ExpertsListPage /> },
@@ -134,24 +127,7 @@ const router = createBrowserRouter([
       {
         element: <AuthWall />,
         children: [
-          { path: 'challenges/create', element: <CreateChallengePage /> },
-          { path: 'challenges/:challengeId/content', element: <Navigate to="info" replace /> },
-          {
-            path: 'challenges/:challengeId/content/*',
-            element: (
-              <UserLayout innerScroll>
-                <ContentEditorPage />
-              </UserLayout>
-            ),
-          },
-          {
-            path: 'challenges/:challengeId/settings',
-            element: (
-              <UserLayout>
-                <EditChallengePage />
-              </UserLayout>
-            ),
-          },
+          ...protectedChallengeRoutes,
           {
             path: 'home/*',
             element: <HomeShowLayout />,

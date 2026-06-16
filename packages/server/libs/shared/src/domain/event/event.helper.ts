@@ -1,6 +1,7 @@
 import { EntityManager, wrap } from '@mikro-orm/core'
 import { Injectable, Logger } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -86,6 +87,18 @@ export class EventHelper {
       param2: file.dxid,
       param3,
       data,
+    })
+    return event
+  }
+
+  async createSignedUpForChallengeEvent(user: User, challenge: Challenge): Promise<Event> {
+    const event = new Event()
+    const organization = await user.organization.load()
+    wrap(event).assign({
+      type: EVENT_TYPES.SIGNED_UP_FOR_CHALLENGE,
+      orgHandle: organization.handle,
+      dxuser: user.dxuser,
+      param1: challenge.id.toString(),
     })
     return event
   }

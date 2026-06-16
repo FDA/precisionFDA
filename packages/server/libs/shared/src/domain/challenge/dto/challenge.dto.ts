@@ -28,7 +28,6 @@ export class ChallengeDTO {
 
   static mapToDTO(
     challenge: Challenge,
-    appUid: Uid<'app'> = null,
     follows: boolean = null,
     isSpaceMember: boolean = null,
     canEdit: boolean = null,
@@ -36,10 +35,10 @@ export class ChallengeDTO {
     return {
       id: challenge.id,
       name: challenge.name,
-      spaceId: challenge.spaceId,
+      spaceId: challenge.space.id,
       description: challenge.description,
       meta: challenge.meta,
-      appUid: appUid,
+      appUid: challenge.app?.getEntity()?.uid ?? null,
       cardImageUrl: challenge.cardImageUrl,
       preRegistrationUrl: challenge.preRegistrationUrl,
       infoContent: challenge.infoContent,

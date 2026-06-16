@@ -5,6 +5,7 @@ import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
 import { EmailModule } from '@shared/domain/email/email.module'
+import { EventModule } from '@shared/domain/event/event.module'
 import { NotificationModule } from '@shared/domain/notification/notification.module'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
@@ -16,6 +17,7 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
     UserFileModule,
     MikroOrmModule.forFeature([ChallengeResource, Challenge]),
     EmailModule,
+    EventModule,
     CaptchaModule,
   ],
   providers: [ChallengeService],

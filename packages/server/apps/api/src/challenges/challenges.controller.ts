@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query,
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { AssignScoringAppDTO } from '@shared/domain/challenge/dto/assign-scoring-app.dto'
 import { ChallengeDTO } from '@shared/domain/challenge/dto/challenge.dto'
+import { ChallengeAppDTO } from '@shared/domain/challenge/dto/challenge-app.dto'
 import { ChallengePaginationDto } from '@shared/domain/challenge/dto/challenge-pagination.dto'
 import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
 import { CreateChallengeResourceDTO } from '@shared/domain/challenge/dto/create-challenge-resource.dto'
@@ -10,6 +11,7 @@ import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
 import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
 import { UpdateChallengeContentDTO } from '@shared/domain/challenge/dto/update-challenge-content.dto'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { ChallengeOrSiteAdminGuard } from '../admin/guards/challenge-or-site-admin.guard'
 import { ChallengeFacade } from '../facade/challenge/challenge.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
@@ -51,7 +53,7 @@ export class ChallengesController {
   async createResource(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: CreateChallengeResourceDTO,
-  ): Promise<{ id: number; fileUid: `file-${string}-${number}` }> {
+  ): Promise<{ id: number; fileUid: Uid<'file'> }> {
     return await this.challengeFacade.createChallengeResource(id, body)
   }
 
@@ -76,11 +78,25 @@ export class ChallengesController {
     return await this.challengeFacade.updateChallenge(id, body)
   }
 
+  @UseGuards(UserContextGuard)
+  @HttpCode(200)
+  @Get(':id/app')
+  async getChallengeApp(@Param('id', ParseIntPipe) id: number): Promise<ChallengeAppDTO> {
+    return await this.challengeService.getChallengeApp(id)
+  }
+
   @UseGuards(ChallengeOrSiteAdminGuard)
   @HttpCode(204)
   @Put(':id/content')
   async updateContent(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateChallengeContentDTO): Promise<void> {
     await this.challengeService.updateContent(id, body)
+  }
+
+  @UseGuards(UserContextGuard)
+  @HttpCode(204)
+  @Post(':id/join')
+  async join(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.challengeService.joinChallenge(id)
   }
 
   @UseGuards(UserContextGuard)
