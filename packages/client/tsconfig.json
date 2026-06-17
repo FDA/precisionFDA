@@ -20,7 +20,6 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "typeRoots" : ["node_modules/@types", "src/types"],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "test-utils": ["./src/utils/test-utils"]

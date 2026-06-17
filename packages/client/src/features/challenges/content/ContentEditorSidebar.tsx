@@ -135,8 +135,6 @@ export const ContentEditorSidebar = ({ challengeId }: { challengeId: string }) =
                   render={
                     <a
                       href={`/challenges/${challengeId}/editor/resources`}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       data-turbolinks="false"
                       onClick={() => {
                         if (isMobile) setOpenMobile(false)
