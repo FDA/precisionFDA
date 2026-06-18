@@ -12,11 +12,12 @@ import { SpaceReportService } from '@shared/domain/space-report/service/space-re
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
+import { ClientRequestError } from '@shared/errors'
 import { SpaceMemberNotificationFacade } from '@shared/facade/space-member-notification/space-member-notification.facade'
 import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { createRunFollowUpActionJobTask } from '@shared/queue'
+import { createRunFollowUpActionJobTask, removeRepeatable } from '@shared/queue'
 import {
   NotifyNewDiscussionJob,
   ProvisionNewUserJob,
@@ -24,6 +25,7 @@ import {
   UiNotifyNewDiscussionReplyJob,
 } from '@shared/queue/task.input'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
+import { OnQueueFailedWithContext } from '../decorator/on-queue-failed-with-context'
 import { ProcessWithContext } from '../decorator/process-with-context'
 
 @Processor(config.workerJobs.queues.default.name)
@@ -158,5 +160,39 @@ export class MainQueueProcessor {
       this.logger.log(`Provisioning new user with invitationId ${id}`)
       await this.userProvisionFacade.provision(id, spaceIds, ids)
     }
+  }
+
+  /**
+   * Event listener for failed jobs. This is not part of the main processing pipeline.
+   *
+   * Case-specific handling:
+   * - 401 errors from the platform: Remove the job, as it cannot be retried successfully.
+   * - Remove job if other errors occur in a repeatable job to prevent job attempts, as the new job will be created on the next schedule.
+   *
+   * All other errors are just logged. Job retries and backoff are managed by the queue configuration.
+   */
+  @OnQueueFailedWithContext()
+  async onQueueFailed(job: Job, error: Error): Promise<void> {
+    const isJobRepeat = !!job.opts.repeat
+    if (error instanceof ClientRequestError && error.props?.clientStatusCode === 401) {
+      // Unauthorized. Expected scenario is that the user token has expired
+      // Removing the sync task will allow a new sync task to be recreated
+      // when user next logs in via UserCheckupTask
+      this.logger.log(`Received 401 from platform for job ${job.data?.type} (${job.id}), removing sync task`)
+      if (isJobRepeat) {
+        await removeRepeatable(job)
+      } else {
+        this.logger.warn(`Non-repeatable job ${job.data?.type} (${job.id}) failed with 401 from platform, removing job`)
+      }
+      return
+    }
+
+    if (isJobRepeat) {
+      this.logger.warn(`Repeatable job ${job.data?.type} (${job.id}) failed, discarding retries`)
+      await job.remove()
+      return
+    }
+
+    this.logger.error(`Job ${job.data?.type} (${job.id}) failed with error: ${error.message}`)
   }
 }

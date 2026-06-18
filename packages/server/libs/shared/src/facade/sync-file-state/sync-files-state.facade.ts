@@ -8,7 +8,6 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { findFileOrAssetsWithDxid, findFileOrAssetWithUid } from '@shared/domain/user-file/user-file.helper'
 import { FILE_STATE_DX, FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { ClientRequestError } from '@shared/errors'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
@@ -47,10 +46,7 @@ export class SyncFilesStateFacade {
     const oldOpenFiles = await this.nodeHelper.findOldOpenFilesAndAssets()
 
     if (recentClosingFiles.length > 0) {
-      const recentClosingResult = await this.resolveRecentClosingFiles(recentClosingFiles, dxuser, job)
-      if (recentClosingResult === false) {
-        return
-      }
+      await this.resolveRecentClosingFiles(recentClosingFiles, dxuser)
     }
 
     if (oldClosingFiles.length > 0) {
@@ -95,18 +91,12 @@ export class SyncFilesStateFacade {
   }
 
   /**
-   * Returns false if another processing should not continue, because something bad happened.
    *
    * @param recentClosingFiles
    * @param dxuser
-   * @param job
    * @private
    */
-  private async resolveRecentClosingFiles(
-    recentClosingFiles: FileOrAsset[],
-    dxuser: string,
-    job: Job,
-  ): Promise<boolean> {
+  private async resolveRecentClosingFiles(recentClosingFiles: FileOrAsset[], dxuser: string): Promise<void> {
     if (recentClosingFiles.length > this.MAX_FILES_PER_RUN) {
       this.logger.warn(
         `Too many closing files (${recentClosingFiles.length}) for ${dxuser}, processing only first ${this.MAX_FILES_PER_RUN}`,
@@ -123,44 +113,28 @@ export class SyncFilesStateFacade {
       `Starting files state sync for ${dxuser}`,
     )
 
-    try {
-      // Group files based on project dxid, this is necessary to provide project hint to the
-      // platform API call, which is VERY slow if this is not present
-      const openFilesByProject = groupBy((file: FileOrAsset) => file.project, recentClosingFiles)
-      for (const projectDxid in openFilesByProject) {
-        // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
-        if (openFilesByProject.hasOwnProperty(projectDxid)) {
-          const openFilesInProject = openFilesByProject[projectDxid]
-          this.logger.log(
-            {
-              projectDxid,
-              openFiles: openFilesInProject.map(f => ({
-                name: f.name,
-                dxid: f.dxid,
-                uid: f.uid,
-              })),
-            },
-            'Syncing files state in project',
-          )
+    // Group files based on project dxid, this is necessary to provide project hint to the
+    // platform API call, which is VERY slow if this is not present
+    const openFilesByProject = groupBy((file: FileOrAsset) => file.project, recentClosingFiles)
+    for (const projectDxid in openFilesByProject) {
+      // biome-ignore lint/suspicious/noPrototypeBuiltins: Fix after migrating to ES2022 or later
+      if (openFilesByProject.hasOwnProperty(projectDxid)) {
+        const openFilesInProject = openFilesByProject[projectDxid]
+        this.logger.log(
+          {
+            projectDxid,
+            openFiles: openFilesInProject.map(f => ({
+              name: f.name,
+              dxid: f.dxid,
+              uid: f.uid,
+            })),
+          },
+          'Syncing files state in project',
+        )
 
-          await this.syncFilesInProject(projectDxid, openFilesInProject)
-        }
+        await this.syncFilesInProject(projectDxid, openFilesInProject)
       }
-    } catch (err) {
-      if (err instanceof ClientRequestError && err.props?.clientStatusCode) {
-        if (err.props.clientStatusCode === 401) {
-          // Unauthorized. Expected scenario is that the user token has expired
-          // Removing the sync task will allow a new sync task to be recreated
-          // when user next logs in via UserCheckupTask
-          this.logger.log({ error: err.props }, 'Received 401 from platform, removing sync task')
-          await removeRepeatable(job)
-        }
-      } else {
-        this.logger.log({ error: err }, 'Unhandled error from platform, will retry later')
-      }
-      return false
     }
-    return true
   }
 
   private async syncFilesInProject(projectDxid: string, files: FileOrAsset[]): Promise<void> {

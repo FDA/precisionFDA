@@ -99,7 +99,7 @@ describe('SyncFilesStateFacade', () => {
     removeNodesFacadeRemoveFileStub.throws()
 
     emFlushStub.reset()
-    emFlushStub.throws()
+    emFlushStub.resolves()
 
     platformClientFileStatesStub.reset()
     platformClientFileStatesStub.throws()
@@ -187,8 +187,26 @@ describe('SyncFilesStateFacade', () => {
             },
           } as FileStateResult,
         ])
+      platformClientFileStatesStub
+        .withArgs({
+          fileDxids: [file3.dxid],
+          projectDxid: file3.project,
+        })
+        .resolves([
+          {
+            id: file3.dxid,
+            describe: {
+              size: 30000,
+              state: FILE_STATE_DX.CLOSED,
+            },
+          } as FileStateResult,
+        ])
+      findFileOrAssetsWithDxidStub.withArgs(em, file1.dxid).resolves({ id: file1.dxid })
+      findFileOrAssetsWithDxidStub.withArgs(em, file2.dxid).resolves({ id: file2.dxid })
+      findFileOrAssetsWithDxidStub.withArgs(em, file3.dxid).resolves({ id: file3.dxid })
       findFileOrAssetWithUidStub.withArgs(em, file1.uid).resolves(file1)
       findFileOrAssetWithUidStub.withArgs(em, file2.uid).resolves(file2)
+      findFileOrAssetWithUidStub.withArgs(em, file3.uid).resolves(file3)
 
       const job = {} as unknown as Job
 
@@ -199,6 +217,8 @@ describe('SyncFilesStateFacade', () => {
       expect(file1.state).to.eq(FILE_STATE_DX.CLOSED)
       expect(file2.fileSize).to.eq(20000)
       expect(file2.state).to.eq(FILE_STATE_DX.CLOSED)
+      expect(file3.fileSize).to.eq(30000)
+      expect(file3.state).to.eq(FILE_STATE_DX.CLOSED)
     })
 
     it('one closed, one open', async () => {

@@ -93,7 +93,7 @@ const initMaintenanceQueue = async (): Promise<void> => {
 }
 
 // removeRepeatable and removeRepeatableJob explanation:
-//     removeRepeatable calls calls queue.removeJobs, removing the job task
+//     removeRepeatable calls queue.removeJobs, removing the job task
 //     removeRepeatableJob calls queue.removeRepeatable, removing the entity with 'cron'
 // Hypothesis: if we remove the repeatableJob (the entity with 'cron') alongside the job as is currently done
 //             when a sync task such as SyncJobOperation finishes, it may be the most correct way of cleaning

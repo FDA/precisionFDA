@@ -41,6 +41,8 @@ export class MainQueueJobProducer extends QueueJobProducer {
       // There should only be one sync files state task per user
       jobId: SyncFilesStateFacade.getBullJobId(user.dxuser),
       repeat: { cron: config.workerJobs.syncFiles.repeatPattern },
+      attempts: 1,
+      backoff: undefined,
     }
 
     return await this.addToQueue(task, options)
@@ -64,6 +66,8 @@ export class MainQueueJobProducer extends QueueJobProducer {
       // There should only be one sync job task
       jobId: JobSynchronizationService.getBullJobId(data.dxid),
       repeat: { cron: config.workerJobs.syncJob.repeatPattern },
+      attempts: 1,
+      backoff: undefined,
     }
 
     return await this.addToQueue(wrapped, options)
@@ -120,6 +124,8 @@ export class MainQueueJobProducer extends QueueJobProducer {
     const options: JobOptions = {
       jobId: SyncDbClusterOperation.getBullJobId(data.dxid),
       repeat: { cron: config.workerJobs.syncDbClusters.repeatPattern },
+      attempts: 1,
+      backoff: undefined,
     }
 
     return await this.addToQueue(wrapped, options)
@@ -135,6 +141,8 @@ export class MainQueueJobProducer extends QueueJobProducer {
     const options: JobOptions = {
       jobId: `${TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT}.${data.jobDxid}`,
       repeat: { cron: config.workerJobs.syncDbClusterJobOutput.repeatPattern },
+      attempts: 1,
+      backoff: undefined,
     }
 
     return await this.addToQueue(wrapped, options)

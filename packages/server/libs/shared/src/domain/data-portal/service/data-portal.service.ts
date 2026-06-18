@@ -109,7 +109,12 @@ export class DataPortalService {
   }
 
   async resetPortalImage(fileId: number): Promise<void> {
-    const portal = await this.dataPortalRepo.findOne({ cardImage: fileId })
+    const portal = await this.dataPortalRepo.findOne(
+      { cardImage: fileId },
+      {
+        filters: { excludeDeleted: false },
+      },
+    )
     if (portal) {
       portal.cardImage = null
       portal.cardImageUrl = null
