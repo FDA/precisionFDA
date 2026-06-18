@@ -1,7 +1,7 @@
-import { Reference } from '@mikro-orm/core'
+import { QueryOrder, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { SinonStub, stub } from 'sinon'
+import { match, SinonStub, stub } from 'sinon'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
@@ -34,8 +34,11 @@ describe('NodeService', () => {
   const nodeRepositoryFindAccessibleStub = stub()
   const spaceRepositoryFindOneStub = stub()
   const nodeHelperCollectChildrenStub = stub()
+  const paginateStub = stub()
+  const nodeHelperGetParentFolderStub = stub()
+  const nodeHelperGetNodePathStub = stub()
   let referenceStub: SinonStub
-  const defaultUser = { id: 1, isSiteAdmin: () => false } as unknown as User
+  const defaultUser = { id: 1, isSiteAdmin: () => false, accessibleSpaces: () => [] } as unknown as User
 
   const createNodeService = (user: User): NodeService => {
     const em = {
@@ -49,16 +52,19 @@ describe('NodeService', () => {
     const nodeRepository = {
       find: nodeRepositoryFindStub,
       findAccessible: nodeRepositoryFindAccessibleStub,
+      paginate: paginateStub,
     } as unknown as NodeRepository
     const userFileService = {} as unknown as UserFileService
     const folderService = {} as unknown as FolderService
     const nodeHelper = {
+      getNodePath: nodeHelperGetNodePathStub,
       collectChildren: nodeHelperCollectChildrenStub,
+      getParentFolder: nodeHelperGetParentFolderStub,
     } as unknown as NodeHelper
     const userRepository = {
       findOne: stub().resolves(user),
     } as unknown as UserRepository
-    const userCtx = { id: user.id } as unknown as UserContext
+    const userCtx = { id: user.id, loadEntity: () => user } as unknown as UserContext
     const fileCountService = {
       count: stub().resolves(0),
     } as unknown as FileCountService
@@ -96,13 +102,22 @@ describe('NodeService', () => {
     nodeRepositoryFindStub.throws()
 
     emPopulateStub.reset()
-    emPopulateStub.throws()
+    emPopulateStub.resolves()
 
     nodeRepositoryFindAccessibleStub.reset()
     nodeRepositoryFindAccessibleStub.throws()
 
+    paginateStub.reset()
+    paginateStub.throws()
+
+    nodeHelperGetNodePathStub.reset()
+    nodeHelperGetNodePathStub.withArgs(match.any).returns('/')
+
     nodeHelperCollectChildrenStub.reset()
     nodeHelperCollectChildrenStub.throws()
+
+    nodeHelperGetParentFolderStub.reset()
+    nodeHelperGetParentFolderStub.resolves(null)
 
     referenceStub = stub(Reference, 'create')
     referenceStub.withArgs(defaultUser).returns(defaultUser)
@@ -314,12 +329,12 @@ describe('NodeService', () => {
       const space1Condition = whereClause.$or[1]
       expect(space1Condition.scope).to.eq('space-1')
       expect(space1Condition.scopedParentFolder).to.eq(parentFolderId)
-      expect(space1Condition.user).to.be.undefined
+      expect(space1Condition.user).to.be.undefined()
 
       const space2Condition = whereClause.$or[2]
       expect(space2Condition.scope).to.eq('space-2')
       expect(space2Condition.scopedParentFolder).to.eq(parentFolderId)
-      expect(space2Condition.user).to.be.undefined
+      expect(space2Condition.user).to.be.undefined()
 
       expect(whereClause.stiType).to.deep.eq({
         $in: [FILE_STI_TYPE.FOLDER],
@@ -453,6 +468,100 @@ describe('NodeService', () => {
       expect(result[2].id).to.eq(node1.id)
       expect(result[3].id).to.eq(folder2.id)
       expect(result[4].id).to.eq(folder1.id)
+    })
+  })
+
+  context('#paginate', () => {
+    it('should return paginated files', async () => {
+      const parentFolder = { id: 1, name: 'folder1' } as unknown as Folder
+      const files = [
+        {
+          id: 2,
+          uid: 'file-uid-1',
+          scope: 'private',
+          parentFolder,
+        },
+        {
+          id: 3,
+          uid: 'file-uid-2',
+          scope: 'private',
+        },
+      ] as unknown as UserFile[]
+      paginateStub.returns({ data: files, meta: { total: 2, page: 1, pageSize: 10 } })
+
+      const nodeService = createNodeService(defaultUser)
+      const res = await nodeService.paginate({
+        page: 1,
+        pageSize: 10,
+        uids: ['file-uid-1', 'file-uid-2'],
+        fields: {
+          path: true,
+        },
+        scope: 'private',
+        sort: { createdAt: QueryOrder.DESC },
+      })
+      expect(res.data).to.deep.eq(files)
+      expect(paginateStub.calledOnce).to.be.true()
+      expect(paginateStub.firstCall.args[0]).to.deep.eq({
+        page: 1,
+        pageSize: 10,
+        sort: {
+          createdAt: QueryOrder.DESC,
+        },
+      })
+      expect(paginateStub.firstCall.args[1].$and).to.deep.include({
+        $or: [
+          {
+            uid: /file-uid-1/i,
+          },
+          {
+            uid: /file-uid-2/i,
+          },
+        ],
+      })
+      expect(emPopulateStub.calledOnceWithExactly(files, ['user', 'parentFolder', 'scopedParentFolder'])).to.be.true()
+    })
+
+    it('should populate taggings and properties if requested', async () => {
+      const file = {
+        id: 2,
+        uid: 'file-uid-1',
+        scope: 'private',
+      } as unknown as UserFile
+      paginateStub.returns({ data: [file], meta: { total: 1, page: 1, pageSize: 10 } })
+
+      const nodeService = createNodeService(defaultUser)
+      const res = await nodeService.paginate({
+        page: 1,
+        pageSize: 10,
+        uids: ['file-uid-1'],
+        fields: {
+          tags: true,
+          properties: true,
+        },
+        scope: 'private',
+        sort: { createdAt: QueryOrder.DESC },
+      })
+      expect(res.data).to.deep.eq([file])
+      expect(paginateStub.calledOnce).to.be.true()
+      expect(paginateStub.firstCall.args[0]).to.deep.eq({
+        page: 1,
+        pageSize: 10,
+        sort: {
+          createdAt: QueryOrder.DESC,
+        },
+      })
+      expect(paginateStub.firstCall.args[1].$and).to.deep.include({
+        $or: [
+          {
+            uid: /file-uid-1/i,
+          },
+        ],
+      })
+
+      expect(
+        emPopulateStub.calledOnceWithExactly([file], ['user', 'taggings', 'taggings.tag', 'properties']),
+      ).to.be.true()
     })
   })
 })

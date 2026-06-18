@@ -1,17 +1,15 @@
 import axios from 'axios'
-import { IChallenge } from '@/types/challenge'
-import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
-import { CopyResponse } from '../actionModals/useCopyToPrivateModal'
-import { CopyToSpaceProperties } from '../actionModals/useCopyToSpace'
-import { DeleteResponse } from '../actionModals/useDeleteModal'
-import { fetchAccessibleFiles, FetchAccessibleFilesResponse } from '../databases/databases.api'
-import { ExecutionListItem } from '../executions/executions.types'
-import { FileScope } from '../files/files.types'
-import { ApiResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
-import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
-import { License } from '../licenses/types'
-import { ISpace } from '../spaces/spaces.types'
-import { AppRevision, AppSpec, ComputeInstance, IApp, InputSpec, IOSpec } from './apps.types'
+import type { IChallenge } from '@/types/challenge'
+import type { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
+import type { CopyResponse } from '../actionModals/useCopyToPrivateModal'
+import type { CopyToSpaceProperties } from '../actionModals/useCopyToSpace'
+import type { DeleteResponse } from '../actionModals/useDeleteModal'
+import type { ExecutionListItem } from '../executions/executions.types'
+import type { ApiResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
+import { formatScopeQ, type Params, prepareListFetch } from '../home/utils'
+import type { License } from '../licenses/types'
+import type { ISpace } from '../spaces/spaces.types'
+import type { AppRevision, AppSpec, ComputeInstance, IApp, InputSpec, IOSpec } from './apps.types'
 
 export interface FetchAppsQuery {
   apps: IApp[]
@@ -53,34 +51,6 @@ export async function fetchSelectableSpaces(id: string): Promise<ISpace[]> {
 
 export async function fetchLicensesOnApp(uid: string): Promise<License[]> {
   return axios.get(`/api/apps/${uid}/licenses_to_accept`).then(r => r.data)
-}
-
-export async function fetchFilteredFiles({
-  searchString,
-  scopes,
-  uid,
-}: {
-  searchString: string
-  scopes: FileScope[]
-  uid?: string[]
-}): Promise<FetchAccessibleFilesResponse> {
-  return fetchAccessibleFiles({
-    scopes,
-    uid,
-    search_string: searchString,
-    states: ['closed'],
-    describe: {
-      include: {
-        user: true,
-        org: true,
-        license: true,
-        all_tags_list: false,
-      },
-    },
-    offset: 0,
-    limit: 1000,
-    ignore_challenge_bot: true,
-  })
 }
 
 export async function fetchFilteredApps(searchString: string, scopes: ServerScope[]): Promise<IApp[]> {

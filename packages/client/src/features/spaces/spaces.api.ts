@@ -6,7 +6,11 @@ import type { Counters, ISpace, ISpaceV2 } from './spaces.types'
 export type FetchSpacesListResponse = { meta: MetaV2; data: ISpaceV2[] }
 export type FetchSpaceDetailsResponse = { meta: unknown; space: ISpace }
 
-export async function spacesListRequest(filters: IFilter[], params: Params): Promise<FetchSpacesListResponse> {
+export async function spacesListRequest(
+  filters: IFilter[],
+  params: Params,
+  options?: Record<string, unknown>,
+): Promise<FetchSpacesListResponse> {
   const spaceGroupFilter = filters.find(filter => filter.id === 'spaceGroupId' && filter.value !== undefined)
   const spaceGroupId = spaceGroupFilter ? spaceGroupFilter.value : undefined
 
@@ -14,13 +18,14 @@ export async function spacesListRequest(filters: IFilter[], params: Params): Pro
     filters.filter(filter => filter.id !== 'spaceGroupId'),
     params,
   )
-  const paramQ = `?${new URLSearchParams(query).toString()}`
 
   if (spaceGroupId) {
-    return axios.get(`/api/v2/space-groups/${spaceGroupId}/spaces/${paramQ}`).then(res => res.data)
+    return axios
+      .get(`/api/v2/space-groups/${spaceGroupId}/spaces`, { params: { ...query, ...options } })
+      .then(res => res.data)
   }
 
-  return axios.get(`/api/v2/spaces/${paramQ}`).then(res => res.data)
+  return axios.get('/api/v2/spaces', { params: { ...query, ...options } }).then(res => res.data)
 }
 
 export async function spaceRequest({ id }: { id?: string | number }): Promise<FetchSpaceDetailsResponse> {

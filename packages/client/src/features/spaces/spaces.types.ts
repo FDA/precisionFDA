@@ -1,4 +1,4 @@
-import { MemberRole, MemberSide } from './members/members.types'
+import type { MemberRole, MemberSide } from './members/members.types'
 
 export interface Counters {
   files: number
@@ -111,6 +111,7 @@ export interface ISpace {
 export interface ISpaceV2 {
   id: number
   name: string
+  title: string
   description: string
   state: 'active' | 'unactivated' | 'locked' | 'deleted'
   type: 'groups' | 'review' | 'private_type' | 'government' | 'administrator'

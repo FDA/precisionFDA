@@ -33,7 +33,7 @@ export const config: ConfigOverride = () => ({
     url: 'redis://localhost:6379',
   },
   platform: {
-    challengeBotUser: 'challenge-bot-test',
+    challengeBotUser: 'challenge.bot.2',
     challengeBotAccessToken: 'challenge-bot-test-access-token',
   },
   workerJobs: {

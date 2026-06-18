@@ -28,4 +28,8 @@ export class AcceptedLicense extends BaseEntity {
     this.user = Reference.create(user)
     this.state = state
   }
+
+  isAccepted(): boolean {
+    return this.state === 'active'
+  }
 }

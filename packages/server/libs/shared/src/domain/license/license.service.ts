@@ -5,6 +5,7 @@ import { LicenseRepository } from '@shared/domain/license/license.repository'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserContext } from '../user-context/model/user-context'
+import { LicenseMap } from './license.types'
 
 @Injectable()
 export class LicenseService {
@@ -92,8 +93,8 @@ export class LicenseService {
   async findLicensesAndAcceptedLicensesByItemIds(
     licenseableType: string,
     licenseableIds: number[],
-  ): Promise<Map<number, { license: License; userAcceptedLicensesCount: number }[]>> {
-    const result = new Map<number, { license: License; userAcceptedLicensesCount: number }[]>()
+  ): Promise<LicenseMap> {
+    const result: LicenseMap = new Map()
 
     if (licenseableIds.length === 0) {
       return result
@@ -111,15 +112,8 @@ export class LicenseService {
     )
 
     for (const item of licensedItems) {
-      if (!result.has(item.licenseableId)) {
-        result.set(item.licenseableId, [])
-      }
-
       const license = item.license.getEntity()
-      result.get(item.licenseableId).push({
-        license,
-        userAcceptedLicensesCount: license.acceptedLicenses.length,
-      })
+      result.set(item.licenseableId, { license })
     }
 
     return result

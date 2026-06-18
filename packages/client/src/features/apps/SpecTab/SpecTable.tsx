@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { Link } from 'react-router'
 import styled from 'styled-components'
-import { IAccessibleFile } from '../../databases/databases.api'
-import { InputSpec, IOSpec } from '../apps.types'
+import type { IFile } from '@/features/files/files.types'
+import type { InputSpec, IOSpec } from '../apps.types'
 
 const StyledDefaultValue = styled.div`
   a {
@@ -20,7 +20,7 @@ const SpecDefault = ({
   sClass,
 }: {
   spaceId?: string
-  value: boolean | number | string | IAccessibleFile[] | null
+  value: boolean | number | string | IFile[] | null
   sClass: IOSpec['class']
 }) => {
   let defaultValues = null
@@ -40,32 +40,18 @@ const SpecDefault = ({
   if (sClass === 'file') {
     defaultValues = value && (
       <StyledDefaultValue>
-        <Link to={`/${spaceId ? `spaces/${spaceId}` : 'home'}/files/${value}`}>
-          {value}
-        </Link>
+        <Link to={`/${spaceId ? `spaces/${spaceId}` : 'home'}/files/${value}`}>{value}</Link>
       </StyledDefaultValue>
     )
   }
-  if (
-    sClass === 'array:string' ||
-    sClass === 'array:float' ||
-    sClass === 'array:int'
-  ) {
-    defaultValues = value && (
-      <StyledDefaultValue>{`[ ${value.map(v => ` ${v}`).toString()} ]`}</StyledDefaultValue>
-    )
+  if (sClass === 'array:string' || sClass === 'array:float' || sClass === 'array:int') {
+    defaultValues = value && <StyledDefaultValue>{`[ ${value.map(v => ` ${v}`).toString()} ]`}</StyledDefaultValue>
   }
   if (sClass === 'boolean') {
-    defaultValues = (
-      <StyledDefaultValue>
-        {value === false ? 'false' : 'true'}
-      </StyledDefaultValue>
-    )
+    defaultValues = <StyledDefaultValue>{value === false ? 'false' : 'true'}</StyledDefaultValue>
   }
   if (sClass === 'string' || sClass === 'float' || sClass === 'int') {
-    defaultValues = value && (
-      <StyledDefaultValue>{value as string}</StyledDefaultValue>
-    )
+    defaultValues = value && <StyledDefaultValue>{value as string}</StyledDefaultValue>
   }
 
   return defaultValues
@@ -77,7 +63,7 @@ export const SpecTable = ({
   config,
   dataTestId,
 }: {
-  spaceId?: string,
+  spaceId?: string
   title: string
   config: InputSpec[] | IOSpec[]
   dataTestId: string
@@ -134,11 +120,7 @@ export const SpecTable = ({
               {spec?.choices && (
                 <tr>
                   <th>Choices :</th>
-                  <td>
-                    {choices
-                      ? `[ ${choices.map(v => ` ${v}`).toString()} ]`
-                      : ''}
-                  </td>
+                  <td>{choices ? `[ ${choices.map(v => ` ${v}`).toString()} ]` : ''}</td>
                 </tr>
               )}
             </tbody>

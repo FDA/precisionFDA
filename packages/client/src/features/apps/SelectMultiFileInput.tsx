@@ -1,9 +1,10 @@
+import type { JSX } from 'react'
 import styled, { css } from 'styled-components'
 import { Button } from '../../components/Button'
 import { theme } from '../../styles/theme'
 import { pluralize } from '../../utils/formatting'
-import type { IAccessibleFile } from '../databases/databases.api'
 import { useSelectFileModal } from '../files/actionModals/useSelectFileModal'
+import type { IFile } from '../files/files.types'
 import type { DialogType } from '../home/types'
 import { ButtonRow } from '../modal/modal.styles'
 
@@ -21,15 +22,18 @@ const FileButton = styled(Button)<{ $isError?: boolean }>`
     &:hover {
       border-color: ${theme.colors.darkRed};
       color: ${theme.colors.darkRed};
-      background-color: ${theme.colors.stateFailedBackground};
-    }
-  `}
+      &:hover {
+        border-color: ${theme.colors.darkRed};
+        color: ${theme.colors.darkRed};
+        background-color: ${theme.colors.stateFailedBackground};
+      }
+    `}
 `
 
 interface Props {
   dialogType?: DialogType
   value?: string[]
-  onChange: (file?: IAccessibleFile[] | null) => void
+  onChange: (file?: IFile[] | null) => void
   dialogTitle: string
   dialogSubtitle?: string
   scopes?: string[]
@@ -42,16 +46,14 @@ export const SelectMultiFileInput = ({
   onChange,
   dialogType = 'radio',
   dialogTitle,
-  dialogSubtitle,
-  scopes,
   disabled,
   isError,
-}: Props) => {
-  const handleSelect = (sF: IAccessibleFile[]) => {
+}: Props): JSX.Element => {
+  const handleSelect = (sF: IFile[]): void => {
     onChange(sF)
   }
 
-  const clear = () => {
+  const clear = (): void => {
     onChange(null)
   }
 
@@ -59,9 +61,9 @@ export const SelectMultiFileInput = ({
     dialogTitle,
     dialogType,
     handleSelect,
-    dialogSubtitle,
-    scopes,
+    undefined,
     value,
+    true,
   )
 
   return (
@@ -71,7 +73,7 @@ export const SelectMultiFileInput = ({
         <FileButton
           $isError={isError}
           type="button"
-          onClick={evt => {
+          onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
             evt.preventDefault()
             showModalResetState()
           }}

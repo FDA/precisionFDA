@@ -1,23 +1,21 @@
-import React from 'react'
-import { UseFormSetValue } from 'react-hook-form'
+import type { UseFormSetValue } from 'react-hook-form'
 import { Button } from '../../../components/Button'
 import Menu from '../../../components/Menu/Menu'
 import { useSelectAppModal } from '../../apps/actionsModals/useSelectAppModal'
-import { IApp } from '../../apps/apps.types'
+import type { IApp } from '../../apps/apps.types'
 import { useSelectAssetModal } from '../../assets/actionModals/useSelectAssetModal'
-import { IAsset } from '../../assets/assets.types'
+import type { IAsset } from '../../assets/assets.types'
 import { useSelectComparisonModal } from '../../comparisons/actionModals/useSelectComparisonModal'
-import { IComparison } from '../../comparisons/comparisons.types'
-import { IAccessibleFile } from '../../databases/databases.api'
+import type { IComparison } from '../../comparisons/comparisons.types'
 import { useSelectJobModal } from '../../executions/actionModals/useSelectJobModal'
-import { IJob } from '../../executions/executions.types'
+import type { IJob } from '../../executions/executions.types'
 import { useSelectFileModal } from '../../files/actionModals/useSelectFileModal'
 import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
-import { IFolder, TreeOnSelectInfo } from '../../files/files.types'
+import type { IFile, IFolder, TreeOnSelectInfo } from '../../files/files.types'
 import { ActionsMenuContent } from '../../home/ActionMenuContent'
-import { Attachment, AttachmentType, FormAttachments, NoteForm } from '../discussions.types'
+import type { NoteScope } from '../api'
+import type { Attachment, AttachmentType, FormAttachments, NoteForm } from '../discussions.types'
 import { typeAttachmentKey } from '../helpers'
-import { NoteScope } from '../api'
 
 export function Attachments({
   setValue,
@@ -30,7 +28,7 @@ export function Attachments({
 }) {
   const onChangeHandler = (
     type: AttachmentType,
-    selected: IAccessibleFile[] | IFolder[] | IAsset[] | IApp[] | IJob[] | IComparison[],
+    selected: IFile[] | IFolder[] | IAsset[] | IApp[] | IJob[] | IComparison[],
   ) => {
     if (visualViewport) {
       const k = typeAttachmentKey[type]
@@ -56,8 +54,9 @@ export function Attachments({
     'Select Files',
     'checkbox',
     v => onChangeHandler('UserFile', v),
-    '',
-    [scope, 'public'],
+    scope !== 'public' ? [scope, 'public'] : ['public'],
+    undefined,
+    false,
   )
 
   const { modalComp: foldersModalComp, setShowModal: setFoldersShowModal } = useSelectFolderModal({

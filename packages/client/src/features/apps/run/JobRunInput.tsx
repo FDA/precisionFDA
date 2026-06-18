@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { XIcon } from 'lucide-react'
 import type { RefCallback } from 'react'
-import { useEffect, useState } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import {
   type FieldErrors,
   type FieldPath,
@@ -28,13 +28,15 @@ import {
 } from '@/components/ui/combobox'
 import { FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { useRunJobFilesContext } from '@/features/apps/run/useRunJobFilesContext'
+import type { IFile } from '@/features/files/files.types'
 import { cn } from '@/utils/cn'
 import { noAccessText } from '../../files/file.utils'
 import type { InputSpec, IOSpec, RunJobFormType } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { SelectMultiFileInput } from '../SelectMultiFileInput'
 import { ErrorMessageForField } from './ErrorMessageForField'
-import { validateFile } from './utils'
+import { validateFiles } from './utils'
 
 type SelectOption = { label: string; value: string }
 type ControlledField = {
@@ -295,15 +297,15 @@ const FreeformArrayInput = ({
  *
  * @param scope
  */
-const enhanceScope = (scope: string) => {
+const enhanceScope = (scope: string): string[] => {
   return ['public', 'private'].includes(scope) ? ['private', 'public'] : [scope, 'public']
 }
 
 /** Reads validation for this path via RHF context (works for nested paths like inputs.0.fields.x). Requires FormProvider. */
 function FileFieldMessage({ name }: { name: FieldPath<FieldValues> }) {
   const { getFieldState, formState } = useFormContext<FieldValues>()
-  const { error, isTouched } = getFieldState(name, formState)
-  return error?.message && (isTouched || formState.isSubmitted) ? <FieldError>{error.message}</FieldError> : null
+  const { error } = getFieldState(name, formState)
+  return error?.message ? <FieldError>{error.message}</FieldError> : null
 }
 
 const ArrayFileInput = ({
@@ -312,27 +314,37 @@ const ArrayFileInput = ({
   scope,
   inputSpec,
   setError,
-  validatedFilesCache,
 }: {
   inputSpec: InputSpec
   field: ControlledField
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
   scope: string
-  validatedFilesCache: Record<string, boolean>
-}) => {
+}): JSX.Element => {
   const { setValue } = useFormContext<FieldValues>()
   const fileUids = getArrayValues(field.value)
-  const areAllFilesPreValidated = fileUids.every(fileUid => validatedFilesCache[fileUid])
+  const { validatedFilesCache, setValidatedFilesCache } = useRunJobFilesContext()
+  const uncachedFileUids = fileUids.filter(uid => !(uid in validatedFilesCache))
 
-  const fileListQuery = useQuery({
-    queryFn: () => Promise.all(fileUids.map(uid => validateFile(uid))),
-    queryKey: ['user-list-files', fileUids],
-    enabled: fileUids.length > 0 && !areAllFilesPreValidated,
+  const fileValidationQuery = useQuery({
+    queryFn: () => validateFiles(uncachedFileUids),
+    queryKey: ['file-validation', uncachedFileUids],
+    enabled: uncachedFileUids.length > 0,
   })
 
-  const allFilesValidated = fileListQuery?.data?.every((isValid: boolean) => isValid) ?? false
-  const error = fileUids.length > 0 && !areAllFilesPreValidated && fileListQuery.isSuccess && !allFilesValidated
+  const combinedValidation = {
+    ...validatedFilesCache,
+    ...(fileValidationQuery.isSuccess ? fileValidationQuery.data : {}),
+  }
+  const hasInaccessibleFiles = fileUids.some(uid => combinedValidation[uid] === false)
+
+  useEffect(() => {
+    if (fileValidationQuery.isSuccess && fileValidationQuery.data) {
+      setValidatedFilesCache({ ...combinedValidation })
+    }
+  }, [fileValidationQuery.isSuccess, fileValidationQuery.data, setValidatedFilesCache])
+
+  const error = fileUids.length > 0 && hasInaccessibleFiles
 
   useEffect(() => {
     if (error) {
@@ -346,7 +358,7 @@ const ArrayFileInput = ({
         dialogType="checkbox"
         dialogTitle="Select input files"
         disabled={disabled}
-        onChange={value => {
+        onChange={(value?: IFile[] | null) => {
           setValue(field.name as FieldPath<FieldValues>, value?.map(v => v.uid) ?? null, {
             shouldValidate: true,
             shouldTouch: true,
@@ -368,40 +380,50 @@ const SingleFileInput = ({
   scope,
   inputSpec,
   setError,
-  validatedFilesCache,
 }: {
   inputSpec: InputSpec
   field: ControlledField
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
   scope: string
-  validatedFilesCache: Record<string, boolean>
-}) => {
+}): JSX.Element => {
   const { setValue } = useFormContext<FieldValues>()
   const fileUid = getStringValue(field.value)
   const hasValue = !!fileUid && fileUid.length > 0
-  const isSuccessfullyPreValidated = fileUid ? validatedFilesCache[fileUid] : false
+  const { validatedFilesCache, setValidatedFilesCache } = useRunJobFilesContext()
+  const isSuccessfullyPreValidated = fileUid && fileUid in validatedFilesCache
 
   const fileListQuery = useQuery({
-    queryFn: () => (fileUid ? validateFile(fileUid) : Promise.resolve(false)),
+    // biome-ignore lint/style/noNonNullAssertion: only runs when fileUid is non-null and non-empty
+    queryFn: () => validateFiles([fileUid!]),
     queryKey: ['user-list-files', fileUid],
     enabled: !!fileUid && fileUid.length > 0 && !isSuccessfullyPreValidated,
   })
 
-  const error = hasValue && fileListQuery.isSuccess && !(isSuccessfullyPreValidated || fileListQuery?.data)
+  // biome-ignore lint/style/noNonNullAssertion: isSuccessfullyPreValidated ensures fileUid is non-null and non-empty
+  const isFileInvalidByCache = isSuccessfullyPreValidated && validatedFilesCache[fileUid!] === false
+  // biome-ignore lint/style/noNonNullAssertion: fileListQuery only runs when fileUid is non-null and non-empty
+  const isFileInvalidByQuery = fileListQuery.isSuccess && fileListQuery?.data?.[fileUid!] === false
+
+  useEffect(() => {
+    if (fileListQuery.isSuccess && fileListQuery.data) {
+      setValidatedFilesCache({ ...validatedFilesCache, ...fileListQuery.data })
+    }
+  }, [fileListQuery.isSuccess, fileListQuery.data, setValidatedFilesCache])
+
+  const error = hasValue && (isFileInvalidByQuery || isFileInvalidByCache)
 
   useEffect(() => {
     if (error) {
       setError(field.name, { type: 'custom', message: noAccessText.single })
     }
   }, [error, setError, field.name])
-
   return (
     <>
       <SelectMultiFileInput
         dialogTitle="Select input file"
         disabled={disabled}
-        onChange={value => {
+        onChange={(value?: IFile[] | null) => {
           setValue(field.name as FieldPath<FieldValues>, value?.[0].uid ?? null, {
             shouldValidate: true,
             shouldTouch: true,
@@ -425,7 +447,6 @@ export const JobRunInput = ({
   disabled,
   scope,
   setError,
-  validatedFilesCache,
 }: {
   inputSpec: InputSpec
   field: ControlledField
@@ -433,34 +454,19 @@ export const JobRunInput = ({
   disabled: boolean
   setError: UseFormSetError<RunJobFormType>
   scope: string
-  validatedFilesCache?: Record<string, boolean>
-}) => {
+}): JSX.Element => {
   const choices = Array.isArray(inputSpec?.choices) ? inputSpec.choices : null
   const choiceOptions = getChoiceOptions(choices)
 
   switch (inputSpec.class) {
     case 'file': {
       return (
-        <SingleFileInput
-          setError={setError}
-          disabled={disabled}
-          field={field}
-          inputSpec={inputSpec}
-          scope={scope}
-          validatedFilesCache={validatedFilesCache || {}}
-        />
+        <SingleFileInput setError={setError} disabled={disabled} field={field} inputSpec={inputSpec} scope={scope} />
       )
     }
     case 'array:file': {
       return (
-        <ArrayFileInput
-          setError={setError}
-          disabled={disabled}
-          field={field}
-          inputSpec={inputSpec}
-          scope={scope}
-          validatedFilesCache={validatedFilesCache || {}}
-        />
+        <ArrayFileInput setError={setError} disabled={disabled} field={field} inputSpec={inputSpec} scope={scope} />
       )
     }
     case 'string': {

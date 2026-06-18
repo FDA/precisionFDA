@@ -2,7 +2,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
+import { UserFileResolvePathDTO } from '@shared/domain/user-file/dto/user-file-resolve-path.dto'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -19,7 +19,7 @@ export class UserFileResolverFacade {
     private readonly userFileRepo: UserFileRepository,
   ) {}
 
-  async resolvePath({ path, scope, type }: ResolvePathDTO): Promise<ResolvePath> {
+  async resolvePath({ path, scope, type }: UserFileResolvePathDTO): Promise<ResolvePath> {
     const userId = this.user.id
 
     // TODO(Julie): Move this to a decorator (37-46)

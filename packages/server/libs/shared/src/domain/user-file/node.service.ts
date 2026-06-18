@@ -1,7 +1,7 @@
 import { FindOptions } from '@mikro-orm/core'
-import { FilterQuery, Loaded, SqlEntityManager } from '@mikro-orm/mysql'
+import { FilterQuery, Loaded, Populate, SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { FetchChildrenDTO } from 'apps/api/src/folders/model/fetch-children.dto'
+import { config } from '@shared/config'
 import { CountStats } from '@shared/database/statistics.type'
 import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -13,6 +13,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
+import { UserFilePaginationDTO } from '@shared/domain/user-file/dto/user-file-pagination.dto'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderService } from '@shared/domain/user-file/folder.service'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -36,6 +37,10 @@ import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EntityScope, SCOPE } from '@shared/types/common'
 import { InputEntityUnion } from '@shared/utils/object-utils'
+import { StringUtils } from '@shared/utils/string.utils'
+import { PaginatedResult } from '../entity/domain/paginated.result'
+import { FetchChildrenDTO } from './dto/fetch-children.dto'
+import { UserFileAccessibleResultDTO } from './dto/user-file-accessible-result.dto'
 
 @Injectable()
 export class NodeService {
@@ -318,5 +323,109 @@ export class NodeService {
 
   async getStatistics(): Promise<CountStats> {
     return await this.nodeRepository.getStatistics()
+  }
+
+  async paginate(query: UserFilePaginationDTO): Promise<PaginatedResult<Node>> {
+    const pagination = {
+      page: query.page,
+      pageSize: query.pageSize,
+      sort: query.sort,
+    }
+    const where = await this.buildCommonFilters(query)
+
+    const populate = ['user']
+    if (query.fields?.path) {
+      populate.push('parentFolder', 'scopedParentFolder')
+    }
+    if (query.fields?.tags) {
+      populate.push('taggings', 'taggings.tag')
+    }
+    if (query.fields?.properties) {
+      populate.push('properties')
+    }
+
+    const result = await this.nodeRepository.paginate(pagination, where, {})
+    await this.em.populate(result.data, populate as unknown as Populate<Node>)
+
+    return result
+  }
+
+  async verifyAccessibleFiles(uids: Uid<'file'>[]): Promise<UserFileAccessibleResultDTO> {
+    return await this.userFileService.verifyAccessibleFiles(uids)
+  }
+
+  private async buildCommonFilters(query: UserFilePaginationDTO): Promise<FilterQuery<UserFile>> {
+    const userEntity = await this.user.loadEntity()
+    const accessibleSpaces = await userEntity.accessibleSpaces()
+    const accessibleScopes: EntityScope[] = accessibleSpaces.map(space => space.scope)
+    const accessibleScopeSet = new Set(accessibleScopes)
+    const where: FilterQuery<UserFile> = {
+      stiType: query.type ?? [FILE_STI_TYPE.USERFILE],
+      $or: [],
+      $and: [],
+    }
+    if (query.uids?.length) {
+      where.$and.push({
+        $or: query.uids.map(uid => ({ uid: new RegExp(uid, 'i') })),
+      })
+    }
+    if (query.ignoreChallengeBot) {
+      where.user = { dxuser: { $ne: config.platform.challengeBotUser } }
+    }
+    if (!query.scope) {
+      where.$or.push(
+        { user: this.user.id, scope: 'private' },
+        { scope: 'public' },
+        { scope: { $in: accessibleScopes } },
+      )
+    } else {
+      if (query.scope === 'private') {
+        where.$or.push({ user: this.user.id, scope: 'private' })
+      }
+      if (query.scope === 'public') {
+        where.$or.push({ scope: 'public' })
+      }
+      if (query.scope === 'spaces') {
+        where.$or.push({ scope: { $in: accessibleScopes } })
+      } else if (accessibleScopeSet.has(query.scope)) {
+        where.$or.push({
+          scope: { $in: [query.scope] },
+        })
+      }
+    }
+    if (query.folderId) {
+      where.$and.push({
+        $or: [{ parentFolder: query.folderId }, { scopedParentFolder: query.folderId }],
+      })
+    } else if (query.folderId === null) {
+      where.$and.push({
+        parentFolder: null,
+        scopedParentFolder: null,
+      })
+    }
+    if (query.filter?.name) {
+      where.name = { $like: `%${query.filter.name}%` }
+    }
+    if (query.filter?.states) {
+      where.state = { $in: query.filter.states }
+    }
+
+    if (query.filter?.size) {
+      const { lower, upper } = query.filter.size
+      where.fileSize = {
+        ...(lower !== undefined && { $gte: lower }),
+        ...(upper !== undefined && { $lte: upper }),
+      }
+    }
+
+    if (query.filter?.tags !== undefined) {
+      const likeConditions = query.filter.tags.map(tag => {
+        const safePattern = StringUtils.escapeRegExp(tag)
+        return { name: new RegExp(safePattern, 'i') }
+      })
+      where.taggings = { tag: { $or: likeConditions } }
+    }
+
+    return where
   }
 }

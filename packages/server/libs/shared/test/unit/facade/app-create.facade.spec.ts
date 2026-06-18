@@ -155,7 +155,7 @@ describe('AppCreateFacade', () => {
     taggingService = new TaggingService(em, taggingRepository, tagRepository)
 
     // Mock transactional to execute the callback directly using the same em (no forking)
-    stub(em, 'transactional').callsFake(async (cb) => {
+    stub(em, 'transactional').callsFake(async cb => {
       await em.begin()
       try {
         const result = await (cb as (...args: unknown[]) => Promise<unknown>)(em)
@@ -402,7 +402,11 @@ describe('AppCreateFacade', () => {
     })
 
     it('copies app series tags when creating a forked app', async () => {
-      const sourceAppSeries = create.appSeriesHelper.create(em, { user }, { name: 'source-app-series', scope: 'private' })
+      const sourceAppSeries = create.appSeriesHelper.create(
+        em,
+        { user },
+        { name: 'source-app-series', scope: 'private' },
+      )
       await em.flush()
 
       const sourceApp = create.appHelper.createRegular(
@@ -473,7 +477,10 @@ describe('AppCreateFacade', () => {
 
       const appCreateFacade = getInstance()
       // Sabotage: fail after tag copying to verify tx rollback semantics.
-      const createAppEventStub = stub(appCreateFacade as unknown as { createAppEvent: () => Promise<void> }, 'createAppEvent')
+      const createAppEventStub = stub(
+        appCreateFacade as unknown as { createAppEvent: () => Promise<void> },
+        'createAppEvent',
+      )
       createAppEventStub.rejects(new Error('Simulated event creation failure'))
 
       const appInput = getDefaultApp()
@@ -839,6 +846,14 @@ describe('AppCreateFacade', () => {
   }
 
   function getInstance(userContext: UserContext = userCtx): AppCreateFacade {
-    return new AppCreateFacade(em, userContext, platformClient, nodeService, appService, appSeriesService, taggingService)
+    return new AppCreateFacade(
+      em,
+      userContext,
+      platformClient,
+      nodeService,
+      appService,
+      appSeriesService,
+      taggingService,
+    )
   }
 })

@@ -20,7 +20,7 @@ interface FilesByFolder {
   [key: string]: Node[]
 }
 
-interface FolderPathEntry {
+export interface FolderPathEntry {
   id: number
   name: string
 }

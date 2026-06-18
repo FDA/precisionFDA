@@ -6,6 +6,7 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { LicenseService } from '@shared/domain/license/license.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
@@ -172,9 +173,14 @@ describe('UserFileDownloadFacade', () => {
 
   it('should throw ValidationError when license is not accepted', async () => {
     const file = createMockFile({ state: FILE_STATE_DX.CLOSED, isInSpace: false })
-    const license = { id: 'license-1', title: 'Test License' }
+    const license = {
+      id: 'license-1',
+      title: 'Test License',
+      approvalRequired: true,
+      acceptedLicenses: { getItems: () => [] },
+    }
     const licensesMap = new Map()
-    licensesMap.set(file.id, [{ license, userAcceptedLicensesCount: 0 }])
+    licensesMap.set(file.id, { license })
 
     getUserFileOrAsset.withArgs(FILE_UID).resolves(file)
     findLicensesAndAcceptedLicensesByItemIdsStub.withArgs('Node', [file.id]).resolves(licensesMap)
@@ -232,6 +238,7 @@ describe('UserFileDownloadFacade', () => {
   }
 
   function getInstance(): UserFileDownloadFacade {
+    const userContext = { id: 123, name: 'Test User' } as unknown as UserContext
     const nodeService = {
       getUserFileOrAsset: getUserFileOrAsset,
       getDownloadLink: getDownloadLinkStub,
@@ -249,6 +256,6 @@ describe('UserFileDownloadFacade', () => {
       findLicensesAndAcceptedLicensesByItemIds: findLicensesAndAcceptedLicensesByItemIdsStub,
     } as unknown as LicenseService
 
-    return new UserFileDownloadFacade(nodeService, spaceService, entityService, licenseService)
+    return new UserFileDownloadFacade(userContext, nodeService, spaceService, entityService, licenseService)
   }
 })

@@ -11,7 +11,11 @@ export const getUploadURL = (uid: string | number, index: number, size: number, 
     .get(`/api/v2/files/${uid}/upload-url`, { params: { index, size, md5 } })
     .then(response => ({ status: response.status, payload: response.data }))
 
-export const uploadChunk = (url: string, chunk: Blob | ArrayBuffer | string, headers?: Record<string, string>) => {
+export const uploadChunk = (
+  url: string,
+  chunk: Blob | ArrayBuffer | string,
+  headers?: Record<string, string>,
+): Promise<{ status: number; payload: any }> => {
   // Not using axios here to avoid header handling issues
   return fetch(url, {
     method: 'PUT',
@@ -22,5 +26,5 @@ export const uploadChunk = (url: string, chunk: Blob | ArrayBuffer | string, hea
   })
 }
 
-export const closeFile = (uid: string) =>
+export const closeFile = (uid: string): Promise<{ status: number; payload: any }> =>
   axios.post('/api/close_file', { uid }).then(response => ({ status: response.status, payload: response.data }))

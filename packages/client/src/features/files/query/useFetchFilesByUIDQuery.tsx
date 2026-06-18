@@ -1,9 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
-import { fetchAccessibleFilesByUID } from '../../databases/databases.api'
+import { type UseQueryResult, useQuery } from '@tanstack/react-query'
+import { type FetchAccessibleFilesResponse, fetchAccessibleFiles } from '../files.api'
 
-export function useFetchFilesByUIDQuery(uids: string[]) {
+export function useFetchFilesByUIDQuery(uids: string[]): UseQueryResult<FetchAccessibleFilesResponse, Error> {
   return useQuery({
-    queryFn: () => fetchAccessibleFilesByUID({ uid: uids ?? []}),
+    queryFn: () =>
+      fetchAccessibleFiles({ uids: uids.join(','), filter: { states: ['closed'] }, fields: { path: true } }),
     queryKey: ['user-list-files', uids],
     enabled: !!uids && uids.length > 0,
   })

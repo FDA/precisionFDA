@@ -1,9 +1,10 @@
 import axios from 'axios'
 import type { EntityUidResponse } from '@/api/types'
+import type { PaginationMetaV2 } from '@/types/pagination'
 import { cleanObject } from '@/utils/object'
 import type { DownloadListResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
 import { formatScopeQ, type Params, prepareListFetch } from '../home/utils'
-import type { FileType, IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
+import type { FileState, FileType, IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
 
 interface RailsFileLinks {
   origin_object?: { origin_type?: string; origin_uid?: string | null }
@@ -305,4 +306,44 @@ export async function validateCopyingFiles(uids: string[], scope: ServerScope): 
       scope,
     })
     .then(r => r.data)
+}
+
+export interface FetchAccessibleFilesRequest {
+  scope?: ServerScope
+  uids?: string[] | string
+  page?: number
+  type?: FileType[]
+  folderId?: number | 'null'
+  pageSize?: number
+  ignoreChallengeBot?: boolean
+  filter: {
+    states?: FileState[]
+    name?: string
+    tags?: string[]
+    size?: string
+  }
+  fields?: {
+    license?: boolean
+    properties?: boolean
+    tags?: boolean
+    path?: boolean
+  }
+}
+
+export interface FetchAccessibleFilesResponse {
+  data: IFile[]
+  meta: PaginationMetaV2
+}
+
+export interface VerifyAccessibleFilesResponse {
+  valid: string[]
+  invalid: string[]
+}
+
+export async function fetchAccessibleFiles(params: FetchAccessibleFilesRequest): Promise<FetchAccessibleFilesResponse> {
+  return axios.get<FetchAccessibleFilesResponse>('/api/v2/files', { params }).then(r => r.data)
+}
+
+export async function verifyAccessibleFiles(uids: string[]): Promise<VerifyAccessibleFilesResponse> {
+  return axios.get<VerifyAccessibleFilesResponse>('/api/v2/files/accessibility', { params: { uids } }).then(r => r.data)
 }

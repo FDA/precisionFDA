@@ -20,15 +20,21 @@ export const StyledAction = styled(Button)`
   }
 `
 
-export const ItemTitle = styled.div``
+export const ItemTitle = styled.div`
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`
 
 export const StyledName = styled.a<{ isCurrent?: boolean }>`
   display: flex;
   align-items: flex-start;
   cursor: pointer;
   flex-shrink: 0;
-  white-space:normal;
-  word-break:break-all;
+  white-space: normal;
+  word-break: break-all;
   gap: 8px;
 
   & > * {
@@ -55,10 +61,10 @@ export const StyledTD = styled.td`
   vertical-align: middle;
 `
 type Row = {
-  [key: string]: React.ReactNode;
+  [key: string]: React.ReactNode
 }
 
-export const ResourceTable: React.FC<{ rows: Row[]}> = ({ rows, ...rest }) => (
+export const ResourceTable: React.FC<{ rows: Row[] }> = ({ rows, ...rest }) => (
   <StyledTable {...rest}>
     <thead>
       <tr>
@@ -69,7 +75,9 @@ export const ResourceTable: React.FC<{ rows: Row[]}> = ({ rows, ...rest }) => (
     <tbody>
       {rows.map((row, i) => (
         <tr key={i}>
-          {Object.keys(row).map((col, n) => <StyledTD key={n}>{row[col]}</StyledTD>)}
+          {Object.keys(row).map((col, n) => (
+            <StyledTD key={n}>{row[col]}</StyledTD>
+          ))}
         </tr>
       ))}
     </tbody>

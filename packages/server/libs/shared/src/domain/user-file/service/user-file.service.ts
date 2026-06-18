@@ -29,6 +29,7 @@ import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserCtx } from '@shared/types'
 import { EntityScope, SpaceScope } from '@shared/types/common'
 import { UserFileCreate } from '../domain/user-file-create'
+import { UserFileAccessibleResultDTO } from '../dto/user-file-accessible-result.dto'
 import { Folder } from '../folder.entity'
 import { UserFile } from '../user-file.entity'
 import { FOLLOW_UP_ACTION } from '../user-file.input'
@@ -469,6 +470,17 @@ export class UserFileService {
 
     if (!isLeadMember) {
       throw new Error(`You have no permissions to ${action} from a Protected Space`)
+    }
+  }
+
+  async verifyAccessibleFiles(uids: Uid<'file'>[]): Promise<UserFileAccessibleResultDTO> {
+    const files = await this.fileRepo.findAccessible({ uid: { $in: uids } }, { fields: ['uid'] })
+    const validUids: Uid<'file'>[] = files.map(file => file.uid)
+    const validUidSet = new Set(validUids)
+    const invalidUids = uids.filter(uid => !validUidSet.has(uid))
+    return {
+      valid: validUids,
+      invalid: invalidUids,
     }
   }
 }

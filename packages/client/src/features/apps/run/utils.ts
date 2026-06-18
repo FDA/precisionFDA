@@ -4,9 +4,9 @@ import { useEffect } from 'react'
 import type { UseFormSetValue } from 'react-hook-form'
 import * as Yup from 'yup'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { verifyAccessibleFiles } from '@/features/files/files.api'
 import type { IUser } from '@/types/user'
 import { cleanObject } from '@/utils/object'
-import { fetchAccessibleFilesByUID } from '../../databases/databases.api'
 import type { FileUid } from '../../files/files.types'
 import type { ServerScope } from '../../home/types'
 import { fetchLicensesForFiles } from '../../licenses/api'
@@ -380,10 +380,16 @@ export const exportFormData = (event: React.MouseEvent<HTMLButtonElement>, formD
   downloadAnchorNode.remove()
 }
 
-export const validateFile = async (fileUid: string) => {
-  const data = await fetchAccessibleFilesByUID({ uid: [fileUid] })
-
-  return data && data.length > 0
+export const validateFiles = async (fileUids: string[]) => {
+  const { valid, invalid } = await verifyAccessibleFiles(fileUids)
+  const validateFilesResult: Record<string, boolean> = {}
+  for (const uid of valid) {
+    validateFilesResult[uid] = true
+  }
+  for (const uid of invalid) {
+    validateFilesResult[uid] = false
+  }
+  return validateFilesResult
 }
 
 export const collectFileUidsFromBatchInput = (batchInput: BatchInput): FileUid[] => {

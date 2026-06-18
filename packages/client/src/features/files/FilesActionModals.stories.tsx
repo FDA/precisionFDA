@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import type React from 'react'
+import { useEffect } from 'react'
 import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
-import { ServerScope } from '../home/types'
+import type { ServerScope } from '../home/types'
 import { useAddFolderModal } from './actionModals/useAddFolderModal'
 import { useConfirmModal } from './actionModals/useConfirmModal'
 import { useCopyFilesModal } from './actionModals/useCopyFilesModal'
@@ -19,7 +20,7 @@ import { useOptionAddFileModal } from './actionModals/useOptionAddFileModal'
 import { useSelectFileModal } from './actionModals/useSelectFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { fetchFiles } from './files.api'
-import { IFile } from './files.types'
+import type { IFile } from './files.types'
 
 const meta: Meta = {
   title: 'Modals/Files',
@@ -248,8 +249,9 @@ const SelectFileModalWrapper = () => {
     files => {
       console.log('Selected files:', files)
     },
-    'Choose files from the list below',
     ['private', 'public'],
+    [],
+    true,
   )
   useEffect(() => {
     setShowModal(true)

@@ -8,6 +8,7 @@ export interface PaginationParams {
 export type SpaceScope = `space-${number}`
 export type StaticScope = 'private' | 'public'
 export type EntityScope = StaticScope | SpaceScope
+export type HomeScope = 'me' | 'featured' | 'everybody' | 'spaces'
 
 export type SCOPE = StaticScope | SpaceScope
 

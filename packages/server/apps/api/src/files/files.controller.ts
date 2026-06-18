@@ -24,16 +24,22 @@ import axios from 'axios'
 import { compareVersions } from 'compare-versions'
 import { Response } from 'express'
 import { DownloadLinkOptionsDTO } from '@shared/domain/entity/domain/download-link-options.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityUidResponseDTO } from '@shared/domain/entity/dto/entity-uid-response.dto'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { FileGetDTO } from '@shared/domain/user-file/dto/file-get.dto'
-import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
+import { FolderDTO } from '@shared/domain/user-file/dto/folder.dto'
+import { UserFileAccessibleResultDTO } from '@shared/domain/user-file/dto/user-file-accessible-result.dto'
 import { UserFileCreateDTO } from '@shared/domain/user-file/dto/user-file-create.dto'
+import { UserFilePaginationDTO } from '@shared/domain/user-file/dto/user-file-pagination.dto'
+import { UserFileResolvePathDTO } from '@shared/domain/user-file/dto/user-file-resolve-path.dto'
+import { UserFileUidsDTO } from '@shared/domain/user-file/dto/user-file-uids.dto'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UrlFetchService } from '@shared/domain/user-file/service/url-fetch.service'
 import { ExistingFileSet, ResolvePath, SelectedNode } from '@shared/domain/user-file/user-file.types'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
+import { FileListRetrieveFacade } from '@shared/facade/file-list-retrieve/file-list-retrieve.facade'
 import { GetUploadURLResponse } from '@shared/platform-client/platform-client.responses'
 import { createCloseFileJobTask } from '@shared/queue'
 import { TimeUtils } from '@shared/utils/time.utils'
@@ -62,7 +68,25 @@ export class FilesController {
     private readonly userFileDownloadFacade: UserFileDownloadFacade,
     private readonly userFileBulkDownloadFacade: UserFileBulkDownloadFacade,
     private readonly userFileCreateFacade: UserFileCreateFacade,
+    private readonly fileListRetrieveFacade: FileListRetrieveFacade,
   ) {}
+
+  @ApiOperation({
+    summary: 'Retrieve a list of nodes (defaults to files) filtered by scope, folder ID, and other criteria',
+  })
+  @HttpCode(200)
+  @Get()
+  async paginateAccessibleFiles(
+    @Query() query: UserFilePaginationDTO,
+  ): Promise<PaginatedResult<FileGetDTO | FolderDTO>> {
+    return await this.fileListRetrieveFacade.retrieveAccessibleFiles(query)
+  }
+
+  @ApiOperation({ summary: 'Verify that files with given uids are accessible to the user' })
+  @Get('/accessibility')
+  async verifyAccessibleFiles(@Query() query: UserFileUidsDTO): Promise<UserFileAccessibleResultDTO> {
+    return await this.nodeService.verifyAccessibleFiles(query.uids)
+  }
 
   @Post()
   @UsePipes(new SnakeToCamelPipe())
@@ -197,7 +221,9 @@ export class FilesController {
 
   @UseGuards(InternalRouteGuard)
   @Get('/path-resolver')
-  async resolvePath(@Query(new CustomValidationPipe({ transform: true })) query: ResolvePathDTO): Promise<ResolvePath> {
+  async resolvePath(
+    @Query(new CustomValidationPipe({ transform: true })) query: UserFileResolvePathDTO,
+  ): Promise<ResolvePath> {
     return await this.userFileResolverFacade.resolvePath(query)
   }
 

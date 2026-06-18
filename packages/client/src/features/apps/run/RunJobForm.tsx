@@ -10,6 +10,7 @@ import { InputNumber, InputText } from '@/components/InputText'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
 import { Button as UiButton } from '@/components/ui/button'
 import { FieldSet } from '@/components/ui/field'
+import { RunJobFilesProvider } from '@/features/apps/run/useRunJobFilesContext'
 import type { IUser } from '@/types/user'
 import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
 import type { TreeOnSelectInfo } from '../../files/files.types'
@@ -45,7 +46,7 @@ import {
   useDefaultScopeSelection,
   useSelectableContexts,
   useSelectableSpaces,
-  validateFile,
+  validateFiles,
 } from './utils'
 
 /**
@@ -138,13 +139,10 @@ const importFormData = async (
         new Set(importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item))),
       ) as string[]
       setTotalFilesToValidate(allFileUids.length)
-      for (const fileUid of allFileUids) {
-        const valid = await validateFile(fileUid)
-        setTotalFilesValidated(prevCount => prevCount + 1)
-        validationCache[fileUid] = valid
-      }
-
+      const validationResults = await validateFiles(allFileUids)
+      Object.assign(validationCache, validationResults)
       setValidatedFilesCache(validationCache)
+      setTotalFilesValidated(Object.keys(validationCache).length)
       clearTimeout(delayDialogTimeout)
       setShowValidationWait(false)
 
@@ -517,16 +515,22 @@ export const RunJobForm = ({
                             required={!inputSpec.optional}
                             key={inputSpec.name + inputSpec}
                           >
-                            <JobRunInput
-                              key={inputSpec.name + inputSpec}
-                              field={field}
-                              inputSpec={inputSpec}
-                              errors={errors as FieldErrors<Record<string, unknown>>}
-                              disabled={isSubmitting}
-                              setError={setError}
-                              scope={app.entity_type === 'https' ? watch().scope?.value : app.scope}
-                              validatedFilesCache={validatedFilesCache}
-                            />
+                            <RunJobFilesProvider
+                              value={{
+                                validatedFilesCache,
+                                setValidatedFilesCache,
+                              }}
+                            >
+                              <JobRunInput
+                                key={inputSpec.name + inputSpec}
+                                field={field}
+                                inputSpec={inputSpec}
+                                errors={errors as FieldErrors<Record<string, unknown>>}
+                                disabled={isSubmitting}
+                                setError={setError}
+                                scope={app.entity_type === 'https' ? watch().scope?.value : app.scope}
+                              />
+                            </RunJobFilesProvider>
                           </FieldGroup>
                         )}
                       />

@@ -4,6 +4,7 @@ import { IsOptional, ValidateNested } from 'class-validator'
 import { PaginationDTO, SortDefinition } from '@shared/domain/entity/domain/pagination.dto'
 import { SpacePaginationFilter } from '@shared/domain/space/dto/space-pagination-filter'
 import { Space } from '@shared/domain/space/space.entity'
+import { TransformAndValidateBoolean } from '@shared/utils/transformers/is-valid-boolean'
 
 export class SpacePaginationDTO extends PaginationDTO<Space> {
   @IsOptional()
@@ -13,4 +14,8 @@ export class SpacePaginationDTO extends PaginationDTO<Space> {
 
   @IsOptional()
   sort?: SortDefinition<Space> = { createdAt: QueryOrder.DESC }
+
+  @IsOptional()
+  @TransformAndValidateBoolean()
+  excludeSharedPrivateSpaces?: boolean = true
 }

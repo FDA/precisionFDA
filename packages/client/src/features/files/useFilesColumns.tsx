@@ -1,8 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Column, ColumnDef, FilterFnOption } from '@tanstack/react-table'
-import React from 'react'
+import type { Column, ColumnDef, FilterFnOption } from '@tanstack/react-table'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
+import { CopyText } from '../../components/CopyText/CopyText'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
 import { AreaChartIcon } from '../../components/icons/AreaChartIcon'
 import { CogsIcon } from '../../components/icons/Cogs'
@@ -15,10 +15,9 @@ import { propertiesColumnDef, selectColumnDef } from '../../components/Table/sel
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { colors } from '../../styles/theme'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
-import { IFile } from './files.types'
-import { CopyText } from '../../components/CopyText/CopyText'
 import styles from './FileList.module.css'
 import { getOriginHref } from './file.utils'
+import type { IFile } from './files.types'
 
 const StyledLocked = styled.div<{ $isLocked: boolean }>`
   flex: 1 0 auto;
@@ -60,9 +59,7 @@ export const useFilesColumns = ({
                   data-testid="file-row-name"
                   data-tooltip-id={`fileNameTooltip${node.uid}`}
                   data-tooltip-content={`File is in ${node.state} state.`}
-                  color={
-                    isIncompleteFile(node.state) ? 'var(--tertiary-600)' : 'var(--c-link)'
-                  }
+                  color={isIncompleteFile(node.state) ? 'var(--tertiary-600)' : 'var(--c-link)'}
                   onClick={() => onFileClick(node.uid)}
                 >
                   <FileIcon height={14} />
@@ -204,12 +201,15 @@ export const useFilesColumns = ({
                 {value.text}
               </StyledLinkCell>
             )}
-            {typeof value === 'object' && value !== null && ['UserFile', 'Node'].includes(originType ?? '') && originHref && (
-              <StyledLinkCell to={originHref}>
-                <FileIcon height={16} />
-                {value.text}
-              </StyledLinkCell>
-            )}
+            {typeof value === 'object' &&
+              value !== null &&
+              ['UserFile', 'Node'].includes(originType ?? '') &&
+              originHref && (
+                <StyledLinkCell to={originHref}>
+                  <FileIcon height={16} />
+                  {value.text}
+                </StyledLinkCell>
+              )}
             {typeof value === 'string' && value}
           </>
         )

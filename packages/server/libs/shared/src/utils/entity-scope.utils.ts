@@ -1,4 +1,6 @@
-import { EntityScope, SpaceScope } from '@shared/types/common'
+import { Space } from '@shared/domain/space/space.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { EntityScope, SpaceScope, StaticScope } from '@shared/types/common'
 
 export class EntityScopeUtils {
   static isSpaceScope(scope: string): scope is SpaceScope {
@@ -29,5 +31,19 @@ export class EntityScopeUtils {
 
   static isPublic(scope: EntityScope): scope is 'public' {
     return scope === 'public'
+  }
+
+  static computeLocation(scope: EntityScope, space?: Space): string {
+    let location: string = ''
+    const staticLocations: Record<StaticScope, string> = {
+      private: 'Private',
+      public: 'Public',
+    }
+    location = staticLocations[scope]
+    if (!location && space) {
+      const suffix = space.isConfidential() ? 'Private' : 'Shared'
+      location = `${space.name} - (${suffix})`
+    }
+    return location
   }
 }

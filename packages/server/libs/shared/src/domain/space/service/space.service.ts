@@ -330,7 +330,7 @@ export class SpaceService {
   // RSA + SA:     All the spaces they are active member of + all the review spaces + all the group spaces
   async paginateSpaces(query: SpacePaginationDTO): Promise<PaginatedResult<SpaceListItemDTO>> {
     const filterWhere = this.buildFilterWhere(query)
-    const accessWhere = await this.buildAccessWhere()
+    const accessWhere = await this.buildAccessWhere(query)
 
     return this.fetchAndMapSpaces(query, { $and: [filterWhere, accessWhere] })
   }
@@ -387,16 +387,19 @@ export class SpaceService {
     return this.spaceGroupService.removeSpaces(spaceGroupId, spaceIds)
   }
 
-  private async buildAccessWhere(): Promise<FilterQuery<Space>> {
+  private async buildAccessWhere(query: SpacePaginationDTO): Promise<FilterQuery<Space>> {
     const isSiteAdmin = await (await this.userContext.loadEntity()).isSiteAdmin()
     const isReviewSpaceAdmin = await (await this.userContext.loadEntity()).isReviewSpaceAdmin()
+    const reviewSpacesFilter = query.excludeSharedPrivateSpaces
+      ? { type: SPACE_TYPE.REVIEW, spaceId: null }
+      : { type: SPACE_TYPE.REVIEW }
     const filters: FilterQuery<Space>[] = [
       {
         spaceMemberships: {
           user: this.userContext.id,
           active: true,
         },
-        $or: [{ type: SPACE_TYPE.REVIEW, spaceId: null }, { type: { $ne: SPACE_TYPE.REVIEW } }],
+        $or: [reviewSpacesFilter, { type: { $ne: SPACE_TYPE.REVIEW } }],
         state: { $ne: SPACE_STATE.DELETED },
       },
     ]

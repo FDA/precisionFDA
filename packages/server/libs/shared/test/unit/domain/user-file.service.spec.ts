@@ -2,6 +2,7 @@ import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import sinon, { match, SinonStub, stub } from 'sinon'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
@@ -351,6 +352,7 @@ describe('UserFileService', () => {
 
     nodeHelperGetNodePathStub.reset()
     nodeHelperGetNodePathStub.throws()
+    nodeHelperGetNodePathStub.withArgs(match.any).returns('/')
 
     eventHelperCreateFolderEventStub.reset()
     eventHelperCreateFolderEventStub.throws()
@@ -821,6 +823,26 @@ describe('UserFileService', () => {
         }),
       ).to.equal(true)
       expect(result).to.equal(files)
+    })
+  })
+
+  context('#verifyAccessibleFiles', () => {
+    it('should return valid and invalid uids', async () => {
+      const uids: Uid<'file'>[] = ['file-uid-1', 'file-uid-2', 'file-uid-3']
+      const files = [
+        {
+          uid: 'file-uid-1',
+        },
+        {
+          uid: 'file-uid-2',
+        },
+      ] as unknown as UserFile[]
+      fileRepoFindAccessibleStub.withArgs({ uid: { $in: uids } }, match.any).returns(files)
+
+      const res = await getInstance().verifyAccessibleFiles(uids)
+      expect(res.valid).to.deep.eq(['file-uid-1', 'file-uid-2'])
+      expect(res.invalid).to.deep.eq(['file-uid-3'])
+      expect(fileRepoFindAccessibleStub.calledOnceWithExactly({ uid: { $in: uids } }, { fields: ['uid'] })).to.be.true()
     })
   })
 

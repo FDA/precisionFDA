@@ -1,8 +1,12 @@
 import { License } from '@shared/domain/license/license.entity'
+import { propertiesToRecord } from '@shared/domain/property/property.helper'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { humanizeFileSize } from '@shared/utils/format'
 import { TimeUtils } from '@shared/utils/time.utils'
+import { FILE_STI_TYPE } from '../user-file.types'
+import { NodeDTO } from './node/node.dto'
 
 interface FileOriginDTO {
   text: string
@@ -38,7 +42,9 @@ interface FileGetDTOMapOptions {
   space: Space | null
 }
 
-export class FileGetDTO {
+export class FileGetDTO extends NodeDTO {
+  readonly stiType = FILE_STI_TYPE.USERFILE
+
   id: number
   uid: string
   name: string
@@ -83,7 +89,7 @@ export class FileGetDTO {
     dto.state = file.state
     dto.scope = file.scope
     dto.spaceId = file.isInSpace() ? file.scope : null
-    dto.location = computeLocation(file, space)
+    dto.location = EntityScopeUtils.computeLocation(file.scope, space)
     dto.addedBy = user.fullName
     dto.addedByDxuser = user.dxuser
     dto.createdAt = TimeUtils.formatShortDate(file.createdAt)
@@ -96,7 +102,7 @@ export class FileGetDTO {
     dto.origin = origin
     dto.originObject = { originType: originParentType, originUid: originParentUid }
     dto.tags = file.taggings.isInitialized() ? file.taggings.getItems().map(t => t.tag?.name ?? '') : []
-    dto.properties = buildProperties(file)
+    dto.properties = propertiesToRecord(file.properties)
     dto.fileLicense = license
       ? {
           id: license.id,
@@ -110,25 +116,4 @@ export class FileGetDTO {
 
     return dto
   }
-}
-
-function buildProperties(file: UserFile): Record<string, string> {
-  const props: Record<string, string> = {}
-  if (file.properties.isInitialized()) {
-    for (const prop of file.properties.getItems()) {
-      props[prop.propertyName] = prop.propertyValue
-    }
-  }
-  return props
-}
-
-function computeLocation(file: UserFile, space: Space | null): string {
-  if (!file.isInSpace()) {
-    return file.scope === 'public' ? 'Public' : 'Private'
-  }
-  if (space) {
-    const suffix = space.isConfidential() ? 'Private' : 'Shared'
-    return `${space.name} - ${suffix}`
-  }
-  return 'Space'
 }

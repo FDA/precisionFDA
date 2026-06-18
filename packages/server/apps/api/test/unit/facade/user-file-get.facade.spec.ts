@@ -18,7 +18,7 @@ describe('UserFileGetFacade', () => {
   const nodeHelperGetParentFolderStub = stub()
   const nodeHelperGetFolderPathEntriesStub = stub()
   const nodeHelperResolveOriginStub = stub()
-  const mapToDTOStub = stub(FileGetDTO, 'mapToDTO')
+  let mapToDTOStub: sinon.SinonStub
 
   beforeEach(() => {
     userFileServiceGetAccessibleFileByUidStub.reset()
@@ -28,10 +28,10 @@ describe('UserFileGetFacade', () => {
     nodeHelperGetParentFolderStub.reset()
     nodeHelperGetFolderPathEntriesStub.reset()
     nodeHelperResolveOriginStub.reset()
-    mapToDTOStub.reset()
+    mapToDTOStub = stub(FileGetDTO, 'mapToDTO')
   })
 
-  after(() => {
+  afterEach(() => {
     mapToDTOStub.restore()
   })
 

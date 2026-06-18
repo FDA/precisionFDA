@@ -4,6 +4,7 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { LicenseService } from '@shared/domain/license/license.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { FileDownloadUrlResponseDTO } from '@shared/domain/user-file/dto/file-download-url-response.dto'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
@@ -16,6 +17,7 @@ export class UserFileDownloadFacade {
   private readonly logger: Logger
 
   constructor(
+    private readonly userContext: UserContext,
     private readonly nodeService: NodeService,
     private readonly spaceService: SpaceService,
     private readonly entityService: EntityService,
@@ -54,11 +56,13 @@ export class UserFileDownloadFacade {
 
     const licenses = await this.licenseService.findLicensesAndAcceptedLicensesByItemIds('Node', [file.id])
     if (licenses.has(file.id)) {
-      for (const { license, userAcceptedLicensesCount } of licenses.get(file.id)) {
-        if (userAcceptedLicensesCount === 0) {
-          this.logger.warn('Download blocked due to unaccepted license', { fileUid: uid, licenseId: license.id })
-          throw new ValidationError('You must accept the license associated with this file before downloading')
-        }
+      const { license } = licenses.get(file.id)
+      const acceptedLicense = license.acceptedLicenses
+        .getItems()
+        .find(al => al.user.getEntity().id === this.userContext.id)
+      if (license.approvalRequired && !acceptedLicense?.isAccepted()) {
+        this.logger.warn('Download blocked due to unaccepted license', { fileUid: uid, licenseId: license.id })
+        throw new ValidationError('You must accept the license associated with this file before downloading')
       }
     }
 

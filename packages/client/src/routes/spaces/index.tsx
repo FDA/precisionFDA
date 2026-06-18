@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { createContext, useContext } from 'react'
 import { Outlet, type RouteObject, useLocation } from 'react-router'
 import { HomeLoader } from '@/features/home/show.styles'
 import { useSpaceCountersDataHook } from '@/features/spaces/show/useSpaceCountersData.hook'
@@ -35,6 +35,18 @@ export interface SpaceOutletContext {
   isLoading: boolean
 }
 
+interface SpaceContextValue {
+  scope: string
+  name: string
+}
+
+const SpaceContext = createContext<SpaceContextValue | null>(null)
+
+export const useSpaceContext = () => {
+  const ctx = useContext(SpaceContext)
+  return ctx
+}
+
 const SpaceShowRoot = () => {
   usePageMeta({ title: 'Spaces - precisionFDA' })
   const { space, isLoading, isNotAllowed, isLocked } = useSpaceDataHook()
@@ -54,10 +66,14 @@ const SpaceShowRoot = () => {
     return <Activation space={space} />
   }
 
+  const contextValue = { scope: `space-${space.id}`, name: space.name }
+
   return (
-    <UserLayout innerScroll>
-      <Outlet context={{ space, counters, isLoading }} />
-    </UserLayout>
+    <SpaceContext.Provider value={contextValue}>
+      <UserLayout innerScroll>
+        <Outlet context={{ space, counters, isLoading }} />
+      </UserLayout>
+    </SpaceContext.Provider>
   )
 }
 

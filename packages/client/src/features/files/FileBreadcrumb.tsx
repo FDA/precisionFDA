@@ -1,9 +1,9 @@
-import { useDroppable } from '@dnd-kit/core'
 import React, { useMemo } from 'react'
+import { useDroppable } from '@dnd-kit/core'
 import { Link } from 'react-router'
-import { Pill } from '../../components/Pill'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { HomeIcon } from '../../components/icons/HomeIcon'
+import { Pill } from '../../components/Pill'
 import { DroppableProps } from '../../components/Table/DnD'
 import { cleanObject } from '../../utils/object'
 import { HomeScope, MetaPath } from '../home/types'
@@ -16,22 +16,17 @@ interface BreadcrumbItem {
   isActive: boolean
 }
 
-const DroppablePathDir: React.FC<DroppableProps & { children: React.ReactNode }> = ({ 
-  id, 
-  name, 
-  children, 
-  disabled = false, 
-  ...rest 
-}) => {  
-  const { setNodeRef, isOver } = useDroppable({ id, disabled, data: { name }})
+const DroppablePathDir: React.FC<DroppableProps & { children: React.ReactNode }> = ({
+  id,
+  name,
+  children,
+  disabled = false,
+  ...rest
+}) => {
+  const { setNodeRef, isOver } = useDroppable({ id, disabled, data: { name } })
 
   return (
-    <div 
-      ref={setNodeRef} 
-      className={styles.droppable}
-      data-is-over={isOver}
-      {...rest}
-    >
+    <div ref={setNodeRef} className={styles.droppable} data-is-over={isOver} {...rest}>
       {children}
     </div>
   )
@@ -45,35 +40,37 @@ const createSearchParam = (params: Record<string, unknown>) => {
 
 const MAX_VISIBLE_BREADCRUMBS = 5
 
-export const FileBreadcrumb = ({ 
-  currentFolderId, 
-  basePath, 
-  scope, 
-  labelText, 
-  fileName, 
-  metaPath = [] 
-}: { 
+export const FileBreadcrumb = ({
+  currentFolderId,
+  basePath,
+  scope,
+  labelText,
+  fileName,
+  metaPath = [],
+  onNavigate,
+}: {
   currentFolderId?: number
   basePath: string
   scope?: HomeScope
   labelText?: string
   fileName?: string
   metaPath?: MetaPath[]
+  onNavigate?: (folderId: number) => void
 }) => {
   const breadcrumbs: BreadcrumbItem[] = useMemo(() => {
     return [
-      { 
-        id: 0, 
-        name: 'Files', 
+      {
+        id: 0,
+        name: 'Files',
         href: `${basePath}${createSearchParam({ scope })}`,
-        isActive: currentFolderId === 0 || !currentFolderId
+        isActive: currentFolderId === 0 || !currentFolderId,
       },
       ...(metaPath || []).map(folder => ({
         id: folder.id,
         name: folder.name,
         href: `${basePath}${createSearchParam({ scope, folder_id: folder.id })}`,
-        isActive: currentFolderId === folder.id
-      }))
+        isActive: currentFolderId === folder.id,
+      })),
     ]
   }, [currentFolderId, basePath, scope, metaPath])
 
@@ -83,12 +80,9 @@ export const FileBreadcrumb = ({
   // Get visible breadcrumbs
   const visibleBreadcrumbs = useMemo(() => {
     if (!needsCollapse) return breadcrumbs
-    
+
     // Always show first item, collapsed indicator, and last MAX_VISIBLE_BREADCRUMBS - 1 items
-    return [
-      breadcrumbs[0],
-      ...breadcrumbs.slice(-(MAX_VISIBLE_BREADCRUMBS - 1))
-    ]
+    return [breadcrumbs[0], ...breadcrumbs.slice(-(MAX_VISIBLE_BREADCRUMBS - 1))]
   }, [breadcrumbs, needsCollapse])
 
   return (
@@ -102,31 +96,27 @@ export const FileBreadcrumb = ({
           return (
             <React.Fragment key={`breadcrumb-${breadcrumb.id}`}>
               {/* Divider between items */}
-              {!isFirst && (
-                <span className={styles.divider}>/</span>
-              )}
+              {!isFirst && <span className={styles.divider}>/</span>}
 
               {/* Breadcrumb item */}
-              <DroppablePathDir 
-                id={breadcrumb.id} 
-                name={breadcrumb.name} 
-                disabled={isActive}
-              >
+              <DroppablePathDir id={breadcrumb.id} name={breadcrumb.name} disabled={isActive}>
                 {isActive ? (
-                  <Pill 
-                    variant="default"
-                    size="small"
-                    icon={isFirst ? <HomeIcon /> : <FolderIcon />}
-                  >
+                  <Pill variant="default" size="small" icon={isFirst ? <HomeIcon /> : <FolderIcon />}>
                     {breadcrumb.name}
                   </Pill>
+                ) : onNavigate ? (
+                  <button
+                    type="button"
+                    onClick={() => onNavigate(breadcrumb.id)}
+                    className={`${styles.breadcrumbPillLink} cursor-pointer`}
+                  >
+                    <Pill variant="secondary" size="small" icon={isFirst ? <HomeIcon /> : <FolderIcon />}>
+                      {breadcrumb.name}
+                    </Pill>
+                  </button>
                 ) : (
                   <Link to={breadcrumb.href} className={styles.breadcrumbPillLink}>
-                    <Pill 
-                      variant="secondary"
-                      size="small"
-                      icon={isFirst ? <HomeIcon /> : <FolderIcon />}
-                    >
+                    <Pill variant="secondary" size="small" icon={isFirst ? <HomeIcon /> : <FolderIcon />}>
                       {breadcrumb.name}
                     </Pill>
                   </Link>

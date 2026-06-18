@@ -1,0 +1,32 @@
+/* Backdrop enter/exit transitions */
+.backdrop {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.backdrop[data-open] {
+  opacity: 1;
+}
+
+.backdrop[data-ending-style] {
+  opacity: 0;
+}
+
+/* Popup enter/exit transitions */
+.popup {
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+.popup[data-open] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.95);
+}

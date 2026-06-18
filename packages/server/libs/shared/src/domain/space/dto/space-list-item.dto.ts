@@ -17,6 +17,7 @@ export class SpaceListItemDTO {
   guestLead: string
   hostLead: string
   currentUserMembership: SpaceMembership
+  title: string
 
   static async fromEntity(space: Space, userId: number): Promise<SpaceListItemDTO> {
     return {
@@ -36,6 +37,7 @@ export class SpaceListItemDTO {
       currentUserMembership: space.spaceMemberships.find(
         spaceMembership => spaceMembership.user.id === userId && spaceMembership.active,
       ),
+      title: space.title,
     }
   }
 }

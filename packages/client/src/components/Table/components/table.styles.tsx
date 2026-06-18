@@ -14,6 +14,7 @@ export const TableStyles = styled.div`
   --_table-bg-color: var(--background);
   --_table-border-color: var(--tertiary-250);
   --_table-cell-height: 40px;
+  position: relative;
 
   * {
     box-sizing: border-box;
@@ -84,7 +85,6 @@ export const TableStyles = styled.div`
     background-color: var(--background-shaded);
   }
 
-
   .col-select-btn {
     background: none;
     border: none;
@@ -115,7 +115,7 @@ export const TableStyles = styled.div`
   .name-btn {
     font-weight: 500;
   }
-  
+
   .filter-row {
     th {
       overflow: visible;
@@ -147,7 +147,8 @@ export const TableStyles = styled.div`
     }
   }
 
-  *:focus-visible, *:focus {
+  *:focus-visible,
+  *:focus {
     outline-color: var(--primary-200);
     outline-style: auto;
   }
@@ -160,8 +161,7 @@ export const TableStyles = styled.div`
     padding-left: 16px;
     button:focus-visible,
     button label:focus-visible,
-    button:focus
-    {
+    button:focus {
       outline: none;
     }
 
@@ -173,7 +173,7 @@ export const TableStyles = styled.div`
 
     &.cell-select-header button {
       position: absolute;
-      top:10px;
+      top: 10px;
     }
   }
 

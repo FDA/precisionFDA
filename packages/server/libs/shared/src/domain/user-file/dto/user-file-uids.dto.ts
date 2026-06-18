@@ -1,0 +1,9 @@
+import { IsArray } from 'class-validator'
+import { IsValidUid } from '@shared/domain/entity/constraint/is-uid-valid.constraint'
+import { Uid } from '@shared/domain/entity/domain/uid'
+
+export class UserFileUidsDTO {
+  @IsArray()
+  @IsValidUid({ each: true, entityType: 'file' })
+  uids: Uid<'file'>[]
+}
