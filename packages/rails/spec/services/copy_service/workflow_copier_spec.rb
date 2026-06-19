@@ -100,5 +100,39 @@ RSpec.describe CopyService::WorkflowCopier, type: :service do
     #   expect(copied_input_file.id).not_to eq(input_file.id)
     #   expect(copied_input_file.scope).to eq(target_space.uid)
     # end
+
+    context "when workflow has a deleted app in stages" do
+      let(:deleted_app) { create(:app, user_id: user.id, title: "deleted app", deleted: true) }
+      let(:workflow_spec) do
+        {
+          input_spec:
+            {
+              stages:
+                [
+                  {
+                    name: deleted_app.title,
+                    prev_slot: nil,
+                    next_slot: nil,
+                    app_dxid: deleted_app.dxid,
+                    app_uid: deleted_app.uid,
+                    inputs: [],
+                    instanceType: "baseline-8",
+                    stageIndex: 0,
+                  },
+                ],
+            },
+        }
+      end
+
+      it "raises WorkflowCopyError" do
+        expect(api).not_to receive(:app_new)
+
+        expect { copier.copy(workflow, target_space.uid) }.
+          to raise_error(
+            CopyService::WorkflowCopier::WorkflowCopyError,
+            /stage app 'deleted app' is deleted/,
+          )
+      end
+    end
   end
 end

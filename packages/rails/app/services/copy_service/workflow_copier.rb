@@ -87,6 +87,10 @@ class CopyService
     def copy_dependencies(new_workflow, workflow, scope, properties)
       stages = workflow.stages.map do |stage|
         source_app = App.find_by!(uid: stage["app_uid"])
+        if source_app.deleted?
+          raise WorkflowCopyError, "Cannot copy workflow '#{workflow.name}', stage app '#{source_app.title}' is deleted"
+        end
+
         begin
           new_app = app_copy_service.copy(source_app, scope, properties)
         rescue HttpsAppsClient::Error => e
