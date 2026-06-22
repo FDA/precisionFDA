@@ -79,7 +79,6 @@ export const AppList = ({
     selectedItems: selectedAppObjects,
     resourceKeys: ['apps'],
     resetSelected,
-    comparatorLinks: {},
     challenges: data?.meta?.challenges || undefined,
     isContributorOrHigher,
   })
@@ -203,19 +202,23 @@ export const AppsListTable = ({
   columnVisibility: VisibilityState
 }) => {
   function filterColsByScope(c: ColumnDefResolved<IApp>): boolean {
+    // `c.id` falls back to `accessorKey` when not explicitly set. Some columns set `id`
+    // explicitly to the Rails snake_case sort key while exposing a camelCase value via
+    // `accessorFn`, so we match on `id ?? accessorKey`.
+    const key = (c.id ?? (c as { accessorKey?: string }).accessorKey) as string | undefined
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
       (
-        (homeScope === 'me' && c.accessorKey === 'added_by') ||
+        (homeScope === 'me' && key === 'added_by') ||
         // Hide 'location' for all homeScopes except 'spaces'.
-        (homeScope !== 'spaces' && c.accessorKey === 'location') ||
+        (homeScope !== 'spaces' && key === 'location') ||
         // Hide 'featured' for all homeScopes except 'everybody'.
-        (homeScope !== 'everybody' && c.accessorKey === 'featured') ||
+        (homeScope !== 'everybody' && key === 'featured') ||
         // Hide 'explorers', 'org', 'run_by_you' if homeScope is defined to something specific.
-        (homeScope !== undefined && c.accessorKey === 'explorers') ||
-        (homeScope !== undefined && c.accessorKey === 'org') ||
-        (homeScope !== undefined && c.accessorKey === 'run_by_you')
+        (homeScope !== undefined && key === 'explorers') ||
+        (homeScope !== undefined && key === 'org') ||
+        (homeScope !== undefined && key === 'run_by_you')
       )
     )
   }

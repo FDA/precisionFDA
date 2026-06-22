@@ -100,6 +100,7 @@ const defaultConfig = {
     billingInfo: parseJSONFromProcess(process.env.BILLING_INFO) ?? BILLING_INFO,
     billingConfirmation: process.env.BILLING_CONFIRMATION,
     pfdaAdminOrg: process.env.PFDA_ADMIN_ORG ?? '',
+    defaultComparisonApp: process.env.DEFAULT_COMPARISON_APP ?? 'app-pfda-comparator/0.2.4',
   },
   emails: {
     smtp: {

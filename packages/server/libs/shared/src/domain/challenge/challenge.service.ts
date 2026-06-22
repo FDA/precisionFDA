@@ -444,6 +444,48 @@ export class ChallengeService implements Searchable<Challenge> {
     return { ...response, data: challenges }
   }
 
+  /**
+   * Find challenges assigned to a specific app.
+   * Uses access-controlled query so non-admin users only see challenges
+   * they have permission to view (e.g. excludes SETUP-status challenges
+   * for non-admin/non-challenge-admin users).
+   */
+  async findAssignedToApp(appId: number): Promise<Challenge[]> {
+    return this.challengeRepo.findAccessible(
+      { app: appId },
+      { orderBy: { createdAt: 'DESC' } },
+    )
+  }
+
+  /**
+   * Find challenges assignable to a specific app by the current user.
+   * Equivalent to Rails: Challenge.all.select { |c| c.can_assign_specific_app?(context, app) }
+   *
+   * Conditions:
+   * - challenge status is paused, setup, or pre-registration
+   * - challenge is not over (endAt > now)
+   * - challenge app_owner is the current user
+   * - challenge app_id is not already set to the given app
+   */
+  async findAssignableForApp(appId: number): Promise<Challenge[]> {
+    const now = new Date()
+    return this.challengeRepo.find(
+      {
+        status: {
+          $in: [
+            CHALLENGE_STATUS.PAUSED,
+            CHALLENGE_STATUS.SETUP,
+            CHALLENGE_STATUS.PRE_REGISTRATION,
+          ],
+        },
+        endAt: { $gt: now },
+        appOwner: this.user.id,
+        app: { $ne: appId },
+      },
+      { orderBy: { createdAt: 'DESC' } },
+    )
+  }
+
   async search(query: string): Promise<Challenge[]> {
     if (!query) {
       return []

@@ -113,6 +113,15 @@ export abstract class AccessControlRepository<Entity extends BaseEntity> extends
     return this.findOne(mergedWhere, options)
   }
 
+  async countAccessible(where: FilterQuery<Entity> = {}): Promise<number> {
+    const accessibleWhere = await this.getAccessibleWhere()
+    if (!accessibleWhere) {
+      return 0
+    }
+    const mergedWhere = this.getMergedWhere(where, accessibleWhere)
+    return this.count(mergedWhere)
+  }
+
   /**
    * Gets the where clause for accessible entities.
    * In case no entities are accessible - returns null

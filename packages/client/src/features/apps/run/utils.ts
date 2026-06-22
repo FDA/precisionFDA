@@ -431,7 +431,7 @@ export const generateCopyUrl = (displayData: string, url: string, app: IApp, cop
   const base64Encoded = btoa(encodeURIComponent(displayData))
   const newAppUrl = url.replace(
     /app-[^/]+/,
-    copyType === 'app' ? app.uid : `app-series-${app.app_series_id.toString()}`,
+    copyType === 'app' ? app.uid : `app-series-${app.appSeriesId.toString()}`,
   )
 
   return `${newAppUrl}#${base64Encoded}`

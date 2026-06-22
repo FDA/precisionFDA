@@ -63,4 +63,26 @@ export class JobRepository extends AccessControlRepository<Job> {
       },
     )
   }
+
+  /**
+   * Count distinct users who have run jobs for a given app series.
+   */
+  async countDistinctUsersByAppSeries(appSeriesId: number): Promise<number> {
+    const rows = await this.em.getKnex()
+      .from('jobs')
+      .where('app_series_id', appSeriesId)
+      .countDistinct('user_id as count')
+    return Number(rows[0]?.count ?? 0)
+  }
+
+  /**
+   * Get distinct app IDs from jobs run by a specific user for a given app series.
+   */
+  async findDistinctAppIdsByUserAndAppSeries(userId: number, appSeriesId: number): Promise<number[]> {
+    return this.em.getKnex()
+      .from('jobs')
+      .where({ app_series_id: appSeriesId, user_id: userId })
+      .distinct('app_id')
+      .pluck('app_id')
+  }
 }

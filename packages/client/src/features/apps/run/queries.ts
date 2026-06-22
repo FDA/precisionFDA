@@ -21,7 +21,7 @@ const getTitle = (space: ISpace): string => {
   return space.name
 }
 
-export const fetchAndConvertSelectableContexts = (scope: IApp['scope'], entityType: IApp['entity_type']) =>
+export const fetchAndConvertSelectableContexts = (scope: IApp['scope'], entityType: IApp['entityType']) =>
   useQuery({
     queryKey: ['selectable-context', scope],
     queryFn: () => fetchEditableSpacesList(),

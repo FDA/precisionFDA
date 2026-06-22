@@ -16,6 +16,42 @@ export interface FetchAppsQuery {
   meta: IMeta
 }
 
+// TODO: Temporary converter while the Rails `/api/apps` (list) endpoint still returns
+// snake_case. Remove once the list endpoint is rewritten in NestJS and returns camelCase.
+type RailsApp = Record<string, unknown> & Partial<IApp>
+const mapRailsAppToIApp = (raw: RailsApp): IApp => {
+  const r = raw as Record<string, unknown>
+  return {
+    id: r.id as number,
+    uid: r.uid as string,
+    dxid: r.dxid as string,
+    entityType: (r.entityType ?? r.entity_type) as string,
+    name: r.name as string,
+    title: r.title as string,
+    addedBy: (r.addedBy ?? r.added_by) as string,
+    addedByFullname: (r.addedByFullname ?? r.added_by_fullname) as string,
+    createdAt: (r.createdAt ?? r.created_at) as string,
+    createdAtDateTime: (r.createdAtDateTime ?? r.created_at_date_time) as string,
+    updatedAt: (r.updatedAt ?? r.updated_at) as string,
+    location: r.location as IApp['location'],
+    readme: r.readme as string,
+    revision: r.revision as number,
+    latestRevision: (r.latestRevision ?? r.latest_revision) as boolean,
+    jobCount: (r.jobCount ?? r.job_count) as number,
+    appSeriesId: (r.appSeriesId ?? r.app_series_id) as number,
+    runByYou: (r.runByYou ?? r.run_by_you) as string,
+    org: r.org as string,
+    explorers: r.explorers as number,
+    featured: r.featured as boolean,
+    active: r.active as boolean,
+    user: r.user as IApp['user'],
+    tags: (r.tags ?? []) as string[],
+    properties: (r.properties ?? {}) as IApp['properties'],
+    scope: r.scope as IApp['scope'],
+    forkedFrom: (r.forkedFrom ?? r.forked_from ?? null) as string | null,
+  }
+}
+
 export interface RunJobRequest {
   appUid: string
   name: string
@@ -42,7 +78,10 @@ export async function fetchApps(filters: IFilter[], params: Params): Promise<Fet
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query as Record<string, string>).toString()}`
   const scopeQ = formatScopeQ(params.scope as HomeScope)
-  return axios.get<FetchAppsQuery>(`/api/apps${scopeQ}${paramQ}`).then(r => r.data)
+  return axios.get<{ apps: RailsApp[]; meta: IMeta }>(`/api/apps${scopeQ}${paramQ}`).then(r => ({
+    apps: (r.data.apps ?? []).map(mapRailsAppToIApp),
+    meta: r.data.meta,
+  }))
 }
 
 export async function fetchSelectableSpaces(id: string): Promise<ISpace[]> {
@@ -68,7 +107,7 @@ export async function fetchFilteredApps(searchString: string, scopes: ServerScop
       offset: 0,
       limit: 1000,
     })
-    .then(r => r.data as IApp[])
+    .then(r => (r.data as RailsApp[]).map(mapRailsAppToIApp))
 }
 
 export interface FetchAppsExecutionsResponse {
@@ -82,7 +121,7 @@ interface FetchAppExecutionsParams extends Params {
 
 export async function fetchAppExecutions(filters: IFilter[], params: FetchAppExecutionsParams) {
   const query = prepareListFetch(filters, params)
-  const paramQ = `?${new URLSearchParams(query).toString()}`
+  const paramQ = `?${new URLSearchParams(query as Record<string, string>).toString()}`
   return axios.get<FetchAppsExecutionsResponse>(`/api/apps/${params.appUid}/jobs${paramQ}`).then(r => r.data)
 }
 
@@ -136,7 +175,7 @@ export interface CreateAppResponse {
 export interface AppFetchResponse {
   app: IApp
   meta: {
-    accessible_jobs_count: number
+    accessibleJobsCount: number
     spec: AppSpec
     internal: {
       code: string
@@ -145,14 +184,10 @@ export interface AppFetchResponse {
     release: string
     assets: Asset[]
     revisions: AppRevision[]
-    // fields required by AppsShow
     comparator: boolean
-    default_comparator: boolean
-    assigned_challenges: IChallenge[]
+    defaultComparator: boolean
+    assignedChallenges: IChallenge[]
     challenges: IChallenge[]
-    links: {
-      comparators: Record<string, string>
-    }
   }
 }
 
@@ -161,7 +196,7 @@ export async function createEditAppRequest(payload: CreateAppPayload): Promise<C
 }
 
 export async function fetchApp(appIdentifier: string): Promise<AppFetchResponse> {
-  return axios.get(`/api/apps/${appIdentifier}`).then(r => r.data as AppFetchResponse)
+  return axios.get(`/api/v2/apps/${appIdentifier}`).then(r => r.data as AppFetchResponse)
 }
 
 export interface UploadAppConfigFileResponse {

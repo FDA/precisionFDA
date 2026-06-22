@@ -76,7 +76,7 @@ const getDefaults = (
             id: 1,
             instanceType: null,
             fields: Object.fromEntries(
-              opts.spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
+              opts.spec.inputSpec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
             ),
           } as BatchInput,
         ],
@@ -174,7 +174,7 @@ export const RunJobForm = ({
     isLoading: computeInstancesLoading,
     allowedComputeResourceIds,
   } = useInstanceTypeAvailability()
-  const { data: selectableContexts } = useSelectableContexts(app.scope, app.entity_type)
+  const { data: selectableContexts } = useSelectableContexts(app.scope, app.entityType)
   const { data: selectableSpaces } = useSelectableSpaces(app.scope)
   const { hash, pathname } = useLocation()
   const navigate = useNavigate()
@@ -192,8 +192,8 @@ export const RunJobForm = ({
   }
 
   const validationSchema = useMemo(
-    () => prepareValidations(spec.input_spec, userJobLimit, app.scope, allowedComputeResourceIds),
-    [spec.input_spec, userJobLimit, app.scope, allowedComputeResourceIds],
+    () => prepareValidations(spec.inputSpec, userJobLimit, app.scope, allowedComputeResourceIds),
+    [spec.inputSpec, userJobLimit, app.scope, allowedComputeResourceIds],
   )
 
   const form = useForm<RunJobFormType>({
@@ -235,7 +235,7 @@ export const RunJobForm = ({
     watchedInputs,
     computeInstances,
     computeInstancesLoading,
-    spec.instance_type,
+    spec.instanceType,
     setValue,
     dirtyFields,
   )
@@ -263,7 +263,7 @@ export const RunJobForm = ({
           instanceType: computeInstances[0],
           id: lastId + 1,
           fields: Object.fromEntries(
-            spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
+            spec.inputSpec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
           ),
         },
         { shouldFocus: false },
@@ -307,7 +307,7 @@ export const RunJobForm = ({
               vals.scope.value as ServerScope,
               batchInput.fields,
               app,
-              spec.input_spec,
+              spec.inputSpec,
             )
 
             const data = await runJobMutation.mutateAsync(req)
@@ -352,8 +352,8 @@ export const RunJobForm = ({
 
   const handleExportInputClick = () => {
     const vals = getValues()
-    vals.inputs = mapInputKeyVals(vals.inputs, spec.input_spec)
-    const fileUids = getFileUIDsFromAppRun(vals.inputs, spec.input_spec)
+    vals.inputs = mapInputKeyVals(vals.inputs, spec.inputSpec)
+    const fileUids = getFileUIDsFromAppRun(vals.inputs, spec.inputSpec)
 
     exportModal.openModal(vals, fileUids)
   }
@@ -411,7 +411,7 @@ export const RunJobForm = ({
                   />
                   <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobLimit" />
                 </FieldGroup>
-                {app.entity_type === 'https' && (
+                {app.entityType === 'https' && (
                   <SelectContext
                     control={control}
                     isSubmitting={isSubmitting}
@@ -502,8 +502,8 @@ export const RunJobForm = ({
                     inputId={`select_instance_type_${batchIndex}`}
                   />
                 )}
-                {spec.input_spec.length > 0 ? (
-                  spec.input_spec.map(inputSpec => {
+                {spec.inputSpec.length > 0 ? (
+                  spec.inputSpec.map(inputSpec => {
                     return (
                       <Controller
                         key={`${inputSpec.name}-${batchInput.id}`}
@@ -528,7 +528,7 @@ export const RunJobForm = ({
                                 errors={errors as FieldErrors<Record<string, unknown>>}
                                 disabled={isSubmitting}
                                 setError={setError}
-                                scope={app.entity_type === 'https' ? watch().scope?.value : app.scope}
+                                scope={app.entityType === 'https' ? watch().scope?.value : app.scope}
                               />
                             </RunJobFilesProvider>
                           </FieldGroup>

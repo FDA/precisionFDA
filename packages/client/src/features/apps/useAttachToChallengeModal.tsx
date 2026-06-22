@@ -112,7 +112,7 @@ const ChallengeAppForm = ({
     e.preventDefault()
     if (selectedId) {
       mutation.mutateAsync({
-        link: app.links.assign_app,
+        link: '/api/assign_app',
         appId: app.id,
         challengeId: selectedId,
       })

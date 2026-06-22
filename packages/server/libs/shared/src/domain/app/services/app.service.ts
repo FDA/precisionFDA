@@ -5,6 +5,14 @@ import { ErrorCodes, InvalidStateError, NotFoundError } from '@shared/errors'
 import { App } from '../app.entity'
 import { AppRepository } from '../app.repository'
 
+type AppPopulateHint =
+  | 'user'
+  | 'user.organization'
+  | 'appSeries'
+  | 'appSeries.taggings.tag'
+  | 'appSeries.properties'
+  | 'assets'
+
 @Injectable()
 export class AppService implements SearchableByUid<'app'> {
   constructor(private readonly appRepository: AppRepository) {}
@@ -39,5 +47,48 @@ export class AppService implements SearchableByUid<'app'> {
     }
 
     return app
+  }
+
+  async getAccessibleRevisions(
+    appSeriesId: number,
+  ): Promise<
+    Pick<App, 'id' | 'uid' | 'title' | 'revision' | 'version' | 'deleted'>[]
+  > {
+    const apps = await this.appRepository.findAccessible(
+      { appSeriesId },
+      {
+        fields: ['id', 'uid', 'title', 'revision', 'version', 'deleted'],
+        orderBy: { revision: 'DESC' },
+      },
+    )
+    return apps
+  }
+
+  async getLatestAccessibleBySeriesId(appSeriesId: number): Promise<App | null> {
+    const apps = await this.appRepository.findAccessible(
+      { appSeriesId, deleted: false },
+      {
+        orderBy: { revision: 'DESC' },
+      },
+    )
+
+    return apps[0] ?? null
+  }
+
+  /**
+   * Populates the app entity with all relations needed for the detail view.
+   */
+  async populateForDetailView(app: App): Promise<void> {
+    await this.appRepository.populate(
+      app as App & Record<string, unknown>,
+      [
+        'user',
+        'user.organization',
+        'appSeries',
+        'appSeries.taggings.tag',
+        'appSeries.properties',
+        'assets',
+      ] as AppPopulateHint[],
+    )
   }
 }

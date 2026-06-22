@@ -10,14 +10,14 @@ export const SpecTab = ({ spec, spaceId }: { spec: AppSpec; spaceId?: string }):
     return <></>
   }
 
-  const internetAccess = spec.internet_access ? 'Yes' : 'No'
+  const internetAccess = spec.internetAccess ? 'Yes' : 'No'
   return (
     <StyledSpecTab>
       <div className="__header">
         <div className="__header_item">
           <MetadataKey>default instance type</MetadataKey>
           <div data-testid="app-default-instance-type" className="__header_item_value">
-            {COMPUTE_RESOURCE_LABELS[spec.instance_type]}
+            {COMPUTE_RESOURCE_LABELS[spec.instanceType]}
           </div>
         </div>
         <div className="__header_item">
@@ -28,8 +28,8 @@ export const SpecTab = ({ spec, spaceId }: { spec: AppSpec; spaceId?: string }):
         </div>
       </div>
       <div className="__table-container">
-        <SpecTable dataTestId="app-inputs" spaceId={spaceId} title="app inputs" config={spec.input_spec} />
-        <SpecTable dataTestId="app-outputs" spaceId={spaceId} title="app outputs" config={spec.output_spec} />
+        <SpecTable dataTestId="app-inputs" spaceId={spaceId} title="app inputs" config={spec.inputSpec} />
+        <SpecTable dataTestId="app-outputs" spaceId={spaceId} title="app outputs" config={spec.outputSpec} />
       </div>
     </StyledSpecTab>
   )

@@ -167,40 +167,6 @@ module Api
       end
     end
 
-    # GET /api/apps/:id (show)
-    # Apps fetch method for app, accessible by user.
-    # @param id [String] uid of App object.
-    # @return app [App] Apps object, with its connected data.
-    def show
-      find_app
-      comments_data(@app)
-      load_revisions
-      load_relations(@app)
-      load_challenges
-
-      render json:
-               @app, adapter: :json,
-             meta: {
-               spec: @app.spec,
-               revisions: @revisions,
-               jobs: [],
-               accessible_jobs_count: @app.app_series.jobs.accessible_by(@context).count,
-               assigned_challenges: @app.user == @context.user ? @assigned_challenges : [],
-               challenges: @assignable_challenges.select do |ch|
-                 ch.accessible_by?(@context) || ch.app_owner == @context.user
-               end,
-               notes: @notes,
-               assets: @app.assets,
-               internal: @app.internal,
-               release: @app.release,
-               discussions: @discussions,
-               answers: @answers,
-               comparator: app_added_to_comparators?(@app),
-               default_comparator: show_comparison_app_label?(@context, @app),
-               comments: @comments,
-               links: meta_links(@app).merge(comparator_links),
-             }
-    end
 
     # TODO: this route needs to be refactored.
     # TODO: change old UI to handle json-response!

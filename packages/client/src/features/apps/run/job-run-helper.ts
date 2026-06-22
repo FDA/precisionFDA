@@ -35,7 +35,7 @@ const fetchAndConvertSelectableSpaces = async (scope: string): Promise<Selectabl
   return []
 }
 
-const fetchAndConvertSelectableContexts = async (entity_type: IApp['entity_type']): Promise<SelectType[]> => {
+const fetchAndConvertSelectableContexts = async (entity_type: IApp['entityType']): Promise<SelectType[]> => {
   if (entity_type === 'https') {
     const spaces: EditableSpace[] = await fetchEditableSpacesList()
     const options = spaces.map(s => ({

@@ -1,7 +1,9 @@
 import { Ref } from '@mikro-orm/core'
 import { EntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
+import * as sinon from 'sinon'
 import { stub } from 'sinon'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { Organization } from '@shared/domain/org/organization.entity'
 import { OrgActionRequestService } from '@shared/domain/org-action-request/org-action-request.service'
 import { UserService } from '@shared/domain/user/service/user.service'
@@ -18,16 +20,12 @@ describe('OrgMemberActionFacade', () => {
   const getUserInOrganizationStub = stub()
   const findPendingRemoveMemberRequestStub = stub()
   const createRemoveMemberRequestStub = stub()
+  const createUserDeactivatedStub = stub()
 
   const em = {
     populate: populateStub,
     flush: flushStub,
     persist: persistStub,
-    transactional: async (cb: (...args: unknown[]) => Promise<unknown>) => {
-      const result = await cb(em)
-      await flushStub()
-      return result
-    },
   } as unknown as EntityManager
 
   const userCtx = {
@@ -43,11 +41,15 @@ describe('OrgMemberActionFacade', () => {
     createRemoveMemberRequest: createRemoveMemberRequestStub,
   } as unknown as OrgActionRequestService
 
+  const eventHelper = {
+    createUserDeactivated: createUserDeactivatedStub,
+  } as unknown as EventHelper
+
   const ORG = {
     id: 10,
     singular: false,
-    admin: { id: 1 },
     handle: 'test-org',
+    admin: { id: 1 },
   } as Organization
 
   const ADMIN_USER = {
@@ -55,7 +57,7 @@ describe('OrgMemberActionFacade', () => {
     dxuser: 'admin-user',
     organization: {
       getEntity: (): Organization => ORG,
-      load: async () => ORG,
+      load: async (): Promise<Organization> => ORG,
     },
   }
 
@@ -73,13 +75,20 @@ describe('OrgMemberActionFacade', () => {
     findPendingRemoveMemberRequestStub.resolves(null)
     createRemoveMemberRequestStub.reset()
     createRemoveMemberRequestStub.resolves()
+    createUserDeactivatedStub.reset()
+    createUserDeactivatedStub.resolves({} as object)
+  })
+
+  afterEach(() => {
+    sinon.restore()
   })
 
   function getInstance(): OrgMemberActionFacade {
-    return new OrgMemberActionFacade(em, userCtx, userService, orgActionRequestService)
+    return new OrgMemberActionFacade(em, userCtx, userService, orgActionRequestService, eventHelper)
   }
 
   describe('#deactivateOrgUser', () => {
+
     it('deactivates an enabled member', async () => {
       const targetUser = { id: 5, dxuser: 'target-user', userState: USER_STATE.ENABLED }
       getUserInOrganizationStub.resolves(targetUser)
@@ -105,7 +114,7 @@ describe('OrgMemberActionFacade', () => {
     })
 
     it('throws PermissionError when targeting the org admin', async () => {
-      const adminTarget = { id: 1, userState: USER_STATE.ENABLED }
+      const adminTarget = { id: 1, dxuser: 'admin-user', userState: USER_STATE.ENABLED }
       getUserInOrganizationStub.resolves(adminTarget)
 
       const facade = getInstance()
@@ -119,7 +128,7 @@ describe('OrgMemberActionFacade', () => {
     })
 
     it('throws InvalidStateError when user is already deactivated', async () => {
-      const deactivatedUser = { id: 5, userState: USER_STATE.DEACTIVATED }
+      const deactivatedUser = { id: 5, dxuser: 'deactivated-user', userState: USER_STATE.DEACTIVATED }
       getUserInOrganizationStub.resolves(deactivatedUser)
 
       const facade = getInstance()

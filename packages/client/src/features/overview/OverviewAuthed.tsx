@@ -243,9 +243,9 @@ const AppUpdatedAt = styled.div`
 `
 
 const TopAppItem = ({ app }: { app: IApp }) => {
-  const timeDistance = formatDistance(new Date(), parseISO(app.updated_at))
-  const isRegular = app.entity_type === 'regular'
-  const linkToApp = `/home${app.links.show}`
+  const timeDistance = formatDistance(new Date(), parseISO(app.updatedAt))
+  const isRegular = app.entityType === 'regular'
+  const linkToApp = `/home/apps/${app.uid}`
   const ariaLabel = `Click this to navigate to the ${app.title} page`
 
   return (

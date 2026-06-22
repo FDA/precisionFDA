@@ -46,11 +46,13 @@ export type AppShowOutletContext = {
 
 const renderOptions = (app: IApp, meta: { release: string }) => {
   const spaceId = getSpaceIdFromScope(app.scope)
+  const spaceLink = spaceId ? `/spaces/${spaceId}/apps` : undefined
+  const userLink = `/users/${app.addedBy}`
   const columns = [
     {
       header: 'location',
       value: 'location',
-      link: app.links.space && `${app.links.space}/apps`,
+      link: spaceLink,
       dataTestId: 'app-location',
     },
     {
@@ -65,22 +67,22 @@ const renderOptions = (app: IApp, meta: { release: string }) => {
     },
     {
       header: 'added by',
-      value: 'added_by_fullname',
-      link: app.links.user,
+      value: 'addedByFullname',
+      link: userLink,
       dataTestId: 'app-added-by',
     },
     {
       header: 'created on',
-      value: 'created_at_date_time',
+      value: 'createdAtDateTime',
       dataTestId: 'app-created-on',
     },
   ]
 
-  if (app.forked_from) {
+  if (app.forkedFrom) {
     columns.push({
       header: 'Forked from',
-      value: 'forked_from',
-      link: `${getBasePath(spaceId)}/apps/${app.forked_from}`,
+      value: 'forkedFrom',
+      link: `${getBasePath(spaceId)}/apps/${app.forkedFrom}`,
       dataTestId: 'app-forked-from',
     })
   }
@@ -137,14 +139,14 @@ const renderOptions = (app: IApp, meta: { release: string }) => {
 const DetailActionsDropdown = ({
   homeScope,
   app,
-  comparatorLinks,
+  meta,
   challenges,
   spaceId,
   isContributorOrHigher,
 }: {
   homeScope?: HomeScope
   app: IApp
-  comparatorLinks: { [key: string]: string }
+  meta: { comparator: boolean; defaultComparator: boolean }
   challenges?: IChallenge[]
   spaceId?: string
   isContributorOrHigher?: boolean
@@ -155,7 +157,8 @@ const DetailActionsDropdown = ({
     selectedItems: [app],
     resetSelected: () => {},
     resourceKeys: ['app', app.uid],
-    comparatorLinks,
+    appComparator: meta.comparator,
+    appDefaultComparator: meta.defaultComparator,
     challenges,
     isContributorOrHigher,
   })
@@ -210,6 +213,8 @@ export const AppsShow = ({
     )
 
   const appTitle = app.title ? app.title : app.name
+  const isInSpace = app.scope?.startsWith('space-')
+  const canRunApp = !isInSpace || !!isContributorOrHigher
   const backPath = getBackPathNext({
     location,
     resourceLocation: 'apps',
@@ -232,9 +237,9 @@ export const AppsShow = ({
               <CubeIcon height={20} />
               <span data-testid="app-title">{appTitle}</span>
               {meta.comparator && <HomeLabel value="Comparator" icon="fa-bullseye" type="success" />}
-              {meta.default_comparator && <HomeLabel value="Default comparator" icon="fa-bullseye" />}
-              {meta.assigned_challenges.length > 0
-                ? meta.assigned_challenges.map(item => (
+              {meta.defaultComparator && <HomeLabel value="Default comparator" icon="fa-bullseye" />}
+              {meta.assignedChallenges.length > 0
+                ? meta.assignedChallenges.map(item => (
                     <HomeLabel type="warning" icon="fa-trophy" value={item.name} key={item.id} />
                   ))
                 : null}
@@ -250,8 +255,8 @@ export const AppsShow = ({
             <StyledRight>
               <CloudResourcesHeaderButton
                 href={`${getBasePath(spaceId)}/apps/${app.uid}/jobs/new`}
-                isLinkDisabled={!app.links.run_job}
                 conditionType="all"
+                isLinkDisabled={!canRunApp}
                 asReactLink
               >
                 Run App
@@ -261,7 +266,7 @@ export const AppsShow = ({
                 homeScope={homeScope}
                 spaceId={spaceId}
                 app={app}
-                comparatorLinks={meta.links.comparators}
+                meta={meta}
                 challenges={meta.challenges}
                 isContributorOrHigher={isContributorOrHigher}
               />
@@ -319,7 +324,7 @@ export const AppsShow = ({
           to={{ pathname: `${basePath}/apps/${app.uid}/jobs`, state: location.state }}
           data-testid="app-show-tab-executions"
         >
-          Executions ({meta.accessible_jobs_count})
+          Executions ({meta.accessibleJobsCount})
         </StyledTab>
         <StyledTab
           activeClassName="active"

@@ -1,10 +1,12 @@
 import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common'
+import { AppGetDTO } from '@shared/domain/app/dto/app-get.dto'
 import { RunAppDTO } from '@shared/domain/app/dto/run-app.dto'
 import { SaveAppDTO } from '@shared/domain/app/dto/save-app.dto'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { License } from '@shared/domain/license/license.entity'
 import { AppCreateFacade } from '@shared/facade/app/app-create.facade'
 import { AppRunFacade } from '@shared/facade/app/app-run.facade'
+import { AppGetFacade } from '../facade/app/app-get.facade'
 import { LicensesForAppFacade } from '../facade/license/licenses-for-app.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { AppUidParamDto } from './model/app-uid-param.dto'
@@ -16,6 +18,7 @@ export class AppsController {
     private readonly licensesForAppFacade: LicensesForAppFacade,
     private readonly appRunFacade: AppRunFacade,
     private readonly appCreateFacade: AppCreateFacade,
+    private readonly appGetFacade: AppGetFacade,
   ) {}
 
   @HttpCode(200)
@@ -23,6 +26,11 @@ export class AppsController {
   async createApp(@Body() body: SaveAppDTO): Promise<{ uid: Uid<'app'> }> {
     const appUid = await this.appCreateFacade.create(body)
     return { uid: appUid }
+  }
+
+  @Get('/:appUid')
+  async getApp(@Param('appUid') appUid: string): Promise<AppGetDTO> {
+    return this.appGetFacade.getApp(appUid)
   }
 
   @Get('/:appUid/licenses-to-accept')

@@ -38,7 +38,7 @@ describe('shouldIncludeInputValue', () => {
 describe('generateCopyUrl', () => {
   const UID = 'app-uid-1'
   const APP_SERIES_ID = 1
-  const APP = { uid: UID, app_series_id: APP_SERIES_ID } as IApp
+  const APP = { uid: UID, appSeriesId: APP_SERIES_ID } as IApp
   const displayData = JSON.stringify({ key: 'value' })
   const encodedData = btoa(encodeURIComponent(displayData))
 

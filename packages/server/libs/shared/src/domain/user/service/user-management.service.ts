@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/mysql'
 import { DNANEXUS_INVALID_EMAIL, ORG_EVERYONE } from '@shared/config/consts'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { createUserDeactivated } from '@shared/domain/event/event.helper'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { PendingUserDTO } from '@shared/domain/user/dto/pending-user.dto'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { Resource, USER_STATE, User } from '@shared/domain/user/user.entity'
@@ -22,6 +22,7 @@ export class UserManagementService {
     private readonly em: EntityManager,
     private readonly user: UserContext,
     private readonly userRepo: UserRepository,
+    private readonly eventHelper: EventHelper,
     @Inject(ADMIN_PLATFORM_CLIENT)
     private readonly adminClient: PlatformClient,
   ) {}
@@ -161,7 +162,7 @@ export class UserManagementService {
           user.normalizedEmail = encodeEmail(user.normalizedEmail)
         }
 
-        const event = await createUserDeactivated(actor, user)
+        const event = await this.eventHelper.createUserDeactivated(actor, user)
         this.em.persist(event)
       }
     })

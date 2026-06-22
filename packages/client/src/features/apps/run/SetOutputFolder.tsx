@@ -24,7 +24,7 @@ export const SetOutputFolder = ({
   spec: AppSpec
   setShowModal: (val: boolean) => void
 }) => {
-  const render = hasAppFileOutputs(spec.output_spec)
+  const render = hasAppFileOutputs(spec.outputSpec)
 
   return render ? (
     <Controller

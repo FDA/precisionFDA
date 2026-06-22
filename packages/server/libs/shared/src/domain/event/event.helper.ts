@@ -121,6 +121,24 @@ export class EventHelper {
     })
     return event
   }
+
+  async createUserDeactivated(actor: User, targetUser: User): Promise<Event> {
+    const event = new Event()
+    const organization = await actor.organization.load()
+    const data = JSON.stringify({
+      targetDxuser: targetUser.dxuser,
+      targetUserId: targetUser.id,
+    })
+    wrap(event).assign({
+      type: EVENT_TYPES.USER_DEACTIVATED,
+      orgHandle: organization.handle,
+      dxuser: actor.dxuser,
+      param1: targetUser.dxuser,
+      param2: targetUser.id.toString(),
+      data,
+    })
+    return event
+  }
 }
 
 // standalone functions, should be refactored into the component above

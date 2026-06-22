@@ -3,6 +3,7 @@ import { stub } from 'sinon'
 import { EntityManager } from '@mikro-orm/mysql'
 import { ORG_EVERYONE } from '@shared/config/consts'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { UserManagementService } from '@shared/domain/user/service/user-management.service'
 import { USER_STATE, User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
@@ -16,6 +17,7 @@ describe('user-management service tests', () => {
   const emPersistStub = stub()
   const emPopulateStub = stub()
   const loadEntityStub = stub()
+  const createUserDeactivatedStub = stub()
 
   const userRepo = createRepositoryStub<User>()
 
@@ -39,6 +41,9 @@ describe('user-management service tests', () => {
         loadEntity: loadEntityStub,
       },
       userRepo as unknown as UserRepository,
+      {
+        createUserDeactivated: createUserDeactivatedStub,
+      } as unknown as EventHelper,
       platformClient,
     )
   }
@@ -50,6 +55,12 @@ describe('user-management service tests', () => {
     emPersistStub.reset()
     emPopulateStub.reset()
     loadEntityStub.reset()
+    createUserDeactivatedStub.reset()
+    createUserDeactivatedStub.callsFake(async (actor: User, targetUser: User) => ({
+      type: EVENT_TYPES.USER_DEACTIVATED,
+      param1: targetUser.dxuser,
+      dxuser: actor.dxuser,
+    }))
     userUnlockStub.throws()
     userResetMfaStub.throws()
     emPopulateStub.resolves()

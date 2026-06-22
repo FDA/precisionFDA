@@ -32,7 +32,8 @@ export const useAppSelectionActions = ({
   selectedItems,
   resourceKeys,
   resetSelected,
-  comparatorLinks,
+  appComparator,
+  appDefaultComparator,
   challenges,
   isContributorOrHigher,
 }: {
@@ -41,7 +42,8 @@ export const useAppSelectionActions = ({
   selectedItems: IApp[]
   resourceKeys: string[]
   resetSelected?: () => void
-  comparatorLinks: { [key: string]: string }
+  appComparator?: boolean
+  appDefaultComparator?: boolean
   challenges: IChallenge[] | undefined
   isContributorOrHigher?: boolean
 }): UseAppSelectionActionsResult => {
@@ -52,10 +54,15 @@ export const useAppSelectionActions = ({
   const isAdmin = user?.admin
   const canDeleteApp = selected.every(
     app =>
-      app.added_by === user?.dxuser ||
+      app.addedBy === user?.dxuser ||
       (isAdmin && app.scope === 'public') ||
       (isContributorOrHigher && app.scope === `space-${spaceId}`),
   )
+
+  // An app is runnable when it's not in a space (accessible = runnable),
+  // or when the user has contributor-or-higher role in that space.
+  const isInSpace = selected.length === 1 && selected[0]?.scope?.startsWith('space-')
+  const canRunApp = !isInSpace || !!isContributorOrHigher
 
   const featureMutation = useFeatureMutation({
     resource: 'apps',
@@ -170,7 +177,7 @@ export const useAppSelectionActions = ({
     isShown: isShownTagsModal,
   } = useEditTagsModal({
     resource: 'apps',
-    selected: { uid: `app-series-${selected[0]?.app_series_id}`, name: selected[0]?.name, tags: selected[0]?.tags },
+    selected: { uid: `app-series-${selected[0]?.appSeriesId}`, name: selected[0]?.name, tags: selected[0]?.tags },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
@@ -205,7 +212,7 @@ export const useAppSelectionActions = ({
       name: 'Run',
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/jobs/new`,
-      isDisabled: selected.length !== 1 || !selected[0].links.run_job,
+      isDisabled: selected.length !== 1 || !canRunApp,
       cloudResourcesConditionType: 'all',
     },
     {
@@ -218,7 +225,7 @@ export const useAppSelectionActions = ({
       name: 'Edit',
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/edit`,
-      isDisabled: selected.length !== 1 || !selected[0].latest_revision || selected[0].added_by !== user?.dxuser,
+      isDisabled: selected.length !== 1 || !selected[0].latestRevision || selected[0].addedBy !== user?.dxuser,
     },
     {
       name: 'Fork to',
@@ -226,7 +233,7 @@ export const useAppSelectionActions = ({
       func: () => setForkToModal(true),
       modal: forkToModal,
       showModal: isShownForkToModal,
-      isDisabled: selected.length !== 1 || selected[0]?.entity_type === 'https',
+      isDisabled: selected.length !== 1 || selected[0]?.entityType === 'https',
     },
     {
       name: 'Export to',
@@ -249,7 +256,7 @@ export const useAppSelectionActions = ({
       func: () => {
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
       },
-      isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
+      isDisabled: selected.length === 0 || !selected.every(e => !e.featured),
       shouldHide: !isAdmin || homeScope !== 'everybody',
     },
     {
@@ -258,7 +265,7 @@ export const useAppSelectionActions = ({
       func: () => {
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
       },
-      isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
+      isDisabled: selected.length === 0 || !selected.every(e => e.featured),
       shouldHide: !isAdmin || (homeScope !== 'everybody' && homeScope !== 'featured'),
     },
     {
@@ -273,7 +280,7 @@ export const useAppSelectionActions = ({
       name: 'Copy to space',
       type: 'modal',
       func: () => setCopyToSpaceModal(true),
-      isDisabled: selected.length === 0 || selected.some(e => !e.links.copy),
+      isDisabled: selected.length === 0,
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
@@ -299,7 +306,8 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length !== 1,
       modal: attachToChallengeModal,
       showModal: isShownAttachToChallengeModal,
-      shouldHide: !challenges || challenges.length === 0 || !selected[0]?.links?.assign_app,
+      shouldHide:
+        !challenges || challenges.length === 0 || (!isAdmin && selected[0]?.addedBy !== user?.dxuser),
     },
     {
       name: 'Edit tags',
@@ -308,7 +316,7 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length !== 1,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser) || selected.length !== 1,
+      shouldHide: (!isAdmin && selected[0]?.addedBy !== user?.dxuser) || selected.length !== 1,
     },
     {
       name: 'Edit properties',
@@ -317,14 +325,14 @@ export const useAppSelectionActions = ({
       modal: propertiesModal,
       isDisabled: selected.length === 0,
       showModal: isShownPropertiesModal,
-      shouldHide: !isAdmin && selected[0]?.added_by !== user?.dxuser,
+      shouldHide: !isAdmin && selected[0]?.addedBy !== user?.dxuser,
     },
     {
       name: 'Add to Comparators',
       type: 'modal',
       func: () => setShowComparatorAddModal(true, 'add_to_comparators'),
       isDisabled: false,
-      shouldHide: !comparatorLinks?.add_to_comparators,
+      shouldHide: !isAdmin || selected[0]?.scope !== 'public' || appComparator || appDefaultComparator,
       showModal: isShownComparatorAddModal,
       modal: comparatorAddModal,
     },
@@ -333,7 +341,7 @@ export const useAppSelectionActions = ({
       type: 'modal',
       func: () => setShowComparatorSetModal(true, 'set_app'),
       isDisabled: false,
-      shouldHide: !comparatorLinks?.set_app,
+      shouldHide: !isAdmin || selected[0]?.scope !== 'public' || appDefaultComparator,
       showModal: isShownComparatorSetModal,
       modal: comparatorSetModal,
     },
@@ -342,7 +350,7 @@ export const useAppSelectionActions = ({
       type: 'modal',
       func: () => setShowComparatorRemoveModal(true, 'remove_from_comparators'),
       isDisabled: false,
-      shouldHide: !comparatorLinks?.remove_from_comparators,
+      shouldHide: !isAdmin || selected[0]?.scope !== 'public' || !appComparator || appDefaultComparator,
       showModal: isShownComparatorRemoveModal,
       modal: comparatorRemoveModal,
     },

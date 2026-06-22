@@ -20,7 +20,6 @@ export interface InputSpec extends IOSpec {
   choices: string[] | null
 }
 
-type Links = Record<string, string>
 
 export type ResourceProperties = { [key: string]: string }
 
@@ -33,38 +32,36 @@ export interface IApp {
   id: number
   uid: string
   dxid: string
-  entity_type: string
+  entityType: string
   name: string
   title: string
-  added_by: string
-  added_by_fullname: string
-  created_at: string
-  created_at_date_time: string
-  updated_at: string
+  addedBy: string
+  addedByFullname: string
+  createdAt: string
+  createdAtDateTime: string
+  updatedAt: string
   location: HomeScope | 'Private'
   readme: string
   revision: number
-  latest_revision: boolean
-  job_count: number
-  app_series_id: number
-  run_by_you: string
+  latestRevision: boolean
+  jobCount: number
+  appSeriesId: number
+  runByYou: string
   org: string
   explorers: number
   featured: boolean
   active: boolean
   user: AppUser
-  /** @deprecated create links from client side */
-  links: Links
   tags: string[]
   properties: ResourceProperties
   scope: ServerScope
-  forked_from: string | null
+  forkedFrom: string | null
 }
 
 export interface AppRevision {
   id: number
   revision: number
-  tag_list: []
+  tagList: []
   title: string
   uid: string
   version: string
@@ -76,10 +73,10 @@ export interface OutputSpec extends IOSpec {
 }
 
 export interface AppSpec {
-  instance_type: ComputeResourceKey
-  internet_access: boolean
-  input_spec: InputSpec[]
-  output_spec: OutputSpec[]
+  instanceType: ComputeResourceKey
+  internetAccess: boolean
+  inputSpec: InputSpec[]
+  outputSpec: OutputSpec[]
 }
 
 export interface AppMeta {
@@ -91,7 +88,6 @@ export interface AppMeta {
   default_comparator: boolean
   discussions: []
   jobs: IJob[]
-  links: Links
   notes: Note[]
   revisions: AppRevision[]
   spec: AppSpec

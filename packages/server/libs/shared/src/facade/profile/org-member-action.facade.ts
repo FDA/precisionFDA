@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { createUserDeactivated } from '@shared/domain/event/event.helper'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { OrgActionRequestService } from '@shared/domain/org-action-request/org-action-request.service'
 import { Organization } from '@shared/domain/org/organization.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -19,6 +19,7 @@ export class OrgMemberActionFacade {
     private readonly userCtx: UserContext,
     private readonly userService: UserService,
     private readonly orgActionRequestService: OrgActionRequestService,
+    private readonly eventHelper: EventHelper,
   ) {}
 
   /**
@@ -41,12 +42,11 @@ export class OrgMemberActionFacade {
       throw new InvalidStateError('User is already deactivated')
     }
 
-    await this.em.transactional(async () => {
-      targetUser.userState = USER_STATE.DEACTIVATED
+    targetUser.userState = USER_STATE.DEACTIVATED
 
-      const event = await createUserDeactivated(currentUser, targetUser)
-      this.em.persist(event)
-    })
+    const event = await this.eventHelper.createUserDeactivated(currentUser, targetUser)
+    this.em.persist(event)
+    await this.em.flush()
 
     this.logger.log(`User ${targetUserId} deactivated by org admin ${currentUser.id} in org ${org.id}`)
   }

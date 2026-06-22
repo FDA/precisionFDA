@@ -164,7 +164,11 @@ export const AppShowPage = () => {
   const context = useUnifiedRouteContext()
   const { appUid } = useParams<{ appUid: string }>()
 
-  return <AppsShow homeContext={context.homeContext} spaceId={context.space?.id.toString()} appUid={appUid!} />
+  const isContributorOrHigher = context.space
+    ? isContributorOrHigherRole(context.space.current_user_membership.role)
+    : undefined
+
+  return <AppsShow homeContext={context.homeContext} spaceId={context.space?.id.toString()} appUid={appUid!} isContributorOrHigher={isContributorOrHigher} />
 }
 
 export const AppSpecPage = () => {

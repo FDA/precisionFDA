@@ -9,6 +9,7 @@ import { CubeIcon } from '../../components/icons/CubeIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { StyledLinkCell, StyledNameCell, StyledRunByYouLink } from '../home/home.styles'
 import { getBasePathFromScope } from '../home/utils'
+import { getSpaceIdFromScope } from '@/utils'
 import { IApp } from './apps.types'
 
 export const Pill = styled.div`
@@ -96,12 +97,16 @@ export const useAppsColumns = ({
     },
     {
       header: 'Added By',
-      accessorKey: 'added_by',
+      // NOTE: column `id` stays snake_case because it is used as the `order_by`/`filters[...]`
+      // param sent to the Rails `/api/apps` list endpoint. Remove `id`/`accessorFn` and
+      // switch back to `accessorKey: 'addedBy'` once the list endpoint is rewritten.
+      id: 'added_by',
+      accessorFn: row => row.addedBy,
       filterFn: 'includesString',
       size: 200,
       cell: props => (
-        <a data-turbolinks="false" href={props.cell.row.original.links.user}>
-          {props.cell.row.original.added_by_fullname}
+        <a data-turbolinks="false" href={`/users/${props.cell.row.original.addedBy}`}>
+          {props.cell.row.original.addedByFullname}
         </a>
       ),
     },
@@ -110,16 +115,22 @@ export const useAppsColumns = ({
       accessorKey: 'location',
       filterFn: 'includesString',
       size: 250,
-      cell: props => (
-        <StyledLinkCell to={`${props.row.original.links.space}/apps`}>
-          <ObjectGroupIcon />
-          {props.getValue<string>()}
-        </StyledLinkCell>
-      ),
+      cell: props => {
+        const spaceId = getSpaceIdFromScope(props.row.original.scope)
+        const spaceLink = spaceId ? `/spaces/${spaceId}/apps` : ''
+        return (
+          <StyledLinkCell to={spaceLink}>
+            <ObjectGroupIcon />
+            {props.getValue<string>()}
+          </StyledLinkCell>
+        )
+      },
     },
     {
       header: 'Created',
-      accessorKey: 'created_at_date_time',
+      // NOTE: snake_case `id` kept for the Rails list endpoint sort param. See above.
+      id: 'created_at_date_time',
+      accessorFn: row => row.createdAtDateTime,
       filterFn: 'includesString',
       sortDescFirst: true,
       enableColumnFilter: false,
@@ -128,7 +139,9 @@ export const useAppsColumns = ({
     },
     {
       header: 'Run By You',
-      accessorKey: 'run_by_you',
+      // NOTE: snake_case `id` kept for the Rails list endpoint sort param. See above.
+      id: 'run_by_you',
+      accessorFn: row => row.runByYou,
       enableColumnFilter: false,
       size: 100,
       cell: props => (

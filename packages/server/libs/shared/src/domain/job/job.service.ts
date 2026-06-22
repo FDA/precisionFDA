@@ -82,6 +82,24 @@ export class JobService implements SearchableByUid<'job'> {
     return this.jobRepo.findAccessibleOne({ id })
   }
 
+  async countAccessibleByAppSeries(appSeriesId: number): Promise<number> {
+    return this.jobRepo.countAccessible({ appSeriesId })
+  }
+
+  /**
+   * Count distinct users who have run jobs for a given app series (explorers).
+   */
+  async countExplorersByAppSeries(appSeriesId: number): Promise<number> {
+    return this.jobRepo.countDistinctUsersByAppSeries(appSeriesId)
+  }
+
+  /**
+   * Get distinct app IDs from jobs run by the current user for a given app series.
+   */
+  async findUserJobAppIds(appSeriesId: number): Promise<number[]> {
+    return this.jobRepo.findDistinctAppIdsByUserAndAppSeries(this.user.id, appSeriesId)
+  }
+
   getAccessibleEntityByUid(uid: Uid<'job'>): Promise<Job | null> {
     return this.jobRepo.findAccessibleOne({ uid })
   }

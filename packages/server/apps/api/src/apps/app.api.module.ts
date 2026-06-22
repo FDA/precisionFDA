@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common'
 import { AppModule } from '@shared/domain/app/app.module'
 import { AppFacadeModule } from '@shared/facade/app/app-facade.module'
+import { AppGetApiFacadeModule } from '../facade/app/app-get-api-facade.module'
 import { LicenseApiFacadeModule } from '../facade/license/license-api-facade.module'
 import { AppsController } from './apps.controller'
 
 @Module({
-  imports: [AppModule, LicenseApiFacadeModule, AppFacadeModule],
+  imports: [AppModule, LicenseApiFacadeModule, AppFacadeModule, AppGetApiFacadeModule],
   controllers: [AppsController],
 })
 export class AppApiModule {}

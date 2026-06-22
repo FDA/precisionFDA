@@ -75,9 +75,15 @@ space-memberships/
 
 Controller imports API facade module (or shared facade). **Never work with entities directly.**
 
+**Provider registration rule:**
+- If a facade is already provided/exported by a shared facade module (`libs/shared/src/facade/...`), do **not** redeclare it in `providers` of an API module.
+- API modules should consume exported facades via `imports`, and keep `providers` only for API-local classes.
+
 ### API Facades (`apps/api/src/facade/`)
 
 Optional layer when API needs extra orchestration beyond shared facades.
+
+- Do not duplicate shared facades in `apps/api/src/facade`; create API facades only for API-specific orchestration.
 
 **Strict rules:**
 - Every API facade class must be declared in its own API facade module.
@@ -136,6 +142,11 @@ export class SpaceMembershipService {
   ) {}
 }
 ```
+
+**Entity retrieval:**
+- Prefer the domain's repository (`find`, `findOne`, custom finder methods) over calling `EntityManager` / `em.find*` directly from a service.
+- Add a new repository method when an existing one does not fit, instead of building ad-hoc queries inside the service.
+- Keep query/filter logic (where clauses, joins, ordering) in the repository; services should only orchestrate calls and apply business rules.
 
 **Transactions:**
 ```ts
@@ -202,6 +213,7 @@ export class SpaceMembershipsController {
 - DTO static mapping methods (e.g. `fromEntity`) must be synchronous
 - Do not perform database or platform calls in DTO static methods
 - Load required relations in service/facade before calling DTO mappers
+- **DTO attributes must use `camelCase` naming** (both request and response DTOs). Do not expose snake_case fields from entities/DB columns directly — map them to camelCase in the DTO. If a legacy Rails endpoint still consumes/emits snake_case for the same shape, add a temporary converter at the boundary and remove it once the Rails endpoint is rewritten.
 - NestJS DTOs must be declared as `class` (not `interface`) so runtime metadata is available for validation/Swagger
 
 ```ts
@@ -358,6 +370,7 @@ describe('SpaceMembershipService', () => {
 | Files | kebab-case | `space-membership.service.ts` |
 | URLs | kebab-case | `/data-portals/:id` |
 | Params | camelCase | `membershipIds` |
+| DTO attributes | camelCase | `appSeriesId`, `createdAtDateTime` |
 | Classes | PascalCase + suffix | `SpaceMembershipService` |
 
 ### Model Files Convention

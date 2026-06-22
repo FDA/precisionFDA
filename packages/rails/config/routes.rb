@@ -220,7 +220,7 @@ Rails.application.routes.draw do
       end
 
 
-      resources :apps do
+      resources :apps, except: [:show] do
         get :describe, on: :member, to: "apps#describe"
         get :jobs, on: :member, to: "jobs#app"
         get :licenses_to_accept
