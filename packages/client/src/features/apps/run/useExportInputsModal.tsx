@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
-import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
+import CodeMirrorEditor from '../../../components/CodeMirrorEditor/CodeMirrorEditor'
 import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { useFetchFilesByUIDQuery } from '../../files/query/useFetchFilesByUIDQuery'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
@@ -53,7 +53,7 @@ export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: 
     >
       <ModalHeaderTop headerText="Export Input Values" hide={() => setShowModal(false)} />
       <ModalScroll>
-        <MonacoEditor
+        <CodeMirrorEditor
           options={{
             minimap: {
               enabled: false,

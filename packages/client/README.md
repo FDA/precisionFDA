@@ -12,7 +12,7 @@ The main React frontend for the precisionFDA project.
 - **State Management**: TanStack React Query
 - **Forms**: React Hook Form with Yup validation
 - **Rich Text Editor**: Lexical
-- **Code Editor**: Monaco Editor
+- **Code Editor**: CodeMirror 6
 - **Testing**: Vitest (unit), Playwright (e2e)
 - **Component Development**: Storybook
 - **API Mocking**: MSW (Mock Service Worker)

@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
+import CodeMirrorEditor from '../../../components/CodeMirrorEditor/CodeMirrorEditor'
+import ExternalLink from '../../../components/Controls/ExternalLink'
 import { Markdown } from '../../../components/Markdown'
 import { FormFields, Help, StyledMarkdownAppShow } from './apps-form.styles'
-import ExternalLink from '../../../components/Controls/ExternalLink'
-import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
 
 const ButtonRow = styled.div`
   display: flex;
@@ -47,20 +47,12 @@ const TopReadme = styled.div`
 
 const View = styled.div<{ $shouldDisplay: boolean }>`
   display: none;
-  ${({ $shouldDisplay }) =>
-    $shouldDisplay && 'display: initial;'
-  }
+  ${({ $shouldDisplay }) => $shouldDisplay && 'display: initial;'}
 `
 
 type Selection = 'edit' | 'preview'
 
-export const ReadMeInput = ({
-  onChange,
-  value,
-}: {
-  onChange: (val?: string) => void
-  value: string
-}) => {
+export const ReadMeInput = ({ onChange, value }: { onChange: (val?: string) => void; value: string }) => {
   const [selected, setSelected] = useState<Selection>('edit')
   const handleClick = (val: Selection) => {
     setSelected(val)
@@ -71,7 +63,10 @@ export const ReadMeInput = ({
       <TopReadme>
         <Help>
           <span>Need help?</span>
-          <ExternalLink to="https://jonschlinkert.github.io/remarkable/demo/"> Learn how to format Markdown</ExternalLink>
+          <ExternalLink to="https://jonschlinkert.github.io/remarkable/demo/">
+            {' '}
+            Learn how to format Markdown
+          </ExternalLink>
         </Help>
         <ButtonRow>
           <Button type="button" data-active={selected === 'edit'} onClick={() => handleClick('edit')}>
@@ -84,7 +79,7 @@ export const ReadMeInput = ({
       </TopReadme>
 
       <View $shouldDisplay={selected === 'edit'}>
-        <MonacoEditor
+        <CodeMirrorEditor
           height="40vh"
           onChange={val => onChange(val)}
           defaultLanguage="markdown"

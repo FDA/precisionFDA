@@ -169,15 +169,15 @@ export const CreateAppForm = {
     // Click Script tab
     await page.getByText('Write your shell script').click()
 
-    // Wait for Monaco editor to load - it can take a while
-    const editor = page.getByTestId('script-editor').locator('.monaco-editor')
+    // Wait for CodeMirror editor to load
+    const editor = page.getByTestId('script-editor').locator('.cm-editor')
     await expect(editor).toBeVisible({ timeout: 90000 })
     await page.waitForTimeout(500)
 
     // Click into the editor and type the script
     await editor.click()
 
-    // Monaco editor - use keyboard to type
+    // CodeMirror editor - use keyboard to type
     await page.keyboard.type(text, { delay: 0 })
   },
 

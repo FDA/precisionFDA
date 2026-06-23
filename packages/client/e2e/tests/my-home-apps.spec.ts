@@ -473,8 +473,8 @@ test.describe('My Home - Apps Run', () => {
     // Click Script tab
     await page.getByText('Write your shell script').click()
 
-    // Wait for Monaco editor to load
-    const editor = page.getByTestId('script-editor').locator('.monaco-editor')
+    // Wait for CodeMirror editor to load
+    const editor = page.getByTestId('script-editor').locator('.cm-editor')
     await expect(editor).toBeVisible({ timeout: 90000 })
     await page.waitForTimeout(500)
 
@@ -655,8 +655,8 @@ test.skip('My Home - Run file to output app with output to folder', () => {
     // Click Script tab
     await page.getByText('Write your shell script').click()
 
-    // Wait for Monaco editor
-    const editor = page.getByTestId('script-editor').locator('.monaco-editor')
+    // Wait for CodeMirror editor
+    const editor = page.getByTestId('script-editor').locator('.cm-editor')
     await expect(editor).toBeVisible({ timeout: 90000 })
     await page.waitForTimeout(500)
     await editor.click()

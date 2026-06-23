@@ -6,11 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { type ComputeResourceKey, RESOURCE_LABELS } from '@/types/user'
 import { cn } from '@/utils/cn'
 import { Button } from '../../../components/Button'
+import CodeMirrorEditor from '../../../components/CodeMirrorEditor/CodeMirrorEditor'
 import { FieldGroup, InputError } from '../../../components/form/form.styles'
 import { InputText } from '../../../components/InputText'
 import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
 import { Loader } from '../../../components/Loader'
-import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
 import { PageTitle } from '../../../components/Page/page.styles'
 import { ButtonRow } from '../../../components/Public/public-layout.styles'
 import { PfTabContent } from '../../../components/Tabs/PfTab'
@@ -25,10 +25,6 @@ import { useInstanceTypeAvailability } from '../instanceTypeAvailability'
 import { getBaseLink } from '../run/utils'
 import { useComputeInstances } from '../useComputeInstances'
 import { useUploadAppConfigFile } from '../useUploadAppConfigFile'
-import { getChoicesValueFromForm, getDefaultValueFromForm, handleSnakeNameChange, validationSchema } from './common'
-import { Inputs } from './Inputs'
-import { Outputs } from './Outputs'
-import { ReadMeInput } from './ReadMeInput'
 import {
   FormFields,
   FormSectionTop,
@@ -44,6 +40,10 @@ import {
   TopFieldGroupTarget,
   TopFieldGroupUbuntu,
 } from './apps-form.styles'
+import { getChoicesValueFromForm, getDefaultValueFromForm, handleSnakeNameChange, validationSchema } from './common'
+import { Inputs } from './Inputs'
+import { Outputs } from './Outputs'
+import { ReadMeInput } from './ReadMeInput'
 import { VmEnvTab } from './VmEnvTab'
 
 type SelectedSection = 'io' | 'vm' | 'script' | 'readme'
@@ -52,13 +52,7 @@ type InstanceTypeFallback = {
   requested: string
 }
 
-const InstanceTypeFallbackNotice = ({
-  fallback,
-  onClick,
-}: {
-  fallback: InstanceTypeFallback
-  onClick: () => void
-}) => (
+const InstanceTypeFallbackNotice = ({ fallback, onClick }: { fallback: InstanceTypeFallback; onClick: () => void }) => (
   <button
     type="button"
     onClick={onClick}
@@ -130,7 +124,8 @@ const AppFormInner = ({
   const baseDefaults = defaultVals ?? initialFormValues
   const requestedInstanceType = baseDefaults.instance_type
   const requestedInstanceTypeIsAllowed = computeInstances.some(i => i.value === requestedInstanceType)
-  const fallbackInstanceType = !requestedInstanceTypeIsAllowed && computeInstances.length > 0 ? computeInstances[0] : null
+  const fallbackInstanceType =
+    !requestedInstanceTypeIsAllowed && computeInstances.length > 0 ? computeInstances[0] : null
 
   const {
     register,
@@ -415,7 +410,7 @@ const AppFormInner = ({
                       Learn more about app scripts
                     </a>
                   </Help>
-                  <MonacoEditor
+                  <CodeMirrorEditor
                     height="40vh"
                     onChange={value => field.onChange(value)}
                     defaultLanguage="shell"
