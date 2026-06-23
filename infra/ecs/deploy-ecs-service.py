@@ -73,8 +73,7 @@ class EcsDeployer:
         self.stages = [
             ["pfda-db-migrate"],
             ["pfda-nodejs-api", "pfda-nodejs-api-internal", "pfda-nodejs-worker",
-             "pfda-nodejs-admin-platform-client", "pfda-docs", "pfda-nginx"],
-            ["pfda-web"]
+             "pfda-nodejs-admin-platform-client", "pfda-docs", "pfda-nginx", "pfda-web"],
         ]
 
         if self.deployment_type == "gsrs":

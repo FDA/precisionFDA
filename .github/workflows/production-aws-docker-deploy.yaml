@@ -116,6 +116,24 @@ jobs:
           echo "AWS Account ID: $ACCOUNT_ID"
           echo "ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
 
+      - name: Invoke SSM backup Lambda
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          FILE_NAME="ssm_deployment_backup_${REF_NAME}"
+          echo "Triggering SSM parameter backup (file_name=${FILE_NAME})..."
+          PAYLOAD=$(jq -n --arg name "$FILE_NAME" '{"file_name": $name}')
+          aws lambda invoke \
+            --function-name pfda_ssm_backup \
+            --payload "$PAYLOAD" \
+            --cli-binary-format raw-in-base64-out \
+            response.json
+          cat response.json
+          # Fail the deploy unless the Lambda explicitly returns ok=true
+          if ! jq -e '.ok == true' response.json > /dev/null 2>&1; then
+            echo "Lambda backup reported a failure" && exit 1
+          fi
+
       - name: Deploy ECS Service
         working-directory: infra/ecs
         env:
