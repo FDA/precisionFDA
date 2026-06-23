@@ -128,25 +128,6 @@ module Api
       Challenge.accessible_by(@context)
     end
 
-    def propose
-      proposal = unsafe_params.slice(:name, :email, :organisation,
-                                     :specific_question, :specific_question_text,
-                                     :data_details, :data_details_text)
-
-      # PREPARED LOGIC FOR MOVING TO NODE ONCE EMAIL TEMPLATES ARE THERE
-      # proposal[:captchaValue] = params[:captchaValue] unless @context.logged_in?
-      # https_apps_client.propose_challenge(proposal)
-
-
-      if @context.logged_in? || verify_captcha_assessment(params[:captchaValue], "propose")
-        https_apps_client.email_send(NotificationPreference.email_types[:challenge_proposal_received], proposal)
-        render json: {}
-      else
-        raise ApiError,
-              "Your proposal was not submitted because of ReCaptcha validation failed, Please try again."
-      end
-    end
-
     private
 
     def filter_challenges

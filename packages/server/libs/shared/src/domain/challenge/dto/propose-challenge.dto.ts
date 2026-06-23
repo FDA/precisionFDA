@@ -1,26 +1,32 @@
-import { IsOptional, IsString } from 'class-validator'
+import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator'
 
 export class ProposeChallengeDTO {
   @IsString()
   name: string
 
+  @IsEmail()
   @IsString()
   email: string
 
+  @IsOptional()
   @IsString()
-  organisation: string
+  organisation?: string
 
-  @IsString()
-  specificQuestion: string
+  @IsOptional()
+  @IsBoolean()
+  specificQuestion?: boolean
 
+  @IsOptional()
   @IsString()
-  specificQuestionText: string
+  specificQuestionText?: string
 
-  @IsString()
-  dataDetails: string
+  @IsOptional()
+  @IsBoolean()
+  dataDetails?: boolean
 
+  @IsOptional()
   @IsString()
-  dataDetailsText: string
+  dataDetailsText?: string
 
   @IsOptional()
   @IsString()

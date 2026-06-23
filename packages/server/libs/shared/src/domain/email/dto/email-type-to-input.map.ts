@@ -1,7 +1,7 @@
 import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
 import { ChallengeCreatedDTO } from '@shared/domain/email/dto/challenge-created.dto'
 import { ChallengeOpenedDTO } from '@shared/domain/email/dto/challenge-opened.dto'
-import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal.dto'
+import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal-input.dto'
 import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
 import { EmptyEmailInputDTO } from '@shared/domain/email/dto/empty-email-input.dto'
 import { IdWithReceiversInputDTO } from '@shared/domain/email/dto/id-with-receivers-input.dto'

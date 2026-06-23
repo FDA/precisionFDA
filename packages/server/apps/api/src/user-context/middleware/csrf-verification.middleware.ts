@@ -39,6 +39,10 @@ export class CSRFVerificationMiddleware implements NestMiddleware {
         userSessionDecrypted: Boolean(userSession),
       })
 
+      // todo jiri - this PermissionError is thrown from middleware, which runs outside the
+      // Nest exception-filter pipeline, so when forgery protection is enabled (prod) a failed
+      // CSRF check returns an HTTP 500 instead of a clean 403. Needs an Express-level error
+      // handler that maps BaseError -> its statusCode, or this check moved into a guard.
       throw new PermissionError()
     }
     next()

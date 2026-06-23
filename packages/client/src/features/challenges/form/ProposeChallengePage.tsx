@@ -1,53 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
-import styled from 'styled-components'
-import NavigationBar from '../../../components/NavigationBar/NavigationBar'
-import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
-import { formatMutationErrors } from '../../../hooks/useMutationErrorEffect'
-import PublicLayout from '../../../layouts/PublicLayout'
+import { Link } from 'react-router'
+import { Button } from '@/components/Button'
+import { CircleCheckIcon } from '@/components/icons/CircleCheckIcon'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { GoogleReCaptchaV3 } from '@/components/ReCaptchaV3'
+import { formatMutationErrors } from '@/hooks/useMutationErrorEffect'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import PublicLayout from '../../../layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { ProposeChallengePayload, proposeChallengeRequest } from './api'
-import { ProposeChallengeForm, ProposeChallengeFormValues } from './ProposeChallengeForm'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
-
-const StyledProposeChallengePage = styled.div`
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-around;
-  align-items: stretch;
-  max-width: 1330px;
-  margin-left: auto;
-  margin-right: auto;
-  flex: 1;
-`
-const LeftColumn = styled.div`
-  width: 288px;
-  flex: 0 0 288px;
-  padding-top: 24px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  padding-right: 0;
-
-  p {
-    margin-bottom: 8px;
-  }
-`
-const MiddleColumn = styled.div`
-  flex-grow: 1;
-  padding-left: 32px;
-  padding-right: 32px;
-  padding-top: 24px;
-  padding-bottom: 24px;
-  overflow-x: auto;
-`
-const ProposeChallengeHeading = styled.div`
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 8px;
-`
+import { type ProposeChallengePayload, proposeChallengeRequest } from './api'
+import { ProposeChallengeForm, type ProposeChallengeFormValues } from './ProposeChallengeForm'
 
 const ProposeChallengePage = () => {
   const user = useAuthUser()
@@ -73,7 +39,9 @@ const ProposeChallengePage = () => {
     },
   })
 
-  const mutationErrors = formatMutationErrors(mutation.error instanceof AxiosError ? mutation.error.response?.data : undefined)
+  const mutationErrors = formatMutationErrors(
+    mutation.error instanceof AxiosError ? mutation.error.response?.data : undefined,
+  )
 
   const handleSubmit = async (v: ProposeChallengeFormValues) => {
     if (!isLoggedIn && recaptchaSiteKey) {
@@ -93,33 +61,47 @@ const ProposeChallengePage = () => {
 
   const thankYouMessage = () => {
     return (
-      <div className="challenge-propose-form-container__success">
-        <h3>Thank you</h3>
-        <p>Your challenge proposal has been submitted successfully! You will hear from us shortly.</p>
+      <div className="flex flex-col items-center gap-3 rounded-lg border border-layout-border bg-(--tertiary-30) px-8 py-10 text-center">
+        <span className="text-(--success-600)">
+          <CircleCheckIcon height={48} />
+        </span>
+        <h3 className="m-0 text-lg font-semibold text-(--c-text-700)">Thank you</h3>
+        <p className="m-0 max-w-105 text-(--c-text-500)">
+          Your challenge proposal has been submitted successfully! You will hear from us shortly.
+        </p>
+        <Button as={Link} to="/challenges" data-variant="primary" className="mt-2">
+          Back to Challenges
+        </Button>
       </div>
     )
   }
 
   const renderContent = () => {
     return (
-      <StyledProposeChallengePage>
-        <LeftColumn>
-          <ProposeChallengeHeading>Propose a Challenge</ProposeChallengeHeading>
-          <p>
-            Do you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would like to put
-            in front of the precisionFDA expert community.
+      <div className="mx-auto flex w-full max-w-225 flex-1 flex-col items-center gap-5 px-4 py-4 sm:px-8">
+        <header className="w-full max-w-200 text-center">
+          <h1 className="m-0 text-3xl font-semibold tracking-tight text-(--c-text-700)">Propose a Challenge</h1>
+          <p className="mx-auto mt-3 max-w-220 text-balance text-base text-(--c-text-500)">
+            Do you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would
+            like to put in front of the precisionFDA expert community?
           </p>
-          <p>Feel free to let us know! We would love to discuss this with you.</p>
-        </LeftColumn>
-        <MiddleColumn>
+          <p className="mt-1 text-base text-(--c-text-500)">
+            Feel free to let us know — we would love to discuss this with you.
+          </p>
+        </header>
+        <div className="w-full md:w-125">
           {submissionSuccess ? (
             thankYouMessage()
           ) : (
-            <ProposeChallengeForm onSubmit={handleSubmit} mutationErrors={mutationErrors} />
+            <ProposeChallengeForm
+              onSubmit={handleSubmit}
+              mutationErrors={mutationErrors}
+              pending={mutation.isPending || triggerCaptcha}
+            />
           )}
           {triggerCaptcha && <GoogleReCaptchaV3 callback={onCaptchaSuccess} action="propose" />}
-        </MiddleColumn>
-      </StyledProposeChallengePage>
+        </div>
+      </div>
     )
   }
 

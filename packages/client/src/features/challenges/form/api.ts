@@ -4,9 +4,9 @@ export interface ProposeChallengePayload {
   name: string
   email: string
   organisation: string
-  specificQuestion: string
+  specificQuestion: boolean
   specificQuestionText: string
-  dataDetails: string
+  dataDetails: boolean
   dataDetailsText: string
   captchaValue?: string
 }
@@ -23,10 +23,6 @@ export async function fetchHostLeads(): Promise<[]> {
   return axios.get('/api/challenges/host_lead_users').then(r => r.data)
 }
 
-export async function fetchActiveUsers(): Promise<[]> {
-  return axios.get('/api/users/active').then(r => r.data)
-}
-
 export async function fetchGuestLeads(): Promise<[]> {
   return axios.get('/api/challenges/guest_lead_users').then(r => r.data)
 }
@@ -34,8 +30,3 @@ export async function fetchGuestLeads(): Promise<[]> {
 export async function fetchChallengeScopes(): Promise<string[]> {
   return axios.get('/api/challenges/scopes_for_select').then(r => r.data)
 }
-
-export async function fetchChallengeOrders() {
-  return axios.get('/api/challenges/challenges_for_select').then(r => r.data)
-}
-

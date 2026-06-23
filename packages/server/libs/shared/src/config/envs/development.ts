@@ -1,4 +1,4 @@
-import { ConfigOverride, parseBooleanFromProcess, parseIntFromProcess } from '..'
+import { ConfigOverride, defaultConfig, parseBooleanFromProcess, parseIntFromProcess } from '..'
 
 export const config: ConfigOverride = () => ({
   api: {
@@ -70,5 +70,5 @@ export const config: ConfigOverride = () => ({
   },
   bullBoardEnabled: true,
   nestjsDevtoolsEnabled: true,
-  challengeProposalRecipients: [],
+  challengeProposalRecipients: [defaultConfig.pfdaEmail],
 })

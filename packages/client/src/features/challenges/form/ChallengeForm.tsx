@@ -4,12 +4,14 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
-import { unstable_usePrompt } from 'react-router'
-import { FieldGroup } from '../../../components/form/FieldGroup'
-import { FieldLabel, InputError } from '../../../components/form/form.styles'
-import { InputDateTime, InputFile, InputText } from '../../../components/InputText'
-import { Loader } from '../../../components/Loader'
-import { Challenge } from '../types'
+import { Button } from '@/components/Button'
+import { FieldGroup } from '@/components/form/FieldGroup'
+import { FieldLabel, InputError } from '@/components/form/form.styles'
+import { InputDateTime, InputFile, InputText } from '@/components/InputText'
+import { Loader } from '@/components/Loader'
+import { NavigationBlockerDialog } from '@/components/NavigationBlockerDialog'
+import { useNavigationBlocker } from '@/hooks/useNavigationBlocker'
+import type { Challenge } from '../types'
 import { ChallengeCreateUpdateModal } from './ChallengeCreateUpdateModal'
 import { createValidationSchema, editValidationSchema } from './common'
 import { GuestLeadUserSelect } from './GuestLeadUserSelect'
@@ -17,7 +19,6 @@ import { HostLeadUserSelect } from './HostLeadUserSelect'
 import { ScopeFieldSelect } from './ScopeFieldSelect'
 import { ScoringAppUserSelect } from './ScoringAppUserSelect'
 import { StatusSelect } from './StatusSelect'
-import { Button } from '../../../components/Button'
 
 const StyledDateInput = styled(InputDateTime)`
   width: fit-content;
@@ -67,10 +68,7 @@ const ImageUploadPreview = styled.img`
 function getBase64(file?: File, callback?: (a: string | null) => void) {
   if (file) {
     const reader = new FileReader()
-    reader.addEventListener(
-      'load',
-      () => callback && callback(reader.result as string),
-    )
+    reader.addEventListener('load', () => callback && callback(reader.result as string))
     reader.readAsDataURL(file)
   }
 }
@@ -88,9 +86,7 @@ export const ChallengeForm = ({
 }) => {
   const [base64Image, setBase64Image] = React.useState<string | null>(null)
   const isEditMode = !!challenge
-  const ended = isEditMode
-    ? new Date().getTime() > new Date(challenge.endAt).getTime()
-    : false
+  const ended = isEditMode ? new Date().getTime() > new Date(challenge.endAt).getTime() : false
 
   const {
     control,
@@ -101,9 +97,7 @@ export const ChallengeForm = ({
     trigger,
   } = useForm<IChallengeForm>({
     mode: 'onBlur',
-    resolver: yupResolver(
-      isEditMode ? editValidationSchema : createValidationSchema,
-    ),
+    resolver: yupResolver(isEditMode ? editValidationSchema : createValidationSchema),
     defaultValues: {
       name: '',
       description: '',
@@ -129,33 +123,23 @@ export const ChallengeForm = ({
     }
   }, [watch().cardImageFile])
 
-
-  unstable_usePrompt({
-    message: 'There are unsaved changes, are you sure you want to leave?',
-    when: ({ currentLocation, nextLocation }) =>
-      (!isSubmitting && Object.keys(dirtyFields).length > 0) &&
-      currentLocation.pathname !== nextLocation.pathname,
-  })
+  const blocker = useNavigationBlocker(Object.keys(dirtyFields).length > 0, isSubmitting)
 
   return (
     <>
       <div>
         <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off" data-testid="challenge-form">
-          <FieldGroup label='Name' required>
+          <FieldGroup label="Name" required>
             <InputText
               placeholder="Name of the challenge"
               {...register('name')}
               disabled={isSubmitting}
               data-testid="challenge-name-input"
             />
-            <ErrorMessage
-              errors={errors}
-              name="name"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
 
-          <FieldGroup label='Description'>
+          <FieldGroup label="Description">
             <InputText
               type="textarea"
               placeholder="What is this challenge about?"
@@ -172,31 +156,16 @@ export const ChallengeForm = ({
 
           <FieldGroup>
             {base64Image ? (
-              <ImageUploadPreview
-                width={300}
-                src={base64Image || undefined}
-                alt="challenge img"
-              />
+              <ImageUploadPreview width={300} src={base64Image || undefined} alt="challenge img" />
             ) : (
               defaultValues?.cardImageUrl && (
-                <ImageUploadPreview
-                  width={300}
-                  src={defaultValues?.cardImageUrl}
-                  alt="challenge img"
-                />
+                <ImageUploadPreview width={300} src={defaultValues?.cardImageUrl} alt="challenge img" />
               )
             )}
 
             <>
-              <FieldLabel>
-                Challenge image file
-              </FieldLabel>
-              <InputFile
-                {...register('cardImageFile')}
-                type="file"
-                accept="image/*"
-                disabled={isSubmitting}
-              />
+              <FieldLabel>Challenge image file</FieldLabel>
+              <InputFile {...register('cardImageFile')} type="file" accept="image/*" disabled={isSubmitting} />
               <ErrorMessage
                 errors={errors}
                 name="cardImageFile"
@@ -205,11 +174,11 @@ export const ChallengeForm = ({
             </>
           </FieldGroup>
 
-          <FieldGroup label='Scope' required>
+          <FieldGroup label="Scope" required>
             <Controller
               name="scope"
               control={control}
-              render={({ field: { onChange, onBlur, value }}) => (
+              render={({ field: { onChange, onBlur, value } }) => (
                 <ScopeFieldSelect
                   isSubmitting={isSubmitting || isEditMode}
                   onChange={onChange}
@@ -218,24 +187,15 @@ export const ChallengeForm = ({
                 />
               )}
             />
-            <ErrorMessage
-              errors={errors}
-              name="scope"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="scope" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
 
-          <FieldGroup label='Scoring App User' required>
+          <FieldGroup label="Scoring App User" required>
             <Controller
               name="appOwnerId"
               control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
-                <ScoringAppUserSelect
-                  isSubmitting={isSubmitting}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                />
+              render={({ field: { value, onChange, onBlur } }) => (
+                <ScoringAppUserSelect isSubmitting={isSubmitting} onChange={onChange} onBlur={onBlur} value={value} />
               )}
             />
             <ErrorMessage
@@ -245,39 +205,31 @@ export const ChallengeForm = ({
             />
           </FieldGroup>
 
-          <FieldGroup label='Start at' required>
+          <FieldGroup label="Start at" required>
             <StyledDateInput
               type="datetime-local"
               {...register('startAt', { valueAsDate: true })}
               disabled={isSubmitting || ended}
               data-testid="challenge-start-at-input"
             />
-            <ErrorMessage
-              errors={errors}
-              name="startAt"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="startAt" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
 
-          <FieldGroup label='End at' required>
+          <FieldGroup label="End at" required>
             <StyledDateInput
               type="datetime-local"
               {...register('endAt', { valueAsDate: true })}
               disabled={isSubmitting || ended}
               data-testid="challenge-end-at-input"
             />
-            <ErrorMessage
-              errors={errors}
-              name="endAt"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="endAt" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
 
-          <FieldGroup label='Host Lead User' required>
+          <FieldGroup label="Host Lead User" required>
             <Controller
               name="hostLeadDxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
+              render={({ field: { value, onChange, onBlur } }) => (
                 <HostLeadUserSelect
                   isDisabled={isEditMode || isSubmitting}
                   onChange={onChange}
@@ -293,11 +245,11 @@ export const ChallengeForm = ({
             />
           </FieldGroup>
 
-          <FieldGroup label='Guest Lead User' required>
+          <FieldGroup label="Guest Lead User" required>
             <Controller
               name="guestLeadDxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
+              render={({ field: { value, onChange, onBlur } }) => (
                 <GuestLeadUserSelect
                   onChange={onChange}
                   onBlur={onBlur}
@@ -313,15 +265,15 @@ export const ChallengeForm = ({
             />
           </FieldGroup>
 
-          <FieldGroup label='Status' required >
+          <FieldGroup label="Status" required>
             <Controller
               name="status"
               control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
+              render={({ field: { value, onChange, onBlur } }) => (
                 <StatusSelect
                   isEditing={isEditMode}
                   isSubmitting={isSubmitting}
-                  onChange={(e) => {
+                  onChange={e => {
                     onChange(e)
                     trigger()
                   }}
@@ -330,14 +282,10 @@ export const ChallengeForm = ({
                 />
               )}
             />
-            <ErrorMessage
-              errors={errors}
-              name="status"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="status" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
 
-          <FieldGroup label='Preregistration Link'>
+          <FieldGroup label="Preregistration Link">
             <InputText
               placeholder="URL for challenge pre-registration"
               {...register('preRegistrationUrl')}
@@ -351,7 +299,7 @@ export const ChallengeForm = ({
           </FieldGroup>
           <Row>
             <Button
-              data-variant='primary'
+              data-variant="primary"
               disabled={Object.keys(errors).length > 0 || isSubmitting || isSaving}
               type="submit"
               data-testid="challenge-submit-button"
@@ -363,6 +311,7 @@ export const ChallengeForm = ({
         </StyledForm>
       </div>
       <ChallengeCreateUpdateModal isEditMode={isEditMode} isSaving={isSaving} />
+      <NavigationBlockerDialog blocker={blocker} />
     </>
   )
 }

@@ -278,14 +278,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def propose_challenge(proposal)
-    request(
-      "/challenges/propose",
-      proposal,
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
   def assign_app(id, app_id)
     request(
       "/challenges/#{id}/app",

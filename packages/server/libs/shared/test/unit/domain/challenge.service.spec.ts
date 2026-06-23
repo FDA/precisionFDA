@@ -9,6 +9,7 @@ import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
+import { EmailService } from '@shared/domain/email/email.service'
 import { Event } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { ChallengeFollow } from '@shared/domain/follow/challenge-follow.entity'
@@ -158,6 +159,7 @@ describe('ChallengeService', () => {
       challengeResourceRepository,
       captchaService,
       eventHelper,
+      { sendEmail: stub() } as unknown as EmailService,
     )
   })
 

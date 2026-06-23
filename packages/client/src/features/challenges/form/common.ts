@@ -1,10 +1,12 @@
+/** biome-ignore-all lint/suspicious/noThenProperty: <explanation> */
 import * as Yup from 'yup'
-import { MutationErrors } from '../../../types/utils'
-import { IChallengeForm } from './ChallengeForm'
-import { ChallengePayload } from '../api'
+import type { MutationErrors } from '@/types/utils'
+import type { ChallengePayload } from '../api'
+import type { IChallengeForm } from './ChallengeForm'
 
 export const title = 'Challenges'
-export const subtitle = 'Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science.'
+export const subtitle =
+  'Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science.'
 
 const commonValidationSchema = {
   name: Yup.string().required('Name is required').max(150, 'Name cannot be longer than 150 characters'),
@@ -31,10 +33,7 @@ const commonValidationSchema = {
     })
     .nullable()
     .required('Scoring App User is required'),
-  startAt: Yup.date()
-    .nullable()
-    .typeError('Invalid Date')
-    .required('Start Date is required'),
+  startAt: Yup.date().nullable().typeError('Invalid Date').required('Start Date is required'),
   endAt: Yup.date()
     .min(Yup.ref('startAt'), 'End date cannot be before start date')
     .nullable()
@@ -49,7 +48,8 @@ const commonValidationSchema = {
   preRegistrationUrl: Yup.string()
     .when('status', {
       is: (val: { value: string } | null | undefined) => val?.value === 'pre-registration',
-      then: (schema: Yup.StringSchema) => schema.required('Preregistration link is required for the pre-registration status'),
+      then: (schema: Yup.StringSchema) =>
+        schema.required('Preregistration link is required for the pre-registration status'),
       otherwise: (schema: Yup.StringSchema) => schema,
     })
     .test(
@@ -81,44 +81,27 @@ export const createValidationSchema = Yup.object().shape({
 
 export const editValidationSchema = Yup.object().shape({
   ...commonValidationSchema,
-  startAt: Yup.date()
-    .nullable()
-    .typeError('Invalid Date')
-    .required('Start date is required'),
+  startAt: Yup.date().nullable().typeError('Invalid Date').required('Start date is required'),
 })
+
+// Text field is required only when its companion radio is answered 'Yes'.
+const requiredWhenYes = (radioField: string) =>
+  Yup.string()
+    .default('')
+    .when(radioField, {
+      is: true,
+      then: schema => schema.required('Field is required'),
+    })
 
 export const proposeValidationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   email: Yup.string().email().required('Email is required'),
   organisation: Yup.string().required('Organisation is required'),
-  specificQuestion: Yup.string().required('Please select one of the options'),
-  specificQuestionText: Yup.string().when('specificQuestion', {
-    is: (specificQuestion: string) => specificQuestion === 'Yes',
-    then: Yup.string().required('Field is required'),
-    otherwise: Yup.string().nullable(),
-  }),
-  dataDetails: Yup.string().required('Please select one of the options'),
-  dataDetailsText: Yup.string().when('dataDetails', {
-    is: (dataDetails: string) => dataDetails === 'Yes',
-    then: Yup.string().required('Field is required'),
-    otherwise: Yup.string().nullable(),
-  }),
+  specificQuestion: Yup.boolean().required('Please select one of the options'),
+  specificQuestionText: requiredWhenYes('specificQuestion'),
+  dataDetails: Yup.boolean().required('Please select one of the options'),
+  dataDetailsText: requiredWhenYes('dataDetails'),
 })
-
-export function formatMutationErrors(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  obj?: any | unknown,
-): MutationErrors | undefined {
-  const nObj = obj
-  if (nObj) {
-    delete nObj['app_id']
-    return {
-      errors: [obj['app_id']],
-      fieldErrors: { ...nObj },
-    }
-  }
-  return undefined
-}
 
 export function mapFormToPayload(v: IChallengeForm): ChallengePayload {
   return {

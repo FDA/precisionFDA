@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
-import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal.dto'
+import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal-input.dto'
 import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { EmailAddress } from '@shared/domain/email/model/email-address'
@@ -33,10 +33,10 @@ export class ChallengeProposalReceivedHandler extends EmailHandler<EMAIL_TYPES.c
           name: input.name,
           email: input.email,
           organisation: input.organisation,
-          specificQuestion: input.specific_question,
-          specificQuestionText: input.specific_question_text,
-          dataDetails: input.data_details,
-          dataDetailsText: input.data_details_text,
+          specificQuestion: input.specificQuestion,
+          specificQuestionText: input.specificQuestionText,
+          dataDetails: input.dataDetails,
+          dataDetailsText: input.dataDetailsText,
         },
       },
     }

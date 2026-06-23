@@ -1,22 +1,23 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { AxiosError } from 'axios'
+import type { AxiosError } from 'axios'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { unstable_usePrompt } from 'react-router'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
-import { Button } from '../../../components/Button'
-import { InputFile, InputNumber, InputText } from '../../../components/InputText'
-import { Loader } from '../../../components/Loader'
-import { FieldGroup } from '../../../components/form/FieldGroup'
-import { FieldInfo } from '../../../components/form/FieldInfo'
-import { InputError } from '../../../components/form/form.styles'
+import { Button } from '@/components/Button'
+import { FieldGroup } from '@/components/form/FieldGroup'
+import { FieldInfo } from '@/components/form/FieldInfo'
+import { InputError } from '@/components/form/form.styles'
+import { InputFile, InputNumber, InputText } from '@/components/InputText'
+import { Loader } from '@/components/Loader'
+import { NavigationBlockerDialog } from '@/components/NavigationBlockerDialog'
+import { useNavigationBlocker } from '@/hooks/useNavigationBlocker'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { ApiErrorResponse } from '../../home/types'
+import type { ApiErrorResponse } from '../../home/types'
 import { SavingModal } from '../../modal/SavingModal'
-import { UsersSelect } from './UsersSelect'
 import { dataPortalValidationSchema } from './common'
+import { UsersSelect } from './UsersSelect'
 
 type SelectItem = { label: string; value: string }
 
@@ -172,11 +173,7 @@ export const DataPortalForm = ({
     }
   }, [mutationErrors])
 
-  unstable_usePrompt({
-    message: 'There are unsaved changes, are you sure you want to leave?',
-    when: ({ currentLocation, nextLocation }) =>
-      !isSubmitting && Object.keys(dirtyFields).length > 0 && currentLocation.pathname !== nextLocation.pathname,
-  })
+  const blocker = useNavigationBlocker(Object.keys(dirtyFields).length > 0, isSubmitting)
 
   const submitErrors = { ...errors }
   delete submitErrors['root']
@@ -208,7 +205,11 @@ export const DataPortalForm = ({
             {...register('description')}
             disabled={isSubmitting}
           />
-          <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
+          <ErrorMessage
+            errors={errors}
+            name="description"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
         </FieldGroup>
         <FieldGroup label="First Lead User" required>
           <Controller
@@ -254,7 +255,9 @@ export const DataPortalForm = ({
           {base64Image ? (
             <ImageUploadPreview width={300} src={base64Image || undefined} alt="portal img" />
           ) : (
-            defaultValues?.cardImageUrl && <ImageUploadPreview width={300} src={defaultValues?.cardImageUrl} alt="portal img" />
+            defaultValues?.cardImageUrl && (
+              <ImageUploadPreview width={300} src={defaultValues?.cardImageUrl} alt="portal img" />
+            )
           )}
 
           <>
@@ -268,7 +271,11 @@ export const DataPortalForm = ({
                 'Image upload is only available to portal leads. You must be selected as First Lead or Second Lead to upload.'
               }
             />
-            <ErrorMessage errors={errors} name="cardImageFile" render={({ message }) => <InputError>{message}</InputError>} />
+            <ErrorMessage
+              errors={errors}
+              name="cardImageFile"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
             {!canUploadImage && <Tooltip id="card_image_file_disabled" />}
           </>
 
@@ -285,12 +292,20 @@ export const DataPortalForm = ({
                 disabled={isSubmitting}
               />
               <FieldInfo text="Portals are presented in ascending order" />
-              <ErrorMessage errors={errors} name="sortOrder" render={({ message }) => <InputError>{message}</InputError>} />
+              <ErrorMessage
+                errors={errors}
+                name="sortOrder"
+                render={({ message }) => <InputError>{message}</InputError>}
+              />
             </FieldGroup>
           </Row>
         )}
         <Row>
-          <ErrorMessage errors={errors} name="root.serverError" render={({ message }) => <InputError>{message}</InputError>} />
+          <ErrorMessage
+            errors={errors}
+            name="root.serverError"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
         </Row>
         <Row>
           <Button
@@ -310,6 +325,7 @@ export const DataPortalForm = ({
         body={`The Data Portal is being ${isEditMode ? 'updated' : 'created'}, please wait until this message disappears.`}
         isSaving={isSubmitting}
       />
+      <NavigationBlockerDialog blocker={blocker} />
     </>
   )
 }

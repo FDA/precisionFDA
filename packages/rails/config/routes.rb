@@ -205,7 +205,6 @@ Rails.application.routes.draw do
         get :scopes_for_select, on: :collection
 
         post :save_editor_page, on: :member
-        post :propose, on: :collection
         put :update_content, on: :member
       end
 

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { config } from '@shared/config'
-import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal.dto'
+import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal-input.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { ChallengeProposalReceivedHandler } from '@shared/domain/email/templates/handlers/challenge-proposal-received.handler'
 import { EmailClient } from '@shared/services/email-client'
@@ -28,10 +28,10 @@ describe('ChallengeProposalReceivedHandler', () => {
       input.name = 'test-name'
       input.email = 'test-email'
       input.organisation = 'test-organisation'
-      input.specific_question = 'test-specific-question'
-      input.specific_question_text = 'test-specific-question-text'
-      input.data_details = 'test-data-details'
-      input.data_details_text = 'test-data-details-text'
+      input.specificQuestion = true
+      input.specificQuestionText = 'test-specific-question-text'
+      input.dataDetails = true
+      input.dataDetailsText = 'test-data-details-text'
       emailClientSendEmailStub.reset()
       const handler = getHandler()
 
@@ -47,10 +47,30 @@ describe('ChallengeProposalReceivedHandler', () => {
       expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('test-name')
       expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('test-email')
       expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('test-organisation')
-      expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('test-specific-question')
+      expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('Yes')
       expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('test-specific-question-text')
-      expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('test-data-details')
       expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('test-data-details-text')
+    })
+
+    it('omits detail blocks when questions are answered No', async () => {
+      const input = new ChallengeProposalInputDTO()
+      input.name = 'test-name'
+      input.email = 'test-email'
+      input.organisation = 'test-organisation'
+      input.specificQuestion = false
+      input.specificQuestionText = ''
+      input.dataDetails = false
+      input.dataDetailsText = ''
+      emailClientSendEmailStub.reset()
+      const handler = getHandler()
+
+      await handler.sendEmail(input)
+
+      expect(emailClientSendEmailStub.calledOnce).to.be.true()
+      const body: string = emailClientSendEmailStub.firstCall.args[0].body
+      expect(body).to.contain('No')
+      expect(body).not.to.contain('Please provide details:')
+      expect(body).not.to.contain('Please provide details about the data')
     })
   })
 })

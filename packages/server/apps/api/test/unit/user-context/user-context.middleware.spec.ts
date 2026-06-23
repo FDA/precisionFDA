@@ -121,11 +121,13 @@ describe('UserContextMiddleware', () => {
     expectRunWithEmptyContext()
   })
 
-  it('should throw unauthorized error in case session cookie decryption fails', async () => {
+  it('should run with empty context in case session cookie decryption fails', async () => {
     encryptorDecryptStub.reset()
     encryptorDecryptStub.throws()
 
-    await expect(callWithSessionToken(VALID_TOKEN)).to.be.rejectedWith(UnauthorizedRequestError)
+    await callWithSessionToken(VALID_TOKEN)
+
+    expectRunWithEmptyContext()
   })
 
   it('should run with empty context when session token expired', async () => {

@@ -22,6 +22,9 @@ import {
   UpdateChallengeContentDTO,
 } from '@shared/domain/challenge/dto/update-challenge-content.dto'
 import { Submission } from '@shared/domain/challenge/submission.entity'
+import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal-input.dto'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EventHelper } from '@shared/domain/event/event.helper'
@@ -56,6 +59,7 @@ export class ChallengeService implements Searchable<Challenge> {
     private readonly challengeResourceRepo: ChallengeResourceRepository,
     private readonly captchaService: CaptchaService,
     private readonly eventHelper: EventHelper,
+    private readonly emailService: EmailService,
   ) {}
 
   async createChallenge(dto: CreateChallengeDTO, spaceId: number): Promise<Challenge> {
@@ -330,7 +334,19 @@ export class ChallengeService implements Searchable<Challenge> {
     }
 
     if (canProposeChallenge) {
-      // SEND CHALLENGE PROPOSE EMAIL WHEN TEMPLATE READY FOR NODE
+      const input = new ChallengeProposalInputDTO()
+      input.name = body.name
+      input.email = body.email
+      input.organisation = body.organisation
+      input.specificQuestion = body.specificQuestion
+      input.specificQuestionText = body.specificQuestion ? body.specificQuestionText : ''
+      input.dataDetails = body.dataDetails
+      input.dataDetailsText = body.dataDetails ? body.dataDetailsText : ''
+
+      await this.emailService.sendEmail({
+        type: EMAIL_TYPES.challengeProposalReceived,
+        input,
+      })
     } else {
       throw new ValidationError('Not permitted to propose a challenge!')
     }

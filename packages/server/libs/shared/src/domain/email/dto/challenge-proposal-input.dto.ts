@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export class ChallengeProposalInputDTO {
   @IsString()
@@ -13,19 +13,19 @@ export class ChallengeProposalInputDTO {
   @IsNotEmpty()
   organisation: string
 
-  @IsString()
+  @IsBoolean()
   @IsNotEmpty()
-  specific_question: string
+  specificQuestion: boolean
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  specific_question_text: string
+  specificQuestionText: string
 
-  @IsString()
+  @IsBoolean()
   @IsNotEmpty()
-  data_details: string
+  dataDetails: boolean
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  data_details_text: string
+  dataDetailsText: string
 }

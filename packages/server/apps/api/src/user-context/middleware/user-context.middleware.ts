@@ -50,8 +50,14 @@ export class UserContextMiddleware implements NestMiddleware {
     try {
       userSession = Encryptor.decrypt(token)
     } catch (error) {
-      this.logger.error(error)
-      throw new UnauthorizedRequestError()
+      // A session cookie we cannot decrypt (stale, corrupt or set with a different
+      // secret) is treated as no session, so the request continues as an
+      // unauthenticated guest. Throwing here would escape the Nest exception
+      // filters - middleware runs outside the request pipeline - and surface as an
+      // HTTP 500 instead of a clean 401 on guarded routes (or a working response on
+      // anonymous routes such as /csrf-token and /challenges/propose).
+      this.logger.warn('Failed to decrypt session cookie; treating request as unauthenticated', error)
+      return null
     }
 
     if (!this.isValidSessionExpiration(userSession)) {
@@ -113,6 +119,10 @@ export class UserContextMiddleware implements NestMiddleware {
     try {
       userSession = CliEncryptor.decrypt(token)
     } catch (error) {
+      // todo jiri - same flaw as the session-cookie path above: this throw happens in
+      // middleware, which is outside the Nest exception-filter pipeline, so a bad CLI key
+      // surfaces as an HTTP 500 instead of a clean 401. Degrade to an unauthenticated
+      // guest (return null) so guarded routes reject it properly via their guards.
       this.logger.error(error)
       throw new UnauthorizedRequestError()
     }
