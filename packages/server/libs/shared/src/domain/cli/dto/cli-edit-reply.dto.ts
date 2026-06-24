@@ -1,21 +1,15 @@
 import { Type } from 'class-transformer'
-import { IsNumber, IsString, ValidateIf, ValidateNested } from 'class-validator'
+import { IsOptional, IsString, MinLength, ValidateNested } from 'class-validator'
 import { CliAttachmentsDTO } from '@shared/domain/cli/dto/cli-attachments.dto'
 
 export class CliEditReplyDTO {
-  @ValidateIf(obj => !obj.commentId)
-  @IsNumber()
-  answerId: number
-
-  @ValidateIf(obj => !obj.answerId)
-  @IsNumber()
-  commentId: number
-
+  @IsOptional()
   @IsString()
-  content: string
+  @MinLength(1)
+  content?: string
 
-  @ValidateIf(obj => obj.answerId)
+  @IsOptional()
   @ValidateNested()
   @Type(() => CliAttachmentsDTO)
-  attachments: CliAttachmentsDTO = new CliAttachmentsDTO()
+  attachments?: CliAttachmentsDTO
 }

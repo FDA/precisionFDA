@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
 import { CliExchangeFacadeModule } from '@shared/facade/cli-exchange/cli-exchange-facade.module'
 import { PropertyFacadeModule } from '@shared/facade/property/property-facade.module'
 import { CliApiFacadeModule } from '../facade/cli/cli-api-facade.module'
@@ -13,6 +14,7 @@ import { CliDiscussionsController } from './cli-discussions.controller'
 import { CliFilesController } from './cli-files.controller'
 import { CliJobsController } from './cli-jobs.controller'
 import { CliNodesController } from './cli-nodes.controller'
+import { CliRepliesController } from './cli-replies.controller'
 import { CliSpacesController } from './cli-spaces.controller'
 
 @Module({
@@ -20,6 +22,7 @@ import { CliSpacesController } from './cli-spaces.controller'
     CliApiFacadeModule,
     CliDbClusterPasswordFacadeModule,
     DiscussionApiFacadeModule,
+    DiscussionModule,
     PropertyFacadeModule,
     CliExchangeFacadeModule,
     UserFileApiFacadeModule,
@@ -33,6 +36,7 @@ import { CliSpacesController } from './cli-spaces.controller'
     CliDiscussionsController,
     CliJobsController,
     CliNodesController,
+    CliRepliesController,
     CliSpacesController,
   ],
 })

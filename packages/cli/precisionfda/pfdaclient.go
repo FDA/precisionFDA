@@ -76,6 +76,8 @@ type IPFDAClient interface {
 	CreateReply(jsonBody string) error
 	EditDiscussion(jsonBody string) error
 	EditReply(jsonBody string) error
+	DeleteDiscussion(discussionID string) error
+	DeleteReply(replyID string) error
 	SetTags(entityID string, tags []string) error
 	SetProperties(entityID string, jsonProperties string) error
 	GetDbClusterPassword(dbClusterID string) error

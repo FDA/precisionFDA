@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { CliCreateReplyDTO } from '@shared/domain/cli/dto/cli-create-reply.dto'
+import { CliReplyCreateDTO } from '@shared/domain/cli/dto/cli-reply-create.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { InvalidStateError } from '@shared/errors'
@@ -14,6 +15,7 @@ export class CliCreateDiscussionReplyFacade {
     private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
 
+  /** @deprecated Backs the legacy `POST /cli/discussions/reply` alias. New code uses {@link createReplyV2}. */
   async createReply(body: CliCreateReplyDTO): Promise<string> {
     // user can not reply with answer to answer
     if (body.answerId && body.discussionId) {
@@ -41,6 +43,28 @@ export class CliCreateDiscussionReplyFacade {
     })
 
     return isAnswer
+      ? await this.discussionService.getAnswerUiLink(reply.id)
+      : await this.discussionService.getCommentUiLink(reply.id)
+  }
+
+  async createReplyV2(body: CliReplyCreateDTO): Promise<string> {
+    let discussionId = body.discussionId
+    if (body.answerId != null) {
+      const answer = await this.discussionService.getDiscussionReply(body.answerId)
+      discussionId = answer.discussionId
+    }
+
+    const attachments = await this.attachmentFacade.transformCliAttachments(body.attachments)
+    const reply = await this.createDiscussionReplyFacade.createReply(discussionId, {
+      title: body.replyType,
+      type: body.replyType,
+      content: body.content,
+      parentId: body.answerId,
+      notify: [],
+      attachments,
+    })
+
+    return body.replyType === DISCUSSION_REPLY_TYPE.ANSWER
       ? await this.discussionService.getAnswerUiLink(reply.id)
       : await this.discussionService.getCommentUiLink(reply.id)
   }

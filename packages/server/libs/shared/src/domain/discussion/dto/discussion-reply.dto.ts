@@ -1,4 +1,5 @@
 import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 import { InternalError } from '@shared/errors'
 import { SCOPE } from '@shared/types/common'
@@ -6,6 +7,7 @@ import { SCOPE } from '@shared/types/common'
 export class DiscussionReplyDTO {
   id: number
   discussionId: number
+  replyType: DISCUSSION_REPLY_TYPE
   title: string
   content: string
   noteId: number
@@ -25,6 +27,7 @@ export class DiscussionReplyDTO {
     const dto = new DiscussionReplyDTO()
     dto.id = reply.id
     dto.discussionId = reply.discussion.id
+    dto.replyType = reply.replyType
     const note = reply.note.getEntity()
     dto.noteId = note.id
     dto.title = note.title

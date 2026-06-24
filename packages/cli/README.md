@@ -141,6 +141,12 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.13.0 (2026-06-30)
+
+- New feature - rm-discussion; removes a discussion by its numeric ID
+- New feature - rm-reply; removes a discussion reply by its numeric ID
+- upgrade Go to 1.26.4
+
 ### 2.12.0 (2026-03-31)
 
 - New feature - run; launches an application with the specified configuration

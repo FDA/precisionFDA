@@ -5,6 +5,8 @@ import { database } from '@shared/database'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { SetPropertiesDTO } from '@shared/domain/property/dto/set-properties.dto'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
@@ -44,7 +46,7 @@ describe('/cli', async () => {
     expect(body).to.be.an('object')
     expect(body).to.have.property('version')
     expect(body.version).to.be.a('string')
-    expect(body.version).to.equal('2.12.0')
+    expect(body.version).to.equal('2.13.0')
   })
 
   describe('cli describe', () => {
@@ -461,6 +463,198 @@ describe('/cli', async () => {
       expect(body).to.be.an('array').of.length(2)
       expect(body[0]).to.have.property('id', discussion1.id)
       expect(body[1]).to.have.property('id', discussion2.id)
+    })
+
+    it('DELETE /discussions/:id removes the discussion', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
+      await em.flush()
+
+      await supertest(testedApp.getHttpServer())
+        .delete(`/cli/discussions/${discussion.id}`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(204)
+
+      em.clear()
+      const remaining = await em.findOne(Discussion, { id: discussion.id })
+      expect(remaining).to.be.null
+    })
+
+    it('DELETE /replies/:id removes the reply', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
+      await em.flush()
+      const reply = create.discussionHelper.createReply(em, DISCUSSION_REPLY_TYPE.COMMENT, {
+        user,
+        discussion,
+        scope: groupSpace.scope,
+      })
+      await em.flush()
+
+      await supertest(testedApp.getHttpServer())
+        .delete(`/cli/replies/${reply.id}`)
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(204)
+
+      em.clear()
+      const remaining = await em.findOne(DiscussionReply, { id: reply.id })
+      expect(remaining).to.be.null
+    })
+
+    it('POST /replies creates a top-level answer to a discussion', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post('/cli/replies')
+        .send({
+          discussionId: discussion.id,
+          replyType: DISCUSSION_REPLY_TYPE.ANSWER,
+          content: 'My answer',
+        })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(201)
+
+      expect(body).to.have.property('url').that.is.a('string')
+      em.clear()
+      const replies = await em.find(DiscussionReply, { discussion: discussion.id })
+      expect(replies).to.have.length(1)
+      expect(replies[0].replyType).to.equal(DISCUSSION_REPLY_TYPE.ANSWER)
+    })
+
+    it('POST /replies creates a comment on an existing answer (discussion derived)', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
+      await em.flush()
+      const answer = create.discussionHelper.createReply(em, DISCUSSION_REPLY_TYPE.ANSWER, {
+        user,
+        discussion,
+        scope: groupSpace.scope,
+      })
+      await em.flush()
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .post('/cli/replies')
+        .send({
+          answerId: answer.id,
+          replyType: DISCUSSION_REPLY_TYPE.COMMENT,
+          content: 'Reply to answer',
+        })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(201)
+
+      expect(body).to.have.property('url').that.is.a('string')
+      em.clear()
+      const replies = await em.find(DiscussionReply, {
+        discussion: discussion.id,
+        replyType: DISCUSSION_REPLY_TYPE.COMMENT,
+      })
+      expect(replies).to.have.length(1)
+    })
+
+    it('POST /replies rejects answer-to-answer', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
+      await em.flush()
+      const answer = create.discussionHelper.createReply(em, DISCUSSION_REPLY_TYPE.ANSWER, {
+        user,
+        discussion,
+        scope: groupSpace.scope,
+      })
+      await em.flush()
+
+      await supertest(testedApp.getHttpServer())
+        .post('/cli/replies')
+        .send({
+          answerId: answer.id,
+          replyType: DISCUSSION_REPLY_TYPE.ANSWER,
+          content: 'cannot do this',
+        })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(400)
+    })
+
+    it('POST /replies rejects when both discussionId and answerId are provided', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
+      await em.flush()
+      const answer = create.discussionHelper.createReply(em, DISCUSSION_REPLY_TYPE.ANSWER, {
+        user,
+        discussion,
+        scope: groupSpace.scope,
+      })
+      await em.flush()
+
+      await supertest(testedApp.getHttpServer())
+        .post('/cli/replies')
+        .send({
+          discussionId: discussion.id,
+          answerId: answer.id,
+          replyType: DISCUSSION_REPLY_TYPE.COMMENT,
+          content: 'ambiguous',
+        })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(400)
+    })
+
+    it('POST /replies rejects when neither discussionId nor answerId is provided', async () => {
+      await supertest(testedApp.getHttpServer())
+        .post('/cli/replies')
+        .send({
+          replyType: DISCUSSION_REPLY_TYPE.COMMENT,
+          content: 'no target',
+        })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(400)
+    })
+
+    it('PUT /replies/:id appends content to a reply', async () => {
+      const groupSpace = create.spacesHelper.create(em, generate.space.group())
+      create.spacesHelper.addMember(em, { user, space: groupSpace }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+      await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
+      await em.flush()
+      const reply = create.discussionHelper.createReply(em, DISCUSSION_REPLY_TYPE.ANSWER, {
+        user,
+        discussion,
+        scope: groupSpace.scope,
+      })
+      await em.flush()
+      const originalContent = reply.note.getProperty('content')
+
+      const { body } = await supertest(testedApp.getHttpServer())
+        .put(`/cli/replies/${reply.id}`)
+        .send({ content: 'Appended bit' })
+        .set('Accept', 'application/json')
+        .set(getDefaultHeaderData(user))
+        .expect(200)
+
+      expect(body).to.have.property('url').that.is.a('string')
+      em.clear()
+      const updated = await em.findOneOrFail(DiscussionReply, { id: reply.id }, { populate: ['note'] })
+      const note = await updated.note.load()
+      expect(note.content).to.contain(originalContent)
+      expect(note.content).to.contain('\n\nAppended bit')
     })
   })
 

@@ -9,13 +9,13 @@ With the precisionFDA CLI, you can easily manage your files, folders, and assets
 import { Download } from 'lucide-react'
 
 <div className="flex gap-4 shrink">
-  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.12.0.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
+  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.13.0.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
     <button data-variant="primary" className="flex items-center gap-1.5 bg-[#1f70b7] py-1 px-4 rounded-md border border-[#4e8cc1] text-white cursor-pointer"><Download className='h-4.5' />Linux</button>
   </a>
-  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.12.0.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
+  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.13.0.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
     <button data-variant="primary" className="flex items-center gap-1.5 bg-[#1f70b7] py-1 px-4 rounded-md border border-[#4e8cc1] text-white cursor-pointer"><Download className='h-4.5' />MacOS</button>
   </a>
-  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.12.0.zip" className='no-underline' target="_blank" rel="noreferrer">
+  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.13.0.zip" className='no-underline' target="_blank" rel="noreferrer">
     <button data-variant="primary" className="flex items-center gap-1.5 bg-[#1f70b7] py-1 px-4 rounded-md border border-[#4e8cc1] text-white cursor-pointer"><Download className='h-4.5' />Windows</button>
   </a>
 </div>
@@ -136,6 +136,9 @@ The CLI command `pfda upload-asset` is designed for uploading an asset to precis
 ### Available Flags
 
 - `-h, -help`: Displays the help message and exits.
+- `-name <NAME>`: The asset name. Required. Must end in `.tar` or `.tar.gz`.
+- `-root <PATH>`: Path to the folder with the asset contents. Required.
+- `-readme <FILE>`: Path to the readme file. Required. Must end in `.md` or `.txt`.
 - `-json`: Displays the command result in JSON format.
 
 ### Example
@@ -163,7 +166,7 @@ All flags are optional. They can be used to specify the download location.
 - `-folder-id <ID>`: Downloads from the specified folder.
 - `-public`: Downloads from a public folder. Must be used with `-folder-id <ID>`.
 - `-overwrite <true|false>`: Preselects the overwrite option for the dialog if the path already exists.
-- `-recursive`: Recursively downloads the content of the selected folder.
+- `-r, -recursive`: Recursively downloads the content of the selected folder.
 - `-json`: Displays the command result in JSON format.
 
 ### Examples
@@ -382,6 +385,77 @@ _# Removes multiple files by combining file IDs and filenames._<br/>
 >
 > When removing multiple files, ensure they are all passed as arguments before any flags.
 
+{/*
+## Removing Discussions
+
+The CLI command `pfda rm-discussion` is designed for removing a discussion by its unique numeric ID. The discussion's replies and attachments are removed along with it.
+
+**Please be cautious. This is a permanent, destructive operation and cannot be undone.**
+
+### Usage
+
+`./pfda rm-discussion <DISCUSSION_ID> [...FLAG]`
+
+### Available Flags
+
+- `-h, -help`: Displays the help message and exits.
+- `-json`: Displays the command result in JSON format.
+
+### Examples
+
+The following examples demonstrate use cases for the `rm-discussion` command:
+
+_# Removes the discussion with ID 15._<br/>
+`./pfda rm-discussion 15`
+
+_# Removes the discussion with ID 15 and responds with the JSON result._<br/>
+`./pfda rm-discussion 15 -json`
+
+> [!info] Tips and Notes
+> **Finding DISCUSSION ID:**
+>
+> To find a DISCUSSION_ID, inspect the URL when viewing a discussion. For example, in the URL **"https://precision.fda.gov/spaces/1995/discussions/15"**, the Discussion ID is **15**.
+> You can also use the precisionFDA CLI command `pfda ls-discussions -space-id <SPACE_ID>` to list discussions in a space.
+>
+> **Permissions:**
+>
+> You can only remove a discussion if you have permission to edit it (typically as its author or with the appropriate role in the containing space).
+
+## Removing Discussion Replies
+
+The CLI command `pfda rm-reply` is designed for removing a single discussion reply (answer or comment) by its unique numeric ID.
+
+**Please be cautious. This is a permanent, destructive operation and cannot be undone.**
+
+### Usage
+
+`./pfda rm-reply <REPLY_ID> [...FLAG]`
+
+### Available Flags
+
+- `-h, -help`: Displays the help message and exits.
+- `-json`: Displays the command result in JSON format.
+
+### Examples
+
+The following examples demonstrate use cases for the `rm-reply` command:
+
+_# Removes the reply with ID 25._<br/>
+`./pfda rm-reply 25`
+
+_# Removes the reply with ID 25 and responds with the JSON result._<br/>
+`./pfda rm-reply 25 -json`
+
+> [!info] Tips and Notes
+> **Reply IDs:**
+>
+> A reply can be either an **answer** or a **comment**; both share the same numeric ID space and can be removed with this command.
+>
+> **Permissions:**
+>
+> You can only remove a reply if you have permission to edit it (typically as its author or with the appropriate role in the containing space).
+*/}
+
 ## Listing Files
 
 The CLI command `pfda ls` is designed for listing files in a given location. If no location is provided, the root of My Home will be listed. By default, public files are not listed. To display public files, use the `-public` flag. If you are interested in a specific Space or folder, provide the location via the corresponding flag. There are also options to filter for only files or only folders.
@@ -445,6 +519,7 @@ The CLI command `pfda ls-assets` is designed for listing assets in a given locat
 All flags are optional and can be used to specify the assets to list.
 
 - `-h, -help`: Displays the help message and exits.
+- `-space-id <ID>`: Lists assets in the specified space.
 - `-public`: Lists public assets.
 - `-json`: Displays the command result in JSON format.
 
@@ -454,6 +529,9 @@ The following examples demonstrate various use cases for the `ls-assets` command
 
 _# Lists all assets in your 'My Home'._<br/>
 `./pfda ls-assets`
+
+_# Lists all assets from the space with ID 24._<br/>
+`./pfda ls-assets -space-id 24`
 
 _# Lists all public assets accessible to the user._<br/>
 `./pfda ls-assets -public`
@@ -490,18 +568,16 @@ _# Lists all public applications accessible to the user._<br/>
 
 ## Listing Discussions
 
-The CLI command `pfda ls-discussions` is designed for listing discussions in a given location.
+The CLI command `pfda ls-discussions` is designed for listing discussions in a given space.
 
 ### Usage
 
-`./pfda ls-discussions [...FLAG]`
+`./pfda ls-discussions -space-id <SPACE_ID>`
 
 ### Available Flags
 
-All flags are optional and can be used to specify the discussions to list.
-
 - `-h, -help`: Displays the help message and exits.
-- `-space-id <ID>`: Lists discussions in the specified space.
+- `-space-id <ID>`: Lists discussions in the specified space. Required to target a space.
 - `-json`: Displays the command result in JSON format.
 
 ### Examples
@@ -561,6 +637,7 @@ All flags are optional. They can be used to filter the results.
 - `-private`: Shows only private spaces.
 - `-administrator`: Shows only administrator spaces.
 - `-government`: Shows only government spaces.
+- `-protected`: Shows only protected spaces.
 - `-json`: Displays the command result in JSON format.
 
 ### Examples
@@ -582,14 +659,12 @@ The CLI command `pfda ls-members` is designed for listing members in a given spa
 
 ### Usage
 
-`./pfda ls-members [...FLAG]`
+`./pfda ls-members -space-id <SPACE_ID>`
 
 ### Available Flags
 
-All flags are optional and can be used to specify the members to list.
-
 - `-h, -help`: Displays the help message and exits.
-- `-space-id <ID>`: Lists members in the specified space.
+- `-space-id <ID>`: Lists members in the specified space. Required to target a space.
 - `-json`: Displays the command result in JSON format.
 
 ### Examples
@@ -604,7 +679,9 @@ _# Lists all members from the space with ID 24 in JSON format._<br/>
 
 ## Describing Entities
 
-The CLI command `pfda describe` is designed to display details about an entity. All you need is the unique entity ID, which is of the form `{entity}-ABCDEF1234567890-{number}`. Supported types are: app, asset, discussion, file, execution, and workflow.
+The CLI command `pfda describe` is designed to display details about an entity. All you need is the unique entity ID. Supported types are: app, discussion, file, folder, execution, and workflow.
+
+For most entities the ID is of the form `{entity}-ABCDEF1234567890-{number}` (for example `app-…`, `file-…`, `workflow-…`). Two cases are worth noting: an **asset** is referenced by its underlying `file-…` ID, and an **execution** is referenced by its `job-…` ID. A **discussion** uses a short numeric form instead, e.g. `discussion-17`.
 
 ### Usage
 
@@ -659,13 +736,18 @@ _# Gets the scope of the current workstation's context._<br/>
 
 ## Printing Content
 
-The CLI commands `pfda cat` and `pfda head` are designed to print the content of a file. They accept a single parameter: the unique file ID. You can print the whole file's content or just the first few lines.
+The CLI commands `pfda cat` and `pfda head` are designed to print the content of a file. They accept a single parameter: the unique file ID. Use `cat` to print the whole file's content, or `head` to print just the first few lines.
+
+### Usage
+
+`./pfda cat <FILE_ID>`
+
+`./pfda head <FILE_ID> [...FLAG]`
 
 ### Available Flags
 
 - `-h, -help`: Displays the help message and exits.
-- `-lines`: Alters the number of lines to display (for `head` command only).
-- `-json`: Displays the command result in JSON format.
+- `-lines <NUMBER>`: Alters the number of lines to display (for the `head` command only). Defaults to 10.
 
 ### Examples
 
@@ -729,6 +811,7 @@ _# Sets properties for a file by its ID using a JSON object._<br/>
 ## pFDA CLI Changelog
 | <div style={{width:'195px'}}>Version</div> | Note  |
 |---|---|
+| Version 2.13.0 (06/30/2026) | {/* New features: rm-discussion, rm-reply; */}Bug fixes and improvements; upgraded Go to 1.26.4 |
 | Version 2.12.0 (03/31/2026) | Bug fixes and improvements |
 | Version 2.11.2 (03/12/2026) | Upgraded Go to 1.26.0 |
 | Version 2.11.1 (10/28/2025) | Fixed issue with json output in upload-file |

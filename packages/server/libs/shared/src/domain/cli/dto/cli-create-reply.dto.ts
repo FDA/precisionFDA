@@ -2,6 +2,7 @@ import { Type } from 'class-transformer'
 import { IsIn, IsNumber, IsString, MinLength, ValidateIf, ValidateNested } from 'class-validator'
 import { CliAttachmentsDTO } from '@shared/domain/cli/dto/cli-attachments.dto'
 
+/** @deprecated Used only by the legacy `POST /cli/discussions/reply` alias. New code should use `CliReplyCreateDTO`. */
 export class CliCreateReplyDTO {
   @ValidateIf(obj => !obj.answerId)
   @IsNumber()

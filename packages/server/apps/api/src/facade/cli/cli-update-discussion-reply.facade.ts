@@ -3,7 +3,6 @@ import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
 import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
-import { InvalidStateError } from '@shared/errors'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { AttachmentRetrieveFacade } from '@shared/facade/discussion/attachment-retrieve.facade'
 import { UpdateDiscussionReplyFacade } from '../discussion/update-reply.facade'
@@ -17,17 +16,7 @@ export class CliUpdateDiscussionReplyFacade {
     private readonly attachmentRetrieveFacade: AttachmentRetrieveFacade,
   ) {}
 
-  async updateReply(dto: CliEditReplyDTO): Promise<string> {
-    if (dto.answerId && dto.commentId) {
-      throw new InvalidStateError('Cannot edit both answer and comment')
-    }
-
-    const replyId = dto.answerId || dto.commentId
-    const type = dto.answerId ? DISCUSSION_REPLY_TYPE.ANSWER : DISCUSSION_REPLY_TYPE.COMMENT
-    return await this.handleReplyUpdate(replyId, dto, type)
-  }
-
-  private async handleReplyUpdate(replyId: number, dto: CliEditReplyDTO, type: DISCUSSION_REPLY_TYPE): Promise<string> {
+  async updateReply(replyId: number, dto: CliEditReplyDTO): Promise<string> {
     const reply = await this.discussionService.getDiscussionReply(replyId)
 
     let attachments: AttachmentsDTO = {
@@ -64,10 +53,10 @@ export class CliUpdateDiscussionReplyFacade {
     await this.updateDiscussionReplyFacade.updateReply(replyId, {
       content,
       attachments: updatedAttachments,
-      type,
+      type: reply.replyType,
     })
 
-    return type === DISCUSSION_REPLY_TYPE.ANSWER
+    return reply.replyType === DISCUSSION_REPLY_TYPE.ANSWER
       ? await this.discussionService.getAnswerUiLink(replyId)
       : await this.discussionService.getCommentUiLink(replyId)
   }

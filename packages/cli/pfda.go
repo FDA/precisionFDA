@@ -53,6 +53,8 @@ All available commands:
    pfda ls-workflows
    pfda mkdir
    pfda rm
+   pfda rm-discussion
+   pfda rm-reply
    pfda rmdir
    pfda rotate-password%s
    pfda set-properties
@@ -237,6 +239,14 @@ var invokeEditDiscussion = func(client precisionfda.IPFDAClient, jsonBody *strin
 
 var invokeEditReply = func(client precisionfda.IPFDAClient, jsonBody *string) error {
 	return client.EditReply(*jsonBody)
+}
+
+var invokeDeleteDiscussion = func(client precisionfda.IPFDAClient, discussionID *string) error {
+	return client.DeleteDiscussion(*discussionID)
+}
+
+var invokeDeleteReply = func(client precisionfda.IPFDAClient, replyID *string) error {
+	return client.DeleteReply(*replyID)
 }
 
 var invokeSetTags = func(client precisionfda.IPFDAClient, entityID string, args []string) error {
@@ -850,6 +860,52 @@ func mainInternal() int {
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
+
+	case "rm-discussion":
+		if help {
+			return helpers.PrintRmDiscussionHelp()
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("Discussion ID is required", *flagJson)
+		}
+
+		if len(args) != 1 {
+			return helpers.ErrorFromString("Only one discussion ID is allowed", *flagJson)
+		}
+
+		if _, parseErr := strconv.Atoi(args[0]); parseErr != nil {
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid discussion ID '%s' - expected a numeric value", args[0]), *flagJson)
+		}
+
+		err := invokeDeleteDiscussion(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+		helpers.PrintResult("Discussion successfully deleted", *flagJson)
+
+	case "rm-reply":
+		if help {
+			return helpers.PrintRmReplyHelp()
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("Reply ID is required", *flagJson)
+		}
+
+		if len(args) != 1 {
+			return helpers.ErrorFromString("Only one reply ID is allowed", *flagJson)
+		}
+
+		if _, parseErr := strconv.Atoi(args[0]); parseErr != nil {
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid reply ID '%s' - expected a numeric value", args[0]), *flagJson)
+		}
+
+		err := invokeDeleteReply(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+		helpers.PrintResult("Reply successfully deleted", *flagJson)
 
 	case "set-tags":
 		if help {

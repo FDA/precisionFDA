@@ -118,7 +118,7 @@ export class DiscussionService {
   }
 
   async deleteDiscussion(discussionId: number): Promise<void> {
-    this.logger.log(`Deleting discussion: ${discussionId}`)
+    this.logger.log(`Deleting discussion: ${discussionId} (user: ${this.userCtx.id})`)
 
     const discussion = await this.discussionRepository.findEditableOne(
       { id: discussionId },
@@ -278,7 +278,7 @@ export class DiscussionService {
       throw new errors.NotFoundError('Unable to update reply: not found or insufficient permissions.')
     }
 
-    const updatedReply = await this.em.transactional(async () => {
+    return await this.em.transactional(async () => {
       const note = reply.note.getEntity()
       if (input?.content) {
         note.content = input.content
@@ -289,8 +289,6 @@ export class DiscussionService {
 
       return DiscussionReplyDTO.fromEntity(reply)
     })
-
-    return updatedReply
   }
 
   async deleteReply(replyId: number): Promise<void> {
@@ -311,6 +309,7 @@ export class DiscussionService {
       await this.em.populate(reply, ['comments', 'comments.note', 'comments.note.attachments'])
     }
 
+    this.logger.log(`Deleting reply: ${replyId} (discussion: ${reply.discussion.id}, user: ${this.userCtx.id})`)
     // TODO PFDA-5997 - part 1: cleanup answerVotes and noteVotes
 
     await this.em.remove(reply).flush()
