@@ -349,7 +349,7 @@ export class JobSynchronizationService {
 
   private async sendTerminationEmail(user: User, checkStatusJob: CheckStatusJob['payload']): Promise<void> {
     // send email to job owner
-    const body = buildEmailTemplate<JobStaleInputTemplate>(jobStaleTemplate, {
+    const body = await buildEmailTemplate<JobStaleInputTemplate>(jobStaleTemplate, {
       firstName: user?.firstName,
       content: {
         // TODO LUDVIK - NONE OF THESE PROPERTIES EXIST IN CheckStatusJob['payload'] and TypeScript doesn't care here ???.
@@ -377,7 +377,7 @@ export class JobSynchronizationService {
   }
 
   private async sendJobFinishedEmail(user: User, job: Job): Promise<void> {
-    const body = buildEmailTemplate<JobFinishedInputTemplate>(jobFinishedTemplate, {
+    const body = await buildEmailTemplate<JobFinishedInputTemplate>(jobFinishedTemplate, {
       firstName: user?.firstName,
       content: {
         job: { id: job.id, name: job.name, uid: job.uid },

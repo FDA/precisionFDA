@@ -1,12 +1,12 @@
 import { Logger, Type } from '@nestjs/common'
 import { plainToInstance } from 'class-transformer'
 import { ValidationArguments } from 'class-validator'
-import mjml2html from 'mjml'
 import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToInputMap } from '@shared/domain/email/dto/email-type-to-input.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { IsEmailInputValidConstraint } from '@shared/domain/email/dto/is-email-input-valid.constraint'
 import { EmailSendInput } from '@shared/domain/email/email.config'
+import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 import { EmailAddress } from '@shared/domain/email/model/email-address'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
@@ -92,11 +92,9 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     }
   }
 
-  protected buildBody(contextObject: EmailTypeToContextMap[T], receiver?: User): string {
+  protected async buildBody(contextObject: EmailTypeToContextMap[T], receiver?: User): Promise<string> {
     const templateInput = this.getTemplateInput(contextObject, receiver)
-    const template = this.getBody(templateInput, contextObject)
-    const processed = mjml2html(template)
-    return processed.html
+    return buildEmailTemplate(input => this.getBody(input, contextObject), templateInput)
   }
 
   private splitReceivers(receivers: (User | EmailAddress)[]): {
@@ -125,7 +123,7 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     return {
       emailType: this.emailType,
       to: email,
-      body: this.buildBody(contextObject, receiver),
+      body: await this.buildBody(contextObject, receiver),
       subject: this.getSubject(contextObject, receiver),
       bcc: this.getBcc(contextObject, receiver),
       replyTo: this.getReplyTo(contextObject, receiver),

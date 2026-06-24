@@ -56,9 +56,9 @@ const getKeyForUserSpaceRole = (
   return `${spaceType ? `${spaceType}_` : ''}${roleName}_${keyBase}`
 }
 
-const buildEmailTemplate = <N>(templateBuilder: (input: N) => string, payload: N): string => {
+const buildEmailTemplate = async <N>(templateBuilder: (input: N) => string, payload: N): Promise<string> => {
   const template = templateBuilder(payload)
-  const processed = mjml2html(template)
+  const processed = await mjml2html(template)
   return processed.html
 }
 

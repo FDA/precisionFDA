@@ -332,7 +332,7 @@ export class UserDataConsistencyReportFacade {
   }
 
   private async sendReportEmail(output: UserDataConsistencyReportOutput): Promise<void> {
-    const body = buildEmailTemplate<UserDataConsistencyReportTemplateInput>(userDataConsistencyReportTemplate, {
+    const body = await buildEmailTemplate<UserDataConsistencyReportTemplateInput>(userDataConsistencyReportTemplate, {
       content: output,
     })
     const email: EmailSendInput = {

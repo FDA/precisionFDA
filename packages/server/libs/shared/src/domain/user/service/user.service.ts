@@ -158,7 +158,7 @@ export class UserService {
           receiver: user,
           daysLeft: daysUntilLockout,
         }
-        const body = buildEmailTemplate<UserInactivityAlertEmailInput>(userInactivityAlertTemplate, emailInput)
+        const body = await buildEmailTemplate<UserInactivityAlertEmailInput>(userInactivityAlertTemplate, emailInput)
         const emailTask: EmailSendInput = {
           emailType: EMAIL_TYPES.userInactivityAlert,
           to: user.email,

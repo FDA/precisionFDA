@@ -26,7 +26,7 @@ export class SpaceNotificationService {
         id: space.id,
       },
     }
-    const body = buildEmailTemplate<SpaceCreatedTemplateInput>(spaceCreatedTemplate, emailInput)
+    const body = await buildEmailTemplate<SpaceCreatedTemplateInput>(spaceCreatedTemplate, emailInput)
     const email = user.email
     const emailTask: EmailSendInput = {
       emailType: EMAIL_TYPES.spaceCreated,

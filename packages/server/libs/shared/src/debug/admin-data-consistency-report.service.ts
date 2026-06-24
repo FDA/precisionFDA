@@ -211,7 +211,7 @@ export class AdminDataConsistencyReportService {
   }
 
   private async sendReportEmail(output: AdminDataConsistencyReportOutput): Promise<void> {
-    const body = buildEmailTemplate<AdminDataConsistencyReportTemplateInput>(adminDataConsistencyReportTemplate, {
+    const body = await buildEmailTemplate<AdminDataConsistencyReportTemplateInput>(adminDataConsistencyReportTemplate, {
       content: output,
     })
     const email: EmailSendInput = {

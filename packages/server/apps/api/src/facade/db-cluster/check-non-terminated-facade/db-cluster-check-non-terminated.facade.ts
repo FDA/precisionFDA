@@ -32,18 +32,21 @@ export class DbClusterCheckNonTerminatedFacade {
       return nonTerminatedDbClusters
     }
 
-    const body = buildEmailTemplate<ReportNonTerminatedDbClustersTemplateInput>(reportNonTerminatedDbClustersTemplate, {
-      content: {
-        nonTerminatedDbClusters: nonTerminatedDbClusters.map(dbcluster => ({
-          uid: dbcluster.uid,
-          name: dbcluster.name,
-          dxuser: dbcluster.user.getEntity().dxuser,
-          status: STATUSES[invertObj(STATUS)[dbcluster.status]],
-          dxInstanceClass: dbcluster.dxInstanceClass,
-          duration: dbcluster.elapsedTimeSinceCreationString(),
-        })),
+    const body = await buildEmailTemplate<ReportNonTerminatedDbClustersTemplateInput>(
+      reportNonTerminatedDbClustersTemplate,
+      {
+        content: {
+          nonTerminatedDbClusters: nonTerminatedDbClusters.map(dbcluster => ({
+            uid: dbcluster.uid,
+            name: dbcluster.name,
+            dxuser: dbcluster.user.getEntity().dxuser,
+            status: STATUSES[invertObj(STATUS)[dbcluster.status]],
+            dxInstanceClass: dbcluster.dxInstanceClass,
+            duration: dbcluster.elapsedTimeSinceCreationString(),
+          })),
+        },
       },
-    })
+    )
 
     const email: EmailSendInput = {
       emailType: EMAIL_TYPES.nonTerminatedDbClusters,
