@@ -228,7 +228,7 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
 
     {}.tap do |links|
       # show job details page - api_job_path
-      links[:show] = job_path(object)
+      links[:show] = pathify(object)
       # link to user who run a job - api_job_path
       links[:user] = user_path(object.user.dxuser)
       # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
@@ -240,7 +240,7 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
       links[:publish] = publish_object if publishable_by_owner
 
       # GET show job's logs page: TODO: move to api/jobs
-      links[:log] = log_job_path(object)
+      links[:log] = "#{pathify(object)}/logs"
       # POST /api/jobs/copy  copy_api_jobs
       links[:copy] = copy_api_jobs_path
       # POST /api/jobs/terminate

@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 import { Button } from '@/components/Button'
 import { PageContainerMargin } from '@/components/Page/page.styles'
@@ -353,7 +352,7 @@ const PrecisionFDALanding = () => {
           <FullWidthCard>
             <FeatureTitle>How do I become a user?</FeatureTitle>
             <FeatureDescription>
-              The best place to start is to <FeatureLink href="/request_access">request access</FeatureLink> in the
+              The best place to start is to <FeatureLink href="/request-access">request access</FeatureLink> in the
               upper right-hand corner of this page. Fill in the form and follow the instructions.
             </FeatureDescription>
             <FeatureDescription>
@@ -396,7 +395,7 @@ const PrecisionFDALanding = () => {
       <CTASection>
         <CTATitle>Ready to Transform Your Research?</CTATitle>
         <CTASubtitle>Join the precisionFDA and accelerate your scientific discoveries</CTASubtitle>
-        <SignUpButton data-variant={'primary'} as={'a'} href={'/request_access'}>
+        <SignUpButton data-variant={'primary'} as={'a'} href={'/request-access'}>
           Request Access Now
         </SignUpButton>
       </CTASection>

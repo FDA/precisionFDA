@@ -28,7 +28,7 @@
     </div>
     <div class="col-sm-6">
       <% if @truth_challenge[:launched] %>
-        <a class="btn btn-join <%= @btn_class %> btn-lg text-uppercase" href="<%= @truth_challenge[:active] ? "/challenges/#{@discussion[:id]}/intro" : discussion_path(@discussion[:id]) %>" role="button">
+        <a class="btn btn-join <%= @btn_class %> btn-lg text-uppercase" href="<%= @truth_challenge[:active] ? "/challenges/#{@discussion[:id]}/intro" : pathify(@discussion) %>" role="button">
           <div class="media">
             <div class="media-left">
               <span class="fa fa-trophy" aria-hidden="true"></span>

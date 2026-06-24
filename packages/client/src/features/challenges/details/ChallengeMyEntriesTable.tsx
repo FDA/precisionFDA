@@ -1,15 +1,14 @@
-import { ColumnDef } from '@tanstack/react-table'
-import React from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
 import styled from 'styled-components'
-import { Loader } from '../../../components/Loader'
 import { ChallengeEntriesTable } from '../../../components/ChallengeEntriesTable'
-import { IUser } from '../../../types/user'
-import { StyledNameCell } from '../../home/home.styles'
-import { SubmissionV2 } from './submission.types'
-import { InputFileCell, NameCell } from './SubmissionTable'
-import { useChallengeEntriesQuery } from './useChallengeEntriesQuery'
-import { StateCell } from '../../executions/StateCell'
+import { Loader } from '../../../components/Loader'
+import type { IUser } from '../../../types/user'
 import { formatDate } from '../../../utils/formatting'
+import { StateCell } from '../../executions/StateCell'
+import { StyledNameCell } from '../../home/home.styles'
+import { InputFileCell, NameCell } from './SubmissionTable'
+import type { SubmissionV2 } from './submission.types'
+import { useChallengeEntriesQuery } from './useChallengeEntriesQuery'
 
 const Info = styled.div`
   margin-bottom: 32px;
@@ -50,7 +49,9 @@ export const useSubmissionTableColumns = ({
       header: 'Input File',
       accessorKey: 'job.inputFiles.id',
       size: 250,
-      cell: ({ cell }) => <InputFileCell authUser={authUser} submission={cell.row.original} isSpaceMember={isSpaceMember} />,
+      cell: ({ cell }) => (
+        <InputFileCell authUser={authUser} submission={cell.row.original} isSpaceMember={isSpaceMember} />
+      ),
       enableSorting: false,
     },
     {
@@ -63,7 +64,7 @@ export const useSubmissionTableColumns = ({
 }
 
 export interface ChallengeMyEntriesTableProps {
-  challengeId: string|number
+  challengeId: string | number
   user?: IUser
   isSpaceMember: boolean
 }
@@ -81,7 +82,7 @@ export const ChallengeMyEntriesTable = ({ challengeId, user, isSpaceMember }: Ch
           login
         </a>
         . If you don&apos;t have a PrecisionFDA account, please{' '}
-        <a data-turbolinks="false" href="/request_access">
+        <a data-turbolinks="false" href="/request-access">
           submit an access request
         </a>{' '}
         to join and engage in the community!

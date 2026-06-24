@@ -105,7 +105,7 @@ test.describe('Logged Out - About', () => {
     await expect(page.getByText('This program is in production at this time.')).toBeVisible()
 
     // Verify Request Access button in the panel
-    await expect(page.locator('.panel-body a[href="/request_access"]').or(page.getByRole('link', { name: 'Request Access' }))).toBeVisible()
+    await expect(page.locator('.panel-body a[href="/request-access"]').or(page.getByRole('link', { name: 'Request Access' }))).toBeVisible()
 
     // Verify How tab links to docs
     const howTab = page.getByRole('link', { name: /How/i })

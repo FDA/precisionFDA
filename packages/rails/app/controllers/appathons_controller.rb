@@ -118,7 +118,7 @@ class AppathonsController < ApplicationController
       redirect_to appathon_path(@appathon)
     else
       flash[:alert] = "You need to log in or request access before participating in the appathon."
-      redirect_to request_access_path
+      redirect_to "/request-access"
     end
   end
 

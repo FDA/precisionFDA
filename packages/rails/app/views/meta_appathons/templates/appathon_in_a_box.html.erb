@@ -9,7 +9,7 @@
         </div>
         <div class="lead">
           The PrecisionFDA community would like to thank all those that participated in the App-a-thon in a Box Challenge!
-          <br/>Closing remarks for this challenge can be viewed <strong><%= link_to "here", discussion_path(APPATHON_IN_A_BOX_DISCUSSION_ID)%></strong>.
+          <br/>Closing remarks for this challenge can be viewed <strong><%= link_to "here", "/home/discussions/#{APPATHON_IN_A_BOX_DISCUSSION_ID}" %></strong>.
           <br/>
           <br/>Please stay tuned for new challenges in the 2017 calendar year!
         </div>
@@ -233,7 +233,7 @@
               </div>
               <div class="col-sm-14 col-sm-offset-1">
                 <p class="lead">
-                File an <%= link_to "access request", request_access_path %>, indicating that you are planning to organize an app-a-thon. The FDA acts as steward to providing the precisionFDA service to the community, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Later, once the FDA approves your account request, you will receive another email with your contributor account information.
+                File an <%= link_to "access request", "/request-access" %>, indicating that you are planning to organize an app-a-thon. The FDA acts as steward to providing the precisionFDA service to the community, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Later, once the FDA approves your account request, you will receive another email with your contributor account information.
                 </p>
               </div>
             </div>
@@ -265,7 +265,7 @@
               </div>
               <div class="col-sm-14 col-sm-offset-1">
                 <p class="lead">
-                If you are the precisionFDA admin of your organization, and the app-a-thon members are from within your organization, visit your profile page and click "Provision new user under my organization". Enter the info (first name, last name, and email) for each user and provision them. Otherwise, ask them to file an <%= link_to "access request", request_access_path %>, indicating that they plan to participate in an app-a-thon.
+                If you are the precisionFDA admin of your organization, and the app-a-thon members are from within your organization, visit your profile page and click "Provision new user under my organization". Enter the info (first name, last name, and email) for each user and provision them. Otherwise, ask them to file an <%= link_to "access request", "/request-access" %>, indicating that they plan to participate in an app-a-thon.
                 </p>
               </div>
             </div>
@@ -328,7 +328,7 @@
               </div>
               <div class="col-sm-14 col-sm-offset-1">
                 <p class="lead">
-                  If the app-a-thon's organizer is in the same organization as you, they may have already provisioned an account for you. Otherwise, file an <%= link_to "access request", request_access_path %>, indicating that you plan to participate in an app-a-thon. The FDA acts as steward to providing the precisionFDA service to the community, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Later, once the FDA approves your account request, you will receive another email with your contributor account information.
+                  If the app-a-thon's organizer is in the same organization as you, they may have already provisioned an account for you. Otherwise, file an <%= link_to "access request", "/request-access" %>, indicating that you plan to participate in an app-a-thon. The FDA acts as steward to providing the precisionFDA service to the community, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Later, once the FDA approves your account request, you will receive another email with your contributor account information.
                 </p>
               </div>
             </div>

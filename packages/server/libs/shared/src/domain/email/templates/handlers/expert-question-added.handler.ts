@@ -32,7 +32,7 @@ export class ExpertQuestionAddedHandler extends EmailHandler<EMAIL_TYPES.expertQ
       },
       { populate: ['expert.user', 'user'] },
     )
-    return { input, expertQuestion, questionAuthor: expertQuestion.user.getEntity() }
+    return { input, expertQuestion, questionAuthor: expertQuestion.user?.getEntity() }
   }
 
   protected async determineReceivers(context: ExpertQuestionAddedContext): Promise<User[]> {

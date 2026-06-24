@@ -10,23 +10,14 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   # rubocop:todo Rails/LexicallyScopedActionFilter
   skip_before_action :require_login, only: %i( # rubocop:todo Rails/LexicallyScopedActionFilter
                                                index
-                                               about
-                                               terms
-                                               security
                                                login
                                                return_from_login
-                                               request_access
                                                guidelines
-                                               browse_access
                                                destroy
-                                               presskit
-                                               news
-                                               mislabeling
-                                               data_portals
-                                               home)
+                                               presskit)
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
-  layout "react", only: %i(about index news terms security data_portals home publish request_access)
+  layout "react", only: %i(index)
 
   def index
     if @context.logged_in?
@@ -63,21 +54,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     redirect_to root_url, status: :see_other
   end
 
-  def about; end
-
-  def data_portals; end
-
-  def home; end
-
   def guidelines; end
-
-  def terms; end
-
-  def security; end
-
-  def publish; end
-
-  def request_access; end
 
   def presskit # rubocop:todo Metrics/MethodLength
     @images = [
@@ -335,44 +312,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       "NONE",
       "user-#{CHALLENGE_BOT_DX_USER}",
     )
-  end
-
-  def browse_access
-    if @context.logged_in?
-      redirect_to root_url
-      return
-    end
-
-    code = unsafe_params[:code].to_s
-    @invitation = Invitation.find_by(code: code, state: "guest")
-    if @invitation.blank?
-      render "_partials/_error", status: :forbidden, locals: { message: "Invalid access code. If you believe this is an error, contact precisionFDA support." }
-      return
-    end
-
-    if @invitation.expired?
-      render "_partials/_error", status: :forbidden, locals: { message: "Your access code is expired. If you believe this is an error, contact precisionFDA support." }
-      return
-    end
-
-    if request.post? # rubocop:todo Style/GuardClause
-      save_session(
-        -1,
-        "Guest-#{@invitation.id}",
-        Context::INVALID_TOKEN,
-        @invitation.expires_at.to_i,
-        -1,
-      )
-      auditor_data = {
-        action: "create",
-        record_type: "Access Request",
-        record: {
-          message: "Browse access requested for #{@invitation.email} (id #{@invitation.id})",
-        },
-      }
-      Auditor.perform_audit(auditor_data)
-      redirect_to root_url
-    end
   end
 
   def tokify

@@ -1,4 +1,4 @@
-<div id="ask-question-modal" class="modal fade">
+<div id="ask-question-modal" class="modal fade" >
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -7,7 +7,11 @@
           Ask <%= @expert.user.first_name.capitalize %> a question
         </h4>
       </div>
-      <%= form_for @expert, url: ask_question_expert_path(@expert), method: :post do |f| %>
+      <%= form_for @expert, url: ask_question_expert_path(@expert), method: :post,
+            html: !@context.logged_in? && !Utils.development_or_test? ? {
+              'data-recaptcha-form' => 'ask-question',
+              'data-recaptcha-site-key' => Recaptcha.configuration.site_key
+            } : {} do |f| %>
         <div class="modal-body">
           <div class="form-group">
             Asking as:&nbsp;&nbsp;
@@ -21,8 +25,9 @@
             <%= f.text_area (:question), rows: 4, class: "form-control input-lg", placeholder: "Ask a question...",  required: "required", "aria-label" => "Enter question to ask Expert" %>
           </div>
           <% if !@context.logged_in? && !Utils.development_or_test? %>
-            <%= recaptcha_v3(action: 'question') %>
-          <% end %> 
+            <script src="https://www.google.com/recaptcha/enterprise.js?render=<%= Recaptcha.configuration.site_key %>"></script>
+            <input type="hidden" name="g-recaptcha-response-data[question]" id="recaptcha-token-input" />
+          <% end %>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>

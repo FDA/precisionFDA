@@ -13,31 +13,7 @@ Rails.application.routes.draw do
       root "base#index"
       get "/alerts" => "base#alerts"
 
-      resources :activity_reports, only: [:index] do
-        collection do
-          get "total"
-          get "data_upload"
-          get "data_download"
-          get "data_generated"
-          get "app_created"
-          get "app_published"
-          get "app_run"
-          get "job_run"
-          get "job_failed"
-          get "user_access_requested"
-          get "user_logged_in"
-          get "user_viewed"
-          get "users_signed_up_for_challenge"
-          get "submissions_created"
-        end
-      end
-
-      resources :usage_reports, only: [:index] do
-        post :update_custom_range, on: :collection
-      end
-
       get "users", to: "users#index"
-      get "spaces", to: "spaces#index"
       get "invitations", to: "invitations#list"
       get "invitations/provisioning", to: "invitations#list_provisioning"
       get "all_users", to: "users#all_users"
@@ -89,29 +65,15 @@ Rails.application.routes.draw do
       get "/*all", to: "base#index"
     end
 
-    # hotfix for PFDA-557
-    get "/challenges/6" => redirect("/challenges/7")
-    get "/mislabeling" => redirect("/challenges/5")
-    # hotfix for PFDA-2432
-    get "/challenges/14" => redirect("/challenges/13")
-
     # Mains controller
     get "login" => "main#login"
     delete "logout" => "main#destroy"
     get "return_from_login" => "main#return_from_login"
     get "check_webapp" => "main#check_webapp"
-    get "publish" => "main#publish"
-    get "request_access" => "main#request_access"
-    get "browse_access" => "main#browse_access"
-    post "browse_access" => "main#browse_access"
-    get "about" => "main#about"
-    get "terms" => "main#terms"
-    get "security" => "main#security"
     post "tokify" => "main#tokify"
     post "set_tags" => "main#set_tags"
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
-    get "news" => "main#news"
 
     post "/spaces/:id/copy_to_cooperative",
          to: "main#copy_to_cooperative",
@@ -124,28 +86,6 @@ Rails.application.routes.draw do
         post "dissolve", to: "org_requests#create_dissolve"
       end
     end
-
-    # My Home (Site-Wide UI & API Redesign)
-    get "home" => "main#home"
-    get "/home/*all", to: "main#home"
-    get "docs" => "docs#index"
-    get "/docs/*all", to: "docs#index"
-    get "data-portals" => "main#data_portals"
-    get "DAaaS" => "main#data_portals"
-    get "daaas" => "main#data_portals"
-    get "/data-portals/*all" => "main#data_portals"
-
-    # Old My Home
-    # TODO: remove old code once new My Home is stable for release or two,
-    #       but for now it still has utility for devs
-    # get "home-old" => "home#index"
-    # get "home-old" => "home#index"
-    # get "/home-old/*all", to: "home#index"
-
-    get "/account", to: "home#index"
-    get "/account/*all", to: "home#index"
-    get "/challenges/propose", to: "challenges#index"
-    get "/challenges/create", to: "challenges#index"
 
     if ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
       get "/csrf-token", to: "ginas_unauthorized#csrf_token"
@@ -487,10 +427,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    resources :jobs, except: %i(index update edit) do
-      member do
-        get "log"
-      end
+    resources :jobs, only: [] do
       resources :comments
     end
 
@@ -555,10 +492,6 @@ Rails.application.routes.draw do
       post "announce_result", on: :member
     end
 
-    resources :discussions, only: [:show] do
-      resources :answers, only: [:show]
-    end
-
     resources :licenses do
       post "accept(/:redirect_to_uid)", on: :member, action: :accept, as: "accept"
       post "license_item/:item_uid",
@@ -612,10 +545,6 @@ Rails.application.routes.draw do
     end
 
     resource :org, only: :update
-    resources :spaces, only: :index
-
-    get "/spaces/*all", to: "spaces#index"
-    get "/spaces-old/*all", to: "spaces#index"
 
     get "/experts/:id/about", to: "experts#show"
 

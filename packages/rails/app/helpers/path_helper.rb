@@ -91,9 +91,11 @@ module PathHelper
     when "comparison"
       comparison_path(item)
     when "discussion"
-      discussion_path(item)
+      prefix = item.scope.present? && item.scope.start_with?("space-") ? "/spaces/#{item.scope[/space-(\d+)/, 1]}" : "/home"
+      "#{prefix}/discussions/#{item.id}"
     when "answer"
-      discussion_answer_path(item.discussion, item.user.dxuser)
+      prefix = item.scope.present? && item.scope.start_with?("space-") ? "/spaces/#{item.scope[/space-(\d+)/, 1]}" : "/home"
+      "#{prefix}/discussions/#{item.discussion.id}/answers/#{item.id}"
     when "user"
       user_path(item.dxuser)
     when "license"

@@ -3,7 +3,7 @@
 
   g.column name: 'Entry', attribute: 'entry', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |result|
     if !result.answer_id.nil?
-      link_to result.entry, discussion_answer_path(TRUTH_DISCUSSION_ID, answers_to_username_map[result.answer_id])
+      link_to result.entry, "/home/discussions/#{TRUTH_DISCUSSION_ID}/answers/#{result.answer_id}"
     else
       result.entry
     end

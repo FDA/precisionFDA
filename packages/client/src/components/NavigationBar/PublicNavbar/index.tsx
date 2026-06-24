@@ -16,7 +16,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const onRequestAccess = () => {
-    window.location.assign('/request_access')
+    window.location.assign('/request-access')
   }
 
   const onLogIn = () => {
@@ -26,11 +26,11 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
   const getNavLinkClassName = (linkPath: string) => {
     if (linkPath === '/') {
       return clsx('nav-link', {
-        'active': pathname === linkPath,
+        active: pathname === linkPath,
       })
     }
     return clsx('nav-link', {
-      'active': pathname.startsWith(linkPath),
+      active: pathname.startsWith(linkPath),
     })
   }
 
@@ -95,66 +95,35 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
                   hidden: !shouldShowLogo,
                 })}
               />
-            <PFDALogoDark 
-              className="brand-logo brand-logo-dark" 
-            />
-          </div>
-          
-          <nav className="desktop-nav" role="navigation" aria-label="Primary navigation" data-testid="public-navbar">
-            <Link 
-              to="/" 
-              className={getNavLinkClassName('/')}
-            >
+              <PFDALogoDark className="brand-logo brand-logo-dark" />
+            </div>
+
+            <nav className="desktop-nav" aria-label="Primary navigation" data-testid="public-navbar">
+              <Link to="/" className={getNavLinkClassName('/')}>
                 Home
               </Link>
-            <Link 
-              to="/challenges" 
-              className={getNavLinkClassName('/challenges')}
-            >
+              <Link to="/challenges" className={getNavLinkClassName('/challenges')}>
                 Challenges
               </Link>
-            <Link 
-              to="/news" 
-              className={getNavLinkClassName('/news')}
-            >
+              <Link to="/news" className={getNavLinkClassName('/news')}>
                 News
               </Link>
-            <Link 
-              to="/experts" 
-              className={getNavLinkClassName('/experts')}
-            >
+              <Link to="/experts" className={getNavLinkClassName('/experts')}>
                 Experts
               </Link>
-            <a 
-              href="/uniisearch" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="nav-link"
-            >
+              <a href="/uniisearch" target="_blank" rel="noopener noreferrer" className="nav-link">
                 UNII Search
               </a>
-            <a 
-              href="/ginas/app/ui" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="nav-link"
-            >
-              GSRS
-            </a>
-          </nav>
-          
-          <div className="desktop-actions" data-testid="public-navbar-actions">
-            <Button 
-              className="action-btn action-btn-secondary" 
-              onClick={onRequestAccess}
-            >
+              <a href="/ginas/app/ui" target="_blank" rel="noopener noreferrer" className="nav-link">
+                GSRS
+              </a>
+            </nav>
+
+            <div className="desktop-actions" data-testid="public-navbar-actions">
+              <Button className="action-btn action-btn-secondary" onClick={onRequestAccess}>
                 Request Access
               </Button>
-            <Button 
-              className="action-btn"
-              data-variant="primary" 
-              onClick={onLogIn}
-            >
+              <Button className="action-btn" data-variant="primary" onClick={onLogIn}>
                 Log In
               </Button>
               {data?.ssoButton.isEnabled && data.ssoButton.data && (
@@ -185,10 +154,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
         </PageContainer>
       </StyledPublicNavbar>
 
-      <MobileMenuOverlay
-        className={clsx({ 'menu-visible': isMobileMenuOpen })}
-        onClick={closeMobileMenu}
-      >
+      <MobileMenuOverlay className={clsx({ 'menu-visible': isMobileMenuOpen })} onClick={closeMobileMenu}>
         <section
           className={clsx('menu-container', { 'menu-visible': isMobileMenuOpen })}
           role="dialog"
@@ -197,7 +163,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
         >
           <div className="menu-header">
             <PFDALogoDark className="menu-brand" id="mobile-menu-title" />
-            <button 
+            <button
               className="menu-close-btn"
               onClick={closeMobileMenu}
               aria-label="Close navigation menu"
@@ -207,48 +173,31 @@ const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
             </button>
           </div>
 
-          <nav className="menu-nav" role="navigation" aria-label="Mobile navigation">
-            <Link 
-              to="/" 
-              className={getMobileNavLinkClassName('/')}
-              data-turbolinks="false"
-              onClick={closeMobileMenu}
-            >
+          <nav className="menu-nav" aria-label="Mobile navigation">
+            <Link to="/" className={getMobileNavLinkClassName('/')} data-turbolinks="false" onClick={closeMobileMenu}>
               Home
             </Link>
-            <Link 
-              to="/challenges" 
-              className={getMobileNavLinkClassName('/challenges')}
-              onClick={closeMobileMenu}
-            >
+            <Link to="/challenges" className={getMobileNavLinkClassName('/challenges')} onClick={closeMobileMenu}>
               Challenges
             </Link>
-            <Link 
-              to="/news" 
-              className={getMobileNavLinkClassName('/news')}
-              onClick={closeMobileMenu}
-            >
+            <Link to="/news" className={getMobileNavLinkClassName('/news')} onClick={closeMobileMenu}>
               News
             </Link>
-            <Link 
-              to="/experts" 
-              className={getMobileNavLinkClassName('/experts')}
-              onClick={closeMobileMenu}
-            >
+            <Link to="/experts" className={getMobileNavLinkClassName('/experts')} onClick={closeMobileMenu}>
               Experts
             </Link>
-            <a 
-              href="/uniisearch" 
-              target="_blank" 
+            <a
+              href="/uniisearch"
+              target="_blank"
               rel="noopener noreferrer"
               className="menu-nav-item"
               onClick={closeMobileMenu}
             >
               UNII Search
             </a>
-            <a 
-              href="/ginas/app/ui" 
-              target="_blank" 
+            <a
+              href="/ginas/app/ui"
+              target="_blank"
               rel="noopener noreferrer"
               className="menu-nav-item"
               onClick={closeMobileMenu}

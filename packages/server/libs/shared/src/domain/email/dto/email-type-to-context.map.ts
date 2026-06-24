@@ -105,7 +105,7 @@ export type InvitationContext = {
 
 export type ExpertQuestionAddedContext = {
   expertQuestion: ExpertQuestion
-  questionAuthor: User
+  questionAuthor: User | null
   input: EmailTypeToInputMap[EMAIL_TYPES.expertQuestionAdded]
 }
 

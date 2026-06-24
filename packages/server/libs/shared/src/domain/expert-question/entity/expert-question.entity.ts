@@ -18,8 +18,8 @@ interface QuestionMeta {
 
 @Entity({ tableName: 'expert_questions', repository: () => ExpertQuestionRepository })
 export class ExpertQuestion extends BaseEntity {
-  @ManyToOne({ entity: () => User })
-  user: Ref<User>
+  @ManyToOne({ entity: () => User, nullable: true })
+  user: Ref<User> | null
 
   @ManyToOne({ entity: () => Expert })
   expert: Ref<Expert>

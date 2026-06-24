@@ -2,13 +2,11 @@
 # rubocop:todo Metrics/ClassLength
 class ChallengesController < ApplicationController
   skip_before_action :require_login,
-                     only: %i(index consistency truth appathons join show treasure_old)
+                     only: %i(consistency truth appathons join show treasure_old)
   before_action :check_on_challenge_admin, only: %i(new)
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
   before_action :check_scope_accessibility, only: %i(update)
-  layout "react", only: %i(index show)
-
-  def index; end
+  layout "react", only: %i(show)
 
   def new
     @challenge = Challenge.new

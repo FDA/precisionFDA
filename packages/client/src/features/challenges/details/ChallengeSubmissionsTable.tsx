@@ -1,13 +1,13 @@
-import React, { useMemo } from 'react'
-import { ColumnDef } from '@tanstack/react-table'
-import { Loader } from '../../../components/Loader'
+import type { ColumnDef } from '@tanstack/react-table'
+import { useMemo } from 'react'
 import { ChallengeEntriesTable } from '../../../components/ChallengeEntriesTable'
-import { IUser } from '../../../types/user'
-import { StyledNameCell } from '../../home/home.styles'
-import { SubmissionV2 } from './submission.types'
-import { InputFileCell, NameCell } from './SubmissionTable'
-import { useChallengeSubmissionQuery } from './useChallengeSubmissionQuery'
+import { Loader } from '../../../components/Loader'
+import type { IUser } from '../../../types/user'
 import { formatDate } from '../../../utils/formatting'
+import { StyledNameCell } from '../../home/home.styles'
+import { InputFileCell, NameCell } from './SubmissionTable'
+import type { SubmissionV2 } from './submission.types'
+import { useChallengeSubmissionQuery } from './useChallengeSubmissionQuery'
 
 export const useSubmissionTableColumns = ({
   isSpaceMember,
@@ -35,7 +35,9 @@ export const useSubmissionTableColumns = ({
     {
       header: 'Input File',
       accessorKey: 'job_input_files',
-      cell: ({ cell }) => <InputFileCell authUser={authUser} submission={cell.row.original} isSpaceMember={isSpaceMember} />,
+      cell: ({ cell }) => (
+        <InputFileCell authUser={authUser} submission={cell.row.original} isSpaceMember={isSpaceMember} />
+      ),
       enableSorting: false,
     },
     {
@@ -71,7 +73,7 @@ export const ChallengeSubmissionsTable = ({
           login
         </a>
         . If you don&apos;t have a PrecisionFDA account, please{' '}
-        <a data-turbolinks="false" href="/request_access">
+        <a data-turbolinks="false" href="/request-access">
           submit an access request
         </a>{' '}
         to join and engage in the community!

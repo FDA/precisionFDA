@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import type React from 'react'
+import { useState } from 'react'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import styled from 'styled-components'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { Button } from '../../../components/Button'
 import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
 import { theme } from '../../../styles/theme'
-import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer as ModalFooter } from '../../modal/modal.styles'
 
@@ -58,15 +59,17 @@ const ExpertAskQuestionModalComponent = ({
   const isAskingDisabled = askedQuestion === ''
 
   const submitQuestion = () => {
-    if (!isLoggedIn) {
+    if (isLoggedIn) {
+      action(user.full_name, askedQuestion, null)
+    } else if (getRuntimeEnv().RECAPTCHA_SITE_KEY?.length) {
       setTriggerCaptcha(true)
     } else {
-      action(user.full_name, askedQuestion, null)
+      action('Anonymous', askedQuestion, null)
     }
   }
 
   const onCaptchaSuccess = (captchaValue: string) => {
-    action(user.full_name, askedQuestion, captchaValue)
+    action('Anonymous', askedQuestion, captchaValue)
   }
 
   const closeAction = () => {

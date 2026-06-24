@@ -127,10 +127,10 @@ class ExpertsController < ApplicationController
           :_edited => false.to_s
       )
       token = unsafe_params.dig("g-recaptcha-response-data", :question)
-      result = verify_captcha_assessment(token, "question")
+      result = verify_captcha_assessment(token, "question", request.remote_ip, request.user_agent)
 
       if result && @exp_question.save!
-        https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], { id: exp_question.id })
+        https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], { id: @exp_question.id })
         flash[:success] = "Your question was submitted successfully."
       else
         flash[:error] = "Your question was not submitted because of an unknown reason. Please try again."

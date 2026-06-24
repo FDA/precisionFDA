@@ -47,7 +47,7 @@ module Api
     def ask_question
       if @context.logged_in?
         exp_question = ExpertQuestion.provision(@expert, @context, params[:question])
-      elsif verify_captcha_assessment(params[:captchaValue], "question")
+      elsif verify_captcha_assessment(params[:captchaValue], "question", request.remote_ip, request.user_agent)
         exp_question = ExpertQuestion.new(
           user_id: nil,
           expert_id: @expert.id,

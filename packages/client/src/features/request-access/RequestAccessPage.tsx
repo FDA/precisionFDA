@@ -1,12 +1,14 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
-import React, { createContext, useCallback, useContext, useState } from 'react'
+import type { AxiosError } from 'axios'
+import type React from 'react'
+import { createContext, useCallback, useContext, useState } from 'react'
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'
 import * as Yup from 'yup'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { FieldGroup } from '../../components/form/FieldGroup'
@@ -14,8 +16,8 @@ import { CheckboxLabel, InputError } from '../../components/form/form.styles'
 import { InputText } from '../../components/InputText'
 import { Loader } from '../../components/Loader'
 import { PFDALogoDark, PFDALogoLight } from '../../components/NavigationBar/PFDALogo'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 import PublicLayout from '../../layouts/PublicLayout'
-import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { createRequestAccess } from './api'
 import { RequestAccessSuccessMessage } from './RequestAccessSuccessMessage'
 import {
@@ -30,8 +32,7 @@ import {
   SectionTitle,
   StyledForm,
 } from './style'
-import { RequestAccess, RequestAccessPayload } from './type'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
+import type { RequestAccess, RequestAccessPayload } from './type'
 
 const requestAccessValidationSchema = Yup.object().shape({
   firstName: Yup.string().required('First name is required'),
@@ -90,7 +91,7 @@ const RequestAccessForm = () => {
       const errorStatus = e.response?.status
       const errorCode = error?.code ?? ''
       if (errorStatus === 400 && ['E_EMAIL_EXISTS'].includes(errorCode)) {
-        setError('email', { message: error!.message })
+        setError('email', { message: error?.message })
         toastError('Some information is missing or incorrect. Please review and try again.')
       } else if (errorStatus === 400 && ['E_INVALID_CAPTCHA'].includes(errorCode)) {
         toastError('Captcha verification failed. Please try again.', { autoClose: false })
@@ -109,6 +110,11 @@ const RequestAccessForm = () => {
   const submitWithCaptcha = useCallback(
     async (data: RequestAccess) => {
       if (!executeRecaptcha) {
+        return
+      }
+
+      if (!getRuntimeEnv().RECAPTCHA_SITE_KEY?.length) {
+        mutation.mutateAsync(data)
         return
       }
 
@@ -133,11 +139,19 @@ const RequestAccessForm = () => {
         <FlexRow>
           <FieldGroup label="First name" required>
             <InputText {...register('firstName')} />
-            <ErrorMessage errors={errors} name="firstName" render={({ message }) => <InputError>{message}</InputError>} />
+            <ErrorMessage
+              errors={errors}
+              name="firstName"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
           </FieldGroup>
           <FieldGroup label="Last name" required>
             <InputText {...register('lastName')} />
-            <ErrorMessage errors={errors} name="lastName" render={({ message }) => <InputError>{message}</InputError>} />
+            <ErrorMessage
+              errors={errors}
+              name="lastName"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
           </FieldGroup>
         </FlexRow>
         <FieldGroup label="Email" required>
@@ -174,7 +188,11 @@ const RequestAccessForm = () => {
         </FieldGroup>
         <FieldGroup label="Do you have any software to contribute? If so, list below.">
           <InputText {...register('reqSoftware')} />
-          <ErrorMessage errors={errors} name="reqSoftware" render={({ message }) => <InputError>{message}</InputError>} />
+          <ErrorMessage
+            errors={errors}
+            name="reqSoftware"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
         </FieldGroup>
         <CheckboxGroup>
           <h5>Ultimately, what do you see as your intended use for precisionFDA?</h5>

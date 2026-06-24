@@ -1,6 +1,4 @@
-/** biome-ignore-all lint/suspicious/noThenProperty: <explanation> */
 import * as Yup from 'yup'
-import type { MutationErrors } from '@/types/utils'
 import type { ChallengePayload } from '../api'
 import type { IChallengeForm } from './ChallengeForm'
 
@@ -48,6 +46,7 @@ const commonValidationSchema = {
   preRegistrationUrl: Yup.string()
     .when('status', {
       is: (val: { value: string } | null | undefined) => val?.value === 'pre-registration',
+      // biome-ignore lint/suspicious/noThenProperty: Yup schema uses 'then' as a conditional branch key, not a Promise handler
       then: (schema: Yup.StringSchema) =>
         schema.required('Preregistration link is required for the pre-registration status'),
       otherwise: (schema: Yup.StringSchema) => schema,
@@ -90,6 +89,7 @@ const requiredWhenYes = (radioField: string) =>
     .default('')
     .when(radioField, {
       is: true,
+      // biome-ignore lint/suspicious/noThenProperty: Yup schema uses 'then' as a conditional branch key, not a Promise handler
       then: schema => schema.required('Field is required'),
     })
 

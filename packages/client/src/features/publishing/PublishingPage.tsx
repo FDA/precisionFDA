@@ -1,14 +1,16 @@
 import { useMutation } from '@tanstack/react-query'
-import React, { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import type { AxiosError } from 'axios'
+import { useState } from 'react'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router'
+import type { BackendError } from '../../api/types'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { EntityIcon } from '../../components/icons/EntityIcon'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 import { UserLayout } from '../../layouts/UserLayout'
 import { HomeLoader, NotFound } from '../home/show.styles'
 import { getEntityTypeFromIdentifier } from '../tracks/TrackProvenanceContent'
 import { publishFolder, publishObjects } from './publishing.api'
-import { TreeRoot } from './publishing.types'
 import {
   DepList,
   DepListBody,
@@ -22,10 +24,8 @@ import {
   StyledCallout,
   StyledPageContainer,
 } from './publishing.styles'
+import type { TreeRoot } from './publishing.types'
 import { usePublishingTreeRootQuery } from './usePublishingTreeQuery'
-import { AxiosError } from 'axios'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
-import { BackendError } from '../../api/types'
 
 const ShowParent = ({ tree, onSelectItem }: { tree: TreeRoot; onSelectItem: (identifier: string) => void }) => {
   const [selected, setSelected] = useState<boolean>(false)
@@ -97,7 +97,7 @@ const PublishingForm = ({ identifier, treeRoot }: { identifier: string; treeRoot
 
   const mutation = useMutation({
     mutationKey: ['publish-objects'],
-    mutationFn: () => publishObjects(identifier!, publishedObjects),
+    mutationFn: () => publishObjects(identifier, publishedObjects),
     onError: () => {
       toastError('Unable to publish selected object(s)')
     },
@@ -155,11 +155,14 @@ const PublishingPage = () => {
   const identifier = searchParams.get('identifier')
   let entityType = searchParams.get('type')
 
-  if (!entityType) {
-    entityType = getEntityTypeFromIdentifier(identifier!)
+  if (identifier && !entityType) {
+    entityType = getEntityTypeFromIdentifier(identifier)
   }
 
-  const { data: treeRoot, isLoading, isError } = usePublishingTreeRootQuery(identifier!, entityType)
+  const { data: treeRoot, isLoading, isError } = usePublishingTreeRootQuery(identifier, entityType)
+  if (!identifier) {
+    return <Navigate to="/home" replace />
+  }
 
   if (isLoading) {
     return <HomeLoader />
@@ -180,11 +183,12 @@ const PublishingPage = () => {
         <StyledCallout data-variant="info">
           Publishing items makes them publicly visible to all logged-in precisionFDA users.
           <br />
-          <a href="/docs/guides/publishing" target="_blank">
-            Review important information about publishing, and learn why it&apos;s a good idea to also publish related items.
+          <a href="/docs/guides/publishing" target="_blank" rel="noopener">
+            Review important information about publishing, and learn why it&apos;s a good idea to also publish related
+            items.
           </a>
         </StyledCallout>
-        <PublishingForm identifier={identifier!} treeRoot={treeRoot} />
+        <PublishingForm identifier={identifier} treeRoot={treeRoot} />
       </StyledPageContainer>
     </UserLayout>
   )

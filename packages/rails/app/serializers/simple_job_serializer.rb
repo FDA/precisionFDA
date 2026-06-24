@@ -122,7 +122,7 @@ class SimpleJobSerializer < ApplicationSerializer
 
     {}.tap do |links|
       # show job details page - api_job_path
-      links[:show] = job_path(object)
+      links[:show] = pathify(object)
       # link to user who run a job - api_job_path
       # show job's app details page - api_app_path
       links[:app] = app_path(object.app) if object.app

@@ -217,7 +217,7 @@ module Api
 
       raise ApiError, "You have no permissions to access this job" unless job
 
-      redirect_back(fallback_location: job_path(job)) && return unless job.https? && job.running?
+      redirect_back(fallback_location: pathify(job)) && return unless job.https? && job.running?
 
       # Update the API key in the background
       refresh_api_key_internal(job, background: true)

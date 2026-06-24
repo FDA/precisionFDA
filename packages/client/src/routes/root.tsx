@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import 'react-tooltip/dist/react-tooltip.css'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet, useLocation, useParams } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { AlertDismissedProvider } from '@/features/admin/alerts/useAlertDismissedLocalStorage'
 import { ExpiringSessionModal } from '@/features/auth/ExpiringSessionModal'
@@ -62,6 +62,11 @@ const AdminRouteRedirect = () => {
   )
 }
 
+const JobRedirect = () => {
+  const { executionUid } = useParams<{ executionUid: string }>()
+  return <Navigate to={`/home/executions/${executionUid}`} replace />
+}
+
 const RootComponent = () => {
   const sessionExpiredModal = useModal()
   const expiringSessionModal = useModal()
@@ -117,10 +122,10 @@ const router = createBrowserRouter([
       { path: 'experts/:expertId/*', element: <ExpertsSinglePage /> },
       { path: 'experts', element: <ExpertsListPage /> },
       { path: 'terms', element: <ToS /> },
-      // keep the snake case route for old content in Rails
-      { path: '/request_access', element: <RequestAccessPage /> },
+      { path: 'request-access', element: <RequestAccessPage /> },
+      { path: 'request_access', element: <Navigate to="/request-access" replace /> },
       { path: 'security', element: <Security /> },
-      { path: 'daaas', element: <Navigate to="/data-portals/main" replace /> },
+      { path: 'daaas', element: <Navigate to="/data-portals/daaas" replace /> },
       { path: '*', element: <NoFoundPage /> },
 
       // Protected routes
@@ -143,10 +148,14 @@ const router = createBrowserRouter([
           },
           { path: 'publish/*', element: <PublishingPage /> },
           { path: 'workflows/:workflowUid/analyses/new', element: <WorkflowRunPage /> },
+          { path: 'admin/activity_reports', element: <Navigate to="/account/admin/activity-reports" replace /> },
+          { path: 'admin/usage_reports', element: <Navigate to="/account/admin/activity-reports" replace /> },
+          { path: 'admin/users_list', element: <Navigate to="/account/admin/users" replace /> },
           { path: 'admin/*', element: <AdminRouteRedirect /> },
           { path: 'comparisons/:identifier/track', element: <TrackPage /> },
           { path: 'notes/:identifier/track', element: <TrackPage /> },
           { path: 'data-portals/*', element: <DataPortalRoutes /> },
+          { path: 'jobs/:executionUid', element: <JobRedirect /> },
         ],
       },
     ],

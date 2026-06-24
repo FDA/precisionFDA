@@ -21,9 +21,9 @@
         <div class="dropdown-item"><%= link_to "Notification Settings", '/account/notifications', data: { turbolinks: false } %></div>
       <% end %>
       <div role="separator" class="divider"></div>
-      <div class="dropdown-item"><a href="<%= about_path %>" data-turbolinks="false"><span class="fa fa-fw fa-info-circle"></span> About</a></div>
+      <div class="dropdown-item"><a href="/about" data-turbolinks="false"><span class="fa fa-fw fa-info-circle"></span> About</a></div>
       <div class="dropdown-item"><a href="<%= guidelines_path %>" data-turbolinks="false"><span class="fa fa-fw fa-institution"></span> Guidelines</a></div>
-      <div class="dropdown-item"><a href="<%= docs_path %>" data-turbolinks="false"><span class="fa fa-fw fa-book"></span> Docs</a></div>
+      <div class="dropdown-item"><a href="/docs" data-turbolinks="false"><span class="fa fa-fw fa-book"></span> Docs</a></div>
       <div role="separator" class="divider"></div>
       <% if @context.logged_in? && @context.can_administer_site? %>
         <div class="dropdown-item"><%= link_to "Admin Dashboard", '/account/admin', data: { turbolinks: false } %></div>

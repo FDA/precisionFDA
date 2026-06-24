@@ -47,17 +47,19 @@ const AboutPage = () => {
 
         <PfTabContent $isShown={selectedSection === 'why'}>
           <div className="text-xl font-bold leading-[30px] text-primary-blue">
-            The Food and Drug Administration (FDA) plays an integral role in precision medicine, which foresees the day when an
-            individual&apos;s medical care will be tailored in part based on their unique characteristics and genetic make-up.
+            The Food and Drug Administration (FDA) plays an integral role in precision medicine, which foresees the day
+            when an individual&apos;s medical care will be tailored in part based on their unique characteristics and
+            genetic make-up.
           </div>
           <hr />
           <div className="flex flex-col gap-4 lg:flex-row lg:*:flex-1">
             <RichText>
               <p>
-                To accelerate progress towards this vision, in July 2014, FDA’s Chief Health Informatics Officer (CHIO), Taha
-                Kass-Hout, M.D., began investigating the concept of a research and development portal that would allow community
-                members to test, pilot, and validate existing and new bioinformatics approaches for processing the vast amount of
-                genomic data that is collected using Next Generation Sequencing (NGS) technology.
+                To accelerate progress towards this vision, in July 2014, FDA’s Chief Health Informatics Officer (CHIO),
+                Taha Kass-Hout, M.D., began investigating the concept of a research and development portal that would
+                allow community members to test, pilot, and validate existing and new bioinformatics approaches for
+                processing the vast amount of genomic data that is collected using Next Generation Sequencing (NGS)
+                technology.
               </p>
               <p>
                 After conducting market research, collaborating with FDA’s{' '}
@@ -68,8 +70,8 @@ const AboutPage = () => {
                 >
                   Center for Devices and Radiological Health
                 </a>{' '}
-                and assembling a project team, the precisionFDA project was initiated on July 22, 2015 with a scheduled beta
-                launch date of December 15, 2015.
+                and assembling a project team, the precisionFDA project was initiated on July 22, 2015 with a scheduled
+                beta launch date of December 15, 2015.
               </p>
             </RichText>
             <div>
@@ -82,9 +84,9 @@ const AboutPage = () => {
 
         <PfTabContent $isShown={selectedSection === 'what'}>
           <div className="text-xl font-bold leading-[30px] text-primary-blue">
-            PrecisionFDA provides the genomics community with a secure, cloud-based platform where participants can access and
-            share datasets, analysis pipelines, and bioinformatics tools, in order to benchmark their approaches and advance
-            regulatory science.
+            PrecisionFDA provides the genomics community with a secure, cloud-based platform where participants can
+            access and share datasets, analysis pipelines, and bioinformatics tools, in order to benchmark their
+            approaches and advance regulatory science.
           </div>
           <hr />
           <RichText>
@@ -93,9 +95,9 @@ const AboutPage = () => {
               regulatory pathways and decision making.
             </p>
             <p>
-              PrecisionFDA provides a private area where participants (individuals or organizations) can conduct genome analysis
-              and comparison against reference material, and a community area where they can publish and share results, reference
-              materials, and tools. The precisionFDA community continues to grow and includes:
+              PrecisionFDA provides a private area where participants (individuals or organizations) can conduct genome
+              analysis and comparison against reference material, and a community area where they can publish and share
+              results, reference materials, and tools. The precisionFDA community continues to grow and includes:
             </p>
 
             <ul>
@@ -113,8 +115,8 @@ const AboutPage = () => {
 
         <PfTabContent $isShown={selectedSection === 'who'}>
           <div className="text-xl font-bold leading-[30px] text-primary-blue">
-            PrecisionFDA is an initiative in the Office of Health Informatics (OHI) at the Food and Drug Administration led by the
-            Chief Health Informatics Officer (CHIO), Dr. Taha Kass-Hout, MD, MS.
+            PrecisionFDA is an initiative in the Office of Health Informatics (OHI) at the Food and Drug Administration
+            led by the Chief Health Informatics Officer (CHIO), Dr. Taha Kass-Hout, MD, MS.
           </div>
           <hr />
           <RichText>
@@ -133,7 +135,9 @@ const AboutPage = () => {
               <li>Zivana Tezak</li>
             </ul>
             <hr />
-            <p>The team also wishes to thank the following individuals for their significant contributions to the effort:</p>
+            <p>
+              The team also wishes to thank the following individuals for their significant contributions to the effort:
+            </p>
             <ul>
               <li>Vincent Amatrudo</li>
               <li>Angela Anderson*</li>
@@ -177,11 +181,12 @@ const AboutPage = () => {
                 <div>
                   <p className="text-xl font-bold">This program is in production at this time.</p>
                   <p>
-                    For further information and to express interest in participating please submit our request access form.
+                    For further information and to express interest in participating please submit our request access
+                    form.
                   </p>
                 </div>
                 <div>
-                  <Button data-variant="primary" as="a" href="/request_access">
+                  <Button data-variant="primary" as="a" href="/request-access">
                     <span className="fa fa-user-plus" aria-hidden="true" /> Request Access
                   </Button>
                 </div>

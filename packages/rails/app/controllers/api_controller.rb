@@ -635,7 +635,7 @@ class ApiController < ApplicationController
       message = "redirect to item"
       @context.user.tag(taggable, with: tags, on: tag_context.presence || :tags)
     else
-      path = home_path
+      path = "/home"
       message = "This item is not accessible by you"
     end
 

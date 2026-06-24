@@ -1,7 +1,7 @@
 import axios from 'axios'
-import { TreeRoot } from './publishing.types'
+import type { TreeRoot } from './publishing.types'
 
-export async function fetchPublishingTreeRoot(identifier: string, type: string) {
+export async function fetchPublishingTreeRoot(identifier: string, type?: string) {
   const url = `/api/v2/publish/tree-root?identifier=${identifier}&type=${type}`
   const r = await axios.get<TreeRoot>(url)
   return r.data

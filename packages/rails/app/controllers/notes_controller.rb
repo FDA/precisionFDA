@@ -32,11 +32,7 @@ class NotesController < ApplicationController
     end
     @commentable = @note
 
-    if @note.note_type == "Answer"
-      redirect_to discussion_answer_path(@note.discussion, @note.user.dxuser)
-    elsif @note.note_type == "Discussion"
-      redirect_to discussion_path(@note.discussion)
-    elsif request.path != note_path(@note)
+    if request.path != note_path(@note)
       redirect_to @note
     else
       js note_js(@note)
@@ -49,10 +45,6 @@ class NotesController < ApplicationController
 
     if @note.nil?
       redirect_to note_path(@note)
-    elsif @note.note_type == "Answer"
-      redirect_to discussion_answer_path(@note.discussion, @note.user.dxuser)
-    elsif @note.note_type == "Discussion"
-      redirect_to discussion_path(@note.discussion)
     end
     js note_js(@note)
   end
