@@ -23,13 +23,13 @@ import { fetchLicensesOnApp } from '../apps.api'
 import type { AppSpec, BatchInput, IApp, RunJobFormType } from '../apps.types'
 import { getDefaultValueFromServer } from '../form/common'
 import { useApplyDefaultRunJobInstanceTypes, useInstanceTypeAvailability } from '../instanceTypeAvailability'
+import { RightGroup, StyledActionsContainer, StyledGrid, StyledJobName } from './apps-run.styles'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { JobRunInput } from './JobRunInput'
 import { SelectContext } from './SelectContext'
 import { SelectInstanceType } from './SelectInstanceType'
 import { SelectSpaceScope } from './SelectSpaceScope'
 import { SetOutputFolder } from './SetOutputFolder'
-import { RightGroup, StyledActionsContainer, StyledGrid, StyledJobName } from './apps-run.styles'
 import { useExportInputsModal } from './useExportInputsModal'
 import { useRunJobMutation } from './useRunJobMutation'
 import {
@@ -528,7 +528,14 @@ export const RunJobForm = ({
                                 errors={errors as FieldErrors<Record<string, unknown>>}
                                 disabled={isSubmitting}
                                 setError={setError}
-                                scope={app.entityType === 'https' ? watch().scope?.value : app.scope}
+                                scopeContext={
+                                  watch().scope
+                                    ? {
+                                        scope: watch().scope?.value as ServerScope,
+                                        name: watch().scope?.name ?? watch().scope?.label,
+                                      }
+                                    : undefined
+                                }
                               />
                             </RunJobFilesProvider>
                           </FieldGroup>

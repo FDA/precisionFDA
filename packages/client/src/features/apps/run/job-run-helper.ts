@@ -41,6 +41,7 @@ const fetchAndConvertSelectableContexts = async (entity_type: IApp['entityType']
     const options = spaces.map(s => ({
       label: `${s.title} - ${s.scope}`,
       value: s.scope,
+      name: s.title,
     }))
 
     return [{ label: 'Private', value: 'private' }, ...options]

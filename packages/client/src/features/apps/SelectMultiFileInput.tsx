@@ -5,7 +5,7 @@ import { theme } from '../../styles/theme'
 import { pluralize } from '../../utils/formatting'
 import { useSelectFileModal } from '../files/actionModals/useSelectFileModal'
 import type { IFile } from '../files/files.types'
-import type { DialogType } from '../home/types'
+import type { DialogType, ScopeContext } from '../home/types'
 import { ButtonRow } from '../modal/modal.styles'
 
 const StyledButtonRow = styled(ButtonRow)`
@@ -36,7 +36,7 @@ interface Props {
   onChange: (file?: IFile[] | null) => void
   dialogTitle: string
   dialogSubtitle?: string
-  scopes?: string[]
+  scopeContext?: ScopeContext
   disabled?: boolean
   isError?: boolean
 }
@@ -46,6 +46,7 @@ export const SelectMultiFileInput = ({
   onChange,
   dialogType = 'radio',
   dialogTitle,
+  scopeContext,
   disabled,
   isError,
 }: Props): JSX.Element => {
@@ -61,6 +62,7 @@ export const SelectMultiFileInput = ({
     dialogTitle,
     dialogType,
     handleSelect,
+    scopeContext,
     undefined,
     value,
     true,
@@ -79,7 +81,7 @@ export const SelectMultiFileInput = ({
           }}
           disabled={disabled}
         >
-          {!!value && Array.isArray(value) && value.length > 0
+          {value && Array.isArray(value) && value.length > 0
             ? `${value.length} ${pluralize('File', value.length)} Selected`
             : 'Select file...'}
         </FileButton>

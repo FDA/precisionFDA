@@ -54,6 +54,7 @@ export function Attachments({
     'Select Files',
     'checkbox',
     v => onChangeHandler('UserFile', v),
+    undefined,
     scope !== 'public' ? [scope, 'public'] : ['public'],
     undefined,
     false,

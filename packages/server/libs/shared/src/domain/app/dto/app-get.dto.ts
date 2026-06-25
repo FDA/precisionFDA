@@ -4,6 +4,7 @@ import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { TimeUtils } from '@shared/utils/time.utils'
+import { ENTITY_TYPE } from '../app.enum'
 
 interface AppRevisionDTO {
   id: number
@@ -131,7 +132,7 @@ export class AppGetDTO {
       id: app.id,
       uid: app.uid,
       dxid: app.dxid,
-      entityType: String(app.entityType),
+      entityType: app.entityType === ENTITY_TYPE.HTTPS ? 'https' : 'regular',
       name: appSeries.name ?? '',
       title: app.title,
       addedBy: user.dxuser,
@@ -174,7 +175,10 @@ export class AppGetDTO {
 
 function buildTags(appSeries: AppSeries): string[] {
   if (!appSeries.taggings.isInitialized()) return []
-  return appSeries.taggings.getItems().map(t => t.tag?.name ?? '').filter(Boolean)
+  return appSeries.taggings
+    .getItems()
+    .map(t => t.tag?.name ?? '')
+    .filter(Boolean)
 }
 
 function buildProperties(appSeries: AppSeries): Record<string, string> {
@@ -236,9 +240,7 @@ function mapInternal(internal: Internal | null | undefined): AppInternalDTO {
   }
 }
 
-function mapRevision(
-  rev: Pick<App, 'id' | 'uid' | 'title' | 'revision' | 'version' | 'deleted'>,
-): AppRevisionDTO {
+function mapRevision(rev: Pick<App, 'id' | 'uid' | 'title' | 'revision' | 'version' | 'deleted'>): AppRevisionDTO {
   return {
     id: rev.id,
     uid: rev.uid,
@@ -248,4 +250,3 @@ function mapRevision(
     deleted: rev.deleted,
   }
 }
-

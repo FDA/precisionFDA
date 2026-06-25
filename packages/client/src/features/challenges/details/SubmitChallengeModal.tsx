@@ -168,7 +168,10 @@ const SubmitChallengeModalContent = ({ challenge, hide }: { challenge: Challenge
                             field={field as never}
                             errors={(errors.inputs ?? {}) as FieldErrors<Record<string, unknown>>}
                             disabled={submitMutation.isPending}
-                            scope="private"
+                            scopeContext={{
+                              scope: 'private',
+                              name: 'Private',
+                            }}
                             setError={setError as never}
                           />
                         )}

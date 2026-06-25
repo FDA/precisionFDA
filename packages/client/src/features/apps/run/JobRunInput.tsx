@@ -30,6 +30,7 @@ import { FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { useRunJobFilesContext } from '@/features/apps/run/useRunJobFilesContext'
 import type { IFile } from '@/features/files/files.types'
+import type { ScopeContext } from '@/features/home/types'
 import { cn } from '@/utils/cn'
 import { noAccessText } from '../../files/file.utils'
 import type { InputSpec, IOSpec, RunJobFormType } from '../apps.types'
@@ -291,16 +292,6 @@ const FreeformArrayInput = ({
   )
 }
 
-/**
- * Private apps need to be able to run with public files and public apps
- * need to be able to run with private files.
- *
- * @param scope
- */
-const enhanceScope = (scope: string): string[] => {
-  return ['public', 'private'].includes(scope) ? ['private', 'public'] : [scope, 'public']
-}
-
 /** Reads validation for this path via RHF context (works for nested paths like inputs.0.fields.x). Requires FormProvider. */
 function FileFieldMessage({ name }: { name: FieldPath<FieldValues> }) {
   const { getFieldState, formState } = useFormContext<FieldValues>()
@@ -311,7 +302,7 @@ function FileFieldMessage({ name }: { name: FieldPath<FieldValues> }) {
 const ArrayFileInput = ({
   disabled,
   field,
-  scope,
+  scopeContext,
   inputSpec,
   setError,
 }: {
@@ -319,7 +310,7 @@ const ArrayFileInput = ({
   field: ControlledField
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
-  scope: string
+  scopeContext?: ScopeContext
 }): JSX.Element => {
   const { setValue } = useFormContext<FieldValues>()
   const fileUids = getArrayValues(field.value)
@@ -365,7 +356,7 @@ const ArrayFileInput = ({
           })
         }}
         value={fileUids.length > 0 ? fileUids : undefined}
-        scopes={enhanceScope(scope)}
+        scopeContext={scopeContext}
       />
 
       <FieldInfo text={inputSpec.help} />
@@ -377,7 +368,7 @@ const ArrayFileInput = ({
 const SingleFileInput = ({
   disabled,
   field,
-  scope,
+  scopeContext,
   inputSpec,
   setError,
 }: {
@@ -385,7 +376,7 @@ const SingleFileInput = ({
   field: ControlledField
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
-  scope: string
+  scopeContext?: ScopeContext
 }): JSX.Element => {
   const { setValue } = useFormContext<FieldValues>()
   const fileUid = getStringValue(field.value)
@@ -431,7 +422,7 @@ const SingleFileInput = ({
         }}
         dialogType="radio"
         value={fileUid ? [fileUid] : undefined}
-        scopes={enhanceScope(scope)}
+        scopeContext={scopeContext}
       />
 
       <FieldInfo text={inputSpec.help} />
@@ -445,7 +436,7 @@ export const JobRunInput = ({
   field,
   errors,
   disabled,
-  scope,
+  scopeContext,
   setError,
 }: {
   inputSpec: InputSpec
@@ -453,7 +444,7 @@ export const JobRunInput = ({
   errors: FieldErrors<Record<string, unknown>>
   disabled: boolean
   setError: UseFormSetError<RunJobFormType>
-  scope: string
+  scopeContext?: ScopeContext
 }): JSX.Element => {
   const choices = Array.isArray(inputSpec?.choices) ? inputSpec.choices : null
   const choiceOptions = getChoiceOptions(choices)
@@ -461,12 +452,24 @@ export const JobRunInput = ({
   switch (inputSpec.class) {
     case 'file': {
       return (
-        <SingleFileInput setError={setError} disabled={disabled} field={field} inputSpec={inputSpec} scope={scope} />
+        <SingleFileInput
+          setError={setError}
+          disabled={disabled}
+          field={field}
+          inputSpec={inputSpec}
+          scopeContext={scopeContext}
+        />
       )
     }
     case 'array:file': {
       return (
-        <ArrayFileInput setError={setError} disabled={disabled} field={field} inputSpec={inputSpec} scope={scope} />
+        <ArrayFileInput
+          setError={setError}
+          disabled={disabled}
+          field={field}
+          inputSpec={inputSpec}
+          scopeContext={scopeContext}
+        />
       )
     }
     case 'string': {

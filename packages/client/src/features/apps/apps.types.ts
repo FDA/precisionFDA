@@ -20,7 +20,6 @@ export interface InputSpec extends IOSpec {
   choices: string[] | null
 }
 
-
 export type ResourceProperties = { [key: string]: string }
 
 export interface AppUser {
@@ -120,6 +119,7 @@ export interface SelectType {
   isDisabled?: boolean
   label: string
   value: string
+  name?: string
 }
 
 export type FormInput =

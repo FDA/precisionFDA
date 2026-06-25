@@ -74,6 +74,7 @@ export type APIResource =
 
 export type HomeScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
+export type ScopeContext = { scope: ServerScope; name: string }
 export type PropertiesResource =
   | 'files'
   | 'folders'

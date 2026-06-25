@@ -28,7 +28,7 @@ import { Loader } from '../../../components/Loader'
 import { Radio } from '../../../components/Radio'
 import { ButtonBadge, Sticky } from '../../actionModals/action-modals.styles'
 import { noAccessText } from '../../files/file.utils'
-import type { DialogType, ServerScope } from '../../home/types'
+import type { DialogType, ScopeContext, ServerScope } from '../../home/types'
 import { ButtonRow, Footer } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
 import { spacesListRequest } from '../../spaces/spaces.api'
@@ -44,6 +44,7 @@ interface FileSelectTabsProps {
   uids: string[]
   selectedFiles: IFile[]
   setSelectedFiles: Dispatch<SetStateAction<IFile[]>>
+  defaultScope?: ScopeContext
   allowedScopes?: string[]
   failedFiles: string[]
   validateLicense?: boolean
@@ -93,7 +94,7 @@ const extractHomeContext = (
   }
   return {
     scope: 'private',
-    name: 'My Home',
+    name: 'Private',
   }
 }
 
@@ -263,7 +264,7 @@ const ScopeTable = ({
     })
   }
   if (!allowedScopes || allowedScopeSet.has('private')) {
-    pinnedItems.push({ name: 'My Home', scope: 'private', icon: <LockIcon height={14} /> })
+    pinnedItems.push({ name: 'Private', scope: 'private', icon: <LockIcon height={14} /> })
   }
   if (!allowedScopes || allowedScopeSet.has('public')) {
     pinnedItems.push({ name: 'Everyone', scope: 'public', icon: <GlobeIcon height={14} /> })
@@ -615,6 +616,7 @@ const ModalBody = ({
   uids,
   selectedFiles,
   setSelectedFiles,
+  defaultScope,
   allowedScopes,
   failedFiles,
   validateLicense,
@@ -629,8 +631,8 @@ const ModalBody = ({
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
   const [folderPath, setFolderPath] = useState<FolderTreePath[]>([])
   const [viewMode, setViewMode] = useState<'files' | 'scopes'>('files')
-  const [activeScope, setActiveScope] = useState<ServerScope | undefined>(extractContext.scope)
-  const [activeScopeName, setActiveScopeName] = useState<string | undefined>(extractContext.name)
+  const [activeScope, setActiveScope] = useState<ServerScope | undefined>(defaultScope?.scope ?? extractContext.scope)
+  const [activeScopeName, setActiveScopeName] = useState<string | undefined>(defaultScope?.name ?? extractContext.name)
   const [showSelectedPanel, setShowSelectedPanel] = useState(uids.length > 0)
 
   const handleScopeClick = (scopeValue: string, label: string): void => {
@@ -721,12 +723,20 @@ const ModalBody = ({
  * by DialogType. In Radio mode only single file selection is allowed, however
  * in checkbox mode it allows user select multiple files.
  *
- * @returns list of selected files
+ * @param title - The modal header text displayed to the user.
+ * @param type - Controls selection mode: `'radio'` for single-file selection, `'checkbox'` for multi-file selection.
+ * @param handleSelect - Callback invoked with the array of selected files when the user confirms.
+ * @param defaultScope - Initial scope selection. Defaults to the current route context (space or home) if omitted.
+ * @param allowedScopes - When provided, restricts the scope picker to only the listed scope identifiers.
+ * @param uids - File UIDs to pre-populate as already-selected when the modal opens.
+ * @param validateLicense - When `true`, files with a pending license acceptance are shown as disabled and cannot be selected.
+ * @returns An object containing the modal component, show/hide helpers, and the current visibility state.
  */
 export const useSelectFileModal = (
   title: string,
   type: DialogType,
   handleSelect: (files: IFile[]) => void,
+  defaultScope?: ScopeContext,
   allowedScopes?: string[],
   uids?: string[],
   validateLicense?: boolean,
@@ -793,6 +803,7 @@ export const useSelectFileModal = (
           setSelectedFiles={setSelectedFiles}
           uids={uids ?? []}
           failedFiles={failedFiles}
+          defaultScope={defaultScope}
           allowedScopes={allowedScopes}
           validateLicense={validateLicense}
         />

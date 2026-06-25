@@ -22,10 +22,10 @@ import type { IUser } from '@/types/user'
 import { getSpaceIdFromScope } from '@/utils'
 import type { AcceptedLicense, IApp, InputSpec, SelectType } from '../../apps/apps.types'
 import { getDefaultValueFromServer } from '../../apps/form/common'
+import { Section, SectionBody, SectionHeader, StyledGrid, Topbox, TopboxItem } from '../../apps/run/apps-run.styles'
 import { ErrorMessageForField } from '../../apps/run/ErrorMessageForField'
 import { JobRunInput } from '../../apps/run/JobRunInput'
 import { SelectSpaceScope } from '../../apps/run/SelectSpaceScope'
-import { Section, SectionBody, SectionHeader, StyledGrid, Topbox, TopboxItem } from '../../apps/run/apps-run.styles'
 import { extractFileUids, getValue, useDefaultScopeSelection, useSelectableSpaces } from '../../apps/run/utils'
 import { useAuthUser } from '../../auth/useAuthUser'
 import type { FileUid } from '../../files/files.types'
@@ -176,7 +176,6 @@ const WorkflowStage = ({
                       errors={errors}
                       disabled={isSubmitting}
                       setError={setError}
-                      scope={app.scope}
                     />
                   </FieldGroup>
                 )}
