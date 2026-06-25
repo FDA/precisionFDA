@@ -34,7 +34,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { JobCreateResponse } from '@shared/platform-client/platform-client.responses'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
-import { SCOPE } from '@shared/types/common'
+import { EntityScope, SCOPE } from '@shared/types/common'
 import { getPluralizedTerm } from '@shared/utils/format'
 import { TimeUtils } from '@shared/utils/time.utils'
 
@@ -50,6 +50,7 @@ export const APP_RUN_ERRORS = {
   INVALID_CONTEXT: 'Unable to execute the app in selected context.',
 
   FILES_NOT_FOUND: (fileCount: string, fileUids: string) => `${fileCount} not found (${fileUids})`,
+  FILES_IN_PROTECTED_SPACE: (fileUids: string) => `Files cannot be used outside of their protected space (${fileUids})`,
   APP_INPUT_REQUIRED: (appUid: Uid<'app'>, specName: string) =>
     `Input "${appUid}:${specName}" is required but no value provided`,
   LICENSE_ACCEPTANCE_REQUIRED: (licenseTitle: string): string =>
@@ -86,7 +87,7 @@ export class AppRunFacade {
     await this.validateAssetsLicenses(app)
 
     const projectDxId = await this.getRunProjectFromScope(runAppInput.scope, user)
-    const inputFiles = await this.getInputFiles(runAppInput, app.spec.input_spec)
+    const inputFiles = await this.getInputFiles(runAppInput, app.spec.input_spec, user)
 
     const processedInput = this.buildJobInput(runAppInput, app, inputFiles)
 
@@ -228,11 +229,16 @@ export class AppRunFacade {
     return projectDxId
   }
 
-  private async getInputFiles(input: RunAppDTO, appInputSpec: AppInputSpecItem[]): Promise<UserFile[]> {
+  private async getInputFiles(input: RunAppDTO, appInputSpec: AppInputSpecItem[], user: User): Promise<UserFile[]> {
     this.logger.log(`Retrieving input files for app run: ${input.scope}`)
     const appInputs = input.inputs
     const inputFiles: UserFile[] = []
     const notFoundFileUids: Uid<'file'>[] = []
+
+    const accessibleSpaces = await user.accessibleSpaces()
+    const protectedScopes = new Set<EntityScope>(
+      accessibleSpaces.filter(space => space.protected && space.scope !== input.scope).map(space => space.scope),
+    )
 
     for (const spec of appInputSpec) {
       if (appInputs[spec.name] === undefined || appInputs[spec.name] === null) {
@@ -249,6 +255,10 @@ export class AppRunFacade {
       }
 
       const foundFiles = await this.nodeService.getAccessibleEntitiesByUids(fileUids)
+      const protectedFiles = foundFiles.filter(file => protectedScopes.has(file.scope))
+      if (protectedFiles.length) {
+        throw new InvalidStateError(APP_RUN_ERRORS.FILES_IN_PROTECTED_SPACE(protectedFiles.map(f => f.uid).join(', ')))
+      }
       if (foundFiles.length !== fileUids.length) {
         const foundFileUidsSet = new Set(foundFiles.map(f => f.uid))
         notFoundFileUids.push(...fileUids.filter(uid => !foundFileUidsSet.has(uid)))

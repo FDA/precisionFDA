@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import React, {
   createContext,
   type Dispatch,
@@ -101,22 +101,47 @@ const ScopeItem = ({
   name,
   scope,
   icon,
+  isSelected,
   onSelectScope,
 }: {
   name: string
   scope: string
   icon: React.ReactNode
+  isSelected?: boolean
   onSelectScope: () => void
 }): JSX.Element => {
+  const styles = isSelected
+    ? {
+        row: 'border-l-[3px] border-l-[var(--primary-500)] bg-[var(--primary-50)] pl-[13px] text-[var(--primary-700)]',
+        icon: 'text-[var(--primary-500)]',
+        name: 'text-[var(--primary-700)]',
+        scope: 'text-[var(--primary-400)]',
+      }
+    : {
+        row: 'pl-4 hover:bg-[var(--c-dropdown-hover-bg)]',
+        icon: 'text-[var(--c-text-400)]',
+        name: '',
+        scope: 'text-[var(--c-text-400)]',
+      }
+
   return (
     <button
       type="button"
-      className="hover:bg-accent flex w-full cursor-pointer items-center gap-2 border-b border-[var(--c-layout-border)] px-4 py-3 text-left text-sm"
+      className={clsx(
+        'flex w-full cursor-pointer items-center gap-2 border-t border-[var(--c-layout-border)] py-3 pr-4 text-left text-sm transition-colors',
+        styles.row,
+      )}
       onClick={onSelectScope}
     >
-      {icon}
-      <span className="font-semibold">{name}</span>
-      <span className="ml-auto text-xs text-[var(--c-text-400)]">{scope}</span>
+      <span className={clsx('flex shrink-0 items-center', styles.icon)}>{icon}</span>
+      <span className={clsx('font-semibold', styles.name)}>{name}</span>
+      {isSelected && (
+        <span className="ml-2 inline-flex items-center gap-0.5 rounded-full border border-[var(--primary-300)] bg-[var(--primary-100)] px-2 py-0.5 text-[10px] font-semibold text-[var(--primary-600)]">
+          <Check width={9} height={9} strokeWidth={2.5} />
+          selected
+        </span>
+      )}
+      <span className={clsx('ml-auto truncate text-xs', styles.scope)}>{scope}</span>
     </button>
   )
 }
@@ -134,7 +159,7 @@ const SelectedFile = ({ file, onRemove }: { file: IFile; onRemove: (file: IFile)
       </button>
       <div className="mr-4 truncate font-semibold">{file.name}</div>
       <div className="mt-0.5 truncate text-xs text-[var(--c-text-400)]">{file.uid}</div>
-      {file.location && <div className="mt-0.5 truncate text-xs text-[var(--c-text-400)]">{file.location}</div>}
+      <div className="mt-0.5 truncate text-xs text-[var(--c-text-400)]">{file.location ?? file.scope}</div>
       {file.folderPath && (
         <div className="mt-0.5 truncate text-xs text-[var(--c-text-400)]">
           Path: /{file.folderPath.map(f => f.name).join('/')}
@@ -190,15 +215,24 @@ const SelectedFilesPanel = ({ failedFiles, onClose }: { failedFiles: string[]; o
   )
 }
 
+const ScopeDivider = ({ label }: { label: string }): JSX.Element => (
+  <div className="border-[var(--c-layout-border)] bg-transparent px-4 py-2">
+    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--c-text-400)]">{label}</span>
+  </div>
+)
+
 const ScopeTable = ({
   onSelectScope,
   allowedScopes,
+  activeScope,
 }: {
   onSelectScope: (scope: string, name: string) => void
   allowedScopes?: string[]
+  activeScope?: string
 }): JSX.Element => {
   const [spaceFilter, setSpaceFilter] = useState('')
   const allowedScopeSet = new Set(allowedScopes)
+  const routeContext = useUnifiedRouteContext()
 
   const { data: spacesData, isLoading: isSpacesLoading } = useQuery({
     queryKey: ['spaces-list-accessible'],
@@ -215,63 +249,101 @@ const ScopeTable = ({
       ),
   })
 
+  // Current space from route context (only when inside a space, not home)
+  const contextSpace = !routeContext.isHome ? routeContext.space : null
+  const contextSpaceScope = !routeContext.isHome ? `space-${routeContext.space.id}` : null
+
+  // Pinned items: current space (if in space context) + Private + Public
+  const pinnedItems: { name: string; scope: string; icon: JSX.Element }[] = []
+  if (contextSpaceScope && contextSpace && (!allowedScopes || allowedScopeSet.has(contextSpaceScope))) {
+    pinnedItems.push({
+      name: contextSpace.name,
+      scope: contextSpaceScope,
+      icon: findSpaceTypeIcon(contextSpace.type) as JSX.Element,
+    })
+  }
+  if (!allowedScopes || allowedScopeSet.has('private')) {
+    pinnedItems.push({ name: 'My Home', scope: 'private', icon: <LockIcon height={14} /> })
+  }
+  if (!allowedScopes || allowedScopeSet.has('public')) {
+    pinnedItems.push({ name: 'Everyone', scope: 'public', icon: <GlobeIcon height={14} /> })
+  }
+
+  // Other spaces: all spaces excluding the current context space, filtered by search
+  const otherSpaceItems = isSpacesLoading
+    ? []
+    : (spacesData?.data ?? [])
+        .filter(
+          space =>
+            `space-${space.id}` !== contextSpaceScope &&
+            !space.protected &&
+            (!spaceFilter ||
+              space.name.toLowerCase().includes(spaceFilter.toLowerCase()) ||
+              space.title.toLowerCase().includes(spaceFilter.toLowerCase())) &&
+            (!allowedScopes || allowedScopeSet.has(`space-${space.id}`)),
+        )
+        .map(space => ({
+          name: space.title,
+          scope: `space-${space.id}`,
+          icon: findSpaceTypeIcon(space.type) as JSX.Element,
+        }))
+
   return (
     <>
-      <Sticky className={'flex items-center justify-between gap-2 px-4 py-2'}>
-        <input
-          type="text"
-          placeholder="Filter scopes by name..."
-          value={spaceFilter}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSpaceFilter(e.target.value)}
-          className="w-80 rounded border border-[var(--c-layout-border)] px-3 py-1.5 text-sm outline-none focus:border-[var(--primary-400)]"
-        />
+      <Sticky className={'flex flex-col gap-0'}>
+        <div className="flex items-center justify-between gap-2 px-4 py-2">
+          <input
+            type="text"
+            placeholder="Filter spaces by name..."
+            value={spaceFilter}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSpaceFilter(e.target.value)}
+            className="w-80 rounded border border-[var(--c-layout-border)] px-3 py-1.5 text-sm outline-none focus:border-[var(--primary-400)]"
+          />
+        </div>
       </Sticky>
       <div className="flex-1 overflow-y-auto">
-        <div className="flex-1 overflow-y-auto">
-          {(!allowedScopes || allowedScopeSet.has('private')) && (
-            <ScopeItem
-              name="Private"
-              scope="Private"
-              icon={<LockIcon height={14} />}
-              onSelectScope={() => onSelectScope('private', 'Private')}
-            />
-          )}
-          {(!allowedScopes || allowedScopeSet.has('public')) && (
-            <ScopeItem
-              name="Public"
-              scope="Public"
-              icon={<GlobeIcon height={14} />}
-              onSelectScope={() => onSelectScope('public', 'Public')}
-            />
-          )}
-          {isSpacesLoading ? (
-            <div className="p-4">
-              <Loader />
-            </div>
-          ) : (
-            (spacesData?.data ?? [])
-              .filter(
-                space =>
-                  (!spaceFilter || space.name.toLowerCase().includes(spaceFilter.toLowerCase())) &&
-                  (!allowedScopes || allowedScopeSet.has(`space-${space.id}`)),
-              )
-              .map(space => (
-                <ScopeItem
-                  key={space.id}
-                  name={space.title}
-                  scope={`space-${space.id}`}
-                  icon={findSpaceTypeIcon(space.type)}
-                  onSelectScope={() => onSelectScope(`space-${space.id}`, space.title)}
-                />
-              ))
-          )}
-          {!isSpacesLoading &&
-            spacesData?.data &&
-            spacesData.data.filter(s => !spaceFilter || s.name.toLowerCase().includes(spaceFilter.toLowerCase()))
-              .length === 0 && (
-              <div className="px-4 py-6 text-center text-sm text-[var(--c-text-400)]">No spaces match your filter.</div>
+        {/* Pinned section — always visible */}
+        {pinnedItems.length > 0 && (
+          <>
+            <ScopeDivider label={`Pinned scopes (${pinnedItems.length})`} />
+            {pinnedItems.map(item => (
+              <ScopeItem
+                key={item.scope}
+                name={item.name}
+                scope={item.scope}
+                icon={item.icon}
+                isSelected={item.scope === activeScope}
+                onSelectScope={() => onSelectScope(item.scope, item.name)}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Other spaces section */}
+        {isSpacesLoading ? (
+          <div className="p-4">
+            <Loader />
+          </div>
+        ) : (
+          <>
+            <ScopeDivider label={`Other spaces (${otherSpaceItems.length})`} />
+            {otherSpaceItems.map(item => (
+              <ScopeItem
+                key={item.scope}
+                name={item.name}
+                scope={item.scope}
+                icon={item.icon}
+                isSelected={item.scope === activeScope}
+                onSelectScope={() => onSelectScope(item.scope, item.name)}
+              />
+            ))}
+            {otherSpaceItems.length === 0 && (
+              <div className="px-4 py-6 text-center text-sm text-[var(--c-text-400)]">
+                {spaceFilter ? 'No spaces match your filter.' : 'No other spaces available.'}
+              </div>
             )}
-        </div>
+          </>
+        )}
       </div>
     </>
   )
@@ -310,7 +382,10 @@ const FileTable = ({
         fields: {
           path: true,
         },
-        uids: debouncedUidFilter.length > 0 ? debouncedUidFilter.split(',').map(uid => uid.trim()) : undefined,
+        uids:
+          debouncedUidFilter.length > 0
+            ? debouncedUidFilter.split(',').map(uid => uid.replace(/[\\%_]/g, '').trim()) // strip unsupported wildcard chars (%, _, \) before sending — server rejects them, so sanitize silently
+            : undefined,
         page,
         pageSize,
       }),
@@ -419,6 +494,7 @@ const FileTable = ({
             files.map(file => {
               const isLicenseBlocked = validateLicense === true && file.fileLicense?.acceptanceStatus === 'pending'
               return (
+                // biome-ignore lint/a11y/useSemanticElements: Custom CSS layout requires divs instead of native tags
                 <div
                   key={file.uid}
                   className={clsx(
@@ -567,7 +643,6 @@ const ModalBody = ({
 
   const handleAllScopes = (): void => {
     setViewMode('scopes')
-    setActiveScopeName(undefined)
     setSelectedFolderId(null)
     setFolderPath([])
   }
@@ -605,6 +680,15 @@ const ModalBody = ({
             >
               All Scopes
             </button>
+            {viewMode === 'scopes' && activeScope && activeScopeName && (
+              <div className="mb-2 flex items-center gap-1.5 rounded border border-[var(--primary-300)] bg-[var(--primary-50)] px-2.5 py-1.5">
+                <Check width={11} height={11} className="shrink-0 text-[var(--primary-500)]" strokeWidth={2.5} />
+                <div className="min-w-0">
+                  <div className="truncate text-xs font-semibold text-[var(--primary-700)]">{activeScopeName}</div>
+                  <div className="truncate text-[10px] text-[var(--primary-400)]">{activeScope}</div>
+                </div>
+              </div>
+            )}
             {viewMode === 'files' && <ScopeFolderTree activeScope={activeScope} activeScopeName={activeScopeName} />}
           </div>
           <div className="relative flex min-h-0 flex-1 flex-col">
@@ -616,7 +700,9 @@ const ModalBody = ({
             >
               Selected &nbsp;<ButtonBadge>{selectedFiles?.length}</ButtonBadge>
             </Button>
-            {viewMode === 'scopes' && <ScopeTable allowedScopes={allowedScopes} onSelectScope={handleScopeClick} />}
+            {viewMode === 'scopes' && (
+              <ScopeTable allowedScopes={allowedScopes} onSelectScope={handleScopeClick} activeScope={activeScope} />
+            )}
             {viewMode === 'files' && (
               <FileTable activeScope={activeScope} type={type} validateLicense={validateLicense} />
             )}

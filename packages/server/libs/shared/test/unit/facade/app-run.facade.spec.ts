@@ -64,6 +64,7 @@ describe('AppRunFacade tests', () => {
     },
     privateFilesProject: 'project-userprivatefiles',
     isJobExecutionEnabled: (): boolean => true,
+    accessibleSpaces: async (): Promise<Space[]> => [],
   } as unknown as User
   const VIEWER = {
     id: 2,
@@ -74,6 +75,7 @@ describe('AppRunFacade tests', () => {
     },
     privateFilesProject: 'project-viewerprivatefiles',
     isJobExecutionEnabled: (): boolean => true,
+    accessibleSpaces: async (): Promise<Space[]> => [],
   } as unknown as User
 
   const APP_UID = 'app-1234567890abcdef12345678-1'
@@ -205,6 +207,39 @@ describe('AppRunFacade tests', () => {
     scope: `space-${SPACE.id}`,
   } as unknown as UserFile
 
+  const PROTECTED_SPACE_ID = 2
+  const PROTECTED_SPACE = {
+    id: PROTECTED_SPACE_ID,
+    protected: true,
+    scope: `space-${PROTECTED_SPACE_ID}`,
+    hostProject: 'project-protected-host',
+    guestProject: 'project-protected-guest',
+  } as unknown as Space
+  const PROTECTED_FILE_1 = {
+    id: 3,
+    dxid: 'file-protected1',
+    uid: 'file-protected1-1',
+    project: PROTECTED_SPACE.hostProject,
+    scope: `space-${PROTECTED_SPACE_ID}`,
+  } as unknown as UserFile
+  const PROTECTED_FILE_2 = {
+    id: 4,
+    dxid: 'file-protected2',
+    uid: 'file-protected2-1',
+    project: PROTECTED_SPACE.hostProject,
+    scope: `space-${PROTECTED_SPACE_ID}`,
+  } as unknown as UserFile
+
+  const PROTECTED_MEMBERSHIP = {
+    id: 3,
+    role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
+    spaces: {
+      getItems: (): Space[] => [PROTECTED_SPACE],
+    },
+    isHost: (): boolean => true,
+    user: USER,
+  }
+
   const PRIVATE_JOB = {
     id: 1,
     dxid: 'job-private',
@@ -299,12 +334,14 @@ describe('AppRunFacade tests', () => {
     getMembershipStub.throws()
     getMembershipStub.withArgs(SPACE.id, USER.id).resolves(MEMBERSHIP)
     getMembershipStub.withArgs(SPACE.id, VIEWER.id).resolves(VIEWER_MEMBERSHIP)
+    getMembershipStub.withArgs(PROTECTED_SPACE_ID, USER.id).resolves(PROTECTED_MEMBERSHIP)
 
     getAccessibleEntitiesByUidsStub.reset()
     getAccessibleEntitiesByUidsStub.throws()
     getAccessibleEntitiesByUidsStub.resolves([])
     getAccessibleEntitiesByUidsStub.withArgs([PRIVATE_FILE.uid]).resolves([PRIVATE_FILE])
     getAccessibleEntitiesByUidsStub.withArgs([SPACE_FILE.uid]).resolves([SPACE_FILE])
+    getAccessibleEntitiesByUidsStub.withArgs([PROTECTED_FILE_1.uid]).resolves([PROTECTED_FILE_1])
 
     generateCliKeyStub.reset()
     generateCliKeyStub.throws()
@@ -500,6 +537,38 @@ describe('AppRunFacade tests', () => {
     )
   })
 
+  it('throws InvalidStateError if input file belongs to a protected space and run scope is outside that space', async () => {
+    const userWithProtectedSpaces = {
+      ...USER,
+      accessibleSpaces: async (): Promise<Space[]> => [PROTECTED_SPACE],
+    } as unknown as User
+    const userContextWithProtectedSpaces = {
+      id: USER.id,
+      dxuser: (USER as unknown as { dxuser: string }).dxuser,
+      async loadEntity(): Promise<User> {
+        return userWithProtectedSpaces
+      },
+    } as unknown as UserContext
+
+    const facade = getInstance(userContextWithProtectedSpaces)
+    const runAppDTO = new RunAppDTO()
+    runAppDTO.jobLimit = USER_JOB_LIMIT
+    runAppDTO.instanceType = 'baseline-2'
+    runAppDTO.inputs = {
+      file_array_input: [PROTECTED_FILE_1.uid, PROTECTED_FILE_2.uid],
+    }
+    runAppDTO.scope = 'private'
+
+    getAccessibleEntitiesByUidsStub
+      .withArgs([PROTECTED_FILE_1.uid, PROTECTED_FILE_2.uid])
+      .resolves([PROTECTED_FILE_1, PROTECTED_FILE_2])
+
+    await expect(facade.run(APP_UID, runAppDTO)).to.be.rejectedWith(
+      InvalidStateError,
+      APP_RUN_ERRORS.FILES_IN_PROTECTED_SPACE(`${PROTECTED_FILE_1.uid}, ${PROTECTED_FILE_2.uid}`),
+    )
+  })
+
   it('throws InvalidStateError if input is not provided for a non-optional input spec', async () => {
     const facade = getInstance()
     const runAppDTO = new RunAppDTO()
@@ -680,6 +749,71 @@ describe('AppRunFacade tests', () => {
     expect(buildProvenanceStub.firstCall.args[1]).to.deep.equal(APP)
     expect(buildProvenanceStub.firstCall.args[2]).to.deep.equal(runAppDTO.inputs)
     expect(createSyncJobStatusTaskStub.calledOnceWithExactly({ dxid: SPACE_JOB.dxid })).to.be.true()
+  })
+
+  it('successfully runs app in protected space with input from that same protected space', async () => {
+    const PROTECTED_SPACE_JOB = {
+      id: 3,
+      dxid: 'job-protectedspace',
+      uid: 'job-protectedspace-1',
+      scope: PROTECTED_SPACE.scope,
+    } as unknown as Job
+
+    const userWithProtectedSpaces = {
+      ...USER,
+      accessibleSpaces: async (): Promise<Space[]> => [PROTECTED_SPACE],
+    } as unknown as User
+    const userContextWithProtectedSpaces = {
+      id: USER.id,
+      dxuser: (USER as unknown as { dxuser: string }).dxuser,
+      async loadEntity(): Promise<User> {
+        return userWithProtectedSpaces
+      },
+    } as unknown as UserContext
+
+    const facade = getInstance(userContextWithProtectedSpaces)
+    const runAppDTO = new RunAppDTO()
+    runAppDTO.jobLimit = USER_JOB_LIMIT
+    runAppDTO.instanceType = 'baseline-2'
+    runAppDTO.inputs = {
+      file_input: PROTECTED_FILE_1.uid,
+    }
+    runAppDTO.scope = PROTECTED_SPACE.scope
+
+    transactionalStub.callsFake(async callback => {
+      await callback(em)
+      return PROTECTED_SPACE_JOB
+    })
+    jobCreateStub.resolves({
+      id: PROTECTED_SPACE_JOB.dxid,
+    })
+
+    const job = await facade.run(APP_UID, runAppDTO)
+    expect(job).to.deep.equal({ id: PROTECTED_SPACE_JOB.uid })
+    expect(getValidAccessibleAppStub.calledOnceWithExactly(APP_UID)).to.be.true()
+    expect(populateStub.calledTwice).to.be.true()
+    expect(populateStub.firstCall.args[0]).to.deep.equal(APP)
+    expect(populateStub.firstCall.args[1]).to.deep.equal(['assets'])
+    expect(populateStub.secondCall.args[0]).to.deep.equal(PROTECTED_MEMBERSHIP)
+    expect(populateStub.secondCall.args[1]).to.deep.equal(['spaces'])
+    expect(getAccessibleEntitiesByUidsStub.calledOnce).to.be.true()
+    expect(getAccessibleEntitiesByUidsStub.firstCall.args[0]).to.deep.equal([PROTECTED_FILE_1.uid])
+    expect(buildClientApiCallStub.calledOnce).to.be.true()
+    expect(buildClientApiCallStub.firstCall.args[0]).to.deep.equal(APP)
+    expect(buildClientApiCallStub.firstCall.args[1]).to.equal(PROTECTED_SPACE.hostProject)
+    expect(buildClientApiCallStub.firstCall.args[2]).to.deep.equal({
+      file_input: { $dnanexus_link: { id: PROTECTED_FILE_1.dxid, project: PROTECTED_FILE_1.project } },
+      default_text_input: 'default value',
+    })
+    expect(buildClientApiCallStub.firstCall.args[3]).to.equal(runAppDTO)
+    expect(jobCreateStub.calledOnce).to.be.true()
+    expect(jobCreateStub.firstCall.args[0]).to.deep.equal({})
+    expect(transactionalStub.calledOnce).to.be.true()
+    expect(buildProvenanceStub.calledOnce).to.be.true()
+    expect(buildProvenanceStub.firstCall.args[0]).to.equal(PROTECTED_SPACE_JOB.dxid)
+    expect(buildProvenanceStub.firstCall.args[1]).to.deep.equal(APP)
+    expect(buildProvenanceStub.firstCall.args[2]).to.deep.equal(runAppDTO.inputs)
+    expect(createSyncJobStatusTaskStub.calledOnceWithExactly({ dxid: PROTECTED_SPACE_JOB.dxid })).to.be.true()
   })
 
   it('create CLI exchange token and send the input if app supports CLI setting', async () => {

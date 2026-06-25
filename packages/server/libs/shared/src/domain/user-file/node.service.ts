@@ -404,7 +404,7 @@ export class NodeService {
       })
     }
     if (query.filter?.name) {
-      where.name = { $like: `%${query.filter.name}%` }
+      where.name = { $like: `%${StringUtils.stripOutWildcards(query.filter.name)}%` }
     }
     if (query.filter?.states) {
       where.state = { $in: query.filter.states }

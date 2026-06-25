@@ -33,6 +33,10 @@ export class StringUtils {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   }
 
+  static stripOutWildcards(str: string): string {
+    return str.replace(/[\\%_]/g, '')
+  }
+
   static titleize(str: string): string {
     return str
       .toLowerCase()

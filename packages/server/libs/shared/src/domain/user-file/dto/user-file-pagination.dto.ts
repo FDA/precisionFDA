@@ -96,7 +96,7 @@ export class UserFilePaginationDTO extends PaginationDTO<UserFile> {
 
   @IsOptional()
   @IsArray()
-  @Matches(/^[a-zA-Z0-9\-_]+$/, { each: true }) // allow filtering uids by exact match or partial match (case-insensitive)
+  @Matches(/^[a-zA-Z0-9-]+$/, { each: true }) // allow filtering uids by exact match or partial match (case-insensitive)
   @Transform(({ value }) =>
     (Array.isArray(value) ? value : value.split(',')).filter((uid: string) => uid.trim() !== ''),
   )
