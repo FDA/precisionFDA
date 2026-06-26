@@ -9,32 +9,12 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   GSRS_ENABLED = ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
   # rubocop:todo Rails/LexicallyScopedActionFilter
   skip_before_action :require_login, only: %i( # rubocop:todo Rails/LexicallyScopedActionFilter
-                                               index
                                                login
                                                return_from_login
                                                guidelines
                                                destroy
                                                presskit)
   # rubocop:enable Rails/LexicallyScopedActionFilter
-
-  layout "react", only: %i(index)
-
-  def index
-    if @context.logged_in?
-      api_with_user_token = DNAnexusAPI.new(@context.token)
-
-      login_tasks_processor = LoginTasksProcessor.new(
-        OrgService::LeaveOrgProcess.new(
-          api_with_user_token,
-          DNAnexusAPI.new(ADMIN_TOKEN),
-          DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI),
-          UserRemovalPolicy,
-          UnusedOrgnameGenerator.new(api_with_user_token),
-        ),
-      )
-      login_tasks_processor.call(@context.user, @context.api)
-    end
-  end
 
   def destroy
     if @context.logged_in?
@@ -247,6 +227,19 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
         save_session(user.id, username, token, expiration_time, user.org_id)
         log_session("User #{username} logged in")
         Event::UserLoggedIn.create_for(user)
+
+        api_with_user_token = DNAnexusAPI.new(token)
+
+        login_tasks_processor = LoginTasksProcessor.new(
+          OrgService::LeaveOrgProcess.new(
+            api_with_user_token,
+            DNAnexusAPI.new(ADMIN_TOKEN),
+            DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI),
+            UserRemovalPolicy,
+            UnusedOrgnameGenerator.new(api_with_user_token),
+          ),
+        )
+        login_tasks_processor.call(user, api_with_user_token)
       end
 
       distribute_results user, token

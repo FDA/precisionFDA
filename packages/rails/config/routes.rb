@@ -574,6 +574,8 @@ Rails.application.routes.draw do
     get "/users/:username(/:tab)", to: "users#show", constraints: user_constraints, as: "user"
 
     # You can have the root of your site routed with "root"
+    # main#index action was removed (nginx serves the React SPA's index.html directly for "/"),
+    # but the root route is kept so Rails URL helpers (root_url, root_path) continue to work.
     root "main#index"
   end
 end
