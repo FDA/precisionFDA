@@ -28,6 +28,15 @@ export const environment = {
 EOF
 fi
 
+# Extract Dojo libs from lib/dojo-custom-jsdraw.zip into
+# src/app/core/assets/ so the JSDraw structure editor can
+# load them at /assets/dojo/dojo.js etc. Without this step ng serve does NOT
+# serve those files (404) and the editor fails with "dojo is not defined".
+if [ ! -d "src/app/core/assets/dojo" ]; then
+  echo "Extracting Dojo/JSDraw assets (first run only)..."
+  npm run process-dojo
+fi
+
 echo "Starting Angular dev server on port 4200..."
 echo "Live reload enabled — changes to source files will auto-rebuild."
 export NODE_OPTIONS="--max-old-space-size=4096"
