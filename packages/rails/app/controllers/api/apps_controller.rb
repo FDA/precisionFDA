@@ -248,7 +248,9 @@ module Api
 
       app_series = AppSeries.includes(:latest_revision_app).
         accessible_by(@context).unremoved.
-        where(scope: scope).page(page)
+        where(scope: scope).
+        order(id: :desc).
+        page(page)
 
       if query
         app_series = app_series.eager_load(:tags)
