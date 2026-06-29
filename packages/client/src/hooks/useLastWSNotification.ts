@@ -10,7 +10,7 @@ export const useLastWSNotification = (filteredActions: NOTIFICATION_ACTION[] = [
       share: true,
       reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
       reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-      shouldReconnect: () => SHOULD_RECONNECT,
+      shouldReconnect: () => SHOULD_RECONNECT && getSessionExpiredAt() > new Date(),
       selector: snapshot => {
         const message = snapshot.lastJsonMessage
         if (message == null || message.type !== WEBSOCKET_MESSAGE_TYPE.NOTIFICATION) {
@@ -25,7 +25,7 @@ export const useLastWSNotification = (filteredActions: NOTIFICATION_ACTION[] = [
         return message
       },
     },
-    getSessionExpiredAt() > new Date(),
+    true,
   )
   return lastJsonMessage
 }

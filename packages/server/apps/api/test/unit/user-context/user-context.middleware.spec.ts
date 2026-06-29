@@ -86,6 +86,7 @@ describe('UserContextMiddleware', () => {
       .withArgs('_precision-fda_session', REFRESHED_TOKEN, {
         httpOnly: true,
         secure: true,
+        sameSite: 'lax',
         path: '/',
       })
       .returns(undefined)

@@ -80,9 +80,9 @@ export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState 
       connectionKey: `job-log:${jobUid}`,
       reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
       reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-      shouldReconnect: () => SHOULD_RECONNECT,
+      shouldReconnect: () => SHOULD_RECONNECT && getSessionExpiredAt() > new Date(),
     },
-    getSessionExpiredAt() > new Date(),
+    true,
   )
 
   useEffect(() => {

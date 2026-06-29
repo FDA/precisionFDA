@@ -2,11 +2,11 @@ import { Injectable, Logger, NestMiddleware } from '@nestjs/common'
 import { NextFunction, Request, Response } from 'express'
 import { config } from '@shared/config'
 import { COOKIE_SESSION_KEY, USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
-import { PermissionError } from '@shared/errors'
+import { InvalidRequestError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { CookieUtils } from '@shared/utils/cookie.utils'
 import { CSRFUtils } from '@shared/utils/csrf.utils'
-import { Encryptor } from '@shared/utils/encryptors/encryptor'
+import { Encryptor, UserSession } from '@shared/utils/encryptors/encryptor'
 
 @Injectable()
 export class CSRFVerificationMiddleware implements NestMiddleware {
@@ -23,8 +23,15 @@ export class CSRFVerificationMiddleware implements NestMiddleware {
     if (['get', 'options'].includes(reqMethod) || (!isReqWithCookie && req.headers.authorization)) {
       return next()
     }
-    const token = CookieUtils.getCookie(COOKIE_SESSION_KEY, req.headers.cookie)
-    const userSession = Encryptor.decrypt(token)
+
+    let userSession: UserSession
+    try {
+      const token = CookieUtils.getCookie(COOKIE_SESSION_KEY, req.headers.cookie)
+      userSession = Encryptor.decrypt(token)
+    } catch (error) {
+      this.logger.warn('Failed to decrypt session cookie; treating request as invalid', error)
+      throw new InvalidRequestError()
+    }
 
     const reqCsrfToken = req.headers[USER_CONTEXT_HTTP_HEADERS.csrfToken] as string
     const csrfToken = userSession?._csrf_token
@@ -39,10 +46,6 @@ export class CSRFVerificationMiddleware implements NestMiddleware {
         userSessionDecrypted: Boolean(userSession),
       })
 
-      // todo jiri - this PermissionError is thrown from middleware, which runs outside the
-      // Nest exception-filter pipeline, so when forgery protection is enabled (prod) a failed
-      // CSRF check returns an HTTP 500 instead of a clean 403. Needs an Express-level error
-      // handler that maps BaseError -> its statusCode, or this check moved into a guard.
       throw new PermissionError()
     }
     next()
