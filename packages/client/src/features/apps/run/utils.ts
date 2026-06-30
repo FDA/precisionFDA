@@ -381,6 +381,12 @@ export const exportFormData = (event: React.MouseEvent<HTMLButtonElement>, formD
 }
 
 export const validateFiles = async (fileUids: string[]) => {
+  // No file uids to check (e.g. an app with no file inputs) — avoid calling the
+  // accessibility endpoint with an empty array, which axios drops from the query
+  // string entirely, causing the server to reject the request as a missing `uids`.
+  if (fileUids.length === 0) {
+    return {} as Record<string, boolean>
+  }
   const { valid, invalid } = await verifyAccessibleFiles(fileUids)
   const validateFilesResult: Record<string, boolean> = {}
   for (const uid of valid) {
@@ -429,10 +435,7 @@ export const getBaseLink = (spaceId?: number | string) => (spaceId ? `spaces/${s
 
 export const generateCopyUrl = (displayData: string, url: string, app: IApp, copyType: 'app' | 'appSeries'): string => {
   const base64Encoded = btoa(encodeURIComponent(displayData))
-  const newAppUrl = url.replace(
-    /app-[^/]+/,
-    copyType === 'app' ? app.uid : `app-series-${app.appSeriesId.toString()}`,
-  )
+  const newAppUrl = url.replace(/app-[^/]+/, copyType === 'app' ? app.uid : `app-series-${app.appSeriesId.toString()}`)
 
   return `${newAppUrl}#${base64Encoded}`
 }
