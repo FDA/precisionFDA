@@ -1,5 +1,5 @@
-import { http, HttpResponse } from 'msw'
-import { SubmissionV2 } from '../../features/challenges/details/submission.types'
+import { HttpResponse, http } from 'msw'
+import type { SubmissionV2 } from '../../features/challenges/details/submission.types'
 
 export const mockChallengeSubmissions: SubmissionV2[] = [
   {
@@ -159,9 +159,16 @@ export const mockChallengeSubmissions: SubmissionV2[] = [
 export const mockEmptySubmissions: SubmissionV2[] = []
 
 export const challengeHandlers = [
+  http.get('/api/v2/admin/memberships/challenge-leads', () =>
+    HttpResponse.json({
+      hostUsernames: ['challenge_host_lead', 'site_admin'],
+      guestUsernames: ['challenge_guest_lead', 'challenge_host_lead', 'site_admin'],
+    }),
+  ),
+
   http.get('/api/v2/challenges/:challengeId/entries', ({ params }) => {
     const { challengeId } = params
-    
+
     switch (challengeId) {
       case 'empty':
         return HttpResponse.json(mockEmptySubmissions)

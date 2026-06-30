@@ -1,28 +1,34 @@
+import { useQuery } from '@tanstack/react-query'
 import { formatDistance, parseISO } from 'date-fns'
 import React from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 import styled from 'styled-components'
+import { Button } from '../../components/Button'
+import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
+import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
 import { Loader } from '../../components/Loader'
-import { PageContainerMargin } from '../../components/Page/page.styles'
-import { OverviewCenterSection, PageRow, RightSide, RightSideItem, SectionTitle } from '../../components/Public/public-layout.styles'
-import { usePageMeta } from '../../hooks/usePageMeta'
-import { IUser } from '../../types/user'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
+import { PageContainerMargin } from '../../components/Page/page.styles'
+import {
+  OverviewCenterSection,
+  PageRow,
+  RightSide,
+  RightSideItem,
+  SectionTitle,
+} from '../../components/Public/public-layout.styles'
+import { usePageMeta } from '../../hooks/usePageMeta'
 import PublicLayout from '../../layouts/PublicLayout'
+import type { IUser } from '../../types/user'
+import { fetchApps } from '../apps/apps.api'
+import type { IApp } from '../apps/apps.types'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ExpertListItem } from '../experts/list/ExpertListItem'
 import { useExpertsListQuery } from '../experts/useExpertsListQuery'
-import { fetchApps } from '../apps/apps.api'
-import { IApp } from '../apps/apps.types'
 import { ChallengesBanner } from './ChallengesBanner'
 import ChallengesOverviewList from './ChallengesOverviewList'
 import { OverviewNewsList } from './OverviewNewsList'
-import { ParticipantOrgsList } from './ParticipantsOrgsList'
 import { CommunityParticipants, ExpertSection, Hr, InfoRow, PageOverviewMainBody } from './overview.styles'
-import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
-import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
-import { Button } from '../../components/Button'
+import { ParticipantOrgsList } from './ParticipantsOrgsList'
 
 const StyledGetStarted = styled.div`
   background-color: var(--tertiary-70);
@@ -163,22 +169,22 @@ const GetStarted = ({ user }: { user?: IUser }) => {
       <SectionTitle>Getting Started</SectionTitle>
       <Hr />
       <div>
-        <a data-turbolinks="false" target="_blank" href="/docs/guides/introduction">
+        <a data-turbolinks="false" target="_blank" href="/docs/guides/introduction" rel="noopener">
           Introduction to precisionFDA
         </a>
       </div>
       <div>
-        <a data-turbolinks="false" target="_blank" href="/docs/guides/files">
+        <a data-turbolinks="false" target="_blank" href="/docs/guides/files" rel="noopener">
           Uploading Files &amp; Data
         </a>
       </div>
       <div>
-        <a data-turbolinks="false" target="_blank" href="/docs/guides/apps">
+        <a data-turbolinks="false" target="_blank" href="/docs/guides/apps" rel="noopener">
           Running Apps
         </a>
       </div>
       <div>
-        <a href="/docs/guides/spaces" target="_blank">
+        <a href="/docs/guides/spaces" target="_blank" rel="noopener">
           Collaborating with Spaces
         </a>
       </div>
@@ -283,7 +289,7 @@ export const TopApps = () => {
         <SectionTitle>Most Recent Apps</SectionTitle>
         <TopAppsList>
           {isLoadingRecentAppsData ? (
-            <Loader className="inline" />
+            <Loader inline />
           ) : (
             recentAppsData?.apps?.slice(0, 4).map(a => <TopAppItem key={a.id} app={a} />)
           )}
@@ -293,7 +299,7 @@ export const TopApps = () => {
         <SectionTitle>Top Featured Apps</SectionTitle>
         <TopAppsList>
           {isLoadingFeaturedAppsData ? (
-            <Loader className="inline" />
+            <Loader inline />
           ) : (
             featuredAppsData?.apps?.slice(0, 4).map(a => <TopAppItem key={a.id} app={a} />)
           )}
@@ -320,7 +326,7 @@ export const OverviewAuthed = () => {
             <ExpertSection>
               <SectionTitle>Expert Highlight</SectionTitle>
               {expertsData?.data[0] &&
-                (expertsIsLoading ? <Loader className="inline" /> : <ExpertListItem expert={expertsData.data[0]} />)}
+                (expertsIsLoading ? <Loader inline /> : <ExpertListItem expert={expertsData.data[0]} />)}
             </ExpertSection>
           </PageOverviewMainBody>
           <RightSide>
@@ -346,7 +352,6 @@ export const OverviewAuthed = () => {
           <Button data-variant="primary" as="a" href="/docs" target="_blank">
             Learn more about precisionFDA
           </Button>
-          <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </InfoRow>
       </OverviewCenterSection>
     </PublicLayout>

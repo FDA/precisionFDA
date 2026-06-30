@@ -86,6 +86,16 @@ class ChallengeRepository extends AccessControlRepository<Challenge> {
     }
   }
 
+  /**
+   * Get a list of years that have at least one challenge, ordered most recent first.
+   */
+  async getDistinctYears(): Promise<number[]> {
+    const allYears: { year: number }[] = await this.em.execute(
+      'SELECT DISTINCT YEAR(start_at) as year FROM challenges ORDER BY year DESC',
+    )
+    return allYears.map(y => y.year)
+  }
+
   async findChallengesByCardImageFileUid(fileUid: Uid<'file'>): Promise<Challenge[]> {
     return await this.createQueryBuilder('ch')
       .leftJoinAndSelect('ch.cardImage', 'ci')

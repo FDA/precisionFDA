@@ -19,7 +19,7 @@ export const OverviewExpertsCondensedList = ({ pick }: { pick?: number }) => {
     page: pagination.page,
   })
 
-  if (isLoading) return <Loader className="inline" />
+  if (isLoading) return <Loader inline />
   const expertsList = pick ? data?.data.slice(0, pick) : data?.data
 
   return (

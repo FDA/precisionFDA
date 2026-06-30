@@ -4,6 +4,7 @@ import { config } from '@shared/config'
 import { ORG_DUMMY } from '@shared/config/consts'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { CountStats } from '@shared/database/statistics.type'
+import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
 import { AdminMembershipPaginationDTO } from '@shared/domain/admin-membership/dto/admin-membership-pagination.dto'
 import { EmailSendInput } from '@shared/domain/email/email.config'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
@@ -186,6 +187,24 @@ export class UserService {
       where.adminMemberships = { adminGroup: { role: query.filter.role } }
     }
     return this.userRepo.paginate(query, where, { populate: ['adminMemberships.adminGroup'] })
+  }
+
+  async listDxusersForAdminRoles(roles: ADMIN_GROUP_ROLES[]): Promise<string[]> {
+    const users = await this.userRepo.find(
+      {
+        userState: USER_STATE.ENABLED,
+        adminMemberships: {
+          adminGroup: {
+            role: { $in: roles },
+          },
+        },
+      },
+      {
+        orderBy: { dxuser: 'ASC' },
+      },
+    )
+
+    return [...new Set(users.map(user => user.dxuser))].sort()
   }
 
   async getAdminUserDetails(id: number): Promise<AdminUserDetailsDTO> {

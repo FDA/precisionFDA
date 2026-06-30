@@ -1,55 +1,44 @@
-import React from 'react'
-import styled from 'styled-components'
-import { Svg } from './icons/Svg'
+import { cn } from '@/utils/cn'
 
-export const LWrap = styled.div`
-  align-self: stretch;
-  height: 100%;
-`
-
-export const LoaderMargin = styled.div`
-  margin: 24px;
-`
-
-const LoaderWrapper = styled.span`
-  display: flex;
-  justify-content: center;
-
-  &.inline {
-    display: inline;
-  }
-
-  &.pageloader {
-    padding-top: 16px;
-  }
-`
+const DOT_SIZE_RATIO = 0.5
+const DOT_GAP_RATIO = 0.6
+const DOT_ANIMATION_DELAY_SECONDS = 0.16
 
 type LoaderProps = {
+  /** Overall height in px. Dot size and spacing scale from this. */
   height?: number
   className?: string
+  /** Flow inline with surrounding text instead of as a centered block. */
+  inline?: boolean
+  /** Accessible status text announced to assistive technology. */
+  label?: string
+  /** Add top padding when used as a full-page / section loader. */
+  pageloader?: boolean
 }
 
-export const Loader = ({ height = 16, className }: LoaderProps) => {
-  // Calculate dimensions
-  const radius = Math.min(6, height / 2)
-  const width = radius * 10
-
-  // Define circle positions
-  const circles = [
-    { cx: width * 0.1, delay: '0.1' },
-    { cx: width * 0.433, delay: '0.2' },
-    { cx: width * 0.766, delay: '0.3' },
-  ]
+export const Loader = ({ height = 16, className, inline, label = 'Loading', pageloader }: LoaderProps) => {
+  const dotSize = Math.max(4, Math.round(height * DOT_SIZE_RATIO))
 
   return (
-    <LoaderWrapper className={className}>
-      <Svg height={height} width={width}>
-        {circles.map(({ cx, delay }) => (
-          <circle key={delay} fill="var(--base)" stroke="none" cx={cx} cy={height / 2} r={radius}>
-            <animate attributeName="opacity" dur="1s" values="0;1;0" repeatCount="indefinite" begin={delay} />
-          </circle>
-        ))}
-      </Svg>
-    </LoaderWrapper>
+    <span
+      role="status"
+      style={{ gap: dotSize * DOT_GAP_RATIO }}
+      className={cn(
+        inline ? 'inline-flex align-middle' : 'flex',
+        'items-center justify-center text-legacy-base',
+        pageloader && 'pt-4',
+        className,
+      )}
+    >
+      <span className="sr-only">{label}</span>
+      {[0, 1, 2].map(i => (
+        <span
+          key={i}
+          aria-hidden
+          className="animate-loader-dot rounded-full bg-current"
+          style={{ width: dotSize, height: dotSize, animationDelay: `${i * DOT_ANIMATION_DELAY_SECONDS}s` }}
+        />
+      ))}
+    </span>
   )
 }

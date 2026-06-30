@@ -9,16 +9,16 @@ import {
   ComboboxList,
 } from '@/components/ui/combobox'
 import { cn } from '@/utils/cn'
-import { fetchHostLeads } from './api'
+import { fetchChallengeLeads } from './api'
 
 type LeadOption = { label: string; value: string }
 
 const useFetchHostLeadUsersQuery = () =>
   useQuery({
-    queryKey: ['host-lead-users'],
-    queryFn: fetchHostLeads,
+    queryKey: ['challenge-leads'],
+    queryFn: fetchChallengeLeads,
     select(data) {
-      return data?.map(s => ({
+      return data.hostUsernames.map(s => ({
         label: s,
         value: s,
       }))

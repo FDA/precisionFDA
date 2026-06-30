@@ -136,16 +136,11 @@ Rails.application.routes.draw do
         get :describe, on: :member # for CLI
       end
 
-      resources :challenges, only: %i(index show create update) do
-        get :years, on: :collection
+      resources :challenges, only: %i(index show) do
         get :scoring_app_users, on: :collection
-        get :host_lead_users, on: :collection
-        get :guest_lead_users, on: :collection
-        get :challenges_for_select, on: :collection
         get :scopes_for_select, on: :collection
 
         post :save_editor_page, on: :member
-        put :update_content, on: :member
       end
 
       resources :submissions, only: %i(index) do

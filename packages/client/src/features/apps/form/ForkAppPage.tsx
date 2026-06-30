@@ -1,18 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
 import React from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
 import { cleanObject } from '../../../utils/object'
-import { ApiErrorResponse, ServerScope } from '../../home/types'
+import type { ApiErrorResponse, ServerScope } from '../../home/types'
 import { getBasePath } from '../../home/utils'
-import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
+import { type CreateAppPayload, type CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
-import { AxiosError } from 'axios'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
   const location = useLocation()
@@ -54,7 +54,7 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
     }
   }
 
-  if (isLoading) return <Loader className="pageloader" />
+  if (isLoading) return <Loader pageloader />
   if (isError && !data) return <NotAllowedPage />
   if (!data) return null
 

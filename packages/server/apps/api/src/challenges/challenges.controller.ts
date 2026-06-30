@@ -23,6 +23,11 @@ export class ChallengesController {
     private readonly challengeFacade: ChallengeFacade,
   ) {}
 
+  @Get('/years')
+  async getYears(): Promise<number[]> {
+    return await this.challengeService.getYears()
+  }
+
   @Get()
   async list(@Query() query: ChallengePaginationDto): Promise<PaginatedResult<ChallengeDTO>> {
     return await this.challengeService.listChallenges(query)

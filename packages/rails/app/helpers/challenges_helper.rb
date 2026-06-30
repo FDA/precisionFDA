@@ -102,21 +102,6 @@ module ChallengesHelper
     User.real.map { |u| [u.select_text, u.id] if u.org }.compact
   end
 
-  # Returns a collection of Site admins and challenge admins
-  # @return [Array<String>] dxids of Site admins and challenge admins
-  def host_lead_dxusers
-    User.site_admins.or(User.challenge_admins).order(:dxuser).distinct.pluck(:dxuser)
-  end
-
-  # Returns a collection of Site admins, challenge evaluators and challenge admins
-  # @return [Array<String>] dxids of Site admins, challenge evaluators and challenge admins
-  def guest_lead_dxusers
-    User.site_admins.
-      or(User.challenge_admins).
-      or(User.challenge_evaluators).
-      order(:dxuser).distinct.pluck(:dxuser)
-  end
-
   # Returns a collection of challenges for selection on challenge edit page
   # @return  Array<Array> Array of challenges name + id
   def challenge_order_for_select

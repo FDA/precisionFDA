@@ -1,15 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { Loader, LoaderMargin } from '../../../components/Loader'
+import { Loader } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/page.styles'
+import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { NOTIFICATION_ACTION } from '../../home/types'
 import { useDataPortalByIdQuery } from '../queries'
 import { DataPortalError } from './DataPortalNotFound'
-
-import { useLastWSNotification } from '../../../hooks/useLastWSNotification'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import {
   canEditContent as canEditContentCheck,
@@ -65,9 +64,9 @@ const DataPortalDetailsPage = () => {
     <UserLayout innerScroll>
       {isLoading || !data ? (
         <PageContainerMargin>
-          <LoaderMargin>
+          <div className="m-6">
             <Loader />
-          </LoaderMargin>
+          </div>
         </PageContainerMargin>
       ) : (
         <DataPortalDetails

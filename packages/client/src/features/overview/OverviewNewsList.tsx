@@ -1,9 +1,9 @@
 import { format } from 'date-fns'
 import React from 'react'
 import styled from 'styled-components'
+import ExternalLink from '../../components/Controls/ExternalLink'
 import { Loader } from '../../components/Loader'
 import { useNewsListQuery } from '../news/useNewsListQuery'
-import ExternalLink from '../../components/Controls/ExternalLink'
 
 export const StyledCondensedList = styled.div`
   display: flex;
@@ -38,7 +38,7 @@ export const Info = styled.div`
 
 export const OverviewNewsList = ({ pick = 3 }: { pick?: number }) => {
   const { data, isLoading } = useNewsListQuery({ orderBy: 'isPublication' })
-  if (isLoading) return <Loader className="inline" />
+  if (isLoading) return <Loader inline />
   const newsList = pick ? data?.data?.slice(0, pick) : data?.data
 
   return (

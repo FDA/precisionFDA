@@ -281,7 +281,6 @@ export const OverviewPublic = () => {
               <Button data-variant="primary" as="a" href="/docs" target="_blank">
                 Learn more
               </Button>
-              <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
             </StyledInfoRow>
           </OverviewCenterSection>
         </PageContainerMargin>

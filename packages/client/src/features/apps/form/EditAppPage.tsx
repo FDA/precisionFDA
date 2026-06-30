@@ -48,7 +48,7 @@ export const EditAppPage = ({
     }
   }
 
-  if (isLoading) return <Loader className="pageloader" />
+  if (isLoading) return <Loader pageloader />
   if (isError && !data) return <NotAllowedPage />
   if (!data) return null
 

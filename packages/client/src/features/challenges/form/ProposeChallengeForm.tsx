@@ -43,7 +43,7 @@ export const ProposeChallengeForm = ({
   mutationErrors,
   pending = false,
 }: {
-  onSubmit: (a: ProposeChallengeFormValues) => Promise<void>
+  onSubmit: (a: ProposeChallengeFormValues) => void | Promise<void>
   mutationErrors?: MutationErrors
   pending?: boolean
 }) => {

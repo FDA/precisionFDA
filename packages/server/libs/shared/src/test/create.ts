@@ -150,32 +150,30 @@ const orgHelper = {
 }
 
 const adminGroupHelper = {
-  createReviewSpaceAdminGroup: (em: EntityManager): AdminGroup => {
-    const rsaGroup = wrap(new AdminGroup()).assign({
-      role: ADMIN_GROUP_ROLES.ROLE_REVIEW_SPACE_ADMIN,
-    })
+  // `admin_groups.role` is unique, so there is exactly one AdminGroup per role shared by all
+  // users via admin_memberships. Reuse the managed/pending group instead of inserting duplicates.
+  findOrCreateGroup: (em: EntityManager, role: ADMIN_GROUP_ROLES): AdminGroup => {
+    const uow = em.getUnitOfWork()
+    const existing = [...uow.getPersistStack(), ...uow.getIdentityMap().values()].find(
+      (entity): entity is AdminGroup => entity instanceof AdminGroup && entity.role === role,
+    )
+    if (existing) {
+      return existing
+    }
 
-    em.persist(rsaGroup)
-    return rsaGroup
-  },
-
-  createSiteAdminGroup: (em: EntityManager): AdminGroup => {
-    const group = wrap(new AdminGroup()).assign({
-      role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN,
-    })
-
+    const group = wrap(new AdminGroup()).assign({ role })
     em.persist(group)
     return group
   },
 
-  createChallengeAdminGroup: (em: EntityManager): AdminGroup => {
-    const group = wrap(new AdminGroup()).assign({
-      role: ADMIN_GROUP_ROLES.ROLE_CHALLENGE_ADMIN,
-    })
+  createReviewSpaceAdminGroup: (em: EntityManager): AdminGroup =>
+    adminGroupHelper.findOrCreateGroup(em, ADMIN_GROUP_ROLES.ROLE_REVIEW_SPACE_ADMIN),
 
-    em.persist(group)
-    return group
-  },
+  createSiteAdminGroup: (em: EntityManager): AdminGroup =>
+    adminGroupHelper.findOrCreateGroup(em, ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN),
+
+  createChallengeAdminGroup: (em: EntityManager): AdminGroup =>
+    adminGroupHelper.findOrCreateGroup(em, ADMIN_GROUP_ROLES.ROLE_CHALLENGE_ADMIN),
 }
 
 const userHelper = {

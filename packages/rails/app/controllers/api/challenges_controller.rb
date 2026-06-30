@@ -41,67 +41,12 @@ module Api
       render json: app_owners_for_select
     end
 
-    def host_lead_users
-      render json: host_lead_dxusers
-    end
-
-    def guest_lead_users
-      render json: guest_lead_dxusers
-    end
-
-    def challenges_for_select
-      render json: challenge_order_for_select
-    end
-
     def scopes_for_select
       challenge = Challenge.new
       if params[:id]
         challenge = Challenge.find(params[:id])
       end
       render json: spaces_for_select(@context, challenge)
-    end
-
-    def challenge_params
-      params.require(:challenge).
-        permit(
-          :name,
-          :description,
-          :scope,
-          :app_owner_id,
-          :start_at,
-          :end_at,
-          :status,
-          :regions,
-          :card_image_id,
-          :card_image_url,
-          :replacement_id,
-          :host_lead_dxuser,
-          :guest_lead_dxuser,
-          :pre_registration_url,
-        )
-    end
-
-    def update_challenge_params
-      params.require(:challenge).
-        permit(
-          :name,
-          :description,
-          :scope,
-          :app_owner_id,
-          :start_at,
-          :end_at,
-          :status,
-          :card_image_id,
-          :card_image_url,
-          :replacement_id,
-          :pre_registration_url,
-        )
-    end
-
-    def years
-      all_years = accessible_challenges.order(start_at: :desc).pluck(:start_at).map(&:year).uniq
-
-      render json: all_years
     end
 
     def save_editor_page

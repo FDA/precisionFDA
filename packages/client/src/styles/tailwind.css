@@ -12,6 +12,30 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --animate-loader-dot: loader-dot 1.2s ease-in-out infinite;
+
+  @keyframes loader-dot {
+    0%,
+    80%,
+    100% {
+      opacity: 0.25;
+      transform: scale(0.6);
+    }
+    40% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-loader-dot {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.2138 0.0019 286.2347);

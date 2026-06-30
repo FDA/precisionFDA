@@ -19,12 +19,21 @@ export async function fetchScoringAppUsers(): Promise<[]> {
   return axios.get('/api/challenges/scoring_app_users').then(r => r.data)
 }
 
-export async function fetchHostLeads(): Promise<[]> {
-  return axios.get('/api/challenges/host_lead_users').then(r => r.data)
+export type ChallengeLeadsResponse = {
+  hostUsernames: string[]
+  guestUsernames: string[]
 }
 
-export async function fetchGuestLeads(): Promise<[]> {
-  return axios.get('/api/challenges/guest_lead_users').then(r => r.data)
+export async function fetchChallengeLeads(): Promise<ChallengeLeadsResponse> {
+  return axios.get('/api/v2/admin/memberships/challenge-leads').then(r => r.data)
+}
+
+export async function fetchHostLeads(): Promise<string[]> {
+  return fetchChallengeLeads().then(r => r.hostUsernames)
+}
+
+export async function fetchGuestLeads(): Promise<string[]> {
+  return fetchChallengeLeads().then(r => r.guestUsernames)
 }
 
 export async function fetchChallengeScopes(): Promise<string[]> {

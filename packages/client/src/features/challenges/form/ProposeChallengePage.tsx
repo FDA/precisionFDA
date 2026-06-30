@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
+import { isAxiosError } from 'axios'
 import { useState } from 'react'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import { Link } from 'react-router'
@@ -14,6 +14,9 @@ import PublicLayout from '../../../layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { type ProposeChallengePayload, proposeChallengeRequest } from './api'
 import { ProposeChallengeForm, type ProposeChallengeFormValues } from './ProposeChallengeForm'
+
+const getMutationErrors = (error: unknown) =>
+  formatMutationErrors(isAxiosError(error) ? error.response?.data : undefined)
 
 const ProposeChallengePage = () => {
   const user = useAuthUser()
@@ -34,29 +37,34 @@ const ProposeChallengePage = () => {
       setSubmissionSuccess(true)
       toastSuccess('Your challenge proposal has been received')
     },
-    onError: () => {
-      toastError('Something went wrong submitting your challenge proposal')
+    onError: error => {
+      const message = getMutationErrors(error)?.errors[0] ?? 'Something went wrong submitting your challenge proposal'
+      toastError(message)
     },
   })
 
-  const mutationErrors = formatMutationErrors(
-    mutation.error instanceof AxiosError ? mutation.error.response?.data : undefined,
-  )
+  const mutationErrors = getMutationErrors(mutation.error)
 
-  const handleSubmit = async (v: ProposeChallengeFormValues) => {
+  const submitProposal = (payload: ProposeChallengePayload) => {
+    mutation.mutate(payload)
+  }
+
+  const handleSubmit = (v: ProposeChallengeFormValues) => {
     if (!isLoggedIn && recaptchaSiteKey) {
       setValues(v)
       setTriggerCaptcha(true)
     } else {
-      await mutation.mutateAsync(v)
+      submitProposal(v)
     }
   }
 
-  const onCaptchaSuccess = async (captchaValue: string) => {
+  const onCaptchaSuccess = (captchaValue: string) => {
     setTriggerCaptcha(false)
-    const data = values as ProposeChallengePayload
-    data.captchaValue = captchaValue
-    await mutation.mutateAsync(data)
+    if (!values) {
+      toastError('Something went wrong submitting your challenge proposal')
+      return
+    }
+    submitProposal({ ...values, captchaValue })
   }
 
   const thankYouMessage = () => {
@@ -105,9 +113,9 @@ const ProposeChallengePage = () => {
     )
   }
 
-  const renderContentWithCaptcha = () => {
+  const renderContentWithCaptcha = (siteKey: string) => {
     return (
-      <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey!} useEnterprise>
+      <GoogleReCaptchaProvider reCaptchaKey={siteKey} useEnterprise>
         {renderContent()}
       </GoogleReCaptchaProvider>
     )
@@ -116,7 +124,7 @@ const ProposeChallengePage = () => {
   return (
     <PublicLayout mainScroll={!!user}>
       <NavigationBar user={user} />
-      {!isLoggedIn && recaptchaSiteKey ? renderContentWithCaptcha() : renderContent()}
+      {!isLoggedIn && recaptchaSiteKey ? renderContentWithCaptcha(recaptchaSiteKey) : renderContent()}
     </PublicLayout>
   )
 }

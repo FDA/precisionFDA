@@ -63,7 +63,7 @@ export async function challengesRequest(params: ChallengeListParams): Promise<Li
 export type NewsYearsListResponse = number[]
 export async function challengesYearsListRequest() {
   return axios
-    .get<NewsYearsListResponse>('/api/challenges/years')
+    .get<NewsYearsListResponse>('/api/v2/challenges/years')
     .then(response => response.data.map(item => item.toString()))
 }
 

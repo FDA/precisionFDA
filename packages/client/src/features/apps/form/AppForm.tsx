@@ -100,7 +100,7 @@ type AppFormProps = {
 
 export const AppForm = (props: AppFormProps) => {
   const { computeInstances, isLoading } = useComputeInstances()
-  if (isLoading) return <Loader className="pageloader" />
+  if (isLoading) return <Loader pageloader />
   return <AppFormInner {...props} computeInstances={computeInstances} />
 }
 

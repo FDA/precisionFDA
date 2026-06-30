@@ -19,7 +19,7 @@ export const LayoutLoader = () => (
   <StyledLayoutLoader>
     <Logo />
     <br />
-    <Loader className="pageloader" />
+    <Loader pageloader />
   </StyledLayoutLoader>
 )
 

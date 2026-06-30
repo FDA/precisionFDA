@@ -467,10 +467,7 @@ export class ChallengeService implements Searchable<Challenge> {
    * for non-admin/non-challenge-admin users).
    */
   async findAssignedToApp(appId: number): Promise<Challenge[]> {
-    return this.challengeRepo.findAccessible(
-      { app: appId },
-      { orderBy: { createdAt: 'DESC' } },
-    )
+    return this.challengeRepo.findAccessible({ app: appId }, { orderBy: { createdAt: 'DESC' } })
   }
 
   /**
@@ -488,11 +485,7 @@ export class ChallengeService implements Searchable<Challenge> {
     return this.challengeRepo.find(
       {
         status: {
-          $in: [
-            CHALLENGE_STATUS.PAUSED,
-            CHALLENGE_STATUS.SETUP,
-            CHALLENGE_STATUS.PRE_REGISTRATION,
-          ],
+          $in: [CHALLENGE_STATUS.PAUSED, CHALLENGE_STATUS.SETUP, CHALLENGE_STATUS.PRE_REGISTRATION],
         },
         endAt: { $gt: now },
         appOwner: this.user.id,
@@ -500,6 +493,13 @@ export class ChallengeService implements Searchable<Challenge> {
       },
       { orderBy: { createdAt: 'DESC' } },
     )
+  }
+
+  /*
+   * Get a list of years that have at least one challenge
+   */
+  async getYears(): Promise<number[]> {
+    return this.challengeRepo.getDistinctYears()
   }
 
   async search(query: string): Promise<Challenge[]> {

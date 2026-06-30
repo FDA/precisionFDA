@@ -1,8 +1,7 @@
-import React from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
-import { Loader } from '../../components/Loader'
-import { SectionTitle } from '../../components/Public/public-layout.styles'
+import { Loader } from '@/components/Loader'
+import { SectionTitle } from '@/components/Public/public-layout.styles'
 import { ChallengeListItem } from '../challenges/list/ChallengeListItem'
 import { useChallengesListQuery } from '../challenges/list/useChallengesListQuery'
 import { getTimeStatusColor } from '../challenges/util'
@@ -66,7 +65,7 @@ export default function ChallengesOverviewList() {
 
   return (
     <StyledChallengesOverview>
-      {(currentIsLoading || upcomingIsLoading || endedIsLoading) && <Loader className="inline" />}
+      {(currentIsLoading || upcomingIsLoading || endedIsLoading) && <Loader inline />}
       {!currentIsLoading && current?.data && current.data?.length > 0 && (
         <Row>
           <StyledSectionTitle $tscolor={getTimeStatusColor('current')}>Current Challenges</StyledSectionTitle>
@@ -95,9 +94,7 @@ export default function ChallengesOverviewList() {
         current?.data?.length === 0 &&
         upcoming?.data?.length === 0 && (
           <Row>
-            <StyledSectionTitle $tscolor={getTimeStatusColor('ended')}>
-              Ended Challenges
-            </StyledSectionTitle>
+            <StyledSectionTitle $tscolor={getTimeStatusColor('ended')}>Ended Challenges</StyledSectionTitle>
             <StyledChallengeList>
               {ended?.data?.slice(0, 2).map(c => (
                 <ChallengeListItem key={c.id} challenge={c} />
