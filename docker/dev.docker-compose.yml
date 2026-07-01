@@ -25,7 +25,6 @@ services:
     environment:
       - PFDA_LOCAL_DOCKER_FILE_WATCHER_PATCH=1
       - RAILS_ENV=development
-      - SKIP_RUBY_DEPS_SETUP=${SKIP_RUBY_DEPS_SETUP}
       - SKIP_DB_SETUP=${SKIP_DB_SETUP}
     volumes:
       - type: volume
@@ -39,7 +38,6 @@ services:
       context: ../packages/client
       dockerfile: ./docker/images/dev.Dockerfile
     environment:
-      - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
       - VITE_OUT_DIR=dist
     volumes:
       - type: volume
@@ -77,7 +75,6 @@ services:
       - NODE_ENV=development
       - NODE_DATABASE_NAME=precision-fda
       - NODE_DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD:-password}@db:3306/precision-fda
-      - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
       - NODE_DEV_WATCH=${NODE_DEV_WATCH:-1}
     volumes:
       - type: bind
@@ -103,7 +100,6 @@ services:
       - NODE_ENV=development
       - NODE_DATABASE_NAME=precision-fda
       - NODE_DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD:-password}@db:3306/precision-fda
-      - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
       - NODE_DEV_WATCH=${NODE_DEV_WATCH:-1}
     volumes:
       - type: bind

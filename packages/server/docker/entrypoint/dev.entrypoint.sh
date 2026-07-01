@@ -7,8 +7,15 @@ if [[ "$#" -eq 0 ]]; then
     exit 1
 fi
 
-if [[ "${SKIP_NODEJS_DEPS_SETUP:-0}" == "0" ]]; then
+# Reinstall deps only when pnpm-lock.yaml changed, detected via a fingerprint marker kept in the
+# persisted node_modules cache volume. A bumped lockfile reinstalls automatically; no flag to flip.
+NODE_DEPS_MARKER=/app/node_modules/.pfda-pnpm-lock.sha
+NODE_DEPS_FINGERPRINT="$(sha256sum pnpm-lock.yaml | cut -d' ' -f1)"
+if [[ "$(cat "$NODE_DEPS_MARKER" 2>/dev/null || true)" == "$NODE_DEPS_FINGERPRINT" ]]; then
+    echo "Node deps unchanged (pnpm-lock.yaml fingerprint match) — skipping pnpm install"
+else
     pnpm i --frozen-lockfile
+    echo "$NODE_DEPS_FINGERPRINT" > "$NODE_DEPS_MARKER"
 fi
 
 # Run the Nest CLI as `node …/nest.js` (PID 1) instead of `pnpm run`, so SIGTERM/SIGINT reach

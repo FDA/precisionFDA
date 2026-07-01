@@ -44,8 +44,6 @@ services:
       dockerfile: ./docker/images/build.Dockerfile
       args:
         - FRONTEND_IMAGE_TAG=24.15.0-slim
-    environment:
-      - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
     volumes:
       - type: bind
         source: ../packages/client/dist

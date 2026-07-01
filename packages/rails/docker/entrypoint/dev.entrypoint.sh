@@ -9,9 +9,17 @@ fi
 # Bind-mounted: don't clobber a developer-customized database.yml on every restart.
 [[ -f config/database.yml ]] || cp config/database.sample.yml config/database.yml
 
-if [[ "${SKIP_RUBY_DEPS_SETUP:-0}" == "0" ]]; then
+# Reinstall gems and bower assets only when their manifests change, detected via a
+# fingerprint marker kept in the persisted gem cache volume. Bumped dependency
+# manifests reinstall automatically; no flag to flip.
+RUBY_DEPS_MARKER=/usr/local/bundle/.pfda-ruby-bower-deps.sha
+RUBY_DEPS_FINGERPRINT="$(sha256sum Gemfile.lock bower.json | sha256sum | cut -d' ' -f1)"
+if [[ "$(cat "$RUBY_DEPS_MARKER" 2>/dev/null || true)" == "$RUBY_DEPS_FINGERPRINT" ]]; then
+  echo "Ruby and bower deps unchanged (dependency fingerprint match) — skipping bundle install and bower install"
+else
   bundle check || bundle install
   bower install --allow-root
+  echo "$RUBY_DEPS_FINGERPRINT" > "$RUBY_DEPS_MARKER"
 fi
 
 if [[ "${SKIP_DB_SETUP:-0}" == "0" ]]; then
