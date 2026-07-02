@@ -1,26 +1,25 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useParams } from 'react-router'
-import { FieldGroup } from '../../../components/form/FieldGroup'
-import { Divider, InputError } from '../../../components/form/form.styles'
-import { InputText } from '../../../components/InputText'
-import { Loader } from '../../../components/Loader'
-import { BackLinkMargin } from '../../../components/Page/PageBackLink'
-import { PageTitle } from '../../../components/Page/page.styles'
-import { StyledTagItem, StyledTags } from '../../../components/Tags'
-import { useEditTagsModal } from '../../actionModals/useEditTagsModal'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useParams } from 'react-router'
+import { Button } from '@/components/Button'
+import { FieldGroup } from '@/components/form/FieldGroup'
+import { Divider, InputError } from '@/components/form/form.styles'
+import { InputText } from '@/components/InputText'
+import { Loader } from '@/components/Loader'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { PageTitle } from '@/components/Page/page.styles'
+import { StyledTagItem, StyledTags } from '@/components/Tags'
+import { useEditTagsModal } from '@/features/actionModals/useEditTagsModal'
+import { type EditSpacePayload, editSpaceRequest, spaceRequest } from '@/features/spaces/spaces.api'
+import { UserLayout } from '@/layouts/UserLayout'
 import { SpaceTypeName } from '../common'
-import { EditSpacePayload, editSpaceRequest, spaceRequest } from '../spaces.api'
-import { ISpace } from '../spaces.types'
+import type { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
 import { editValidationSchema } from './helpers'
 import { HintText, Row, StyledButton, StyledForm, StyledPageCenter, StyledPageContent } from './spaces-form.styles'
-import { UserLayout } from '../../../layouts/UserLayout'
-import { Button } from '../../../components/Button'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 const EditTags = ({ spaceId, tags = [] }: { spaceId: number; tags?: string[] }) => {
   const queryClient = useQueryClient()
@@ -37,7 +36,11 @@ const EditTags = ({ spaceId, tags = [] }: { spaceId: number; tags?: string[] }) 
   return (
     <FieldGroup label="Tags">
       <StyledTags data-testid="tags-container">
-        {tags && tags.map(tag => <StyledTagItem data-testid="space-tag-item" key={tag}>{tag}</StyledTagItem>)}
+        {tags?.map(tag => (
+          <StyledTagItem data-testid="space-tag-item" key={tag}>
+            {tag}
+          </StyledTagItem>
+        ))}
         <StyledButton type="button" onClick={() => setTagsModal(true)}>
           Edit Tags
         </StyledButton>
@@ -60,12 +63,9 @@ interface SpaceSettingsVals {
 
 export interface ISpaceSettingsForm {
   space: ISpace
-  isEditing?: boolean
-  defaultValues?: Partial<SpaceSettingsVals>
 }
 
 export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { actions, modals } = useSpaceActions({ space })
   const [formError, setFormError] = useState<string | undefined>()
@@ -76,8 +76,6 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
-    getValues,
   } = useForm<SpaceSettingsVals>({
     mode: 'onBlur',
     resolver: yupResolver(editValidationSchema),
@@ -97,9 +95,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     mutationFn: (payload: EditSpacePayload) => editSpaceRequest(space.id, payload),
     onSuccess: res => {
       if (res?.id) {
-        queryClient.invalidateQueries({
-          queryKey: ['spaces'],
-        })
+        queryClient.invalidateQueries({ queryKey: ['space', space.id.toString()] })
         toastSuccess('Space settings has been saved')
       } else if (res?.errors) {
         const errorMessages = res.errors.flatMap(error => error.messages || []).join('\r\n')
@@ -114,27 +110,22 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     },
   })
 
-  const onSubmit = () => {
+  const onSubmit = handleSubmit(({ name, description, cts }) => {
     setFormError(undefined)
-    const vals = getValues()
-    const payload = {
-      ...vals,
-      cts: vals?.cts ?? undefined,
-    }
-    mutation.mutateAsync(payload)
-  }
+    mutation.mutate({ name, description, cts: cts ?? undefined })
+  })
   const isSubmitting = mutation.isPending
 
   return (
-    <StyledForm onSubmit={handleSubmit(onSubmit)}>
+    <StyledForm onSubmit={onSubmit}>
       {!lockUnlockAction?.shouldHide && (
         <div>
           <Button
             type="button"
             data-testid="lock-space-button"
             onClick={() => {
-              if (lockUnlockAction && 'func' in lockUnlockAction) {
-                ;(lockUnlockAction as { func: () => void }).func()
+              if (lockUnlockAction?.type === 'modal') {
+                lockUnlockAction.func()
               }
             }}
           >
@@ -148,7 +139,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
         <InputText data-testid="space-type" value={SpaceTypeName[space.type]} disabled />
       </FieldGroup>
       <FieldGroup label="Name" required>
-        <InputText {...register('name', { required: 'Name is required.' })} disabled={isSubmitting} />
+        <InputText {...register('name')} disabled={isSubmitting} />
         <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
       </FieldGroup>
       <FieldGroup label="Description" required>
@@ -158,14 +149,14 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
 
       <EditTags spaceId={space.id} tags={space.tags} />
 
-      {watch().spaceType === 'review' && (
+      {space.type === 'review' && (
         <FieldGroup label="Center Tracking System #">
           <InputText {...register('cts')} disabled={isSubmitting} />
           <HintText>
-            FDA uses the Center Tracking System (CTS) to track the progress of industry submitted pre-market documents through the
-            review process. CTS is a workflow/work management system that provides support for the Center for Devices and
-            Radiogical Health (CDRH) business processes and business rules, for all stages of the product lifecycle for medical
-            devices.
+            FDA uses the Center Tracking System (CTS) to track the progress of industry submitted pre-market documents
+            through the review process. CTS is a workflow/work management system that provides support for the Center
+            for Devices and Radiogical Health (CDRH) business processes and business rules, for all stages of the
+            product lifecycle for medical devices.
           </HintText>
           <ErrorMessage errors={errors} name="cts" render={({ message }) => <InputError>{message}</InputError>} />
           <Divider />
@@ -176,7 +167,6 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
         <Button data-variant="primary" disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">
           Save
         </Button>
-        {isSubmitting && <Loader />}
         {formError && <InputError>{formError}</InputError>}
       </Row>
     </StyledForm>
@@ -198,8 +188,7 @@ export const SpaceSettings = () => {
     <UserLayout mainScroll>
       <StyledPageCenter>
         <StyledPageContent>
-          <div className='pt-2'></div>
-          <PageTitle>Space Settings</PageTitle>
+          <PageTitle className="pt-2">Space Settings</PageTitle>
           <SpaceSettingsForm space={data.space} />
         </StyledPageContent>
       </StyledPageCenter>

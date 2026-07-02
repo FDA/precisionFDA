@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import { BackLink } from '../../../components/Page/PageBackLink'
-import { Button } from '../../../components/Button'
+import { Button } from '@/components/Button'
+import { BackLink } from '@/components/Page/PageBackLink'
 
 export const StyledForm = styled.form`
   display: flex;
