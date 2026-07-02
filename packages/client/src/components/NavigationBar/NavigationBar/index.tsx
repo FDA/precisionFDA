@@ -1,12 +1,9 @@
-import React, { ReactNode } from 'react'
-import { useLocation } from 'react-router'
+import type { ReactNode } from 'react'
 import styled from 'styled-components'
-
-import { MailButton, StyledSocialMediaButtons } from '../SocialMediaButtons'
-import { PublicNavbar } from '../PublicNavbar'
+import type { IUser } from '@/types/user'
 import { MainBanner } from '../../Banner'
 import { PageContainerMargin } from '../../Page/page.styles'
-import { IUser } from '../../../types/user'
+import { PublicNavbar } from '../PublicNavbar'
 
 const NavigationBarBanner = styled(PageContainerMargin)`
   max-width: 1330px;
@@ -17,10 +14,6 @@ const NavigationBarBanner = styled(PageContainerMargin)`
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-
-  ${StyledSocialMediaButtons} {
-    padding-top: 1rem;
-  }
 `
 
 export const NavigationBarPublicLandingTitle = styled.div`
@@ -110,28 +103,16 @@ interface INavigationBarProps {
 
 const NavigationBar = ({ children, title, subtitle, user }: INavigationBarProps) => {
   const isLoggedIn = user && Object.keys(user).length > 0
-  const showSocialMediaButtons = !children // Show social media buttons unless there's a custom header like in ChallengesDetailsPage
-  // Displaying button text for social media button only happens in the landing page for a logged in user
-  //   In this scenario we don't render the subtitle block in order to get the correct layout
-  //   as the design does not include a title nor subtitle in this scenario
-  const showSocialMediaButtonText = isLoggedIn && useLocation().pathname === '/'
 
   const renderTitleIfDefined = () => {
-    if (title || subtitle || showSocialMediaButtonText) {
+    if (title || subtitle) {
       return (
-
         <NavigationBarBanner>
           <NavigationBarLogoAndTitle>
             <h1>{title}</h1>
           </NavigationBarLogoAndTitle>
-            {!showSocialMediaButtonText && (
-              <NavigationBarSubtitle>
-                {subtitle}
-              </NavigationBarSubtitle>
-            )}
-          {showSocialMediaButtons && <MailButton />}
+          <NavigationBarSubtitle>{subtitle}</NavigationBarSubtitle>
         </NavigationBarBanner>
-
       )
     }
     return ''

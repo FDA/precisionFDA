@@ -1,22 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
-import React from 'react'
 import { Link, Navigate, Route, Routes, useParams } from 'react-router'
 import 'react-toastify/dist/ReactToastify.css'
 import styled from 'styled-components'
-import { Loader } from '../../../components/Loader'
-import { PageContainerMargin } from '../../../components/Page/page.styles'
-import { usePageMeta } from '../../../hooks/usePageMeta'
-import { colors } from '../../../styles/theme'
+import { Loader } from '@/components/Loader'
+import { NavLink } from '@/components/NavLink'
+import { PageContainerMargin } from '@/components/Page/page.styles'
+import { usePageMeta } from '@/hooks/usePageMeta'
+import { colors } from '@/styles/theme'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
-import MailButton from '../../../components/NavigationBar/SocialMediaButtons'
 import PublicLayout from '../../../layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { expertDetailsRequest } from '../api'
-import { ExpertDetails } from '../types'
+import type { ExpertDetails } from '../types'
 import { ExpertAbout } from './About'
 import { ExpertBlog } from './Blog'
 import { ExpertData, ExpertImage, ExpertRow, Filler, StyledTab, StyledTabList } from './experts-details.styles'
-import { NavLink } from '../../../components/NavLink'
 
 const StyledNavigationBar = styled.div`
   width: 100%;
@@ -24,10 +22,6 @@ const StyledNavigationBar = styled.div`
   height: 140px;
   display: flex;
   flex-direction: row;
-`
-const StyledSocialMediaButtons = styled.div`
-  margin-top: 100px;
-  justify-self: flex-end;
 `
 
 const ExpertContentRow = styled.div`
@@ -57,9 +51,6 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
                 <h1>{expert?.title}</h1>
               </ExpertData>
             </ExpertRow>
-            <StyledSocialMediaButtons>
-              <MailButton />
-            </StyledSocialMediaButtons>
           </StyledNavigationBar>
         </PageContainerMargin>
       </NavigationBar>
@@ -74,7 +65,13 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
               <StyledTab as={NavLink} to={`/experts/${expert?.id}/blog`} activeClassName="selected">
                 Blog Post
               </StyledTab>
-              <StyledTab as="a" data-turbolinks="false" href={`/experts/${expert?.id}/qa`} target="_blank" rel="noreferrer">
+              <StyledTab
+                as="a"
+                data-turbolinks="false"
+                href={`/experts/${expert?.id}/qa`}
+                target="_blank"
+                rel="noreferrer"
+              >
                 Q&A
               </StyledTab>
             </StyledTabList>
