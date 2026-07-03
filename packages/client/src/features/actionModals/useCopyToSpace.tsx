@@ -39,7 +39,7 @@ const SpacesList = ({
     <>
       <ModalSearchBar>
         <InputText
-          placeholder={'Search space...'}
+          placeholder={'Search by space name or ID...'}
           value={searchQuery}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
         />
@@ -47,12 +47,14 @@ const SpacesList = ({
           Clear
         </Button>
       </ModalSearchBar>
-      <SpaceSelectionList
-        excludeScopes={excludeScopes}
-        filterString={searchQuery}
-        selectedScope={selected}
-        onSelect={space => onSelect(space.scope)}
-      />
+      <ModalScroll>
+        <SpaceSelectionList
+          excludeScopes={excludeScopes}
+          filterString={searchQuery}
+          selectedScope={selected}
+          onSelect={space => onSelect(space.scope)}
+        />
+      </ModalScroll>
     </>
   )
 }
@@ -136,11 +138,9 @@ const CopyToSpaceForm = ({
   }
   return (
     <>
-      <ModalScroll>
-        <form className="p-4" id="copy-to-space-form" onSubmit={handleSubmit}>
-          <SpacesList selected={selectedTarget} spaceId={spaceId?.toString()} onSelect={handleSelect} />
-        </form>
-      </ModalScroll>
+      <form className="p-4" id="copy-to-space-form" onSubmit={handleSubmit}>
+        <SpacesList selected={selectedTarget} spaceId={spaceId?.toString()} onSelect={handleSelect} />
+      </form>
       <Footer>
         <ButtonRow>
           {mutation.isPending && <Loader height={14} />}
@@ -189,6 +189,7 @@ export function useCopyToSpaceModal<T extends { id: string | number }>({
       data-testid={`modal-${resource}-copytospace`}
       isShown={isShown}
       hide={(): void => setShowModal(false)}
+      variant="medium"
     >
       <ModalHeaderTop
         disableClose={false}

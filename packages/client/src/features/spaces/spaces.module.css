@@ -144,8 +144,10 @@
 }
 
 .spaceSelectionEmptyMessage {
-    padding: 16px 12px;
+    padding: 32px 12px;
     color: var(--c-text-500);
+    text-align: center;
+    width: 100%;
 }
 
 .spaceSelectionMatch {

@@ -162,6 +162,11 @@ export const Card = styled.div`
 
 export const ModalSearchBar = styled(SearchBar)`
   margin-bottom: 16px;
+  width: 100%;
+
+  & > input {
+    max-width: none;
+  }
 `
 
 export const ColScopeTitle = styled.div`

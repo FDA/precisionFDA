@@ -3,6 +3,7 @@ import type React from 'react'
 import { HomeIcon } from '@/components/icons/HomeIcon'
 import { FdaRestrictedIcon } from '@/components/icons/FdaRestrictedIcon'
 import { ProtectedIcon } from '@/components/icons/ProtectedIcon'
+import { highlightMatch } from './highlightMatch'
 import { type EditableSpace, fetchEditableSpacesList } from './spaces.api'
 import styles from './spaces.module.css'
 import { findSpaceTypeIcon } from './useSpacesColumns'
@@ -10,21 +11,6 @@ import { findSpaceTypeIcon } from './useSpacesColumns'
 interface MyHomeProps {
   isSelected: boolean
   onSelect: () => void
-}
-
-const highlightMatch = (text: string, query: string): React.ReactNode => {
-  if (!query) return text
-  const lower = text.toLowerCase()
-  const q = query.toLowerCase()
-  const idx = lower.indexOf(q)
-  if (idx === -1) return text
-  return (
-    <>
-      {text.slice(0, idx)}
-      <mark className={styles.spaceSelectionMatch}>{text.slice(idx, idx + q.length)}</mark>
-      {text.slice(idx + q.length)}
-    </>
-  )
 }
 
 interface SpaceSelectionListProps {

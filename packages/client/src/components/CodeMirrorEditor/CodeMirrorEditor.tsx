@@ -95,6 +95,7 @@ const CodeMirrorEditor = ({
 
   return (
     <CodeMirror
+      data-testid={'code-mirror-editor'}
       basicSetup={{
         foldGutter: false,
         highlightActiveLineGutter: false,

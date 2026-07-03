@@ -36,7 +36,7 @@ export const useForkAppToModal = ({ selectedApp }: { selectedApp?: IApp }) => {
       headerText="Fork App To"
       isShown={isShown}
       hide={() => setShowModal(false)}
-      variant="small"
+      variant="medium"
     >
       <ModalHeaderTop headerText="Fork App To" hide={() => setShowModal(false)} />
       <ModalContentPadding>
