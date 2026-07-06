@@ -6,7 +6,7 @@ export const InfoRow = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   margin: 64px 0;
 `
 

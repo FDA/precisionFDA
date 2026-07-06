@@ -482,17 +482,16 @@ export class ChallengeService implements Searchable<Challenge> {
    */
   async findAssignableForApp(appId: number): Promise<Challenge[]> {
     const now = new Date()
-    return this.challengeRepo.find(
-      {
-        status: {
-          $in: [CHALLENGE_STATUS.PAUSED, CHALLENGE_STATUS.SETUP, CHALLENGE_STATUS.PRE_REGISTRATION],
-        },
-        endAt: { $gt: now },
-        appOwner: this.user.id,
-        app: { $ne: appId },
+    const where: FilterQuery<Challenge> = {
+      status: {
+        $in: [CHALLENGE_STATUS.PAUSED, CHALLENGE_STATUS.SETUP, CHALLENGE_STATUS.PRE_REGISTRATION],
       },
-      { orderBy: { createdAt: 'DESC' } },
-    )
+      endAt: { $gt: now },
+      appOwner: this.user.id,
+      $or: [{ app: null }, { app: { $ne: appId } }],
+    }
+
+    return this.challengeRepo.find(where, { orderBy: { createdAt: 'DESC' } })
   }
 
   /*

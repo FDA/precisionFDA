@@ -1,24 +1,24 @@
 import { useQuery } from '@tanstack/react-query'
 import { formatDistance, parseISO } from 'date-fns'
-import React from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
-import { Button } from '../../components/Button'
-import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
-import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
-import { Loader } from '../../components/Loader'
-import NavigationBar from '../../components/NavigationBar/NavigationBar'
-import { PageContainerMargin } from '../../components/Page/page.styles'
+import { Button } from '@/components/Button'
+import { AppTypeIconBlue } from '@/components/icons/AppTypeIconBlue'
+import { AppTypeIconYellow } from '@/components/icons/AppTypeIconYellow'
+import { Loader } from '@/components/Loader'
+import { PageContainerMargin } from '@/components/Page/page.styles'
 import {
   OverviewCenterSection,
   PageRow,
   RightSide,
   RightSideItem,
   SectionTitle,
-} from '../../components/Public/public-layout.styles'
-import { usePageMeta } from '../../hooks/usePageMeta'
+} from '@/components/Public/public-layout.styles'
+import styles from '@/features/overview/OverviewPublic.module.css'
+import { usePageMeta } from '@/hooks/usePageMeta'
+import type { IUser } from '@/types/user'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
-import type { IUser } from '../../types/user'
 import { fetchApps } from '../apps/apps.api'
 import type { IApp } from '../apps/apps.types'
 import { useAuthUser } from '../auth/useAuthUser'
@@ -349,9 +349,16 @@ export const OverviewAuthed = () => {
 
       <OverviewCenterSection>
         <InfoRow>
-          <Button data-variant="primary" as="a" href="/docs" target="_blank">
-            Learn more about precisionFDA
+          <Button className={styles.infoButton} data-variant="primary" as="a" href="/docs" target="_blank">
+            Learn more
           </Button>
+          <a
+            className={styles.feedbackLink}
+            href="mailto:precisionfda@fda.hhs.gov"
+            aria-label="Send feedback to the precisionFDA team via email"
+          >
+            Feedback
+          </a>
         </InfoRow>
       </OverviewCenterSection>
     </PublicLayout>

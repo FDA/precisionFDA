@@ -53,8 +53,10 @@ describe('ChallengeService', () => {
   const findChallengesStub = stub()
   const findChallengeResourcesStub = stub()
   const findAccessibleOneStub = stub()
+  const findStub = stub()
 
   const challengeRepository = {
+    find: findStub,
     findChallengesByCardImageFileUid: findChallengesStub,
     findAccessibleOne: findAccessibleOneStub,
   } as unknown as ChallengeRepository
@@ -132,6 +134,7 @@ describe('ChallengeService', () => {
     ])
 
     findAccessibleOneStub.reset()
+    findStub.reset()
 
     fileDownloadLinkStub.reset()
     fileDownloadLinkStub.resolves({
@@ -217,6 +220,29 @@ describe('ChallengeService', () => {
       NotFoundError,
       `Challenge resource for fileUid ${FILE_UID} was not found`,
     )
+  })
+
+  describe('findAssignableForApp', () => {
+    const APP_ID = 7
+
+    it('includes unassigned challenges as assignable candidates', async () => {
+      const challenge = { id: 1 } as unknown as Challenge
+      findStub.resolves([challenge])
+
+      const result = await challengeService.findAssignableForApp(APP_ID)
+
+      expect(result).to.deep.equal([challenge])
+      expect(findStub.calledOnce).to.be.true()
+
+      const [where, options] = findStub.getCall(0).args
+      expect(where.status).to.deep.equal({
+        $in: [CHALLENGE_STATUS.PAUSED, CHALLENGE_STATUS.SETUP, CHALLENGE_STATUS.PRE_REGISTRATION],
+      })
+      expect(where.endAt.$gt).to.be.instanceOf(Date)
+      expect(where.appOwner).to.eq(USER_ID)
+      expect(where.$or).to.deep.equal([{ app: null }, { app: { $ne: APP_ID } }])
+      expect(options).to.deep.equal({ orderBy: { createdAt: 'DESC' } })
+    })
   })
 
   describe('joinChallenge', () => {
