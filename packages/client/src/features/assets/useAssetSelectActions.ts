@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
@@ -7,16 +7,16 @@ import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useAuthUser } from '../auth/useAuthUser'
 import { deleteFilesRequest } from '../files/files.api'
-import { Action } from '../home/action-types'
+import type { Action } from '../home/action-types'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
-import { HomeScope } from '../home/types'
+import type { HomeScope } from '../home/types'
 import { useLicensesListQuery } from '../licenses/queries'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
 import { useDownloadAssetsModal } from './actionModals/useDownloadAssetsModal'
 import { useEditAssetModal } from './actionModals/useEditAssetModal'
-import { IAsset } from './assets.types'
+import type { IAsset } from './assets.types'
 
 export interface UseAssetActionsResult {
   actions: Action[]
@@ -43,6 +43,7 @@ export const useAssetActions = ({
   const user = useAuthUser()
   const isAdmin = user?.admin
   const selectedButNotClosed = selected.some(e => e.state !== 'closed')
+  const canDeleteAsset = Boolean(selected[0]?.links.remove) || (isAdmin && selected[0]?.scope === 'public')
 
   const featureMutation = useFeatureMutation({
     resource: 'assets',
@@ -63,7 +64,12 @@ export const useAssetActions = ({
   } = useDeleteModal({
     resource: 'asset',
     selected: selected.map(s => ({ id: s.uid, name: s.name, location: s.location })),
-    request: () => deleteFilesRequest(ids),
+    // Asset removal via /api/v2/nodes/remove is async and returns no messages,
+    // so resolve with an empty DeleteResponse.
+    request: async () => {
+      await deleteFilesRequest(ids)
+      return {}
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['assets'],
@@ -162,7 +168,8 @@ export const useAssetActions = ({
       func: () => {
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
       },
-      isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature) || selectedButNotClosed,
+      isDisabled:
+        selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature) || selectedButNotClosed,
       shouldHide: !isAdmin || homeScope !== 'everybody',
     },
     {
@@ -183,7 +190,7 @@ export const useAssetActions = ({
     {
       name: 'Delete',
       type: 'modal',
-      isDisabled: selected.length !== 1 || !selected[0]?.links.remove,
+      isDisabled: selected.length !== 1 || !canDeleteAsset,
       func: () => setDeleteModal(true),
       modal: deleteModal,
       showModal: isShownDeleteModal,
@@ -229,7 +236,8 @@ export const useAssetActions = ({
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || selectedButNotClosed,
+      shouldHide:
+        (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || selectedButNotClosed,
     },
     {
       name: 'Edit properties',
