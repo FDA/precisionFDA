@@ -2,6 +2,7 @@ import { Reference } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { ORG_EVERYONE } from '@shared/config/consts'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
@@ -816,6 +817,30 @@ describe('AppCreateFacade', () => {
       expect(appAddAuthorizedUsersStub.firstCall.args[0]).to.deep.equal({
         appId: loadedApp.dxid,
         authorizedUsers: [space.hostDxOrg, space.guestDxOrg],
+      })
+      expect(appPublishStub.calledOnce).to.be.true()
+      expect(appPublishStub.firstCall.args[0]).to.deep.equal({
+        appId: loadedApp.dxid,
+        makeDefault: false,
+      })
+    })
+
+    it('create app and publish it to orgs if scope is public scope', async () => {
+      create.userHelper.addSiteAdminRole(em, user)
+      await em.flush()
+
+      const appInput = getDefaultApp()
+      appInput.scope = 'public'
+
+      const appCreateFacade = getInstance()
+      const resultId = await appCreateFacade.create(appInput)
+
+      const loadedApp = await em.findOneOrFail(App, { uid: resultId })
+      expect(loadedApp.scope).to.equal('public')
+      expect(appAddAuthorizedUsersStub.calledOnce).to.be.true()
+      expect(appAddAuthorizedUsersStub.firstCall.args[0]).to.deep.equal({
+        appId: loadedApp.dxid,
+        authorizedUsers: [ORG_EVERYONE],
       })
       expect(appPublishStub.calledOnce).to.be.true()
       expect(appPublishStub.firstCall.args[0]).to.deep.equal({

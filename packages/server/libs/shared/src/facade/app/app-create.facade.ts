@@ -1,7 +1,7 @@
 import * as crypto from 'node:crypto'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { UBUNTU_20, UBUNTU_RELEASES, VALID_IO_CLASSES } from '@shared/config/consts'
+import { ORG_EVERYONE, UBUNTU_20, UBUNTU_RELEASES, VALID_IO_CLASSES } from '@shared/config/consts'
 import { validUbuntuPackages } from '@shared/config/ubuntu_packages'
 import { App, AppSpec, Internal } from '@shared/domain/app/app.entity'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
@@ -106,6 +106,8 @@ export class AppCreateFacade {
 
     if (EntityScopeUtils.isSpaceScope(appInput.scope)) {
       await this.publishAppInSpace(user, EntityScopeUtils.getSpaceIdFromScope(appInput.scope), platformAppId)
+    } else if (appInput.scope === STATIC_SCOPE.PUBLIC) {
+      await this.publishAppInPublic(platformAppId)
     }
 
     return this.em.transactional(async () => {
@@ -160,6 +162,11 @@ export class AppCreateFacade {
       belongOrgs.push(space.guestDxOrg)
     }
     await this.platformClient.appAddAuthorizedUsers({ appId: appDxid, authorizedUsers: belongOrgs })
+    await this.platformClient.appPublish({ appId: appDxid, makeDefault: false })
+  }
+
+  private async publishAppInPublic(appDxid: DxId<'app'>): Promise<void> {
+    await this.platformClient.appAddAuthorizedUsers({ appId: appDxid, authorizedUsers: [ORG_EVERYONE] })
     await this.platformClient.appPublish({ appId: appDxid, makeDefault: false })
   }
 
