@@ -1,10 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
 import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
+import type { BackendError } from '@/api/types'
 import { capitalize, pluralize } from '../../../utils/formatting'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { changeMembershipRolesRequest, MembershipRolesChangePayload } from './members.api'
-import { MEMBER_ROLE, MemberRole, SpaceMembership, UpdateRolesFormValues } from './members.types'
+import { changeMembershipRolesRequest, type MembershipRolesChangePayload } from './members.api'
+import { MEMBER_ROLE, type MemberRole, type SpaceMembership, type UpdateRolesFormValues } from './members.types'
 
 type ErrorResponse = { response?: { data?: { errors?: string } } }
 
@@ -42,12 +44,11 @@ export const useUpdateMemberRolesMutation = (spaceId: number, members: SpaceMemb
         toast.success(msg)
       }
     },
-    onError: (error: unknown) => {
-      if (error && typeof error === 'object' && 'response' in error) {
-        const err = error as ErrorResponse
-        toast.error(`Change member roles. ${err.response?.data?.errors || 'Unknown error'}`)
+    onError: (error: AxiosError<BackendError>) => {
+      if (error.response?.data?.error?.message) {
+        toast.error(`Change member roles failed. ${error.response?.data?.error?.message}`)
       } else {
-        toast.error('Change member roles. Unknown error')
+        toast.error('Change member roles failed. Unknown error')
       }
     },
   })

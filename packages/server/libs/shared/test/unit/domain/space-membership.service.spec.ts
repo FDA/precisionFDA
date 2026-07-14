@@ -241,10 +241,10 @@ describe('SpaceMembershipService', () => {
         [groupViewerMembership.id, groupContributorMembership.id],
         SPACE_MEMBERSHIP_ROLE.ADMIN,
       )
-      expect(result).to.deep.equal([groupViewerMembership, groupContributorMembership])
+      expect(result.memberships).to.deep.equal([groupViewerMembership, groupContributorMembership])
     })
 
-    it('should skip org access update if updater does not have access to guest org in Group space', async () => {
+    it('should skip org access update if updater does not have access to guest org', async () => {
       orgSetMemberAccessStub
         .withArgs({
           orgDxId: groupSpace.guestDxOrg,
@@ -266,10 +266,11 @@ describe('SpaceMembershipService', () => {
         [groupViewerMembership.id],
         SPACE_MEMBERSHIP_ROLE.ADMIN,
       )
-      expect(result).to.deep.equal([groupViewerMembership])
+      expect(result.memberships).to.deep.equal([groupViewerMembership])
+      expect(result.pendingOrgAccessUpdates).to.deep.equal([groupSpace.guestDxOrg])
     })
 
-    it('should skip org access update if updater does not have access to host org in Group space', async () => {
+    it('should skip org access update if updater does not have access to host org', async () => {
       orgSetMemberAccessStub
         .withArgs({
           orgDxId: groupSpace.hostDxOrg,
@@ -291,62 +292,59 @@ describe('SpaceMembershipService', () => {
         [groupViewerMembership.id],
         SPACE_MEMBERSHIP_ROLE.ADMIN,
       )
-      expect(result).to.deep.equal([groupViewerMembership])
+      expect(result.memberships).to.deep.equal([groupViewerMembership])
+      expect(result.pendingOrgAccessUpdates).to.deep.equal([groupSpace.hostDxOrg])
     })
+  })
 
-    it('should throw error if org access update fails by other platform error', async () => {
-      orgSetMemberAccessStub
-        .withArgs({
-          orgDxId: groupSpace.hostDxOrg,
-          data: {
-            [groupViewerMembership.user.getEntity().dxid]:
-              spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
-          },
-        })
-        .throws(new ClientRequestError(`Some other platform error`, { clientStatusCode: 500, clientResponse: '' }))
-
-      await expect(
-        getInstance().updatePermission(
-          groupSpace,
-          groupGuestLeadMembership,
-          [groupViewerMembership.id],
-          SPACE_MEMBERSHIP_ROLE.ADMIN,
-        ),
-      ).to.be.rejectedWith(ClientRequestError, 'Some other platform error')
-    })
-
-    it('should throw error if org access update fails in non-Group space', async () => {
-      const reviewSpace = create.spacesHelper.create(em, {
-        type: SPACE_TYPE.REVIEW,
-        state: SPACE_STATE.ACTIVE,
-        hostProject: 'project-reviewhost',
-        guestProject: 'project-reviewguest',
+  it('should skip org access update if user is not added to the org', async () => {
+    const groupViewerUserDxId = groupViewerMembership.user.getEntity().dxid
+    orgSetMemberAccessStub
+      .withArgs({
+        orgDxId: groupSpace.hostDxOrg,
+        data: {
+          [groupViewerUserDxId]: spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+        },
       })
-      const spaceHostLead = create.spacesHelper.addMember(
-        em,
-        { user: hostLead, space: reviewSpace },
-        { role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST },
-      )
-      const reviewSpaceMember = create.spacesHelper.addMember(
-        em,
-        { user: create.userHelper.create(em), space: reviewSpace },
-        { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
-      )
-      await em.flush()
-      orgSetMemberAccessStub
-        .withArgs({
-          orgDxId: reviewSpace.hostDxOrg,
-          data: {
-            [reviewSpaceMember.user.getEntity().dxid]:
-              spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+      .throws(
+        new ClientRequestError(
+          `InvalidState (422): Unable to modify membership settings for the following users: ${groupViewerUserDxId}`,
+          {
+            clientStatusCode: 401,
+            clientResponse: '',
           },
-        })
-        .throws(new ClientRequestError(`Some other platform error`, { clientStatusCode: 500, clientResponse: '' }))
+        ),
+      )
 
-      await expect(
-        getInstance().updatePermission(reviewSpace, spaceHostLead, [reviewSpaceMember.id], SPACE_MEMBERSHIP_ROLE.ADMIN),
-      ).to.be.rejectedWith(ClientRequestError, 'Some other platform error')
-    })
+    const result = await getInstance().updatePermission(
+      groupSpace,
+      groupGuestLeadMembership,
+      [groupViewerMembership.id],
+      SPACE_MEMBERSHIP_ROLE.ADMIN,
+    )
+    expect(result.memberships).to.deep.equal([groupViewerMembership])
+    expect(result.pendingOrgAccessUpdates).to.deep.equal([groupSpace.hostDxOrg])
+  })
+
+  it('should throw error if org access update fails by other platform error', async () => {
+    orgSetMemberAccessStub
+      .withArgs({
+        orgDxId: groupSpace.hostDxOrg,
+        data: {
+          [groupViewerMembership.user.getEntity().dxid]:
+            spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.ADMIN].memberAccess,
+        },
+      })
+      .throws(new ClientRequestError(`Some other platform error`, { clientStatusCode: 500, clientResponse: '' }))
+
+    await expect(
+      getInstance().updatePermission(
+        groupSpace,
+        groupGuestLeadMembership,
+        [groupViewerMembership.id],
+        SPACE_MEMBERSHIP_ROLE.ADMIN,
+      ),
+    ).to.be.rejectedWith(ClientRequestError, 'Some other platform error')
   })
 
   context('changeLeadRole', () => {
@@ -693,6 +691,16 @@ describe('SpaceMembershipService', () => {
     })
 
     it('should call orgSetMemberAccess and update memberships', async () => {
+      orgFindMembersStub.resolves({
+        results: [
+          {
+            id: groupViewerMembership.user.getEntity().dxid,
+          },
+          {
+            id: groupContributorMembership.user.getEntity().dxid,
+          },
+        ],
+      })
       const memberAccessPayload = {
         [groupViewerMembership.user.getEntity().dxid]:
           spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.VIEWER].memberAccess,
@@ -716,6 +724,87 @@ describe('SpaceMembershipService', () => {
         {
           orgDxId: groupSpace.guestDxOrg,
           data: memberAccessPayload,
+        },
+      ])
+    })
+
+    it('should invite user to org if user is not found in org', async () => {
+      orgFindMembersStub
+        .withArgs({
+          orgDxid: groupSpace.hostDxOrg,
+          id: [groupViewerMembership.user.getEntity().dxid, groupContributorMembership.user.getEntity().dxid],
+        })
+        .resolves({
+          results: [
+            {
+              id: groupContributorMembership.user.getEntity().dxid,
+            },
+            {
+              id: groupViewerMembership.user.getEntity().dxid,
+            },
+          ],
+        })
+      orgFindMembersStub
+        .withArgs({
+          orgDxid: groupSpace.guestDxOrg,
+          id: [groupViewerMembership.user.getEntity().dxid, groupContributorMembership.user.getEntity().dxid],
+        })
+        .resolves({
+          results: [
+            {
+              id: groupContributorMembership.user.getEntity().dxid,
+            },
+          ],
+        })
+
+      const result = await getInstance().syncPlatformAccess(groupSpace.id, [
+        groupViewerMembership.id,
+        groupContributorMembership.id,
+      ])
+      expect(result).to.deep.equal(undefined)
+      expect(orgFindMembersStub.calledTwice).to.be.true()
+      expect(orgFindMembersStub.firstCall.args).to.deep.equal([
+        {
+          orgDxid: groupSpace.hostDxOrg,
+          id: [groupViewerMembership.user.getEntity().dxid, groupContributorMembership.user.getEntity().dxid],
+        },
+      ])
+      expect(orgFindMembersStub.secondCall.args).to.deep.equal([
+        {
+          orgDxid: groupSpace.guestDxOrg,
+          id: [groupViewerMembership.user.getEntity().dxid, groupContributorMembership.user.getEntity().dxid],
+        },
+      ])
+      expect(orgSetMemberAccessStub.calledTwice).to.be.true()
+      expect(orgSetMemberAccessStub.firstCall.args).to.deep.equal([
+        {
+          orgDxId: groupSpace.hostDxOrg,
+          data: {
+            [groupViewerMembership.user.getEntity().dxid]:
+              spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.VIEWER].memberAccess,
+            [groupContributorMembership.user.getEntity().dxid]:
+              spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR].memberAccess,
+          },
+        },
+      ])
+      expect(orgSetMemberAccessStub.secondCall.args).to.deep.equal([
+        {
+          orgDxId: groupSpace.guestDxOrg,
+          data: {
+            [groupContributorMembership.user.getEntity().dxid]:
+              spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR].memberAccess,
+          },
+        },
+      ])
+      expect(inviteUserToOrganizationStub.calledOnce).to.be.true()
+      expect(inviteUserToOrganizationStub.firstCall.args).to.deep.equal([
+        {
+          orgDxId: groupSpace.guestDxOrg,
+          data: {
+            invitee: groupViewerMembership.user.getEntity().dxid,
+            suppressEmailNotification: true,
+            ...spaceMembershipToPlatformAccessProviderMap[SPACE_MEMBERSHIP_ROLE.VIEWER].memberAccess,
+          },
         },
       ])
     })
@@ -759,7 +848,6 @@ describe('SpaceMembershipService', () => {
     return new SpaceMembershipService(
       em,
       userContext,
-      platformClient,
       adminClient,
       spaceMembershipRepository,
       spaceMembershipUpdatePermissionProviderMap,

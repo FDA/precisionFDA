@@ -102,7 +102,7 @@ export type SyncSpacesPermissionsJob = TaskWithAuth & {
 
 export type SyncSpaceMemberAccessJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_SPACE_MEMBER_ACCESS
-  payload: { spaceId: number; memberIds: number[] }
+  payload: { spaceId: number; memberIds: number[]; orgDxIds?: DxId<'org'>[] }
 }
 
 export type SyncSpaceLeadBillToJob = TaskWithAuth & {

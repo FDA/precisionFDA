@@ -9,6 +9,7 @@ import { SpaceMembershipUpdatePermissionProvider } from '@shared/domain/space-me
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { BaseError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
@@ -36,7 +37,7 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
     space: Space,
     currentLeadMembership: SpaceMembership,
     changeableMemberships: SpaceMembership[],
-  ): Promise<SpaceMembership[]> {
+  ): Promise<{ memberships: SpaceMembership[]; pendingOrgAccessUpdates: DxId<'org'>[] }> {
     if (changeableMemberships.length !== 1 && new Set(changeableMemberships.map(m => m.user.id)).size !== 1) {
       throw new Error('Cannot update multiple memberships to lead role at once')
     }
@@ -45,7 +46,7 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
     await this.em.populate(newLead, ['user', 'user.organization'])
     const billTo = newLead.user.getEntity().billTo()
 
-    await this.updateOrgsAccess(space, currentLeadMembership, changeableMemberships)
+    const pendingOrgAccessUpdates = await this.updateOrgsAccess(space, currentLeadMembership, changeableMemberships)
 
     // Update the project's billTo to the new lead's organization
     const project = getProjectDxid(space, currentLeadMembership)
@@ -60,7 +61,7 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
       await this.updateSpaceBillTo(cfProject as DxId<'project'>, billTo as DxId<'org'>)
     }
 
-    return await this.em.transactional(
+    await this.em.transactional(
       async () => {
         currentLeadMembership.role = SPACE_MEMBERSHIP_ROLE.ADMIN
         changeableMemberships.forEach(m => {
@@ -86,24 +87,36 @@ export class SpaceMembershipUpdatePermissionToLeadProvider extends SpaceMembersh
         propagation: TransactionPropagation.REQUIRED,
       },
     )
+    return { memberships: changeableMemberships, pendingOrgAccessUpdates }
   }
 
   override async updateOrgsAccess(
     space: Space,
     membership: SpaceMembership,
     changeableMemberships: SpaceMembership[],
-  ): Promise<void> {
+  ): Promise<DxId<'org'>[]> {
     const orgs = space.getMembershipOrg(membership)
     const promises = orgs.map(org => {
-      return this.adminClient.orgSetMemberAccess({
-        orgDxId: org,
-        data: {
-          [changeableMemberships[0].user.getEntity().dxid]:
-            this.spaceMembershipPlatformAccessToAdminProvider.memberAccess,
-        },
-      })
+      return this.adminClient
+        .orgSetMemberAccess({
+          orgDxId: org,
+          data: {
+            [changeableMemberships[0].user.getEntity().dxid]:
+              this.spaceMembershipPlatformAccessToAdminProvider.memberAccess,
+          },
+        })
+        .catch(async (err: BaseError) => {
+          this.logger.error(`Failed to update platform access for org ${org} and space ${space.id}: ${err.message}`)
+          if (
+            err.message.startsWith('InvalidState (422): Unable to modify membership settings for the following users')
+          ) {
+            return org
+          }
+          throw err
+        })
     })
-    await Promise.all(promises)
+    const pendingOrgAccessUpdates = (await Promise.all(promises)).filter(org => org !== undefined) as DxId<'org'>[]
+    return pendingOrgAccessUpdates
   }
 
   private async updateSpaceBillTo(projectDxid: DxId<'project'>, billTo: DxId<'org'>): Promise<ClassIdResponse> {

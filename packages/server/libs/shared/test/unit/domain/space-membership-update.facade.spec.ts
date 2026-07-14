@@ -105,7 +105,7 @@ describe('SpaceMembershipUpdateFacade', () => {
     persist: persistStub,
     flush: flushStub,
   } as unknown as SqlEntityManager
-  const platformClient = {
+  const adminClient = {
     orgDescribe: orgDescribeStub,
   } as unknown as PlatformClient
   const spaceService = {
@@ -252,7 +252,7 @@ describe('SpaceMembershipUpdateFacade', () => {
     })
 
     it('should deactivate memberships if enabled is false', async () => {
-      updatePermissionStub.resolves(changeableMemberships)
+      updatePermissionStub.resolves({ memberships: changeableMemberships, pendingOrgAccessUpdates: [] })
 
       const facade = getInstance()
       await facade.updateState(space, MEMBER_IDS, false)
@@ -310,7 +310,7 @@ describe('SpaceMembershipUpdateFacade', () => {
     })
 
     it('should activate memberships if enabled is true', async () => {
-      updatePermissionStub.resolves(changeableMemberships)
+      updatePermissionStub.resolves({ memberships: changeableMemberships, pendingOrgAccessUpdates: [] })
 
       const facade = getInstance()
       await facade.updateState(space, MEMBER_IDS, true)
@@ -368,7 +368,7 @@ describe('SpaceMembershipUpdateFacade', () => {
     })
 
     it('should rollback platform changes if update failed', async () => {
-      updatePermissionStub.resolves(changeableMemberships)
+      updatePermissionStub.resolves({ memberships: changeableMemberships, pendingOrgAccessUpdates: [] })
       flushStub.rejects(new Error('Test error'))
 
       const facade = getInstance()
@@ -393,7 +393,7 @@ describe('SpaceMembershipUpdateFacade', () => {
     })
 
     it('should update role for memberships', async () => {
-      updatePermissionStub.resolves(changeableMemberships)
+      updatePermissionStub.resolves({ memberships: changeableMemberships, pendingOrgAccessUpdates: [] })
       const facade = getInstance()
       await facade.updateRole(space, MEMBER_IDS, SPACE_MEMBERSHIP_ROLE.VIEWER)
       expect(getCurrentUserMembershipInSharedSpaceStub.calledOnce).to.be.true()
@@ -456,7 +456,7 @@ describe('SpaceMembershipUpdateFacade', () => {
     })
 
     it('should rollback platform changes if update failed', async () => {
-      updatePermissionStub.resolves(changeableMemberships)
+      updatePermissionStub.resolves({ memberships: changeableMemberships, pendingOrgAccessUpdates: [] })
       flushStub.rejects(new Error('Test error'))
 
       const facade = getInstance()
@@ -465,11 +465,14 @@ describe('SpaceMembershipUpdateFacade', () => {
         'Test error',
       )
       expect(createSyncSpaceMemberAccessTaskStub.calledOnce).to.be.true()
-      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID, MEMBER_IDS])
+      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([
+        GROUP_SPACE_ID,
+        [...MEMBER_IDS, CURRENT_MEMBERSHIP_ID],
+      ])
     })
 
     it('should rollback billTo changes if update failed', async () => {
-      updatePermissionStub.resolves(changeableMemberships)
+      updatePermissionStub.resolves({ memberships: changeableMemberships, pendingOrgAccessUpdates: [] })
       flushStub.rejects(new Error('Test error'))
 
       const facade = getInstance()
@@ -478,9 +481,27 @@ describe('SpaceMembershipUpdateFacade', () => {
         'Test error',
       )
       expect(createSyncSpaceMemberAccessTaskStub.calledOnce).to.be.true()
-      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([GROUP_SPACE_ID, [MEMBER_IDS[0]]])
+      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([
+        GROUP_SPACE_ID,
+        [MEMBER_IDS[0], CURRENT_MEMBERSHIP_ID],
+      ])
       expect(createSyncSpaceLeadBillToTaskStub.calledOnce).to.be.true()
       expect(createSyncSpaceLeadBillToTaskStub.firstCall.args).to.deep.equal([membership.id])
+    })
+
+    it('should createSyncSpaceMemberAccessTask if pendingOrgAccessUpdates is not empty', async () => {
+      updatePermissionStub.resolves({
+        memberships: changeableMemberships,
+        pendingOrgAccessUpdates: ['org-pfda..test'],
+      })
+      const facade = getInstance()
+      await facade.updateRole(space, MEMBER_IDS, SPACE_MEMBERSHIP_ROLE.VIEWER)
+      expect(createSyncSpaceMemberAccessTaskStub.calledOnce).to.be.true()
+      expect(createSyncSpaceMemberAccessTaskStub.firstCall.args).to.deep.equal([
+        GROUP_SPACE_ID,
+        MEMBER_IDS.concat(CURRENT_MEMBERSHIP_ID),
+        ['org-pfda..test'],
+      ])
     })
   })
 
@@ -651,7 +672,7 @@ describe('SpaceMembershipUpdateFacade', () => {
   function getInstance(): SpaceMembershipUpdateFacade {
     return new SpaceMembershipUpdateFacade(
       em,
-      platformClient,
+      adminClient,
       userContext,
       spaceService,
       spaceMembershipService,

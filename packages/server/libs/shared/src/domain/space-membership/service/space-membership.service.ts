@@ -1,5 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { getOppositeOrgDxid } from '@shared/domain/space/space.helper'
@@ -29,7 +30,6 @@ export class SpaceMembershipService {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly userContext: UserContext,
-    private readonly platformClient: PlatformClient,
     @Inject(ADMIN_PLATFORM_CLIENT)
     private readonly adminClient: PlatformClient,
     private readonly spaceMembershipRepository: SpaceMembershipRepository,
@@ -107,7 +107,7 @@ export class SpaceMembershipService {
     currentMembership: SpaceMembership,
     membershipIds: number[],
     targetPermission: SpaceMembershipPermission,
-  ): Promise<SpaceMembership[]> {
+  ): Promise<{ memberships: SpaceMembership[]; pendingOrgAccessUpdates: DxId<'org'>[] }> {
     const provider = this.spaceMembershipUpdatePermissionProviderMap[targetPermission]
     await provider.validateUpdaterRole(currentMembership)
 
@@ -121,8 +121,8 @@ export class SpaceMembershipService {
       throw new InvalidStateError('No memberships can be changed')
     }
 
-    await provider.update(space, currentMembership, changeableMemberships)
-    return changeableMemberships
+    const { pendingOrgAccessUpdates } = await provider.update(space, currentMembership, changeableMemberships)
+    return { memberships: changeableMemberships, pendingOrgAccessUpdates }
   }
 
   async changeLeadRole(
@@ -212,38 +212,61 @@ export class SpaceMembershipService {
       }
     }
     const leadProvider = this.spaceMembershipUpdatePermissionProviderMap[SPACE_MEMBERSHIP_ROLE.LEAD]
-    return await leadProvider.update(sharedSpace, currentLeadMember, allLeadMemberships)
+    const { memberships: updatedMemberships } = await leadProvider.update(
+      sharedSpace,
+      currentLeadMember,
+      allLeadMemberships,
+    )
+    return updatedMemberships
   }
 
-  async syncPlatformAccess(spaceId: number, memberIds: number[]): Promise<void> {
+  async syncPlatformAccess(spaceId: number, memberIds: number[], orgDxIds?: DxId<'org'>[]): Promise<void> {
     this.logger.log(`Syncing platform access for space ${spaceId} and members ${memberIds}`)
-    if (memberIds.length === 0) {
+    const { space, memberships } = await this.findMembershipsAndSpace(spaceId, memberIds)
+
+    if (!space || memberships.length === 0) {
+      this.logger.warn(
+        `No memberships or space found for space ${spaceId} and members ${memberIds}, skipping syncing platform access`,
+      )
       return
     }
 
-    const memberships = await this.spaceMembershipRepository.find(
-      {
-        id: { $in: memberIds },
-        spaces: {
-          state: SPACE_STATE.ACTIVE,
-          id: spaceId,
-        },
-      },
-      {
-        populate: ['user', 'spaces'],
-      },
-    )
+    const dxUsers = memberships.map(m => m.user.getEntity().dxid)
+    const orgs = space.getMembershipOrg(memberships[0]).filter(org => !orgDxIds || orgDxIds.includes(org))
+    const promises = orgs.map(async org => {
+      const findMembership = await this.adminClient.orgFindMembers({
+        orgDxid: org,
+        id: dxUsers,
+      })
+      const existingDxUsers = new Set(findMembership.results.map(r => r.id))
+      const missingMemberships = memberships.filter(m => !existingDxUsers.has(m.user.getEntity().dxid))
+      const existingMemberships = memberships.filter(m => existingDxUsers.has(m.user.getEntity().dxid))
 
-    if (memberships.length === 0) {
-      this.logger.warn(`No memberships found for space ${spaceId} and members ${memberIds}`)
-      return
-    }
+      await Promise.all(
+        missingMemberships.map(membership =>
+          this.adminClient.inviteUserToOrganization({
+            orgDxId: org,
+            data: {
+              invitee: membership.user.getEntity().dxid,
+              suppressEmailNotification: true,
+              ...(membership.active
+                ? this.spaceMembershipToPlatformAccessProviderMap[membership.role].memberAccess
+                : this.spaceMembershipToPlatformAccessProviderMap.disable.memberAccess),
+            },
+          }),
+        ),
+      )
 
-    const space = memberships[0].spaces.getItems().find(s => s.id === spaceId)
-    const membershipAccessPayload = this.spaceMembershipUpdatePermissionHelper.buildMembershipAccessPayload(memberships)
-    const orgs = space.getMembershipOrg(memberships[0])
-    const promises = orgs.map(org => {
-      return this.platformClient.orgSetMemberAccess({
+      if (existingMemberships.length === 0) {
+        this.logger.warn(
+          `No existing memberships found in org ${org} for space ${spaceId} and members ${memberIds}, skipping updating platform access`,
+        )
+        return
+      }
+
+      const membershipAccessPayload =
+        this.spaceMembershipUpdatePermissionHelper.buildMembershipAccessPayload(existingMemberships)
+      return this.adminClient.orgSetMemberAccess({
         orgDxId: org,
         data: membershipAccessPayload,
       })
@@ -302,5 +325,35 @@ export class SpaceMembershipService {
         }
       }
     }
+  }
+
+  private async findMembershipsAndSpace(
+    spaceId: number,
+    membershipIds: number[],
+  ): Promise<{ space: Space | null; memberships: SpaceMembership[] }> {
+    if (membershipIds.length === 0) {
+      return { space: null, memberships: [] }
+    }
+
+    const memberships = await this.spaceMembershipRepository.find(
+      {
+        id: { $in: membershipIds },
+        spaces: {
+          state: SPACE_STATE.ACTIVE,
+          id: spaceId,
+        },
+      },
+      {
+        populate: ['user', 'spaces'],
+      },
+    )
+
+    if (memberships.length === 0) {
+      this.logger.warn(`No memberships found for space ${spaceId} and members ${membershipIds}`)
+      return { space: null, memberships: [] }
+    }
+
+    const space = memberships[0].spaces.getItems().find(s => s.id === spaceId) ?? null
+    return { space, memberships }
   }
 }

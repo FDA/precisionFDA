@@ -2,12 +2,11 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Logger } from '@nestjs/common'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Space } from '@shared/domain/space/space.entity'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SpaceMembershipPlatformAccessProvider } from '@shared/domain/space-membership/providers/platform-access/space-membership-platform-access.provider'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { BaseError, PermissionError } from '@shared/errors'
+import { BaseError, InvalidStateError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 
@@ -31,41 +30,46 @@ export abstract class SpaceMembershipUpdatePermissionProvider {
     }
   }
 
+  /**
+   * Updates memberships and their organization access.
+   * @returns Object containing:
+   *   - memberships: The updated membership entities
+   *   - pendingOrgAccessUpdates: Organization IDs where access updates failed and need retry
+   */
   async update(
     space: Space,
     currentMembership: SpaceMembership,
     changeableMemberships: SpaceMembership[],
-  ): Promise<SpaceMembership[]> {
+  ): Promise<{ memberships: SpaceMembership[]; pendingOrgAccessUpdates: DxId<'org'>[] }> {
     await this.updateMemberships(changeableMemberships)
-    await this.updateOrgsAccess(space, currentMembership, changeableMemberships)
-    return changeableMemberships
+    const pendingOrgAccessUpdates = await this.updateOrgsAccess(space, currentMembership, changeableMemberships)
+    return { memberships: changeableMemberships, pendingOrgAccessUpdates }
   }
 
+  /**
+   * Updates organization access for memberships across all relevant orgs.
+   * @returns Array of organization IDs where access updates failed and need to be retried later
+   */
   protected async updateOrgsAccess(
     space: Space,
     membership: SpaceMembership,
     changeableMemberships: SpaceMembership[],
-  ): Promise<void> {
+  ): Promise<DxId<'org'>[]> {
     const orgs = space.getMembershipOrg(membership)
     const promises = orgs.map(org => {
-      return this.updateOrgAccess(org, changeableMemberships).catch((err: BaseError) => {
+      return this.updateOrgAccess(org, changeableMemberships).catch(async (err: BaseError) => {
+        this.logger.error(`Failed to update platform access for org ${org} and space ${space.id}: ${err.message}`)
         if (
-          space.type === SPACE_TYPE.GROUPS &&
+          err.message.startsWith('InvalidState (422): Unable to modify membership settings for the following users') ||
           err.message === `PermissionDenied (401): Administrator access to ${org} required to perform this operation`
         ) {
-          // Log the error and continue with other orgs
-          this.logger.error(`Failed to update platform access for org ${org} and space ${space.id}: ${err.message}`)
-          this.logger.error(
-            'This happens for legacy orgs where the leads were not invited to the reverse org when the org was created',
-          )
-          // TODO(PFDA-6821): create task to sync access for failure org by utilizing admin token
-
-          return
+          return org
         }
         throw err
       })
     })
-    await Promise.all(promises)
+    const pendingOrgAccessUpdates = (await Promise.all(promises)).filter(org => org !== undefined) as DxId<'org'>[]
+    return pendingOrgAccessUpdates
   }
 
   protected async updateOrgAccess(org: DxId<'org'>, memberships: SpaceMembership[]): Promise<void> {

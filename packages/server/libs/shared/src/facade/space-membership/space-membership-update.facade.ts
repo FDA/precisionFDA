@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/mysql'
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
@@ -22,6 +22,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ClientRequestError, InternalError, InvalidStateError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 
 @Injectable()
@@ -31,7 +32,8 @@ export class SpaceMembershipUpdateFacade {
 
   constructor(
     private readonly em: EntityManager,
-    private readonly platformClient: PlatformClient,
+    @Inject(ADMIN_PLATFORM_CLIENT)
+    private readonly adminClient: PlatformClient,
     private readonly userContext: UserContext,
     private readonly spaceService: SpaceService,
     private readonly spaceMembershipService: SpaceMembershipService,
@@ -59,7 +61,7 @@ export class SpaceMembershipUpdateFacade {
     try {
       let activityType: SPACE_EVENT_ACTIVITY_TYPE
       let action: 'disable' | 'enable'
-      const updatedMemberships = await this.em.transactional(async () => {
+      const { memberships: updatedMemberships, pendingOrgAccessUpdates } = await this.em.transactional(async () => {
         if (enabled) {
           activityType = SPACE_EVENT_ACTIVITY_TYPE.membership_enabled
           action = 'enable'
@@ -67,18 +69,35 @@ export class SpaceMembershipUpdateFacade {
           activityType = SPACE_EVENT_ACTIVITY_TYPE.membership_disabled
           action = 'disable'
         }
-        const updated = await this.spaceMembershipService.updatePermission(space, membership, memberIds, action)
+        const { memberships, pendingOrgAccessUpdates } = await this.spaceMembershipService.updatePermission(
+          space,
+          membership,
+          memberIds,
+          action,
+        )
 
-        await this.createSpaceEvents(updated, action, activityType)
-        return updated
+        await this.createSpaceEvents(memberships, action, activityType)
+        return { memberships, pendingOrgAccessUpdates }
       })
 
       await this.sendUpdateEmail(updatedMemberships, space.id, SPACE_EVENT_ACTIVITY_TYPE[activityType], action)
+
+      if (pendingOrgAccessUpdates.length > 0) {
+        // This happens for legacy orgs where the leads were not invited to the reverse org when the org was created
+        await this.maintenanceQueueJobProducer.createSyncSpaceMemberAccessTask(
+          space.id,
+          memberIds.concat(membership.id),
+          pendingOrgAccessUpdates,
+        )
+      }
+
       return updatedMemberships
     } catch (error: unknown) {
       await this.maintenanceQueueJobProducer.createSyncSpaceMemberAccessTask(space.id, memberIds)
       if (error instanceof ClientRequestError) {
-        throw new InternalError('Failed to update space membership')
+        throw new InternalError(
+          'An unexpected error occurred. Please try again and contact support if the issue persists.',
+        )
       } else {
         throw error
       }
@@ -93,16 +112,15 @@ export class SpaceMembershipUpdateFacade {
 
     try {
       const activityType = SPACE_EVENT_ACTIVITY_TYPE.membership_changed
-      const updatedMemberships = await this.em.transactional(async () => {
-        const updatedMemberships = await this.spaceMembershipService.updatePermission(
+      const { memberships: updatedMemberships, pendingOrgAccessUpdates } = await this.em.transactional(async () => {
+        const { memberships, pendingOrgAccessUpdates } = await this.spaceMembershipService.updatePermission(
           space,
           membership,
           memberIds,
           targetRole as SPACE_MEMBERSHIP_ROLE,
         )
-
-        await this.createSpaceEvents(updatedMemberships, targetRole, activityType)
-        return updatedMemberships
+        await this.createSpaceEvents(memberships, targetRole, activityType)
+        return { memberships, pendingOrgAccessUpdates }
       })
 
       await this.sendUpdateEmail(
@@ -111,14 +129,28 @@ export class SpaceMembershipUpdateFacade {
         SPACE_EVENT_ACTIVITY_TYPE[activityType],
         SPACE_MEMBERSHIP_ROLE[targetRole],
       )
+
+      if (pendingOrgAccessUpdates.length > 0) {
+        this.logger.error(
+          'This happens for legacy orgs where the leads were not invited to the reverse org when the org was created',
+        )
+        await this.maintenanceQueueJobProducer.createSyncSpaceMemberAccessTask(
+          space.id,
+          memberIds.concat(membership.id),
+          pendingOrgAccessUpdates,
+        )
+      }
+
       return updatedMemberships
     } catch (error: unknown) {
-      await this.maintenanceQueueJobProducer.createSyncSpaceMemberAccessTask(space.id, memberIds)
+      await this.maintenanceQueueJobProducer.createSyncSpaceMemberAccessTask(space.id, memberIds.concat(membership.id))
       if (targetRole === SPACE_MEMBERSHIP_ROLE.LEAD) {
         await this.maintenanceQueueJobProducer.createSyncSpaceLeadBillToTask(membership.id)
       }
       if (error instanceof ClientRequestError) {
-        throw new InternalError('Failed to update space membership')
+        throw new InternalError(
+          'An unexpected error occurred. Please try again and contact support if the issue persists.',
+        )
       } else {
         throw error
       }
@@ -208,7 +240,7 @@ export class SpaceMembershipUpdateFacade {
   }
 
   private async checkAdminMembership(org: DxId<'org'>): Promise<boolean> {
-    const orgDescribe = await this.platformClient.orgDescribe({
+    const orgDescribe = await this.adminClient.orgDescribe({
       dxid: org,
       defaultFields: false,
       fields: {

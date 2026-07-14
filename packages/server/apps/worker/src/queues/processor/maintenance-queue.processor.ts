@@ -11,7 +11,7 @@ import { JobRunningNotificationFacade } from '@shared/facade/job/job-running-not
 import { JobStaleCheckFacade } from '@shared/facade/job/job-stale-check.facade'
 import { JobSyncTaskCheckFacade } from '@shared/facade/job/job-sync-task-check.facade'
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
-import { SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
+import { SyncSpaceMemberAccessJob, SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
 import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 
@@ -55,9 +55,9 @@ export class MaintenanceQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_SPACE_MEMBER_ACCESS)
-  async syncSpaceMemberAccess(job: Job): Promise<void> {
-    const { spaceId, memberIds } = job.data.payload
-    await this.spaceMembershipService.syncPlatformAccess(spaceId, memberIds)
+  async syncSpaceMemberAccess(job: Job<SyncSpaceMemberAccessJob>): Promise<void> {
+    const { spaceId, memberIds, orgDxIds } = job.data.payload
+    await this.spaceMembershipService.syncPlatformAccess(spaceId, memberIds, orgDxIds)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_SPACE_LEAD_BILLTO)
