@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "/health", to: "health#show"
+
   get "data_portals/index"
 
   default_url_options Rails.configuration.action_mailer.default_url_options

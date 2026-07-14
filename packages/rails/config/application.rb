@@ -37,6 +37,9 @@ module PrecisionFda
 
     config.sass.preferred_syntax = :sass
 
+    # Exclude /health from the force_ssl redirect so ECS health checks work
+    config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/health" } } }
+
     config.assets.precompile << "next_application.js"
 
     config.middleware.move_after(ActionDispatch::Session::CookieStore, Rails::Rack::Logger)

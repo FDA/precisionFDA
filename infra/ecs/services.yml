@@ -88,6 +88,12 @@ services:
       serviceConnect:
         securityGroups:
           - name: web-sg
+      healthCheck:
+        command: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+        interval: 30
+        timeout: 5
+        retries: 3
+        startPeriod: 60
       xray_enabled: true
       secrets:
         - ADMIN_TOKEN
@@ -127,6 +133,12 @@ services:
       serviceConnect:
         securityGroups:
           - name: gsrs-web-sg
+      healthCheck:
+        command: ["CMD-SHELL", "curl -f http://localhost:8080/frontend/substances/ui || exit 1"]
+        interval: 30
+        timeout: 5
+        retries: 3
+        startPeriod: 120
 
       volumes:
         - name: read-only-base-index
