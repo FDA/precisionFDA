@@ -46,8 +46,22 @@ module Sortable
   # @param array input arrays of objects for sort.
   # @return sorted array.
   def sort_array_by_fields(array, default_order = "launched_on")
-    sort_by = self.class::SORT_FIELDS[params[:order_by] || default_order]
-    array = array.sort(&sort_by)
+    sort_key = params[:order_by] || default_order
+    sort_by = self.class::SORT_FIELDS[sort_key]
+
+    # If no comparator exists for this sort key, return unsorted to avoid
+    # ArgumentError from Ruby's Array#sort when objects don't implement <=>.
+    return array unless sort_by
+
+    # Wrap each comparison: <=> can return nil when either side is nil or
+    # incompatible, which would raise ArgumentError. Fall back to 0 (equal).
+    array = array.sort do |left, right|
+      begin
+        sort_by.call(left, right) || 0
+      rescue ArgumentError, NoMethodError
+        0
+      end
+    end
 
     order_direction(params[:order_dir]) != Sortable::DIRECTION_ASC ? array.reverse : array
   end

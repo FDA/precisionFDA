@@ -1,7 +1,13 @@
-import { ColumnSort } from '@tanstack/react-table'
-import { useState } from 'react'
-import { useSearchParams } from 'react-router'
-import { columnSortToParams, OrderDir, paramsToColumnSort, SortByParams, SortParams } from '../types/sorting'
+import type { ColumnSort } from '@tanstack/react-table'
+import { useCallback, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
+import {
+  columnSortToParams,
+  type OrderDir,
+  paramsToColumnSort,
+  type SortByParams,
+  type SortParams,
+} from '@/types/sorting'
 
 export function useOrderByState({
   defaultOrder,
@@ -36,38 +42,45 @@ export function useOrderByParams({
   defaultOrder?: SortParams
   onSetSortBy?: (cols: ColumnSort[]) => void
 }): SortByParams {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
+  const navigate = useNavigate()
 
-  const sortByParam: SortParams = {
-    order_by: searchParams.get('order_by') || defaultOrder?.order_by,
-    order_dir: (searchParams.get('order_dir') as OrderDir) || defaultOrder?.order_dir,
-  }
+  // Read sort params from the current location (kept in sync by React Router)
+  const sortByParam: SortParams = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search)
+    return {
+      order_by: searchParams.get('order_by') || defaultOrder?.order_by,
+      order_dir: (searchParams.get('order_dir') as OrderDir) || defaultOrder?.order_dir,
+    }
+  }, [location.search, defaultOrder?.order_by, defaultOrder?.order_dir])
 
-  const handleSetSortBy = (cols: ColumnSort[]) => {
-    if (onSetSortBy) onSetSortBy(cols)
-    const newSort = columnSortToParams(cols)
+  const handleSetSortBy = useCallback(
+    (cols: ColumnSort[]) => {
+      if (onSetSortBy) onSetSortBy(cols)
+      const newSort = columnSortToParams(cols)
 
-    setSearchParams(
-      prev => {
-        const newParams = new URLSearchParams(prev)
+      // Read directly from window.location to avoid stale React Router state –
+      // this is the same pattern used by useFilterParams so both hooks stay
+      // consistent and never overwrite each other's changes.
+      const currentUrl = new URL(window.location.href)
+      const newParams = new URLSearchParams(currentUrl.search)
 
-        if (newSort.order_by) {
-          newParams.set('order_by', newSort.order_by)
-        } else {
-          newParams.delete('order_by')
-        }
+      if (newSort.order_by) {
+        newParams.set('order_by', newSort.order_by)
+      } else {
+        newParams.delete('order_by')
+      }
 
-        if (newSort.order_dir) {
-          newParams.set('order_dir', newSort.order_dir)
-        } else {
-          newParams.delete('order_dir')
-        }
+      if (newSort.order_dir) {
+        newParams.set('order_dir', newSort.order_dir)
+      } else {
+        newParams.delete('order_dir')
+      }
 
-        return newParams
-      },
-      { replace: false },
-    )
-  }
+      navigate(`${currentUrl.pathname}?${newParams.toString()}`, { replace: true })
+    },
+    [navigate, onSetSortBy],
+  )
 
   const sortBy = paramsToColumnSort(sortByParam)
 

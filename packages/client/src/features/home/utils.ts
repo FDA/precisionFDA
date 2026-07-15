@@ -72,6 +72,9 @@ export function renameFilterKeys(filters: IFilter[]) {
 const customKeyMappings = {
   file_size: 'size',
   created_at_date_time: 'created_at',
+  appTitle: 'app_title',
+  launchedBy: 'username',
+  launchedOn: 'launched_on',
   launched_by: 'username',
   launched_on: 'created_at',
   dx_instance_class: 'instance',

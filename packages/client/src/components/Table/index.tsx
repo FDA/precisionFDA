@@ -3,6 +3,7 @@ import {
   type ColumnFiltersState,
   type ColumnSizingState,
   type ExpandedState,
+  type GroupingState,
   getCoreRowModel,
   getExpandedRowModel,
   getFacetedMinMaxValues,
@@ -12,7 +13,6 @@ import {
   getGroupedRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  type GroupingState,
   type OnChangeFn,
   type Row,
   type RowSelectionState,
@@ -20,8 +20,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from '@tanstack/react-table'
-import React, { type DragEventHandler, useMemo } from 'react'
-
+import React, { type DragEventHandler, useEffectEvent, useMemo } from 'react'
 import CustomTable from './components/CustomTable'
 import { TableStyles } from './components/table.styles'
 import { useComponentWidth } from './useComponentWidth'
@@ -88,19 +87,22 @@ function Table<T extends { id: number | string }>({
 
   const handleColumnFiltersChange: OnChangeFn<ColumnFiltersState> = updater => {
     if (typeof updater === 'function') {
-      if(setColumnFilters) setColumnFilters(updater(columnFilters))
+      if (setColumnFilters) setColumnFilters(updater(columnFilters))
     }
   }
 
-  const handleColumnSortChange: OnChangeFn<SortingState> = updater => {
+  const handleColumnSortChange: OnChangeFn<SortingState> = useEffectEvent(updater => {
+    if (!setColumnSortBy) return
     if (typeof updater === 'function') {
-      if(setColumnSortBy) setColumnSortBy(updater(columnSortBy))
+      setColumnSortBy(updater(columnSortBy))
+    } else {
+      setColumnSortBy(updater)
     }
-  }
+  })
 
   const handleSelectedRowsChange: OnChangeFn<RowSelectionState> = updater => {
     if (typeof updater === 'function') {
-      if(setSelectedRows) setSelectedRows(updater(rowSelection))
+      if (setSelectedRows) setSelectedRows(updater(rowSelection))
     }
   }
 
@@ -108,7 +110,7 @@ function Table<T extends { id: number | string }>({
     if (typeof updater === 'function') {
       const resolvedUpdater = updater(liveColumnSizing)
       setLiveColumnSizing(resolvedUpdater)
-      if(setColumnSizing) setColumnSizing(resolvedUpdater)
+      if (setColumnSizing) setColumnSizing(resolvedUpdater)
     }
   }
 
@@ -120,18 +122,17 @@ function Table<T extends { id: number | string }>({
 
   const handleSetColumnVisibility: OnChangeFn<VisibilityState> = updater => {
     if (typeof updater === 'function') {
-      if(setColumnVisibility) {
+      if (setColumnVisibility) {
         const resolvedUpdater = updater(columnVisibility)
         setColumnVisibility(resolvedUpdater)
       }
     }
   }
 
-
   const table = useReactTable({
     data,
     columns,
-    getSubRows: row => subRowKey && row[subRowKey] as [],
+    getSubRows: row => subRowKey && (row[subRowKey] as []),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -174,11 +175,11 @@ function Table<T extends { id: number | string }>({
   // Fix empty space with column header with calculated width
   const { containerRef, containerWidth = 50 } = useComponentWidth()
   const sum = table
-  .getVisibleFlatColumns()
-  .map(c => c.getSize())
-  .reduce((accumulator, value) => {
-    return accumulator + value
-  }, 0)
+    .getVisibleFlatColumns()
+    .map(c => c.getSize())
+    .reduce((accumulator, value) => {
+      return accumulator + value
+    }, 0)
   const spacerWidth = useMemo(() => {
     if (!columnVisibility || !columnSizing) {
       return 0

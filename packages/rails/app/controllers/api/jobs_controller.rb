@@ -17,11 +17,31 @@ module Api
 
     ORDER_FIELDS = { # we use this order-fields Hash for simple filtering (JobService::JobFilter)
       "created_at" => %w(created_at),
+      # launched_on is special-cased in `order_from_params` to use a single
+      # COALESCE(analyses.created_at, jobs.created_at) expression so SQL ordering
+      # matches the value displayed in `render_jobs_list`. The marker column name
+      # below is only used to keep the key recognized as a valid order option.
+      "launched_on" => %w(launched_on),
       "name" => %w(name),
       "app_title" => %w(apps.title),
       "username" => %w(users.first_name users.last_name),
       "workflow" => %w(workflows.title),
     }.freeze
+
+    # Subset of ORDER_FIELDS keys whose SQL ordering preserves the
+    # "jobs of the same analysis are adjacent" invariant that `render_jobs_list`
+    # relies on to group workflow executions. Any other key must be sorted in
+    # memory after grouping (see `should_sort_in_memory?`).
+    #
+    # NOTE: `created_at` is intentionally NOT listed here. SQL-ordering by
+    # `jobs.created_at` would interleave jobs from different analyses and emit
+    # the same workflow execution as multiple partial rows. The in-memory
+    # `SORT_FIELDS["created_at"]` comparator (which uses `created_at_date_time`,
+    # available on both JobSerializer and WorkflowSerializer) is used instead,
+    # while SQL ordering falls back to `default_chronological_order`
+    # (COALESCE(analyses.created_at, jobs.created_at)) to keep analysis jobs
+    # adjacent before grouping.
+    SQL_SAFE_ORDER_KEYS = %w(launched_on).freeze
 
     SORT_FIELDS = { # additional sorting for grouped and serialized values (see render_jobs_list)
       "created_at" => ->(left, right) { left.created_at_date_time <=> right.created_at_date_time },
@@ -60,6 +80,7 @@ module Api
           jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
 
           jobs = JobService::JobsFilter.call(jobs, params[:filters])
+          jobs = jobs.order(order_params) unless params[:order_by_property]
         end
 
         render_jobs_list(jobs)
@@ -75,6 +96,7 @@ module Api
         jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
 
         jobs = JobService::JobsFilter.call(jobs, params[:filters])
+        jobs = jobs.order(order_params) unless params[:order_by_property]
 
         render_jobs_list(jobs)
       end
@@ -94,6 +116,7 @@ module Api
 
       jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      jobs = jobs.order(order_params) unless params[:order_by_property]
 
       render_jobs_list(jobs)
     end
@@ -113,6 +136,7 @@ module Api
       jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      jobs = jobs.order(order_params) unless params[:order_by_property]
 
       render_jobs_list(jobs)
     end
@@ -181,6 +205,7 @@ module Api
       jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      jobs = jobs.order(order_params) unless params[:order_by_property]
 
       render_jobs_list(jobs)
     rescue StandardError => e
@@ -308,6 +333,7 @@ module Api
 
           jobs = JobService::JobsFilter.call(jobs, params[:filters])
         end
+
         render json: jobs, each_serializer: CliJobSerializer
       elsif params[:public_scope] == "true"
         # Fetches all 'public' jobs.
@@ -339,15 +365,84 @@ module Api
 
     private
 
-    # Default to reverse chronological order unless overriden by params
+    # Default to reverse chronological order unless overriden by params.
+    # When a sort key is requested that we sort in memory (after workflow
+    # grouping in `render_jobs_list`), we still need a SQL ordering that keeps
+    # jobs of the same analysis adjacent, otherwise grouping would emit one
+    # workflow execution as several partial rows. Fall back to the displayed
+    # launched_on expression for that purpose.
     def order_params
-      if params[:order_by] == "energy"
-        energy_order_sql
-      elsif params[:order_by]
-        order_from_params
-      else
-        { created_at: Sortable::DIRECTION_DESC }
+      # NOTE: `energy` is intentionally not short-circuited to `energy_order_sql`
+      # here. The `render_jobs_list` flows group consecutive jobs by analysis,
+      # so applying per-job cost ordering in SQL can interleave jobs from
+      # different analyses and emit one workflow execution as multiple partial
+      # rows. Instead, fall through to `default_chronological_order` (which
+      # keeps analysis jobs adjacent) and let `should_sort_in_memory?` sort the
+      # already-grouped serialized rows via `SORT_FIELDS["energy"]`.
+      requested_key = params[:order_by].to_s
+      if requested_key.present? && !self.class::SQL_SAFE_ORDER_KEYS.include?(requested_key)
+        return default_chronological_order
       end
+
+      order = order_from_params
+      order.presence || default_chronological_order
+    end
+
+    # SQL ordering used for the displayed `launched_on` column and as the
+    # grouping-preserving default. Matches `job.analysis&.created_at || job.created_at`
+    # used in `render_jobs_list` and is therefore stable across pagination.
+    #
+    # An `analyses.id` tie-breaker is added before `jobs.id` so that when two
+    # different analyses share the same `created_at` timestamp, their jobs
+    # never interleave. Without it, jobs from analysis A and analysis B could
+    # be ordered A1, B1, A2, B2 by `jobs.id` alone, causing `render_jobs_list`
+    # (which only merges *consecutive* same-analysis jobs) to emit each
+    # workflow execution as multiple partial rows. NULL `analyses.id` values
+    # (standalone jobs) cluster together, preserving existing behavior.
+    def default_chronological_order
+      Arel.sql(
+        "COALESCE(analyses.created_at, jobs.created_at) #{Sortable::DIRECTION_DESC}, " \
+        "analyses.id #{Sortable::DIRECTION_DESC}, " \
+        "jobs.id #{Sortable::DIRECTION_DESC}",
+      )
+    end
+
+    # Use JobsController ORDER_FIELDS instead of Sortable concern defaults.
+    # The concern map does not include execution-specific keys (e.g. launched_on/app_title).
+    def order_from_params(default_order = "launched_on")
+      order_fields = self.class::ORDER_FIELDS
+      order_field_values = order_fields.values.flatten
+      order_by_key = params[:order_by].presence_in(order_fields.keys) || default_order
+      order_dir = order_direction(params[:order_dir])
+
+      # launched_on is rendered as COALESCE(analyses.created_at, jobs.created_at);
+      # use the same expression for SQL ordering so that the displayed value and
+      # the row order match exactly. `analyses.id` is added as a tie-breaker
+      # before `jobs.id` so analyses sharing the same `created_at` do not
+      # interleave their jobs (see `default_chronological_order`).
+      if order_by_key == "launched_on"
+        return Arel.sql(
+          "COALESCE(analyses.created_at, jobs.created_at) #{order_dir}, " \
+          "analyses.id #{order_dir}, " \
+          "jobs.id #{order_dir}",
+        )
+      end
+
+      order_query(order_fields[order_by_key], order_dir, order_field_values)
+    end
+
+    # Most list ordering now happens in SQL. We only sort in memory for sort
+    # keys whose SQL ordering would either be missing (e.g. `location` is not in
+    # ORDER_FIELDS) or would break the analysis grouping performed by
+    # `render_jobs_list` (e.g. `name`, `app_title`, `username`).
+    def should_sort_in_memory?
+      return false if params[:order_by_property]
+      return false if params[:order_by].blank?
+
+      sort_key = params[:order_by].to_s
+      return false unless self.class::SORT_FIELDS.key?(sort_key)
+
+      !self.class::SQL_SAFE_ORDER_KEYS.include?(sort_key)
     end
 
     def create_property_order
@@ -436,8 +531,7 @@ module Api
         end
       end.flatten!
 
-      workflow_with_jobs = sort_array_by_fields(workflow_with_jobs) unless params[:order_by_property]
-
+      workflow_with_jobs = sort_array_by_fields(workflow_with_jobs) if should_sort_in_memory?
       page_array = paginate_array(workflow_with_jobs)
       page_meta = pagination_meta(workflow_with_jobs.count)
 
