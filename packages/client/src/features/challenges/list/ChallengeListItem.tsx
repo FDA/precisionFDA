@@ -1,10 +1,13 @@
+import { TZDate } from '@date-fns/tz'
 import { format } from 'date-fns'
-import React from 'react'
+import { enUS } from 'date-fns/locale'
 import { Link } from 'react-router'
 import styled from 'styled-components'
+import { canonicalTimeZoneId } from '@/utils/timezones'
 import { Content, ItemBody } from '../../../components/Public/public-layout.styles'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { DateArea, ItemImage, ViewDetailsButton } from '../challenges.styles'
-import { Challenge } from '../types'
+import type { Challenge } from '../types'
 import { getChallengeTimeRemaining, getTimeStatus } from '../util'
 
 const StyledChallengeListItem = styled.div`
@@ -26,23 +29,28 @@ export const Title = styled(Link)`
 `
 
 export const ChallengeListItem = ({ challenge }: { challenge: Challenge }) => {
+  const user = useAuthUser()
+  const preferredTimeZone = canonicalTimeZoneId(user?.time_zone) || new Intl.DateTimeFormat().resolvedOptions().timeZone
+
   return (
     <StyledChallengeListItem>
       <ItemImage $timeStatus={getTimeStatus(challenge.startAt, challenge.endAt)}>
         <img width="100%" src={challenge.cardImageUrl} alt="sf" />
       </ItemImage>
       <ItemBody>
-        <Title to={`/challenges/${challenge.id}`} data-testid="challenge-title">{challenge.name}</Title>
+        <Title to={`/challenges/${challenge.id}`} data-testid="challenge-title">
+          {challenge.name}
+        </Title>
         <DateArea>
           <span className="challenge-date-label">Starts</span>
-        <span className="challenge-date">
-          {format(challenge.startAt, 'MM/dd/yyyy')}
-        </span>
+          <span className="challenge-date">
+            {format(new TZDate(challenge.startAt, preferredTimeZone), 'MM/dd/yyyy', { locale: enUS })}
+          </span>
           <span>&rarr;</span>
           <span className="challenge-date-label">Ends</span>
-        <span className="challenge-date">
-          {format(challenge.endAt, 'MM/dd/yyyy')}{' '}
-        </span>
+          <span className="challenge-date">
+            {format(new TZDate(challenge.endAt, preferredTimeZone), 'MM/dd/yyyy', { locale: enUS })}{' '}
+          </span>
           <div className="challenge-date-remaining">
             {getChallengeTimeRemaining({
               startAt: challenge.startAt,

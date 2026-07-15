@@ -138,7 +138,7 @@ export class AppGetDTO {
       addedBy: user.dxuser,
       addedByFullname: user.fullName,
       createdAt: TimeUtils.formatShortDate(app.createdAt),
-      createdAtDateTime: TimeUtils.formatAtTime(app.createdAt),
+      createdAtDateTime: TimeUtils.formatDateTimeUTC(app.createdAt),
       updatedAt: TimeUtils.formatAtTime(app.updatedAt),
       location: computeLocation(app, space),
       readme: app.readme,

@@ -12,6 +12,7 @@ import { PencilIcon } from '@/components/icons/PencilIcon'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
 import { PageContainer } from '@/components/Page/page.styles'
 import type { IUser } from '@/types/user'
+import { canonicalTimeZoneId } from '@/utils/timezones'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { joinChallengeRequest } from '../api'
 import type { Challenge } from '../types'
@@ -90,7 +91,7 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
   // N.B. it's not enough to specify timeZone to date-fns-tz's format function, as it also
   //      depends on the locale
   //      See https://stackoverflow.com/questions/65416339/how-to-detect-timezone-abbreviation-using-date-fns-tz
-  const userTimeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone
+  const userTimeZone = canonicalTimeZoneId(user?.time_zone) || new Intl.DateTimeFormat().resolvedOptions().timeZone
 
   const challengeAction = () => {
     if (challengePreRegistration) {
