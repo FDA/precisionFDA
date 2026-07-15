@@ -57,6 +57,11 @@ export type SiteNavItemType = {
   navigation: NavigationTarget
 }
 
+export function getObjectsByIds(ids: string[], items: SiteNavItemType[]): SiteNavItemType[] {
+  const itemMap = new Map(items.map(item => [item.id, item]))
+  return ids.map(id => itemMap.get(id)).filter((item): item is SiteNavItemType => Boolean(item))
+}
+
 export const siteNavItems: SiteNavItemType[] = [
   {
     id: 'overview',

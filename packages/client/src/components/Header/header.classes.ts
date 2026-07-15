@@ -1,7 +1,7 @@
 import { cn } from '@/utils/cn'
 
 /** Shared hit target + hover fill for header chrome */
-const headerChromeInteractive = (active?: boolean) =>
+export const headerChromeInteractive = (active?: boolean) =>
   cn(
     'flex shrink-0 items-center gap-2 rounded-[3px] !px-2 !py-1.5 text-[13px] leading-none',
     'transition-[background-color,color] duration-100 ease-in-out',

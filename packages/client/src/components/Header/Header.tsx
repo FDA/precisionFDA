@@ -1,11 +1,16 @@
 import type { ReactNode, RefObject } from 'react'
-import { useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { type PlacesType, Tooltip } from 'react-tooltip'
 import { useAlertDismissed } from '@/features/admin/alerts/useAlertDismissedLocalStorage'
 import { type CDMHKey, logout } from '@/features/auth/api'
 import { useAuthUser } from '@/features/auth/useAuthUser'
-import { CDMHNames, type SiteSettingsDataPortal, useSiteSettingsQuery } from '@/features/auth/useSiteSettingsQuery'
+import {
+  CDMHNames,
+  type SiteSettingsDataPortal,
+  type SiteSettingsResponse,
+  useSiteSettingsQuery,
+} from '@/features/auth/useSiteSettingsQuery'
 import { useOnOutsideClickRef } from '@/hooks/useOnOutsideClick'
 import type { IUser } from '@/types/user'
 import { cn } from '@/utils/cn'
@@ -25,21 +30,18 @@ import { PFDALogoLight } from '../NavigationBar/PFDALogo'
 import { NotificationCenter } from '../NotificationCenter/NotificationCenter'
 import { ThemeToggle } from '../ThemeToggle'
 import { useEditFavoritesModal } from './favorites/useEditFavoritesModal'
-import { headerDropdownTrigger, headerIconWrap } from './header.classes'
+import { headerChromeInteractive, headerDropdownTrigger, headerIconWrap } from './header.classes'
 import styles from './header.module.css'
-import { getNavigationPath, getNavigationRel, getNavigationTarget, type SiteNavItemType } from './NavItems'
+import {
+  getNavigationPath,
+  getNavigationRel,
+  getNavigationTarget,
+  getObjectsByIds,
+  type SiteNavItemType,
+} from './NavItems'
 import { UserMenu } from './UserMenu'
 import type { NavFavorite } from './useNavFavorites'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
-
-/** Shared hit target + hover fill for header chrome */
-const headerChromeInteractive = (active?: boolean) =>
-  cn(
-    'flex shrink-0 items-center gap-2 rounded-[3px] !px-2 !py-1.5 text-[13px] leading-none',
-    'transition-[background-color,color] duration-100 ease-in-out',
-    'hover:!bg-app-header-hover hover:!text-white',
-    active && 'bg-app-header-hover !text-white',
-  )
 
 /**
  * Favorites strip + search control.
@@ -86,17 +88,14 @@ const siteNavDisabledRow = ({ inDrawer = true }: { inDrawer?: boolean } = {}) =>
     inDrawer ? 'text-menu-item-disabled-drawer' : 'text-menu-item-disabled dark:text-menu-item-disabled-dark',
   )
 
-export function getObjectsByIds(ids: string[], items: SiteNavItemType[]) {
-  const itemMap = Object.fromEntries(items.map(item => [item.id, item]))
-  return ids.map(id => itemMap[id]).filter(Boolean) as SiteNavItemType[]
-}
-
 const isActiveLink = (linkPath: string, pathname: string) => {
-  if (linkPath === '/') {
+  // Nav paths may carry a query string (e.g. /spaces?hidden=false) but pathname never does
+  const path = linkPath.split('?')[0]
+  if (path === '/') {
     // Special case
-    return pathname === linkPath
+    return pathname === path
   }
-  return pathname.startsWith(linkPath)
+  return pathname.startsWith(path)
 }
 
 const MenuLink = ({
@@ -194,105 +193,79 @@ const DisabledMenuItem = ({
   )
 }
 
-const DisabledTopMenuItem = ({
-  navItem,
-  siteSettingsDataPortal,
-}: {
-  navItem: SiteNavItemType
-  siteSettingsDataPortal: SiteSettingsDataPortal
-}) => {
-  return (
-    <DisabledMenuItem
-      navItem={navItem}
-      siteSettingsDataPortal={siteSettingsDataPortal}
-      tooltipPos="bottom"
-      inDrawer={false}
-    />
-  )
-}
-
 const dataPortalMenuItem = (
   i: SiteNavItemType,
   pathname: string,
   setShowSiteNav: (v: boolean, ms?: number) => void,
   siteSettingsDataPortal: SiteSettingsDataPortal | undefined,
 ) => {
-  if (siteSettingsDataPortal?.accessible) {
-    return <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
-  }
-  if (siteSettingsDataPortal) {
+  if (siteSettingsDataPortal && !siteSettingsDataPortal.accessible) {
     return <DisabledMenuItem key={i.id} navItem={i} siteSettingsDataPortal={siteSettingsDataPortal} />
   }
   return <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
 }
 
 const getUsername = (user?: IUser) => {
-  if (user) {
-    if (user.full_name === ' ') {
-      return user.dxuser
-    }
-    return user.full_name
-  }
-  return '...'
+  if (!user) return '...'
+  return user.full_name?.trim() ? user.full_name : user.dxuser
 }
+
+/** Left drawer column; groups are separated by a vertical gap */
+const SITE_NAV_GROUPS = [
+  ['overview', 'data-portals', 'discussions', 'challenges', 'experts'],
+  ['home', 'spaces'],
+  ['notes', 'comparisons'],
+  ['docs', 'support'],
+]
+
+const CDMH_ACCESS_MAILTO = 'mailto:mitra.rocca@fda.hhs.gov?cc=precisionFDA@fda.hhs.gov&subject=CDMH access request'
 
 const SiteNav = ({
   open,
   setShowSiteNav,
   ignoredOutsideClickRef,
-  isSiteAdmin = false,
+  isSiteAdmin,
 }: {
   open: boolean
   setShowSiteNav: (v: boolean, ms?: number) => void
-  ignoredOutsideClickRef: RefObject<HTMLElement> | RefObject<HTMLButtonElement | null>
+  ignoredOutsideClickRef: RefObject<HTMLElement | null>
   isSiteAdmin: boolean
 }) => {
-  const clickRef = useOnOutsideClickRef(true, () => setShowSiteNav(false), ignoredOutsideClickRef)
+  const clickRef = useOnOutsideClickRef(open, () => setShowSiteNav(false), ignoredOutsideClickRef)
   const { pathname } = useLocation()
   const { data: siteSettings } = useSiteSettingsQuery()
   const { userSiteNavItems, showCDMHLink, showGSRSLink } = useUserSiteNavItems()
 
-  const portalIDs = ['daaas', 'prism', 'tools']
-  if (isSiteAdmin) {
-    portalIDs.push('precisionfda-system-administration-portal')
-  }
+  const portalIDs = ['daaas', 'prism', 'tools', ...(isSiteAdmin ? ['precisionfda-system-administration-portal'] : [])]
 
   return (
     <div
       ref={clickRef}
+      id="site-nav-drawer"
       data-site-nav-drawer
+      inert={!open}
       className={cn(
-        'absolute bottom-0 left-0 z-3 flex w-[400px] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground',
+        'absolute bottom-0 left-0 z-3 flex w-100 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground',
         'top-below-header',
         'shadow-none transition-all duration-80 ease-out motion-reduce:duration-150',
         open ? 'translate-x-0 shadow-[0_0_40px_rgb(0_0_0/0.22)]' : '-translate-x-full pointer-events-none',
       )}
     >
       <div className="absolute right-4 top-2 flex justify-end">
-        <TransparentButton className="p-2" onClick={() => setShowSiteNav(false, 100)}>
+        <TransparentButton className="p-2" aria-label="Close navigation" onClick={() => setShowSiteNav(false, 100)}>
           <CrossIcon height={16} />
         </TransparentButton>
       </div>
       <div className={cn('min-h-0 flex-1 overflow-y-auto px-4', styles.siteNavBodyScroll)}>
-        <div className="flex gap-8 py-8 [&>div]:min-w-[148px]">
+        <div className="flex gap-8 py-8 [&>div]:min-w-37">
           <div>
-            {getObjectsByIds(
-              ['overview', 'data-portals', 'discussions', 'challenges', 'experts'],
-              userSiteNavItems,
-            ).map(i => (
-              <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
-            ))}
-            <div className="mx-1 h-5 opacity-60" />
-            {getObjectsByIds(['home', 'spaces'], userSiteNavItems).map(i => (
-              <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
-            ))}
-            <div className="mx-1 h-5 opacity-60" />
-            {getObjectsByIds(['notes', 'comparisons'], userSiteNavItems).map(i => (
-              <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
-            ))}
-            <div className="mx-1 h-5 opacity-60" />
-            {getObjectsByIds(['docs', 'support'], userSiteNavItems).map(i => (
-              <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
+            {SITE_NAV_GROUPS.map((group, index) => (
+              <Fragment key={group[0]}>
+                {index > 0 && <div className="mx-1 h-5 opacity-60" />}
+                {getObjectsByIds(group, userSiteNavItems).map(i => (
+                  <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
+                ))}
+              </Fragment>
             ))}
           </div>
           <div>
@@ -311,10 +284,7 @@ const SiteNav = ({
                 <Tooltip id="menu-item.cdmh.right" clickable place="right">
                   <div>This is the Common Data Model Harmonization; access is currently restricted to FDA users.</div>
                   <div>
-                    <a
-                      className="underline"
-                      href="mailto:mitra.rocca@fda.hhs.gov?cc=precisionFDA@fda.hhs.gov&subject=CDMH access request"
-                    >
+                    <a className="underline" href={CDMH_ACCESS_MAILTO}>
                       Reach out to the FDA for access.
                     </a>
                   </div>
@@ -337,12 +307,33 @@ const SiteNav = ({
           </div>
         </div>
       </div>
-      <div className="absolute bottom-2 right-4 flex justify-between">
-        <div />
+      <div className="absolute bottom-2 right-4">
         <ThemeToggle />
       </div>
     </div>
   )
+}
+
+const getOrderedFavoritesOnly = (items: NavFavorite[]) => {
+  return items.filter(item => item.favorite).map(item => item.name)
+}
+
+/** Favorites reuse the static nav items, but some targets depend on runtime settings/permissions */
+const resolveFavoriteNavItem = (
+  item: SiteNavItemType,
+  siteSettings: SiteSettingsResponse | undefined,
+  isSiteAdmin: boolean,
+): SiteNavItemType => {
+  // CDMH items are identified by kebab-case ids but keyed camelCase in site settings
+  const normalizedId = item.id.replace(/-([a-z])/g, (_match, letter) => letter.toUpperCase()) as CDMHKey
+  const cdmhUrl = siteSettings?.cdmh.data?.[normalizedId]
+  if (cdmhUrl !== undefined) {
+    return { ...item, navigation: { type: 'external', url: cdmhUrl } }
+  }
+  if (item.id === 'spaces' && isSiteAdmin) {
+    return { ...item, navigation: { type: 'internal', path: '/spaces?hidden=false' } }
+  }
+  return item
 }
 
 const Header = () => {
@@ -352,30 +343,32 @@ const Header = () => {
   const siteSettings = useSiteSettingsQuery()
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
   const buttonElement = useRef<HTMLButtonElement>(null)
+  const sidebarTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { isShown, modalComp, setShowModal } = useEditFavoritesModal()
   const { isShown: isSearchShown, modalComp: searchModalComp, setShowModal: setShowSearch } = useSearchModal()
   const { userSiteNavItems } = useUserSiteNavItems()
 
+  useEffect(() => {
+    return () => {
+      if (sidebarTimer.current) clearTimeout(sidebarTimer.current)
+    }
+  }, [])
+
   if (!user) return null
 
   const userCanAdministerSite = user.can_administer_site || false
-  const showAlertBanner = !isAlertDismissed && !!siteSettings.data?.alerts?.[0]
+  const activeAlert = siteSettings.data?.alerts?.[0]
 
   const handleLogout = async () => {
     setIsAlertDismissed(false)
-    await logout().then(() => {
-      window.location.replace('/')
-    })
+    await logout()
+    window.location.replace('/')
   }
 
-  const setSidebar = (v: boolean, ms?: number) => {
-    setTimeout(() => {
-      setShowSiteNav(() => v)
-    }, ms ?? 225)
-  }
-
-  const getOrderedFavoritesOnly = (items: NavFavorite[]) => {
-    return items.filter(item => item.favorite).map(item => item.name)
+  // Delayed so a click on a drawer nav item lands before the drawer closes
+  const setSidebar = (v: boolean | ((prev: boolean) => boolean), ms = 225) => {
+    if (sidebarTimer.current) clearTimeout(sidebarTimer.current)
+    sidebarTimer.current = setTimeout(() => setShowSiteNav(v), ms)
   }
 
   const orderedFavorites = getOrderedFavoritesOnly(user.header_items ?? [])
@@ -384,11 +377,11 @@ const Header = () => {
     <>
       {modalComp}
       {searchModalComp}
-      {showAlertBanner && siteSettings.data?.alerts?.[0] && (
+      {!isAlertDismissed && activeAlert && (
         <AlertBanner
-          variant={siteSettings.data.alerts[0].type}
+          variant={activeAlert.type}
           dismissAlert={() => setIsAlertDismissed(true)}
-          alertText={siteSettings.data.alerts[0].content}
+          alertText={activeAlert.content}
         />
       )}
       <SiteNav
@@ -405,14 +398,17 @@ const Header = () => {
         data-testid="main-header"
       >
         <nav className="flex w-full flex-1 flex-nowrap items-center gap-4 text-xs font-normal whitespace-nowrap transition-all duration-180 ease-in-out [&_a]:text-inherit [&_a]:no-underline [&_button]:shrink-0">
-          <Link to="/" data-turbolinks="false" className="shrink-0">
+          <Link to="/" className="shrink-0">
             <PFDALogoLight className="box-border min-w-[143.98px] py-1" height={20} />
           </Link>
           <TransparentButton
             className={headerMenuButton(showSiteNav)}
             data-testid="button-open-menu"
             ref={buttonElement}
-            onClick={() => setSidebar(!showSiteNav, 100)}
+            aria-label="Site navigation"
+            aria-expanded={showSiteNav}
+            aria-controls="site-nav-drawer"
+            onClick={() => setSidebar(prev => !prev, 100)}
           >
             <SiteMenuIcon height={20} />
           </TransparentButton>
@@ -420,41 +416,30 @@ const Header = () => {
             <div
               className={cn(
                 styles.headerFavoritesScroll,
-                'flex min-h-0 min-w-0 flex-1 flex-nowrap items-center gap-x-[9px] overflow-x-auto overflow-y-hidden overscroll-x-contain *:shrink-0 [&_a]:flex [&_a]:max-w-max',
+                'flex min-h-0 min-w-0 flex-1 flex-nowrap items-center gap-x-2.25 overflow-x-auto overflow-y-hidden overscroll-x-contain *:shrink-0 [&_a]:flex [&_a]:max-w-max',
               )}
             >
               {getObjectsByIds(orderedFavorites, userSiteNavItems).map(i => {
-                if (siteSettings?.data?.dataPortals[i.id]?.accessible === false) {
+                const dataPortal = siteSettings.data?.dataPortals[i.id]
+                if (dataPortal?.accessible === false) {
                   return (
-                    <DisabledTopMenuItem
+                    <DisabledMenuItem
                       key={i.id}
                       navItem={i}
-                      siteSettingsDataPortal={siteSettings.data.dataPortals[i.id]}
+                      siteSettingsDataPortal={dataPortal}
+                      tooltipPos="bottom"
+                      inDrawer={false}
                     />
                   )
                 }
 
-                const dynamicNavItem = { ...i }
-
-                // If CDMH item, get the correct link
-                const normalizedId = i.id.replace(/-([a-z])/g, (_match, letter) => {
-                  return letter.toUpperCase()
-                }) as CDMHKey
-                const cdmhList = siteSettings.data?.cdmh.data
-                if (cdmhList !== undefined && cdmhList[normalizedId] !== undefined) {
-                  dynamicNavItem.navigation = { type: 'external', url: cdmhList[normalizedId] }
-                }
-                if (i.id === 'spaces' && !!user?.can_administer_site) {
-                  dynamicNavItem.navigation = { type: 'internal', path: '/spaces?hidden=false' }
-                }
-
-                const { id, iconHeight, text, icon: Icon } = dynamicNavItem
-                const navigationPath = getNavigationPath(dynamicNavItem)
-                const favActive = isActiveLink(navigationPath, pathname)
+                const navItem = resolveFavoriteNavItem(i, siteSettings.data, userCanAdministerSite)
+                const { id, iconHeight, text, icon: Icon } = navItem
+                const favActive = isActiveLink(getNavigationPath(navItem), pathname)
 
                 return (
                   <MenuLink
-                    navItem={dynamicNavItem}
+                    navItem={navItem}
                     key={id}
                     data-testid={`favoritenav-${id}`}
                     className={headerBarItem(favActive)}
@@ -489,6 +474,7 @@ const Header = () => {
               className={headerBarItem(isSearchShown)}
               onClick={() => setShowSearch(true)}
               data-testid="search-button"
+              aria-label="Search"
             >
               <SearchIcon />
             </TransparentButton>
@@ -504,7 +490,7 @@ const Header = () => {
                     </div>
                     <div className="flex select-none items-center text-[13px]">
                       {getUsername(user)}
-                      <span className="mb-px ml-[5px] inline-flex">
+                      <span className="mb-px ml-1.25 inline-flex">
                         <CaretIcon height={6} />
                       </span>
                     </div>
@@ -512,7 +498,7 @@ const Header = () => {
                 </Menu.Trigger>
               }
             >
-              <UserMenu user={user} userCanAdministerSite={userCanAdministerSite} handleLogout={handleLogout} />
+              <UserMenu user={user} handleLogout={handleLogout} />
             </Menu>
           </div>
         </nav>
