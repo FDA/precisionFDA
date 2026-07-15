@@ -1,5 +1,4 @@
 import { Space } from '@shared/domain/space/space.entity'
-import { STATIC_SCOPE } from '@shared/enums'
 import { EntityScope, SpaceScope, StaticScope } from '@shared/types/common'
 
 export class EntityScopeUtils {
@@ -42,7 +41,7 @@ export class EntityScopeUtils {
     location = staticLocations[scope]
     if (!location && space) {
       const suffix = space.isConfidential() ? 'Private' : 'Shared'
-      location = `${space.name} - (${suffix})`
+      location = `${space.name} - ${suffix}`
     }
     return location
   }

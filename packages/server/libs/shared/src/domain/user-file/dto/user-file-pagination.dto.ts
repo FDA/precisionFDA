@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -25,6 +26,7 @@ import { NumberRange } from '@shared/utils/types/range/number-range'
 class UserFileFilter {
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
   name?: string
 
   @IsOptional()

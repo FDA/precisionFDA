@@ -289,6 +289,53 @@ describe('GET /files', () => {
     expect(body2.data[0]).to.have.property('name', 'file4name.txt')
   })
 
+  it('fetch files with name filter', async () => {
+    create.filesHelper.create(em, { user }, { name: 'report_2024.txt', scope: 'private' })
+    create.filesHelper.create(em, { user }, { name: 'report_2025.txt', scope: 'private' })
+    create.filesHelper.create(em, { user }, { name: 'summary\\.txt', scope: 'private' })
+    await em.flush()
+
+    // matches by partial name
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get(`/files?scope=private&filter[name]=report`)
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body.data.length).to.equal(2)
+    const names = body.data.map((item: FileGetDTO) => item.name)
+    expect(names).to.include.members(['report_2024.txt', 'report_2025.txt'])
+
+    // underscore treated as a literal character, not a SQL wildcard
+    const { body: body2 } = await supertest(testedApp.getHttpServer())
+      .get(`/files?scope=private&filter[name]=report_2024`)
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body2.data.length).to.equal(1)
+    expect(body2.data[0].name).to.equal('report_2024.txt')
+
+    const { body: body3 } = await supertest(testedApp.getHttpServer())
+      .get(`/files?scope=private&filter[name]=\\`)
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body3.data.length).to.equal(1)
+    expect(body3.data[0].name).to.equal('summary\\.txt')
+
+    // no match
+    const { body: body4 } = await supertest(testedApp.getHttpServer())
+      .get(`/files?scope=private&filter[name]=nonexistent`)
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body4.data.length).to.equal(0)
+
+    await supertest(testedApp.getHttpServer())
+      .get(`/files?scope=private&filter[name]=`)
+      .set(getDefaultHeaderData(user))
+      .expect(400)
+  })
+
   it('fetch files and populate necessary fields for the frontend', async () => {
     create.filesHelper.create(em, { user }, { name: 'file1.txt', scope: 'private' })
     await em.flush()

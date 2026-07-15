@@ -368,13 +368,16 @@ const FileTable = ({
 
   const debouncedNameFilter = useDebounce(nameFilter, 300)
   const debouncedUidFilter = useDebounce(uidFilter, 300)
+  const isFilteringFiles = debouncedNameFilter.length || debouncedUidFilter.length
+
+  const parsedFolderId = (folderId: string | null) => (folderId ? parseInt(folderId, 10) : 'null')
 
   const { data: folderFiles, isLoading: isFolderFilesLoading } = useQuery({
     queryKey: ['folder-children-files', activeScope, selectedFolderId, page, debouncedNameFilter, debouncedUidFilter],
     queryFn: () =>
       fetchAccessibleFiles({
         scope: activeScope,
-        folderId: selectedFolderId ? parseInt(selectedFolderId, 10) : 'null',
+        folderId: isFilteringFiles > 0 ? undefined : parsedFolderId(selectedFolderId),
         type: ['UserFile'],
         filter: {
           name: debouncedNameFilter || undefined,
@@ -385,7 +388,7 @@ const FileTable = ({
         },
         uids:
           debouncedUidFilter.length > 0
-            ? debouncedUidFilter.split(',').map(uid => uid.replace(/[\\%_]/g, '').trim()) // strip unsupported wildcard chars (%, _, \) before sending — server rejects them, so sanitize silently
+            ? debouncedUidFilter.split(',').map(uid => uid.replace(/[%]/g, '').trim()) // strip unsupported wildcard char (%) before sending — server rejects them, so sanitize silently
             : undefined,
         page,
         pageSize,

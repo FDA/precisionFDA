@@ -33,8 +33,8 @@ export class StringUtils {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   }
 
-  static stripOutWildcards(str: string): string {
-    return str.replace(/[\\%_]/g, '')
+  static escapeSqlLike(str: string): string {
+    return str.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
   }
 
   static titleize(str: string): string {

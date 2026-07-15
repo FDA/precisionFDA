@@ -46,53 +46,53 @@ describe('StringUtils', () => {
     })
   })
 
-  describe('stripOutWildcards', () => {
-    it('should remove a single percentage sign (%) from the string', () => {
+  describe('escapeSqlLike', () => {
+    it('should escape a single percentage sign (%)', () => {
       const input = 'select%user'
-      const result = StringUtils.stripOutWildcards(input)
-      expect(result).to.equal('selectuser')
+      const result = StringUtils.escapeSqlLike(input)
+      expect(result).to.equal('select\\%user')
     })
 
-    it('should remove a single underscore (_) from the string', () => {
+    it('should escape a single underscore (_)', () => {
       const input = 'user_name'
-      const result = StringUtils.stripOutWildcards(input)
-      expect(result).to.equal('username')
+      const result = StringUtils.escapeSqlLike(input)
+      expect(result).to.equal('user\\_name')
     })
 
-    it('should remove a single backslash (\\) from the string', () => {
+    it('should escape a single backslash (\\)', () => {
       const input = 'path\\to\\file'
-      const result = StringUtils.stripOutWildcards(input)
-      expect(result).to.equal('pathtofile')
+      const result = StringUtils.escapeSqlLike(input)
+      expect(result).to.equal('path\\\\to\\\\file')
     })
 
-    it('should remove multiple mixed wildcards throughout the string', () => {
+    it('should escape multiple mixed wildcards throughout the string', () => {
       const input = '%admin\\_user%'
-      const result = StringUtils.stripOutWildcards(input)
-      expect(result).to.equal('adminuser')
+      const result = StringUtils.escapeSqlLike(input)
+      expect(result).to.equal('\\%admin\\\\\\_user\\%')
     })
 
-    it('should return an empty string if the input only contains wildcards', () => {
+    it('should escape all wildcards when the input only contains them', () => {
       const input = '%%__\\\\%%'
-      const result = StringUtils.stripOutWildcards(input)
-      expect(result).to.equal('')
+      const result = StringUtils.escapeSqlLike(input)
+      expect(result).to.equal('\\%\\%\\_\\_\\\\\\\\\\%\\%')
     })
 
     it('should return the exact same string if no wildcards are present', () => {
       const input = 'Hello-World-123!'
-      const result = StringUtils.stripOutWildcards(input)
+      const result = StringUtils.escapeSqlLike(input)
       expect(result).to.equal('Hello-World-123!')
     })
 
     it('should handle an empty string gracefully', () => {
       const input = ''
-      const result = StringUtils.stripOutWildcards(input)
+      const result = StringUtils.escapeSqlLike(input)
       expect(result).to.equal('')
     })
 
     it('should preserve spaces and other special characters', () => {
       const input = 'hello % world _ !'
-      const result = StringUtils.stripOutWildcards(input)
-      expect(result).to.equal('hello  world  !')
+      const result = StringUtils.escapeSqlLike(input)
+      expect(result).to.equal('hello \\% world \\_ !')
     })
   })
 })
