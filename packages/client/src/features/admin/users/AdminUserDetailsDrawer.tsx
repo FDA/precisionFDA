@@ -15,6 +15,7 @@ import { formatNumberUS } from '../../home/utils'
 import { ModalScroll } from '../../modal/modal.styles'
 import { useConfirm } from '../../modal/useConfirm'
 import {
+  bulkActivate,
   bulkDeactivate,
   bulkDisableResource,
   bulkEnableResource,
@@ -55,12 +56,35 @@ const invalidateAdminUserQueries = (queryClient: ReturnType<typeof useQueryClien
   queryClient.invalidateQueries({ queryKey: ['admin-user'] })
 }
 
+const useAdminUserAction = <TData, TVariables = void>({
+  mutationKey,
+  mutationFn,
+  successMessage,
+  errorMessage,
+}: {
+  mutationKey: readonly unknown[]
+  mutationFn: (variables: TVariables) => Promise<TData>
+  successMessage: string
+  errorMessage: string
+}) => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey,
+    mutationFn,
+    onSuccess: () => {
+      toastSuccess(successMessage)
+      invalidateAdminUserQueries(queryClient)
+    },
+    onError: error => toastError(getBackendErrorMessage(error, errorMessage)),
+  })
+}
+
 // ─── Shared layout primitives ────────────────────────────────────────────────
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="flex items-center gap-3 py-1.5">
     <dt className="w-40 shrink-0 text-sm text-(--c-text-600)">{label}</dt>
-    <dd className="min-w-0 flex-1 text-sm text-(--c-text-700)">{children}</dd>
+    <dd className="min-w-0 flex-1 text-sm break-words text-(--c-text-700)">{children}</dd>
   </div>
 )
 
@@ -71,6 +95,22 @@ const SectionHeading = ({ title }: { title: string }) => (
     </span>
     <div className="h-px flex-1 bg-(--tertiary-250)" />
   </div>
+)
+
+const YesNoBadge = ({ value }: { value: boolean }) => (
+  <span
+    className={`inline-flex w-8 items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium ${
+      value ? 'bg-(--success-100) text-(--success-700)' : 'bg-(--warning-100) text-(--warning-700)'
+    }`}
+  >
+    {value ? 'Yes' : 'No'}
+  </span>
+)
+
+const StatusBadge = ({ state }: { state: AdminUserDetails['userState'] }) => (
+  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusClassName[state]}`}>
+    {statusLabel[state]}
+  </span>
 )
 
 // ─── Inline limit editor ─────────────────────────────────────────────────────
@@ -207,35 +247,26 @@ const ResourceGroup = ({
 const CloudResourcesSection = ({
   userId,
   settings,
-  queryClient,
 }: {
   userId: number
   settings: AdminUserDetails['cloudResourceSettings']
-  queryClient: ReturnType<typeof useQueryClient>
 }) => {
+  const queryClient = useQueryClient()
   const [pendingResources, setPendingResources] = useState<Set<ResourceKey>>(new Set())
   const enabledSet = new Set(settings?.resources ?? [])
 
-  const onMutateSuccess = () => invalidateAdminUserQueries(queryClient)
-
-  const totalLimitMutation = useMutation({
+  const totalLimitMutation = useAdminUserAction({
     mutationKey: ['set-total-limit', userId],
     mutationFn: (limit: number) => setTotalLimit([userId], limit),
-    onSuccess: () => {
-      toastSuccess('Total limit updated')
-      onMutateSuccess()
-    },
-    onError: error => toastError(getBackendErrorMessage(error, 'Failed to update total limit')),
+    successMessage: 'Total limit updated',
+    errorMessage: 'Failed to update total limit',
   })
 
-  const jobLimitMutation = useMutation({
+  const jobLimitMutation = useAdminUserAction({
     mutationKey: ['set-job-limit', userId],
     mutationFn: (limit: number) => setJobLimit([userId], limit),
-    onSuccess: () => {
-      toastSuccess('Job limit updated')
-      onMutateSuccess()
-    },
-    onError: error => toastError(getBackendErrorMessage(error, 'Failed to update job limit')),
+    successMessage: 'Job limit updated',
+    errorMessage: 'Failed to update job limit',
   })
 
   const toggleResource = async (resource: ResourceKey, currentlyEnabled: boolean) => {
@@ -246,7 +277,7 @@ const CloudResourcesSection = ({
       } else {
         await bulkEnableResource([userId], resource)
       }
-      onMutateSuccess()
+      invalidateAdminUserQueries(queryClient)
     } catch (error) {
       toastError(getBackendErrorMessage(error, 'Failed to update resource'))
     } finally {
@@ -296,41 +327,137 @@ const CloudResourcesSection = ({
   )
 }
 
-// ─── Drawer body ─────────────────────────────────────────────────────────────
+// ─── Actions ─────────────────────────────────────────────────────────────────
 
-type DrawerBodyProps = {
-  details: AdminUserDetails
-  queryClient: ReturnType<typeof useQueryClient>
-  isPendingActivation: boolean
-  isDeactivated: boolean
-  isCurrentUser: boolean
-  isResendPending: boolean
-  isResetMfaPending: boolean
-  isDisablePending: boolean
-  isUnlockPending: boolean
-  canUnlock: boolean
-  onResendActivationEmail: () => void
-  onResetMfa: () => void
-  onDisableUser: () => void
-  onUnlockUser: () => void
+const ActionRow = ({
+  label,
+  description,
+  variant = 'outline',
+  disabled,
+  onClick,
+}: {
+  label: string
+  description: string
+  variant?: 'outline' | 'primary' | 'warning'
+  disabled: boolean
+  onClick: () => void
+}) => (
+  <div className="flex items-center gap-4 py-2.5">
+    <Button data-variant={variant} disabled={disabled} onClick={onClick} style={{ minWidth: 210 }}>
+      {label}
+    </Button>
+    <span className="text-xs text-(--c-text-400)">{description}</span>
+  </div>
+)
+
+const UserActionsSection = ({ details }: { details: AdminUserDetails }) => {
+  const currentUser = useAuthUser()
+
+  const resendActivationEmailMutation = useAdminUserAction({
+    mutationKey: ['resend-activation-email', details.id],
+    mutationFn: () => userResendActivationEmail(details.id),
+    successMessage: 'Activation email was resent to the user',
+    errorMessage: 'Failed to resend activation email to the user',
+  })
+
+  const resetMfaMutation = useAdminUserAction({
+    mutationKey: ['reset-mfa', details.id],
+    mutationFn: () => userResetMfa(details.id),
+    successMessage: 'Multi-factor authentication was reset for the user',
+    errorMessage: 'Failed to reset multi-factor authentication',
+  })
+
+  const disableUserMutation = useAdminUserAction({
+    mutationKey: ['deactivate-user', details.id],
+    mutationFn: () => bulkDeactivate([details.id]),
+    successMessage: 'User was successfully deactivated!',
+    errorMessage: 'Error deactivating user',
+  })
+
+  const activateUserMutation = useAdminUserAction({
+    mutationKey: ['activate-user', details.id],
+    mutationFn: () => bulkActivate([details.id]),
+    successMessage: 'User was successfully activated!',
+    errorMessage: 'Error activating user',
+  })
+
+  const unlockUserMutation = useAdminUserAction({
+    mutationKey: ['unlock-user', details.id],
+    mutationFn: () => userUnlock(details.id),
+    successMessage: 'User was successfully unlocked!',
+    errorMessage: 'Error unlocking user',
+  })
+
+  const { open: openDisableUserConfirmation, Confirm: DisableUserConfirm } = useConfirm({
+    onOk: () => {
+      void disableUserMutation.mutateAsync()
+    },
+    okText: 'Disable User',
+    headerText: 'Disable User',
+    dataVariant: 'warning',
+    body: (
+      <ModalScroll>
+        <p>
+          Are you sure you want to disable <strong>{details.fullName}</strong>?
+        </p>
+      </ModalScroll>
+    ),
+  })
+
+  const isPendingActivation = details.permissions.pendingActivation
+  const isDeactivated = details.userState === 'deactivated'
+  const isCurrentUser = details.id === currentUser?.id
+  const canUnlock = canAdminUnlockUsers([details])
+
+  return (
+    <>
+      <div className="flex flex-col divide-y divide-(--tertiary-200)">
+        <ActionRow
+          label="Resend Activation Email"
+          description="Send a new activation link to the user's email address. Only available for accounts pending activation."
+          disabled={!isPendingActivation || resendActivationEmailMutation.isPending}
+          onClick={() => void resendActivationEmailMutation.mutateAsync()}
+        />
+        <ActionRow
+          label="Reset MFA"
+          description="Clear the user's multi-factor authentication setup so they can reconfigure it on next login."
+          disabled={resetMfaMutation.isPending}
+          onClick={() => void resetMfaMutation.mutateAsync()}
+        />
+        {isDeactivated ? (
+          <ActionRow
+            label="Activate User"
+            description="Reactivate this account so the user can log in again."
+            variant="primary"
+            disabled={activateUserMutation.isPending}
+            onClick={() => void activateUserMutation.mutateAsync()}
+          />
+        ) : (
+          <ActionRow
+            label="Disable User"
+            description="Deactivate this account and prevent the user from logging in."
+            variant="warning"
+            disabled={isCurrentUser || disableUserMutation.isPending}
+            onClick={openDisableUserConfirmation}
+          />
+        )}
+        <ActionRow
+          label="Unlock User"
+          description="Restore access to a locked account so the user can log in again."
+          disabled={!canUnlock || unlockUserMutation.isPending}
+          onClick={() => void unlockUserMutation.mutateAsync()}
+        />
+      </div>
+      <DisableUserConfirm />
+    </>
+  )
 }
 
-const DrawerBody = ({
-  details,
-  queryClient,
-  isPendingActivation,
-  isDeactivated,
-  isCurrentUser,
-  isResendPending,
-  isResetMfaPending,
-  isDisablePending,
-  isUnlockPending,
-  canUnlock,
-  onResendActivationEmail,
-  onResetMfa,
-  onDisableUser,
-  onUnlockUser,
-}: DrawerBodyProps) => {
+// ─── Drawer body ─────────────────────────────────────────────────────────────
+
+const DrawerBody = ({ details }: { details: AdminUserDetails }) => {
+  const lastLoginAgo = relativeTimeAgo(details.lastLogin)
+
   const permissionRows: { label: string; enabled: boolean }[] = [
     { label: 'Pending activation', enabled: details.permissions.pendingActivation },
     { label: 'Government user', enabled: details.permissions.isGovernmentUser },
@@ -347,27 +474,15 @@ const DrawerBody = ({
       <Row label="Username">@{details.dxuser}</Row>
       <Row label="Email">{details.email}</Row>
       <Row label="Status">
-        <span
-          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusClassName[details.userState]}`}
-        >
-          {statusLabel[details.userState]}
-        </span>
+        <StatusBadge state={details.userState} />
       </Row>
       <Row label="Single sign-on">
-        <span
-          className={`inline-flex w-8 items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium ${
-            details.isSSO ? 'bg-(--success-100) text-(--success-700)' : 'bg-(--warning-100) text-(--warning-700)'
-          }`}
-        >
-          {details.isSSO ? 'Yes' : 'No'}
-        </span>
+        <YesNoBadge value={details.isSSO} />
       </Row>
       <Row label="Joined">{formatDateTime(details.createdAt)}</Row>
       <Row label="Last login">
         {formatDateTime(details.lastLogin)}
-        {relativeTimeAgo(details.lastLogin) ? (
-          <span className="ml-1.5 text-xs text-(--c-text-400)">({relativeTimeAgo(details.lastLogin)})</span>
-        ) : null}
+        {lastLoginAgo ? <span className="ml-1.5 text-xs text-(--c-text-400)">({lastLoginAgo})</span> : null}
       </Row>
       <Row label="Last updated">{formatDateTime(details.updatedAt)}</Row>
       <Row label="Timezone">{details.timeZone ?? 'N/A'}</Row>
@@ -383,19 +498,13 @@ const DrawerBody = ({
         {permissionRows.map(({ label, enabled }) => (
           <div key={label} className="flex items-center justify-between gap-2 rounded px-1 py-1">
             <span className="text-sm text-(--c-text-600)">{label}</span>
-            <span
-              className={`inline-flex w-8 items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                enabled ? 'bg-(--success-100) text-(--success-700)' : 'bg-(--warning-100) text-(--warning-700)'
-              }`}
-            >
-              {enabled ? 'Yes' : 'No'}
-            </span>
+            <YesNoBadge value={enabled} />
           </div>
         ))}
       </div>
 
       <SectionHeading title="Cloud Resources" />
-      <CloudResourcesSection userId={details.id} settings={details.cloudResourceSettings} queryClient={queryClient} />
+      <CloudResourcesSection userId={details.id} settings={details.cloudResourceSettings} />
 
       {details.disableMessage ? (
         <>
@@ -407,55 +516,7 @@ const DrawerBody = ({
       ) : null}
 
       <SectionHeading title="Actions" />
-      <div className="flex flex-col divide-y divide-(--tertiary-200)">
-        <div className="flex items-center gap-4 py-2.5">
-          <Button
-            data-variant="outline"
-            disabled={!isPendingActivation || isResendPending}
-            onClick={onResendActivationEmail}
-            style={{ minWidth: 210 }}
-          >
-            Resend Activation Email
-          </Button>
-          <span className="text-xs text-(--c-text-400)">
-            Send a new activation link to the user's email address. Only available for accounts pending activation.
-          </span>
-        </div>
-        <div className="flex items-center gap-4 py-2.5">
-          <Button data-variant="outline" disabled={isResetMfaPending} onClick={onResetMfa} style={{ minWidth: 210 }}>
-            Reset MFA
-          </Button>
-          <span className="text-xs text-(--c-text-400)">
-            Clear the user's multi-factor authentication setup so they can reconfigure it on next login.
-          </span>
-        </div>
-        <div className="flex items-center gap-4 py-2.5">
-          <Button
-            data-variant="warning"
-            disabled={isDeactivated || isCurrentUser || isDisablePending}
-            onClick={onDisableUser}
-            style={{ minWidth: 210 }}
-          >
-            Disable User
-          </Button>
-          <span className="text-xs text-(--c-text-400)">
-            Deactivate this account and prevent the user from logging in.
-          </span>
-        </div>
-        <div className="flex items-center gap-4 py-2.5">
-          <Button
-            data-variant="outline"
-            disabled={!canUnlock || isUnlockPending}
-            onClick={onUnlockUser}
-            style={{ minWidth: 210 }}
-          >
-            Unlock User
-          </Button>
-          <span className="text-xs text-(--c-text-400)">
-            Restore access to a locked account so the user can log in again.
-          </span>
-        </div>
-      </div>
+      <UserActionsSection details={details} />
     </dl>
   )
 }
@@ -463,75 +524,12 @@ const DrawerBody = ({
 // ─── Drawer root ─────────────────────────────────────────────────────────────
 
 export const AdminUserDetailsDrawer = ({ userId, open, onClose }: AdminUserDetailsDrawerProps) => {
-  const queryClient = useQueryClient()
-  const currentUser = useAuthUser()
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-user', userId],
     queryFn: () => fetchAdminUserDetails(userId as number),
     enabled: open && userId != null,
     refetchOnWindowFocus: false,
   })
-
-  const resendActivationEmailMutation = useMutation({
-    mutationKey: ['resend-activation-email', userId],
-    mutationFn: () => userResendActivationEmail(userId as number),
-    onSuccess: () => {
-      toastSuccess('Activation email was resent to the user')
-      invalidateAdminUserQueries(queryClient)
-    },
-    onError: error => toastError(getBackendErrorMessage(error, 'Failed to resend activation email to the user')),
-  })
-
-  const resetMfaMutation = useMutation({
-    mutationKey: ['reset-mfa', userId],
-    mutationFn: () => userResetMfa(userId as number),
-    onSuccess: () => {
-      toastSuccess('Multi-factor authentication was reset for the user')
-      invalidateAdminUserQueries(queryClient)
-    },
-    onError: error => toastError(getBackendErrorMessage(error, 'Failed to reset multi-factor authentication')),
-  })
-
-  const disableUserMutation = useMutation({
-    mutationKey: ['deactivate-user', userId],
-    mutationFn: () => bulkDeactivate([userId as number]),
-    onSuccess: () => {
-      toastSuccess('User was successfully deactivated!')
-      invalidateAdminUserQueries(queryClient)
-    },
-    onError: error => toastError(getBackendErrorMessage(error, 'Error deactivating user')),
-  })
-
-  const unlockUserMutation = useMutation({
-    mutationKey: ['unlock-user', userId],
-    mutationFn: () => userUnlock(userId as number),
-    onSuccess: () => {
-      toastSuccess('User was successfully unlocked!')
-      invalidateAdminUserQueries(queryClient)
-    },
-    onError: error => toastError(getBackendErrorMessage(error, 'Error unlocking user')),
-  })
-
-  const { open: openDisableUserConfirmation, Confirm: DisableUserConfirm } = useConfirm({
-    onOk: () => {
-      void disableUserMutation.mutateAsync()
-    },
-    okText: 'Disable User',
-    headerText: 'Disable User',
-    dataVariant: 'warning',
-    body: (
-      <ModalScroll>
-        <p>
-          Are you sure you want to disable <strong>{data?.fullName ?? 'this user'}</strong>?
-        </p>
-      </ModalScroll>
-    ),
-  })
-
-  const isPendingActivation = data?.permissions.pendingActivation ?? false
-  const isDeactivated = data?.userState === 'deactivated'
-  const isCurrentUser = data?.id === currentUser?.id
-  const canUnlock = canAdminUnlockUsers(data ? [data] : [])
 
   return (
     <Drawer.Root open={open} onOpenChange={(nextOpen: boolean) => !nextOpen && onClose()} swipeDirection="right">
@@ -552,13 +550,7 @@ export const AdminUserDetailsDrawer = ({ userId, open, onClose }: AdminUserDetai
                   </Drawer.Title>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     {data?.dxuser ? <span className="text-xs text-(--c-text-400)">@{data.dxuser}</span> : null}
-                    {data?.userState ? (
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusClassName[data.userState]}`}
-                      >
-                        {statusLabel[data.userState]}
-                      </span>
-                    ) : null}
+                    {data?.userState ? <StatusBadge state={data.userState} /> : null}
                   </div>
                 </div>
                 <Drawer.Close
@@ -575,27 +567,8 @@ export const AdminUserDetailsDrawer = ({ userId, open, onClose }: AdminUserDetai
                 {!isLoading && error ? (
                   <div className="px-5 py-4 text-sm text-(--warning-600)">Failed to load user details.</div>
                 ) : null}
-                {!isLoading && !error && data ? (
-                  <DrawerBody
-                    details={data}
-                    queryClient={queryClient}
-                    isPendingActivation={isPendingActivation}
-                    isDeactivated={isDeactivated}
-                    isCurrentUser={isCurrentUser}
-                    isResendPending={resendActivationEmailMutation.isPending}
-                    isResetMfaPending={resetMfaMutation.isPending}
-                    isDisablePending={disableUserMutation.isPending}
-                    isUnlockPending={unlockUserMutation.isPending}
-                    canUnlock={canUnlock}
-                    onResendActivationEmail={() => void resendActivationEmailMutation.mutateAsync()}
-                    onResetMfa={() => void resetMfaMutation.mutateAsync()}
-                    onDisableUser={openDisableUserConfirmation}
-                    onUnlockUser={() => void unlockUserMutation.mutateAsync()}
-                  />
-                ) : null}
+                {!isLoading && !error && data ? <DrawerBody details={data} /> : null}
               </div>
-
-              <DisableUserConfirm />
             </Drawer.Content>
           </Drawer.Popup>
         </Drawer.Viewport>
