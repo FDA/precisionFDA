@@ -5,11 +5,8 @@ import { SinonStub, stub } from 'sinon'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
@@ -40,6 +37,7 @@ describe('CopyNodesFacade', () => {
   const emTransactionalStub = stub()
 
   const userLoadEntityStub = stub()
+  const userGetDestinationProjectIdStub = stub()
 
   const platformProjectCloneStub = stub()
   const platformContainerRemoveObjectsStub = stub()
@@ -62,14 +60,13 @@ describe('CopyNodesFacade', () => {
   const loggerLogStub = stub()
   const loggerErrorStub = stub()
 
-  const spaceMembershipRepoGetMembershipStub = stub()
-
   let referenceCreateStub: SinonStub
 
   const USER = {
     id: USER_ID,
     privateFilesProject: PRIVATE_PROJECT,
     publicFilesProject: PUBLIC_PROJECT,
+    getDestinationProjectId: userGetDestinationProjectIdStub,
   } as unknown as User
 
   const USER_CTX = {
@@ -115,10 +112,6 @@ describe('CopyNodesFacade', () => {
     sendNotificationForEvent: spaceEventSendNotificationStub,
   } as unknown as SpaceEventService
 
-  const spaceMembershipRepo = {
-    getMembership: spaceMembershipRepoGetMembershipStub,
-  } as unknown as SpaceMembershipRepository
-
   beforeEach(() => {
     emFindOneStub.reset()
     emFindOneStub.resolves(null)
@@ -139,6 +132,9 @@ describe('CopyNodesFacade', () => {
 
     userLoadEntityStub.reset()
     userLoadEntityStub.resolves(USER)
+
+    userGetDestinationProjectIdStub.reset()
+    userGetDestinationProjectIdStub.resolves(PRIVATE_PROJECT)
 
     platformProjectCloneStub.reset()
     platformProjectCloneStub.resolves()
@@ -161,9 +157,6 @@ describe('CopyNodesFacade', () => {
     notificationCreateStub.reset()
     spaceEventCreateStub.reset()
     spaceEventSendNotificationStub.reset()
-
-    spaceMembershipRepoGetMembershipStub.reset()
-    spaceMembershipRepoGetMembershipStub.throws()
 
     loggerLogStub.reset()
     loggerErrorStub.reset()
@@ -346,42 +339,37 @@ describe('CopyNodesFacade', () => {
       const spaceScope = 'space-10' as EntityScope
       const spaceId = 10
 
-      const space = {
-        id: spaceId,
-        hostProject: 'project-host',
-        guestProject: 'project-guest',
-      } as unknown as Space
-
-      const spacesCollection = [space] as unknown as Space[] & { load: () => Promise<void> }
-
-      spacesCollection.load = stub().resolves()
-
-      const spaceMembership = {
-        isHost: () => true,
-        spaces: spacesCollection,
-      } as unknown as SpaceMembership
-
-      userLoadEntityStub.resolves({
-        ...USER,
-        spaceMemberships: [
-          {
-            spaces: [{ id: spaceId, hostProject: 'project-host' }],
-            isHost: () => true,
-          },
-        ],
-      })
-
       nodeServiceLoadNodesStub.withArgs([SOURCE_FILE_ID], {}).resolves([sourceFile])
       nodeServiceGetAccessibleEntityByIdStub.withArgs(SOURCE_FILE_ID).resolves(sourceFile)
-      spaceMembershipRepoGetMembershipStub.withArgs(spaceId, USER.id).resolves(spaceMembership)
+      userGetDestinationProjectIdStub.withArgs(spaceScope, 'editable').resolves('project-host')
 
       await getInstance().copyNodes([SOURCE_FILE_ID], spaceScope)
+
+      // the destination project must be resolved for the requested scope with edit access enforced
+      expect(userGetDestinationProjectIdStub.calledOnceWith(spaceScope, 'editable')).to.be.true()
+      expect(platformProjectCloneStub.firstCall.args).to.deep.eq(['project-source', 'project-host', [SOURCE_FILE_DXID]])
 
       expect(spaceEventCreateStub.called).to.be.true()
       expect(spaceEventCreateStub.firstCall.firstArg.spaceId).to.eq(spaceId)
       expect(spaceEventCreateStub.firstCall.firstArg.activityType).to.eq(SPACE_EVENT_ACTIVITY_TYPE.file_added)
       expect(spaceEventCreateStub.firstCall.firstArg.userId).to.eq(USER.id)
       expect(spaceEventSendNotificationStub.called).to.be.true()
+    })
+
+    it('should not copy and should notify with error if destination project cannot be resolved', async () => {
+      nodeServiceLoadNodesStub.withArgs([SOURCE_FILE_ID], {}).resolves([sourceFile])
+      userGetDestinationProjectIdStub.resolves(null)
+
+      await getInstance().copyNodes([SOURCE_FILE_ID], 'space-10' as EntityScope)
+
+      expect(platformProjectCloneStub.called).to.be.false()
+      expect(emPersistStub.called).to.be.false()
+      expect(notificationCreateStub.calledOnce).to.be.true()
+      expect(notificationCreateStub.firstCall.args[0]).to.include({
+        severity: SEVERITY.ERROR,
+        message: 'You do not have permission to copy files to this scope.',
+      })
+      expect(loggerErrorStub.called).to.be.true()
     })
 
     it('should copy parent folder BEFORE child file and link them correctly', async () => {
@@ -461,7 +449,6 @@ describe('CopyNodesFacade', () => {
       nodeService,
       notificationService,
       spaceEventService,
-      spaceMembershipRepo,
     )
     ;(service as unknown as { logger: object }).logger = {
       log: loggerLogStub,

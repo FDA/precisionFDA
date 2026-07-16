@@ -1,14 +1,12 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 import { EVENT_TYPES, Event } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { NodeTagging } from '@shared/domain/tagging/node-tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -25,7 +23,6 @@ import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { EntityScope } from '@shared/types/common'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 /**
  * Facade for copying nodes (files and folders) between different scopes. If user specifies
@@ -45,7 +42,6 @@ export class CopyNodesFacade {
     private readonly nodeService: NodeService,
     private readonly notificationService: NotificationService,
     private readonly spaceEventService: SpaceEventService,
-    private readonly spaceMembershipRepo: SpaceMembershipRepository,
   ) {}
 
   async copyNodes(requestedIds: number[], targetScope: EntityScope, targetFolderId?: number): Promise<void> {
@@ -65,7 +61,13 @@ export class CopyNodesFacade {
       throw new InvalidStateError('All nodes to be copied must belong to the same source project.')
     }
 
-    const destinationProject = await this.getDestinationProjectId(targetScope, user)
+    // 'editable' also enforces a CAN_EDIT role in a target space, mirroring the copy/validate pre-check
+    const destinationProject = await user.getDestinationProjectId(targetScope, 'editable')
+    if (!destinationProject) {
+      this.logger.error(`Failed to resolve destination project for scope ${targetScope}`)
+      await this.processErrorNotification('You do not have permission to copy files to this scope.')
+      return
+    }
     const fileDxIds = nodes.filter(node => node.isFile || node.isAsset).map((n: FileOrAsset) => n.dxid)
 
     try {
@@ -227,9 +229,11 @@ export class CopyNodesFacade {
     }
   }
 
-  private async processErrorNotification(): Promise<void> {
+  private async processErrorNotification(
+    message = 'An error occurred while copying your files. Please try again later.',
+  ): Promise<void> {
     await this.notificationService.createNotification({
-      message: `An error occurred while copying your files. Please try again later.`,
+      message,
       severity: SEVERITY.ERROR,
       action: NOTIFICATION_ACTION.NODES_COPIED,
       userId: this.user.id,
@@ -419,19 +423,6 @@ export class CopyNodesFacade {
       targetNode.scopedParentFolderId = resolvedParentId
     } else {
       targetNode.parentFolderId = resolvedParentId
-    }
-  }
-
-  private async getDestinationProjectId(scope: EntityScope, user: User): Promise<DxId<'project'>> {
-    if (EntityScopeUtils.isPublic(scope)) {
-      return user.publicFilesProject
-    } else if (EntityScopeUtils.isPrivate(scope)) {
-      return user.privateFilesProject
-    } else if (EntityScopeUtils.isSpaceScope(scope)) {
-      const spaceId = EntityScopeUtils.getSpaceIdFromScope(scope)
-      const membership = await this.spaceMembershipRepo.getMembership(spaceId, user.id)
-      await membership.spaces.load()
-      return membership.isHost() ? membership.spaces[0].hostProject : membership.spaces[0].guestProject
     }
   }
 }

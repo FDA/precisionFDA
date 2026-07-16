@@ -1,3 +1,7 @@
+# Explicit empty packages field: pnpm 11 errors with "packages field missing
+# or empty" otherwise. See the matching note in packages/server/pnpm-workspace.yaml.
+packages: []
+
 # Lets pnpm purge a stale node_modules without a TTY prompt. See the matching
 # note in packages/server/pnpm-workspace.yaml.
 confirmModulesPurge: false

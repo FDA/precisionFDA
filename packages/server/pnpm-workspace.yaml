@@ -3,6 +3,11 @@
 # directory is the cwd and the root pnpm-workspace.yaml is not visible.
 # The root workspace file is the source of truth — keep these two in sync.
 
+# Explicit empty packages field: pnpm 11 errors with "packages field missing
+# or empty" otherwise, which breaks `pnpm run ...` invoked with this directory
+# as cwd (e.g. via the local, non-Docker `make run-dev` targets).
+packages: []
+
 # Lets pnpm purge a stale node_modules without a TTY prompt. The per-service
 # pnpm-deps-cache-* volumes outlive image rebuilds, so a pnpm major upgrade
 # leaves them stamped with the old version; without this, the entrypoint

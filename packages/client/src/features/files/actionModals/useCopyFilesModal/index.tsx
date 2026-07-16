@@ -1,22 +1,24 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
-import React, { useEffect, useState } from 'react'
+import type { AxiosError } from 'axios'
+import type React from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { Button } from '../../../../components/Button'
-import { FileCheckIcon } from '../../../../components/icons/FileCheckIcon'
-import { FileIcon } from '../../../../components/icons/FileIcon'
-import { FolderOpenIcon } from '../../../../components/icons/FolderOpenIcon'
-import { cn } from '../../../../utils/cn'
-import { ApiErrorResponse, HomeScope, ServerScope } from '../../../home/types'
+import { Button } from '@/components/Button'
+import { FileCheckIcon } from '@/components/icons/FileCheckIcon'
+import { FileIcon } from '@/components/icons/FileIcon'
+import { FolderOpenIcon } from '@/components/icons/FolderOpenIcon'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { cn } from '@/utils/cn'
+import type { ApiErrorResponse, HomeScope, ServerScope } from '../../../home/types'
 import { getBasePathFromScope } from '../../../home/utils'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
-import { useModal } from '../../../modal/useModal'
-import { copyFilesRequest, fetchSelectedFiles, validateCopyingFiles } from '../../files.api'
-import { IExistingFileSet, ISelectedFile, ISelectedFolder, SelectedNode } from '../../files.types'
-import { ScopeAndFolderSelection } from './ScopeAndFolderSelection'
-import styles from './CopyFilesModal.module.css'
 import { Footer } from '../../../modal/modal.styles'
-import { toastError, toastSuccess } from '../../../../components/NotificationCenter/ToastHelper'
+import { useModal } from '../../../modal/useModal'
+import type { EditableSpace } from '../../../spaces/spaces.api'
+import { copyFilesRequest, fetchSelectedFiles, validateCopyingFiles } from '../../files.api'
+import type { IExistingFileSet, ISelectedFile, ISelectedFolder, SelectedNode } from '../../files.types'
+import styles from './CopyFilesModal.module.css'
+import { ScopeAndFolderSelection } from './ScopeAndFolderSelection'
 
 interface FileListItemContentProps {
   file: ISelectedFile
@@ -115,9 +117,9 @@ const SelectedFolder = ({ folder }: SelectedFolderProps): React.ReactElement => 
         </a>
       </div>
       <ul className={styles.folderChildren}>
-        {folder.children.map((child: ISelectedFile, index: number) => (
+        {folder.children.map((child: ISelectedFile) => (
           <li
-            key={index}
+            key={child.id}
             className={cn(styles.folderChild, !folder.isCopied && child.isCopied && styles.folderChildCopied)}
           >
             <FileListItemContent file={child} />
@@ -135,11 +137,11 @@ interface CopyFileListProps {
 const CopyFileList = ({ nodes }: CopyFileListProps): React.ReactElement => {
   return (
     <ul className={styles.selectedItemsList}>
-      {nodes.map((node: SelectedNode, index: number) => {
+      {nodes.map((node: SelectedNode) => {
         return node.type === 'UserFile' ? (
-          <SelectedFile key={index} file={node} />
+          <SelectedFile key={node.id} file={node} />
         ) : (
-          <SelectedFolder key={index} folder={node} />
+          <SelectedFolder key={node.id} folder={node} />
         )
       })}
     </ul>
@@ -156,10 +158,15 @@ export const useCopyFilesModal = ({
   sourceScopes,
   selectedIds,
   onSuccess,
+  fixedTarget,
+  headerText,
 }: {
   sourceScopes: ServerScope[]
   selectedIds: number[]
   onSuccess?: () => void
+  /** Locks the destination to this scope, skipping space selection (folder selection remains). */
+  fixedTarget?: EditableSpace
+  headerText?: string
 }): { modalComp: React.ReactElement; setShowModal: (show: boolean) => void; isShown: boolean } => {
   const { isShown, setShowModal } = useModal()
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>(undefined)
@@ -200,6 +207,9 @@ export const useCopyFilesModal = ({
       setCopyMessage('')
       setSelectedFolderId(undefined)
       setCopyFiles(selectedFiles)
+      // ScopeAndFolderSelection remounts on reopen and re-emits its scope; clearing
+      // here guarantees the validation effect below re-runs even for a fixed target.
+      setSelectedScope(null)
     }
   }, [isShown])
 
@@ -263,7 +273,9 @@ export const useCopyFilesModal = ({
         setIsDisableCopy(false)
       }
     })
-  }, [selectedScope])
+    // uids must be a dependency: with a fixed target the scope is set before the
+    // selected-files fetch resolves, so validation has to re-run when uids arrive.
+  }, [selectedScope, uids])
 
   const mutation = useMutation({
     mutationKey: ['copy-to-space', 'files'],
@@ -293,12 +305,12 @@ export const useCopyFilesModal = ({
     <ModalNext
       id="modal-files-validate-copied"
       data-testid="modal-files-validate-copied"
-      headerText="Add Files To Space"
+      headerText={headerText ?? 'Add Files To Space'}
       isShown={isShown}
       hide={(): void => setShowModal(false)}
       variant="large"
     >
-      <ModalHeaderTop headerText="Copy Files" hide={(): void => setShowModal(false)} />
+      <ModalHeaderTop headerText={headerText ?? 'Copy Files'} hide={(): void => setShowModal(false)} />
       <div className={styles.modalContainer}>
         {/* Left Panel - Selected Items */}
         <div className={cn(styles.panel, styles.panelLeft)}>
@@ -317,6 +329,7 @@ export const useCopyFilesModal = ({
           sourceScopes={sourceScopes}
           onSelectFolder={setSelectedFolderId}
           onSelectScope={setSelectedScope}
+          fixedTarget={fixedTarget}
         />
       </div>
       <Footer>

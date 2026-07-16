@@ -10,7 +10,7 @@ import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { getBaseLink } from '../apps/run/utils'
 import { useAuthUser } from '../auth/useAuthUser'
-import type { Action } from '../home/action-types'
+import type { Action, ModalAction } from '../home/action-types'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import type { BaseAPIResponse, HomeScope, ServerScope } from '../home/types'
 import { useLicensesListQuery } from '../licenses/queries'
@@ -26,7 +26,7 @@ import { useEditFolderModal } from './actionModals/useEditFolderModal'
 import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
-import { isOpenable } from './file.utils'
+import { getReviewAreaCopyTarget, isOpenable, type ReviewAreaCopyTarget } from './file.utils'
 import { moveFilesRequest } from './files.api'
 import type { IFile, NodePermissions, TreeOnSelectInfo } from './files.types'
 import { normalizePermissions } from './normalizePermissions'
@@ -61,7 +61,14 @@ export const useFilesSelectActions = ({
   selectedItems: IFile[]
   resourceKeys: string[]
   resetSelected?: () => void
-}): { actions: Action[]; modals: Record<string, React.ReactNode | null> } => {
+}): {
+  actions: Action[]
+  modals: Record<string, React.ReactNode | null>
+  /** Toolbar-only action for review spaces: copy selection to the opposite (shared/private) area. */
+  copyToAreaAction?: ModalAction
+  /** The resolved destination area, exposing its variant so the button can match the area colour. */
+  copyToAreaTarget?: ReviewAreaCopyTarget
+} => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
@@ -244,6 +251,30 @@ export const useFilesSelectActions = ({
   } = useCopyFilesModal({
     sourceScopes: Array.from(sourceScopes.values()) as ServerScope[],
     selectedIds: selectedIds,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
+  // One-click copy to the opposite area of a review space (shared <-> private),
+  // confirmed through the copy modal with the destination locked.
+  const areaTarget = getReviewAreaCopyTarget(space)
+  const {
+    modalComp: copyToAreaModal,
+    setShowModal: setCopyToAreaModal,
+    isShown: isShownCopyToAreaModal,
+  } = useCopyFilesModal({
+    sourceScopes: Array.from(sourceScopes.values()) as ServerScope[],
+    selectedIds: selectedIds,
+    fixedTarget: areaTarget
+      ? {
+          name: areaTarget.areaName,
+          title: areaTarget.areaName,
+          scope: areaTarget.scope,
+          type: 'review',
+          protected: !!space?.protected,
+        }
+      : undefined,
+    headerText: areaTarget?.modalTitle,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
@@ -496,7 +527,19 @@ export const useFilesSelectActions = ({
     filteredActions = actions.filter(action => allowedNames.includes(action.name))
   }
 
-  const modals = extractModalsFromActions(actions)
+  // Kept out of the actions array on purpose: it renders only as a toolbar button, not in the dropdown.
+  const copyToAreaAction: ModalAction | undefined = areaTarget
+    ? {
+        name: areaTarget.label,
+        type: 'modal',
+        func: () => setCopyToAreaModal(true),
+        isDisabled: selected.length === 0 || perms.some(p => !p.canCopy),
+        modal: copyToAreaModal,
+        showModal: isShownCopyToAreaModal,
+      }
+    : undefined
 
-  return { actions: filteredActions, modals }
+  const modals = extractModalsFromActions(copyToAreaAction ? [...actions, copyToAreaAction] : actions)
+
+  return { actions: filteredActions, modals, copyToAreaAction, copyToAreaTarget: areaTarget }
 }

@@ -140,8 +140,8 @@ export const Tab = styled.div`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &[data-variant='shared'] {
-    background: linear-gradient(135deg, oklch(56% 0.15 155.65) 0%, oklch(60% 0.18 155.65) 100%);
-    border-color: oklch(76% 0.15 155.65);
+    background: var(--area-shared-gradient);
+    border-color: var(--area-shared-border);
     color: oklch(90% 0.08 155.65);
     margin-left: -5px;
     z-index: 2;
@@ -156,15 +156,18 @@ export const Tab = styled.div`
       z-index: 1;
 
       &:hover {
-        opacity: 0.75;
+        opacity: 1;
+        background: var(--area-shared-gradient);
+        border-color: var(--area-shared-border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         transform: scale(0.99);
       }
     }
   }
 
   &[data-variant='private'] {
-    background: linear-gradient(135deg, oklch(56% 0.15 308.12) 0%, oklch(60% 0.18 308.12) 100%);
-    border-color: oklch(76% 0.15 308.12);
+    background: var(--area-private-gradient);
+    border-color: var(--area-private-border);
     color: oklch(96% 0.08 308.12);
     margin-right: -5px;
     z-index: 2;
@@ -172,14 +175,17 @@ export const Tab = styled.div`
 
     &[data-isactive='false'] {
       opacity: 0.6;
-      background: linear-gradient(135deg, oklch(50% 0.05 300.12) 0%, oklch(53% 0.08 300.12) 100%);
+      background: linear-gradient(135deg, oklch(50% 0.05 308.12) 0%, oklch(53% 0.08 308.12) 100%);
       border-color: oklch(76% 0.05 308.12);
       box-shadow: -28px 0 10px -20px rgba(0, 0, 0, 0.8) inset;
       transform: scale(0.985);
       z-index: 1;
 
       &:hover {
-        opacity: 0.75;
+        opacity: 1;
+        background: var(--area-private-gradient);
+        border-color: var(--area-private-border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         transform: scale(0.99);
       }
     }
@@ -264,20 +270,30 @@ export const SpaceHeader = styled.div`
 
   &[data-isshared='true'] {
     &::before {
-      background: linear-gradient(90deg, oklch(56% 0.15 155.65) 0%, oklch(60% 0.18 155.65) 50%, oklch(56% 0.15 155.65) 100%);
+      background: linear-gradient(
+        90deg,
+        var(--area-shared-accent) 0%,
+        var(--area-shared-accent-strong) 50%,
+        var(--area-shared-accent) 100%
+      );
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    box-shadow: 0 -20px 15px -20px oklch(56% 0.15 155.65) inset;
+    box-shadow: 0 -20px 15px -20px var(--area-shared-accent) inset;
   }
 
   &[data-isprivate='true'] {
     &::before {
-      background: linear-gradient(90deg, oklch(56% 0.15 308.12) 0%, oklch(60% 0.18 308.12) 50%, oklch(56% 0.15 308.12) 100%);
+      background: linear-gradient(
+        90deg,
+        var(--area-private-accent) 0%,
+        var(--area-private-accent-strong) 50%,
+        var(--area-private-accent) 100%
+      );
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    box-shadow: 0 -20px 15px -20px oklch(56% 0.15 308.12) inset;
+    box-shadow: 0 -20px 15px -20px var(--area-private-accent) inset;
   }
 `
 

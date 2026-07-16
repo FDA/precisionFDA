@@ -121,6 +121,23 @@
 
   --c-footer-bg: #f4f8fd;
   --c-subtleblue: #f5f8fc;
+
+  /*
+   * Space area accents — single source of truth for the SpaceTypeTabs, the
+   * SpaceHeader banner (spaces-show.styles.ts) and the "Copy to <area>" toolbar
+   * button (FileList.module.css). shared = green (hue 155.65), private = purple
+   * (hue 308.12). Keep active surfaces referencing these so the button never
+   * drifts from the tab it mirrors.
+   */
+  --area-shared-accent: oklch(56% 0.15 155.65);
+  --area-shared-accent-strong: oklch(60% 0.18 155.65);
+  --area-shared-border: oklch(76% 0.15 155.65);
+  --area-shared-gradient: linear-gradient(135deg, var(--area-shared-accent) 0%, var(--area-shared-accent-strong) 100%);
+
+  --area-private-accent: oklch(56% 0.15 308.12);
+  --area-private-accent-strong: oklch(60% 0.18 308.12);
+  --area-private-border: oklch(76% 0.15 308.12);
+  --area-private-gradient: linear-gradient(135deg, var(--area-private-accent) 0%, var(--area-private-accent-strong) 100%);
 }
 
 html.dark {

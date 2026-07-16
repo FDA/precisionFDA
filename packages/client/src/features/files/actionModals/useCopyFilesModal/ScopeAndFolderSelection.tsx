@@ -56,13 +56,11 @@ const FolderList = ({
   ) : (
     <div className={styles.selectionList}>
       {filteredFolders?.map(folder => (
-        <div
+        <button
           key={folder.id}
+          type="button"
           className={styles.selectionRow}
           onClick={() => onSelect(folder as IFolder)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={e => e.key === 'Enter' && onSelect(folder as IFolder)}
         >
           <div className={cn(styles.selectionCell, styles.selectionCellName)}>
             <div className={styles.itemName}>
@@ -74,7 +72,7 @@ const FolderList = ({
               </span>
             </div>
           </div>
-        </div>
+        </button>
       ))}
     </div>
   )
@@ -84,14 +82,17 @@ export const ScopeAndFolderSelection = ({
   sourceScopes,
   onSelectScope,
   onSelectFolder,
+  fixedTarget,
 }: {
   sourceScopes: ServerScope[]
   onSelectScope: (scope: ServerScope | null) => void
   onSelectFolder: (folderId: number | undefined) => void
+  /** Locks the destination to this scope: no space selection, only folder selection within it. */
+  fixedTarget?: EditableSpace
 }) => {
   const [breadcrumbs, setBreadcrumbs] = useState<IFolderPath[]>([])
   const [folderId, setFolderId] = useState<number | null>(null)
-  const [selectedTarget, setSelectedTarget] = useState<EditableSpace | undefined>(undefined)
+  const [selectedTarget, setSelectedTarget] = useState<EditableSpace | undefined>(fixedTarget)
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [searchType, setSearchType] = useState<'spaces' | 'folders'>('spaces')
   const BREADCRUMBS_LIMIT = 2
@@ -158,12 +159,14 @@ export const ScopeAndFolderSelection = ({
           </Button>
         </div>
         <div className={styles.breadcrumbs}>
-          <button type="button" className={styles.breadcrumbButton} onClick={() => setSelectedTarget(undefined)}>
-            All Scopes
-          </button>
+          {!fixedTarget && (
+            <button type="button" className={styles.breadcrumbButton} onClick={() => setSelectedTarget(undefined)}>
+              All Scopes
+            </button>
+          )}
           {breadcrumbs.length > BREADCRUMBS_LIMIT && (
             <span className={styles.breadcrumbItem}>
-              <span className={styles.breadcrumbDivider}>/</span>
+              {!fixedTarget && <span className={styles.breadcrumbDivider}>/</span>}
               <button
                 type="button"
                 className={styles.breadcrumbButton}
@@ -174,8 +177,10 @@ export const ScopeAndFolderSelection = ({
             </span>
           )}
           {breadcrumbs.slice(-BREADCRUMBS_LIMIT).map((b, index) => (
-            <span key={`divider-${index}`} className={styles.breadcrumbItem}>
-              <span className={styles.breadcrumbDivider}>/</span>
+            <span key={`${b.id}-${b.name}`} className={styles.breadcrumbItem}>
+              {!(fixedTarget && breadcrumbs.length <= BREADCRUMBS_LIMIT && index === 0) && (
+                <span className={styles.breadcrumbDivider}>/</span>
+              )}
               <button
                 type="button"
                 className={styles.breadcrumbButton}

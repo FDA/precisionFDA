@@ -44,3 +44,28 @@
 .copyVal:focus {
   outline: none;
 }
+
+/*
+ * "Copy to <area>" toolbar button, coloured to match its destination area tab
+ * (see SpaceTypeTabs / spaces-show.styles.ts). Accents come from the shared
+ * --area-*-gradient / --area-*-border tokens (variables.css) so the button
+ * cannot drift from the tab it mirrors. CSS-module rules are unlayered, so they
+ * win over the Tailwind button variant's background/border/text utilities.
+ */
+.copyToArea {
+  border-width: 1px;
+  border-style: solid;
+}
+.copyToArea:hover {
+  filter: brightness(1.06);
+}
+.copyToShared {
+  background: var(--area-shared-gradient);
+  border-color: var(--area-shared-border);
+  color: oklch(97% 0.03 155.65);
+}
+.copyToPrivate {
+  background: var(--area-private-gradient);
+  border-color: var(--area-private-border);
+  color: oklch(97% 0.03 308.12);
+}

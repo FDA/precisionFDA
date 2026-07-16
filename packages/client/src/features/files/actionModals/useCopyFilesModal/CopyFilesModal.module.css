@@ -1,4 +1,3 @@
-
 /* Modal Layout */
 .modalContainer {
   display: flex;
@@ -113,7 +112,6 @@
   background-color: var(--background);
   transition: all 150ms ease;
 }
-
 
 .fileCardCopied {
   background-color: var(--success-50);
@@ -314,7 +312,6 @@
   padding: 32px 16px;
   text-align: center;
   color: var(--c-text-500);
-  max-width: 300px;
 }
 
 .emptyStateText {
@@ -397,8 +394,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   padding: 10px 12px;
+  border: none;
   border-bottom: 1px solid var(--c-layout-border-100);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   transition: all 150ms ease;
   gap: 12px;

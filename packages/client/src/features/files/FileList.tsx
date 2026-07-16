@@ -8,7 +8,7 @@ import type {
   VisibilityState,
 } from '@tanstack/react-table'
 import { clsx } from 'clsx'
-import { ArrowUpRightFromSquareIcon } from 'lucide-react'
+import { ArrowUpRightFromSquareIcon, FolderInputIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { CopyText } from '@/components/CopyText/CopyText'
@@ -127,7 +127,7 @@ export const FileList = ({
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, files)
   const selectedFileIds = selectedObjects.map(o => o.uid).filter(Boolean)
 
-  const { actions, modals } = useFilesSelectActions({
+  const { actions, modals, copyToAreaAction, copyToAreaTarget } = useFilesSelectActions({
     homeScope,
     space,
     folderId: folderIdParam,
@@ -187,6 +187,20 @@ export const FileList = ({
             )}
           </QuickActions>
           <QuickActions>
+            {copyToAreaAction && selectedObjects.length > 0 && (
+              <Button
+                variant="outline"
+                data-testid="space-files-copy-to-area-button"
+                className={clsx(
+                  styles.copyToArea,
+                  copyToAreaTarget?.variant === 'private' ? styles.copyToPrivate : styles.copyToShared,
+                )}
+                onClick={(): void => copyToAreaAction.func()}
+                disabled={copyToAreaAction.isDisabled}
+              >
+                <FolderInputIcon height={14} /> {copyToAreaAction.name}
+              </Button>
+            )}
             {selectedFileIds.length > 0 && (
               <CopyText
                 value={selectedFileIds.join(', ')}
@@ -322,14 +336,12 @@ export const FilesListTable = ({
 
   function filterColsByScope(c: ColumnDefResolved<IFile>): boolean {
     return !(
-      (
-        (homeScope === 'me' && c.accessorKey === 'addedBy') ||
-        (homeScope !== 'spaces' && c.accessorKey === 'location') ||
-        // Hide 'featured' for all homeScopes except 'everybody'.
-        (homeScope !== 'everybody' && c.accessorKey === 'featured') ||
-        // Hide 'state' if homeScope is defined to something specific.
-        (homeScope !== undefined && c.accessorKey === 'state')
-      )
+      (homeScope === 'me' && c.accessorKey === 'addedBy') ||
+      (homeScope !== 'spaces' && c.accessorKey === 'location') ||
+      // Hide 'featured' for all homeScopes except 'everybody'.
+      (homeScope !== 'everybody' && c.accessorKey === 'featured') ||
+      // Hide 'state' if homeScope is defined to something specific.
+      (homeScope !== undefined && c.accessorKey === 'state')
     )
   }
 
