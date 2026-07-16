@@ -44,10 +44,6 @@
           <a class="btn btn-primary" href="<%=   admin_resend_activation_email_path(dxuser: @user.dxuser) %>"><span class="fa fa-key"></span> Resend</a>
         </li>
       <% end %>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Reset multi-factor authentication</h5>
-        <a class="btn btn-primary" href="<%=  admin_reset_mfa_user_path(dxuser: @user.dxuser) %>">Reset</a>
-      </li>
       <% if ["enabled","deactivated"].include?(@user.user_state) %>
         <li class="list-group-item">
           <% if @user.user_state == 'enabled' %>
@@ -64,12 +60,7 @@
           <% end %>
         </li>
       <% end %>
-
-          <li class="list-group-item">
-            <h5 class="list-group-item-heading">Unlock User</h5>
-            <a class="btn btn-primary" href="<%= admin_unlock_user_path(dxuser: @user.dxuser) %>" id="toggleLockUser"><span class="fa fa-unlock"></span>Unlock</a>
-          </li>
-      <% end %>
+    <% end %>
   </ul>
 </div>
 

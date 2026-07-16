@@ -7,17 +7,6 @@
 #########################################################
 
 class UserShowView
-  # disable / enable user
-  toggleLockUser: (data, ev) ->
-    href = $(ev.currentTarget).prop('href')
-    $.ajax(href, {
-      method: 'POST'
-    }).fail((data, textStatus, err) ->
-      Precision.alert.show("Permission Denied")
-    ).done((data) ->
-      Precision.alert.show("Successfully unlocked", "alert-success")
-    )
-
   showDeactivateUserModal: (root, e) ->
     dxuser = $(e.target).attr('data-dxuser')
     @deactivateUserModal.showModal(dxuser)

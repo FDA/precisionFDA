@@ -101,64 +101,6 @@ module Admin
       end
     end
 
-    # POST
-    # Resets 2FA.
-    # TODO PFDA-5953 - remove this method once we have user profile page in React.
-    # The feature is already implemented in Node - admin controller.
-    def reset_2fa
-      user = User.find_by(dxuser: unsafe_params[:dxuser])
-
-      begin
-        api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
-        api.call(user.dxid, "resetUserMFA", user_id: user.dxid, org_id: ORG_EVERYONE, revokeChildTokens: false)
-      rescue DXClient::Errors::DXClientError => e
-        if e.message =~ /MFA is already reset/
-          redirect_back(
-            fallback_location: user_path(user),
-            alert: "MFA is already reset or not yet configured",
-          )
-        else
-          redirect_back(
-            fallback_location: user_path(user),
-            alert: "There was a server error, please try again",
-          )
-        end
-      else
-        redirect_back(fallback_location: user_path(user), alert: "Reset successfully")
-      end
-    end
-
-    # TODO PFDA-5953 - remove this method once we have user profile page in React.
-    # The feature is already implemented in Node - admin controller.
-    # Rails is using paths generation and other stuff we dont want to break at the moment.
-    # precision-fda/app/views/users/show.html.erb
-    # POST
-    # Unlocks user.
-    def unlock_user
-      user = User.find_by(dxuser: unsafe_params[:dxuser])
-
-      begin
-        api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
-        api.call(
-          @context.user.dxid,
-          "unlockUserAccount",
-          user_id: user.dxid,
-          org_id: ORG_EVERYONE,
-        )
-      rescue DXClient::Errors::DXClientError => e
-        if request.post?
-          render json: { ok: "error" }, status: :forbidden
-        else
-          error = "There was an error, please try again later."
-          error = "permission denied, must be a user of the org." if e.message =~ /must be an admin/
-
-          redirect_back(fallback_location: user_path(user), alert: error)
-        end
-      else
-        redirect_back(fallback_location: user_path(user), alert: "User has been unlocked")
-      end
-    end
-
     # GET
     # Exports active users to CSV.
     def active
