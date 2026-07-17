@@ -68,7 +68,7 @@ type IPFDAClient interface {
 	LsMembers(spaceID string) error
 	LsDiscussions(spaceID string) error
 	Mkdir(names []string, folderID string, spaceID string, parents bool) error
-	Rmdir(args []string) error
+	Rmdir(args []string, recursive bool) error
 	Rm(args []string, folderID string, spaceID string) error
 	Head(arg string, lines int) error
 	GetScope() error
@@ -897,7 +897,7 @@ func (c *PFDAClient) Mkdir(dirs []string, folderID string, spaceID string, paren
 	return nil
 }
 
-func (c *PFDAClient) Rmdir(args []string) error {
+func (c *PFDAClient) Rmdir(args []string, recursive bool) error {
 
 	c.ContinueOnError = len(args) > 1
 
@@ -923,12 +923,13 @@ func (c *PFDAClient) Rmdir(args []string) error {
 			continue
 		}
 
-		if response[0].Children == 0 {
-			err := c.RemoveDir(arg)
-			c.HandleError(err)
-		} else {
+		if response[0].Children > 0 && !recursive {
 			c.HandleError(fmt.Errorf("Unable to remove non-empty folder"))
+			continue
 		}
+
+		err = c.RemoveDir(arg)
+		c.HandleError(err)
 	}
 
 	return nil

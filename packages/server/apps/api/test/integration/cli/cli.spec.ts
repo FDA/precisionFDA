@@ -46,7 +46,7 @@ describe('/cli', async () => {
     expect(body).to.be.an('object')
     expect(body).to.have.property('version')
     expect(body.version).to.be.a('string')
-    expect(body.version).to.equal('2.13.0')
+    expect(body.version).to.equal('2.14.0')
   })
 
   describe('cli describe', () => {

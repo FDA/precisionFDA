@@ -2,9 +2,7 @@
 
 ##### Written using Go
 
-As of Go 1.18 the BoringCrypto fork has been merged with the main branch. BoringCrypto is used because of [FIPS 140-2 compliance](https://boringssl.googlesource.com/boringssl/+/master/crypto/fipsmodule/FIPS.md).
-
-Latest releases of boringcrypto are available [here](https://go.googlesource.com/go/+/dev.boringcrypto/misc/boring/RELEASES)
+Distribution builds use Go's native [FIPS 140-3 support](https://go.dev/doc/security/fips140). The Docker build sets `GOFIPS140=v1.26.0`, which links the Go Cryptographic Module v1.26.0 and enables FIPS 140-3 mode by default.
 
 
 ### Getting Started:
@@ -53,6 +51,22 @@ or for staging https://precisionfda-staging.dnanexus.com/assets/new and then
 To test for local development, add the following flags `--server localhost:3000 --skipverify true`
 To test on staging, add the following flags `--server precisionfda-staging.dnanexus.com`
 
+To troubleshoot failing requests, add the `-debug` flag to any command. It traces every HTTP request and
+response (method, URL, headers, bodies, status, duration, retry attempts) to stderr, so it can be captured
+separately with `pfda <command> -debug 2>debug.log`. Response headers are filtered to the diagnostically
+relevant ones (`X-Request-Id`, `Content-Type`, `Retry-After`, ...), and error response bodies are always
+shown.
+
+What is redacted: secret-bearing request/response headers (like `Authorization`) are omitted; signatures
+and tokens are masked in the request-line URL and in the `Location` redirect header. Non-JSON bodies (file
+downloads, binary upload chunks) are summarized instead of dumped, so file contents never reach the trace.
+Oversized request bodies are summarized; oversized response bodies (JSON, or any error body) are truncated
+to the first 10KB and printed with a `<truncated>` marker.
+
+**Warning:** JSON request and response bodies are printed verbatim (up to 10KB). These bodies are **not**
+scrubbed, so any presigned upload/download URLs the API returns inside them - including their signatures and
+access tokens - appear in the trace in full. Always review the log before sharing it.
+
 For example:
 
    ``` # Set KEY API key generated above
@@ -74,14 +88,14 @@ For example:
 Run `make test`
 
 Or run it inside an interactive docker container
-   ```$ docker run -it --rm --entrypoint bash --network host --mount type=bind,source="$(pwd)",target=/go/src/dnanexus.com/precision-fda-cli -w /go/src/dnanexus.com/precision-fda-cli goboring/golang:1.16.7b7
+   ```$ docker run -it --rm --entrypoint bash --network host --mount type=bind,source="$(pwd)",target=/go/src/dnanexus.com/precision-fda-cli -w /go/src/dnanexus.com/precision-fda-cli precisionfda-cli
    $ go test ./...
    ```
 
 
 ### Build for Distribution
 
-Make sure the goboring docker image is built, then invoke `./build-dist.sh` from the /go directory.
+Make sure the `precisionfda-cli` docker image is built, then invoke `./build-dist.sh` from the /go directory.
 
 Build products will be available in `./dist`
 
@@ -128,18 +142,34 @@ windows		amd64
 
 # FIPS Compliance
 
-List of FIPS certifications is listed in the BoringCrypto:
-https://boringssl.googlesource.com/boringssl/+/master/crypto/fipsmodule/FIPS.md#validations
+The pFDA CLI uses Go's native FIPS 140-3 support. Distribution builds are compiled with `GOFIPS140=v1.26.0`, so FIPS 140-3 mode is enabled by default in the built executable.
 
-The current validation on NIST site:
-https://csrc.nist.gov/Projects/Cryptographic-Module-Validation-Program/Certificate/3678
+To verify the runtime status, run:
 
-The package is configured by itself solely by importing it, the relevant code is here: https://go.googlesource.com/go/+/dev.boringcrypto/src/crypto/tls/fipsonly/fipsonly.go
+```bash
+$ pfda -version
+```
 
-To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda` and ensure that crypto/internal/boring/sig.FIPSOnly.* is present.
+The output includes a `FIPS 140-3` line. A FIPS-enabled distribution build prints the selected Go Cryptographic Module version, for example:
 
+```text
+  FIPS 140-3  :    enabled (module v1.26.0)
+```
+
+If FIPS mode is not active, the command prints:
+
+```text
+  FIPS 140-3  :    warning: FIPS mode not active
+```
+
+See the [Go FIPS 140-3 documentation](https://go.dev/doc/security/fips140) for details about `crypto/fips140`, `GOFIPS140`, supported platforms, and module validation status.
 
 # Version History
+
+### 2.14.0 (2026-07-27)
+
+- New feature - rmdir `-r` flag; deletes a folder and all its nested contents (non-empty folders now require this flag)
+- New feature - `-debug` flag; traces HTTP requests/responses to stderr for troubleshooting (auth headers omitted and URL signatures masked; bodies printed verbatim)
 
 ### 2.13.0 (2026-06-30)
 

@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"dnanexus.com/precision-fda-cli/precisionfda"
@@ -116,6 +118,44 @@ func runMainInternal(surpressStdout bool) int {
 	return returnCode
 }
 
+func captureStdout(t *testing.T, fn func()) string {
+	t.Helper()
+
+	originalStdout := os.Stdout
+	reader, writer, err := os.Pipe()
+	test.Ok(t, err)
+
+	os.Stdout = writer
+	fn()
+	test.Ok(t, writer.Close())
+	os.Stdout = originalStdout
+
+	output, err := io.ReadAll(reader)
+	test.Ok(t, err)
+	test.Ok(t, reader.Close())
+
+	return string(output)
+}
+
+func captureStderr(t *testing.T, fn func()) string {
+	t.Helper()
+
+	originalStderr := os.Stderr
+	reader, writer, err := os.Pipe()
+	test.Ok(t, err)
+
+	os.Stderr = writer
+	fn()
+	test.Ok(t, writer.Close())
+	os.Stderr = originalStderr
+
+	output, err := io.ReadAll(reader)
+	test.Ok(t, err)
+	test.Ok(t, reader.Close())
+
+	return string(output)
+}
+
 func TestMainNoArgs(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
@@ -132,6 +172,53 @@ func TestWrongCmdError(t *testing.T) {
 	os.Args = []string{"pfda", "foobar"}
 	returnCode := runMainInternal(true)
 	test.Equals(t, 1, returnCode)
+}
+
+func TestVersionPrintsFIPSInfo(t *testing.T) {
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+
+	oldInvokeGetLatestVersion := invokeGetLatestVersion
+	defer func() { invokeGetLatestVersion = oldInvokeGetLatestVersion }()
+	invokeGetLatestVersion = func(client precisionfda.IPFDAClient) (string, error) {
+		return Version, nil
+	}
+
+	os.Args = []string{"pfda", "-version"}
+	output := captureStdout(t, func() {
+		returnCode := mainInternal()
+		test.Equals(t, 0, returnCode)
+	})
+
+	test.Assert(t, strings.Contains(output, "  FIPS 140-3  :"), "expected version output to include FIPS 140-3 status, got %q", output)
+	test.Assert(
+		t,
+		strings.Contains(output, "enabled (module ") || strings.Contains(output, "warning: FIPS mode not active"),
+		"expected native FIPS status in version output, got %q",
+		output,
+	)
+}
+
+func TestDebugFlag(t *testing.T) {
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+
+	oldInvokeListing := invokeListing
+	defer func() { invokeListing = oldInvokeListing }()
+	var funcWasCalled = false
+	invokeListing = func(client precisionfda.IPFDAClient, folderID *string, spaceID *string, flags map[string]bool) error {
+		funcWasCalled = true
+		return nil
+	}
+
+	os.Args = []string{"pfda", "ls", "--key", "HELLO", "--debug"}
+	stderr := captureStderr(t, func() {
+		returnCode := runMainInternal(true)
+		test.Equals(t, 0, returnCode)
+	})
+
+	test.Equals(t, true, funcWasCalled)
+	test.Assert(t, strings.Contains(stderr, "debug mode enabled"), "expected debug banner on stderr, got %q", stderr)
 }
 
 func TestPositionalCmdInWrongPlace(t *testing.T) {
@@ -638,28 +725,47 @@ func TestInvokeRmdir(t *testing.T) {
 		input.Reset()
 	}
 
-	invokeRmdir = func(client precisionfda.IPFDAClient, args *[]string) error {
+	invokeRmdir = func(client precisionfda.IPFDAClient, args *[]string, recursive bool) error {
 		funcWasCalled = true
 		input.Args = args
+		input.FlagRecursive = recursive
 		return nil
 	}
 
-	// Case: simple mkdir
+	// Case: simple rmdir
 	os.Args = []string{"pfda", "rmdir", "123", "--key", "AUTH_KEY"}
 	returnCode := runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
 	test.Equals(t, []string{"123"}, *input.Args)
+	test.Equals(t, false, input.FlagRecursive)
 	reset()
 
-	// Case: mkdir with multiple args
+	// Case: rmdir with multiple args
 	os.Args = []string{"pfda", "rmdir", "123", "333", "--key", "AUTH_KEY"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
 	test.Equals(t, []string{"123", "333"}, *input.Args)
+	test.Equals(t, false, input.FlagRecursive)
+	reset()
 
-	test.Equals(t, false, input.FlagParents)
+	// Case: recursive rmdir
+	os.Args = []string{"pfda", "rmdir", "123", "--recursive", "--key", "AUTH_KEY"}
+	returnCode = runMainInternal(false)
+	test.Equals(t, 0, returnCode)
+	test.Equals(t, true, funcWasCalled)
+	test.Equals(t, []string{"123"}, *input.Args)
+	test.Equals(t, true, input.FlagRecursive)
+	reset()
+
+	// Case: recursive rmdir short flag
+	os.Args = []string{"pfda", "rmdir", "123", "-r", "--key", "AUTH_KEY"}
+	returnCode = runMainInternal(false)
+	test.Equals(t, 0, returnCode)
+	test.Equals(t, true, funcWasCalled)
+	test.Equals(t, []string{"123"}, *input.Args)
+	test.Equals(t, true, input.FlagRecursive)
 	reset()
 }
 

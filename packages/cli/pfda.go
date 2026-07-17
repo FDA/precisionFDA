@@ -204,8 +204,8 @@ var invokeMkdir = func(client precisionfda.IPFDAClient, names *[]string, folderI
 	return client.Mkdir(*names, *folderID, *spaceID, parents)
 }
 
-var invokeRmdir = func(client precisionfda.IPFDAClient, args *[]string) error {
-	return client.Rmdir(*args)
+var invokeRmdir = func(client precisionfda.IPFDAClient, args *[]string, recursive bool) error {
+	return client.Rmdir(*args, recursive)
 }
 
 var invokeRm = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string) error {
@@ -315,6 +315,7 @@ func mainInternal() int {
 	// optional flags for adjusting the desired output values, format and behavior
 	flagBrief := flag.Bool("brief", false, "[optional] Only present brief info")
 	flagJson := flag.Bool("json", false, "[optional] Present result as JSON")
+	flagDebug := flag.Bool("debug", false, "[optional] Print HTTP request/response traces to stderr (secrets redacted)")
 	flagFilesOnly := flag.Bool("files", false, "[optional] Only present files")
 	flagFoldersOnly := flag.Bool("folders", false, "[optional] Only present folders")
 	flagPublic := flag.Bool("public", false, "[optional] Only present public scope")
@@ -378,8 +379,13 @@ func mainInternal() int {
 		transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
 
+	// Must come after the *http.Transport type assertion above, as it wraps the transport
+	if *flagDebug {
+		pfdaclient.EnableDebug(os.Stderr)
+	}
+
 	if *pfdaVersion {
-		printInfo(pfdaclient)
+		printInfo(transport)
 		checkLatestVersion(pfdaclient)
 		return 0
 	}
@@ -775,7 +781,7 @@ func mainInternal() int {
 		if help {
 			return helpers.PrintRmdirHelp()
 		}
-		err := invokeRmdir(pfdaclient, &args)
+		err := invokeRmdir(pfdaclient, &args, recursive)
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
@@ -1088,7 +1094,7 @@ func mainInternal() int {
 }
 
 // PRINT FUNCTIONS
-func printInfo(pfdaclient *precisionfda.PFDAClient) {
+func printInfo(transport *http.Transport) {
 	fmt.Printf("\npFDA CLI Info\n")
 	fmt.Printf("  Commit ID   :    %s\n", commitID)
 	fmt.Printf("  CLI Version :    %s\n", Version)
@@ -1096,10 +1102,9 @@ func printInfo(pfdaclient *precisionfda.PFDAClient) {
 	fmt.Printf("  Build Time  :    %s\n", BuildTime)
 	fmt.Printf("  Go Version  :    %s\n", runtime.Version())
 
-	transport := pfdaclient.Client.HTTPClient.Transport.(*http.Transport)
 	fmt.Printf("  TLS Version :    %s\n", GetTLSVersion(transport))
 
-	// printCryptoInfo()
+	printCryptoInfo()
 }
 
 func checkLatestVersion(pfdaclient *precisionfda.PFDAClient) {

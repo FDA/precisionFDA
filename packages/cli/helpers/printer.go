@@ -346,14 +346,16 @@ func PrintRmdirHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Deleting a folder. Only empty folders are allowed to be deleted.\n")
+	writeLine("  For:", "Deleting a folder. Non-empty folders require the recursive flag.\n")
 	writeLine("  Usage:", "rmdir <FOLDER_ID> [FLAG...]\n")
 	writeLine("  Examples:", "rmdir 2221 [Removes folder (id:2221)]")
 	writeLine("  ", "rmdir 2221 2332 2333 [Removes folders with given ids if empty]\n")
+	writeLine("  ", "rmdir 2221 -recursive [Removes folder and all nested contents]\n")
 	writeLine("  Arguments:", "")
 	writeLine("   <FOLDER_ID>", "The numeric ID of the folder to delete (required)\n")
 	writeLine("  Flags:", "All flags listed below are OPTIONAL")
 	writeLine("   -h, -help", "Displays this help message and exits")
+	writeLine("   -r, -recursive", "Recursively removes folder contents")
 	writeLine("   -json", "Displays response in JSON format")
 
 	writer.Flush()
