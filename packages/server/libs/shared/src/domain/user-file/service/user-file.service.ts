@@ -5,7 +5,6 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
-import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
@@ -19,8 +18,8 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { ASSET_VALIDATION_ERROR, DeleteRelationError, PermissionError, ValidationError } from '@shared/errors'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { DeleteRelationError, PermissionError, ValidationError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { FileDescribeResponse } from '@shared/platform-client/platform-client.responses'
@@ -57,25 +56,11 @@ export class UserFileService {
     private readonly nodeRepo: NodeRepository,
     private readonly fileRepo: UserFileRepository,
     private readonly spaceRepo: SpaceRepository,
-    private readonly licensedItemRepo: LicensedItemRepository,
     private readonly nodeHelper: NodeHelper,
     private readonly eventHelper: EventHelper,
     private readonly spaceEventService: SpaceEventService,
     private readonly notificationService: NotificationService,
   ) {}
-
-  async getRunnableFileByAccessibleScope(uids: Uid<'file'>[], accessibleScope: EntityScope): Promise<FileOrAsset[]> {
-    let accessibleWhere = {}
-    if (accessibleScope === STATIC_SCOPE.PRIVATE) {
-      accessibleWhere = { user: this.userCtx.id, scope: STATIC_SCOPE.PRIVATE }
-    } else {
-      accessibleWhere = { scope: accessibleScope }
-    }
-    return this.fileRepo.find({
-      uid: { $in: uids },
-      $or: [{ scope: STATIC_SCOPE.PUBLIC }, { ...accessibleWhere }],
-    })
-  }
 
   async getFilesByUids(uids: Uid<'file'>[]): Promise<UserFile[]> {
     if (uids.length === 0) {
@@ -307,20 +292,6 @@ export class UserFileService {
     await this.fileRepo.persistAndFlush(file)
 
     return file
-  }
-
-  /**
-   * An asset cannot be deleted if it has an attached license and is associated with an app.
-   *
-   * @param assetToRemove
-   */
-  async validateAssetRemoval(assetToRemove: Asset): Promise<void> {
-    await this.em.populate(assetToRemove, ['apps'])
-    const licenseItems = await this.licensedItemRepo.getLicenseItemsForNode(assetToRemove.id)
-
-    if (assetToRemove.apps.count() > 0 && licenseItems.length > 0) {
-      throw new ValidationError(ASSET_VALIDATION_ERROR)
-    }
   }
 
   async validateSpaceReports(fileToRemove: UserFile): Promise<void> {

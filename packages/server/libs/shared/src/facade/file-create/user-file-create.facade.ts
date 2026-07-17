@@ -5,10 +5,12 @@ import { JobService } from '@shared/domain/job/job.service'
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
 import { UserService } from '@shared/domain/user/service/user.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { AssetCreateDTO } from '@shared/domain/user-file/dto/asset-create.dto'
 import { UserFileCreateDTO } from '@shared/domain/user-file/dto/user-file-create.dto'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { InternalError, InvalidStateError, PermissionError } from '@shared/errors'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { FILE_STATE_DX, FILE_STATE_PFDA, PARENT_TYPE } from '../../domain/user-file/user-file.types'
@@ -88,6 +90,45 @@ export class UserFileCreateFacade {
       scopedParentFolderId: isSpaceScope ? folder?.id : null,
     })
     return { uid: file.uid, id: file.uid }
+  }
+
+  async createAsset(input: AssetCreateDTO): Promise<EntityUidResponseDTO> {
+    const user = await this.user.loadEntity()
+
+    await this.userService.checkTotalChargesLimit()
+
+    // Assets are always created in the user's private files project.
+    const project = await user.getDestinationProjectId(STATIC_SCOPE.PRIVATE, 'editable')
+    if (!project) {
+      throw new InvalidStateError('User does not have access to a private files project')
+    }
+
+    const dxid = (
+      await this.platformFileService.createFile({
+        name: input.name,
+        project,
+        description: input.description ?? '',
+      })
+    )?.id as DxId<'file'>
+
+    if (dxid == null) {
+      throw new InternalError('Failed to create the asset on the platform')
+    }
+
+    const asset = await this.nodeService.createAsset(
+      {
+        dxid,
+        project,
+        name: input.name,
+        description: input.description ?? '',
+        userId: user.id,
+        scope: STATIC_SCOPE.PRIVATE,
+        state: FILE_STATE_DX.OPEN,
+      },
+      input.paths,
+    )
+
+    return { uid: asset.uid, id: asset.uid }
   }
 
   async saveFileToDB(input: FileCreate): Promise<UserFile> {

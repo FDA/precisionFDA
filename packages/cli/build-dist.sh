@@ -2,7 +2,7 @@
 #
 # N.B. run from packages/cli
 
-VERSION=2.14.0
+VERSION=2.14.1
 COMMITID=$(git rev-parse HEAD)
 SHORT_SHA=$(git rev-parse --short HEAD)
 

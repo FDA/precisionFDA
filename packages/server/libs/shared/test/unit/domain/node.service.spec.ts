@@ -9,13 +9,13 @@ import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderService } from '@shared/domain/user-file/folder.service'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
+import { AssetService } from '@shared/domain/user-file/service/asset.service'
 import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
 import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
@@ -71,7 +71,7 @@ describe('NodeService', () => {
     const assetCountService = {
       count: stub().resolves(0),
     } as unknown as AssetCountService
-    const assetRepository = {} as unknown as AssetRepository
+    const assetService = {} as unknown as AssetService
 
     return new NodeService(
       em,
@@ -84,7 +84,7 @@ describe('NodeService', () => {
       nodeHelper,
       fileCountService,
       assetCountService,
-      assetRepository,
+      assetService,
     )
   }
 

@@ -10,8 +10,8 @@ export class ArchiveEntry {
   @Property({ type: 'text' })
   path: string
 
-  @Property()
-  name: string
+  @Property({ nullable: true })
+  name?: string
 
   @ManyToOne(() => Asset)
   asset: Asset

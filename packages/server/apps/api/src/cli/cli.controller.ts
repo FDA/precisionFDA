@@ -22,7 +22,7 @@ export class CliController {
 
   @Get('/version/latest')
   getLatestVersion(): { version: string } {
-    return { version: '2.14.0' }
+    return { version: '2.14.1' }
   }
 
   @ApiOperation({ summary: 'Exchange CLI token for platform workers' })

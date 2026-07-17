@@ -132,10 +132,14 @@ func (c *PFDAClient) UploadResource(path string, portalID string, withProgressBa
 	}
 
 	chunkPool := make(chan uploadChunk, c.NumRoutines)
-	wg := c.initWaitGroup(fileUID, chunkPool, &size, withProgressBar)
-	c.readAndChunk(file, chunkPool, &size)
+	wait := c.initWaitGroup(fileUID, chunkPool, &size, withProgressBar)
+	if err := c.readAndChunk(file, chunkPool, &size); err != nil {
+		close(chunkPool)
+		wait()
+		return err
+	}
 	close(chunkPool)
-	wg.Wait()
+	wait()
 
 	closeURL := fmt.Sprintf("%s/api/v2/files/%s/close", c.BaseURL, fileUID)
 	c.makeRequest("PATCH", closeURL, nil)

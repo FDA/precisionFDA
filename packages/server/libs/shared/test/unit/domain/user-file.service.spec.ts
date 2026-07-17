@@ -4,7 +4,6 @@ import { expect } from 'chai'
 import sinon, { match, SinonStub, stub } from 'sinon'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EventHelper } from '@shared/domain/event/event.helper'
-import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Organization } from '@shared/domain/org/organization.entity'
 import { Space } from '@shared/domain/space/space.entity'
@@ -13,7 +12,6 @@ import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-even
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -24,7 +22,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { FILE_STATE_DX, FILE_STI_TYPE, PARENT_TYPE, SelectedFile } from '@shared/domain/user-file/user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { ASSET_VALIDATION_ERROR, PermissionError, ValidationError } from '@shared/errors'
+import { PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import * as queue from '@shared/queue'
 
@@ -82,8 +80,6 @@ describe('UserFileService', () => {
   const getWarningsForUnclosedFilesStub = stub()
   const sanitizeNodeNamesStub = stub()
   const renameDuplicateFilesStub = stub()
-
-  const getLicenseItemsForNodeStub = stub()
 
   const createAndSendSpaceEventStub = stub()
 
@@ -178,9 +174,6 @@ describe('UserFileService', () => {
     findEditable: findEditableStub,
     persistAndFlush: fileRepoPersistAndFlushStub,
   } as unknown as UserFileRepository
-  const licensedItemRepo = {
-    getLicenseItemsForNode: getLicenseItemsForNodeStub,
-  } as unknown as LicensedItemRepository
   const spaceRepository = {
     findOne: spaceFindOneStub,
   } as unknown as SpaceRepository
@@ -258,9 +251,6 @@ describe('UserFileService', () => {
 
     nodeHelperCollectChildrenStub.reset()
     nodeHelperCollectChildrenStub.throws()
-
-    getLicenseItemsForNodeStub.reset()
-    getLicenseItemsForNodeStub.throws()
 
     userClientFileCloseStub.reset()
     userClientFileCloseStub.throws()
@@ -696,57 +686,6 @@ describe('UserFileService', () => {
     it('throw error if not in leadership', async () => {})
   })
 
-  describe('#validateAssetRemoval', async () => {
-    it('has license and no app - no error', async () => {
-      const asset = {
-        id: 1,
-        apps: {
-          count: () => 0,
-        },
-      } as unknown as Asset
-      emPopulateStub.reset()
-      getLicenseItemsForNodeStub.withArgs(asset.id).returns([{}])
-
-      const userFileService = getInstance()
-      await userFileService.validateAssetRemoval(asset)
-
-      expect(emPopulateStub.calledOnce).to.be.true()
-    })
-
-    it('has app and no license - no error', async () => {
-      const asset = {
-        id: 1,
-        apps: {
-          count: () => 1,
-        },
-      } as unknown as Asset
-      emPopulateStub.reset()
-      getLicenseItemsForNodeStub.withArgs(asset.id).returns([])
-
-      const userFileService = getInstance()
-      await userFileService.validateAssetRemoval(asset)
-
-      expect(emPopulateStub.calledOnce).to.be.true()
-    })
-
-    it('has app and license - throws error', async () => {
-      const asset = {
-        id: 1,
-        apps: {
-          count: () => 1,
-        },
-      } as unknown as Asset
-      emPopulateStub.reset()
-      getLicenseItemsForNodeStub.withArgs(asset.id).returns([{}])
-
-      const userFileService = getInstance()
-      await expect(userFileService.validateAssetRemoval(asset)).to.be.rejectedWith(
-        ValidationError,
-        ASSET_VALIDATION_ERROR,
-      )
-    })
-  })
-
   describe('#getFilesByUids', () => {
     it('returns [] for empty input', async () => {
       const userFileService = getInstance()
@@ -855,7 +794,6 @@ describe('UserFileService', () => {
       nodeRepository,
       fileRepository,
       spaceRepository,
-      licensedItemRepo,
       nodeHelper,
       eventHelper,
       spaceEventService,

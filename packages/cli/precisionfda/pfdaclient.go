@@ -11,11 +11,9 @@ import (
 	"math"
 	"net/url"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -154,12 +152,6 @@ type jsonCreateFilePayload struct {
 	ParentID   string `json:"parent_id"`
 }
 
-type jsonCreateAssetPayload struct {
-	Name  string   `json:"name"`
-	Desc  string   `json:"description"`
-	Paths []string `json:"paths"`
-}
-
 type jsonCreateFolderPayload struct {
 	Name           string `json:"name"`
 	ParentFolderID string `json:"parent_folder_id,omitempty"`
@@ -217,124 +209,6 @@ func (c *PFDAClient) CallAPI(route string, data string, outputFile string) error
 	return nil
 }
 
-func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFilePath string) error {
-	createURL := c.BaseURL + "/api/create_asset"
-	closeURL := c.BaseURL + "/api/close_asset"
-
-	// Get list of all asset files
-	var fileList []string
-	assetSize := int64(0)
-	err := filepath.Walk(rootFolderPath, func(path string, f os.FileInfo, err error) error {
-		if !f.IsDir() {
-			relPath, err := filepath.Rel(rootFolderPath, path)
-			if err != nil {
-				return err
-			}
-			fileList = append(fileList, relPath)
-			assetSize += f.Size()
-		}
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-
-	if assetSize > maxFileSize {
-		return fmt.Errorf("Size of asset folder '%s' (%d) exceeds maximum allowed file size(%d)", rootFolderPath, assetSize, maxFileSize)
-	}
-
-	if assetSize == 0 {
-		return fmt.Errorf("Size of asset folder '%s' is 0 - uploading an empty asset is not allowed", rootFolderPath)
-	}
-
-	// Read in the readme all at once
-	readmeBuf, err := os.ReadFile(readmeFilePath)
-	if err != nil {
-		return err
-	}
-
-	jsonData, err := json.Marshal(jsonCreateAssetPayload{
-		Name:  name,
-		Desc:  string(readmeBuf),
-		Paths: fileList[:],
-	})
-	if err != nil {
-		return err
-	}
-
-	fileID, err := c.createFileID(createURL, jsonData)
-	if err != nil {
-		return err
-	}
-
-	chunkPool := make(chan uploadChunk, c.NumRoutines)
-	wg := c.initWaitGroup(fileID, chunkPool, &assetSize, true)
-
-	if !c.JsonResponse {
-		fmt.Println(">> Archiving asset...")
-	}
-	// different approach for WinOS tar command
-	if runtime.GOOS == "windows" {
-		cmd := exec.Command("tar", "-cf", name, "-C", rootFolderPath, ".")
-		if strings.HasSuffix(name, ".tar.gz") {
-			cmd = exec.Command("tar", "-czf", name, "-C", rootFolderPath, ".")
-		}
-		err = cmd.Start()
-		if err != nil {
-			return err
-		}
-		err = cmd.Wait()
-		if err != nil {
-			return err
-		}
-		tarArchive, err := os.Open(name)
-		if err != nil {
-			return err
-		}
-		defer os.Remove(name)
-		defer tarArchive.Close()
-		c.readAndChunk(tarArchive, chunkPool, &assetSize)
-	} else {
-		cmd := exec.Command("tar", "-c", "-C", rootFolderPath, ".")
-		if strings.HasSuffix(name, ".tar.gz") {
-			cmd = exec.Command("tar", "-cz", "-C", rootFolderPath, ".")
-		}
-		stdout, err := cmd.StdoutPipe()
-		err = cmd.Start()
-		if err != nil {
-			return err
-		}
-		c.readAndChunk(stdout, chunkPool, &assetSize)
-	}
-	if !c.JsonResponse {
-		fmt.Print(">> Uploading asset |")
-	}
-
-	close(chunkPool)
-	wg.Wait()
-
-	if !c.JsonResponse {
-		fmt.Println(">| Uploaded 100%\n>> Finalizing asset...")
-	}
-	jsonData, err = json.Marshal(jsonID{
-		ID: fileID,
-	})
-	if err != nil {
-		return err
-	}
-
-	c.makeRequestFail("POST", closeURL, jsonData)
-	assetURL := c.BaseURL + "/home/assets/" + fileID
-	if c.JsonResponse {
-		helpers.PrettyPrint(struct {
-			Url string `json:"url"`
-		}{Url: assetURL})
-	} else {
-		fmt.Println(">> Done! Access your asset at " + assetURL)
-	}
-	return nil
-}
-
 // If folderID is not empty, the file will be uploaded to the specified folder
 // If spaceID is empty, the file will be uploaded to the user's home
 func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, withProgressBar bool) error {
@@ -352,7 +226,7 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, wi
 
 	size := info.Size()
 	if size > maxFileSize {
-		return fmt.Errorf("Size of file '%s' (%d) exceeds maximum allowed file size(%d)", path, size, maxFileSize)
+		return fmt.Errorf("Size of file '%s' (%d) exceeds maximum allowed file size (%d)", path, size, maxFileSize)
 	}
 
 	if size == 0 {
@@ -377,7 +251,6 @@ func (c *PFDAClient) UploadStdin(fileName string, folderID string, spaceID strin
 
 func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, spaceID string, size int64, withProgressBar bool) error {
 	createURL := c.BaseURL + "/api/create_file"
-	closeURL := c.BaseURL + "/api/close_file"
 
 	scope, parentType, parentId := "", "", ""
 	if spaceID != "" {
@@ -416,25 +289,25 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 		fmt.Printf(">> Uploading file %s\n", path)
 	}
 
-	wg := c.initWaitGroup(fileID, chunkPool, &size, withProgressBar)
-	c.readAndChunk(file, chunkPool, &size)
+	wait := c.initWaitGroup(fileID, chunkPool, &size, withProgressBar)
+	if err := c.readAndChunk(file, chunkPool, &size); err != nil {
+		close(chunkPool)
+		wait()
+		return fmt.Errorf("reading file: %w", err)
+	}
 
 	close(chunkPool)
 	c.SetTags(fileID, []string{tagCLI})
-	wg.Wait()
+	wait()
 
 	if withProgressBar && !c.JsonResponse {
 		fmt.Println(">> Finalizing file...")
 	}
 
-	jsonData, err = json.Marshal(jsonID{
-		ID: fileID,
-	})
-	if err != nil {
+	closeURL := c.BaseURL + "/api/v2/files/" + fileID + "/close"
+	if _, err := c.makeRequest("PATCH", closeURL, nil); err != nil {
 		return err
 	}
-
-	c.makeRequestFail("POST", closeURL, jsonData)
 	var finalUrl string
 	if spaceID != "" {
 		finalUrl = c.BaseURL + "/spaces/" + spaceID + "/files/" + fileID
@@ -1222,13 +1095,15 @@ func (c *PFDAClient) parallelDownload(uids []string, outputFilePath string, over
 	wg.Wait()
 }
 
-func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size *int64, withProgressBar bool) (wg *sync.WaitGroup) {
+// initWaitGroup launches numRoutines upload goroutines and returns a wait
+// function that blocks until all goroutines finish and then stops the
+// progress writer.  Callers must close chunkPool before calling wait().
+func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size *int64, withProgressBar bool) func() {
 	numRoutines := helpers.Min(c.NumRoutines, int(math.Ceil(float64(*size)/float64(c.ChunkSize))))
 
 	var totalSent uint64 = 0
 	writer := uilive.New()
 	writer.Start()
-	defer writer.Stop()
 
 	var g sync.WaitGroup
 	for i := 0; i < numRoutines; i++ {
@@ -1249,12 +1124,14 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 			g.Done()
 		}()
 	}
-	wg = &g
-	return
+
+	return func() {
+		g.Wait()
+		writer.Stop()
+	}
 }
 
-func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *int64) {
-	// dynamically adjust chunkSize
+func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *int64) error {
 	chunkIndex := 1
 	var totalDataLength = 0
 	for {
@@ -1264,7 +1141,7 @@ func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *
 			tempBuf := byteBuf[i:]
 			m, err := f.Read(tempBuf)
 			if err != nil && err != io.EOF {
-				panic(err)
+				return err
 			}
 			i += m
 			if err == io.EOF {
@@ -1278,11 +1155,12 @@ func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *
 		}
 		ch <- uploadChunk{
 			index: chunkIndex,
-			data:  byteBuf[:i], // use slice
+			data:  byteBuf[:i],
 		}
 		chunkIndex++
 	}
 	atomic.StoreInt64(size, int64(totalDataLength))
+	return nil
 }
 
 func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {

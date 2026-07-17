@@ -21,6 +21,7 @@ import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
+import { AssetService } from '@shared/domain/user-file/service/asset.service'
 import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
 import { AssetScopeFilterProvider } from '@shared/domain/user-file/service/asset-scope-filter.provider'
 import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
@@ -56,6 +57,7 @@ import { Node } from './node.entity'
   ],
   providers: [
     UserFileService,
+    AssetService,
     FolderService,
     NodeService,
     ArchiveEntryService,
@@ -69,6 +71,7 @@ import { Node } from './node.entity'
   ],
   exports: [
     UserFileService,
+    AssetService,
     FolderService,
     NodeService,
     NodeHelper,

@@ -166,6 +166,10 @@ See the [Go FIPS 140-3 documentation](https://go.dev/doc/security/fips140) for d
 
 # Version History
 
+### 2.14.1 (2026-07-27)
+
+- fixed issue with upload-asset across all platforms
+
 ### 2.14.0 (2026-07-27)
 
 - New feature - rmdir `-r` flag; deletes a folder and all its nested contents (non-empty folders now require this flag)

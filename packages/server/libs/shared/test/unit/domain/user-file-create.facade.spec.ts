@@ -4,18 +4,19 @@ import { JobService } from '@shared/domain/job/job.service'
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
 import { UserService } from '@shared/domain/user/service/user.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { AssetCreateDTO } from '@shared/domain/user-file/dto/asset-create.dto'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
-import { InternalError } from '@shared/errors'
+import { InternalError, InvalidStateError } from '@shared/errors'
 import { FileCreate } from '@shared/facade/file-create/model/file-create'
 import { FileCreateWithContent } from '@shared/facade/file-create/model/file-create-with-content'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 
 describe('UserFileCreateFacade', () => {
   const USER_ID = 0
-  const USER_CTX = { id: USER_ID } as UserContext
 
   const FILE_PARENT_TYPE = PARENT_TYPE.USER
   const FILE_SCOPE = STATIC_SCOPE.PRIVATE
@@ -39,8 +40,12 @@ describe('UserFileCreateFacade', () => {
 
   const platformCreateFileStub = stub()
   const serviceCreateFileStub = stub()
+  const serviceCreateAssetStub = stub()
   const serviceCloseFileStub = stub()
   const uploadFileContentStub = stub()
+  const checkTotalChargesLimitStub = stub()
+  const getDestinationProjectIdStub = stub()
+  const loadEntityStub = stub()
 
   beforeEach(() => {
     platformCreateFileStub.reset()
@@ -65,12 +70,24 @@ describe('UserFileCreateFacade', () => {
       })
       .resolves(SERVICE_RESULT)
 
+    serviceCreateAssetStub.reset()
+    serviceCreateAssetStub.throws()
+
     serviceCloseFileStub.reset()
     serviceCloseFileStub.throws()
     serviceCloseFileStub.withArgs(`${DXID}-1`).resolves()
 
     uploadFileContentStub.reset()
     uploadFileContentStub.throws()
+
+    checkTotalChargesLimitStub.reset()
+    checkTotalChargesLimitStub.resolves()
+
+    getDestinationProjectIdStub.reset()
+    getDestinationProjectIdStub.resolves(PROJECT)
+
+    loadEntityStub.reset()
+    loadEntityStub.resolves({ id: USER_ID, getDestinationProjectId: getDestinationProjectIdStub })
   })
 
   describe('#saveFileToDB', () => {
@@ -149,6 +166,86 @@ describe('UserFileCreateFacade', () => {
     })
   })
 
+  describe('#createAsset', () => {
+    const PATHS = ['work/tool.jar', 'usr/bin/bgzip']
+
+    const ASSET_CREATE: AssetCreateDTO = {
+      name: 'asset.tar.gz',
+      description: DESCRIPTION,
+      paths: PATHS,
+    }
+
+    const ASSET_RESULT = {
+      name: ASSET_CREATE.name,
+      uid: `${DXID}-1`,
+    } as unknown as Asset
+
+    beforeEach(() => {
+      platformCreateFileStub.reset()
+      platformCreateFileStub.throws()
+      platformCreateFileStub
+        .withArgs({ name: ASSET_CREATE.name, project: PROJECT, description: DESCRIPTION })
+        .returns({ id: DXID })
+
+      serviceCreateAssetStub.reset()
+      serviceCreateAssetStub.throws()
+      serviceCreateAssetStub
+        .withArgs(
+          {
+            dxid: DXID,
+            project: PROJECT,
+            name: ASSET_CREATE.name,
+            description: DESCRIPTION,
+            userId: USER_ID,
+            scope: STATIC_SCOPE.PRIVATE,
+            state: STATE,
+          },
+          PATHS,
+        )
+        .resolves(ASSET_RESULT)
+    })
+
+    it('should check the total charges limit before creating', async () => {
+      await getInstance().createAsset(ASSET_CREATE)
+
+      expect(checkTotalChargesLimitStub.calledOnce).to.be.true()
+    })
+
+    it('should reject when the user has no private files project', async () => {
+      getDestinationProjectIdStub.reset()
+      getDestinationProjectIdStub.resolves(null)
+
+      await expect(getInstance().createAsset(ASSET_CREATE)).to.be.rejectedWith(
+        InvalidStateError,
+        'User does not have access to a private files project',
+      )
+    })
+
+    it('should reject if platform returns a null dxid', async () => {
+      platformCreateFileStub.reset()
+      platformCreateFileStub.returns({ id: null })
+
+      await expect(getInstance().createAsset(ASSET_CREATE)).to.be.rejectedWith(
+        InternalError,
+        'Failed to create the asset on the platform',
+      )
+    })
+
+    it('should not catch error from the create asset service', async () => {
+      const error = new Error('my error')
+      serviceCreateAssetStub.reset()
+      serviceCreateAssetStub.throws(error)
+
+      await expect(getInstance().createAsset(ASSET_CREATE)).to.be.rejectedWith(error)
+    })
+
+    it('should return the created asset uid as both uid and id', async () => {
+      const res = await getInstance().createAsset(ASSET_CREATE)
+
+      expect(res).to.deep.equal({ uid: `${DXID}-1`, id: `${DXID}-1` })
+    })
+  })
+
   function getInstance(): UserFileCreateFacade {
     const platformFileService = {
       createFile: platformCreateFileStub,
@@ -156,11 +253,15 @@ describe('UserFileCreateFacade', () => {
     } as unknown as PlatformFileService
     const nodeService = {
       createFile: serviceCreateFileStub,
+      createAsset: serviceCreateAssetStub,
       closeFile: serviceCloseFileStub,
     } as unknown as NodeService
     const jobService = {} as unknown as JobService
-    const userService = {} as unknown as UserService
+    const userService = {
+      checkTotalChargesLimit: checkTotalChargesLimitStub,
+    } as unknown as UserService
+    const userCtx = { id: USER_ID, loadEntity: loadEntityStub } as unknown as UserContext
 
-    return new UserFileCreateFacade(USER_CTX, platformFileService, nodeService, jobService, userService)
+    return new UserFileCreateFacade(userCtx, platformFileService, nodeService, jobService, userService)
   }
 })

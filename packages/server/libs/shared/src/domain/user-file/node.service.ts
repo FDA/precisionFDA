@@ -11,7 +11,7 @@ import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
-import { AssetRepository } from '@shared/domain/user-file/asset.repository'
+import { AssetCreate } from '@shared/domain/user-file/domain/asset-create'
 import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
 import { UserFilePaginationDTO } from '@shared/domain/user-file/dto/user-file-pagination.dto'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -19,6 +19,7 @@ import { FolderService } from '@shared/domain/user-file/folder.service'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { AssetService } from '@shared/domain/user-file/service/asset.service'
 import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
 import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
@@ -58,7 +59,7 @@ export class NodeService {
     private readonly nodeHelper: NodeHelper,
     private readonly fileCountService: FileCountService,
     private readonly assetCountService: AssetCountService,
-    private readonly assetRepository: AssetRepository,
+    private readonly assetService: AssetService,
   ) {}
 
   /**
@@ -86,7 +87,7 @@ export class NodeService {
     where: FilterQuery<Asset>,
     options?: Omit<FindOptions<Asset, Hint, Fields, Excludes>, 'limit' | 'offset'>,
   ): Promise<Loaded<Asset, Hint, Fields, Excludes>[]> {
-    return this.assetRepository.findAccessible(where, options)
+    return this.assetService.listAccessibleAssets(where, options)
   }
 
   getEditableEntityByUid(uid: Uid<'file'>): Promise<FileOrAsset> {
@@ -275,7 +276,7 @@ export class NodeService {
   }
 
   async validateAssetRemoval(assetToRemove: Asset): Promise<void> {
-    await this.userFileService.validateAssetRemoval(assetToRemove)
+    await this.assetService.validateAssetRemoval(assetToRemove)
   }
 
   async validateSpaceReports(fileToRemove: UserFile): Promise<void> {
@@ -288,6 +289,10 @@ export class NodeService {
 
   async createFile(fileCreate: UserFileCreate): Promise<UserFile> {
     return await this.userFileService.createFile(fileCreate)
+  }
+
+  async createAsset(assetCreate: AssetCreate, paths: string[]): Promise<Asset> {
+    return await this.assetService.createAsset(assetCreate, paths)
   }
 
   async lockFile(fileId: number): Promise<void> {

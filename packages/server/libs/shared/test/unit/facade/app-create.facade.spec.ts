@@ -35,7 +35,6 @@ import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
-import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { FolderService } from '@shared/domain/user-file/folder.service'
@@ -43,6 +42,7 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
+import { AssetService } from '@shared/domain/user-file/service/asset.service'
 import { AssetCountService } from '@shared/domain/user-file/service/asset-count.service'
 import { FileCountService } from '@shared/domain/user-file/service/file-count.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
@@ -148,7 +148,7 @@ describe('AppCreateFacade', () => {
       nodeHelper,
       {} as unknown as FileCountService,
       {} as unknown as AssetCountService,
-      {} as unknown as AssetRepository,
+      {} as unknown as AssetService,
     )
 
     appService = new AppService(appRepository)

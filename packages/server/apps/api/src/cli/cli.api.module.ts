@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
 import { CliExchangeFacadeModule } from '@shared/facade/cli-exchange/cli-exchange-facade.module'
+import { UserFileCreateFacadeModule } from '@shared/facade/file-create/user-file-create-facade.module'
 import { PropertyFacadeModule } from '@shared/facade/property/property-facade.module'
 import { CliApiFacadeModule } from '../facade/cli/cli-api-facade.module'
 import { CliDbClusterPasswordFacadeModule } from '../facade/db-cluster/password-facade/cli-db-cluster-password-facade.module'
@@ -26,6 +27,7 @@ import { CliSpacesController } from './cli-spaces.controller'
     PropertyFacadeModule,
     CliExchangeFacadeModule,
     UserFileApiFacadeModule,
+    UserFileCreateFacadeModule,
   ],
   controllers: [
     CliAssetsController,
