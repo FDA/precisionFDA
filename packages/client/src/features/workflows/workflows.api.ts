@@ -23,6 +23,7 @@ interface RailsSimpleJob {
   instance_type: keyof typeof COMPUTE_RESOURCE_LABELS
   launched_on: string
   launched_by: string
+  launched_by_dxuser: string
   created_at_date_time: string
   location: string
   logged_dxuser: string
@@ -59,6 +60,7 @@ function mapSimpleJob(raw: RailsSimpleJob): Job {
     name: raw.name,
     appTitle: raw.app_title,
     appRevision: 0,
+    appUid: raw.app_uid,
     appActive: raw.app_active,
     workflowTitle: '',
     workflowUid: raw.workflow_uid,
@@ -77,6 +79,7 @@ function mapSimpleJob(raw: RailsSimpleJob): Job {
     location: raw.location,
     launchedBy: raw.launched_by ?? '',
     launchedOn: raw.launched_on,
+    launchedByDxuser: raw.launched_by_dxuser,
     featured: false,
     entityType: 'regular',
     loggedDxuser: raw.logged_dxuser,

@@ -27,11 +27,11 @@ import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { shouldShowExecutionColumn } from './executionColumnVisibility'
 import { EXECUTION_LIST_NOTIFICATION_ACTIONS, EXECUTION_LIST_QUERY_KEY } from './executionList.constants'
 import { fetchExecutions } from './executions.api'
-import type { IExecution } from './executions.types'
+import type { ExecutionListItem } from './executions.types'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionSelectActions } from './useExecutionSelectActions'
 
-type ListType = { jobs: IExecution[]; meta: IMeta }
+type ListType = { jobs: ExecutionListItem[]; meta: IMeta }
 
 export const ExecutionList = ({
   homeScope,
@@ -152,7 +152,7 @@ export const ExecutionsListTable = ({
   setColumnVisibility,
 }: {
   isAdmin?: boolean
-  jobs?: IExecution[]
+  jobs?: ExecutionListItem[]
   properties?: string[]
   isLoading: boolean
   homeScope?: HomeScope
@@ -174,7 +174,7 @@ export const ExecutionsListTable = ({
 
   return (
     <StyledPageTable>
-      <Table<IExecution>
+      <Table<ExecutionListItem>
         isLoading={isLoading}
         data={jobs ?? []}
         columns={columns}

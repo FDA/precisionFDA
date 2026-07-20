@@ -51,5 +51,5 @@ export const StyledStageHeader = styled.div`
   flex-direction: row;
   align-items: center;
   padding: 5px;
-  background-color: ${colors.stageBlue};
+  background-color: var(--c-stage-blue);
 `

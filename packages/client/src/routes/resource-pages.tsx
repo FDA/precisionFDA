@@ -41,6 +41,9 @@ const WorkflowList = React.lazy(() =>
 const WorkflowShow = React.lazy(() =>
   import('../features/workflows/WorkflowShow').then(m => ({ default: m.WorkflowShow })),
 )
+const WorkflowRun = React.lazy(() =>
+  import('../features/workflows/run/RunWorkflowForm').then(m => ({ default: m.WorkflowRunPage })),
+)
 const ExecutionList = React.lazy(() =>
   import('../features/executions/ExecutionList').then(m => ({ default: m.ExecutionList })),
 )
@@ -168,7 +171,14 @@ export const AppShowPage = () => {
     ? isContributorOrHigherRole(context.space.current_user_membership.role)
     : undefined
 
-  return <AppsShow homeContext={context.homeContext} spaceId={context.space?.id.toString()} appUid={appUid!} isContributorOrHigher={isContributorOrHigher} />
+  return (
+    <AppsShow
+      homeContext={context.homeContext}
+      spaceId={context.space?.id.toString()}
+      appUid={appUid!}
+      isContributorOrHigher={isContributorOrHigher}
+    />
+  )
 }
 
 export const AppSpecPage = () => {
@@ -289,6 +299,13 @@ export const WorkflowShowPage = () => {
   const { workflowUid } = useParams<{ workflowUid: string }>()
 
   return <WorkflowShow workflowId={workflowUid!} homeContext={context.homeContext} spaceId={context.space?.id} />
+}
+
+export const WorkflowRunPage = () => {
+  const context = useUnifiedRouteContext()
+  const { workflowUid } = useParams<{ workflowUid: string }>()
+
+  return <WorkflowRun workflowUid={workflowUid!} spaceId={context.space?.id} />
 }
 
 export const ExecutionListPage = () => {

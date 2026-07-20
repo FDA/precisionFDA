@@ -54,7 +54,7 @@ const idMappings: Record<string, string> = {
   added_by: 'username',
   engine: 'type',
   dx_instance_class: 'instance',
-  launched_by: 'username',
+  launchedBy: 'username',
 }
 
 export function renameFilterKeys(filters: IFilter[]) {

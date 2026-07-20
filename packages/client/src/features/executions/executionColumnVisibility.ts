@@ -7,9 +7,9 @@ export type ExecutionColumnLike = {
   accessorKey?: unknown
 }
 
-const HOME_ALWAYS_HIDDEN_COLUMNS = ['createdAtDateTime', 'workflowTitle'] as const
-const APP_HIDDEN_COLUMNS = ['featured', 'app_title', 'location', 'select'] as const
-const WORKFLOW_HIDDEN_COLUMNS = ['workflow', 'featured', 'location', 'tags', 'select'] as const
+const HOME_ALWAYS_HIDDEN_COLUMNS = ['createdAtDateTime'] as const
+const APP_HIDDEN_COLUMNS = ['featured', 'appTitle', 'location', 'select'] as const
+const WORKFLOW_HIDDEN_COLUMNS = ['workflowTitle', 'featured', 'location', 'tags', 'select'] as const
 
 export function getHiddenExecutionColumns(
   context: ExecutionColumnVisibilityContext,
@@ -46,9 +46,7 @@ export function shouldShowExecutionColumn(
   homeScope?: HomeScope,
 ): boolean {
   const hiddenColumns = getHiddenExecutionColumns(context, homeScope)
-  const identifiers = [column.id, column.accessorKey].filter(
-    (value): value is string => typeof value === 'string',
-  )
+  const identifiers = [column.id, column.accessorKey].filter((value): value is string => typeof value === 'string')
 
   return identifiers.every(identifier => !hiddenColumns.has(identifier))
 }

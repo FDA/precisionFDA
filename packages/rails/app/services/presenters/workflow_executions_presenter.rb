@@ -126,6 +126,8 @@ module Presenters
       filters[:name] = filters.delete :workflow_title if filters.key?(:workflow_title)
       # For filtering launched_by via 'username' to normalize execution filter keys with JobsFilter
       filters[:launched_by] = filters.delete :username if filters.key?(:username)
+      # For filtering by app title
+      filters[:app_title] = filters.delete :appTitle if filters.key?(:appTitle)
 
       # Workflows matching the filter
       matching_workflow_executions = response.filter { |f| matcher.call(f) }

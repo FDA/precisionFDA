@@ -43,7 +43,6 @@ const NewsListPage = React.lazy(() => import('../features/news/NewsPage'))
 const LandingPage = React.lazy(() => import('../features/overview/OverviewPage'))
 const AboutPage = React.lazy(() => import('../pages/AboutPage'))
 const ExpertsListPage = React.lazy(() => import('../features/experts/ExpertsList'))
-const WorkflowRunPage = React.lazy(() => import('../features/workflows/run/RunWorkflowForm'))
 const ToS = React.lazy(() => import('../pages/ToS'))
 const Security = React.lazy(() => import('../pages/Security'))
 
@@ -147,7 +146,6 @@ const router = createBrowserRouter([
             children: spacesRoutes,
           },
           { path: 'publish/*', element: <PublishingPage /> },
-          { path: 'workflows/:workflowUid/analyses/new', element: <WorkflowRunPage /> },
           { path: 'admin/activity_reports', element: <Navigate to="/account/admin/activity-reports" replace /> },
           { path: 'admin/usage_reports', element: <Navigate to="/account/admin/activity-reports" replace /> },
           { path: 'admin/users_list', element: <Navigate to="/account/admin/users" replace /> },

@@ -15,6 +15,7 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
     :app_active,
     :workflow_title,
     :workflow_uid,
+    :workflow_series_id,
     :platform_tags,
     :workstation_api_version,
     :run_input_data,
@@ -165,6 +166,12 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
     else
       "N/A"
     end
+  end
+
+  def workflow_series_id
+    return unless object.try(:analysis).try(:workflow)
+
+    object.analysis.workflow.workflow_series_id
   end
 
   def platform_tags

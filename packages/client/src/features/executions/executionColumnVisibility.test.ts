@@ -10,7 +10,6 @@ describe('getHiddenExecutionColumns()', () => {
     expect(hidden.has('addedBy')).toBe(true)
     expect(hidden.has('location')).toBe(true)
     expect(hidden.has('featured')).toBe(true)
-    expect(hidden.has('workflowTitle')).toBe(true)
     expect(hidden.has('createdAtDateTime')).toBe(true)
   })
 
@@ -31,13 +30,13 @@ describe('getHiddenExecutionColumns()', () => {
     expect(appHidden.has('featured')).toBe(true)
     expect(appHidden.has('location')).toBe(true)
     expect(appHidden.has('select')).toBe(true)
-    expect(appHidden.has('app_title')).toBe(true)
+    expect(appHidden.has('appTitle')).toBe(true)
 
     expect(workflowHidden.has('featured')).toBe(true)
     expect(workflowHidden.has('location')).toBe(true)
     expect(workflowHidden.has('tags')).toBe(true)
     expect(workflowHidden.has('select')).toBe(true)
-    expect(workflowHidden.has('workflow')).toBe(true)
+    expect(workflowHidden.has('workflowTitle')).toBe(true)
   })
 })
 
@@ -50,10 +49,5 @@ describe('shouldShowExecutionColumn()', () => {
   it('uses id when filtering context columns', () => {
     expect(shouldShowExecutionColumn('app', { id: 'select' })).toBe(false)
     expect(shouldShowExecutionColumn('workflow', { id: 'select' })).toBe(false)
-  })
-
-  it('preserves current legacy key behavior for app and workflow execution lists', () => {
-    expect(shouldShowExecutionColumn('app', { accessorKey: 'appTitle' })).toBe(true)
-    expect(shouldShowExecutionColumn('workflow', { accessorKey: 'workflowTitle' })).toBe(true)
   })
 })

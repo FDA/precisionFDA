@@ -1,15 +1,8 @@
 import axios from 'axios'
-import { HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
-import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
-import {
-  ExecutionDetail,
-  ExecutionListItem,
-  IJob,
-  Job,
-  RunData,
-  RunDataUpdates,
-} from './executions.types'
-import { COMPUTE_RESOURCE_LABELS } from '@/types/user'
+import type { COMPUTE_RESOURCE_LABELS } from '@/types/user'
+import type { HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
+import { formatScopeQ, type Params, prepareListFetch } from '../home/utils'
+import type { ExecutionDetail, ExecutionListItem, IJob, Job, RunData, RunDataUpdates } from './executions.types'
 
 export interface FetchExecutionsQuery {
   jobs: ExecutionListItem[]
@@ -40,6 +33,7 @@ interface RailsJob {
   app_title: string
   app_revision: number
   app_active: boolean
+  app_uid: string
   workflow_title: string
   workflow_uid: string
   run_input_data: RailsRunDataItem[]
@@ -56,6 +50,7 @@ interface RailsJob {
   scope: string
   location: string
   launched_by: string
+  launched_by_dxuser: string
   launched_on: string
   featured: boolean
   entity_type: 'regular' | 'https'
@@ -64,16 +59,15 @@ interface RailsJob {
 }
 
 /** Snake_case IExecution shape as returned by the Rails list API. */
-interface RailsExecution extends RailsJob {
+export interface RailsExecution extends RailsJob {
   dxid: string
   title: string
   added_by: string
   workstation_api_version: string | null
   cost_limit: number
-  launched_by_dxuser: string
   revision: number
   readme: string
-  workflow_series_id: number | string
+  workflow_series_id: number | null
   version: string
   active: boolean
   snapshot: boolean
@@ -133,6 +127,7 @@ function mapJob(raw: RailsJob): Job {
     appTitle: raw.app_title,
     appRevision: raw.app_revision,
     appActive: raw.app_active,
+    appUid: raw.app_uid,
     workflowTitle: raw.workflow_title,
     workflowUid: raw.workflow_uid,
     runInputData: mapRunData(raw.run_input_data),
@@ -149,6 +144,7 @@ function mapJob(raw: RailsJob): Job {
     scope: raw.scope,
     location: raw.location,
     launchedBy: raw.launched_by,
+    launchedByDxuser: raw.launched_by_dxuser,
     launchedOn: raw.launched_on,
     featured: raw.featured,
     entityType: raw.entity_type,
@@ -157,7 +153,7 @@ function mapJob(raw: RailsJob): Job {
   }
 }
 
-function mapExecution(raw: RailsExecution): ExecutionListItem {
+export function mapExecution(raw: RailsExecution): ExecutionListItem {
   return {
     id: raw.id,
     uid: raw.uid,

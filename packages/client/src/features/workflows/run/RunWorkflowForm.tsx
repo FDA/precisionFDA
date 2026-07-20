@@ -1,13 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import {
-  type Control,
-  Controller,
-  FormProvider,
-  type UseFormRegister,
-  type UseFormSetError,
-  useForm,
-} from 'react-hook-form'
+import { type Control, Controller, FormProvider, type UseFormSetError, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import * as Yup from 'yup'
 import { Button } from '@/components/Button'
@@ -18,15 +11,22 @@ import { GearIcon } from '@/components/icons/GearIcon'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
 import { BackLink } from '@/components/Page/PageBackLink'
 import { FormPageContainer } from '@/components/Page/page.styles'
+import { defaultHomeContext, type HomeScopeContextValue } from '@/features/home/HomeScopeContext'
 import type { IUser } from '@/types/user'
 import { getSpaceIdFromScope } from '@/utils'
-import type { AcceptedLicense, IApp, InputSpec, SelectType } from '../../apps/apps.types'
+import type { AcceptedLicense, InputSpec, SelectType } from '../../apps/apps.types'
 import { getDefaultValueFromServer } from '../../apps/form/common'
-import { Section, SectionBody, SectionHeader, StyledGrid, Topbox, TopboxItem } from '../../apps/run/apps-run.styles'
+import { Section, SectionBody, SectionHeader, StyledGrid, Topbox } from '../../apps/run/apps-run.styles'
 import { ErrorMessageForField } from '../../apps/run/ErrorMessageForField'
 import { JobRunInput } from '../../apps/run/JobRunInput'
 import { SelectSpaceScope } from '../../apps/run/SelectSpaceScope'
-import { extractFileUids, getValue, useDefaultScopeSelection, useSelectableSpaces } from '../../apps/run/utils'
+import {
+  extractFileUids,
+  getBaseLink,
+  getValue,
+  useDefaultScopeSelection,
+  useSelectableSpaces,
+} from '../../apps/run/utils'
 import { useAuthUser } from '../../auth/useAuthUser'
 import type { FileUid } from '../../files/files.types'
 import { StyledForm } from '../../home/home.styles'
@@ -362,8 +362,7 @@ const RunWorkflowForm = ({ workflow, meta, user }: { workflow: IWorkflow; meta: 
   )
 }
 
-const WorkflowRunPage = () => {
-  const { workflowUid } = useParams<{ workflowUid: string }>()
+export const WorkflowRunPage = ({ workflowUid, spaceId }: { workflowUid: string; spaceId?: number }) => {
   const { data: workflowData, isLoading: loadingWorkflowIsLoading } = useQuery({
     queryKey: ['workflow', workflowUid],
     enabled: !!workflowUid,
@@ -388,13 +387,11 @@ const WorkflowRunPage = () => {
     )
 
   const workflowTitle = workflow.title ? workflow.title : workflow.name
-  const spaceId = getSpaceIdFromScope(workflow.scope)
-  const baseLink = spaceId ? `spaces/${spaceId}` : 'home'
 
   return (
     <FormPageContainer>
       <Topbox>
-        <BackLink linkTo={`/${baseLink}/workflows/${workflow.uid}`}>Back to Workflow</BackLink>
+        <BackLink linkTo={`/${getBaseLink(spaceId)}/workflows/${workflow.uid}`}>Back to Workflow</BackLink>
         <div>
           <Title>
             <CubeIcon height={20} />
@@ -407,5 +404,3 @@ const WorkflowRunPage = () => {
     </FormPageContainer>
   )
 }
-
-export default WorkflowRunPage

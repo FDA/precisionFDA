@@ -1,7 +1,7 @@
-import { COMPUTE_RESOURCE_LABELS } from '@/types/user'
-import { RESOURCE_TYPES } from '../admin/users/types'
-import { FileOrg, FileUser, FormInput, IOSpec } from '../apps/apps.types'
-import { ServerScope } from '../home/types'
+import type { COMPUTE_RESOURCE_LABELS } from '@/types/user'
+import type { RESOURCE_TYPES } from '../admin/users/types'
+import type { FileOrg, FileUser, FormInput, IOSpec } from '../apps/apps.types'
+import type { ServerScope } from '../home/types'
 
 export type RunInputs = { [key: string]: FormInput }
 export type RunOutputs = Record<string, string | null>
@@ -39,6 +39,7 @@ export interface Job {
   appTitle: string
   appRevision: number
   appActive: boolean
+  appUid: string
   workflowTitle: string
   workflowUid: string
   runInputData: RunData[]
@@ -55,6 +56,7 @@ export interface Job {
   scope: string
   location: string
   launchedBy: string
+  launchedByDxuser: string
   launchedOn: string
   featured: boolean
   entityType: string
@@ -135,7 +137,7 @@ export interface ExecutionListItem extends ExecutionBase {
   addedBy: string
   revision: number
   readme: string
-  workflowSeriesId: number | string
+  workflowSeriesId: number | null
   version: string
   active: boolean
   isPublishable: boolean

@@ -14,7 +14,7 @@ import { getSpaceIdFromScope } from '@/utils'
 import SelectFilter, { selectFilterFn } from '../../components/Table/components/SelectFilter'
 import { StyledLinkCell } from '../home/home.styles'
 import { getBasePath, getBasePathFromScope } from '../home/utils'
-import type { IExecution } from './executions.types'
+import type { ExecutionListItem } from './executions.types'
 import { getUserLink } from './executions.util'
 import { StateCell } from './StateCell'
 
@@ -26,7 +26,7 @@ export const useExecutionColumns = ({
   isAdmin?: boolean
   filterDataTestIdPrefix?: string | undefined
   properties?: string[]
-}): ColumnDef<IExecution>[] => {
+}): ColumnDef<ExecutionListItem>[] => {
   const location = useLocation()
   const queryClient = useQueryClient()
   return [
@@ -39,7 +39,7 @@ export const useExecutionColumns = ({
       filterFn: 'includesString',
       size: 300,
       cell: ({ row }) => {
-        const rowType = row.original.workflowSeriesId ? 'workflows' : 'executions'
+        const rowType = row.original.uid.startsWith('workflow') ? 'workflows' : 'executions'
         const spaceId = getSpaceIdFromScope(row.original.scope)
         const pathname = `${getBasePath(spaceId)}/${rowType}/${row.original.uid}`
 
@@ -61,7 +61,7 @@ export const useExecutionColumns = ({
       size: 120,
       filterFn: selectFilterFn,
       meta: {
-        filterElement: (column: Column<IExecution>) => (
+        filterElement: (column: Column<ExecutionListItem>) => (
           <SelectFilter
             column={column}
             options={[
@@ -93,14 +93,14 @@ export const useExecutionColumns = ({
       filterFn: 'includesString',
       size: 200,
       cell: ({ row }) => {
-        const rowType = row.original.workflowSeriesId ? 'workflows' : 'executions'
-        const value = row.original.workflowTitle
+        const rowType = row.original.uid.startsWith('workflow') ? 'workflows' : 'executions'
+        const value = rowType === 'executions' ? row.original.workflowTitle : row.original.title
         const spaceId = getSpaceIdFromScope(row.original.scope)
-        const pathname = `${getBasePath(spaceId)}/${rowType}/${row.original.uid}`
+        const pathname = `${getBasePath(spaceId)}/workflows/${rowType === 'executions' ? row.original.workflowUid : row.original.uid}`
         if (value === 'N/A') {
           return value
         }
-        if (rowType === 'executions') {
+        if (rowType === 'executions' && !row.original.workflowSeriesId) {
           return
         }
         return (
@@ -159,11 +159,14 @@ export const useExecutionColumns = ({
       accessorKey: 'launchedBy',
       filterFn: 'includesString',
       size: 200,
-      cell: props => (
-        <a data-turbolinks="false" href={getUserLink(props.row.original.launchedByDxuser)}>
-          {props.row.original.launchedBy}
-        </a>
-      ),
+      cell: props => {
+        const rowType = props.row.original.uid.startsWith('workflow') ? 'workflows' : 'executions'
+        return rowType === 'executions' ? (
+          <a data-turbolinks="false" href={getUserLink(props.row.original.launchedByDxuser)}>
+            {props.row.original.launchedBy}
+          </a>
+        ) : null
+      },
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-by` } : {}),
     },
     {
@@ -251,6 +254,6 @@ export const useExecutionColumns = ({
       ),
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-tags` } : {}),
     },
-    ...propertiesColumnDef<IExecution>(properties),
+    ...propertiesColumnDef<ExecutionListItem>(properties),
   ]
 }

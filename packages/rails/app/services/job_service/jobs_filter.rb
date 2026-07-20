@@ -13,8 +13,8 @@ module JobService
         condition(WORKFLOW_TABLE[:name], value).or(condition(JOB_TABLE[:name], value))
       end,
       "state" => ->(value) { condition(JOB_TABLE[:state], value) },
-      "app_title" => ->(value) { condition(APP_TABLE[:title], value) },
-      "workflow_title" => ->(value) { condition(WORKFLOW_TABLE[:title], value) },
+      "appTitle" => ->(value) { condition(APP_TABLE[:title], value) },
+      "workflowTitle" => ->(value) { condition(WORKFLOW_TABLE[:title], value) },
       "featured" => ->(value) { JOB_TABLE[:featured].eq(to_bool(value)) },
       "location" => lambda do |value|
         scopes = Space.where(condition(Space.arel_table[:name], value)).map(&:uid)

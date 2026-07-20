@@ -11,6 +11,7 @@ import { useExportToModal } from '../apps/useExportToModal'
 import { useAuthUser } from '../auth/useAuthUser'
 import type { Action } from '../home/action-types'
 import type { ApiResponse, HomeScope } from '../home/types'
+import { getBasePath } from '../home/utils'
 import { copyWorkflowsRequest, deleteWorkflowRequest, type WorkflowCopyResponse } from './workflows.api'
 import type { IWorkflow } from './workflows.types'
 
@@ -115,7 +116,7 @@ export const useWorkflowSelectActions = ({
       {
         name: 'Run',
         type: 'route',
-        to: `${links?.show}/analyses/new`,
+        to: `${getBasePath(spaceId)}/workflows/${selected[0]?.uid}/analyses/new`,
         isDisabled: selected.length !== 1 || !links?.run_workflow,
         cloudResourcesConditionType: 'all',
       },

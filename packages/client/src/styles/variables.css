@@ -121,6 +121,7 @@
 
   --c-footer-bg: #f4f8fd;
   --c-subtleblue: #f5f8fc;
+  --c-stage-blue: #d9edf7;
 
   /*
    * Space area accents — single source of truth for the SpaceTypeTabs, the
@@ -137,7 +138,11 @@
   --area-private-accent: oklch(56% 0.15 308.12);
   --area-private-accent-strong: oklch(60% 0.18 308.12);
   --area-private-border: oklch(76% 0.15 308.12);
-  --area-private-gradient: linear-gradient(135deg, var(--area-private-accent) 0%, var(--area-private-accent-strong) 100%);
+  --area-private-gradient: linear-gradient(
+    135deg,
+    var(--area-private-accent) 0%,
+    var(--area-private-accent-strong) 100%
+  );
 }
 
 html.dark {
@@ -257,4 +262,5 @@ html.dark {
   --c-tabs-selected: rgba(203, 84, 76, 1);
 
   --c-modal-border: var(--c-layout-border);
+  --c-stage-blue: hsl(204, 40%, 20%);
 }

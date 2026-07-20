@@ -1,13 +1,11 @@
-import React from 'react'
-import { type RouteObject, Navigate } from 'react-router'
-
+import { Navigate, type RouteObject } from 'react-router'
 import {
   AppJobsPage,
   AppReadmePage,
   AppShowPage,
-  AppsListPage,
   AppSpecPage,
   AppSpecRedirect,
+  AppsListPage,
   CreateDatabasePage,
   CreateDiscussionPageWrapper,
   DatabaseListPage,
@@ -25,6 +23,7 @@ import {
   TrackExecutionInHomePage,
   TrackInHomePage,
   WorkflowListPage,
+  WorkflowRunPage,
   WorkflowShowPage,
 } from './resource-pages'
 
@@ -110,6 +109,10 @@ export const commonResourceRoutes: RouteObject[] = [
   {
     path: 'workflows/:workflowUid/*',
     Component: WorkflowShowPage,
+  },
+  {
+    path: 'workflows/:workflowUid/analyses/new',
+    Component: WorkflowRunPage,
   },
   {
     path: 'executions',

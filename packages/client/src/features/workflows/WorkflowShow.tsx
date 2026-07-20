@@ -116,7 +116,7 @@ const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
   )
 }
 
-const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
+const DetailActionsDropdown = ({ workflow, spaceId }: { workflow: IWorkflow; spaceId?: number }) => {
   const { actions, modals } = useWorkflowSelectActions({
     homeScope: workflow.scope === 'private' ? 'me' : (workflow.scope as HomeScope),
     selectedItems: [workflow],
@@ -128,7 +128,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
       <CloudResourcesHeaderButton
         asReactLink
         data-turbolinks="false"
-        href={`${workflow.links.show}/analyses/new`}
+        href={`${getBasePath(spaceId)}/workflows/${workflow.uid}/analyses/new`}
         isLinkDisabled={!workflow.links.run_workflow}
         data-testid="workflow-show-actions-run"
         conditionType="all"
@@ -215,7 +215,7 @@ export const WorkflowShow = ({
             />
           </HeaderLeft>
           <div>
-            <StyledRight>{workflow && <DetailActionsDropdown workflow={workflow} />}</StyledRight>
+            <StyledRight>{workflow && <DetailActionsDropdown workflow={workflow} spaceId={spaceId} />}</StyledRight>
           </div>
         </ResourceHeader>
 

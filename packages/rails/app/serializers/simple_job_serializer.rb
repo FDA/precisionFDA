@@ -17,6 +17,8 @@ class SimpleJobSerializer < ApplicationSerializer
     :energy_consumption,
     :instance_type,
     :launched_on,
+    :launched_by,
+    :launched_by_dxuser,
     :created_at_date_time,
     :links,
     :location,
@@ -58,6 +60,10 @@ class SimpleJobSerializer < ApplicationSerializer
   # @return [String] User full_name.
   def launched_by
     added_by_fullname
+  end
+
+  def launched_by_dxuser
+    added_by
   end
 
   # Writer for formatted launched_on time.

@@ -20,7 +20,8 @@ import { toArrayFromObject } from '@/utils/object'
 import Table from '../../components/Table'
 import { shouldShowExecutionColumn } from '../executions/executionColumnVisibility'
 import { EXECUTION_LIST_NOTIFICATION_ACTIONS } from '../executions/executionList.constants'
-import type { IExecution } from '../executions/executions.types'
+import type { FetchExecutionsQuery } from '../executions/executions.api'
+import type { ExecutionListItem } from '../executions/executions.types'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import { columnFilters } from '../home/columnFilters'
 import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
@@ -28,7 +29,7 @@ import type { IFilter } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import type { Params } from '../home/utils'
-import { type FetchAppsExecutionsResponse, fetchAppExecutions } from './apps.api'
+import { fetchAppExecutions } from './apps.api'
 
 export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string; appUid: string }) => {
   const resource = 'app-executions'
@@ -43,8 +44,8 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string; appUi
 
   const { filterQuery, setSearchFilter } = useFilterParams({ filters: columnFilters })
 
-  const query = useListQuery<FetchAppsExecutionsResponse>({
-    fetchList: (filters: IFilter[], params: Params): Promise<FetchAppsExecutionsResponse> =>
+  const query = useListQuery<FetchExecutionsQuery>({
+    fetchList: (filters: IFilter[], params: Params): Promise<FetchExecutionsQuery> =>
       fetchAppExecutions(filters, { ...params, appUid }),
     resource,
     pagination: { page: pageParam, perPage: perPageParam },
@@ -115,7 +116,7 @@ export const ExecutionsListTable = ({
   setColumnVisibility,
   columnVisibility,
 }: {
-  jobs?: IExecution[]
+  jobs?: ExecutionListItem[]
   isLoading: boolean
   sortBy: ColumnSort[]
   setSortBy: (cols: ColumnSort[]) => void
@@ -136,7 +137,7 @@ export const ExecutionsListTable = ({
 
   return (
     <StyledPageTable>
-      <Table<IExecution>
+      <Table<ExecutionListItem>
         isLoading={isLoading}
         data={data || []}
         columns={columns}

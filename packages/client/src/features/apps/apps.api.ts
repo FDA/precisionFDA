@@ -4,7 +4,7 @@ import type { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
 import type { CopyResponse } from '../actionModals/useCopyToPrivateModal'
 import type { CopyToSpaceProperties } from '../actionModals/useCopyToSpace'
 import type { DeleteResponse } from '../actionModals/useDeleteModal'
-import type { ExecutionListItem } from '../executions/executions.types'
+import { mapExecution, type RailsExecution } from '../executions/executions.api'
 import type { ApiResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
 import { formatScopeQ, type Params, prepareListFetch } from '../home/utils'
 import type { License } from '../licenses/types'
@@ -111,7 +111,7 @@ export async function fetchFilteredApps(searchString: string, scopes: ServerScop
 }
 
 export interface FetchAppsExecutionsResponse {
-  jobs: ExecutionListItem[]
+  jobs: RailsExecution[]
   meta: IMeta
 }
 
@@ -122,7 +122,11 @@ interface FetchAppExecutionsParams extends Params {
 export async function fetchAppExecutions(filters: IFilter[], params: FetchAppExecutionsParams) {
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query as Record<string, string>).toString()}`
-  return axios.get<FetchAppsExecutionsResponse>(`/api/apps/${params.appUid}/jobs${paramQ}`).then(r => r.data)
+  const res = await axios.get<FetchAppsExecutionsResponse>(`/api/apps/${params.appUid}/jobs${paramQ}`).then(r => r.data)
+  return {
+    jobs: res.jobs.map(mapExecution),
+    meta: res.meta,
+  }
 }
 
 export async function copyAppsRequest(
