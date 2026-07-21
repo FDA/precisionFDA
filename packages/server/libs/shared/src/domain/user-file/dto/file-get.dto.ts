@@ -51,7 +51,7 @@ export class FileGetDTO extends NodeDTO {
   type: string
   state: string | null
   scope: string
-  spaceId: string | null
+  spaceId: number | null
   location: string
   addedBy: string
   addedByDxuser: string
@@ -88,12 +88,12 @@ export class FileGetDTO extends NodeDTO {
     dto.type = file.stiType
     dto.state = file.state
     dto.scope = file.scope
-    dto.spaceId = file.isInSpace() ? file.scope : null
+    dto.spaceId = space?.id
     dto.location = EntityScopeUtils.computeLocation(file.scope, space)
     dto.addedBy = user.fullName
     dto.addedByDxuser = user.dxuser
     dto.createdAt = TimeUtils.formatShortDate(file.createdAt)
-    dto.createdAtDateTime = TimeUtils.formatAtTime(file.createdAt)
+    dto.createdAtDateTime = TimeUtils.formatDateTimeUTC(file.createdAt)
     dto.featured = file.featured
     dto.locked = file.locked
     dto.description = file.description ?? null

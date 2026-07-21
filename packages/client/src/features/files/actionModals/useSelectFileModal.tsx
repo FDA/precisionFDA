@@ -377,6 +377,7 @@ const FileTable = ({
     queryFn: () =>
       fetchAccessibleFiles({
         scope: activeScope,
+        ignoreComparison: false,
         folderId: isFilteringFiles > 0 ? undefined : parsedFolderId(selectedFolderId),
         type: ['UserFile'],
         filter: {

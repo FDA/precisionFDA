@@ -9,7 +9,7 @@ import type {
 } from '@tanstack/react-table'
 import { clsx } from 'clsx'
 import { ArrowUpRightFromSquareIcon, FolderInputIcon } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { type JSX, useEffect, useRef } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { CopyText } from '@/components/CopyText/CopyText'
 import { FileIcon } from '@/components/icons/FileIcon'
@@ -27,7 +27,7 @@ import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ResourceQueryErrorMessage } from '../home/ResourceQueryErrorMessage'
 import { FilesListResourceHeader } from '../home/show.styles'
-import type { HomeScope, IMeta, MetaPath } from '../home/types'
+import type { HomeScope, MetaPath, MetaV2 } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import type { ISpace } from '../spaces/spaces.types'
@@ -35,14 +35,14 @@ import { centerToCursorCollisionDetection } from './centerToCursorCollisionDetec
 import { FileBreadcrumb } from './FileBreadcrumb'
 import styles from './FileList.module.css'
 import { fetchFiles } from './files.api'
-import type { IFile, IFolder } from './files.types'
+import type { IFile, INode } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
 import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFilesWebSocketUpdates } from './useFilesWebSocketUpdates'
 import { useFolderActions } from './useFolderActions'
 
-type ListType = { files: (IFile | IFolder)[]; meta: IMeta }
+type ListType = { files: INode[]; meta: MetaV2 }
 
 export const FileList = ({
   homeScope,
@@ -58,7 +58,7 @@ export const FileList = ({
   const location = useLocation()
 
   const [searchParams] = useSearchParams()
-  const folderIdParam = searchParams.get('folder_id') ?? undefined
+  const folderIdParam = searchParams.get('folderId') ?? undefined
 
   const navigate = useNavigate()
 
@@ -81,10 +81,10 @@ export const FileList = ({
   } = useList<ListType>({
     fetchList: fetchFiles,
     resource: 'files',
-    scope: homeScope,
     params: {
       folderId: folderIdParam || undefined,
-      spaceId: space?.id || undefined,
+      spaceId: space?.id,
+      scope: homeScope,
     },
   })
 
@@ -114,24 +114,23 @@ export const FileList = ({
     resetSelected()
     const search = new URLSearchParams(
       cleanObject({
-        folder_id: folderId,
+        folderId,
         scope: homeScope as string,
-        per_page: perPageParam.toString(),
+        pageSize: perPageParam.toString(),
       }),
     ).toString()
     navigate({ search })
   }
 
-  // @ts-expect-error sometimes shows as entries instead of files
-  const files: IFile[] = data?.files || data?.entries
+  const files = data?.files
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, files)
-  const selectedFileIds = selectedObjects.map(o => o.uid).filter(Boolean)
+  const selectedFileIds = selectedObjects.map(o => (o.stiType === 'UserFile' ? (o as IFile).uid : o.id)).filter(Boolean)
 
   const { actions, modals, copyToAreaAction, copyToAreaTarget } = useFilesSelectActions({
     homeScope,
     space,
     folderId: folderIdParam,
-    selectedItems: selectedObjects,
+    selectedItems: selectedObjects as IFile[],
     resetSelected,
     resourceKeys: ['files'],
   })
@@ -244,7 +243,6 @@ export const FileList = ({
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery)}
         files={files}
-        filesMeta={data?.meta}
         metaPath={currentMetaPath}
         properties={propertiesData?.keys}
         onFolderClick={onFolderClick}
@@ -263,13 +261,13 @@ export const FileList = ({
 
       <ContentFooter>
         <Pagination
-          page={data?.meta?.pagination?.current_page}
-          totalCount={data?.meta?.pagination?.total_count}
-          totalPages={data?.meta?.pagination?.total_pages}
+          page={data?.meta?.page}
+          totalCount={data?.meta?.total}
+          totalPages={data?.meta?.totalPages}
           perPage={perPageParam}
           isHidden={false}
           setPage={(p: number): void => setPageParam(p, true)}
-          onPerPageSelect={(p: number): void => setPerPageParam(p, true)}
+          onPerPageSelect={(p: number): void => setPerPageParam(p)}
         />
       </ContentFooter>
 
@@ -303,7 +301,6 @@ export const FilesListTable = ({
   setColumnVisibility,
 }: {
   spaceId?: number
-  filesMeta?: IMeta
   metaPath?: MetaPath[]
   shouldResetFilters?: (string | undefined)[]
   isAdmin: boolean
@@ -313,12 +310,12 @@ export const FilesListTable = ({
   setSortBy: (cols: ColumnSort[]) => void
   selectedRows: Record<string, boolean> | undefined
   setSelectedRows: (ids: RowSelectionState) => void
-  files?: IFile[]
+  files?: INode[]
   isLoading: boolean
   properties?: string[]
   onFolderClick: (folderId: string) => void
   onFileClick: (fileId: string) => void
-  selectedObjects: IFile[]
+  selectedObjects: INode[]
   homeScope?: HomeScope
   columnSizing: ColumnSizingState
   setColumnSizing: (columnResizing: ColumnSizingState) => void
@@ -383,7 +380,7 @@ export const FilesListTable = ({
         )}
       </div>
       <StyledPageTable>
-        <Table<IFile>
+        <Table<INode>
           isLoading={isLoading}
           data={files || []}
           columns={col}

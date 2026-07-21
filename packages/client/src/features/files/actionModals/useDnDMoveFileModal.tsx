@@ -1,22 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
-import React, { useMemo, useState } from 'react'
+import type { AxiosError } from 'axios'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
-import { Loader } from '../../../components/Loader'
-import { VerticalCenter } from '../../../components/Page/page.styles'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FolderIcon } from '../../../components/icons/FolderIcon'
+import { Loader } from '../../../components/Loader'
+import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import { VerticalCenter } from '../../../components/Page/page.styles'
 import { itemsCountString, pluralize } from '../../../utils/formatting'
+import type { ApiErrorResponse } from '../../home/types'
 import { getBasePath } from '../../home/utils'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
 import { moveFilesRequest } from '../files.api'
-import { IFile } from '../files.types'
-import { ApiErrorResponse } from '../../home/types'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import type { IFile, INode } from '../files.types'
 
 const StyledLink = styled(Link)`
   display: flex;
@@ -33,7 +33,7 @@ export const useDnDMoveFileModal = ({
   onCanceled,
 }: {
   spaceId?: number
-  selected: IFile[]
+  selected: INode[]
   onSuccess?: () => void
   onCanceled?: () => void
 }) => {
@@ -64,7 +64,9 @@ export const useDnDMoveFileModal = ({
       setShowModal(false)
       if (onSuccess) {
         onSuccess()
-        toastSuccess(`Successfully moved ${memoSelected.length} ${pluralize('item', memoSelected.length)} to ${targetNode.name}`)
+        toastSuccess(
+          `Successfully moved ${memoSelected.length} ${pluralize('item', memoSelected.length)} to ${targetNode.name}`,
+        )
       }
     },
   })
@@ -83,10 +85,12 @@ export const useDnDMoveFileModal = ({
       <ModalScroll>
         {memoSelected.map(s => {
           const link =
-            s.type === 'Folder' ? `${getBasePath(spaceId)}/files?folder_id=${s.id}` : `${getBasePath(spaceId)}/files/${s.uid}`
+            s.stiType === 'Folder'
+              ? `${getBasePath(spaceId)}/files?folderId=${s.id}`
+              : `${getBasePath(spaceId)}/files/${(s as IFile).uid}`
           return (
             <StyledLink key={s.id} to={link} target="_blank">
-              <VerticalCenter>{s.type === 'UserFile' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
+              <VerticalCenter>{s.stiType === 'UserFile' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
               {s.name}
             </StyledLink>
           )

@@ -31,6 +31,7 @@ import {
   FILE_STATE_PFDA,
   FILE_STI_TYPE,
   FileOrAsset,
+  PARENT_TYPE,
   SelectedNode,
 } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -359,7 +360,7 @@ export class NodeService {
     return await this.userFileService.verifyAccessibleFiles(uids)
   }
 
-  private async buildCommonFilters(query: UserFilePaginationDTO): Promise<FilterQuery<UserFile>> {
+  private async buildCommonFilters(query: UserFilePaginationDTO): Promise<FilterQuery<Node>> {
     const userEntity = await this.user.loadEntity()
     const accessibleSpaces = await userEntity.accessibleSpaces()
     const accessibleScopes: EntityScope[] = accessibleSpaces.map(space => space.scope)
@@ -367,7 +368,7 @@ export class NodeService {
     const where: FilterQuery<UserFile> = {
       stiType: query.type ?? [FILE_STI_TYPE.USERFILE],
       $or: [],
-      $and: [],
+      $and: [{ $or: [{ state: null }, { state: { $ne: FILE_STATE_PFDA.REMOVING } }] }],
     }
     if (query.uids?.length) {
       where.$and.push({
@@ -376,6 +377,9 @@ export class NodeService {
     }
     if (query.ignoreChallengeBot) {
       where.user = { dxuser: { $ne: config.platform.challengeBotUser } }
+    }
+    if (typeof query.featured === 'boolean') {
+      where.featured = query.featured
     }
     if (!query.scope) {
       where.$or.push(
@@ -391,7 +395,13 @@ export class NodeService {
         where.$or.push({ scope: 'public' })
       }
       if (query.scope === 'spaces') {
-        where.$or.push({ scope: { $in: accessibleScopes } })
+        const location = query.filter?.location
+        const scopes = location
+          ? accessibleSpaces
+              .filter(space => space.name.toLowerCase().includes(location.toLowerCase()))
+              .map(space => space.scope)
+          : accessibleScopes
+        where.$or.push({ scope: { $in: scopes } })
       } else if (accessibleScopeSet.has(query.scope)) {
         where.$or.push({
           scope: { $in: [query.scope] },
@@ -406,6 +416,11 @@ export class NodeService {
       where.$and.push({
         parentFolder: null,
         scopedParentFolder: null,
+      })
+    }
+    if (query.ignoreComparison) {
+      where.$and.push({
+        parentType: { $ne: PARENT_TYPE.COMPARISON },
       })
     }
     if (query.filter?.name) {
@@ -429,6 +444,16 @@ export class NodeService {
         return { name: new RegExp(safePattern, 'i') }
       })
       where.taggings = { tag: { $or: likeConditions } }
+    }
+
+    if (query.filter?.addedBy) {
+      const escaped = StringUtils.escapeSqlLike(query.filter.addedBy)
+      const words = escaped.split(/\s+/).filter(Boolean)
+
+      const wordConditions = words.map(word => ({
+        $or: [{ user: { firstName: { $like: `%${word}%` } } }, { user: { lastName: { $like: `%${word}%` } } }],
+      }))
+      where.$and.push(wordConditions)
     }
 
     return where

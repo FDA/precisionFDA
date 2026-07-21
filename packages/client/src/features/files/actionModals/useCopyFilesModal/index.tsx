@@ -31,7 +31,7 @@ const FileListItemContent = ({ file }: FileListItemContentProps): React.ReactEle
   const pathWithScope = homeScope ? `${currentPath}?scope=${homeScope}` : `${currentPath}?scope=me`
   let folderQ = ''
   if (file.sourceFolderId) {
-    folderQ = `&folder_id=${file.sourceFolderId}`
+    folderQ = `&folderId=${file.sourceFolderId}`
   }
 
   return (
@@ -106,7 +106,7 @@ const SelectedFolder = ({ folder }: SelectedFolderProps): React.ReactElement => 
     <li className={cn(styles.folderCard, folder.isCopied && styles.folderCardCopied)}>
       <div className={styles.folderHeader}>
         <a
-          href={`${pathWithScope}folder_id=${folder.id}`}
+          href={`${pathWithScope}folderId=${folder.id}`}
           target="_blank"
           rel="noopener noreferrer"
           className={styles.folderLink}

@@ -18,7 +18,7 @@ export type FetchListFn<T = unknown> = (filter: IFilter[], params: Params) => Pr
 
 type ListType = { [key: string]: unknown; meta: IMeta | MetaV2 }
 interface IUseList<T> {
-  spaceId?: string
+  spaceId?: number | string // spaceId string will be deprecated
   scope?: HomeScope
   fetchList: FetchListFn<T>
   resource: APIResource

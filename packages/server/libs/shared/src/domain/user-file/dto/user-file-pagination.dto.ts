@@ -25,6 +25,7 @@ import { NumberRange } from '@shared/utils/types/range/number-range'
 
 class UserFileFilter {
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @IsNotEmpty()
   name?: string
@@ -45,6 +46,16 @@ class UserFileFilter {
   @IsString({ each: true })
   @Transform(({ value }) => (Array.isArray(value) ? value : value.split(',')).map(t => t.trim()).filter(Boolean))
   tags?: string[]
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  addedBy?: string
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  location?: string
 }
 
 class UserFileFields {
@@ -107,6 +118,15 @@ export class UserFilePaginationDTO extends PaginationDTO<UserFile> {
   @IsBoolean()
   @TransformAndValidateBoolean()
   ignoreChallengeBot: boolean = true
+
+  @IsBoolean()
+  @TransformAndValidateBoolean()
+  ignoreComparison: boolean = true
+
+  @IsOptional()
+  @IsBoolean()
+  @TransformAndValidateBoolean()
+  featured?: boolean
 
   @IsOptional()
   @ValidateNested()

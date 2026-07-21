@@ -103,7 +103,7 @@ export const FileShow = ({
       }),
   })
   const params = queryString.parse(location?.state?.fromSearch)
-  const folderId = params?.folder_id as string | undefined
+  const folderId = params?.folderId as string | undefined
 
   if (isLoading) {
     return <HomeLoader />
@@ -129,7 +129,7 @@ export const FileShow = ({
   const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
   const backPath = getBackPathNext({ spaceId: space?.id, location, resourceLocation: 'files', homeScope })
 
-  const spaceLink = file.spaceId ? `/spaces/${file.spaceId.replace('space-', '')}` : null
+  const spaceLink = file.spaceId ? `/spaces/${file.spaceId}` : null
   const userLink = file.addedByDxuser ? `/users/${file.addedByDxuser}` : '#'
   const filePermissions = normalizePermissions(file, user, space)
   const showLicensePending = file.fileLicense?.acceptanceStatus === 'pending'

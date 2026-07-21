@@ -1,7 +1,8 @@
 import { HttpResponse, http } from 'msw'
 import { indexBy } from 'ramda'
+import type { FetchEntitiesQuery } from '@/features/home/types'
 import type { FetchFilesQuery, FetchFolderChildrenResponse } from '../../features/files/files.api'
-import type { IFile, IFolder } from '../../features/files/files.types'
+import type { IFile, IFolder, INode } from '../../features/files/files.types'
 
 export const mockExportInputFiles: IFile[] = [
   {
@@ -66,7 +67,6 @@ const folders = [
   {
     id: 11,
     name: 'Most Important',
-    type: 'Folder',
     stiType: 'Folder',
     state: null,
     location: 'Private',
@@ -85,6 +85,7 @@ const folders = [
     ],
     createdAtDateTime: '2024-01-23 13:51:19 CET',
     originObject: { originType: 'User', originUid: 'user-7' },
+    folderId: null,
   },
 ] satisfies IFolder[]
 
@@ -141,7 +142,6 @@ const files = [
   {
     id: 9,
     name: 'CI_Patient1_ExomeSeq_2024-01-18.fastq.gz',
-    type: 'UserFile',
     stiType: 'UserFile',
     state: 'closed',
     location: 'Private',
@@ -161,11 +161,11 @@ const files = [
     description: null,
     show_license_pending: false,
     originObject: { originType: 'User', originUid: 'user-7' },
+    folderId: null,
   },
   {
     id: 8,
     name: 'CI_Patient2_RNASeq_Batch3_2024-01-18.fastq.gz',
-    type: 'UserFile',
     stiType: 'UserFile',
     state: 'closed',
     location: 'Private',
@@ -185,11 +185,12 @@ const files = [
     description: null,
     show_license_pending: false,
     originObject: { originType: 'User', originUid: 'user-7' },
+    folderId: null,
   },
   {
     id: 7,
     name: 'CI_Patient3_GenomeSeq_Run5_2024-01-18.fastq.gz',
-    type: 'UserFile',
+    stiType: 'UserFile',
     state: 'closed',
     location: 'Private',
     addedBy: 'Dr. Leon Voss',
@@ -208,11 +209,12 @@ const files = [
     description: null,
     show_license_pending: false,
     originObject: { originType: 'User', originUid: 'user-7' },
+    folderId: null,
   },
   {
     id: 6,
     name: 'CI_Patient4_Metagenomics_2024-01-18.fastq.gz',
-    type: 'UserFile',
+    stiType: 'UserFile',
     state: 'closed',
     location: 'Private',
     addedBy: 'Dr. Leon Voss',
@@ -231,11 +233,12 @@ const files = [
     description: null,
     show_license_pending: false,
     originObject: { originType: 'User', originUid: 'user-7' },
+    folderId: null,
   },
   {
     id: 3,
     name: 'CI_Patient5_TranscriptomeSeq_2024-01-18.fastq.gz',
-    type: 'UserFile',
+    stiType: 'UserFile',
     state: 'closed',
     location: 'Private',
     addedBy: 'Dr. Leon Voss',
@@ -254,6 +257,7 @@ const files = [
     description: null,
     show_license_pending: false,
     originObject: { originType: 'User', originUid: 'user-7' },
+    folderId: null,
   },
 ] satisfies IFile[]
 
@@ -333,30 +337,16 @@ export const filesMocks = [
   http.get('/api/v2/files/:uid', ({ params: { uid } }) =>
     HttpResponse.json<IFile>(filesByUid[uid as string], { status: 200 }),
   ),
-  http.get('/api/files*', () =>
-    HttpResponse.json<FetchFilesQuery>(
+  http.get('/api/v2/files*', () =>
+    HttpResponse.json<FetchEntitiesQuery<INode>>(
       {
-        files: [...folders, ...files],
+        data: [...folders, ...files],
         meta: {
-          links: {
-            copy_private: '/api/files/copy_private',
-            comments: '/files/comments',
-            edit_tags: '/api/set_tags',
-          },
-          spec: {
-            input_spec: [],
-            output_spec: [],
-          },
           path: [],
-          count: 5,
-          challenges: null,
-          pagination: {
-            current_page: 1,
-            next_page: null,
-            prev_page: null,
-            total_pages: 1,
-            total_count: 5,
-          },
+          page: 1,
+          pageSize: 10,
+          total: 6,
+          totalPages: 1,
         },
       },
       { status: 200 },

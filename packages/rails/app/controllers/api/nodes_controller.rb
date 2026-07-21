@@ -4,14 +4,14 @@ module Api
 
     # POST /api/nodes/lock
     def lock
-      path = params[:scope] == Scopes::SCOPE_PUBLIC ? everybody_api_files_path : api_files_path
+      path = params[:scope] == Scopes::SCOPE_PUBLIC ? "/home/files?scope=everybody" : "/home/files"
       https_apps_client.nodes_lock(unsafe_params[:ids])
       render json: { path: path }, adapter: :json
     end
 
     # POST /api/nodes/unlock
     def unlock
-      path = params[:scope] == Scopes::SCOPE_PUBLIC ? everybody_api_files_path : api_files_path
+      path = params[:scope] == Scopes::SCOPE_PUBLIC ? "/home/files?scope=everybody" : "/home/files"
       https_apps_client.nodes_unlock(unsafe_params[:ids])
       render json: { path: path }, adapter: :json
     end

@@ -2,169 +2,24 @@ import axios from 'axios'
 import type { EntityUidResponse } from '@/api/types'
 import type { PaginationMetaV2 } from '@/types/pagination'
 import { cleanObject } from '@/utils/object'
-import type { DownloadListResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
-import { formatScopeQ, type Params, prepareListFetch } from '../home/utils'
-import type { FileState, FileType, IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
-
-interface RailsFileLinks {
-  origin_object?: { origin_type?: string; origin_uid?: string | null }
-  user?: string
-  space?: string
-  download?: string
-  [key: string]: unknown
-}
-
-interface RailsFile {
-  id: number
-  uid: string
-  name: string
-  type: string
-  stiType?: string
-  state: string | null
-  location: string
-  added_by: string
-  added_by_dxuser?: string
-  created_at: string
-  featured: boolean
-  scope: string
-  space_id: string | null
-  origin: unknown
-  tags: string[]
-  properties: Record<string, string>
-  locked: boolean
-  resource?: boolean
-  file_size: string
-  created_at_date_time: string
-  description: string | null
-  links?: RailsFileLinks
-  file_license?: { id: string; uid: string; title: string } | null
-  show_license_pending: boolean
-  path?: unknown[]
-  [key: string]: unknown
-}
-
-interface RailsFolder {
-  id: number
-  name: string
-  type: string
-  stiType: string
-  state: null
-  location: string
-  added_by: string
-  added_by_dxuser?: string
-  created_at: string
-  featured: boolean
-  scope: string
-  space_id: string | null
-  origin: string | null
-  tags: string[]
-  properties: Record<string, string>
-  locked: boolean
-  created_at_date_time: string
-  links?: RailsFileLinks
-  path?: unknown[]
-  [key: string]: unknown
-}
-
-function extractDxuserFromUserLink(userLink?: string): string | undefined {
-  if (!userLink) {
-    return undefined
-  }
-  const match = userLink.match(/\/users\/([^/]+)$/)
-  return match?.[1]
-}
-
-function mapRailsFile(raw: RailsFile): IFile {
-  return {
-    id: raw.id,
-    uid: raw.uid,
-    name: raw.name,
-    type: raw.type as IFile['type'],
-    stiType: raw.stiType as IFile['stiType'],
-    state: raw.state as IFile['state'],
-    location: raw.location,
-    addedBy: raw.added_by,
-    addedByDxuser: raw.added_by_dxuser ?? extractDxuserFromUserLink(raw.links?.user),
-    createdAt: raw.created_at,
-    featured: raw.featured,
-    scope: raw.scope as IFile['scope'],
-    spaceId: raw.space_id,
-    origin: raw.origin as IFile['origin'],
-    originObject: raw.links?.origin_object
-      ? ({
-          originType: raw.links.origin_object.origin_type as IFile['originObject'],
-          originUid: raw.links.origin_object.origin_uid ?? null,
-        } as IFile['originObject'])
-      : undefined,
-    tags: raw.tags,
-    properties: raw.properties,
-    locked: raw.locked,
-    resource: raw.resource ?? false,
-    fileSize: raw.file_size,
-    createdAtDateTime: raw.created_at_date_time,
-    description: raw.description,
-    fileLicense: raw.file_license,
-    show_license_pending: raw.show_license_pending,
-    requestApprovalLicenseLink:
-      typeof raw.links?.request_approval_license === 'string' ? raw.links.request_approval_license : undefined,
-    acceptLicenseActionLink:
-      typeof raw.links?.accept_license_action === 'string' ? raw.links.accept_license_action : undefined,
-    downloadLink: raw.links?.download,
-  }
-}
-
-function mapRailsFolder(raw: RailsFolder): IFolder {
-  return {
-    id: raw.id,
-    name: raw.name,
-    type: raw.type as IFolder['type'],
-    stiType: raw.stiType as IFolder['stiType'],
-    state: raw.state,
-    location: raw.location,
-    addedBy: raw.added_by,
-    addedByDxuser: raw.added_by_dxuser ?? extractDxuserFromUserLink(raw.links?.user),
-    createdAt: raw.created_at,
-    featured: raw.featured,
-    scope: raw.scope as IFolder['scope'],
-    spaceId: raw.space_id,
-    origin: raw.origin,
-    originObject: raw.links?.origin_object
-      ? ({
-          originType: raw.links.origin_object.origin_type as IFolder['originObject'],
-          originUid: raw.links.origin_object.origin_uid ?? null,
-        } as IFolder['originObject'])
-      : undefined,
-    tags: raw.tags,
-    properties: raw.properties,
-    locked: raw.locked,
-    createdAtDateTime: raw.created_at_date_time,
-    path: raw.path as IFolder['path'],
-  }
-}
-
-function mapRailsNode(raw: RailsFile | RailsFolder): IFile | IFolder {
-  if (raw.type === 'Folder') return mapRailsFolder(raw as RailsFolder)
-  return mapRailsFile(raw as RailsFile)
-}
+import type { DownloadListResponse, HomeScope, IFilter, MetaV2, ServerScope } from '../home/types'
+import { type Params, prepareListFetchV2 } from '../home/utils'
+import type { FileState, FileType, IExistingFileSet, IFile, IFolder, INode, SelectedNode } from './files.types'
 
 export interface FetchFilesQuery {
-  files: (IFile | IFolder)[]
-  meta: IMeta
+  files: INode[]
+  meta: MetaV2
 }
 
 export interface FetchFolderChildrenResponse {
   nodes: IFolder[]
 }
 
-export async function fetchFiles(filters: IFilter[], params: Params, scope?: HomeScope): Promise<FetchFilesQuery> {
-  const query = prepareListFetch(filters, params)
-  const paramQ = `?${new URLSearchParams(query as Record<string, string>).toString()}`
-  const scopeQ = formatScopeQ(scope)
-  const res = await axios.get<{ files: (RailsFile | RailsFolder)[]; meta: IMeta }>(`/api/files${scopeQ}${paramQ}`)
-  return {
-    files: res.data.files.map(mapRailsNode),
-    meta: res.data.meta,
-  }
+const SCOPE_DICT: Record<HomeScope, ServerScope | 'spaces'> = {
+  me: 'private',
+  everybody: 'public',
+  featured: 'public',
+  spaces: 'spaces',
 }
 
 export async function fetchFile(uid: string): Promise<IFile> {
@@ -291,8 +146,8 @@ export const moveFilesRequest = async (
   return axios.post(url, body).then(res => res.data as MoveFilesResponse)
 }
 
-export async function createFile(name: string, scope: string, folder_id: string | null): Promise<EntityUidResponse> {
-  return axios.post('/api/v2/files', { name, scope, folderId: folder_id }).then(r => r.data)
+export async function createFile(name: string, scope: string, folderId: string | null): Promise<EntityUidResponse> {
+  return axios.post('/api/v2/files', { name, scope, folderId }).then(r => r.data)
 }
 
 export async function fetchSelectedFiles(ids: number[]): Promise<SelectedNode[]> {
@@ -316,22 +171,26 @@ export interface FetchAccessibleFilesRequest {
   folderId?: number | 'null'
   pageSize?: number
   ignoreChallengeBot?: boolean
-  filter: {
+  ignoreComparison?: boolean
+  filter?: {
     states?: FileState[]
     name?: string
     tags?: string[]
     size?: string
+    addedBy?: string
+    location?: string
   }
   fields?: {
     license?: boolean
     properties?: boolean
     tags?: boolean
     path?: boolean
+    origin?: boolean
   }
 }
 
 export interface FetchAccessibleFilesResponse {
-  data: IFile[]
+  data: INode[]
   meta: PaginationMetaV2
 }
 
@@ -346,4 +205,43 @@ export async function fetchAccessibleFiles(params: FetchAccessibleFilesRequest):
 
 export async function verifyAccessibleFiles(uids: string[]): Promise<VerifyAccessibleFilesResponse> {
   return axios.get<VerifyAccessibleFilesResponse>('/api/v2/files/accessibility', { params: { uids } }).then(r => r.data)
+}
+
+export async function fetchFiles(filter: IFilter[], params: Params): Promise<FetchFilesQuery> {
+  const query = prepareListFetchV2(filter, params)
+
+  // normalize fileSize filter
+  // TODO(PFDA-7013): refactor size filter after rewriting /assets to Node
+  if (query['filter[fileSize]']) {
+    const sizeFilter = query['filter[fileSize]'] as { from: number | null; to: number | null }
+    query['filter[size]'] =
+      `${sizeFilter.from ? sizeFilter.from * 1024 : ''},${sizeFilter.to ? sizeFilter.to * 1024 : ''}`
+    delete query['filter[fileSize]']
+  }
+
+  const scopeFilter: Record<string, unknown> = params.spaceId
+    ? { scope: `space-${params.spaceId}` }
+    : {
+        // biome-ignore lint/style/noNonNullAssertion: scope is non-null if spaceId is not provided
+        scope: SCOPE_DICT[params.scope!],
+        ...(params.scope === 'everybody' && { ignoreComparison: false, ignoreChallengeBot: false }),
+        ...(params.scope === 'featured' && { featured: true }),
+      }
+
+  const res = await fetchAccessibleFiles({
+    type: ['UserFile', 'Folder'],
+    fields: {
+      properties: true,
+      tags: true,
+      origin: true,
+      path: true,
+    },
+    folderId: params.folderId ? parseInt(params.folderId, 10) : 'null',
+    ...scopeFilter,
+    ...query,
+  })
+  return {
+    files: res.data,
+    meta: res.meta,
+  }
 }

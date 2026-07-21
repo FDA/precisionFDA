@@ -259,9 +259,6 @@ Rails.application.routes.draw do
         get :download, on: :member
 
         collection do
-          get :featured
-          get :everybody
-          get :spaces
           get :cli
           get :bulk_download, to: "files#bulk_download_content"
           get :test_streaming

@@ -28,7 +28,7 @@ export const UploadHeaderText: React.FC<UploadHeaderTextProps> = ({
     const basePath = `${getBasePath(spaceId)}/files`
     const params = cleanObject({
       scope: homeScope as string,
-      folder_id: folderId?.toString(),
+      folderId: folderId?.toString(),
     })
     const queryString = new URLSearchParams(params as Record<string, string>).toString()
     return queryString ? `${basePath}?${queryString}` : basePath

@@ -3,7 +3,7 @@ import type { ServerScope } from '../features/home/types'
 
 export const createFile = (name: string, scope?: ServerScope, folderId?: string | number) =>
   axios
-    .post('/api/v2/files', { name, scope, folderId })
+    .post('/api/v2/files', { name, scope, folderId: folderId ? parseInt(folderId.toString(), 10) : null })
     .then(response => ({ status: response.status, payload: response.data }))
 
 export const getUploadURL = (uid: string | number, index: number, size: number, md5: string) =>

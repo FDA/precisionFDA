@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { range } from 'ramda'
 import React, { type DragEventHandler } from 'react'
 import styled from 'styled-components'
-import type { IFile } from '../../../features/files/files.types'
+import type { INode } from '../../../features/files/files.types'
 import { Draggable, Droppable } from '../DnD'
 import { ColumnSelect } from './ColumnSelect'
 import Filter from './Filter'
@@ -39,7 +39,7 @@ const DnDRow = ({
   onClick,
   className,
 }: {
-  row: Row<IFile>
+  row: Row<INode>
   numSelected: number
   children: React.ReactNode
   onClick?: React.MouseEventHandler<HTMLTableRowElement>
@@ -48,10 +48,10 @@ const DnDRow = ({
   const isSelected = row.getIsSelected()
 
   let DnDComp = isSelected ? Draggable : 'tr'
-  if (isSelected && row.original.type === 'Folder') {
+  if (isSelected && row.original.stiType === 'Folder') {
     DnDComp = Draggable
   }
-  if (!isSelected && row.original.type === 'Folder') {
+  if (!isSelected && row.original.stiType === 'Folder') {
     DnDComp = Droppable
   }
   const RowComponent = DnDComp as React.ElementType
@@ -109,7 +109,8 @@ export function CustomTable<T extends RowData>({
   const [headerGroups] = getTableHeaderGroups(table, tableGroup)
   const numSelected = table.getSelectedRowModel().rows.length
 
-  const colFiller = (as: string) => displayColSpacer && <Filler as={as} style={{ width: spacerWidth - 10, minWidth: 50 }} />
+  const colFiller = (as: string) =>
+    displayColSpacer && <Filler as={as} style={{ width: spacerWidth - 10, minWidth: 50 }} />
 
   return (
     <>
@@ -191,7 +192,9 @@ export function CustomTable<T extends RowData>({
 
         <tbody>
           {isLoading &&
-            range(0, 3).map(i => <LoadingRows visibleColumns={headerGroups[0].headers.map(h => h.column)} delay={i} key={i} />)}
+            range(0, 3).map(i => (
+              <LoadingRows visibleColumns={headerGroups[0].headers.map(h => h.column)} delay={i} key={i} />
+            ))}
           {table.getRowModel().rows.map(row => {
             const handleRowClick: React.MouseEventHandler<HTMLTableRowElement> = e => {
               if (shouldIgnoreRowClick(e.target)) return
@@ -217,7 +220,7 @@ export function CustomTable<T extends RowData>({
               return (
                 <DnDRow
                   key={row.id}
-                  row={row as Row<IFile>}
+                  row={row as Row<INode>}
                   numSelected={numSelected}
                   onClick={handleRowClick}
                   className={clsx({ 'row-click-select': isRowClickable })}
@@ -261,7 +264,9 @@ export function CustomTable<T extends RowData>({
           })}
         </tbody>
       </table>
-      {!isLoading && table.getRowModel().rows.length === 0 && emptyText && <div className="table-empty">{emptyText}</div>}
+      {!isLoading && table.getRowModel().rows.length === 0 && emptyText && (
+        <div className="table-empty">{emptyText}</div>
+      )}
     </>
   )
 }

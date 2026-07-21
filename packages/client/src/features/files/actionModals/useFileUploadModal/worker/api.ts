@@ -21,9 +21,7 @@ export async function createFileRequest(session: WorkerSession): Promise<void> {
   const data = cleanObject({
     name: session.fileName,
     scope: session.scope,
-    folder_id: session.folderId,
-    space_id: session.spaceId,
-    home_scope: session.homeScope,
+    folderId: session.folderId ? parseInt(session.folderId, 10) : null,
   })
 
   const controller = new AbortController()

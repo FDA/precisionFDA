@@ -1,5 +1,4 @@
-import { Column, FilterFnOption } from '@tanstack/react-table'
-import React from 'react'
+import type { Column, FilterFnOption } from '@tanstack/react-table'
 import styled from 'styled-components'
 import DebouncedInput from './DebouncedInput'
 
@@ -49,7 +48,15 @@ const NumberInputWrapper = styled.div`
   }
 `
 
-function NumberRangeFilter<T>({ column, fromPlaceholder, toPlaceholder }: { column: Column<T>, fromPlaceholder: string, toPlaceholder: string }) {
+function NumberRangeFilter<T>({
+  column,
+  fromPlaceholder,
+  toPlaceholder,
+}: {
+  column: Column<T>
+  fromPlaceholder: string
+  toPlaceholder: string
+}) {
   const filterValue = (column.getFilterValue() as NumberRangeFilterValue) ?? { from: null, to: null }
 
   return (

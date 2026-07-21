@@ -28,7 +28,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { getReviewAreaCopyTarget, isOpenable, type ReviewAreaCopyTarget } from './file.utils'
 import { moveFilesRequest } from './files.api'
-import type { IFile, NodePermissions, TreeOnSelectInfo } from './files.types'
+import type { IFile, IFolder, NodePermissions, TreeOnSelectInfo } from './files.types'
 import { normalizePermissions } from './normalizePermissions'
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
@@ -169,7 +169,7 @@ export const useFilesSelectActions = ({
     onSuccess: () => {
       if (space) {
         if (folderId) {
-          navigate(`/spaces/${space.id}/files?folder_id=${folderId}`)
+          navigate(`/spaces/${space.id}/files?folderId=${folderId}`)
           queryClient.invalidateQueries({
             queryKey: ['files', folderId],
           })
@@ -181,7 +181,7 @@ export const useFilesSelectActions = ({
         }
       } else {
         if (folderId) {
-          navigate(`/home/files?folder_id=${folderId}&scope=${homeScope}`)
+          navigate(`/home/files?folderId=${folderId}&scope=${homeScope}`)
           queryClient.invalidateQueries({
             queryKey: ['files', folderId],
           })
@@ -303,8 +303,8 @@ export const useFilesSelectActions = ({
   })
 
   const availableLicenses = Boolean(licenses?.licenses.length !== 0)
-  const isFolder = selected.every(e => e.type === 'Folder')
-  const selectedButNotClosed = selected.some(e => e.type === 'UserFile' && e.state !== 'closed')
+  const isFolder = selected.every(e => e.stiType === 'Folder')
+  const selectedButNotClosed = selected.some(e => e.stiType === 'UserFile' && e.state !== 'closed')
   const requestLicenseApprovalLink =
     selected[0]?.fileLicense?.id != null
       ? `/licenses/${selected[0].fileLicense.id}/request_approval`
@@ -338,7 +338,7 @@ export const useFilesSelectActions = ({
       isDisabled: selected.length === 0 || perms.some(p => !p.canDownload),
       modal: openFileModal,
       showModal: isShownOpenFileModal,
-      shouldHide: selected.some(e => e.type !== 'UserFile' || !isOpenable(e.name)),
+      shouldHide: selected.some(e => e.stiType !== 'UserFile' || !isOpenable(e.name)),
     },
     {
       name: 'Download',

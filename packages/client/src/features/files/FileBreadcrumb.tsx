@@ -1,12 +1,12 @@
-import React, { useMemo } from 'react'
 import { useDroppable } from '@dnd-kit/core'
+import React, { useMemo } from 'react'
 import { Link } from 'react-router'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { HomeIcon } from '../../components/icons/HomeIcon'
 import { Pill } from '../../components/Pill'
-import { DroppableProps } from '../../components/Table/DnD'
+import type { DroppableProps } from '../../components/Table/DnD'
 import { cleanObject } from '../../utils/object'
-import { HomeScope, MetaPath } from '../home/types'
+import type { HomeScope, MetaPath } from '../home/types'
 import styles from './FileBreadcrumb.module.css'
 
 interface BreadcrumbItem {
@@ -68,7 +68,7 @@ export const FileBreadcrumb = ({
       ...(metaPath || []).map(folder => ({
         id: folder.id,
         name: folder.name,
-        href: `${basePath}${createSearchParam({ scope, folder_id: folder.id })}`,
+        href: `${basePath}${createSearchParam({ scope, folderId: folder.id })}`,
         isActive: currentFolderId === folder.id,
       })),
     ]

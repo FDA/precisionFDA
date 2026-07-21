@@ -1,3 +1,4 @@
+import { extend } from 'lodash'
 import type { TreeProps } from 'rc-tree'
 import type { BasicDataNode } from 'rc-tree/es/interface'
 import type { DataNode } from 'rc-tree/lib/interface'
@@ -36,81 +37,54 @@ export interface OriginObject {
   originUid?: string | null
 }
 
-export interface IFile {
-  id: number
-  name: string
-  size?: string
-  type: FileType
-  stiType?: FileType
-  locked: boolean
-  resource: boolean
-  locking?: boolean
-  state: FileState | null
-  location: FileLocation
-  addedBy: string
-  addedByDxuser?: string
-  createdAt: string
-  featured: boolean
-  scope: ServerScope
-  spaceId: string | null
-  origin: FileOrigin | string | null
-  originObject?: OriginObject
-  tags: string[]
-  properties: {
-    [key: string]: string
-  }
-  uid: string
-  fileSize: string
-  createdAtDateTime: string
-  description: string | null
-  fileLicense?: FileLicense | null
-  show_license_pending?: boolean
-  folderPath?: { id: number; name: string }[]
-  private?: boolean
-  public?: boolean
-  user?: FileUser
-  org?: FileOrg
-  permissions?: NodePermissions
-  requestApprovalLicenseLink?: string
-  acceptLicenseActionLink?: string
-  downloadLink?: string
-}
-
 export interface IFolderPath {
   id: number | null
   name: string
 }
 
-export interface IFolder {
-  path: IFolderPath[]
-  filePath?: string
-  state: null
+export interface INode {
   id: number
   name: string
-  size?: string
-  type: FileType
-  stiType: FileType
+  scope: ServerScope
+  state: FileState | null
+  spaceId: number | null
+  featured: boolean
   locked: boolean
-  locking?: boolean
-  location: FileLocation
-  origin: string | null
+  createdAt: string
+  createdAtDateTime: string
+  path?: string
+  folderId: number | null
   addedBy: string
   addedByDxuser?: string
-  createdAt: string
-  featured: boolean
-  scope: ServerScope
-  spaceId: string | null
-  originObject?: OriginObject
   tags: string[]
   properties: {
     [key: string]: string
   }
-  createdAtDateTime: string
-  private?: boolean
-  public?: boolean
-  user?: FileUser
-  org?: FileOrg
+  location: FileLocation
+  stiType: FileType
   permissions?: NodePermissions
+}
+
+export interface IFolder extends INode {
+  stiType: 'Folder'
+}
+
+export interface IFile extends INode {
+  uid: string
+  size?: string
+  stiType: 'UserFile'
+  resource: boolean
+  locking?: boolean
+  origin: FileOrigin | string | null
+  originObject?: OriginObject
+  fileSize: string
+  description: string | null
+  show_license_pending?: boolean
+  fileLicense?: FileLicense | null
+  folderPath?: { id: number; name: string }[]
+  requestApprovalLicenseLink?: string
+  acceptLicenseActionLink?: string
+  downloadLink?: string
 }
 
 export interface ISelectedNode {

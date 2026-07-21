@@ -76,6 +76,10 @@ export class SpaceService {
     return this.spaceRepository.findEditableOne({ id })
   }
 
+  async findByIds(ids: number[]): Promise<Space[]> {
+    return this.spaceRepository.find({ id: { $in: ids } })
+  }
+
   async deleteSpaces(spaceIds: number[]): Promise<void> {
     this.logger.log(`Deleting spaces with ids ${spaceIds}`)
 

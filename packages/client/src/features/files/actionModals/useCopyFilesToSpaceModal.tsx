@@ -1,23 +1,23 @@
-import React, { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
-import { DataNode } from 'rc-tree/lib/interface'
+import type { AxiosError } from 'axios'
+import type { DataNode } from 'rc-tree/lib/interface'
+import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { useImmer } from 'use-immer'
-import { BackendError } from '@/api/types'
+import type { BackendError } from '@/api/types'
 import { Button } from '@/components/Button'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, StyledModalScroll } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
+import { FileTree } from '../FileTree'
 import { findById } from '../file.utils'
 import { copyFilesRequest, fetchFolderChildren } from '../files.api'
-import { CustomDataNode, IFile } from '../files.types'
-import { FileTree } from '../FileTree'
+import type { CustomDataNode, IFile } from '../files.types'
 
 export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   const [searchParams] = useSearchParams()
-  const folderIdParam = searchParams.get('folder_id')
+  const folderIdParam = searchParams.get('folderId')
   const folderId = folderIdParam ? parseInt(folderIdParam, 10) : undefined
 
   const { isShown, setShowModal } = useModal()

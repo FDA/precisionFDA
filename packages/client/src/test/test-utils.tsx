@@ -1,12 +1,12 @@
-import { render as browserRender } from 'vitest-browser-react'
-import { page } from 'vitest/browser'
-import { FC } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { FC } from 'react'
 import { BrowserRouter } from 'react-router'
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+import { page } from 'vitest/browser'
+import { render as browserRender } from 'vitest-browser-react'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
-import { ThemeProvider } from '../utils/ThemeContext'
-import { OnlineStatusProvider } from '../utils/OnlineStatusContext'
 import { FileUploadModalProvider } from '../features/files/actionModals/useFileUploadModal/FileUploadModalProvider'
+import { OnlineStatusProvider } from '../utils/OnlineStatusContext'
+import { ThemeProvider } from '../utils/ThemeContext'
 
 // Ensure modal-root element exists for portal-based modals
 const ensureModalRoot = () => {
@@ -43,11 +43,7 @@ export const AllTheProviders: FC<{ children: React.ReactNode }> = ({ children })
 const customRender = (ui: React.ReactElement, { route = '/' } = {}) => {
   ensureModalRoot()
   window.history.pushState({}, 'Test page', route)
-  browserRender(
-    <AllTheProviders>
-      {ui}
-    </AllTheProviders>,
-  )
+  browserRender(<AllTheProviders>{ui}</AllTheProviders>)
   // Return the page object for querying elements
   return page
 }

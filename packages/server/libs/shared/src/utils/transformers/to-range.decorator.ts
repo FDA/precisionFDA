@@ -20,8 +20,14 @@ export function ToNumberRange(): PropertyDecorator {
     if (typeof range !== 'object') return value
 
     return {
-      lower: range.lower !== undefined && !Number.isNaN(Number(range.lower)) ? Number(range.lower) : undefined,
-      upper: range.upper !== undefined && !Number.isNaN(Number(range.upper)) ? Number(range.upper) : undefined,
+      lower:
+        range.lower !== undefined && range.lower !== '' && !Number.isNaN(Number(range.lower))
+          ? Number(range.lower)
+          : undefined,
+      upper:
+        range.upper !== undefined && range.upper !== '' && !Number.isNaN(Number(range.upper))
+          ? Number(range.upper)
+          : undefined,
     }
   })
 }

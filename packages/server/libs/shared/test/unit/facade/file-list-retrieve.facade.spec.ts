@@ -1,6 +1,4 @@
-import { create } from 'axios'
 import { expect } from 'chai'
-import { is } from 'ramda'
 import { match, stub } from 'sinon'
 import { LicenseService } from '@shared/domain/license/license.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
@@ -24,6 +22,7 @@ describe('FileListRetrieveFacade', () => {
   const getParentFolderStub = stub()
   const getFolderPathEntriesStub = stub()
   const spaceGetAccessibleByIdStub = stub()
+  const spaceFindByIdsStub = stub()
   const findLicensesAndAcceptedLicensesByItemIdsStub = stub()
 
   const USER = {
@@ -81,6 +80,8 @@ describe('FileListRetrieveFacade', () => {
     createdAt: new Date(),
     user: { getEntity: () => USER },
     isInSpace: () => false,
+    taggings: { isInitialized: () => false },
+    properties: { isInitialized: () => false },
   } as unknown as Folder
 
   const FILE_IN_FOLDER = {
@@ -127,6 +128,8 @@ describe('FileListRetrieveFacade', () => {
     createdAt: new Date(),
     user: { getEntity: () => USER },
     isInSpace: () => true,
+    taggings: { isInitialized: () => false },
+    properties: { isInitialized: () => false },
   } as unknown as Folder
 
   const USER_UPLOAD_ORIGIN = {
@@ -151,6 +154,7 @@ describe('FileListRetrieveFacade', () => {
   } as unknown as NodeHelper
   const spaceService = {
     getAccessibleById: spaceGetAccessibleByIdStub,
+    findByIds: spaceFindByIdsStub,
   } as unknown as SpaceService
   const licenseService = {
     findLicensesAndAcceptedLicensesByItemIds: findLicensesAndAcceptedLicensesByItemIdsStub,
@@ -192,6 +196,10 @@ describe('FileListRetrieveFacade', () => {
 
     spaceGetAccessibleByIdStub.reset()
     spaceGetAccessibleByIdStub.withArgs(SPACE.id).resolves(SPACE)
+
+    spaceFindByIdsStub.reset()
+    spaceFindByIdsStub.resolves([])
+    spaceFindByIdsStub.withArgs([SPACE.id]).resolves([SPACE])
 
     findLicensesAndAcceptedLicensesByItemIdsStub.reset()
     findLicensesAndAcceptedLicensesByItemIdsStub.resolves(new Map())
@@ -298,6 +306,62 @@ describe('FileListRetrieveFacade', () => {
         originUid: USER_UPLOAD_ORIGIN.parentUid,
       })
       expect(resolveOriginStub.calledWith(FILE_IN_FOLDER)).to.be.true()
+    })
+
+    it('should retrieve files across all spaces when scope is "spaces"', async () => {
+      const SPACE2 = {
+        id: 223,
+        name: 'Test Space 2',
+        type: SPACE_TYPE.GROUPS,
+        scope: 'space-223',
+        isConfidential: () => false,
+      } as unknown as Space
+      const SPACE2_FILE = {
+        id: 6,
+        name: 'space2_file1.txt',
+        uid: 'file-uid-6',
+        stiType: FILE_STI_TYPE.USERFILE,
+        scope: SPACE2.scope,
+        createdAt: new Date(),
+        user: { getEntity: () => USER },
+        taggings: { isInitialized: () => false },
+        properties: { isInitialized: () => false },
+        isInSpace: () => true,
+      } as unknown as UserFile
+      Object.setPrototypeOf(SPACE2_FILE, UserFile.prototype)
+      const query = {
+        scope: 'spaces',
+        fields: { origin: false, path: false },
+      } as UserFilePaginationDTO
+      nodePaginateStub.withArgs(match.has('scope', 'spaces')).resolves({
+        data: [SPACE_FILE, SPACE_FOLDER, SPACE2_FILE],
+        total: 2,
+        page: 1,
+        pageSize: 10,
+      })
+      findLicensesAndAcceptedLicensesByItemIdsStub
+        .withArgs('Node', [SPACE_FILE.id, SPACE_FOLDER.id, SPACE2_FILE.id])
+        .resolves(
+          new Map([
+            [SPACE_FILE.id, { license: APPROVAL_PENDING_LICENSE, userAcceptedLicensesCount: 0 }],
+            [SPACE2_FILE.id, { license: APPROVAL_PENDING_LICENSE, userAcceptedLicensesCount: 0 }],
+          ]),
+        )
+
+      const facade = getInstance()
+      const result = await facade.retrieveAccessibleFiles(query)
+
+      expect(result.data.length).to.equal(3)
+      expect(spaceGetAccessibleByIdStub.notCalled).to.be.true()
+      expect(spaceFindByIdsStub.calledWith([SPACE.id, SPACE2.id])).to.be.true()
+      const fileDTO1: FileGetDTO = result.data.find(item => (item as FileGetDTO).uid === SPACE_FILE.uid) as FileGetDTO
+      expect(fileDTO1).to.include({ name: SPACE_FILE.name })
+      expect(fileDTO1.scope).to.equal(SPACE.scope)
+      const folderDTO = result.data.find(item => item.name === SPACE_FOLDER.name)
+      expect(folderDTO).to.include({ name: SPACE_FOLDER.name })
+      const fileDTO2: FileGetDTO = result.data.find(item => (item as FileGetDTO).uid === SPACE2_FILE.uid) as FileGetDTO
+      expect(fileDTO2).to.include({ name: SPACE2_FILE.name })
+      expect(fileDTO2.scope).to.equal(SPACE2.scope)
     })
 
     it('should retrieve files in space scope', async () => {

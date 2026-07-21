@@ -26,9 +26,14 @@ export class FileListRetrieveFacade {
 
   async retrieveAccessibleFiles(query: UserFilePaginationDTO): Promise<PaginatedResult<FileGetDTO | FolderDTO>> {
     const result = await this.nodeService.paginate(query)
-    let space: Space | null = null
+    const spaceMap = new Map<string, Space>()
     if (EntityScopeUtils.isSpaceScope(query.scope)) {
-      space = await this.spaceService.getAccessibleById(getIdFromScopeName(query.scope))
+      const space = await this.spaceService.getAccessibleById(getIdFromScopeName(query.scope))
+      spaceMap.set(query.scope, space)
+    } else if (query.scope === 'spaces') {
+      const spaceIds = [...new Set(result.data.map(node => getIdFromScopeName(node.scope)))]
+      const spaces = await this.spaceService.findByIds(spaceIds)
+      spaces.forEach(s => spaceMap.set(`space-${s.id}`, s))
     }
 
     const nodeIds = result.data.map(node => node.id)
@@ -42,14 +47,17 @@ export class FileListRetrieveFacade {
     const mappedData = await Promise.all(
       result.data.map(node => {
         return node instanceof UserFile
-          ? this.mapFileToFileDTO(node, space, licenseMap, query, folderPath)
-          : Promise.resolve(FolderDTO.fromEntity(node, space))
+          ? this.mapFileToFileDTO(node, spaceMap.get(node.scope), licenseMap, query, folderPath)
+          : Promise.resolve(FolderDTO.fromEntity(node, spaceMap.get(node.scope)))
       }),
     )
 
     return {
-      ...result,
       data: mappedData,
+      meta: {
+        path: folderPath,
+        ...result.meta,
+      },
     }
   }
 

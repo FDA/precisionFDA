@@ -38,58 +38,6 @@ module Api
       "username" => ->(left, right) { left.user.full_name <=> right.user.full_name },
     }.freeze
 
-    # GET /api/files or GET /api/files/?space_id=params[:space_id]
-    # A common UserFies fetch method for space and home pages, depends upon @params[:space_id].
-    # @param space_id [Integer] Space id for files fetch. When it is nil, then fetching for
-    #   all files, editable by current user.
-    # @param order_by, order_dir [String] Params for ordering.
-    # @return files [UserFile] Array of UserFile objects if they exist OR files: [].
-    def index
-      # Fetches space files.
-      respond_with_space_files && return if params[:space_id]
-
-      # Fetches all user 'private' files.
-      filter_tags = params.dig(:filters, :tags)
-
-      files = UserFile.
-        real_files.
-        not_removing.
-        editable_by(@context).
-        accessible_by_private.
-        where.not(parent_type: ["Comparison", nil]).
-        includes(:taggings).
-        eager_load(user: :org).
-        search_by_tags(filter_tags)
-
-      return files.size if show_count
-
-      files = files.where(parent_folder_id: @parent_folder_id)
-      files = FileService::FilesFilter.call(files, params[:filters])
-
-      folders = private_folders(@parent_folder_id).includes(:taggings).
-        eager_load(user: :org).search_by_tags(filter_tags)
-      folders = FileService::FilesFilter.call(folders, params[:filters])
-
-      user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id))
-
-      if params[:order_by_property]
-        user_files = user_files.
-          # has to join properties because of sorting by them.
-          left_outer_joins(:properties).
-          order(order_params).
-          page(page_from_params).per(page_size)
-      else
-        user_files = user_files.order(order_params).page(page_from_params).per(page_size)
-      end
-
-      page_dict = pagination_dict(user_files)
-
-      render json: user_files, root: "files", adapter: :json,
-             meta: files_meta.
-               merge(count(UserFile.private_count(@context.user))).
-               merge({ pagination: page_dict })
-    end
-
     # USED EXCLUSIVELY BY CLI
     def describe
       # the param is actually uid, this is because default ruby behavior. Not worth it to change.
@@ -183,108 +131,6 @@ module Api
     def path_resolver
       result = https_apps_client.resolve_path(params[:path], params[:scope], params[:type])
       render json: result
-    end
-
-    # GET /api/files/featured
-    # A fetch method for files, accessible by public and with user taggings.
-    # @param created_at [String] Param for ordering.
-    # @return files [UserFile] Array of UserFile objects if they exist OR files: [].
-    def featured
-      filter_tags = params.dig(:filters, :tags)
-
-      files = UserFile.real_files.
-        not_removing.
-        featured.accessible_by(@context).
-        where(parent_folder_id: @parent_folder_id).
-        includes(:user, :taggings).eager_load(user: :org).
-        search_by_tags(filter_tags)
-      files = FileService::FilesFilter.call(files, params[:filters])
-
-      folders = Folder.
-        featured.
-        not_removing.
-        accessible_by(@context).
-        where(parent_folder_id: @parent_folder_id).
-        includes(:taggings).
-        eager_load(user: :org).
-        search_by_tags(filter_tags)
-      folders = FileService::FilesFilter.call(folders, params[:filters])
-
-      if show_count
-        # Return a single value for the count
-        return files.count + folders.count
-      end
-
-      # Otherwise, render the data from the helper method
-      render_files_list(files: files, folders: folders)
-    end
-
-    # GET /api/files/everybody
-    # A fetch method for files, accessible by public and of latest revisions.
-    # @param created_at [String] Param for ordering.
-    # @return files [UserFile] Array of UserFile objects if they exist OR files: [].
-    # app/controllers/api/files_controller.rb
-    def everybody
-      filter_tags = params.dig(:filters, :tags)
-
-      files =
-        UserFile.real_files.
-          not_removing.
-          accessible_by_public.
-          includes(:taggings).eager_load(user: :org).
-          search_by_tags(filter_tags)
-
-      files = files.where(parent_folder_id: @parent_folder_id) unless show_count
-      files = FileService::FilesFilter.call(files, params[:filters])
-
-      folders = explore_folders(@parent_folder_id).includes(:taggings).
-        eager_load(user: :org).search_by_tags(filter_tags)
-      folders = FileService::FilesFilter.call(folders, params[:filters])
-
-      if show_count
-        # Return a single value if `show_count` is true
-        files.count
-      else
-      # Call the helper method and render the returned hash
-      render_files_list(files: files, folders: folders)
-      end
-    end
-
-    # GET /api/files/spaces
-    # A fetch method for files, accessible by user and of 'space' scope.
-    # @param created_at [String] Param for ordering.
-    # @return files [UserFile] Array of UserFile and Folder objects,
-    #   which scope is not 'private' or 'public', i.e.
-    #   files and folders scope is one of 'space-...', if they exist OR files: [].
-    def spaces
-      filter_tags = params.dig(:filters, :tags)
-
-      files = UserFile.real_files.
-        not_removing.
-        where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
-        accessible_by(@context).
-        includes(:taggings).eager_load(user: :org).
-        search_by_tags(filter_tags)
-
-      files = files.where(scoped_parent_folder_id: @parent_folder_id) unless show_count
-      files = FileService::FilesFilter.call(files, params[:filters])
-
-      folders = Folder.
-        where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
-        not_removing.
-        accessible_by(@context).
-        includes(:taggings).eager_load(user: :org).
-        where(scoped_parent_folder_id: @parent_folder_id).
-        search_by_tags(filter_tags)
-      folders = FileService::FilesFilter.call(folders, params[:filters])
-
-      if show_count
-        # Return the count directly
-        files.size
-      else
-        # Your existing code for when show_count is false
-        render_files_list(files: files, folders: folders)
-      end
     end
 
     # GET /api/files/:uid
@@ -431,7 +277,7 @@ module Api
           parent_folder = Folder.accessible_by_public.find_by(id: params[:parent_folder_id])
           scope = "public"
         else
-          path = everybody_api_files_path
+          path = "/home/files?scope=everybody"
           type = :error
           text = "You are not allowed to create public folders"
           render json: { path: path, message: { type: type, text: text } }, adapter: :json
@@ -457,7 +303,7 @@ module Api
       path = if parent_folder.present?
         pathify_folder(parent_folder)
       else
-        scope == "public" ? everybody_api_files_path : api_files_path
+        scope == "public" ? "/home/files?scope=everybody" : "/home/files"
       end
       render json: { path: path, id: id, message: { type: type, text: text } }, adapter: :json
     end
@@ -492,7 +338,7 @@ module Api
       path = if target_folder.present?
                pathify_folder(target_folder)
              else
-               result.value[:scope] == "public" ? everybody_api_files_path : api_files_path
+               result.value[:scope] == "public" ? "/home/files?scope=everybody" : "/home/files"
              end
 
       render json: { path: path }, adapter: :json

@@ -17,7 +17,7 @@ import { colors } from '../../styles/theme'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
 import styles from './FileList.module.css'
 import { getOriginHref } from './file.utils'
-import type { IFile } from './files.types'
+import type { IFile, INode } from './files.types'
 
 const StyledLocked = styled.div<{ $isLocked: boolean }>`
   flex: 1 0 auto;
@@ -39,11 +39,11 @@ export const useFilesColumns = ({
   onFolderClick: (folderId: string) => void
   isAdmin?: boolean
   properties?: string[]
-}): ColumnDef<IFile>[] => {
+}): ColumnDef<INode>[] => {
   const queryClient = useQueryClient()
 
   return [
-    selectColumnDef<IFile>(),
+    selectColumnDef<INode>(),
     {
       header: 'Name',
       accessorKey: 'name',
@@ -53,21 +53,23 @@ export const useFilesColumns = ({
         const node = cell.row.original
         return (
           <StyledLocked $isLocked={node.locked}>
-            {node.type === 'UserFile' || node.type === 'File' || node.type === 'Asset' ? (
+            {node.stiType === 'UserFile' ? (
               <>
                 <StyledNameCell
                   data-testid="file-row-name"
-                  data-tooltip-id={`fileNameTooltip${node.uid}`}
+                  data-tooltip-id={`fileNameTooltip${(node as IFile).uid}`}
                   data-tooltip-content={`File is in ${node.state} state.`}
                   color={isIncompleteFile(node.state) ? 'var(--tertiary-600)' : 'var(--c-link)'}
-                  onClick={() => onFileClick(node.uid)}
+                  onClick={() => onFileClick((node as IFile).uid)}
                 >
                   <FileIcon height={14} />
-                  {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
+                  {(node as IFile).locked && <LockIcon height={12} color={colors.darkYellow} />}
 
                   {node.name}
                 </StyledNameCell>
-                {isIncompleteFile(node.state) && <Tooltip id={`fileNameTooltip${node.uid}`} style={{ zIndex: 2 }} />}
+                {isIncompleteFile(node.state) && (
+                  <Tooltip id={`fileNameTooltip${(node as IFile).uid}`} style={{ zIndex: 2 }} />
+                )}
               </>
             ) : (
               <>
@@ -98,7 +100,7 @@ export const useFilesColumns = ({
       size: 280,
       cell: ({ row }) => {
         const node = row.original
-        const val = node.type === 'Folder' ? node.id.toString() : node.uid
+        const val = node.stiType === 'Folder' ? node.id.toString() : (node as IFile).uid
         return (
           <div style={{}}>
             {val && (
@@ -113,11 +115,13 @@ export const useFilesColumns = ({
     {
       header: 'Location',
       accessorKey: 'location',
+      // TODO (PFDA-7013): support sorting location string in Nodejs
+      enableSorting: false,
       filterFn: 'includesString',
       size: 250,
       cell: ({ row, getValue }) => {
         const spaceId = row.original.spaceId
-        const spaceLink = spaceId ? `/spaces/${spaceId.replace('space-', '')}/files` : null
+        const spaceLink = spaceId ? `/spaces/${spaceId}/files` : null
         if (spaceLink) {
           return (
             <StyledLinkCell to={spaceLink}>
@@ -135,7 +139,7 @@ export const useFilesColumns = ({
       enableColumnFilter: false,
       size: 93,
       cell: ({ cell }) => {
-        const id = cell.row.original.type === 'Folder' ? cell.row.original.id : cell.row.original.uid
+        const id = cell.row.original.stiType === 'Folder' ? cell.row.original.id : (cell.row.original as IFile).uid
         return (
           <div style={{ paddingLeft: 20 }}>
             <FeaturedToggle
@@ -156,6 +160,8 @@ export const useFilesColumns = ({
     {
       header: 'Added By',
       accessorKey: 'addedBy',
+      // TODO (PFDA-7013): support sorting full name in Nodejs
+      enableSorting: false,
       filterFn: 'includesString',
       size: 198,
     },
@@ -163,9 +169,9 @@ export const useFilesColumns = ({
       header: 'Size',
       accessorKey: 'fileSize',
       size: 160,
-      filterFn: numberRangeFilterFn as FilterFnOption<IFile>,
+      filterFn: numberRangeFilterFn as FilterFnOption<INode>,
       meta: {
-        filterElement: (column: Column<IFile>) => (
+        filterElement: (column: Column<INode>) => (
           <NumberRangeFilter column={column} fromPlaceholder="Min (KB)" toPlaceholder="Max (KB)" />
         ),
       },
@@ -184,9 +190,13 @@ export const useFilesColumns = ({
       enableSorting: false,
       size: 240,
       cell: ({ row }) => {
-        const value = row.original.origin
-        const originType = row.original.originObject?.originType
-        const originHref = getOriginHref(row.original.originObject)
+        if (row.original.stiType === 'Folder') {
+          return
+        }
+        const file = row.original as IFile
+        const value = file.origin
+        const originType = file.originObject?.originType
+        const originHref = getOriginHref(file.originObject)
         return (
           <>
             {typeof value === 'object' && value !== null && originType === 'Job' && originHref && (
@@ -235,6 +245,12 @@ export const useFilesColumns = ({
         </StyledTags>
       ),
     },
-    ...propertiesColumnDef<IFile>(properties),
+    // TODO (PFDA-7013): support sorting properties in Nodejs
+    ...propertiesColumnDef<INode>(properties).map(col => {
+      return {
+        ...col,
+        enableSorting: false,
+      }
+    }),
   ]
 }

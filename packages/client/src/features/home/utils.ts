@@ -96,8 +96,9 @@ export type SortBy = SortConfig<OrderBy>
 export type Params = {
   sortBy?: SortBy
   entityScope?: string
-  folderId?: string | number
+  folderId?: string
   spaceId?: string | number
+  scope?: HomeScope
   perPage?: number
   page?: number
 } & Record<string, unknown>
@@ -186,7 +187,7 @@ export function prepareListFetchV2(filters: IFilter[], params: Params): QueryTyp
   const sort = sortField && params.sortBy?.order_dir ? { [createSortQueryKey(sortField)]: params.sortBy.order_dir } : {}
 
   return cleanObject({
-    folder_id: params?.folderId?.toString(),
+    folderId: params?.folderId?.toString(),
     space_id: params?.spaceId?.toString(),
     pageSize: params?.perPage?.toString(),
     page: params?.page?.toString(),

@@ -5,5 +5,9 @@ export interface PaginatedResult<T> {
     totalPages: number
     pageSize: number
     page: number
+    path?: {
+      id: number
+      name: string
+    }[]
   }
 }

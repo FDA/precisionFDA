@@ -2,6 +2,7 @@ import type { ColumnFiltersState } from '@tanstack/react-table'
 import { useCallback, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { toObjectFromArray } from '@/utils/object'
+import type { FilterVal } from './types'
 
 export const defaultFilterValues = (arr: string[]): Record<string, undefined> =>
   arr.reduce<Record<string, undefined>>((acc, curr) => {
@@ -48,6 +49,7 @@ const KEYS = [
   'featured',
   'revision',
   'added_by',
+  'addedBy',
   'title',
   'state',
   'hidden',
@@ -122,18 +124,24 @@ export function useFilterParams({
   // Parse filter query from search params - always read from current location
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search])
 
-  const filterQuery: Record<string, unknown> = {}
+  const filterQuery: Record<string, FilterVal> = {}
   Object.keys(filters).forEach(key => {
     const paramValue = searchParams.get(key)
 
-    if (filters[key] === 'string' || filters[key] === 'number') {
-      filterQuery[key] = paramValue || undefined
+    if ((filters[key] === 'string' || filters[key] === 'number') && paramValue) {
+      filterQuery[key] = paramValue
     }
     if (filters[key] === 'range') {
-      filterQuery[key] = parseRange(paramValue)
+      const range = parseRange(paramValue)
+      if (range) {
+        filterQuery[key] = range
+      }
     }
     if (filters[key] === 'date_range') {
-      filterQuery[key] = parseDelimitedArray(paramValue)
+      const parsedResult = parseDelimitedArray(paramValue)
+      if (parsedResult) {
+        filterQuery[key] = parsedResult
+      }
     }
   })
 

@@ -67,11 +67,14 @@ export function usePaginationParams(resourceName?: string) {
   }
 }
 
-export function usePaginationParamsV2() {
+export function usePaginationParamsV2(resourceName?: string) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [userPerPage, setUserPerPage] = useLocalStorage<Record<string, number>>('userPerPage', {
+    [resourceName || 'default']: defaultPerPageCount,
+  })
 
   const pageParam = Number(searchParams.get('page')) || defaultPage
-  const pageSizeParam = Number(searchParams.get('pageSize')) || defaultPerPageCount
+  const pageSizeParam = userPerPage[resourceName || 'default'] || defaultPerPageCount
 
   const handleSetPageParam = (v: number, replace: boolean = false) => {
     setSearchParams(
@@ -89,6 +92,9 @@ export function usePaginationParamsV2() {
   }
 
   const handleSetPageSizeParam = (v: number) => {
+    if (resourceName) {
+      setUserPerPage({ ...userPerPage, [resourceName]: v })
+    }
     setSearchParams(
       prev => {
         const newParams = new URLSearchParams(prev)

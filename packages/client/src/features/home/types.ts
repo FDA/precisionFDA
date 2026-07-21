@@ -115,6 +115,7 @@ export type MetaV2 = {
   pageSize: number
   total: number
   totalPages: number
+  path?: MetaPath[]
 }
 
 export interface IMeta {
@@ -141,8 +142,15 @@ export interface IMeta {
   }
 }
 
+export interface FetchEntitiesQuery<T> {
+  data: Array<T>
+  meta: MetaV2
+}
+
 export type Size = null | number
-export type FilterVal = NonNullable<string | string[] | number | number[] | undefined>
+export type FilterVal =
+  | NonNullable<string | string[] | number | number[] | undefined>
+  | { from: number | null; to: number | null }
 export interface IFilter {
   id: string
   value: FilterVal
