@@ -162,6 +162,13 @@ export default defineConfig(({ command, mode }) => {
                 test: /node_modules[\\/](react-markdown|rehype-.*|remark-.*|unified|hast-.*|mdast-.*|micromark.*|vfile|unist-.*)([\\/]|$)/,
                 priority: 30,
               },
+              {
+                // Large (~635 kB) and rarely changing: splitting CodeMirror out of
+                // app-components keeps it cached across app-code deploys.
+                name: 'vendor-codemirror',
+                test: /node_modules[\\/](@codemirror[\\/]|@uiw[\\/](react-codemirror|codemirror-extensions-basic-setup)|codemirror[\\/])/,
+                priority: 30,
+              },
 
               // ── App source groups ────────────────────────────────
               {

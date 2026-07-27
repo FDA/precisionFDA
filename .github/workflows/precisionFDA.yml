@@ -118,7 +118,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install modules
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Get changed files (server)
         id: changed-server
