@@ -4,6 +4,8 @@ import { Tagging } from './tagging.entity'
 
 export class TaggingRepository extends BaseEntityRepository<Tagging> {
   async findForTaggable(taggableId: number, taggableType: TAGGABLE_TYPE): Promise<Tagging[]> {
-    return await this.find({ taggableId, taggableType }, { populate: ['tag'] })
+    // filters: false prevents a needless join to `spaces` (SpaceTagging is an STI sibling and Space
+    // carries a default `excludeDeleted` filter, which forces the join even when querying other types)
+    return await this.find({ taggableId, taggableType }, { populate: ['tag'], filters: false })
   }
 }

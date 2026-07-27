@@ -6,6 +6,7 @@ import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
@@ -110,10 +111,14 @@ export class RemoveNodesFacade {
     const loadedIds = nodes.map(node => node.id)
     await this.validateNodes(nodes)
 
-    await this.em.transactional(async () => {
-      await this.nodeService.markNodesAsRemoving(loadedIds)
+    await this.nodeService.markNodesAsRemoving(loadedIds)
+    try {
+      // enqueued only after the state change is committed - the Redis queue is not part of the DB transaction
       await this.fileSyncQueueJobProducer.createRemoveNodesJobTask(loadedIds, this.user)
-    })
+    } catch (error) {
+      await this.nodeService.rollbackRemovingState(nodes)
+      throw error
+    }
   }
 
   private async validateNodes(nodes: Node[]): Promise<void> {
@@ -139,7 +144,8 @@ export class RemoveNodesFacade {
     const lastNode = (await this.userFileRepository.count({ dxid: fileToRemove.dxid })) === 1
     const filePath = await this.nodeHelper.getNodePath(fileToRemove as Node)
     const user = await this.user.loadEntity()
-    return await this.em.transactional(async () => {
+    let spaceEvent: SpaceEvent | undefined
+    await this.em.transactional(async () => {
       await this.licensedItemService.removeItemLicensedForNode(fileToRemove.id)
       await this.taggingService.removeTaggings(fileToRemove.id, TAGGABLE_TYPE.NODE)
 
@@ -168,7 +174,7 @@ export class RemoveNodesFacade {
       }
 
       if (fileToRemove.isInSpace() && !skipCreateSpaceEvent) {
-        await this.spaceEventService.createAndSendSpaceEvent({
+        spaceEvent = await this.spaceEventService.createSpaceEvent({
           entity: { type: 'userFile', value: fileToRemove },
           spaceId: fileToRemove.getSpaceId(),
           userId: this.user.id,
@@ -178,8 +184,14 @@ export class RemoveNodesFacade {
 
       this.em.remove(fileToRemove)
       this.logger.log(`Removed file with uid: ${fileToRemove.uid}`)
-      return 1
     })
+
+    if (spaceEvent) {
+      // sent after commit so the SMTP round trips don't hold the transaction open
+      await this.spaceEventService.sendNotificationForEvent(spaceEvent)
+    }
+
+    return 1
   }
 
   private async removeFolder(folderToRemove: Folder): Promise<number> {

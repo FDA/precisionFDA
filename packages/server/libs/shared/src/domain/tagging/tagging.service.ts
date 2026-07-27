@@ -33,7 +33,10 @@ export class TaggingService {
       await this.em.persist(activeTag).flush()
     }
 
-    const existingTagging = await this.taggingRepo.findOne({ tag: activeTag, taggableType, taggableId })
+    const existingTagging = await this.taggingRepo.findOne(
+      { tag: activeTag, taggableType, taggableId },
+      { filters: false },
+    )
     if (existingTagging) return
 
     const tagging = new Tagging()
@@ -48,23 +51,21 @@ export class TaggingService {
   }
 
   /**
-   * Operation removes tags corresponding to entity represented by id.
-   * If the tag is used by some other entity as well (taggingCount > 1) it only
-   * decreases the count and removes Tagging. If taggingCount is 1 it removes
-   * Tag as well.
+   * Operation removes taggings corresponding to entity represented by id.
+   * If a tag is not used by any other entity, the Tag itself is removed as well.
    */
   async removeTaggings(id: number, type: TAGGABLE_TYPE): Promise<void> {
     this.logger.log(`Removing taggings for entity with id: ${id} and type ${type}`)
     return this.em.transactional(async () => {
       const taggings = await this.taggingRepo.findForTaggable(id, type)
       for (const tagging of taggings) {
-        const count = await this.taggingRepo.count({ tagId: tagging.tagId })
-        if (count === 1) {
-          // last tagging
+        await this.em.remove(tagging).flush()
+
+        // filters: false avoids a needless join to `spaces` (Space's default filter on the SpaceTagging STI sibling)
+        const count = await this.taggingRepo.count({ tagId: tagging.tagId }, { filters: false })
+        if (count === 0) {
           this.em.remove(tagging.tag)
         }
-
-        this.em.remove(tagging)
       }
     })
   }

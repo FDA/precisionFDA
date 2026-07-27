@@ -35,7 +35,7 @@ describe('RemoveNodesFacade', () => {
     loadEntity: async () => user,
   } as UserContext
 
-  const emTransactionalStub = stub().callsArg(0)
+  const emTransactionalStub = stub()
   const emClearStub = stub()
   const emPersistStub = stub()
   const emRemoveStub = stub()
@@ -54,7 +54,8 @@ describe('RemoveNodesFacade', () => {
   const removeArchiveEntriesForNodeStub = stub()
   const taggingServiceRemoveTaggingsStub = stub()
   const userClientFileRemoveStub = stub()
-  const spaceEventServiceCreateAndSendSpaceEventStub = stub()
+  const spaceEventServiceCreateSpaceEventStub = stub()
+  const spaceEventServiceSendNotificationForEventStub = stub()
   const nodeHelperGetNodePathStub = stub()
   const eventHelperCreateFileEventStub = stub()
   const eventHelperCreateFolderEventStub = stub()
@@ -67,6 +68,7 @@ describe('RemoveNodesFacade', () => {
       persist: emPersistStub,
       remove: emRemoveStub,
     } as unknown as SqlEntityManager
+    emTransactionalStub.callsFake(async callback => callback(em))
     const userFileRepository = {
       count: userFileRepositoryCountStub,
     } as unknown as UserFileRepository
@@ -90,7 +92,8 @@ describe('RemoveNodesFacade', () => {
       removeTaggings: taggingServiceRemoveTaggingsStub,
     } as unknown as TaggingService
     const spaceEventService = {
-      createAndSendSpaceEvent: spaceEventServiceCreateAndSendSpaceEventStub,
+      createSpaceEvent: spaceEventServiceCreateSpaceEventStub,
+      sendNotificationForEvent: spaceEventServiceSendNotificationForEventStub,
     } as unknown as SpaceEventService
     const licensedItemService = {
       removeItemLicensedForNode: licensedItemServiceRemoveItemLicensedForNodeStub,
@@ -138,6 +141,8 @@ describe('RemoveNodesFacade', () => {
   }
 
   beforeEach(() => {
+    emTransactionalStub.reset()
+
     emClearStub.reset()
     emClearStub.throws()
 
@@ -192,8 +197,11 @@ describe('RemoveNodesFacade', () => {
     userClientFileRemoveStub.reset()
     userClientFileRemoveStub.throws()
 
-    spaceEventServiceCreateAndSendSpaceEventStub.reset()
-    spaceEventServiceCreateAndSendSpaceEventStub.throws()
+    spaceEventServiceCreateSpaceEventStub.reset()
+    spaceEventServiceCreateSpaceEventStub.throws()
+
+    spaceEventServiceSendNotificationForEventStub.reset()
+    spaceEventServiceSendNotificationForEventStub.throws()
 
     nodeHelperGetNodePathStub.reset()
     nodeHelperGetNodePathStub.throws()
@@ -260,9 +268,32 @@ describe('RemoveNodesFacade', () => {
 
       expect(queueCreateRemoveNodesJobTaskStub.calledOnce).to.be.true()
       expect(queueCreateRemoveNodesJobTaskStub.calledWith(ids, userCtx)).to.be.true()
+      expect(nodeServiceMarkNodesAsRemovingStub.calledBefore(queueCreateRemoveNodesJobTaskStub)).to.be.true()
 
       expect(nodeServiceValidateAssetRemovalStub.calledOnce).to.be.true()
       expect(nodeServiceValidateAssetRemovalStub.calledWith(node2)).to.be.true()
+    })
+
+    it('rolls back removing state when queueing fails', async () => {
+      const ids = [1]
+      const node = { id: 1, stiType: FILE_STI_TYPE.FOLDER } as unknown as Folder
+      const nodes = [node]
+      const error = new Error('Queue unavailable')
+
+      nodeServiceLoadNodesStub.withArgs(ids).returns(nodes)
+      nodeServiceValidateProtectedSpacesStub.reset()
+      nodeServiceValidateEditableByStub.reset()
+      spaceServiceValidateVerificationSpaceStub.reset()
+      nodeServiceMarkNodesAsRemovingStub.reset()
+      queueCreateRemoveNodesJobTaskStub.reset()
+      queueCreateRemoveNodesJobTaskStub.rejects(error)
+      nodeServiceRollbackRemovingStateStub.reset()
+
+      const removeNodesFacade = createRemoveNodesFacade()
+
+      await expect(removeNodesFacade.removeNodesAsync(ids)).to.be.rejectedWith(error)
+
+      expect(nodeServiceRollbackRemovingStateStub.calledOnceWith(nodes)).to.be.true()
     })
   })
 
@@ -287,6 +318,7 @@ describe('RemoveNodesFacade', () => {
       } as unknown as UserFile
       const folder1 = { id: 3, name: 'folder1', stiType: FILE_STI_TYPE.FOLDER } as unknown as Folder
       const nodes = [node1, node2, folder1]
+      const spaceEvent = { id: 42 }
 
       nodeHelperGetNodePathStub.callsFake((node: Node) => {
         return `/path/to/${node.name}`
@@ -301,7 +333,9 @@ describe('RemoveNodesFacade', () => {
       taggingServiceRemoveTaggingsStub.reset()
       emPersistStub.reset()
       userClientFileRemoveStub.reset()
-      spaceEventServiceCreateAndSendSpaceEventStub.reset()
+      spaceEventServiceCreateSpaceEventStub.reset()
+      spaceEventServiceCreateSpaceEventStub.resolves(spaceEvent)
+      spaceEventServiceSendNotificationForEventStub.reset()
       emRemoveStub.reset()
 
       const removeNodesFacade = createRemoveNodesFacade()
@@ -326,6 +360,8 @@ describe('RemoveNodesFacade', () => {
       expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledWith(node2.id)).to.be.true()
 
       expect(taggingServiceRemoveTaggingsStub.calledTwice).to.be.true()
+      expect(taggingServiceRemoveTaggingsStub.calledWith(node1.id, TAGGABLE_TYPE.NODE)).to.be.true()
+      expect(taggingServiceRemoveTaggingsStub.calledWith(node2.id, TAGGABLE_TYPE.NODE)).to.be.true()
 
       expect(eventHelperCreateFileEventStub.calledTwice).to.be.true()
       expect(
@@ -341,15 +377,20 @@ describe('RemoveNodesFacade', () => {
           ids: ['file-1'],
         }),
       ).to.be.true()
-      expect(spaceEventServiceCreateAndSendSpaceEventStub.calledOnce).to.be.true()
+      expect(spaceEventServiceCreateSpaceEventStub.calledOnce).to.be.true()
       expect(
-        spaceEventServiceCreateAndSendSpaceEventStub.calledWith({
+        spaceEventServiceCreateSpaceEventStub.calledWith({
           entity: { type: 'userFile', value: node1 },
           spaceId: node1.getSpaceId(),
           userId: USER_ID,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.file_deleted,
         }),
-      )
+      ).to.be.true()
+      expect(spaceEventServiceSendNotificationForEventStub.calledOnce).to.be.true()
+      expect(spaceEventServiceSendNotificationForEventStub.calledWith(spaceEvent)).to.be.true()
+      expect(
+        spaceEventServiceCreateSpaceEventStub.calledBefore(spaceEventServiceSendNotificationForEventStub),
+      ).to.be.true()
 
       expect(emRemoveStub.calledThrice).to.be.true()
       expect(emRemoveStub.calledWith(node1)).to.be.true()
@@ -385,6 +426,7 @@ describe('RemoveNodesFacade', () => {
         stiType: FILE_STI_TYPE.USERFILE,
       } as unknown as UserFile
       const nodes = [node1, node2]
+      const spaceEvent = { id: 42 }
 
       nodeHelperGetNodePathStub.callsFake((node: Node) => {
         return `/path/to/${node.name}`
@@ -409,7 +451,9 @@ describe('RemoveNodesFacade', () => {
             clientResponse: '',
           }),
         )
-      spaceEventServiceCreateAndSendSpaceEventStub.reset()
+      spaceEventServiceCreateSpaceEventStub.reset()
+      spaceEventServiceCreateSpaceEventStub.resolves(spaceEvent)
+      spaceEventServiceSendNotificationForEventStub.reset()
       emRemoveStub.reset()
 
       const removeNodesFacade = createRemoveNodesFacade()
@@ -453,15 +497,17 @@ describe('RemoveNodesFacade', () => {
         }),
       ).to.be.true()
 
-      expect(spaceEventServiceCreateAndSendSpaceEventStub.calledOnce).to.be.true()
+      expect(spaceEventServiceCreateSpaceEventStub.calledOnce).to.be.true()
       expect(
-        spaceEventServiceCreateAndSendSpaceEventStub.calledWith({
+        spaceEventServiceCreateSpaceEventStub.calledWith({
           entity: { type: 'userFile', value: node1 },
           spaceId: node1.getSpaceId(),
           userId: USER_ID,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.file_deleted,
         }),
-      )
+      ).to.be.true()
+      expect(spaceEventServiceSendNotificationForEventStub.calledOnce).to.be.true()
+      expect(spaceEventServiceSendNotificationForEventStub.calledWith(spaceEvent)).to.be.true()
 
       expect(emRemoveStub.calledTwice).to.be.true()
       expect(emRemoveStub.calledWith(node1)).to.be.true()
@@ -504,7 +550,8 @@ describe('RemoveNodesFacade', () => {
       taggingServiceRemoveTaggingsStub.reset()
       emPersistStub.reset()
       userClientFileRemoveStub.reset()
-      spaceEventServiceCreateAndSendSpaceEventStub.reset()
+      spaceEventServiceCreateSpaceEventStub.reset()
+      spaceEventServiceSendNotificationForEventStub.reset()
       emRemoveStub.reset()
 
       nodeServiceRollbackRemovingStateStub.reset()
@@ -541,7 +588,8 @@ describe('RemoveNodesFacade', () => {
       taggingServiceRemoveTaggingsStub.reset()
       emPersistStub.reset()
       userClientFileRemoveStub.reset()
-      spaceEventServiceCreateAndSendSpaceEventStub.reset()
+      spaceEventServiceCreateSpaceEventStub.reset()
+      spaceEventServiceSendNotificationForEventStub.reset()
       emRemoveStub.reset()
       nodeServiceValidateProtectedSpacesStub.reset()
       nodeServiceValidateEditableByStub.reset()
@@ -555,7 +603,8 @@ describe('RemoveNodesFacade', () => {
 
       expect(result).to.deep.equal(1)
 
-      expect(spaceEventServiceCreateAndSendSpaceEventStub.called).to.be.false()
+      expect(spaceEventServiceCreateSpaceEventStub.called).to.be.false()
+      expect(spaceEventServiceSendNotificationForEventStub.called).to.be.false()
 
       expect(emRemoveStub.calledOnce).to.be.true()
       expect(emRemoveStub.calledWith(node1)).to.be.true()

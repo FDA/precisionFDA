@@ -10,6 +10,7 @@ describe('TaggingService', () => {
   const emTransactionalStub = sinon.stub()
   const emPersistStub = sinon.stub()
   const emPersistFlushStub = sinon.stub()
+  const emFlushStub = sinon.stub()
   const emRemoveStub = sinon.stub()
 
   const tagRepoFindOneStub = sinon.stub()
@@ -37,6 +38,7 @@ describe('TaggingService', () => {
       transactional: emTransactionalStub,
       persist: emPersistStub,
       remove: emRemoveStub,
+      flush: emFlushStub,
       getRepository: sinon.stub().callsFake((entity: unknown) => {
         const entityName = (entity as { name?: string })?.name
         if (entityName === 'Tag') return tagRepository
@@ -59,8 +61,11 @@ describe('TaggingService', () => {
     emPersistFlushStub.reset()
     emPersistFlushStub.resolves()
 
+    emFlushStub.reset()
+    emFlushStub.resolves()
+
     emRemoveStub.reset()
-    emRemoveStub.returns(undefined)
+    emRemoveStub.callsFake(() => ({ flush: emFlushStub }))
 
     taggingRepoFindForTaggableStub.reset()
     taggingRepoFindForTaggableStub.throws()
@@ -153,9 +158,7 @@ describe('TaggingService', () => {
       const tag = { id: 5 }
       const tagging = { tag, tagId: tag.id }
       taggingRepoFindForTaggableStub.withArgs(1, TAGGABLE_TYPE.NODE).resolves([tagging])
-      taggingRepoCountStub.reset()
       taggingRepoCountStub.withArgs({ tagId: tag.id }).resolves(2)
-      emRemoveStub.reset()
 
       const service = getTaggingService()
       const id = 1
@@ -165,6 +168,7 @@ describe('TaggingService', () => {
 
       expect(emTransactionalStub.calledOnce).to.be.true()
       expect(taggingRepoFindForTaggableStub.calledOnce).to.be.true()
+      expect(emFlushStub.calledOnce).to.be.true()
       expect(emRemoveStub.calledOnce).to.be.true()
       expect(emRemoveStub.calledWith(tagging)).to.be.true()
     })
@@ -173,10 +177,7 @@ describe('TaggingService', () => {
       const tag = { id: 5 }
       const tagging = { tag, tagId: tag.id }
       taggingRepoFindForTaggableStub.withArgs(1, TAGGABLE_TYPE.NODE).resolves([tagging])
-      taggingRepoCountStub.reset()
-      taggingRepoCountStub.throws()
-      taggingRepoCountStub.withArgs({ tagId: tag.id }).resolves(1)
-      emRemoveStub.reset()
+      taggingRepoCountStub.withArgs({ tagId: tag.id }).resolves(0)
 
       const service = getTaggingService()
       const id = 1
@@ -188,8 +189,40 @@ describe('TaggingService', () => {
       expect(taggingRepoFindForTaggableStub.calledOnce).to.be.true()
       expect(taggingRepoFindForTaggableStub.calledWith(id, type)).to.be.true()
       expect(emRemoveStub.callCount).to.eq(2)
-      expect(emRemoveStub.firstCall.calledWith(tag)).to.be.true()
-      expect(emRemoveStub.secondCall.calledWith(tagging)).to.be.true()
+      expect(emRemoveStub.firstCall.calledWith(tagging)).to.be.true()
+      expect(emRemoveStub.secondCall.calledWith(tag)).to.be.true()
+    })
+
+    it('should remove tag only once all of the entity own taggings for it are gone', async () => {
+      const tag = { id: 5 }
+      const taggingA = { tag, tagId: tag.id }
+      const taggingB = { tag, tagId: tag.id }
+      taggingRepoFindForTaggableStub.withArgs(1, TAGGABLE_TYPE.NODE).resolves([taggingA, taggingB])
+      const countForTag = taggingRepoCountStub.withArgs({ tagId: tag.id })
+      countForTag.onCall(0).resolves(1) // taggingB still present
+      countForTag.onCall(1).resolves(0) // taggingB just removed too
+
+      const service = getTaggingService()
+
+      await service.removeTaggings(1, TAGGABLE_TYPE.NODE)
+
+      expect(taggingRepoCountStub.callCount).to.eq(2)
+      expect(emRemoveStub.callCount).to.eq(3)
+      expect(emRemoveStub.getCall(0).calledWith(taggingA)).to.be.true()
+      expect(emRemoveStub.getCall(1).calledWith(taggingB)).to.be.true()
+      expect(emRemoveStub.getCall(2).calledWith(tag)).to.be.true()
+    })
+
+    it('should not query counts nor remove anything when there are no taggings', async () => {
+      taggingRepoFindForTaggableStub.withArgs(1, TAGGABLE_TYPE.NODE).resolves([])
+
+      const service = getTaggingService()
+
+      await service.removeTaggings(1, TAGGABLE_TYPE.NODE)
+
+      expect(taggingRepoCountStub.notCalled).to.be.true()
+      expect(emFlushStub.notCalled).to.be.true()
+      expect(emRemoveStub.notCalled).to.be.true()
     })
   })
 })

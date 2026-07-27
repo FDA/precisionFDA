@@ -380,11 +380,16 @@ export class AppCreateFacade {
         await this.em.persist(activeTag).flush()
       }
 
-      const existingTagging = await this.em.findOne(Tagging, {
-        tag: activeTag,
-        taggableType: TAGGABLE_TYPE.APP_SERIES,
-        taggableId: targetAppSeries.id,
-      })
+      const existingTagging = await this.em.findOne(
+        Tagging,
+        {
+          tag: activeTag,
+          taggableType: TAGGABLE_TYPE.APP_SERIES,
+          taggableId: targetAppSeries.id,
+        },
+        // filters: false avoids a needless join to `spaces` (Space's default filter on the SpaceTagging STI sibling)
+        { filters: false },
+      )
       if (existingTagging) continue
 
       const tagging = new Tagging()
