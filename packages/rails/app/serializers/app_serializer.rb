@@ -112,8 +112,6 @@ class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
       links[:user] = user_path(added_by)
       links[:space] = space_path if object.in_space?
       links[:jobs] = jobs_api_app_path(object)
-      # GET /apps/:id/fork - fork a single app
-      links[:fork] = fork_app_path(object) unless object.https?
       links[:forked_from] = "/home/apps/#{object.forked_from}" if object.forked_from
       # POST export a single app to a docker container
       links[:export] = export_app_path(object)

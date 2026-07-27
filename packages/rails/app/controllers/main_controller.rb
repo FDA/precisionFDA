@@ -255,16 +255,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     root_url
   end
 
-  def check_webapp
-    job_dxid = (params[:redirect_uri].presence || "")[/job-[^\.]+/]
-    head(:unprocessable_entity) && return unless job_dxid
-
-    job = Job.accessible_by(@context).find_by(dxid: job_dxid)
-    head(:forbidden) && return unless job
-
-    redirect_to open_external_api_job_path(job)
-  end
-
   def distribute_results(user, token) # rubocop:todo Metrics/MethodLength
     user_api = DNAnexusAPI.new(token)
     api = DNAnexusAPI.for_challenge_bot
@@ -307,10 +297,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     )
   end
 
-  def tokify
-    @key = generate_auth_key
-  end
-
   # Inputs
   #
   # taggable_uid (string, required): the uid of the item to tag
@@ -342,33 +328,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       flash[:error] = "This item is not accessible by you"
       redirect_to :root
     end
-  end
-
-  # This action is only for backward compatibility with the old pages and was moved here from
-  # the old Spaces Controller. It copies an item from a current confidential space to cooperative.
-  # Only needed for the old Comparisons and Notes pages.
-  def copy_to_cooperative
-    space = Space.confidential.accessible_by(current_user).find(unsafe_params[:id])
-    object = item_from_uid(unsafe_params[:object_id])
-    copy_service = CopyService.new(api: @context.api, user: @context.user)
-
-    if space.editable_by?(current_user) && space.member_in_cooperative?(@context.user_id)
-      copy_service.copy(object, space.shared_space.uid).each do |new_object|
-        SpaceEventService.call(
-          space.shared_space.id,
-          @context.user_id,
-          nil,
-          new_object,
-          "copy_to_cooperative",
-        )
-      end
-
-      flash[:success] = "#{object.class} successfully copied"
-    else
-      flash[:warning] = "You have no permission to copy object(s) to cooperative."
-    end
-
-    redirect_back(fallback_location: _space_path(space))
   end
 
   private

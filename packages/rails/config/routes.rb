@@ -8,20 +8,13 @@ Rails.application.routes.draw do
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
   #   by wrapping everything into a scope.
   scope(format: false) do
-    get "/admin/news" => "main#news"
-    get "/admin/news/:id/edit" => "main#news"
 
     namespace(:admin) do
+      # in SPA, keep for path helpers
       root "base#index"
-      get "/alerts" => "base#alerts"
 
-      get "users", to: "users#index"
-      get "invitations", to: "invitations#list"
-      get "invitations/provisioning", to: "invitations#list_provisioning"
-      get "all_users", to: "users#all_users"
       get "toggle_activate_user", to: "users#toggle_activate_user"
       post "toggle_activate_user", to: "users#toggle_activate_user"
-      get "pending", to: "users#pending"
       get "org_action_requests", to: "org_requests#index"
       get "deactivated_users", to: "users#deactivated_users"
       get "resend_activation_email", to: "users#resend_activation_email"
@@ -31,15 +24,6 @@ Rails.application.routes.draw do
           post :set_comparison_app
           post :remove_from_comparators
           post :add_to_comparators
-        end
-      end
-
-      resources :invitations, only: %i(index) do
-        collection do
-          post "search"
-          post "provision"
-          post "browse"
-          get "list", to: "invitations#list_invitations"
         end
       end
 
@@ -68,15 +52,9 @@ Rails.application.routes.draw do
     get "login" => "main#login"
     delete "logout" => "main#destroy"
     get "return_from_login" => "main#return_from_login"
-    get "check_webapp" => "main#check_webapp"
-    post "tokify" => "main#tokify"
     post "set_tags" => "main#set_tags"
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
-
-    post "/spaces/:id/copy_to_cooperative",
-         to: "main#copy_to_cooperative",
-         as: :copy_to_cooperative_space
 
     resources :org_requests do
       collection do
@@ -370,7 +348,7 @@ Rails.application.routes.draw do
     end
     # end API
 
-    # FHIR
+    # FHIR - deprecated
     scope "/fhir" do
       get "Sequence", to: "comparisons#fhir_index"
       get "metadata", to: "comparisons#fhir_cap"
@@ -389,14 +367,12 @@ Rails.application.routes.draw do
       resources :jobs, only: %i(new create)
       get "jobs", on: :member, to: "apps#index"
       member do
-        get "fork"
         get "export"
         get "cwl_export"
         get "wdl_export"
       end
       get "featured", on: :collection, as: "featured"
-      get "explore", on: :collection, as: "explore"
-      post "run", on: :collection
+      get "explore", on: :collection, as: "explore" # deprecated
       resources :comments
     end
 
@@ -427,7 +403,6 @@ Rails.application.routes.draw do
       get "visualize", on: :member
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"
-      get "track", on: :member, as: "track"
       resources :comments
     end
 
@@ -445,7 +420,6 @@ Rails.application.routes.draw do
       post "rename", on: :member
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"
-      get "track", on: :member, as: "track"
       resources :comments
     end
 
@@ -453,11 +427,11 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    get "challenges/mislabeling" => redirect("/mislabeling")
     get "challenges/#{ACTIVE_META_APPATHON}" => "meta_appathons#show", as: "active_meta_appathon"
     get "challenges/#{APPATHON_IN_A_BOX_HANDLE}", as: "appathon_in_a_box"
     get "challenges", to: "challenges#index"
     get "challenges/:id/content/*all" => "challenges#show"
+    # deprecated - Hidden Treasure challenge points to /challenges/1 (React page)
     get "old_challenges/treasure", to: "challenges#treasure_old"
     get "old_challenges/treasure(/:tab)", to: "challenges#treasure_old"
 
@@ -479,6 +453,7 @@ Rails.application.routes.draw do
         post "publish", on: :collection, action: :publish
         get "log", on: :member
       end
+      # deprecated - assigning app was migrated to React/Node
       post "assign_app", on: :member
       post "announce_result", on: :member
     end
@@ -522,6 +497,7 @@ Rails.application.routes.draw do
       post "open", on: :member
       post "close", on: :member
       get "dashboard", on: :member
+      # deprecated - migrated to React
       get "blog", on: :member
       get "qa", on: :member
       nested do
@@ -537,6 +513,7 @@ Rails.application.routes.draw do
 
     resource :org, only: :update
 
+    # deprecated - migrated to React
     get "/experts/:id/about", to: "experts#show"
 
     # to debug
@@ -555,8 +532,10 @@ Rails.application.routes.draw do
       resources :comments
     end
 
+    # used in truth challenge
     resources :queries, only: %i(create destroy)
 
+    # deprecated - we no longer use phone confirmation
     resources :phone_confirmations, only: [:create] do
       get "check_code", on: :collection
     end
