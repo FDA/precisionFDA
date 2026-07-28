@@ -71,7 +71,8 @@ Rails.application.routes.draw do
       get "/ginas/app/api/v1/whoami", to: "ginas_authorized#whoami"
       get "/ginas/app/api/v1/substances:path", to: "ginas_unauthorized#skip_request",
           constraints: ->(request) { request.fullpath.ends_with? "(undefined)?view=internal" }
-      match "/ginas/app/api/v1/substances", to: "ginas_authorized#substances", via: %i(put post)
+      match "/ginas/app/api/v1/substances", to: "ginas_authorized#substances", via: %i(put post), defaults: { action_type: "substances" }
+      match "/ginas/app/api/v1/ssg4m", to: "ginas_authorized#substances", via: %i(put post), defaults: { action_type: "ssg4m" }
       match "/ginas/*path", to: "ginas_unauthorized#index", via: :all
       match "/substances/api/v1/substances/*query" => redirect(path: "/ginas/app/api/v1/substances/%{query}"), via: :all
     end

@@ -10,7 +10,7 @@ on:
       GSRS_MAIN_BRANCH:
         description: "Branch/Tag for ncats/gsrs3-main-deployment"
         required: true
-        default: "GSRSv3.1.2PUB"
+        default: "GSRSv3.2.0PUB"
       FRONTEND_TAG:
         description: "Tag/Branch for ncats/GSRSFrontend"
         required: true

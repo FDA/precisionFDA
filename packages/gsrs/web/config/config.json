@@ -4,7 +4,8 @@
   },
   "sessionRefreshOnActiveUserOnly": true,
   "apiBaseUrl": "${HOST}/ginas/app/",
-  "version": "3.0.2",
+  "apiSSG4mBaseUrl": "${HOST}/ginas/app/",
+  "version": "3.2.0",
   "contactEmail": "fda-srs@fda.hhs.gov",
   "isPfdaVersion": true,
   "displayMatchApplication": "false",
@@ -32,7 +33,8 @@
     "products": false,
     "clinicaltrials": false,
     "adverseevents": false,
-    "impurities": false
+    "impurities": false,
+    "ssg4m": true
   },
   "substanceDetailsCards": [
     {
@@ -1009,6 +1011,17 @@
   "relationshipsVisualizationUri": "/ginas/app/beta/substanceRelationshipVisualizer/index.html?uuid=",
   "navItems": [
     {
+      "display": "Register",
+      "children": [
+        {
+          "component": "ssg4m",
+          "display": "G4 Specified Substance Manufacturing",
+          "path": "substances-ssg4m/register",
+          "order": 190
+        }
+      ]
+    },
+    {
       "display": "Help",
       "order": 60,
       "children": [
@@ -1228,6 +1241,96 @@
         "default": "BDNUM",
         "orgDisplayKeyType": "BDNUM",
         "clinicalTrialKeyType": "UUID"
+      }
+    }
+  },
+  "ssg4Form": {
+    "showRegisterEditTitle": "true",
+    "parentSubstanceHeader": "Manufactured Substance",
+    "titles": {
+      "parentSubstance": "Search or Register a New Substance",
+      "stage": "Step",
+      "processingMaterials": "Solvents and Catalysts"
+    },
+    "settingsDisplay": {
+      "references": "simple",
+      "process": {
+        "processName": "simple",
+        "processRole": "advanced",
+        "processType": "advanced",
+        "processDescription": "advanced",
+        "processComments": "advanced"
+      },
+      "site": {
+        "siteName": "advanced",
+        "siteIdType": "advanced",
+        "siteId": "advanced",
+        "siteAddress": "advanced",
+        "siteGPSLatitude": "advanced",
+        "siteGPSLongitude": "advanced",
+        "siteGPSElevation": "advanced",
+        "siteClearance": "advanced",
+        "companyName": "advanced",
+        "companyId": "advanced",
+        "companyIdType": "advanced",
+        "siteComments": "advanced"
+      },
+      "stage": {
+        "stageNumber": "simple",
+        "stageType": "advanced",
+        "stageRole": "advanced",
+        "stageEquipment": "advanced",
+        "stageComments": "advanced"
+      },
+      "criteriaParameter": {
+        "propertyName": "simple",
+        "average": "simple",
+        "lowLimit": "simple",
+        "highLimit": "simple",
+        "units": "simple",
+        "propertyType": "advanced",
+        "referencedSubstance": "advanced",
+        "amountType": "advanced",
+        "low": "advanced",
+        "high": "advanced",
+        "nonNumericValue": "advanced",
+        "parameters": "removed"
+      },
+      "startingMaterial": {
+        "substanceName": "simple",
+        "verbatimName": "simple",
+        "substanceRole": "simple",
+        "comments": "advanced",
+        "substanceGrade": "advanced",
+        "manufacturer": "advanced",
+        "acceptanceCriteria": "advanced",
+        "amount": "advanced",
+        "specificationReference": "advanced",
+        "references": "advanced"
+      },
+      "processingMaterial": {
+        "substanceName": "simple",
+        "verbatimName": "simple",
+        "substanceRole": "simple",
+        "comments": "advanced",
+        "substanceGrade": "advanced",
+        "manufacturer": "advanced",
+        "acceptanceCriteria": "advanced",
+        "amount": "advanced",
+        "specificationReference": "advanced",
+        "references": "advanced"
+      },
+      "resultingMaterial": {
+        "substanceName": "simple",
+        "verbatimName": "simple",
+        "substanceRole": "simple",
+        "comments": "advanced",
+        "substanceGrade": "advanced",
+        "acceptanceCriteria": "advanced",
+        "amount": "advanced"
+      },
+      "stepView": {
+        "showAmountValues": "true"
       }
     }
   }

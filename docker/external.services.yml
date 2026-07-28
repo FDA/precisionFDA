@@ -4,7 +4,7 @@ services:
       context: ../packages/gsrs/web
       dockerfile: Dockerfile
       args:
-        GSRS3_MAIN_BRANCH: ${GSRS3_MAIN_BRANCH:-GSRSv3.1.2PUB}
+        GSRS3_MAIN_BRANCH: ${GSRS3_MAIN_BRANCH:-GSRSv3.2.0PUB}
         FRONTEND_TAG: ${GSRS_FRONTEND_TAG:-pfda}
     # Alias as gsrs-web so gsrs-nginx config works unchanged (matches cloud service name)
     networks:

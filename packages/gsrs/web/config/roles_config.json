@@ -1,0 +1,59 @@
+{
+	"roles": [
+		{
+			"name": "Query",
+			"privileges": [
+				"Search",
+				"Browse",
+				"Export Data"
+			],
+			"include": []
+		},
+		{
+			"name": "DataEntry",
+			"privileges": [
+				"Create",
+				"Edit"
+			],
+			"include": [
+				"Query"
+			]
+		},
+		{
+			"name": "Approver",
+			"privileges": [
+				"Approve Records",
+				"Edit Public Data",
+				"Make Records Public",
+				"Modify Relationships",
+				"Restore Previous Versions",
+				"Delete Lower Level Items"
+			],
+			"include": [
+				"DataEntry"
+			]
+		},
+		{
+			"name": "Admin",
+			"privileges": [
+				"Manage Users",
+				"Configure System",
+				"Manage CVs",
+				"Import Data",
+				"Index Data",
+				"Run Backup",
+				"Run Tasks",
+				"Override Duplicate Checks",
+				"Modify Relationships",
+				"Merge Subconcepts",
+				"Edit Approval IDs",
+				"Manage Others Lists",
+				"View Files",
+				"View Service Info"
+			],
+			"include": [
+				"Approver"
+			]
+		}
+	]
+}

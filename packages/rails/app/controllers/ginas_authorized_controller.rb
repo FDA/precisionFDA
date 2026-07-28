@@ -43,7 +43,7 @@ class GinasAuthorizedController < ApplicationController
     substance_creator = Ginas::SubstanceFileCreator.new(@context)
 
     begin
-      file = substance_creator.create_and_upload_file(request)
+      file = params[:action_type] == "ssg4m" ? substance_creator.create_and_upload_ssg4m_file(request) : substance_creator.create_and_upload_substance_file(request)
     rescue StandardError => e
       msg = "Can't create a substance file for #{current_user.dxuser}, encountered: #{e}"
       logger.error msg

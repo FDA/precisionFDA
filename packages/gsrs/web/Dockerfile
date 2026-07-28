@@ -3,7 +3,7 @@
 # ==========================================
 FROM tomcat:10.1-jdk17 AS builder
 
-ARG GSRS3_MAIN_BRANCH=GSRSv3.1.2PUB
+ARG GSRS3_MAIN_BRANCH=GSRSv3.2.0PUB
 ARG FRONTEND_TAG=pfda
 
 # Optional: set these to build dependencies from source instead of using Maven SNAPSHOTs.
@@ -128,6 +128,7 @@ COPY --from=builder /build/artifacts/frontend webapps/frontend
 COPY config/server.xml conf/server.xml
 COPY config/context.xml conf/context.xml
 COPY config/rewrite.config conf/Catalina/localhost/rewrite.config
+COPY config/roles_config.json conf/roles_config.json
 
 COPY config/application.conf /tmp/application.conf.template
 COPY config/config.json /tmp/config.json.template

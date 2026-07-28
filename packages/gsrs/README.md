@@ -19,7 +19,7 @@ You can override the default build branches/tags using Docker build arguments:
 
 | Argument | Default | Description |
 |----------|---------|-------------|
-| `GSRS3_MAIN_BRANCH` | `GSRSv3.1.2PUB` | Branch or tag for the backend repository (`ncats/gsrs3-main-deployment`) |
+| `GSRS3_MAIN_BRANCH` | `GSRSv3.2.0PUB` | Branch or tag for the backend repository (`ncats/gsrs3-main-deployment`) |
 | `FRONTEND_TAG` | `pfda` | Branch or tag for the frontend repository (`ncats/GSRSFrontend`) |
 
 ### Example Build Command

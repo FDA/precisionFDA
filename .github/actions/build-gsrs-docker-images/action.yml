@@ -19,7 +19,7 @@ inputs:
     description: "Package name (must be 'gsrs_web' or 'gsrs_nginx')"
   gsrs-main-branch:
     required: false
-    default: "GSRSv3.1.2PUB"
+    default: "GSRSv3.2.0PUB"
     description: "External branch/tag for GSRS build"
   frontend-tag:
     required: false
