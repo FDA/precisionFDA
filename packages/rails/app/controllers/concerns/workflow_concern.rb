@@ -196,6 +196,7 @@ module WorkflowConcern
         job = Job.create!(opts)
         job.input_file_ids = input_file_ids
         job.save!
+        Event::JobRun.create_for(job, @context.user)
         https_apps_client.job_sync(job.dxid)
       end
     end

@@ -2,14 +2,15 @@ import { EntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { database } from '@shared/database'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
-import { createJobClosed } from '@shared/domain/event/event.helper'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { calculateJobRuntime } from '@shared/domain/job/job.helper'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { create, db, generate } from '@shared/test'
 
-describe('event.helper', () => {
+describe('EventHelper', () => {
   let em: EntityManager
   let user: User
 
@@ -34,15 +35,25 @@ describe('event.helper', () => {
         },
       )
       await em.flush()
+      const platformJobDescribe = {
+        totalPrice: 1,
+        startedRunning: 1781016479000,
+        stoppedRunning: 1781016581563,
+      } as JobDescribeResponse
 
-      const event = await createJobClosed(user, job, { totalPrice: 1 } as JobDescribeResponse)
+      const eventHelper = getInstance()
+      const event = await eventHelper.createJobClosed(user, job, platformJobDescribe)
       await em.persist(event)
       await em.flush()
 
       expect(event.type).to.equal(EVENT_TYPES.JOB_CLOSED)
       expect(event.dxuser).to.equal(user.dxuser)
       expect(event.param1).to.equal(job.dxid)
-      expect(event.param2).to.equal(app.dxid)
+      expect(event.param2).to.equal(
+        Math.trunc(
+          calculateJobRuntime(platformJobDescribe.startedRunning, platformJobDescribe.stoppedRunning) / 1000,
+        ).toString(),
+      )
     })
 
     // For this, see PFDA-3217 for context
@@ -57,14 +68,19 @@ describe('event.helper', () => {
       )
       await em.flush()
 
-      const event = await createJobClosed(user, job, { totalPrice: 1 } as JobDescribeResponse)
+      const eventHelper = getInstance()
+      const event = await eventHelper.createJobClosed(user, job, { totalPrice: 1 } as JobDescribeResponse)
       await em.persist(event)
       await em.flush()
 
       expect(event.type).to.equal(EVENT_TYPES.JOB_CLOSED)
       expect(event.dxuser).to.equal(user.dxuser)
       expect(event.param1).to.equal(job.dxid)
-      expect(event.param2).to.equal(undefined)
+      expect(event.param2).to.equal('0')
     })
   })
+
+  function getInstance(): EventHelper {
+    return new EventHelper(em)
+  }
 })

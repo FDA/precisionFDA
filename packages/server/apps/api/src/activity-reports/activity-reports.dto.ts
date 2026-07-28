@@ -1,7 +1,7 @@
 import { IsDate, IsIn, IsOptional } from 'class-validator'
 import { ACTIVITY_METRIC_TYPES } from '@shared/domain/event/model/activity-metric-types'
 import { MetricType } from '@shared/domain/event/model/metric.type'
-import { ToOptionalDate } from '../validation/decorators/to-optional-date.decorator'
+import { ToOptionalDate, ToOptionalEndOfDayDate } from '../validation/decorators/to-optional-date.decorator'
 
 export class ActivityReportQueryDTO {
   @IsOptional()
@@ -10,7 +10,7 @@ export class ActivityReportQueryDTO {
   dateFrom?: Date
 
   @IsOptional()
-  @ToOptionalDate()
+  @ToOptionalEndOfDayDate()
   @IsDate()
   dateTo?: Date
 }

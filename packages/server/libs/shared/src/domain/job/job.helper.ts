@@ -19,3 +19,13 @@ export const buildIsOverMaxDuration = (terminateOrNotify: 'terminate' | 'notify'
     return Date.now() - job.createdAt.getTime() >= maxDurationMs
   }
 }
+
+export const calculateJobRuntime = (startedAt?: number, stoppedAt?: number): number => {
+  if (!startedAt) {
+    return 0
+  }
+  if (!stoppedAt) {
+    return Date.now() - startedAt
+  }
+  return stoppedAt - startedAt
+}

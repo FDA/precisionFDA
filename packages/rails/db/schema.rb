@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_20_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_09_120000) do
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
     t.integer "user_id"
@@ -704,8 +704,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_120000) do
   create_table "space_group_spaces", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.bigint "space_group_id"
     t.integer "space_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" }, null: false
     t.index ["space_group_id"], name: "fk_rails_108430c5fa"
     t.index ["space_id"], name: "fk_rails_ae5de248be"
   end

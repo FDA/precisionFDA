@@ -9,6 +9,7 @@ import { AppService } from '@shared/domain/app/services/app.service'
 import { AuthService } from '@shared/domain/auth/services/auth.service'
 import { CliExchangeToken } from '@shared/domain/cli-exchange-token/cli-exchange-token.entity'
 import { CliExchangeTokenService } from '@shared/domain/cli-exchange-token/services/cli-exchange-token.service'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobService } from '@shared/domain/job/job.service'
 import { LicenseService } from '@shared/domain/license/license.service'
@@ -53,6 +54,7 @@ describe('AppRunFacade tests', () => {
   const createNewTokenStub = stub()
   const deleteTokenStub = stub()
   const checkTotalChargesLimitStub = stub()
+  const createJobRunStub = stub()
 
   const USER_JOB_LIMIT = 100
   const USER = {
@@ -310,6 +312,10 @@ describe('AppRunFacade tests', () => {
     createSyncJobStatusTask: createSyncJobStatusTaskStub,
   } as unknown as MainQueueJobProducer
 
+  const eventHelper = {
+    createJobRun: createJobRunStub,
+  } as unknown as EventHelper
+
   beforeEach(() => {
     populateStub.reset()
     populateStub.throws()
@@ -387,6 +393,10 @@ describe('AppRunFacade tests', () => {
     checkTotalChargesLimitStub.reset()
     checkTotalChargesLimitStub.throws()
     checkTotalChargesLimitStub.resolves()
+
+    createJobRunStub.reset()
+    createJobRunStub.throws()
+    createJobRunStub.resolves()
   })
 
   afterEach(() => {
@@ -903,6 +913,7 @@ describe('AppRunFacade tests', () => {
       cliExchangeTokenService,
       userService,
       mainQueueJobProducer,
+      eventHelper,
     )
   }
 })

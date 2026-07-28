@@ -14,6 +14,7 @@ import { CliExchangeToken } from '@shared/domain/cli-exchange-token/cli-exchange
 import { CliExchangeTokenService } from '@shared/domain/cli-exchange-token/services/cli-exchange-token.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { Job } from '@shared/domain/job/job.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { JobInput } from '@shared/domain/job/job.input'
@@ -75,6 +76,7 @@ export class AppRunFacade {
     private readonly cliExchangeTokenService: CliExchangeTokenService,
     private readonly userService: UserService,
     private readonly mainQueueJobProducer: MainQueueJobProducer,
+    private readonly eventHelper: EventHelper,
   ) {}
 
   async run(appUid: Uid<'app'>, runAppInput: RunAppDTO): Promise<{ id: Uid<'job'> }> {
@@ -137,7 +139,7 @@ export class AppRunFacade {
     }
 
     this.logger.log(`Created new job on platform with dxid: ${newJobClientRes.id}`)
-    const job = await this.em.transactional(() => {
+    const job = await this.em.transactional(async () => {
       const runData: JobRunData = {
         run_instance_type: runAppInput.instanceType,
         run_inputs: runAppInput.inputs,
@@ -164,6 +166,10 @@ export class AppRunFacade {
         exchangeToken.dxid = newJobClientRes.id
         this.em.persist(exchangeToken)
       }
+
+      const eventEntity = await this.eventHelper.createJobRun(user, job)
+      this.em.persist(eventEntity)
+
       return job
     })
 

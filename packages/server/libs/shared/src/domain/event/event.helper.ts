@@ -10,6 +10,8 @@ import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { DbCluster } from '../db-cluster/db-cluster.entity'
+import { JOB_STATE } from '../job/job.enum'
+import { calculateJobRuntime } from '../job/job.helper'
 import { EVENT_TYPES, Event } from './event.entity'
 
 @Injectable()
@@ -139,6 +141,37 @@ export class EventHelper {
     })
     return event
   }
+
+  async createJobClosed(user: User, job: Job, platformJobData: JobDescribeResponse): Promise<Event> {
+    const event = new Event()
+    const organization = await user.organization.load()
+    wrap(event).assign({
+      type: EVENT_TYPES.JOB_CLOSED,
+      orgHandle: organization ? organization.handle : 'no-org',
+      dxuser: user.dxuser,
+      param1: job.dxid,
+      param2: Math.trunc(
+        calculateJobRuntime(platformJobData.startedRunning, platformJobData.stoppedRunning) / 1000,
+      ).toString(),
+      param3: platformJobData.totalPrice?.toString(),
+      param4: platformJobData.state,
+    })
+    return event
+  }
+
+  async createJobRun(user: User, job: Job): Promise<Event> {
+    const event = new Event()
+    const app = job.app ? (job.app.isInitialized() ? job.app.getEntity() : await job.app.load()) : undefined
+    const organization = await user.organization.load()
+    wrap(event).assign({
+      type: EVENT_TYPES.JOB_RUN,
+      orgHandle: organization ? organization.handle : 'no-org',
+      dxuser: user.dxuser,
+      param1: job.dxid,
+      param2: app?.dxid,
+    })
+    return event
+  }
 }
 
 // standalone functions, should be refactored into the component above
@@ -182,21 +215,6 @@ const createDbClusterPasswordRotated = async (user: User, dbCluster: DbCluster):
   return event
 }
 
-const createJobClosed = async (user: User, job: Job, platformJobData: JobDescribeResponse): Promise<Event> => {
-  const event = new Event()
-  const app = job.app ? (job.app.isInitialized() ? job.app.getEntity() : await job.app.load()) : undefined
-  const organization = await user.organization.load()
-  wrap(event).assign({
-    type: EVENT_TYPES.JOB_CLOSED,
-    orgHandle: organization ? organization.handle : 'no-org',
-    dxuser: user.dxuser,
-    param1: job.dxid,
-    param2: app?.dxid,
-    param3: platformJobData.totalPrice?.toString(),
-  })
-  return event
-}
-
 const createUserDeactivated = async (actor: User, targetUser: User): Promise<Event> => {
   const event = new Event()
   const organization = await actor.organization.load()
@@ -211,4 +229,4 @@ const createUserDeactivated = async (actor: User, targetUser: User): Promise<Eve
   return event
 }
 
-export { createAppCreated, createAppPublished, createDbClusterPasswordRotated, createJobClosed, createUserDeactivated }
+export { createAppCreated, createAppPublished, createDbClusterPasswordRotated, createUserDeactivated }

@@ -3,6 +3,7 @@ import { AppModule } from '@shared/domain/app/app.module'
 import { AppSeriesModule } from '@shared/domain/app-series/app-series.module'
 import { AuthModule } from '@shared/domain/auth/auth.module'
 import { CliExchangeTokenModule } from '@shared/domain/cli-exchange-token/cli-exchange-token.module'
+import { EventModule } from '@shared/domain/event/event.module'
 import { JobModule } from '@shared/domain/job/job.module'
 import { LicenseModule } from '@shared/domain/license/license.module'
 import { SpaceMembershipModule } from '@shared/domain/space-membership/space-membership.module'
@@ -26,6 +27,7 @@ import { AppRunFacade } from './app-run.facade'
     PlatformClientModule,
     CliExchangeTokenModule,
     UserModule,
+    EventModule,
   ],
   providers: [AppRunFacade, AppCreateFacade],
   exports: [AppRunFacade, AppCreateFacade],

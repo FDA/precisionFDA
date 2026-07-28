@@ -35,7 +35,7 @@ import { EntityScope } from '@shared/types/common'
 import { EmailSendInput } from '../../email/email.config'
 import { buildEmailTemplate, getBullJobIdForEmailOperation } from '../../email/email.helper'
 import { JobStaleInputTemplate, jobStaleTemplate } from '../../email/templates/mjml/job-stale.handler'
-import { createJobClosed } from '../../event/event.helper'
+import { EventHelper } from '../../event/event.helper'
 import { Job } from '../job.entity'
 import { JOB_STATE } from '../job.enum'
 import { buildIsOverMaxDuration, isStateActive, isStateTerminal, shouldSyncStatus } from '../job.helper'
@@ -61,6 +61,7 @@ export class JobSynchronizationService {
     private readonly platformClient: PlatformClient,
     @Inject(CHALLENGE_BOT_PLATFORM_CLIENT) private readonly challengeBotClient: PlatformClient,
     @Inject(CHALLENGE_BOT_USER_CONTEXT) private readonly challengeBotUserContext: UserContext,
+    private readonly eventHelper: EventHelper,
   ) {}
 
   static getBullJobId(jobDxid: string): string {
@@ -123,7 +124,7 @@ export class JobSynchronizationService {
       )
 
       const challengeBotUser = await this.challengeBotUserContext.loadEntity()
-      const eventEntity = await createJobClosed(challengeBotUser, job, platformJobData)
+      const eventEntity = await this.eventHelper.createJobClosed(challengeBotUser, job, platformJobData)
       this.em.persist(eventEntity)
       await createSyncOutputsTask({ dxid: job.dxid }, this.challengeBotUserContext)
     }
@@ -229,7 +230,7 @@ export class JobSynchronizationService {
       // create jobClosed event
       // TODO: this is worth refactoring, because job.describe (that is used for event) is updated
       // with data from platformJobData later in createSyncOutputsTask
-      const eventEntity = await createJobClosed(user, job, platformJobData)
+      const eventEntity = await this.eventHelper.createJobClosed(user, job, platformJobData)
       this.em.persist(eventEntity)
 
       if (remoteState === JOB_STATE.FAILED) {

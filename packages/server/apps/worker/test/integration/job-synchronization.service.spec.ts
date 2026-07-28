@@ -3,7 +3,7 @@ import { Job as BullJob } from 'bull'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import * as eventHelper from '@shared/domain/event/event.helper'
+import { EventHelper } from '@shared/domain/event/event.helper'
 import { Job } from '@shared/domain/job/job.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { JobRepository } from '@shared/domain/job/job.repository'
@@ -58,12 +58,11 @@ describe('JobSynchronizationService', () => {
   const challengePlatformClientJobTerminateStub = stub()
   const challengePlatformClientJobDescribeStub = stub()
   const createNotificationStub = stub()
+  const createJobClosedStub = stub()
 
-  let createJobClosedStub = stub()
   let createSyncOutputsTaskStub = stub()
 
   beforeEach(() => {
-    createJobClosedStub = stub(eventHelper, 'createJobClosed')
     createSyncOutputsTaskStub = stub(queueHelper, 'createSyncOutputsTask')
 
     createJobClosedStub.reset()
@@ -104,7 +103,6 @@ describe('JobSynchronizationService', () => {
   })
 
   afterEach(() => {
-    createJobClosedStub.restore()
     createSyncOutputsTaskStub.restore()
   })
 
@@ -128,6 +126,10 @@ describe('JobSynchronizationService', () => {
       jobTerminate: challengePlatformClientJobTerminateStub,
     } as unknown as PlatformClient
 
+    const eventHelper = {
+      createJobClosed: createJobClosedStub,
+    } as unknown as EventHelper
+
     return new JobSynchronizationService(
       em,
       USER_CONTEXT,
@@ -136,6 +138,7 @@ describe('JobSynchronizationService', () => {
       platformClient,
       challengePlatformClient,
       challengeBotUserContext,
+      eventHelper,
     )
   }
 
