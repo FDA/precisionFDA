@@ -2,13 +2,13 @@
 
 ##### Written using Go
 
-Distribution builds use Go's native [FIPS 140-3 support](https://go.dev/doc/security/fips140). The Docker build sets `GOFIPS140=v1.26.0`, which links the Go Cryptographic Module v1.26.0 and enables FIPS 140-3 mode by default.
+Distribution builds use Go's native [FIPS 140-3 support](https://go.dev/doc/security/fips140). The Docker build sets `GOFIPS140=v1.0.0-c2097c7c`, which links that exact Go Cryptographic Module snapshot and enables FIPS 140-3 mode by default.
 
 
 ### Getting Started:
 This will install Go locally on your machine. For customized installation please refer to the [Go docs on installation](https://golang.org/doc/install).
 
-Run the following in the precision-fda/go directory:
+Run the following in the `packages/cli` directory:
 
 1. To build the Go docker image:
    ```bash
@@ -34,7 +34,7 @@ To quickly test changes to the code, you can use the same docker image as follow
 
 First build the precisionfda-cli docker image:
 
-   ```# Make sure cwd is the precision-fda/go directory
+   ```# Make sure cwd is the packages/cli directory
    $ make build-docker
    or
    $ docker build -t precisionfda-cli .
@@ -45,7 +45,7 @@ or for staging https://precisionfda-staging.dnanexus.com/assets/new and then
 
    ```$ docker run -it --rm --entrypoint bash --network host --mount type=bind,source="$(pwd)",target=/go/src/dnanexus.com/precision-fda-cli -w /go/src/dnanexus.com/precision-fda-cli precisionfda-cli
    $ export KEY=<INSERT KEY>
-   $ go run pfda.go upload-file --key $KEY --file <PATH_TO_FILE>
+   $ go run . upload-file --key $KEY --file <PATH_TO_FILE>
    ```
 
 To test for local development, add the following flags `--server localhost:3000 --skipverify true`
@@ -142,7 +142,19 @@ windows		amd64
 
 # FIPS Compliance
 
-The pFDA CLI uses Go's native FIPS 140-3 support. Distribution builds are compiled with `GOFIPS140=v1.26.0`, so FIPS 140-3 mode is enabled by default in the built executable.
+The pFDA CLI uses Go's native FIPS 140-3 support. Distribution builds are compiled with `GOFIPS140=v1.0.0-c2097c7c`, so FIPS 140-3 mode is enabled by default in the built executable.
+
+`v1.0.0-c2097c7c` is the exact, immutable snapshot of Go Cryptographic Module v1.0.0 — the version covered by [CMVP Certificate #5247](https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/5247). Snapshot zips are checksummed in `$(go env GOROOT)/lib/fips140/fips140.sum` and, per the Go team's policy in that file, "must not change" once published.
+
+It is pinned to the full snapshot rather than the shorter `v1.0.0` because **`v1.0.0` is itself an alias**: `lib/fips140/v1.0.0.txt` is a redirect file that currently resolves to `v1.0.0-c2097c7c`. If Go publishes a further patched v1.0.0 snapshot, that redirect can be re-pointed, and a `GOFIPS140=v1.0.0` build would silently link a different module. Pinning the full snapshot removes that possibility. It is likewise not set to the `certified` or `inprocess` aliases, which resolve to a moving target by design (`inprocess` currently selects v1.26.0, which is only Pending Review and therefore *not* validated).
+
+**This pin does not survive module removal.** Go removes older module versions once a newer one obtains a CMVP certificate, and removal deletes the snapshot zip itself — which both `v1.0.0` and `v1.0.0-c2097c7c` depend on. So when v1.26.0 is certified and a later `golang` base image drops the v1.0.0 snapshot, this build will fail with:
+
+```text
+go: unknown GOFIPS140 version "v1.0.0-c2097c7c"
+```
+
+That failure is intentional and preferable to a silent crypto module swap: bumping the FIPS module is a compliance-relevant change that should be reviewed deliberately. When it happens, update the `GOFIPS140` value in the `Dockerfile` to the new certified snapshot (check `ls $(go env GOROOT)/lib/fips140` and `cat $(go env GOROOT)/lib/fips140/certified.txt` in the new base image) and re-verify `pfda -version`.
 
 To verify the runtime status, run:
 
@@ -150,11 +162,13 @@ To verify the runtime status, run:
 $ pfda -version
 ```
 
-The output includes a `FIPS 140-3` line. A FIPS-enabled distribution build prints the selected Go Cryptographic Module version, for example:
+The output includes a `FIPS 140-3` line. A FIPS-enabled distribution build prints the Go Cryptographic Module version, the runtime mode (`on`, or `only (enforced)` when non-approved algorithms are rejected), and the module snapshot the binary was built against, for example:
 
 ```text
-  FIPS 140-3  :    enabled (module v1.26.0)
+  FIPS 140-3  :    enabled (module v1.0.0, mode on, built GOFIPS140=v1.0.0-c2097c7c)
 ```
+
+The `built GOFIPS140=` value is read from the embedded build info and is the *resolved* snapshot, not whatever string was passed at build time — so an artifact always records exactly which module it was built against, even if an alias had been used.
 
 If FIPS mode is not active, the command prints:
 
@@ -162,9 +176,19 @@ If FIPS mode is not active, the command prints:
   FIPS 140-3  :    warning: FIPS mode not active
 ```
 
+If FIPS mode was turned on at runtime (for example via `GODEBUG=fips140=on`) without building against a frozen module, the build is not FIPS-validated and the command prints:
+
+```text
+  FIPS 140-3  :    warning: enabled with non-frozen 'latest' module (not a validated build)
+```
+
 See the [Go FIPS 140-3 documentation](https://go.dev/doc/security/fips140) for details about `crypto/fips140`, `GOFIPS140`, supported platforms, and module validation status.
 
 # Version History
+
+### 2.14.2 (2026-08-03)
+
+- fixed issue with the distribution build configuration
 
 ### 2.14.1 (2026-07-27)
 

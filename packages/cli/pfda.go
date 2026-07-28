@@ -2,7 +2,6 @@
 package main
 
 import (
-	"crypto/fips140"
 	"crypto/tls"
 	"flag"
 	"fmt"
@@ -374,7 +373,7 @@ func mainInternal() int {
 	transport := pfdaclient.Client.HTTPClient.Transport.(*http.Transport)
 	if skipVerifyBool {
 		// Setting '-skipverify' true will allow devs to connect to local instances with self-signed certs
-		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true, ServerName: *server}
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true, ServerName: *server, MinVersion: tls.VersionTLS12}
 	} else {
 		transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
@@ -1102,7 +1101,7 @@ func printInfo(transport *http.Transport) {
 	fmt.Printf("  Build Time  :    %s\n", BuildTime)
 	fmt.Printf("  Go Version  :    %s\n", runtime.Version())
 
-	fmt.Printf("  TLS Version :    %s\n", GetTLSVersion(transport))
+	fmt.Printf("  TLS Min Ver :    %s\n", GetTLSVersion(transport))
 
 	printCryptoInfo()
 }
@@ -1115,28 +1114,6 @@ func checkLatestVersion(pfdaclient *precisionfda.PFDAClient) {
 	if res != Version {
 		fmt.Printf("\nThere is a newer version available for you to download - v%s \nVisit https://precision.fda.gov/docs/cli to get the latest version!\n", res)
 	}
-}
-
-func printCryptoInfo() {
-	if fips140.Enabled() {
-		fmt.Printf("  FIPS 140-3  :    enabled (module %s)\n", fips140.Version())
-	} else {
-		fmt.Println("  FIPS 140-3  :    warning: FIPS mode not active")
-	}
-}
-
-func GetTLSVersion(tr *http.Transport) string {
-	switch tr.TLSClientConfig.MinVersion {
-	case tls.VersionTLS10:
-		return "TLS 1.0"
-	case tls.VersionTLS11:
-		return "TLS 1.1"
-	case tls.VersionTLS12:
-		return "TLS 1.2"
-	case tls.VersionTLS13:
-		return "TLS 1.3"
-	}
-	return "Unknown"
 }
 
 func GetUserAgent() string {
