@@ -2,7 +2,6 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type React from 'react'
-import { useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import * as Yup from 'yup'
 import { getBackendErrorMessage } from '@/api/types'
@@ -27,22 +26,45 @@ import type { MemberSideV2, SpaceMembershipV2 } from '../../spaces/members/membe
 import type { ISpaceV2 } from '../../spaces/spaces.types'
 import { recoverSpaceLeadRequest } from './api'
 
-const validationSchema = Yup.object().shape({
+type CurrentLeadOption = { label: string; value: number; username: string }
+
+const getMembershipSide = (side: MemberSideV2, spaceType: ISpaceV2['type']) => {
+  if (spaceType === 'review') {
+    return side === 'HOST' ? 'REVIEWER' : 'SPONSOR'
+  }
+  return side
+}
+
+const buildLeadOptions = (spaceMemberships: SpaceMembershipV2[], spaceType: ISpaceV2['type']): CurrentLeadOption[] =>
+  spaceMemberships
+    // Inactive memberships are rejected by the backend, so don't offer them
+    .filter(member => member.role === 'LEAD' && member.active)
+    .map(member => ({
+      value: member.id,
+      label: `${member.username} (${getMembershipSide(member.side, spaceType)})`,
+      username: member.username,
+    }))
+
+export const recoverLeadValidationSchema = Yup.object().shape({
   currentLead: Yup.object()
     .shape({
       value: Yup.number().required(),
       label: Yup.string().required(),
+      username: Yup.string().required(),
     })
+    // Without an undefined default, yup casts a missing value to an object of the shape's
+    // defaults, so the inner required tests fire instead of this message.
+    .default(undefined)
     .required('Current Lead is required'),
   newLeadDxuser: Yup.string()
+    .trim()
     .required('New Lead is required')
     .test('not-already-lead', 'The user is already a lead in the space', function (value) {
       const { leadOptions } = this.options.context || {}
-      return !leadOptions?.some((m: { label: string; value: number }) => m.label.includes(value))
+      const newLead = value?.toLowerCase()
+      return !leadOptions?.some((lead: CurrentLeadOption) => lead.username.toLowerCase() === newLead)
     }),
 })
-
-type CurrentLeadOption = { label: string; value: number }
 
 interface RecoverLeadFormValues {
   currentLead: CurrentLeadOption
@@ -57,19 +79,7 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
     queryFn: () => fetchSpaceMemberships(space.id),
   })
 
-  const getMembershipSide = (side: MemberSideV2) => {
-    if (space.type === 'review') {
-      return side === 'HOST' ? 'REVIEWER' : 'SPONSOR'
-    }
-    return side
-  }
-  const leadOptions = useMemo(() => {
-    const leadUsers = spaceMemberships.filter((member: SpaceMembershipV2) => member.role === 'LEAD')
-    return leadUsers.map((member: SpaceMembershipV2) => ({
-      value: member.id,
-      label: `${member.username} (${getMembershipSide(member.side)})`,
-    }))
-  }, [spaceMemberships, space])
+  const leadOptions = buildLeadOptions(spaceMemberships, space.type)
 
   const {
     handleSubmit,
@@ -77,7 +87,7 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
     formState: { errors },
     reset,
     register,
-  } = useForm<RecoverLeadFormValues>({ resolver: yupResolver(validationSchema), context: { leadOptions } })
+  } = useForm<RecoverLeadFormValues>({ resolver: yupResolver(recoverLeadValidationSchema), context: { leadOptions } })
 
   const mutation = useMutation({
     mutationFn: ({
@@ -94,6 +104,9 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
       queryClient.invalidateQueries({
         queryKey: ['spaces'],
       })
+      queryClient.invalidateQueries({
+        queryKey: ['space-memberships', space.id],
+      })
     },
     onError: error => {
       toastError(`Recover space lead failed. ${getBackendErrorMessage(error, 'Unknown error')}`)
@@ -101,7 +114,7 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
   })
 
   const onSubmit = (data: RecoverLeadFormValues) => {
-    mutation.mutateAsync({ currentLeadMembershipId: data.currentLead.value, newLeadDxuser: data.newLeadDxuser })
+    mutation.mutate({ currentLeadMembershipId: data.currentLead.value, newLeadDxuser: data.newLeadDxuser })
   }
   const onCancel = () => {
     reset()
@@ -109,7 +122,7 @@ const RecoverSpaceLeadForm = ({ space, onClose }: { space: ISpaceV2; onClose: ()
   }
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <div className="p-4">Loading...</div>
   }
 
   const isSubmitting = mutation.isPending
