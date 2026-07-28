@@ -12,7 +12,7 @@ import { getBasePath } from '../../home/utils'
 import { type CreateAppPayload, type CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
-import { mapFromServerToForm } from './common'
+import { mapFromServerToForm, mapIOSpecFromServerToForm } from './common'
 
 export const EditAppPage = ({
   spaceId,
@@ -71,8 +71,8 @@ export const EditAppPage = ({
         ordered_assets: data?.meta?.assets || [],
         code: data.meta?.internal?.code || '',
         packages: data.meta?.internal?.packages || [],
-        input_spec: data.meta?.spec?.inputSpec.map(mapFromServerToForm) || [],
-        output_spec: data.meta?.spec?.outputSpec || [],
+        input_spec: data.meta?.spec?.inputSpec?.map(mapFromServerToForm) || [],
+        output_spec: data.meta?.spec?.outputSpec?.map(mapIOSpecFromServerToForm) || [],
         createAppSeries: false,
         createAppRevision: false,
       }}

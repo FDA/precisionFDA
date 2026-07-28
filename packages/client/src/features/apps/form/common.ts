@@ -90,8 +90,8 @@ export function getDefaultValueFromServer<T extends IOSpec['class']>(sClass: T, 
   return val == null ? null : runDefs[sClass]?.(val)
 }
 
-export function mapServerClassToFormClass<T extends IOSpec>(spec: T): T {
-  return { ...spec, class: spec.class.replace('array:', '') }
+export function mapIOSpecFromServerToForm<T extends IOSpec>(spec: T): T {
+  return { ...spec, isArray: spec.class.startsWith('array:') }
 }
 
 function formatFormDefault(val: string | number | string[] | null, sClass: IOSpec['class']): null | string[] {
@@ -106,7 +106,7 @@ function formatFormDefault(val: string | number | string[] | null, sClass: IOSpe
 
 export function mapFromServerToForm<T extends InputSpec>(spec: T): InputSpecForm {
   return {
-    ...spec,
+    ...mapIOSpecFromServerToForm(spec),
     choices: spec.choices ? spec.choices.toString() : '',
     default: formatFormDefault(spec.default, spec.class),
   }
