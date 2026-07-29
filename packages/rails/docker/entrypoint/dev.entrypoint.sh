@@ -22,10 +22,38 @@ else
   echo "$RUBY_DEPS_FINGERPRINT" > "$RUBY_DEPS_MARKER"
 fi
 
-if [[ "${SKIP_DB_SETUP:-0}" == "0" ]]; then
+# Cheap pending-migration check: one MySQL query instead of a full Rails boot.
+# Returns 0 (setup needed) when the DB/schema is unreachable or any migration
+# in db/migrate is missing from schema_migrations.
+db_setup_needed() {
+  local cfg host user pass name applied f v
+  cfg="$(ruby -ryaml -rerb -e '
+    c = YAML.load(ERB.new(File.read("config/database.yml")).result, aliases: true)
+    c = c.fetch(ENV.fetch("RAILS_ENV", "development"))
+    puts [c["host"], c["username"], c["password"], c["database"]].join("\t")
+  ' 2>/dev/null)" || return 0
+  IFS=$'\t' read -r host user pass name <<<"$cfg"
+  applied="$(MYSQL_PWD="$pass" mysql -h "$host" -u "$user" -N -B \
+    -e 'SELECT version FROM schema_migrations' "$name" 2>/dev/null)" || return 0
+  for f in db/migrate/[0-9]*.rb; do
+    v="${f##*/}"
+    v="${v%%_*}"
+    grep -qx "$v" <<<"$applied" || return 0
+  done
+  return 1
+}
+
+if [[ "${SKIP_DB_SETUP:-0}" == "0" || "${PFDA_DB_INIT_ONLY:-0}" == "1" ]]; then
   # One rake invocation = one Rails env boot for all three tasks.
   # db:prepare sets up or migrates; the data tasks are idempotent (no-op once seeded).
   bundle exec rake db:prepare db:generate_mock_data user:generate_test_users
+elif db_setup_needed; then
+  # SKIP_DB_SETUP=1 skips the mock data / test user seeding, but pending
+  # migrations are always applied so the app doesn't 500 after a git pull.
+  echo "Pending migrations detected — running db:prepare despite SKIP_DB_SETUP=1"
+  bundle exec rake db:prepare
+else
+  echo "Database schema up to date — skipping db setup (SKIP_DB_SETUP=1)"
 fi
 
 if [[ "${PFDA_DB_INIT_ONLY:-0}" == "1" ]]; then

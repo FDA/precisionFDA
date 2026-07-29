@@ -73,6 +73,12 @@ const DnDRow = ({
 
 const Filler = styled.td``
 
+function ariaSort(isSorted: false | 'asc' | 'desc', canSort: boolean) {
+  if (isSorted === 'asc') return 'ascending'
+  if (isSorted === 'desc') return 'descending'
+  return canSort ? 'none' : undefined
+}
+
 function shouldIgnoreRowClick(target: EventTarget | null) {
   if (!(target instanceof Element)) return false
   return Boolean(
@@ -135,6 +141,7 @@ export function CustomTable<T extends RowData>({
                     key={header.id}
                     style={{ width: header.getSize() }}
                     colSpan={header.colSpan}
+                    aria-sort={ariaSort(header.column.getIsSorted(), header.column.getCanSort())}
                   >
                     <button
                       type="button"
@@ -149,19 +156,17 @@ export function CustomTable<T extends RowData>({
                       {header.column.getIsSorted() ? (header.column.getIsSorted() === 'asc' ? '↑' : '↓') : ''}
                     </button>
 
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Resize column"
-                      onDoubleClick={() => header.column.resetSize()}
-                      onMouseDown={header.getResizeHandler()}
-                      onTouchStart={header.getResizeHandler()}
-                      className={
-                        header.column.getCanResize()
-                          ? `resizer ${table.options.columnResizeDirection} ${header.column.getIsResizing() ? 'isResizing' : ''}`
-                          : ''
-                      }
-                    />
+                    {header.column.getCanResize() && (
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Resize column"
+                        onDoubleClick={() => header.column.resetSize()}
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                        className={`resizer ${table.options.columnResizeDirection} ${header.column.getIsResizing() ? 'isResizing' : ''}`}
+                      />
+                    )}
                   </th>
                 ))}
                 {colFiller('th')}
@@ -179,7 +184,7 @@ export function CustomTable<T extends RowData>({
                     >
                       {header.column.columnDef.meta?.filterElement?.(header.column)}
                       {header.column.getCanFilter() && !header.column.columnDef.meta?.filterElement ? (
-                        <Filter column={header.column} table={table} />
+                        <Filter column={header.column} />
                       ) : null}
                     </th>
                   ))}

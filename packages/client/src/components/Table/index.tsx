@@ -17,6 +17,7 @@ import {
   type Row,
   type RowSelectionState,
   type SortingState,
+  type Updater,
   useReactTable,
   type VisibilityState,
 } from '@tanstack/react-table'
@@ -24,6 +25,10 @@ import React, { type DragEventHandler, useEffectEvent, useMemo } from 'react'
 import CustomTable from './components/CustomTable'
 import { TableStyles } from './components/table.styles'
 import { useComponentWidth } from './useComponentWidth'
+
+function resolveUpdater<S>(updater: Updater<S>, current: S): S {
+  return typeof updater === 'function' ? (updater as (old: S) => S)(current) : updater
+}
 
 function Table<T extends { id: number | string }>({
   enableColumnFilters = true,
@@ -86,47 +91,29 @@ function Table<T extends { id: number | string }>({
   const [liveColumnSizing, setLiveColumnSizing] = React.useState(columnSizing)
 
   const handleColumnFiltersChange: OnChangeFn<ColumnFiltersState> = updater => {
-    if (typeof updater === 'function') {
-      if (setColumnFilters) setColumnFilters(updater(columnFilters))
-    }
+    setColumnFilters?.(resolveUpdater(updater, columnFilters))
   }
 
   const handleColumnSortChange: OnChangeFn<SortingState> = useEffectEvent(updater => {
-    if (!setColumnSortBy) return
-    if (typeof updater === 'function') {
-      setColumnSortBy(updater(columnSortBy))
-    } else {
-      setColumnSortBy(updater)
-    }
+    setColumnSortBy?.(resolveUpdater(updater, columnSortBy))
   })
 
   const handleSelectedRowsChange: OnChangeFn<RowSelectionState> = updater => {
-    if (typeof updater === 'function') {
-      if (setSelectedRows) setSelectedRows(updater(rowSelection))
-    }
+    setSelectedRows?.(resolveUpdater(updater, rowSelection))
   }
 
   const handleColumnSizeChange: OnChangeFn<ColumnSizingState> = updater => {
-    if (typeof updater === 'function') {
-      const resolvedUpdater = updater(liveColumnSizing)
-      setLiveColumnSizing(resolvedUpdater)
-      if (setColumnSizing) setColumnSizing(resolvedUpdater)
-    }
+    const resolved = resolveUpdater(updater, liveColumnSizing)
+    setLiveColumnSizing(resolved)
+    setColumnSizing?.(resolved)
   }
 
   const handleExpandingChange: OnChangeFn<ExpandedState> = updater => {
-    if (typeof updater === 'function' && setExpanded) {
-      setExpanded(updater(expanded))
-    }
+    setExpanded?.(resolveUpdater(updater, expanded))
   }
 
   const handleSetColumnVisibility: OnChangeFn<VisibilityState> = updater => {
-    if (typeof updater === 'function') {
-      if (setColumnVisibility) {
-        const resolvedUpdater = updater(columnVisibility)
-        setColumnVisibility(resolvedUpdater)
-      }
-    }
+    setColumnVisibility?.(resolveUpdater(updater, columnVisibility))
   }
 
   const table = useReactTable({

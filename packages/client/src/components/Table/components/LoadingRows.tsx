@@ -1,5 +1,4 @@
-import { Column } from '@tanstack/react-table'
-import React from 'react'
+import type { Column } from '@tanstack/react-table'
 import styled, { css } from 'styled-components'
 
 export const Loading1 = styled.div<{ $delay?: number }>`
@@ -33,18 +32,12 @@ export const Loading1 = styled.div<{ $delay?: number }>`
     ${({ $delay }) =>
       $delay &&
       css`
-        animation-delay: 0 ${$delay}s;
+        animation-delay: ${$delay}s;
       `}
   }
 `
 
-export function LoadingRows<T>({
-  visibleColumns,
-  delay,
-}: {
-  visibleColumns: Column<T>[]
-  delay: number
-}) {
+export function LoadingRows<T>({ visibleColumns, delay }: { visibleColumns: Column<T>[]; delay: number }) {
   return (
     <tr>
       {visibleColumns.map(column => (

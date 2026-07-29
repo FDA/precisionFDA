@@ -24,6 +24,11 @@ export const TableStyles = styled.div`
     table-layout: fixed;
     border: none;
     width: fit-content;
+    /* Tailwind preflight sets border-collapse: collapse. Collapsed borders are painted by the
+       table rather than by the sticky <thead>, which leaves 1px transparent slits along the
+       header rows that scrolled body rows show through. */
+    border-collapse: separate;
+    border-spacing: 0;
   }
 
   thead {
@@ -45,7 +50,6 @@ export const TableStyles = styled.div`
     padding: 2px 4px;
     position: relative;
     font-weight: bold;
-    border-top: 1px solid var(--c-layout-border-200);
   }
 
   td {
@@ -110,6 +114,10 @@ export const TableStyles = styled.div`
 
   .name-row {
     height: var(--_table-cell-height);
+
+    th {
+      border-top: 1px solid var(--c-layout-border-200);
+    }
   }
 
   .name-btn {
@@ -185,14 +193,13 @@ export const TableStyles = styled.div`
   }
 
   .table-empty {
-    --_table-border-color: none;
     position: absolute;
+    left: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 50;
     padding: 20px;
-    width: 80vw;
+    width: 100%;
     white-space: normal;
   }
 

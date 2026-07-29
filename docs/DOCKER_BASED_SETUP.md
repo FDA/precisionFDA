@@ -210,6 +210,10 @@ NODE_DEV_WATCH=0
 
 These flags aren't checked into the repo — set them for your local workflow only.
 
+> **Note:** `SKIP_DB_SETUP=1` only skips the mock data / test user seeding. Pending
+> migrations are still detected on `web` startup via a cheap MySQL query and applied
+> automatically, and `make prepare-db` always performs the full DB setup.
+
 ## macOS notes
 
 On macOS, the default Rails file watcher doesn't reliably detect changes inside Docker bind-mounts. To work around this, [`docker/dev.docker-compose.yml`](../docker/dev.docker-compose.yml) sets `PFDA_LOCAL_DOCKER_FILE_WATCHER_PATCH=1`, which forces Rails to use a polling-based watcher in the local Docker stack. See [`packages/rails/config/environments/development.rb`](../packages/rails/config/environments/development.rb).
