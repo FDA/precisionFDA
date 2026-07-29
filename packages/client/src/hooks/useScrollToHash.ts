@@ -14,5 +14,5 @@ export const useScrollToHash = (dep?: unknown) => {
       const el = document.getElementById(location.hash.slice(1))
       el?.scrollIntoView()
     }
-  }, [dep])
+  }, [dep, location.hash])
 }

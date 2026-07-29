@@ -139,7 +139,7 @@ export const commonResourceRoutes: RouteObject[] = [
     Component: CreateDiscussionPageWrapper,
   },
   {
-    path: 'discussions/:discussionId/*',
+    path: 'discussions/:discussionId',
     Component: DiscussionShowPage,
   },
   {

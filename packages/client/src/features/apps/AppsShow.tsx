@@ -314,21 +314,24 @@ export const AppsShow = ({
         <StyledTab
           activeClassName="active"
           end
-          to={{ pathname: `${basePath}/apps/${app.uid}`, state: location.state }}
+          to={{ pathname: `${basePath}/apps/${app.uid}` }}
+          state={location.state}
           data-testid="app-show-tab-spec"
         >
           Spec
         </StyledTab>
         <StyledTab
           activeClassName="active"
-          to={{ pathname: `${basePath}/apps/${app.uid}/jobs`, state: location.state }}
+          to={{ pathname: `${basePath}/apps/${app.uid}/jobs` }}
+          state={location.state}
           data-testid="app-show-tab-executions"
         >
           Executions ({meta.accessibleJobsCount})
         </StyledTab>
         <StyledTab
           activeClassName="active"
-          to={{ pathname: `${basePath}/apps/${app.uid}/readme`, state: location.state }}
+          to={{ pathname: `${basePath}/apps/${app.uid}/readme` }}
+          state={location.state}
           data-testid="app-show-tab-readme"
         >
           Readme

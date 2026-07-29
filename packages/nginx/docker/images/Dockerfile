@@ -1,4 +1,4 @@
-FROM node:22.15.0-slim AS client-builder
+FROM node:24.15.0-slim AS client-builder
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ RUN apt-get update && \
 	apt-get install -y --no-install-recommends build-essential python3 && \
 	rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g pnpm@10.10.0
+RUN npm install -g pnpm@11.1.1
 
 COPY packages/client/package.json ./package.json
 COPY packages/client/pnpm-lock.yaml ./pnpm-lock.yaml

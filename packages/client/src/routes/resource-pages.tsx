@@ -1,5 +1,5 @@
 import React from 'react'
-import { Navigate, useLocation, useOutletContext, useParams, useSearchParams } from 'react-router'
+import { Navigate, useOutletContext, useParams, useSearchParams } from 'react-router'
 import type { AppShowOutletContext } from '@/features/apps/AppsShow'
 import { StyledMarkdownAppShow } from '@/features/apps/form/apps-form.styles'
 import { useAuthUser } from '@/features/auth/useAuthUser'
@@ -186,10 +186,7 @@ export const AppSpecPage = () => {
   return <SpecTab spaceId={spaceId} spec={spec} />
 }
 
-export const AppSpecRedirect = () => {
-  const location = useLocation()
-  return <Navigate to={location.pathname.replace(/\/spec$/, '')} replace />
-}
+export const AppSpecRedirect = () => <Navigate to=".." relative="path" replace />
 
 export const AppReadmePage = () => {
   const { readme } = useOutletContext<AppShowOutletContext>()

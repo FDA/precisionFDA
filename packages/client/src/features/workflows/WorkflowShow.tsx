@@ -260,28 +260,32 @@ export const WorkflowShow = ({
         <StyledTab
           activeClassName="active"
           end
-          to={{ pathname: `${basePath}/workflows/${workflow.uid}`, state: location.state }}
+          to={{ pathname: `${basePath}/workflows/${workflow.uid}` }}
+          state={location.state}
           data-testid="workflow-show-tab-spec"
         >
           Spec
         </StyledTab>
         <StyledTab
           activeClassName="active"
-          to={{ pathname: `${basePath}/workflows/${workflow.uid}/jobs`, state: location.state }}
+          to={{ pathname: `${basePath}/workflows/${workflow.uid}/jobs` }}
+          state={location.state}
           data-testid="workflow-show-tab-executions"
         >
           Executions ({workflow.job_count})
         </StyledTab>
         <StyledTab
           activeClassName="active"
-          to={{ pathname: `${basePath}/workflows/${workflow.uid}/diagram`, state: location.state }}
+          to={{ pathname: `${basePath}/workflows/${workflow.uid}/diagram` }}
+          state={location.state}
           data-testid="workflow-show-tab-diagram"
         >
           Diagram
         </StyledTab>
         <StyledTab
           activeClassName="active"
-          to={{ pathname: `${basePath}/workflows/${workflow.uid}/readme`, state: location.state }}
+          to={{ pathname: `${basePath}/workflows/${workflow.uid}/readme` }}
+          state={location.state}
           data-testid="workflow-show-tab-readme"
         >
           Readme
@@ -290,7 +294,7 @@ export const WorkflowShow = ({
       <StyledTabPanel>
         <Routes>
           <Route path="/" element={<HomeWorkflowsSpec spec={meta.spec} />} />
-          <Route path="spec" element={<Navigate to={`${location.pathname}`} replace />} />
+          <Route path="spec" element={<Navigate to=".." relative="path" replace />} />
           <Route
             path="readme"
             element={

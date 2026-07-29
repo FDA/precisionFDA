@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import 'react-tooltip/dist/react-tooltip.css'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { createBrowserRouter, Navigate, Outlet, useLocation, useParams } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet, type RouteObject, useLocation, useParams } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { AlertDismissedProvider } from '@/features/admin/alerts/useAlertDismissedLocalStorage'
 import { ExpiringSessionModal } from '@/features/auth/ExpiringSessionModal'
@@ -108,7 +108,7 @@ const RootComponent = () => {
   )
 }
 
-const router = createBrowserRouter([
+export const appRoutes: RouteObject[] = [
   {
     path: '/',
     element: <RootComponent />,
@@ -129,11 +129,12 @@ const router = createBrowserRouter([
 
       // Protected routes
       {
+        id: 'protected',
         element: <AuthWall />,
         children: [
           ...protectedChallengeRoutes,
           {
-            path: 'home/*',
+            path: 'home',
             element: <HomeShowLayout />,
             children: homeRoutes,
           },
@@ -142,10 +143,13 @@ const router = createBrowserRouter([
             children: accountRoutes,
           },
           {
-            path: 'spaces/*',
+            path: 'spaces',
             children: spacesRoutes,
           },
-          { path: 'publish/*', element: <PublishingPage /> },
+          { path: 'publish', element: <PublishingPage /> },
+          { path: 'home/*', id: 'protected-home-not-found', element: <NoFoundPage /> },
+          { path: 'spaces/*', id: 'protected-spaces-not-found', element: <NoFoundPage /> },
+          { path: 'publish/*', id: 'protected-publish-not-found', element: <NoFoundPage /> },
           { path: 'admin/activity_reports', element: <Navigate to="/account/admin/activity-reports" replace /> },
           { path: 'admin/usage_reports', element: <Navigate to="/account/admin/activity-reports" replace /> },
           { path: 'admin/users_list', element: <Navigate to="/account/admin/users" replace /> },
@@ -158,7 +162,9 @@ const router = createBrowserRouter([
       },
     ],
   },
-])
+]
+
+const router = createBrowserRouter(appRoutes)
 
 const root = () => {
   return <RouterProvider router={router} />

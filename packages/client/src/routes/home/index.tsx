@@ -1,10 +1,12 @@
 import React from 'react'
-import { Navigate, RouteObject } from 'react-router'
+import { Navigate, type RouteObject } from 'react-router'
 import NavigateWithParams from '../../utils/NavigateWithParams'
 import { AssetShowPage, AssetsListPage, TrackDatabaseInHomePage } from '../resource-pages'
 import { commonResourceRoutes } from '../shared'
 
-const CreateAppPage = React.lazy(() => import('../../features/apps/form/CreateAppPage').then(m => ({ default: m.CreateAppPage })))
+const CreateAppPage = React.lazy(() =>
+  import('../../features/apps/form/CreateAppPage').then(m => ({ default: m.CreateAppPage })),
+)
 
 export const homeRoutes: RouteObject[] = [
   ...commonResourceRoutes,
@@ -17,7 +19,7 @@ export const homeRoutes: RouteObject[] = [
     Component: AssetsListPage,
   },
   {
-    path: 'assets/:assetUid/*',
+    path: 'assets/:assetUid',
     Component: AssetShowPage,
   },
   {

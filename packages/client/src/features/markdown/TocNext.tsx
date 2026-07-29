@@ -1,6 +1,5 @@
-import React from 'react'
 import styled, { css } from 'styled-components'
-import { breakPoints } from '../../styles/theme'
+import { breakPoints } from '@/styles/theme'
 
 export const ToCItemWrap = styled.a<{ $level?: number }>`
   vertical-align: center;
@@ -10,7 +9,7 @@ export const ToCItemWrap = styled.a<{ $level?: number }>`
   box-sizing: border-box;
   border: 0 solid transparent;
   padding: 4px 0;
-  ${({ $level }) => $level && `border-left-width: ${$level * 10}px;`}
+  ${({ $level = 0 }) => ($level > 0 ? `border-left-width: ${$level * 10}px;` : '')}
   transition: color 0.2s ease-in-out;
 `
 
@@ -51,9 +50,6 @@ export const StyledToC = styled.div`
   display: flex;
   flex-direction: column;
   font-size: 14px;
-  height: initial;
-  overflow: initial;
-  position: initial;
 `
 
 export interface IToCItem {

@@ -360,8 +360,8 @@ export const ExecutionDetails = ({
           end
           to={{
             pathname: `${basePath}/executions/${execution.uid}`,
-            state: location.state,
           }}
+          state={location.state}
         >
           Inputs & Outputs
         </StyledTab>
@@ -369,8 +369,8 @@ export const ExecutionDetails = ({
           activeClassName="active"
           to={{
             pathname: `${basePath}/executions/${execution.uid}/logs`,
-            state: location.state,
           }}
+          state={location.state}
         >
           Logs
         </StyledTab>

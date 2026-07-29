@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo } from 'react'
-import styled from 'styled-components'
 import DOMPurify from 'dompurify'
-import { useScrollToHash } from '../../hooks/useScrollToHash'
+import type React from 'react'
+import { useEffect, useMemo } from 'react'
+import styled from 'styled-components'
+import { useScrollToHash } from '@/hooks/useScrollToHash'
 
 const Content = styled.div``
 
@@ -63,7 +64,7 @@ export function AddIdsToHeaders({
     return addIdsToHtmlContent(content)
   }, [content])
 
-  useScrollToHash(docRef)
+  useScrollToHash(processedContent)
 
   useEffect(() => {
     // Use setTimeout to ensure the DOM is fully updated after dangerouslySetInnerHTML

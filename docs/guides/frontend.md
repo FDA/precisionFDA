@@ -42,7 +42,7 @@ Our frontend technology stack is built on:
 | **Vite** | Build tool and dev server |
 | **TanStack Query** | Server state management and data fetching |
 | **TanStack Table** | Headless table library |
-| **React Router v7** | Client-side routing |
+| **React Router v8** | Client-side routing |
 | **react-hook-form + Yup** | Form handling and validation |
 | **axios** | HTTP client for API calls |
 | **CSS Modules** | Scoped component styling |
@@ -529,7 +529,7 @@ Use the shared form components:
 
 ## Routing
 
-### React Router v7
+### React Router v8
 
 Routes are defined in `src/routes/root.tsx`:
 
@@ -551,8 +551,8 @@ const router = createBrowserRouter([
         element: <AuthWall />,
         children: [
           { path: 'admin/*', element: <Admin /> },
-          { path: 'home/*', element: <HomeShowLayout />, children: homeRoutes },
-          { path: 'spaces/*', children: spacesRoutes },
+          { path: 'home', element: <HomeShowLayout />, children: homeRoutes },
+          { path: 'spaces', children: spacesRoutes },
         ],
       },
     ],
@@ -563,6 +563,9 @@ export default function Root() {
   return <RouterProvider router={router} />
 }
 ```
+
+Routes that declare `children` do not need a trailing splat. Reserve `/*` for route elements that render their own descendant `<Routes>` tree or intentionally consume an arbitrary suffix.
+For protected prefixes, add a more-specific fallback such as `home/*` inside the `AuthWall` branch so unknown protected URLs cannot fall through to the public root catch-all.
 
 ### Route Organization
 
@@ -622,7 +625,7 @@ export const homeRoutes: RouteObject[] = [
   // Home-only routes
   { path: 'apps/create', Component: CreateAppPage },
   { path: 'assets', Component: AssetsListPage },
-  { path: 'assets/:assetUid/*', Component: AssetShowPage },
+  { path: 'assets/:assetUid', Component: AssetShowPage },
 ]
 ```
 
@@ -1835,6 +1838,8 @@ import { render } from '@/test/test-utils'
 // Render with route
 const screen = render(<MyComponent />, { route: '/my-page' })
 ```
+
+The test utility uses `createMemoryRouter` and `RouterProvider`, matching the production data-router model so components using APIs such as `useBlocker` behave consistently in tests.
 
 ### E2E Tests with Playwright
 

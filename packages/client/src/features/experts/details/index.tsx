@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { skipToken, useQuery } from '@tanstack/react-query'
 import { Link, Navigate, Route, Routes, useParams } from 'react-router'
 import 'react-toastify/dist/ReactToastify.css'
 import styled from 'styled-components'
@@ -91,8 +91,8 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
 const ExpertsSingleDetailsPage = () => {
   const { expertId } = useParams<{ expertId: string }>()
   const { isLoading, data } = useQuery({
-    queryKey: ['queryExpertDetails'],
-    queryFn: () => expertDetailsRequest(expertId!),
+    queryKey: ['queryExpertDetails', expertId],
+    queryFn: expertId ? () => expertDetailsRequest(expertId) : skipToken,
   })
   if (isLoading) return <Loader />
   if (!data?.expert) return <div>No expert found</div>

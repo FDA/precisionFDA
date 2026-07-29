@@ -1,5 +1,5 @@
 import React from 'react'
-import { Navigate, Outlet } from 'react-router'
+import { Navigate, Outlet, type RouteObject } from 'react-router'
 import { AccountLayout } from '@/features/account/AccountLayout'
 import { useAuthUser } from '@/features/auth/useAuthUser'
 import { LayoutLoader } from '@/layouts/UserLayout'
@@ -56,7 +56,7 @@ const AdminRouteGuard = () => {
   return <Outlet />
 }
 
-const accountRoutes = [
+const accountRoutes: RouteObject[] = [
   {
     element: <AccountLayout />,
     children: [

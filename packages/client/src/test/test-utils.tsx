@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { FC } from 'react'
-import { BrowserRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
+import { RouterProvider } from 'react-router/dom'
 import { page } from 'vitest/browser'
 import { render as browserRender } from 'vitest-browser-react'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
@@ -28,22 +29,28 @@ const queryClient = new QueryClient({
 
 export const AllTheProviders: FC<{ children: React.ReactNode }> = ({ children }) => (
   <ThemeProvider>
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <AlertDismissedProvider>
-          <OnlineStatusProvider>
-            <FileUploadModalProvider>{children}</FileUploadModalProvider>
-          </OnlineStatusProvider>
-        </AlertDismissedProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <AlertDismissedProvider>
+        <OnlineStatusProvider>
+          <FileUploadModalProvider>{children}</FileUploadModalProvider>
+        </OnlineStatusProvider>
+      </AlertDismissedProvider>
+    </QueryClientProvider>
   </ThemeProvider>
 )
 
 const customRender = (ui: React.ReactElement, { route = '/' } = {}) => {
   ensureModalRoot()
-  window.history.pushState({}, 'Test page', route)
-  browserRender(<AllTheProviders>{ui}</AllTheProviders>)
+  const router = createMemoryRouter(
+    [
+      {
+        path: '*',
+        element: <AllTheProviders>{ui}</AllTheProviders>,
+      },
+    ],
+    { initialEntries: [route] },
+  )
+  browserRender(<RouterProvider router={router} />)
   // Return the page object for querying elements
   return page
 }
