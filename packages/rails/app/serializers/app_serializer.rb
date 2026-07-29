@@ -9,6 +9,7 @@ class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
     :title,
     :added_by,
     :added_by_fullname,
+    :added_by_user_id,
     :created_at,
     :created_at_date_time,
     :updated_at,

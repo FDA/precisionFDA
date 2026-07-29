@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { CopyText } from '@/components/CopyText/CopyText'
 import { DatabaseIcon } from '@/components/icons/DatabaseIcon'
@@ -31,100 +31,110 @@ import {
   Topbox,
 } from '../home/show.styles'
 import { type HomeScope, NOTIFICATION_ACTION } from '../home/types'
+import { UserDetailsDrawer } from '../users/UserDetailsDrawer'
 import { DBStatus } from './DbStatus'
 import { fetchDatabaseRequest } from './databases.api'
 import type { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 
-const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
+const DatabaseDetails = ({ db, homeScope }: { db: IDatabase; homeScope?: HomeScope }) => {
+  const [isUserOpen, setIsUserOpen] = useState<boolean>(false)
   const spaceId = getSpaceIdFromScope(db.scope)
   return (
-    <MetadataSection>
-      <MetadataRow>
-        <MetadataItem>
-          <MetadataKey>Location</MetadataKey>
-          <MetadataVal data-testid="db-location">
-            <Link
-              target="_blank"
-              to={spaceId ? `/spaces/${spaceId}/databases` : `/home/databases?scope=${homeScope?.toLowerCase()}`}
-            >
-              {homeScope === 'featured' ? 'Featured' : db.location}
-            </Link>
-          </MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>ID</MetadataKey>
-          <MetadataVal data-testid="db-id">
-            <CopyText
-              className="inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]"
-              value={db.uid}
-              onCopy={() => toastInfo('Database ID copied to clipboard')}
-            >
-              <span>{db.uid}</span>
-            </CopyText>
-          </MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Added By</MetadataKey>
-          <MetadataVal data-testid="db-added-by">
-            {' '}
-            <Link target="_blank" to={`/users/${db.addedBy}`}>
-              {db.addedByFullname}
-            </Link>
-          </MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Created On</MetadataKey>
-          <MetadataVal data-testid="db-created-on">
-            {format(new Date(db.createdAtDateTime), 'yyyy-MM-dd HH:mm:ss')}
-          </MetadataVal>
-        </MetadataItem>
-      </MetadataRow>
-      <MetadataRow>
-        <MetadataItem>
-          <MetadataKey>Status</MetadataKey>
-          <MetadataVal data-testid="db-status">
-            <DBStatus status={db.status} />
-          </MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>DB Port</MetadataKey>
-          <MetadataVal data-testid="db-port">{db.port}</MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Engine</MetadataKey>
-          <MetadataVal data-testid="db-engine">{db.engine}</MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Version</MetadataKey>
-          <MetadataVal data-testid="db-version">{db.engineVersion}</MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Instance</MetadataKey>
-          <MetadataVal data-testid="db-instance">
-            {DATABASE_RESOURCE_LABELS[db.dxInstanceClass] ?? db.dxInstanceClass}
-          </MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Synchronization Status</MetadataKey>
-          <MetadataVal data-testid="db-sync-status">
-            <DBStatus status={db.syncStatus} />
-          </MetadataVal>
-        </MetadataItem>
-      </MetadataRow>
-      <MetadataRow>
-        <MetadataItem>
-          <MetadataKey>Status Updated</MetadataKey>
-          <MetadataVal data-testid="db-status-updated">
-            {format(new Date(db.statusUpdatedDateTime), 'yyyy-MM-dd HH:mm:ss')}
-          </MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Host Endpoint</MetadataKey>
-          <MetadataValBreakAll data-testid="db-host">{db.host}</MetadataValBreakAll>
-        </MetadataItem>
-      </MetadataRow>
-    </MetadataSection>
+    <>
+      <MetadataSection>
+        <MetadataRow>
+          <MetadataItem>
+            <MetadataKey>Location</MetadataKey>
+            <MetadataVal data-testid="db-location">
+              <Link
+                target="_blank"
+                to={spaceId ? `/spaces/${spaceId}/databases` : `/home/databases?scope=${homeScope?.toLowerCase()}`}
+              >
+                {homeScope === 'featured' ? 'Featured' : db.location}
+              </Link>
+            </MetadataVal>
+          </MetadataItem>
+          <MetadataItem>
+            <MetadataKey>ID</MetadataKey>
+            <MetadataVal data-testid="db-id">
+              <CopyText
+                className="inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]"
+                value={db.uid}
+                onCopy={() => toastInfo('Database ID copied to clipboard')}
+              >
+                <span>{db.uid}</span>
+              </CopyText>
+            </MetadataVal>
+          </MetadataItem>
+          <MetadataItem>
+            <MetadataKey>Added By</MetadataKey>
+            <MetadataVal data-testid="db-added-by">
+              {' '}
+              <button
+                type="button"
+                className={'inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]'}
+                onClick={() => setIsUserOpen(true)}
+              >
+                {db.addedBy}
+              </button>
+            </MetadataVal>
+          </MetadataItem>
+          <MetadataItem>
+            <MetadataKey>Created On</MetadataKey>
+            <MetadataVal data-testid="db-created-on">
+              {format(new Date(db.createdAtDateTime), 'yyyy-MM-dd HH:mm:ss')}
+            </MetadataVal>
+          </MetadataItem>
+        </MetadataRow>
+        <MetadataRow>
+          <MetadataItem>
+            <MetadataKey>Status</MetadataKey>
+            <MetadataVal data-testid="db-status">
+              <DBStatus status={db.status} />
+            </MetadataVal>
+          </MetadataItem>
+          <MetadataItem>
+            <MetadataKey>DB Port</MetadataKey>
+            <MetadataVal data-testid="db-port">{db.port}</MetadataVal>
+          </MetadataItem>
+          <MetadataItem>
+            <MetadataKey>Engine</MetadataKey>
+            <MetadataVal data-testid="db-engine">{db.engine}</MetadataVal>
+          </MetadataItem>
+          <MetadataItem>
+            <MetadataKey>Version</MetadataKey>
+            <MetadataVal data-testid="db-version">{db.engineVersion}</MetadataVal>
+          </MetadataItem>
+          <MetadataItem>
+            <MetadataKey>Instance</MetadataKey>
+            <MetadataVal data-testid="db-instance">
+              {DATABASE_RESOURCE_LABELS[db.dxInstanceClass] ?? db.dxInstanceClass}
+            </MetadataVal>
+          </MetadataItem>
+          <MetadataItem>
+            <MetadataKey>Synchronization Status</MetadataKey>
+            <MetadataVal data-testid="db-sync-status">
+              <DBStatus status={db.syncStatus} />
+            </MetadataVal>
+          </MetadataItem>
+        </MetadataRow>
+        <MetadataRow>
+          <MetadataItem>
+            <MetadataKey>Status Updated</MetadataKey>
+            <MetadataVal data-testid="db-status-updated">
+              {format(new Date(db.statusUpdatedDateTime), 'yyyy-MM-dd HH:mm:ss')}
+            </MetadataVal>
+          </MetadataItem>
+          <MetadataItem>
+            <MetadataKey>Host Endpoint</MetadataKey>
+            <MetadataValBreakAll data-testid="db-host">{db.host}</MetadataValBreakAll>
+          </MetadataItem>
+        </MetadataRow>
+      </MetadataSection>
+
+      <UserDetailsDrawer userId={db.addedByUserId} open={isUserOpen} onClose={() => setIsUserOpen(false)} />
+    </>
   )
 }
 
@@ -217,7 +227,7 @@ export const DatabaseShow = ({
           </div>
         </ResourceHeader>
 
-        {renderOptions(data, homeScope)}
+        <DatabaseDetails db={data} homeScope={homeScope} />
 
         {data.tags.length > 0 && (
           <MetadataSection>

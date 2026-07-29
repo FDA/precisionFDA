@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router'
 import { CloudResourcesHeaderButton } from '@/components/CloudResourcesHeaderButton'
 import { CopyText } from '@/components/CopyText/CopyText'
@@ -31,6 +32,7 @@ import {
 } from '../home/show.styles'
 import type { HomeScope } from '../home/types'
 import { getBasePath } from '../home/utils'
+import { UserDetailsDrawer } from '../users/UserDetailsDrawer'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { WorkflowExecutionsList } from './WorkflowExecutionsList'
 import HomeWorkflowsSpec from './WorkflowSpec/WorkflowSpec'
@@ -45,7 +47,9 @@ interface IColumn {
   dataTestId: string
 }
 
-const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
+const WorkflowDetails = ({ workflow, homeScope }: { workflow: IWorkflow; homeScope?: HomeScope }) => {
+  const [isUserOpen, setIsUserOpen] = useState<boolean>(false)
+
   const columns: IColumn[] = [
     {
       header: 'location',
@@ -66,7 +70,6 @@ const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
     {
       header: 'added by',
       value: 'added_by',
-      link: workflow.links.user,
       dataTestId: 'workflow-show-meta-added-by',
     },
     {
@@ -103,6 +106,16 @@ const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
             <span>{workflow.uid}</span>
           </CopyText>
         </MetadataVal>
+      ) : e.value === 'added_by' ? (
+        <MetadataVal data-testid={e.dataTestId}>
+          <button
+            type="button"
+            className={'inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]'}
+            onClick={() => setIsUserOpen(true)}
+          >
+            {workflow.added_by}
+          </button>
+        </MetadataVal>
       ) : (
         <MetadataVal data-testid={e.dataTestId}>{workflow[e.value] as string}</MetadataVal>
       )}
@@ -112,6 +125,8 @@ const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
   return (
     <MetadataSection>
       <MetadataRow>{list}</MetadataRow>
+
+      <UserDetailsDrawer userId={workflow.added_by_user_id} open={isUserOpen} onClose={() => setIsUserOpen(false)} />
     </MetadataSection>
   )
 }
@@ -219,7 +234,7 @@ export const WorkflowShow = ({
           </div>
         </ResourceHeader>
 
-        {renderOptions(workflow, homeScope)}
+        <WorkflowDetails workflow={workflow} homeScope={homeScope} />
         {workflow.tags.length > 0 && (
           <MetadataSection>
             <MetadataRow>

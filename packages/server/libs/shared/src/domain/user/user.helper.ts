@@ -1,7 +1,7 @@
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { ErrorCodes, NotFoundError } from '../../errors'
 import { ORG_HANDLE_MAX_LENGTH, PFDA_PREFIX } from '../org/org.utils'
-import { User } from './user.entity'
+import { USER_STATE, User } from './user.entity'
 
 // right now, we run everything under user private project
 const getProjectToRunApp = (user: User): DxId<'project'> => {
@@ -31,4 +31,17 @@ const isGovEmail = (email: string): boolean => {
   return ['fda.hhs.gov', 'fda.gov'].includes(emailDomain)
 }
 
-export { constructOrgFromUsername, constructUsername, getProjectToRunApp, isGovEmail }
+const serializeUserState = (userState: USER_STATE): 'active' | 'deactivated' | 'locked' | 'n/a' => {
+  switch (userState) {
+    case USER_STATE.ENABLED:
+      return 'active'
+    case USER_STATE.DEACTIVATED:
+      return 'deactivated'
+    case USER_STATE.LOCKED:
+      return 'locked'
+    default:
+      return 'n/a'
+  }
+}
+
+export { constructOrgFromUsername, constructUsername, getProjectToRunApp, isGovEmail, serializeUserState }

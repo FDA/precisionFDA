@@ -24,6 +24,7 @@ interface AppBodyDTO {
   title: string
   addedBy: string
   addedByFullname: string
+  addedByUserId: number
   createdAt: string
   createdAtDateTime: string
   updatedAt: string
@@ -137,6 +138,7 @@ export class AppGetDTO {
       title: app.title,
       addedBy: user.dxuser,
       addedByFullname: user.fullName,
+      addedByUserId: user.id,
       createdAt: TimeUtils.formatShortDate(app.createdAt),
       createdAtDateTime: TimeUtils.formatDateTimeUTC(app.createdAt),
       updatedAt: TimeUtils.formatAtTime(app.updatedAt),

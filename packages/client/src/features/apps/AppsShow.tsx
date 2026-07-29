@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { CloudResourcesHeaderButton } from '@/components/CloudResourcesHeaderButton'
 import { CopyText } from '@/components/CopyText/CopyText'
@@ -33,6 +34,7 @@ import {
 import type { HomeScope } from '../home/types'
 import { useHomeDisplayScope } from '../home/useHomeDisplayScope'
 import { getBasePath } from '../home/utils'
+import { UserDetailsDrawer } from '../users/UserDetailsDrawer'
 import type { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
@@ -44,10 +46,10 @@ export type AppShowOutletContext = {
   appUid: string
 }
 
-const renderOptions = (app: IApp, meta: { release: string }) => {
+const AppDetails = ({ app, meta }: { app: IApp; meta: { release: string } }) => {
+  const [isUserOpen, setIsUserOpen] = useState<boolean>(false)
   const spaceId = getSpaceIdFromScope(app.scope)
   const spaceLink = spaceId ? `/spaces/${spaceId}/apps` : undefined
-  const userLink = `/users/${app.addedBy}`
   const columns = [
     {
       header: 'location',
@@ -68,7 +70,6 @@ const renderOptions = (app: IApp, meta: { release: string }) => {
     {
       header: 'added by',
       value: 'addedByFullname',
-      link: userLink,
       dataTestId: 'app-added-by',
     },
     {
@@ -116,6 +117,16 @@ const renderOptions = (app: IApp, meta: { release: string }) => {
             <span>{app.uid}</span>
           </CopyText>
         </MetadataVal>
+      ) : e.value === 'addedByFullname' ? (
+        <MetadataVal data-testid={e.dataTestId}>
+          <button
+            type="button"
+            className={'inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]'}
+            onClick={() => setIsUserOpen(true)}
+          >
+            {app.addedByFullname}
+          </button>
+        </MetadataVal>
       ) : (
         // @ts-expect-error dynamic key
         <MetadataVal data-testid={e.dataTestId}>{app[e.value]}</MetadataVal>
@@ -132,6 +143,8 @@ const renderOptions = (app: IApp, meta: { release: string }) => {
           <MetadataVal data-testid="app-ubuntu-release">{meta.release}</MetadataVal>
         </MetadataItem>
       </MetadataRow>
+
+      <UserDetailsDrawer userId={app.addedByUserId} open={isUserOpen} onClose={() => setIsUserOpen(false)} />
     </MetadataSection>
   )
 }
@@ -274,7 +287,7 @@ export const AppsShow = ({
           </div>
         </ResourceHeader>
 
-        {renderOptions(app, meta)}
+        <AppDetails app={app} meta={meta} />
         {app.tags.length > 0 && (
           <MetadataSection>
             <MetadataRow>

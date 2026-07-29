@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { CopyText } from '@/components/CopyText/CopyText'
 import { HomeLabel } from '@/components/HomeLabel'
@@ -28,6 +29,7 @@ import {
 } from '../home/show.styles'
 import type { HomeScope } from '../home/types'
 import { License } from '../licenses/License'
+import { UserDetailsDrawer } from '../users/UserDetailsDrawer'
 import { ArchiveContents } from './ArchiveContents'
 import { fetchAsset } from './assets.api'
 import type { IAsset } from './assets.types'
@@ -58,6 +60,7 @@ export const AssetShow = ({
   homeContext?: HomeScopeContextValue
 }) => {
   const { homeScope, setDisplayScope, isHome } = homeContext
+  const [isUserOpen, setIsUserOpen] = useState<boolean>(false)
   const { data, isLoading } = useQuery({
     queryKey: ['asset', assetUid],
     queryFn: () =>
@@ -160,9 +163,13 @@ export const AssetShow = ({
             <MetadataItem>
               <MetadataKey>Added By</MetadataKey>
               <MetadataVal>
-                <Link target="_blank" to={asset.links.user!}>
+                <button
+                  type="button"
+                  className={'inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]'}
+                  onClick={() => setIsUserOpen(true)}
+                >
                   {asset.added_by}
-                </Link>
+                </button>
               </MetadataVal>
             </MetadataItem>
 
@@ -181,6 +188,8 @@ export const AssetShow = ({
               <MetadataVal>{asset.created_at_date_time}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
+
+          <UserDetailsDrawer userId={asset.added_by_user_id} open={isUserOpen} onClose={() => setIsUserOpen(false)} />
         </MetadataSection>
 
         {asset.tags.length > 0 && (

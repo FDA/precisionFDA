@@ -6,6 +6,7 @@ class WorkflowSerializer < ApplicationSerializer
     :name,
     :title,
     :added_by,
+    :added_by_user_id,
     :created_at,
     :created_at_date_time,
     :launched_by,

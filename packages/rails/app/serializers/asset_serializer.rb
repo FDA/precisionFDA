@@ -4,6 +4,7 @@ class AssetSerializer < UserFileSerializer
     :uid,
     :created_at_date_time,
     :added_by,
+    :added_by_user_id,
     :archive_content,
     :links,
     :file_license,

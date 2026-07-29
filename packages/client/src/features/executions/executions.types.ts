@@ -114,6 +114,7 @@ export interface ExecutionBase {
   instanceType: keyof typeof COMPUTE_RESOURCE_LABELS
   launchedBy: string
   launchedByDxuser: string
+  launchedByUserId: number
   launchedOn: string
   location: string
   scope: ServerScope

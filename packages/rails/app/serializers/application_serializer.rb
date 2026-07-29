@@ -84,6 +84,10 @@ class ApplicationSerializer < ActiveModel::Serializer
     object.user.dxuser
   end
 
+  def added_by_user_id
+    object.user.id
+  end
+
   # A method for constructing a space specific path, if app is in space
   # @return [String] Space object UI url
   def space_path

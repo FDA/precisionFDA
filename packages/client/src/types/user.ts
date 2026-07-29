@@ -71,6 +71,8 @@ export const DatabaseInstancePricingMap: Record<DatabaseResourceKey, number> = {
 
 export const RESOURCES = Object.keys(RESOURCE_LABELS) as ResourceKey[]
 
+export type UserState = 'active' | 'deactivated' | 'locked' | 'n/a'
+
 export interface IUser {
   id: number
   org: { id: number; name: string; handle: string }

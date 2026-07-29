@@ -541,6 +541,7 @@ Rails.application.routes.draw do
       get "check_code", on: :collection
     end
 
+    # Internal use in Ruby for rendering user_path
     user_constraints = { username: %r{[^/]*} }
     get "/users/:username(/:tab)", to: "users#show", constraints: user_constraints, as: "user"
 

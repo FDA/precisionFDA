@@ -1,6 +1,6 @@
-import type { ServerScope } from '../home/types'
-import type { FileState } from '../files/files.types'
 import type { FileOrg, FileUser } from '../apps/apps.types'
+import type { FileState } from '../files/files.types'
+import type { ServerScope } from '../home/types'
 
 type Links = Record<string, string>
 
@@ -32,6 +32,7 @@ export interface IAsset {
   description: string
   added_by: string
   added_by_fullname: string
+  added_by_user_id: number
   archive_content: string[]
   created_at: string
   created_at_date_time: string

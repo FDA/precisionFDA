@@ -32,6 +32,7 @@ export class DbClusterDTO {
   description?: string
   addedBy: string
   addedByFullname: string
+  addedByUserId: number
   createdAt: Date
   createdAtDateTime: Date
   engine: ENGINE
@@ -79,6 +80,7 @@ export class DbClusterDTO {
       description: dbcluster.description,
       addedBy: dbcluster.user.getProperty('dxuser'),
       addedByFullname: dbcluster.user.getProperty('fullName'),
+      addedByUserId: dbcluster.user.id,
       createdAt: dbcluster.createdAt,
       createdAtDateTime: dbcluster.createdAt,
       engine: ENGINES[invertObj(ENGINE)[dbcluster.engine]],

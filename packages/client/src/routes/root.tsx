@@ -39,6 +39,9 @@ const RequestAccessPage = React.lazy(() => import('../features/request-access/Re
 const ExpertsSinglePage = React.lazy(() => import('../features/experts/details/index'))
 const PublishingPage = React.lazy(() => import('../features/publishing/PublishingPage'))
 const TrackPage = React.lazy(() => import('../features/tracks/TrackPage'))
+const UserDetailsPage = React.lazy(() =>
+  import('../features/users/UserDetailsPage').then(m => ({ default: m.UserDetailsPage })),
+)
 const NewsListPage = React.lazy(() => import('../features/news/NewsPage'))
 const LandingPage = React.lazy(() => import('../features/overview/OverviewPage'))
 const AboutPage = React.lazy(() => import('../pages/AboutPage'))
@@ -158,6 +161,7 @@ export const appRoutes: RouteObject[] = [
           { path: 'notes/:identifier/track', element: <TrackPage /> },
           { path: 'data-portals/*', element: <DataPortalRoutes /> },
           { path: 'jobs/:executionUid', element: <JobRedirect /> },
+          { path: 'users/:dxuser', element: <UserDetailsPage /> },
         ],
       },
     ],

@@ -1,6 +1,6 @@
-import { DATABASE_RESOURCE_LABELS } from '@/types/user'
-import { FileLicense } from '../assets/assets.types'
-import { ServerScope } from '../home/types'
+import type { DATABASE_RESOURCE_LABELS } from '@/types/user'
+import type { FileLicense } from '../assets/assets.types'
+import type { ServerScope } from '../home/types'
 
 export type DBStatus = 'creating' | 'available' | 'stopped' | 'stopping' | 'starting' | 'terminating' | 'terminated'
 
@@ -19,6 +19,7 @@ export interface IDatabase {
   description: string
   addedBy: string
   addedByFullname: string
+  addedByUserId: number
   createdAt: Date
   createdAtDateTime: string
   engine: string

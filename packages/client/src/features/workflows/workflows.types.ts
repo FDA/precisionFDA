@@ -1,7 +1,7 @@
-import { COMPUTE_RESOURCE_LABELS } from '@/types/user'
-import { InputSpec as AppInputSpec, IOSpec } from '../apps/apps.types'
-import { IExecution } from '../executions/executions.types'
-import { IMeta, ServerScope } from '../home/types'
+import type { COMPUTE_RESOURCE_LABELS } from '@/types/user'
+import type { InputSpec as AppInputSpec, IOSpec } from '../apps/apps.types'
+import type { IExecution } from '../executions/executions.types'
+import type { IMeta, ServerScope } from '../home/types'
 
 export interface Spec2 {
   input_spec: AppInputSpec[]
@@ -49,7 +49,7 @@ export interface WorkflowRevision {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface Batches {}
+export type Batches = {}
 
 export interface Links2 {
   comments: string
@@ -135,6 +135,7 @@ export interface IWorkflow {
   name: string
   title: string
   added_by: string
+  added_by_user_id: number
   created_at: string
   created_at_date_time: string
   launched_by: string

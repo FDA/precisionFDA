@@ -56,6 +56,7 @@ export class JobGetDTO {
   location: string
   launchedBy: string
   launchedByDxuser: string
+  launchedByUserId: number
   launchedOn: string
   featured: boolean
   entityType: 'regular' | 'https'
@@ -112,6 +113,7 @@ export class JobGetDTO {
     dto.location = resolveLocation(job, space)
     dto.launchedBy = user.fullName
     dto.launchedByDxuser = user.dxuser
+    dto.launchedByUserId = user.id
     dto.launchedOn = TimeUtils.formatDateTimeUTC(job.createdAt)
     dto.featured = job.featured
     dto.entityType = job.isHTTPS() ? 'https' : 'regular'

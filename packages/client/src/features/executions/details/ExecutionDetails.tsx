@@ -7,6 +7,7 @@ import { BoltIcon } from '@/components/icons/BoltIcon'
 import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
 import { StyledTab, StyledTabList, StyledTabPanel } from '@/components/Tabs'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
+import { UserDetailsDrawer } from '@/features/users/UserDetailsDrawer'
 import { useLastWSNotification } from '@/hooks/useLastWSNotification'
 import { COMPUTE_RESOURCE_LABELS, type ComputeResourceKey, ComputeResourcePricingMap } from '@/types/user'
 import { pluralize } from '@/utils/formatting'
@@ -32,7 +33,6 @@ import { getBasePath } from '../../home/utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
 import { fetchExecution } from '../executions.api'
 import type { IExecution } from '../executions.types'
-import { getUserLink } from '../executions.util'
 import { InputsAndOutputs } from '../InputsAndOutputs'
 import { Logs } from '../Log'
 import { StateCell } from '../StateCell'
@@ -130,6 +130,7 @@ export const ExecutionDetails = ({
   spaceId?: number
 }): JSX.Element => {
   const { homeScope, isHome, setDisplayScope } = homeContext
+  const [isUserOpen, setIsUserOpen] = useState<boolean>(false)
   const location = useLocation()
 
   const {
@@ -284,9 +285,17 @@ export const ExecutionDetails = ({
             <MetadataItem>
               <MetadataKey>Launched By</MetadataKey>
               <MetadataVal data-testid="execution-launched-by">
-                <Link target="_blank" to={getUserLink(execution.launchedByDxuser)}>
-                  {execution.launchedBy}
-                </Link>
+                {!execution.launchedByDxuser?.startsWith('challenge.bot') ? (
+                  <button
+                    type="button"
+                    className={'inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]'}
+                    onClick={() => setIsUserOpen(true)}
+                  >
+                    {execution.launchedBy}
+                  </button>
+                ) : (
+                  execution.launchedBy
+                )}
               </MetadataVal>
             </MetadataItem>
 
@@ -316,6 +325,12 @@ export const ExecutionDetails = ({
               <MetadataVal data-testid="execution-app-revision">{execution.appRevision}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
+
+          <UserDetailsDrawer
+            userId={execution.launchedByUserId}
+            open={isUserOpen}
+            onClose={() => setIsUserOpen(false)}
+          />
         </MetadataSection>
         {execution.tags.length > 0 && (
           <MetadataSection>

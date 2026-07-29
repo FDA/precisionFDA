@@ -231,7 +231,7 @@ export default defineConfig(({ command, mode }) => {
           '/login', '/logout', '/return_from_login',
           // Rails-rendered pages still served by Rails
           '/docs', '/pdfs', '/assets', '/guidelines', '/profile',
-          '/users', '/licenses', '/notes', '/comparisons',
+          '/licenses', '/notes', '/comparisons',
           '/discussions', '/apps', '/workflows/new', '/experts/new',
           // Admin pages (Rails-rendered)
           '/admin/comparator_settings', '/admin/org_action_requests',

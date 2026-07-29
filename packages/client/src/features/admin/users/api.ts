@@ -1,8 +1,8 @@
 import axios, { type AxiosRequestConfig } from 'axios'
-import type { AdminUserDetails, AdminUserListType, User } from './types'
-import type { InvitationListType } from '../invitations/types'
 import type { IFilter } from '../../home/types'
 import { type Params, prepareListFetchV2 } from '../../home/utils'
+import type { InvitationListType } from '../invitations/types'
+import type { AdminUserDetails, AdminUserListType, User } from './types'
 
 interface CountStats {
   total: number
@@ -77,7 +77,10 @@ export const fetchInvitations = async (configs: AxiosRequestConfig) => {
   return axios.get<InvitationListType>('/api/v2/admin/invitations', configs).then(r => r.data)
 }
 
-export async function editInvitationBasicInfo(id: number, data: Partial<{ firstName: string; lastName: string; email: string }>) {
+export async function editInvitationBasicInfo(
+  id: number,
+  data: Partial<{ firstName: string; lastName: string; email: string }>,
+) {
   return axios.put(`/api/v2/admin/invitations/${id}`, data).then(r => r.data)
 }
 
@@ -93,7 +96,8 @@ export const setJobLimit = async (ids: User['id'][], limit: number) =>
     })
     .then(res => res.data)
 
-export const userResetMfa = async (id: User['id']) => axios.post(`/api/v2/admin/users/${id}/resetMfa`).then(res => res.data)
+export const userResetMfa = async (id: User['id']) =>
+  axios.post(`/api/v2/admin/users/${id}/resetMfa`).then(res => res.data)
 
 export const userUnlock = async (id: User['id']) => axios.post(`/api/v2/admin/users/${id}/unlock`).then(res => res.data)
 
@@ -114,8 +118,14 @@ export const bulkDeactivate = async (ids: User['id'][]) =>
     })
     .then(res => res.data)
 
-export async function fetchAdminUserDetails(id: User['id']) {
+export async function fetchAdminUserById(id: number) {
   return await axios.get<AdminUserDetails>(`/api/v2/admin/users/${id}`).then(r => r.data)
+}
+
+export async function fetchAdminUserByDxuser(dxuser: string) {
+  return await axios
+    .get<AdminUserDetails>(`/api/v2/admin/users/username/${encodeURIComponent(String(dxuser))}`)
+    .then(r => r.data)
 }
 
 export async function fetchUsers(filters: IFilter[], params: Params) {

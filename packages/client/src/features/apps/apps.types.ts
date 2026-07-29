@@ -36,6 +36,7 @@ export interface IApp {
   title: string
   addedBy: string
   addedByFullname: string
+  addedByUserId: number
   createdAt: string
   createdAtDateTime: string
   updatedAt: string

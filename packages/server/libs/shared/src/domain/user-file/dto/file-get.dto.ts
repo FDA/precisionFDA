@@ -55,6 +55,7 @@ export class FileGetDTO extends NodeDTO {
   location: string
   addedBy: string
   addedByDxuser: string
+  addedByUserId: number
   createdAt: string
   createdAtDateTime: string
   featured: boolean
@@ -92,6 +93,7 @@ export class FileGetDTO extends NodeDTO {
     dto.location = EntityScopeUtils.computeLocation(file.scope, space)
     dto.addedBy = user.fullName
     dto.addedByDxuser = user.dxuser
+    dto.addedByUserId = user.id
     dto.createdAt = TimeUtils.formatShortDate(file.createdAt)
     dto.createdAtDateTime = TimeUtils.formatDateTimeUTC(file.createdAt)
     dto.featured = file.featured

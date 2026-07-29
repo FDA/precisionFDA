@@ -1,15 +1,21 @@
-import { Drawer } from '@base-ui/react/drawer'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Pencil, X } from 'lucide-react'
-import type React from 'react'
+import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { getBackendErrorMessage } from '@/api/types'
 import { Button } from '@/components/Button'
 import { Checkbox } from '@/components/CheckboxNext'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { BaseDrawer } from '@/components/ui/base-drawer'
+import {
+  Row,
+  SectionHeading,
+  UserAccount,
+  type UserDetailsDrawerProps,
+  UserDrawerHeader,
+  UserOrganization,
+  YesNoBadge,
+} from '@/features/users/UserDetailsDrawer'
 import { COMPUTE_RESOURCE_LABELS, DATABASE_RESOURCE_LABELS, RESOURCE_LABELS, type ResourceKey } from '@/types/user'
-import { relativeTimeAgo } from '@/utils/datetime'
-import { formatDate } from '@/utils/formatting'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { formatNumberUS } from '../../home/utils'
 import { ModalScroll } from '../../modal/modal.styles'
@@ -19,7 +25,7 @@ import {
   bulkDeactivate,
   bulkDisableResource,
   bulkEnableResource,
-  fetchAdminUserDetails,
+  fetchAdminUserById,
   setJobLimit,
   setTotalLimit,
   userResendActivationEmail,
@@ -29,27 +35,8 @@ import {
 import { canAdminUnlockUsers } from './canAdminUnlockUsers'
 import type { AdminUserDetails } from './types'
 
-type AdminUserDetailsDrawerProps = {
-  userId: number | null
-  open: boolean
-  onClose: () => void
-}
+type AdminUserDetailsDrawerProps = UserDetailsDrawerProps
 
-const statusLabel: Record<AdminUserDetails['userState'], string> = {
-  active: 'Active',
-  deactivated: 'Deactivated',
-  locked: 'Locked',
-  'n/a': 'N/A',
-}
-
-const statusClassName: Record<AdminUserDetails['userState'], string> = {
-  active: 'bg-(--success-100) text-(--success-700)',
-  deactivated: 'bg-(--highlight-100) text-(--highlight-800)',
-  locked: 'bg-(--warning-100) text-(--warning-700)',
-  'n/a': 'bg-(--tertiary-100) text-(--tertiary-500)',
-}
-
-const formatDateTime = (value: string | null) => (value ? formatDate(value) : 'N/A')
 const formatCurrency = (value: number | undefined) => (typeof value === 'number' ? `$${formatNumberUS(value)}` : 'N/A')
 const invalidateAdminUserQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
   queryClient.invalidateQueries({ queryKey: ['admin-users'] })
@@ -78,40 +65,6 @@ const useAdminUserAction = <TData, TVariables = void>({
     onError: error => toastError(getBackendErrorMessage(error, errorMessage)),
   })
 }
-
-// ─── Shared layout primitives ────────────────────────────────────────────────
-
-const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className="flex items-center gap-3 py-1.5">
-    <dt className="w-40 shrink-0 text-sm text-(--c-text-600)">{label}</dt>
-    <dd className="min-w-0 flex-1 text-sm break-words text-(--c-text-700)">{children}</dd>
-  </div>
-)
-
-const SectionHeading = ({ title }: { title: string }) => (
-  <div className="flex items-center gap-2 pt-5 pb-2 first:pt-0">
-    <span className="whitespace-nowrap text-[11px] font-semibold tracking-widest text-(--c-text-400) uppercase">
-      {title}
-    </span>
-    <div className="h-px flex-1 bg-(--tertiary-250)" />
-  </div>
-)
-
-const YesNoBadge = ({ value }: { value: boolean }) => (
-  <span
-    className={`inline-flex w-8 items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium ${
-      value ? 'bg-(--success-100) text-(--success-700)' : 'bg-(--warning-100) text-(--warning-700)'
-    }`}
-  >
-    {value ? 'Yes' : 'No'}
-  </span>
-)
-
-const StatusBadge = ({ state }: { state: AdminUserDetails['userState'] }) => (
-  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusClassName[state]}`}>
-    {statusLabel[state]}
-  </span>
-)
 
 // ─── Inline limit editor ─────────────────────────────────────────────────────
 
@@ -453,11 +406,9 @@ const UserActionsSection = ({ details }: { details: AdminUserDetails }) => {
   )
 }
 
-// ─── Drawer body ─────────────────────────────────────────────────────────────
+// ─── Admin user content (shared between drawer and page) ─────────────────────
 
-const DrawerBody = ({ details }: { details: AdminUserDetails }) => {
-  const lastLoginAgo = relativeTimeAgo(details.lastLogin)
-
+export const AdminUserDetailsContent = ({ details }: { details: AdminUserDetails }) => {
   const permissionRows: { label: string; enabled: boolean }[] = [
     { label: 'Pending activation', enabled: details.permissions.pendingActivation },
     { label: 'Government user', enabled: details.permissions.isGovernmentUser },
@@ -469,29 +420,8 @@ const DrawerBody = ({ details }: { details: AdminUserDetails }) => {
 
   return (
     <dl className="px-5 py-4">
-      <SectionHeading title="Account" />
-      <Row label="Full name">{details.fullName}</Row>
-      <Row label="Username">@{details.dxuser}</Row>
-      <Row label="Email">{details.email}</Row>
-      <Row label="Status">
-        <StatusBadge state={details.userState} />
-      </Row>
-      <Row label="Single sign-on">
-        <YesNoBadge value={details.isSSO} />
-      </Row>
-      <Row label="Joined">{formatDateTime(details.createdAt)}</Row>
-      <Row label="Last login">
-        {formatDateTime(details.lastLogin)}
-        {lastLoginAgo ? <span className="ml-1.5 text-xs text-(--c-text-400)">({lastLoginAgo})</span> : null}
-      </Row>
-      <Row label="Last updated">{formatDateTime(details.updatedAt)}</Row>
-      <Row label="Timezone">{details.timeZone ?? 'N/A'}</Row>
-
-      <SectionHeading title="Organization" />
-      <Row label="Name">{details.organization.name}</Row>
-      <Row label="Handle">{details.organization.handle}</Row>
-      <Row label="Admin">{details.organization.adminFullName ?? 'N/A'}</Row>
-      <Row label="Type">{details.organization.singular ? 'Single-user' : 'Multi-user'}</Row>
+      <UserAccount details={details} />
+      <UserOrganization details={details} />
 
       <SectionHeading title="Access" />
       <div className="grid grid-cols-2 gap-x-4 gap-y-1 py-1">
@@ -526,53 +456,23 @@ const DrawerBody = ({ details }: { details: AdminUserDetails }) => {
 export const AdminUserDetailsDrawer = ({ userId, open, onClose }: AdminUserDetailsDrawerProps) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-user', userId],
-    queryFn: () => fetchAdminUserDetails(userId as number),
+    queryFn: () => fetchAdminUserById(userId as number),
     enabled: open && userId != null,
     refetchOnWindowFocus: false,
   })
 
   return (
-    <Drawer.Root open={open} onOpenChange={(nextOpen: boolean) => !nextOpen && onClose()} swipeDirection="right">
-      <Drawer.Portal keepMounted>
-        <Drawer.Backdrop className="fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 data-closed:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0" />
-        <Drawer.Viewport className="fixed inset-0 z-50">
-          <Drawer.Popup className="fixed inset-y-0 right-0 z-50 flex w-full max-w-150 outline-none transition-transform duration-200 ease-out data-closed:translate-x-full data-starting-style:translate-x-full data-ending-style:translate-x-full">
-            <Drawer.Content className="flex h-full w-full flex-col overflow-hidden border-l border-(--tertiary-250) bg-background shadow-[-16px_0_48px_rgba(0,0,0,0.16)] outline-none">
-              <Drawer.Description className="sr-only">
-                Admin-visible account details, roles, and cloud resource access.
-              </Drawer.Description>
-
-              {/* Header */}
-              <div className="flex items-start justify-between gap-4 border-b border-(--tertiary-250) px-5 py-4">
-                <div className="min-w-0">
-                  <Drawer.Title className="truncate text-base font-semibold text-(--c-text-700)">
-                    {data?.fullName ?? 'User details'}
-                  </Drawer.Title>
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    {data?.dxuser ? <span className="text-xs text-(--c-text-400)">@{data.dxuser}</span> : null}
-                    {data?.userState ? <StatusBadge state={data.userState} /> : null}
-                  </div>
-                </div>
-                <Drawer.Close
-                  aria-label="Close user details"
-                  className="inline-flex size-8 shrink-0 items-center justify-center rounded text-(--c-text-500) transition-colors hover:bg-(--background-shaded-100) hover:text-(--c-text-700)"
-                >
-                  <X size={16} aria-hidden="true" />
-                </Drawer.Close>
-              </div>
-
-              {/* Scrollable body */}
-              <div className="min-h-0 flex-1 overflow-y-auto">
-                {isLoading ? <div className="px-5 py-4 text-sm text-(--c-text-400)">Loading…</div> : null}
-                {!isLoading && error ? (
-                  <div className="px-5 py-4 text-sm text-(--warning-600)">Failed to load user details.</div>
-                ) : null}
-                {!isLoading && !error && data ? <DrawerBody details={data} /> : null}
-              </div>
-            </Drawer.Content>
-          </Drawer.Popup>
-        </Drawer.Viewport>
-      </Drawer.Portal>
-    </Drawer.Root>
+    <BaseDrawer
+      open={open}
+      onClose={onClose}
+      header={
+        <UserDrawerHeader fullName={data?.fullName} dxuser={data?.dxuser} userState={data?.userState} userId={userId} />
+      }
+      description="Admin-visible account details, roles, and cloud resource access."
+    >
+      {isLoading && <div className="px-5 py-4 text-sm text-(--c-text-400)">Loading…</div>}
+      {error && <div className="px-5 py-4 text-sm text-(--warning-600)">Failed to load user details.</div>}
+      {userId != null && data ? <AdminUserDetailsContent details={data} /> : null}
+    </BaseDrawer>
   )
 }

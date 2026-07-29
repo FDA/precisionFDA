@@ -1,9 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
+import { populate } from 'dotenv'
 import sinon, { match, stub } from 'sinon'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { Organization } from '@shared/domain/org/organization.entity'
+import { AdminUserDetailsDTO } from '@shared/domain/user/dto/admin-user-details.dto'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { UserService } from '@shared/domain/user/service/user.service'
 import { USER_STATE, User } from '@shared/domain/user/user.entity'
@@ -15,12 +17,12 @@ import { PlatformClient } from '@shared/platform-client'
 describe('user service tests', () => {
   const emFlushStub = sinon.stub()
   const emTransactionalStub = stub()
-  const emPopulateStub = stub()
   const createSendEmailTaskStub = stub()
   const userRepoPaginateStub = stub()
   const userRepoFindActiveStub = stub()
   const userRepoFindStub = stub()
   const userRepoFindOneStub = stub()
+  const userRepoPopulateStub = stub()
   const userCloudResourcesStub = stub()
   const userRepoFindOneOrFailStub = stub()
   const platformClientGetSSOIdStub = stub()
@@ -52,7 +54,6 @@ describe('user service tests', () => {
     const em = {
       transactional: emTransactionalStub,
       flush: emFlushStub,
-      populate: emPopulateStub,
     } as unknown as EntityManager<MySqlDriver>
 
     const emailsJobProducer = {
@@ -65,6 +66,7 @@ describe('user service tests', () => {
       find: userRepoFindStub,
       findOne: userRepoFindOneStub,
       findOneOrFail: userRepoFindOneOrFailStub,
+      populate: userRepoPopulateStub,
     } as unknown as UserRepository
 
     emTransactionalStub.callsFake(async callback => {
@@ -395,7 +397,7 @@ describe('user service tests', () => {
     })
   })
 
-  describe('#getAdminUserDetails', () => {
+  describe('#getUserDetailsById by Admin', () => {
     const buildUser = (extras: { sso_enabled: boolean | null }): User =>
       ({
         id: 99,
@@ -431,20 +433,20 @@ describe('user service tests', () => {
 
     beforeEach(() => {
       userRepoFindOneOrFailStub.reset()
-      emPopulateStub.reset()
+      userRepoPopulateStub.reset()
       emFlushStub.reset()
       platformClientGetSSOIdStub.reset()
-      emPopulateStub.resolves(undefined)
+      userRepoPopulateStub.resolves(undefined)
       emFlushStub.resolves(undefined)
     })
 
     it('lazy-backfills sso_enabled when null and persists', async () => {
       const user = buildUser({ sso_enabled: null })
-      userRepoFindOneOrFailStub.resolves(user)
+      userRepoFindOneStub.resolves(user)
       platformClientGetSSOIdStub.resolves({ SSOId: 'idp-okta-123' })
 
       const userService = createUserService()
-      const dto = await userService.getAdminUserDetails(99)
+      const dto = (await userService.getUserDetailsById(99, true)) as AdminUserDetailsDTO
 
       expect(platformClientGetSSOIdStub.calledOnceWithExactly({ id: 'user-sso.user' })).to.equal(true)
       expect(user.extras?.sso_enabled).to.equal(true)
@@ -454,11 +456,11 @@ describe('user service tests', () => {
 
     it('records non-SSO users when platform returns empty SSOId', async () => {
       const user = buildUser({ sso_enabled: null })
-      userRepoFindOneOrFailStub.resolves(user)
+      userRepoFindOneStub.resolves(user)
       platformClientGetSSOIdStub.resolves({ SSOId: '' })
 
       const userService = createUserService()
-      const dto = await userService.getAdminUserDetails(99)
+      const dto = (await userService.getUserDetailsById(99, true)) as AdminUserDetailsDTO
 
       expect(user.extras?.sso_enabled).to.equal(false)
       expect(emFlushStub.callCount).to.equal(1)
@@ -467,10 +469,10 @@ describe('user service tests', () => {
 
     it('skips platform call when sso_enabled is already set', async () => {
       const user = buildUser({ sso_enabled: false })
-      userRepoFindOneOrFailStub.resolves(user)
+      userRepoFindOneStub.resolves(user)
 
       const userService = createUserService()
-      const dto = await userService.getAdminUserDetails(99)
+      const dto = (await userService.getUserDetailsById(99, true)) as AdminUserDetailsDTO
 
       expect(platformClientGetSSOIdStub.callCount).to.equal(0)
       expect(emFlushStub.callCount).to.equal(0)
@@ -479,11 +481,11 @@ describe('user service tests', () => {
 
     it('swallows platform errors and leaves sso_enabled untouched', async () => {
       const user = buildUser({ sso_enabled: null })
-      userRepoFindOneOrFailStub.resolves(user)
+      userRepoFindOneStub.resolves(user)
       platformClientGetSSOIdStub.rejects(new Error('platform unavailable'))
 
       const userService = createUserService()
-      const dto = await userService.getAdminUserDetails(99)
+      const dto = (await userService.getUserDetailsById(99, true)) as AdminUserDetailsDTO
 
       expect(user.extras?.sso_enabled).to.equal(null)
       expect(emFlushStub.callCount).to.equal(0)

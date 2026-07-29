@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import queryString from 'query-string'
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Button } from '@/components/Button'
 import { CopyText } from '@/components/CopyText/CopyText'
@@ -11,6 +12,7 @@ import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
 import { Filler } from '@/components/Page/page.styles'
 import { type ITab, TabsSwitch } from '@/components/TabsSwitch'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
+import { UserDetailsDrawer } from '@/features/users/UserDetailsDrawer'
 import { theme } from '@/styles/theme'
 import { sanitizeFileName } from '@/utils/formatting'
 import { getBackPathNext } from '@/utils/getBackPath'
@@ -90,6 +92,7 @@ export const FileShow = ({
   homeContext?: HomeScopeContextValue
 }): React.ReactElement => {
   const { homeScope, setDisplayScope, isHome } = homeContext
+  const [isUserOpen, setIsUserOpen] = useState<boolean>(false)
   const user = useAuthUser()
   const location = useLocation()
   const { data: file, isLoading } = useQuery({
@@ -130,7 +133,6 @@ export const FileShow = ({
   const backPath = getBackPathNext({ spaceId: space?.id, location, resourceLocation: 'files', homeScope })
 
   const spaceLink = file.spaceId ? `/spaces/${file.spaceId}` : null
-  const userLink = file.addedByDxuser ? `/users/${file.addedByDxuser}` : '#'
   const filePermissions = normalizePermissions(file, user, space)
   const showLicensePending = file.fileLicense?.acceptanceStatus === 'pending'
   const originHref = getOriginHref(file.originObject)
@@ -222,9 +224,17 @@ export const FileShow = ({
             <MetadataItem>
               <MetadataKey>Added By</MetadataKey>
               <MetadataVal data-testid="file-added-by">
-                <Link target="_blank" to={userLink}>
-                  {file.addedBy}
-                </Link>
+                {!file.addedByDxuser?.startsWith('challenge.bot') ? (
+                  <button
+                    type="button"
+                    className={'inline-flex items-center gap-2 cursor-pointer text-[color:var(--c-link)]'}
+                    onClick={() => setIsUserOpen(true)}
+                  >
+                    {file.addedBy}
+                  </button>
+                ) : (
+                  file.addedBy
+                )}
               </MetadataVal>
             </MetadataItem>
 
@@ -300,6 +310,8 @@ export const FileShow = ({
 
       <Filler $size={40} />
       <TabsSwitch tabsConfig={tabsConfig} />
+
+      <UserDetailsDrawer userId={file.addedByUserId} open={isUserOpen} onClose={() => setIsUserOpen(false)} />
     </>
   )
 }

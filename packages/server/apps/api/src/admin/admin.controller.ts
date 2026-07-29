@@ -27,6 +27,7 @@ import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { AdminUserDetailsDTO } from '@shared/domain/user/dto/admin-user-details.dto'
 import { PendingUserDTO } from '@shared/domain/user/dto/pending-user.dto'
+import { UserGetParamsDTO } from '@shared/domain/user/dto/user-get-params.dto'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { UserService } from '@shared/domain/user/service/user.service'
 import { UserManagementService } from '@shared/domain/user/service/user-management.service'
@@ -76,9 +77,16 @@ export class AdminController {
     return this.userManagementService.paginatePendingUsers(query)
   }
 
+  @Get('/users/username/:dxuser')
+  async getUserByDxuser(@Param('dxuser') dxuser: string): Promise<AdminUserDetailsDTO> {
+    const userDetails = (await this.userService.getUserDetailsByDxuser(dxuser, true)) as AdminUserDetailsDTO
+    return userDetails
+  }
+
   @Get('/users/:id')
-  async getUserDetails(@Param('id', ParseIntPipe) id: number): Promise<AdminUserDetailsDTO> {
-    return await this.userService.getAdminUserDetails(id)
+  async getUserBasicInfo(@Param('id', ParseIntPipe) id: number): Promise<AdminUserDetailsDTO> {
+    const userDetails = (await this.userService.getUserDetailsById(id, true)) as AdminUserDetailsDTO
+    return userDetails
   }
 
   @HttpCode(204)

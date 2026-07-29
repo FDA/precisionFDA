@@ -28,6 +28,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { StringUtils } from '@shared/utils/string.utils'
 import { AdminUserDetailsDTO } from '../dto/admin-user-details.dto'
+import { UserBasicInfoDTO } from '../dto/user-basic-info.dto'
 import { USER_ERRORS } from '../user.errors'
 
 @Injectable()
@@ -207,27 +208,38 @@ export class UserService {
     return [...new Set(users.map(user => user.dxuser))].sort()
   }
 
-  async getAdminUserDetails(id: number): Promise<AdminUserDetailsDTO> {
-    const user = await this.userRepo.findOneOrFail({ id })
-    await this.em.populate(user, [
-      'organization',
-      'organization.admin',
-      'adminMemberships',
-      'adminMemberships.adminGroup',
-    ])
-
-    user.extras ??= new UserExtras()
-    if (user.extras.sso_enabled === null || user.extras.sso_enabled === undefined) {
-      try {
-        const response = await this.platformClient.getSSOId({ id: user.dxid })
-        user.extras.sso_enabled = Boolean(response.SSOId)
-        await this.em.flush()
-      } catch (error) {
-        this.logger.warn(`Failed to fetch SSO id for user ${user.dxuser}: ${error}`)
-      }
+  async getUserDetailsByDxuser(
+    dxuser: string,
+    isSiteAdminRequest: boolean = false,
+  ): Promise<UserBasicInfoDTO | AdminUserDetailsDTO> {
+    if (dxuser === config.platform.challengeBotUser) {
+      throw new InvalidStateError('User is not supported')
     }
 
-    return AdminUserDetailsDTO.fromEntity(user)
+    const user = await this.userRepo.findOne({ dxuser })
+
+    if (!user) throw new NotFoundError(`User not found: ${dxuser}`)
+
+    if (isSiteAdminRequest) {
+      return this.getAdminUserDetails(user)
+    }
+
+    return this.getBasicUserDetails(user)
+  }
+
+  async getUserDetailsById(
+    id: number,
+    isSiteAdminRequest: boolean = false,
+  ): Promise<UserBasicInfoDTO | AdminUserDetailsDTO> {
+    const user = await this.userRepo.findOne({ id })
+
+    if (!user) throw new NotFoundError(`User not found: ${id}`)
+
+    if (isSiteAdminRequest) {
+      return this.getAdminUserDetails(user)
+    }
+
+    return this.getBasicUserDetails(user)
   }
 
   async getUserInOrganization(userId: number, organizationId: number): Promise<User | null> {
@@ -330,5 +342,33 @@ export class UserService {
       }
     }
     return {}
+  }
+
+  private async getBasicUserDetails(user: User): Promise<UserBasicInfoDTO> {
+    await this.userRepo.populate(user, ['organization', 'organization.admin'])
+
+    return UserBasicInfoDTO.fromEntity(user)
+  }
+
+  private async getAdminUserDetails(user: User): Promise<AdminUserDetailsDTO> {
+    await this.userRepo.populate(user, [
+      'organization',
+      'organization.admin',
+      'adminMemberships',
+      'adminMemberships.adminGroup',
+    ])
+
+    user.extras ??= new UserExtras()
+    if (user.extras.sso_enabled === null || user.extras.sso_enabled === undefined) {
+      try {
+        const response = await this.platformClient.getSSOId({ id: user.dxid })
+        user.extras.sso_enabled = Boolean(response.SSOId)
+        await this.em.flush()
+      } catch (error) {
+        this.logger.warn(`Failed to fetch SSO id for user ${user.dxuser}: ${error}`)
+      }
+    }
+
+    return AdminUserDetailsDTO.fromEntity(user)
   }
 }
