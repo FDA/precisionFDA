@@ -45,7 +45,7 @@ module Sortable
   # Manually sort array in direct/reverse order by sort_fields.
   # @param array input arrays of objects for sort.
   # @return sorted array.
-  def sort_array_by_fields(array, default_order = "launched_on")
+  def sort_array_by_fields(array, default_order = "created_at")
     sort_key = params[:order_by] || default_order
     sort_by = self.class::SORT_FIELDS[sort_key]
 
@@ -67,9 +67,9 @@ module Sortable
   end
 
   # Prepare Order/OrderDirection pair from params (only allowed values).
-  # @return { order => order_dir }, { :launched_on => 'DESC' }
+  # @return { order => order_dir }, { :created_at => 'DESC' }
   #   if no param values provided.
-  def order_from_params(default_order = "launched_on")
+  def order_from_params(default_order = "created_at")
     order_by_key = params[:order_by].presence_in(ORDER_FIELDS.keys) || default_order
     order_dir = order_direction(params[:order_dir])
     order_query(ORDER_FIELDS[order_by_key], order_dir, ORDER_FIELD_VALUES)
