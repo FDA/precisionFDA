@@ -1,6 +1,6 @@
-import { http, HttpResponse } from 'msw'
-import { FetchExecutionsQuery } from '../../features/executions/executions.api'
-import { IExecution } from '../../features/executions/executions.types'
+import { HttpResponse, http } from 'msw'
+import type { FetchExecutionsQuery } from '../../features/executions/executions.api'
+import type { IExecution, IJob } from '../../features/executions/executions.types'
 
 export const mockRunningExecution: IExecution = {
   id: 1,
@@ -105,6 +105,199 @@ export const mockRunningExecution2: IExecution = {
 }
 
 export const mockExecutionsForTerminate = [mockRunningExecution, mockRunningExecution2]
+
+export const mockSelectJobs: IJob[] = [
+  {
+    id: 4101,
+    uid: 'job-GATK4xWgsNA12878',
+    className: 'job',
+    fa_class: 'fa-cogs',
+    scope: 'private',
+    path: '/home/jobs/job-GATK4xWgsNA12878',
+    owned: true,
+    editable: true,
+    accessible: true,
+    file_path: null,
+    parent_folder_name: null,
+    public: false,
+    private: true,
+    in_space: false,
+    space_private: false,
+    space_public: false,
+    title: 'GATK4 germline variant calling - NA12878 WGS trio',
+    user: { dxuser: 'lvoss', full_name: 'Dr. Leon Voss' },
+    org: { name: 'Precision Genomics Lab', handle: 'precision_genomics' },
+  },
+  {
+    id: 4102,
+    uid: 'job-BwaMemTumorNormalPanel',
+    className: 'job',
+    fa_class: 'fa-cogs',
+    scope: 'private',
+    path: '/home/jobs/job-BwaMemTumorNormalPanel',
+    owned: true,
+    editable: true,
+    accessible: true,
+    file_path: null,
+    parent_folder_name: null,
+    public: false,
+    private: true,
+    in_space: false,
+    space_private: false,
+    space_public: false,
+    title: 'BWA-MEM alignment for tumor-normal 500 gene panel',
+    user: { dxuser: 'lvoss', full_name: 'Dr. Leon Voss' },
+    org: { name: 'Precision Genomics Lab', handle: 'precision_genomics' },
+  },
+  {
+    id: 4103,
+    uid: 'job-DeepVariantRareDisease',
+    className: 'job',
+    fa_class: 'fa-cogs',
+    scope: 'public',
+    path: '/home/jobs/job-DeepVariantRareDisease',
+    owned: false,
+    editable: false,
+    accessible: true,
+    file_path: null,
+    parent_folder_name: null,
+    public: true,
+    private: false,
+    in_space: false,
+    space_private: false,
+    space_public: false,
+    title: 'DeepVariant benchmarking on rare disease exomes',
+    user: { dxuser: 'mchen', full_name: 'Mira Chen' },
+    org: { name: 'Open Variant Consortium', handle: 'open_variant' },
+  },
+  {
+    id: 4104,
+    uid: 'job-RnaSeqImmuneResponse',
+    className: 'job',
+    fa_class: 'fa-cogs',
+    scope: 'public',
+    path: '/home/jobs/job-RnaSeqImmuneResponse',
+    owned: false,
+    editable: false,
+    accessible: true,
+    file_path: null,
+    parent_folder_name: null,
+    public: true,
+    private: false,
+    in_space: false,
+    space_private: false,
+    space_public: false,
+    title: 'RNA-seq differential expression in immune response cohort',
+    user: { dxuser: 'skhan', full_name: 'Samira Khan' },
+    org: { name: 'Transcriptomics Core', handle: 'tx_core' },
+  },
+  {
+    id: 4105,
+    uid: 'job-CramJointGenotyping',
+    className: 'job',
+    fa_class: 'fa-cogs',
+    scope: 'space-101',
+    path: '/spaces/101/jobs/job-CramJointGenotyping',
+    owned: false,
+    editable: true,
+    accessible: true,
+    file_path: null,
+    parent_folder_name: null,
+    public: false,
+    private: false,
+    in_space: true,
+    space_private: true,
+    space_public: false,
+    title: 'Joint genotyping of CRAM cohort - pharmacogenomics study',
+    user: { dxuser: 'arodriguez', full_name: 'Ana Rodriguez' },
+    org: { name: 'Clinical Sequencing Network', handle: 'clinseq_net' },
+  },
+  {
+    id: 4106,
+    uid: 'job-CnvExomePediatricCancer',
+    className: 'job',
+    fa_class: 'fa-cogs',
+    scope: 'space-101',
+    path: '/spaces/101/jobs/job-CnvExomePediatricCancer',
+    owned: false,
+    editable: true,
+    accessible: true,
+    file_path: null,
+    parent_folder_name: null,
+    public: false,
+    private: false,
+    in_space: true,
+    space_private: true,
+    space_public: false,
+    title: 'Exome CNV calling for pediatric cancer samples',
+    user: { dxuser: 'lvoss', full_name: 'Dr. Leon Voss' },
+    org: { name: 'Clinical Sequencing Network', handle: 'clinseq_net' },
+  },
+  {
+    id: 4107,
+    uid: 'job-LongReadSvDiscovery',
+    className: 'job',
+    fa_class: 'fa-cogs',
+    scope: 'space-202',
+    path: '/spaces/202/jobs/job-LongReadSvDiscovery',
+    owned: false,
+    editable: true,
+    accessible: true,
+    file_path: null,
+    parent_folder_name: null,
+    public: false,
+    private: false,
+    in_space: true,
+    space_private: true,
+    space_public: false,
+    title: 'Long-read structural variant discovery in repeat expansions',
+    user: { dxuser: 'jpatel', full_name: 'Jules Patel' },
+    org: { name: 'Neurogenomics Research Space', handle: 'neurogenomics' },
+  },
+  {
+    id: 4108,
+    uid: 'job-QcFastqMultiSitePilot',
+    className: 'job',
+    fa_class: 'fa-cogs',
+    scope: 'space-202',
+    path: '/spaces/202/jobs/job-QcFastqMultiSitePilot',
+    owned: false,
+    editable: true,
+    accessible: true,
+    file_path: null,
+    parent_folder_name: null,
+    public: false,
+    private: false,
+    in_space: true,
+    space_private: true,
+    space_public: false,
+    title: 'FASTQ QC aggregation for multi-site sequencing pilot',
+    user: { dxuser: 'ekim', full_name: 'Eun Kim' },
+    org: { name: 'Neurogenomics Research Space', handle: 'neurogenomics' },
+  },
+]
+
+export const selectJobModalHandlers = [
+  http.post('/api/list_jobs', async ({ request }) => {
+    const body = (await request.json()) as { search_string?: string; scopes?: IJob['scope'][] }
+    const searchText = body.search_string?.toLowerCase().trim() ?? ''
+    const scopes = body.scopes ?? []
+
+    const jobs = mockSelectJobs.filter(job => {
+      const matchesScope = scopes.length === 0 || scopes.includes(job.scope)
+      const matchesSearch =
+        searchText.length === 0 ||
+        job.title.toLowerCase().includes(searchText) ||
+        job.uid.toLowerCase().includes(searchText) ||
+        job.user.full_name.toLowerCase().includes(searchText) ||
+        job.org.name.toLowerCase().includes(searchText)
+
+      return matchesScope && matchesSearch
+    })
+
+    return HttpResponse.json(jobs)
+  }),
+]
 
 export const mockWorkstationExecution: IExecution = {
   id: 3,
@@ -252,6 +445,7 @@ const workflowExecution: IExecution = {
 }
 
 export const executionsMocks = [
+  ...selectJobModalHandlers,
   http.post('/api/jobs/terminate', () => {
     return HttpResponse.json({
       message: {
@@ -262,7 +456,7 @@ export const executionsMocks = [
   http.post('/api/workstations/:id/snapshot', ({ params }) => {
     return HttpResponse.json({
       snapshot: {
-        id: parseInt(params.id as string),
+        id: parseInt(params.id as string, 10),
         name: 'test-snapshot',
         created_at: '2024-01-01T12:00:00Z',
       },

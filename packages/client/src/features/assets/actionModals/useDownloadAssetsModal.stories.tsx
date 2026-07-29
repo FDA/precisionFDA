@@ -1,9 +1,8 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useEffect } from 'react'
-import { WithListData } from '../../../stories/helpers'
+import { mockSelectAssets } from '../../../mocks/handlers/assets.handlers'
 import { StorybookProviders } from '../../../stories/StorybookProviders'
-import { fetchAssets } from '../assets.api'
-import { IAsset } from '../assets.types'
+import type { IAsset } from '../assets.types'
 import { useDownloadAssetsModal } from './useDownloadAssetsModal'
 
 const meta: Meta = {
@@ -21,23 +20,26 @@ type Props = {
 }
 type Story = StoryObj<Props>
 
+const assets = mockSelectAssets.map(asset => ({
+  ...asset,
+  links: {
+    ...asset.links,
+    show: `/home/assets/${asset.uid}`,
+    download: asset.links.download ?? `/api/assets/${asset.uid}/download`,
+  },
+}))
+
 const DownloadAssetsModalWrapper = (props: Props) => {
   const { modalComp, setShowModal } = useDownloadAssetsModal(props.data)
 
   useEffect(() => {
     setShowModal(true)
-  }, [])
+  }, [setShowModal])
   return modalComp
 }
 
 export const DownloadAssetsModal: Story = {
-  render: () => {
-    return (
-      <WithListData resource="assets" fetchList={fetchAssets}>
-        {({ data }) => data && <DownloadAssetsModalWrapper data={data?.assets} />}
-      </WithListData>
-    )
-  },
+  render: () => <DownloadAssetsModalWrapper data={assets} />,
 }
 
 export default meta

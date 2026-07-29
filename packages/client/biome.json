@@ -1,9 +1,13 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
   "root": false,
   "extends": "//",
   "files": {
-    "includes": ["src/**", "!src/features/lexi", "biome.json"]
+    "includes": [
+      "src/**",
+      "!src/features/lexi",
+      "biome.json"
+    ]
   },
   "linter": {
     "rules": {

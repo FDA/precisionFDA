@@ -1,15 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { ColumnDef } from '@tanstack/react-table'
-import React from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
 import { Tooltip } from 'react-tooltip'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
-import { propertiesColumnDef } from '../../components/Table/selectColumnDef'
-import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
-import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
-import { IAsset } from './assets.types'
 import NumberRangeFilter, { numberRangeFilterFn } from '../../components/Table/components/NumberRangeFilter'
+import { propertiesColumnDef, selectColumnDef } from '../../components/Table/selectColumnDef'
+import { StyledTagItem, StyledTags } from '../../components/Tags'
+import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
+import type { IAsset } from './assets.types'
 
 const isUnclosedAsset = (asset: IAsset): boolean => asset.state === 'open' || asset.state === 'closing'
 
@@ -24,6 +23,7 @@ export const useAssetColumns = ({
 }): ColumnDef<IAsset>[] => {
   const queryClient = useQueryClient()
   return [
+    selectColumnDef<IAsset>(),
     {
       header: 'Name',
       accessorKey: 'name',
@@ -40,7 +40,9 @@ export const useAssetColumns = ({
             <FileZipIcon height={14} />
             {c.row.original.name}
           </StyledNameCell>
-          {isUnclosedAsset(c.row.original) && <Tooltip id={`assetNameTooltip${c.row.original.uid}`} style={{ zIndex: 3 }} />}
+          {isUnclosedAsset(c.row.original) && (
+            <Tooltip id={`assetNameTooltip${c.row.original.uid}`} style={{ zIndex: 3 }} />
+          )}
         </>
       ),
     },
@@ -68,7 +70,7 @@ export const useAssetColumns = ({
             resource="assets"
             featured={props.cell.row.original.featured}
             uids={[props.cell.row.original.uid]}
-            onSuccess={() => queryClient.invalidateQueries({ queryKey: ['assets']})}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ['assets'] })}
           />
         </div>
       ),

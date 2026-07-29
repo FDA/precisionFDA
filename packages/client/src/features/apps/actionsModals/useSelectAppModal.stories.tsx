@@ -1,9 +1,26 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { HttpResponse, http } from 'msw'
 import { useEffect } from 'react'
+import { mockSelectApps } from '../../../mocks/handlers/apps.handlers'
 import { StorybookProviders } from '../../../stories/StorybookProviders'
-import { DialogType } from '../../home/types'
-import { IApp } from '../apps.types'
+import type { DialogType } from '../../home/types'
+import type { IApp } from '../apps.types'
 import { useSelectAppModal } from './useSelectAppModal'
+
+const longSelectAppList = Array.from({ length: 18 }, (_, index) => {
+  const app = mockSelectApps[index % mockSelectApps.length]
+  const appNumber = index + 1
+
+  return {
+    ...app,
+    id: appNumber,
+    uid: `${app.uid}-${appNumber}`,
+    dxid: `${app.dxid}-${appNumber}`,
+    name: `${app.name}-${appNumber}`,
+    title: `${app.title} ${appNumber}`,
+    org: typeof app.org === 'string' ? { handle: app.org.toLowerCase().replaceAll(' ', '-'), name: app.org } : app.org,
+  }
+})
 
 const meta: Meta = {
   title: 'Modals/Apps',
@@ -14,6 +31,11 @@ const meta: Meta = {
       </StorybookProviders>
     ),
   ],
+  parameters: {
+    msw: {
+      handlers: [http.post('/api/list_apps', () => HttpResponse.json(longSelectAppList))],
+    },
+  },
 }
 
 type Props = {

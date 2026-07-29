@@ -69,6 +69,8 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
     staleTime,
   })
 
+  const hasSubfolders = !isExpanded || isLoading || children.length > 0
+
   const handleToggle = useCallback(() => {
     setIsExpanded(prev => !prev)
   }, [])
@@ -82,10 +84,10 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       handleSelect()
-    } else if (e.key === 'ArrowRight' && !isExpanded) {
+    } else if (e.key === 'ArrowRight' && !isExpanded && hasSubfolders) {
       e.preventDefault()
       handleToggle()
-    } else if (e.key === 'ArrowLeft' && isExpanded) {
+    } else if (e.key === 'ArrowLeft' && isExpanded && hasSubfolders) {
       e.preventDefault()
       handleToggle()
     }
@@ -100,7 +102,7 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
     <div>
       <div
         role="treeitem"
-        aria-expanded={isExpanded}
+        aria-expanded={hasSubfolders ? isExpanded : undefined}
         aria-selected={isSelected}
         tabIndex={0}
         className={cn(
@@ -112,21 +114,25 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
         onClick={handleSelect}
         onKeyDown={handleKeyDown}
       >
-        <button
-          type="button"
-          className="text-muted-foreground hover:text-foreground flex size-4 shrink-0 items-center justify-center rounded-sm"
-          onClick={handleClickFolder}
-          tabIndex={-1}
-          aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
-        >
-          {isLoading ? (
-            <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-          ) : isExpanded ? (
-            <ChevronDown className="size-3.5" />
-          ) : (
-            <ChevronRight className="size-3.5" />
-          )}
-        </button>
+        {hasSubfolders ? (
+          <button
+            type="button"
+            className="text-muted-foreground hover:text-foreground flex size-4 shrink-0 items-center justify-center rounded-sm"
+            onClick={handleClickFolder}
+            tabIndex={-1}
+            aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
+          >
+            {isLoading ? (
+              <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : isExpanded ? (
+              <ChevronDown className="size-3.5" />
+            ) : (
+              <ChevronRight className="size-3.5" />
+            )}
+          </button>
+        ) : (
+          <span className="size-4 shrink-0" aria-hidden />
+        )}
         {isExpanded ? (
           <FolderOpen className="text-muted-foreground size-4 shrink-0" />
         ) : (

@@ -1,14 +1,14 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import React from 'react'
+import type { PropsWithChildren } from 'react'
 import { BrowserRouter } from 'react-router'
 import '../styles/tailwind.css'
 import '../styles/variables.css'
 import '../styles/app-globals.css'
-import GlobalStyle from '../styles/global'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
-import { ThemeProvider } from '../utils/ThemeContext'
 import { FileUploadModalProvider } from '../features/files/actionModals/useFileUploadModal/FileUploadModalProvider'
+import GlobalStyle from '../styles/global'
 import { OnlineStatusProvider } from '../utils/OnlineStatusContext'
+import { ThemeProvider } from '../utils/ThemeContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,7 +19,11 @@ const queryClient = new QueryClient({
   },
 })
 
-export function StorybookProviders({ children }: React.PropsWithChildren) {
+export function resetStorybookQueryClient() {
+  queryClient.clear()
+}
+
+export function StorybookProviders({ children }: PropsWithChildren) {
   return (
     <ThemeProvider>
       <BrowserRouter>

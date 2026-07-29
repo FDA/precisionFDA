@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import clsx from 'clsx'
-import { Check, X } from 'lucide-react'
+import { Check, Layers, PanelRightIcon, Search, X } from 'lucide-react'
 import React, {
   createContext,
   type Dispatch,
@@ -14,22 +13,30 @@ import React, {
 } from 'react'
 import { Tooltip } from 'react-tooltip'
 import { FolderTree, type FolderTreeNode, type FolderTreePath } from '@/components/FolderTree'
-import { Modal, ModalHeaderTop } from '@/components/Modal'
 import { NumberPagination } from '@/components/Pagination/NumberPagination'
 import { useDebounce } from '@/components/Table/useDebounce'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogHeaderClose,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useRunJobFilesContext } from '@/features/apps/run/useRunJobFilesContext'
 import type { HomeScopeContextValue } from '@/features/home/HomeScopeContext'
 import { useUnifiedRouteContext } from '@/routes/resource-pages'
-import { Checkbox } from '../../../components/CheckboxNext'
+import { cn } from '@/utils/cn'
+import { FileIcon } from '../../../components/icons/FileIcon'
 import { GlobeIcon } from '../../../components/icons/GlobeIcon'
 import { LockIcon } from '../../../components/icons/LockIcon'
 import { Loader } from '../../../components/Loader'
-import { Radio } from '../../../components/Radio'
-import { ButtonBadge, Sticky } from '../../actionModals/action-modals.styles'
 import { noAccessText } from '../../files/file.utils'
 import type { DialogType, ScopeContext, ServerScope } from '../../home/types'
-import { ButtonRow, Footer } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
 import { spacesListRequest } from '../../spaces/spaces.api'
 import { findSpaceTypeIcon } from '../../spaces/useSpacesColumns'
@@ -40,14 +47,13 @@ import { useFetchFilesByUIDQuery } from '../query/useFetchFilesByUIDQuery'
 
 interface FileSelectTabsProps {
   type: DialogType
-  setShowModal: (show: boolean) => void
-  uids: string[]
   selectedFiles: IFile[]
   setSelectedFiles: Dispatch<SetStateAction<IFile[]>>
   defaultScope?: ScopeContext
   allowedScopes?: string[]
   failedFiles: string[]
   validateLicense?: boolean
+  showSelectedPanel: boolean
 }
 
 interface FileSelectContextValue {
@@ -98,79 +104,80 @@ const extractHomeContext = (
   }
 }
 
+const SidebarSection = ({ title, children }: { title: string; children: React.ReactNode }): JSX.Element => (
+  <div className="mb-3">
+    <div className="text-muted-foreground mb-1 px-2 text-[11px] font-semibold tracking-wide uppercase">{title}</div>
+    {children}
+  </div>
+)
+
 const ScopeItem = ({
+  className,
   name,
   scope,
   icon,
+  isActive,
   isSelected,
   onSelectScope,
 }: {
   name: string
-  scope: string
+  scope?: string
   icon: React.ReactNode
+  isActive?: boolean
   isSelected?: boolean
   onSelectScope: () => void
+  className?: string
 }): JSX.Element => {
-  const styles = isSelected
-    ? {
-        row: 'border-l-[3px] border-l-[var(--primary-500)] bg-[var(--primary-50)] pl-[13px] text-[var(--primary-700)]',
-        icon: 'text-[var(--primary-500)]',
-        name: 'text-[var(--primary-700)]',
-        scope: 'text-[var(--primary-400)]',
-      }
-    : {
-        row: 'pl-4 hover:bg-[var(--c-dropdown-hover-bg)]',
-        icon: 'text-[var(--c-text-400)]',
-        name: '',
-        scope: 'text-[var(--c-text-400)]',
-      }
+  const selected = isActive || isSelected
 
   return (
     <button
       type="button"
-      className={clsx(
-        'flex w-full cursor-pointer items-center gap-2 border-t border-[var(--c-layout-border)] py-3 pr-4 text-left text-sm transition-colors',
-        styles.row,
+      className={cn(
+        'flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1 text-left text-sm transition-colors',
+        selected ? 'bg-accent text-accent-foreground font-medium' : 'hover:bg-accent/60 text-foreground',
+        className,
       )}
       onClick={onSelectScope}
     >
-      <span className={clsx('flex shrink-0 items-center', styles.icon)}>{icon}</span>
-      <span className={clsx('font-semibold', styles.name)}>{name}</span>
-      {isSelected && (
-        <span className="ml-2 inline-flex items-center gap-0.5 rounded-full border border-[var(--primary-300)] bg-[var(--primary-100)] px-2 py-0.5 text-[10px] font-semibold text-[var(--primary-600)]">
-          <Check width={9} height={9} strokeWidth={2.5} />
-          selected
-        </span>
-      )}
-      <span className={clsx('ml-auto truncate text-xs', styles.scope)}>{scope}</span>
+      <span className="text-muted-foreground flex size-4 shrink-0 items-center justify-center">{icon}</span>
+      <span className="min-w-0 flex-1 truncate">{name}</span>
+      {scope && <span className="text-muted-foreground hidden truncate text-xs sm:inline">{scope}</span>}
+      {isSelected && <Check className="text-primary size-3.5 shrink-0" strokeWidth={3} />}
     </button>
   )
 }
 
 const SelectedFile = ({ file, onRemove }: { file: IFile; onRemove: (file: IFile) => void }): JSX.Element => {
+  const pathLabel = file.folderPath
+    ? `/${file.folderPath.map(f => f.name).join('/')}`
+    : file.location
+      ? file.location
+      : file.scope
+
   return (
-    <li className="group hover:bg-accent text-smborder-[var(--c-layout-border)] relative rounded border px-3 py-2">
+    <li className="group hover:bg-accent/60 flex items-start gap-2 rounded-sm px-2 py-1.5">
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm flex items-center gap-1">
+          <FileIcon height={14} />
+          {file.name}
+        </div>
+        <div className="text-muted-foreground truncate font-mono text-[11px]">{file.uid}</div>
+        {pathLabel && <div className="text-muted-foreground truncate text-[11px]">{pathLabel}</div>}
+      </div>
       <button
         type="button"
-        className="absolute top-1.5 right-1.5 rounded p-0.5 text-[var(--c-text-400)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-500 cursor-pointer"
+        className="text-muted-foreground hover:text-destructive mt-0.5 shrink-0 rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
         onClick={() => onRemove(file)}
         aria-label={`Remove ${file.name}`}
       >
-        <X width={12} height={12} />
+        <X className="size-3.5" />
       </button>
-      <div className="mr-4 truncate font-semibold">{file.name}</div>
-      <div className="mt-0.5 truncate text-xs text-[var(--c-text-400)]">{file.uid}</div>
-      <div className="mt-0.5 truncate text-xs text-[var(--c-text-400)]">{file.location ?? file.scope}</div>
-      {file.folderPath && (
-        <div className="mt-0.5 truncate text-xs text-[var(--c-text-400)]">
-          Path: /{file.folderPath.map(f => f.name).join('/')}
-        </div>
-      )}
     </li>
   )
 }
 
-const SelectedFilesPanel = ({ failedFiles, onClose }: { failedFiles: string[]; onClose: () => void }): JSX.Element => {
+const SelectedFilesPanel = ({ failedFiles }: { failedFiles: string[] }): JSX.Element => {
   const { selectedFiles, setSelectedFiles } = useFileSelectContext()
 
   const handleRemove = (file: IFile): void => {
@@ -178,34 +185,24 @@ const SelectedFilesPanel = ({ failedFiles, onClose }: { failedFiles: string[]; o
   }
 
   return (
-    <div className="flex w-72 shrink-0 flex-col border-l border-[var(--c-layout-border)]">
-      <div className="flex flex-col justify-between gap-2 border-b border-[var(--c-layout-border)] px-2 py-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold">Selected ({selectedFiles.length})</span>
-          <button type="button" className="text-xs text-[var(--primary-500)] cursor-pointer" onClick={onClose}>
-            Close
-          </button>
+    <div className="bg-muted/95 absolute top-0 right-0 bottom-14 z-20 flex w-[min(16rem,calc(100vw-1rem))] shrink-0 flex-col border-l shadow-lg lg:relative lg:inset-auto lg:w-64 lg:bg-muted/20 lg:shadow-none">
+      {failedFiles.length > 0 && (
+        <div className="border-b border-(--warning-400) bg-(--warning-50) px-3 py-2">
+          <div className="mb-1 text-xs font-medium text-(--warning-600)">{noAccessText.multi}</div>
+          <ul className="space-y-0.5">
+            {failedFiles.map(uid => (
+              <li key={uid} className="text-muted-foreground truncate font-mono text-[11px]">
+                {uid}
+              </li>
+            ))}
+          </ul>
         </div>
-        {failedFiles.length > 0 && (
-          <div className="rounded border border-[var(--warning-400)] bg-[var(--warning-50)] px-3 py-2">
-            <div className="mb-1 text-sm font-semibold text-[var(--warning-600)]">{noAccessText.multi}</div>
-            <ul className="space-y-1">
-              {failedFiles.map(uid => (
-                <li key={uid} className="flex items-start justify-between text-sm">
-                  <div className="min-w-0">
-                    <div className="">{uid}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-      <div className="flex-1 overflow-y-auto p-2">
+      )}
+      <div className="flex-1 overflow-y-auto py-1">
         {selectedFiles.length === 0 ? (
-          <div className="p-4 text-center text-sm text-[var(--c-text-400)]">No files selected</div>
+          <div className="text-muted-foreground px-3 py-6 text-center text-xs">Select files from the list</div>
         ) : (
-          <ul className="mb-3 space-y-1">
+          <ul>
             {selectedFiles.map(file => (
               <SelectedFile key={file.uid} file={file} onRemove={handleRemove} />
             ))}
@@ -217,8 +214,8 @@ const SelectedFilesPanel = ({ failedFiles, onClose }: { failedFiles: string[]; o
 }
 
 const ScopeDivider = ({ label }: { label: string }): JSX.Element => (
-  <div className="border-[var(--c-layout-border)] bg-transparent px-4 py-2">
-    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--c-text-400)]">{label}</span>
+  <div className="border-layout-border bg-transparent px-2 py-2">
+    <span className="text-(--c-text-400) text-[10px] font-bold uppercase tracking-wider">{label}</span>
   </div>
 )
 
@@ -290,20 +287,21 @@ const ScopeTable = ({
         }))
 
   return (
-    <>
-      <Sticky className={'flex flex-col gap-0'}>
-        <div className="flex items-center justify-between gap-2 px-4 py-2">
-          <input
-            type="text"
-            placeholder="Filter spaces by name..."
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="border-b px-3 py-2">
+        <InputGroup className="h-8">
+          <InputGroupAddon>
+            <Search className="size-3.5" />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder="Filter scopes..."
             value={spaceFilter}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSpaceFilter(e.target.value)}
-            className="w-80 rounded border border-[var(--c-layout-border)] px-3 py-1.5 text-sm outline-none focus:border-[var(--primary-400)]"
+            className="text-sm"
           />
-        </div>
-      </Sticky>
-      <div className="flex-1 overflow-y-auto">
-        {/* Pinned section — always visible */}
+        </InputGroup>
+      </div>
+      <div className="flex-1 overflow-y-auto px-1 py-2">
         {pinnedItems.length > 0 && (
           <>
             <ScopeDivider label={`Pinned scopes (${pinnedItems.length})`} />
@@ -319,8 +317,6 @@ const ScopeTable = ({
             ))}
           </>
         )}
-
-        {/* Other spaces section */}
         {isSpacesLoading ? (
           <div className="p-4">
             <Loader />
@@ -339,14 +335,14 @@ const ScopeTable = ({
               />
             ))}
             {otherSpaceItems.length === 0 && (
-              <div className="px-4 py-6 text-center text-sm text-[var(--c-text-400)]">
-                {spaceFilter ? 'No spaces match your filter.' : 'No other spaces available.'}
+              <div className="text-muted-foreground px-2 py-6 text-center text-xs">
+                {spaceFilter ? 'No scopes match your filter.' : 'No other spaces available.'}
               </div>
             )}
           </>
         )}
       </div>
-    </>
+    </div>
   )
 }
 
@@ -365,15 +361,26 @@ const FileTable = ({
   const pageSize = 20
   const [nameFilter, setNameFilter] = useState('')
   const [uidFilter, setUidFilter] = useState('')
+  const [filterMode, setFilterMode] = useState<'name' | 'id'>('name')
 
   const debouncedNameFilter = useDebounce(nameFilter, 300)
   const debouncedUidFilter = useDebounce(uidFilter, 300)
-  const isFilteringFiles = debouncedNameFilter.length || debouncedUidFilter.length
+  const activeNameFilter = filterMode === 'name' ? debouncedNameFilter : ''
+  const activeUidFilter = filterMode === 'id' ? debouncedUidFilter : ''
+  const isFilteringFiles = activeNameFilter.length > 0 || activeUidFilter.length > 0
 
   const parsedFolderId = (folderId: string | null) => (folderId ? parseInt(folderId, 10) : 'null')
 
   const { data: folderFiles, isLoading: isFolderFilesLoading } = useQuery({
-    queryKey: ['folder-children-files', activeScope, selectedFolderId, page, debouncedNameFilter, debouncedUidFilter],
+    queryKey: [
+      'folder-children-files',
+      activeScope,
+      selectedFolderId,
+      page,
+      filterMode,
+      activeNameFilter,
+      activeUidFilter,
+    ],
     queryFn: () =>
       fetchAccessibleFiles({
         scope: activeScope,
@@ -381,15 +388,15 @@ const FileTable = ({
         folderId: isFilteringFiles > 0 ? undefined : parsedFolderId(selectedFolderId),
         type: ['UserFile'],
         filter: {
-          name: debouncedNameFilter || undefined,
+          name: activeNameFilter || undefined,
           states: ['closed'],
         },
         fields: {
           path: true,
         },
         uids:
-          debouncedUidFilter.length > 0
-            ? debouncedUidFilter.split(',').map(uid => uid.replace(/[%]/g, '').trim()) // strip unsupported wildcard char (%) before sending — server rejects them, so sanitize silently
+          activeUidFilter.length > 0
+            ? activeUidFilter.split(',').map(uid => uid.replace(/[%]/g, '').trim())
             : undefined,
         page,
         pageSize,
@@ -398,7 +405,7 @@ const FileTable = ({
 
   useEffect(() => {
     setPage(1)
-  }, [selectedFolderId, nameFilter, uidFilter])
+  }, [selectedFolderId, filterMode, nameFilter, uidFilter])
 
   const breadcrumbMetaPath = useMemo(
     () => folderPath.filter(p => p.id !== 'ROOT').map(p => ({ id: Number(p.id), name: p.name })),
@@ -433,128 +440,118 @@ const FileTable = ({
   const files = (folderFiles?.data ?? []) as IFile[]
 
   return (
-    <>
-      <Sticky className={'flex items-center justify-between gap-2 px-4 py-2'}>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="bg-background sticky top-0 z-10 space-y-2 border-b px-3 py-2">
         <FileBreadcrumb
           currentFolderId={selectedFolderId ? Number(selectedFolderId) : 0}
           basePath=""
           metaPath={breadcrumbMetaPath}
           onNavigate={handleBreadcrumbNavigate}
         />
-      </Sticky>
-      <div className="flex-1 overflow-y-auto">
-        <div>
-          {/* Header */}
-          <div
-            className="sticky top-0 z-10 grid w-full items-center gap-3 border-b border-[var(--c-layout-border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold text-[var(--c-text-500)]"
-            style={{ gridTemplateColumns: '40px 1fr 1fr' }}
-          >
-            <div />
-            <div>Name</div>
-            <div>ID</div>
-          </div>
-          {/* Filter row */}
-          <div
-            className="sticky top-[37px] z-10 grid w-full items-center gap-3 border-b border-[var(--c-layout-border)] bg-[var(--background)] px-4 py-1"
-            style={{ gridTemplateColumns: '40px 1fr 1fr' }}
-          >
-            <div />
-            <div>
-              <input
-                type="text"
-                placeholder="Filter name..."
-                autoComplete="off"
-                value={nameFilter}
-                onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-                  setNameFilter(evt.target.value)
-                }}
-                className="w-full border border-[var(--c-layout-border)] px-2 py-1 text-xs font-normal outline-none focus:border-[var(--primary-400)]"
-              />
-            </div>
-            <div>
-              <input
-                type="text"
-                placeholder="Filter by file ID(s), separate with commas..."
-                autoComplete="off"
-                value={uidFilter}
-                onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-                  setUidFilter(evt.target.value)
-                }}
-                className="w-full border border-[var(--c-layout-border)] px-2 py-1 text-xs font-normal outline-none focus:border-[var(--primary-400)]"
-              />
-            </div>
-          </div>
-          {/* Loading */}
-          {isFolderFilesLoading && (
-            <div className="flex items-center justify-center py-8">
-              <Loader />
-            </div>
-          )}
-          {/* Empty */}
-          {!isFolderFilesLoading && files.length === 0 && (
-            <div className="py-8 text-center text-sm text-[var(--c-text-400)]">No files found.</div>
-          )}
-          {/* Rows */}
-          {!isFolderFilesLoading &&
-            files.map(file => {
-              const isLicenseBlocked = validateLicense === true && file.fileLicense?.acceptanceStatus === 'pending'
-              return (
-                // biome-ignore lint/a11y/useSemanticElements: Custom CSS layout requires divs instead of native tags
-                <div
-                  key={file.uid}
-                  className={clsx(
-                    'grid w-full items-center gap-3 border-b border-[var(--c-layout-border-200)] px-4 py-1 transition-colors',
-                    isLicenseBlocked
-                      ? 'cursor-not-allowed opacity-50'
-                      : 'cursor-pointer hover:bg-[var(--c-dropdown-hover-bg)]',
-                    isFileSelected(file) && 'bg-[var(--primary-50)]',
-                  )}
-                  style={{
-                    gridTemplateColumns: '40px 1fr 1fr',
-                    minHeight: 44,
-                  }}
-                  onClick={() => {
-                    if (!isLicenseBlocked) toggleFile(file)
-                  }}
-                  role="row"
-                  tabIndex={isLicenseBlocked ? -1 : 0}
-                  aria-disabled={isLicenseBlocked}
-                  data-tooltip-id={isLicenseBlocked ? 'license-blocked-tooltip' : undefined}
-                  data-tooltip-content={
-                    isLicenseBlocked
-                      ? `License "${file.fileLicense?.title}" must be accepted before selecting this file`
-                      : undefined
-                  }
-                  onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-                    if (isLicenseBlocked) return
-                    if (e.key === ' ' || e.key === 'Enter') {
-                      e.preventDefault()
-                      toggleFile(file)
-                    }
-                  }}
-                >
-                  <div className="flex items-center justify-center">
-                    {type === 'radio' ? (
-                      <Radio checked={isFileSelected(file)} onChange={() => {}} />
-                    ) : (
-                      <Checkbox checked={isFileSelected(file)} onChange={() => {}} />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-[var(--c-link)]" title={file.name}>
-                      {file.name}
-                    </div>
-                  </div>
-                  <div className="truncate text-[13px] text-[var(--c-text-600)]" title={file.uid}>
-                    {file.uid}
-                  </div>
-                </div>
-              )
-            })}
-          <Tooltip id="license-blocked-tooltip" place="bottom" className="max-w-[90%] whitespace-normal break-words" />
-        </div>
+        <InputGroup className="h-8">
+          <InputGroupAddon className="gap-1 pr-1">
+            <span className="text-muted-foreground hidden px-1 text-xs font-normal sm:inline">Filter by</span>
+            <Tabs value={filterMode} onValueChange={value => setFilterMode(value as 'name' | 'id')} className="gap-0">
+              <TabsList className="h-7 rounded-md p-0.5">
+                <TabsTrigger value="name" className="px-2 py-0.5 text-xs">
+                  Name
+                </TabsTrigger>
+                <TabsTrigger value="id" className="px-2 py-0.5 text-xs">
+                  ID
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <span aria-hidden className="bg-border ml-1 h-5 w-px" />
+          </InputGroupAddon>
+          <InputGroupAddon className="pl-2">
+            <Search className="size-3.5" />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder={filterMode === 'name' ? 'Filter by name...' : 'Filter by file ID(s), comma-separated...'}
+            autoComplete="off"
+            value={filterMode === 'name' ? nameFilter : uidFilter}
+            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+              if (filterMode === 'name') {
+                setNameFilter(evt.target.value)
+              } else {
+                setUidFilter(evt.target.value)
+              }
+            }}
+            className="text-sm"
+          />
+        </InputGroup>
       </div>
-      <div className="px-2">
+
+      <div className="flex-1 overflow-y-auto" role="listbox" aria-multiselectable={type === 'checkbox'}>
+        {isFolderFilesLoading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader />
+          </div>
+        )}
+        {!isFolderFilesLoading && files.length === 0 && (
+          <div className="text-muted-foreground py-12 text-center text-sm">No files found</div>
+        )}
+        {!isFolderFilesLoading &&
+          files.map(file => {
+            const selected = isFileSelected(file)
+            const isLicenseBlocked = validateLicense === true && file.fileLicense?.acceptanceStatus === 'pending'
+            return (
+              <div
+                key={file.uid}
+                role="option"
+                aria-selected={selected}
+                className={cn(
+                  'flex cursor-pointer items-center gap-3 border-l-2 border-transparent px-3 py-1.5 transition-colors',
+                  isLicenseBlocked ? 'cursor-not-allowed opacity-50' : 'hover:bg-accent/50',
+                  selected && !isLicenseBlocked && 'border-l-primary bg-accent/70',
+                )}
+                onClick={() => {
+                  if (!isLicenseBlocked) toggleFile(file)
+                }}
+                tabIndex={isLicenseBlocked ? -1 : 0}
+                aria-disabled={isLicenseBlocked}
+                data-tooltip-id={isLicenseBlocked ? 'license-blocked-tooltip' : undefined}
+                data-tooltip-content={
+                  isLicenseBlocked
+                    ? `License "${file.fileLicense?.title}" must be accepted before selecting this file`
+                    : undefined
+                }
+                onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                  if (isLicenseBlocked) return
+                  if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault()
+                    toggleFile(file)
+                  }
+                }}
+              >
+                {type === 'checkbox' && (
+                  <Checkbox
+                    checked={selected}
+                    onCheckedChange={() => toggleFile(file)}
+                    onClick={event => event.stopPropagation()}
+                  />
+                )}
+
+                <div className="min-w-0 flex-1">
+                  <div className="wrap-break-word whitespace-normal text-sm">
+                    <span className="inline-block align-text-bottom">
+                      <FileIcon width={13} height={13} />
+                    </span>{' '}
+                    <span>{file.name}</span>
+                  </div>
+                  <div className="text-muted-foreground truncate font-mono text-[11px]">{file.uid}</div>
+                </div>
+              </div>
+            )
+          })}
+        <Tooltip
+          id="license-blocked-tooltip"
+          place="bottom"
+          className="max-w-[90%] whitespace-normal wrap-break-word"
+        />
+      </div>
+
+      <div className="flex h-14 shrink-0 items-center border-t px-2">
         <NumberPagination
           page={page}
           totalPages={folderFiles?.meta.totalPages ?? 1}
@@ -563,17 +560,11 @@ const FileTable = ({
           setPage={setPage}
         />
       </div>
-    </>
+    </div>
   )
 }
 
-const ScopeFolderTree = ({
-  activeScope,
-  activeScopeName,
-}: {
-  activeScope?: ServerScope
-  activeScopeName?: string
-}): JSX.Element => {
+const ScopeFolderTree = ({ activeScope }: { activeScope?: ServerScope }): JSX.Element => {
   const { selectedFolderId, setSelectedFolderId, setFolderPath } = useFolderSelectContext()
 
   const fetchFolders = useCallback(
@@ -600,30 +591,28 @@ const ScopeFolderTree = ({
   )
 
   return (
-    <>
-      <div className="mb-1 flex items-center gap-1 px-2 text-xs font-semibold text-[var(--c-text-500)]">
-        {activeScope && <span className="truncate">{activeScopeName}</span>}
-      </div>
+    <SidebarSection title="Folders">
       <FolderTree
         fetchChildren={fetchFolders}
         onSelect={handleFolderSelect}
         selectedId={selectedFolderId}
         rootLabel="/"
         queryKeyPrefix={activeScope ? [activeScope] : []}
+        className="px-0.5"
       />
-    </>
+    </SidebarSection>
   )
 }
 
 const ModalBody = ({
   type,
-  uids,
   selectedFiles,
   setSelectedFiles,
   defaultScope,
   allowedScopes,
   failedFiles,
   validateLicense,
+  showSelectedPanel,
 }: FileSelectTabsProps): JSX.Element => {
   const context = useUnifiedRouteContext()
   const extractContext: { scope: ServerScope; name: string } = context.isHome
@@ -637,7 +626,6 @@ const ModalBody = ({
   const [viewMode, setViewMode] = useState<'files' | 'scopes'>('files')
   const [activeScope, setActiveScope] = useState<ServerScope | undefined>(defaultScope?.scope ?? extractContext.scope)
   const [activeScopeName, setActiveScopeName] = useState<string | undefined>(defaultScope?.name ?? extractContext.name)
-  const [showSelectedPanel, setShowSelectedPanel] = useState(uids.length > 0)
 
   const handleScopeClick = (scopeValue: string, label: string): void => {
     setActiveScope(scopeValue as ServerScope)
@@ -674,38 +662,36 @@ const ModalBody = ({
   return (
     <FileSelectContext.Provider value={contextValue}>
       <FolderSelectContext.Provider value={folderContextValue}>
-        <div className="flex min-h-0 flex-1 flex-row">
-          <div className="w-60 shrink-0 overflow-y-auto border-r border-[var(--c-layout-border)] p-2">
-            <button
-              type="button"
-              className={clsx('mb-2 w-full cursor-pointer rounded px-3 py-1.5 text-left text-sm font-medium', {
-                'bg-[var(--primary-100)] text-[var(--primary-600)]': viewMode === 'scopes',
-                'hover:bg-accent': viewMode !== 'scopes',
-              })}
-              onClick={handleAllScopes}
-            >
-              All Scopes
-            </button>
-            {viewMode === 'scopes' && activeScope && activeScopeName && (
-              <div className="mb-2 flex items-center gap-1.5 rounded border border-[var(--primary-300)] bg-[var(--primary-50)] px-2.5 py-1.5">
-                <Check width={11} height={11} className="shrink-0 text-[var(--primary-500)]" strokeWidth={2.5} />
-                <div className="min-w-0">
-                  <div className="truncate text-xs font-semibold text-[var(--primary-700)]">{activeScopeName}</div>
-                  <div className="truncate text-[10px] text-[var(--primary-400)]">{activeScope}</div>
-                </div>
-              </div>
-            )}
-            {viewMode === 'files' && <ScopeFolderTree activeScope={activeScope} activeScopeName={activeScopeName} />}
+        <div className="relative flex min-h-0 flex-1 flex-col lg:flex-row">
+          <div className="bg-muted/20 max-h-40 shrink-0 overflow-y-auto border-b px-1 py-2 lg:max-h-none lg:w-56 lg:border-r lg:border-b-0">
+            <SidebarSection title="Scope">
+              <ScopeItem
+                name="All Scopes"
+                icon={<Layers className="size-3.5" />}
+                isActive={viewMode === 'scopes'}
+                onSelectScope={handleAllScopes}
+              />
+              {viewMode === 'files' && activeScopeName && (
+                <ScopeItem
+                  className=""
+                  name={activeScopeName}
+                  icon={
+                    activeScope === 'private' ? (
+                      <LockIcon height={14} />
+                    ) : activeScope === 'public' ? (
+                      <GlobeIcon height={14} />
+                    ) : (
+                      findSpaceTypeIcon('groups')
+                    )
+                  }
+                  isActive
+                  onSelectScope={() => {}}
+                />
+              )}
+            </SidebarSection>
+            {viewMode === 'files' && <ScopeFolderTree activeScope={activeScope} />}
           </div>
-          <div className="relative flex min-h-0 flex-1 flex-col">
-            <Button
-              variant="default"
-              className="absolute top-2 right-1 z-1"
-              size="sm"
-              onClick={() => setShowSelectedPanel(prev => !prev)}
-            >
-              Selected &nbsp;<ButtonBadge>{selectedFiles?.length}</ButtonBadge>
-            </Button>
+          <div className="flex min-h-0 flex-1 flex-col">
             {viewMode === 'scopes' && (
               <ScopeTable allowedScopes={allowedScopes} onSelectScope={handleScopeClick} activeScope={activeScope} />
             )}
@@ -713,9 +699,7 @@ const ModalBody = ({
               <FileTable activeScope={activeScope} type={type} validateLicense={validateLicense} />
             )}
           </div>
-          {showSelectedPanel && (
-            <SelectedFilesPanel failedFiles={failedFiles} onClose={() => setShowSelectedPanel(false)} />
-          )}
+          {showSelectedPanel && <SelectedFilesPanel failedFiles={failedFiles} />}
         </div>
       </FolderSelectContext.Provider>
     </FileSelectContext.Provider>
@@ -752,12 +736,12 @@ export const useSelectFileModal = (
 } => {
   const { isShown, setShowModal } = useModal()
   const [selectedFiles, setSelectedFiles] = useState<IFile[]>([])
-  const { data: fetchAccessibleResult, isFetched: isAccessibleFilesFetched } = useFetchFilesByUIDQuery(
-    isShown && uids ? uids : [],
-  )
-  const fetchAccessibleData = fetchAccessibleResult?.data || []
+  const uidKey = (uids ?? []).join(',')
+  const requestedUids = useMemo(() => (isShown && uidKey ? uidKey.split(',') : []), [isShown, uidKey])
+  const { data: fetchAccessibleResult, isFetched: isAccessibleFilesFetched } = useFetchFilesByUIDQuery(requestedUids)
   const { validatedFilesCache, setValidatedFilesCache } = useRunJobFilesContext()
   const [failedFiles, setFailedFiles] = useState<string[]>([])
+  const [showSelectedPanel, setShowSelectedPanel] = useState(true)
 
   useEffect(() => {
     if (!isShown) {
@@ -765,16 +749,17 @@ export const useSelectFileModal = (
     }
     setSelectedFiles([])
     setFailedFiles([])
-  }, [isShown, uids])
+  }, [isShown, uidKey])
 
   useEffect(() => {
     if (!isShown || !isAccessibleFilesFetched) {
       return
     }
+    const fetchAccessibleData = fetchAccessibleResult?.data ?? []
     setSelectedFiles(fetchAccessibleData)
     const accessibleUidSet = new Set(fetchAccessibleData.map(f => f.uid))
-    setFailedFiles((uids ?? []).filter(uid => !accessibleUidSet.has(uid)))
-  }, [isShown, isAccessibleFilesFetched, fetchAccessibleData, uids])
+    setFailedFiles(requestedUids.filter(uid => !accessibleUidSet.has(uid)))
+  }, [isShown, isAccessibleFilesFetched, fetchAccessibleResult?.data, requestedUids])
 
   const showModalResetState = (): void => {
     setShowModal(true)
@@ -791,36 +776,63 @@ export const useSelectFileModal = (
     setSelectedFiles([])
   }
 
-  const hideModal = (): void => {
-    setShowModal(false)
+  const handleOpenChange = (open: boolean): void => {
+    setShowModal(open)
   }
 
   const modalComp = (
-    <Modal variant="large" id="select-file-modal" headerText={title} hide={hideModal} isShown={isShown}>
-      <ModalHeaderTop headerText={title} hide={hideModal} />
+    <Dialog open={isShown} onOpenChange={handleOpenChange}>
+      <DialogContent
+        id="select-file-modal"
+        data-testid="select-file-modal"
+        variant="large"
+        showCloseButton={false}
+        className="flex flex-col gap-0 overflow-hidden p-0"
+      >
+        <DialogHeader className="mx-0 flex-row items-center justify-between gap-2 border-b px-3 py-2 sm:px-4 sm:py-3">
+          <DialogTitle className="min-w-0 truncate text-base font-semibold">{title}</DialogTitle>
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <Button
+              type="button"
+              variant={showSelectedPanel ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 gap-1.5 px-2"
+              aria-label={showSelectedPanel ? 'Hide selected files sidebar' : 'Show selected files sidebar'}
+              aria-pressed={showSelectedPanel}
+              onClick={() => setShowSelectedPanel(prev => !prev)}
+            >
+              <PanelRightIcon />
+              <span className="hidden sm:inline">Selected</span>
+              <span className="bg-background text-foreground min-w-5 rounded-sm border px-1.5 text-center text-xs font-semibold tabular-nums shadow-xs">
+                {selectedFiles.length}
+              </span>
+            </Button>
+            <DialogHeaderClose />
+          </div>
+        </DialogHeader>
 
-      {isShown && (
-        <ModalBody
-          type={type}
-          setShowModal={setShowModal}
-          selectedFiles={selectedFiles}
-          setSelectedFiles={setSelectedFiles}
-          uids={uids ?? []}
-          failedFiles={failedFiles}
-          defaultScope={defaultScope}
-          allowedScopes={allowedScopes}
-          validateLicense={validateLicense}
-        />
-      )}
-      <Footer>
-        <ButtonRow>
-          <Button onClick={hideModal}>Cancel</Button>
-          <Button data-variant="primary" onClick={handleSubmit} disabled={selectedFiles?.length === 0}>
-            Select
+        {isShown && (
+          <ModalBody
+            type={type}
+            selectedFiles={selectedFiles}
+            setSelectedFiles={setSelectedFiles}
+            failedFiles={failedFiles}
+            defaultScope={defaultScope}
+            allowedScopes={allowedScopes}
+            validateLicense={validateLicense}
+            showSelectedPanel={showSelectedPanel}
+          />
+        )}
+        <DialogFooter className="mx-0 border-t px-4 py-3">
+          <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+            Cancel
           </Button>
-        </ButtonRow>
-      </Footer>
-    </Modal>
+          <Button onClick={handleSubmit} disabled={selectedFiles?.length === 0}>
+            Select{selectedFiles.length > 0 ? ` (${selectedFiles.length})` : ''}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

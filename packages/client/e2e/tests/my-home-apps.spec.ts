@@ -109,7 +109,7 @@ test.describe('My Home - Apps', () => {
 
     await page.getByText('Cypress Private Space for "copy to space" action').click()
 
-    await page.getByRole('button', { name: 'Copy' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Copy', exact: true }).click()
 
     await expect(page.getByText('The app has been copied to the space successfully.')).toBeVisible()
 
@@ -359,7 +359,7 @@ test.describe('My Home - Apps', () => {
 
     await page.getByText('Cypress Private Space for "copy to space" action').click()
 
-    await page.getByRole('button', { name: 'Copy' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Copy', exact: true }).click()
 
     await expect(page.getByText('The app has been copied to the space successfully.')).toBeVisible()
 

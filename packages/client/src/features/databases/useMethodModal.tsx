@@ -1,34 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React, { useMemo } from 'react'
-import styled from 'styled-components'
-import { Button } from '../../components/Button'
+import { useMemo } from 'react'
 import { Loader } from '../../components/Loader'
-import { ResourceTable } from '../../components/ResourceTable'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
 import { pluralize } from '../../utils/formatting'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Content, Footer } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { databaseMethodRequest } from './databases.api'
-import { MethodType } from './databases.types'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
-
-const ResourceTableContainer = styled.div`
-  margin-bottom: 20px;
-  padding: 1rem;
-`
-
-const InfoText = styled.div`
-  margin-top: 20px;
-
-  p {
-    margin-bottom: 10px;
-  }
-`
-
-const FooterInfo = styled.p`
-  margin-right: auto;
-  padding-left: 8px;
-`
+import type { MethodType } from './databases.types'
 
 const getVerb = (method: MethodType) => {
   switch (method) {
@@ -77,60 +57,61 @@ export function useMethodModal<T extends { dxid: string; name: string; location?
     mutation.mutateAsync(dxids)
   }
   const methodText = method.charAt(0).toUpperCase() + method.slice(1)
+  const title = `${methodText} ${momoSelected.length} ${pluralize('item', momoSelected.length)}`
 
   const modalComp = (
-    <ModalNext
-      data-testid="modal-dbcluster-method"
-      headerText={`${methodText} ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-      variant="medium"
-      id="method-modal"
-    >
-      <ModalHeaderTop
-        headerText={`${methodText} ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
-        hide={() => setShowModal(false)}
-      />
-      <ResourceTableContainer>
-        <ResourceTable
-          rows={selected.map(s => {
-            return {
-              name: <div>{s.name}</div>,
-              location: <div>{s.location || ''}</div>,
-            }
-          })}
-        />
-      </ResourceTableContainer>
-      {method === 'stop' ? (
-        <Content>
-          <InfoText>
-            <p>
-              This database cluster will be stopped. After seven days, the database cluster will automatically re-activate and
-              begin incurring charges. If you do not wish to keep this database cluster, use the Terminate action to permanently
-              stop it and delete its contents.
-            </p>
-          </InfoText>
-        </Content>
-      ) : null}
-      <Footer>
-        <>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="method-modal" data-testid="modal-dbcluster-method" variant="medium">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <div className="mb-5 p-4 **:data-[slot=table-container]:overflow-visible">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead sticky>Name</TableHead>
+                <TableHead sticky>Location</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {selected.map(s => (
+                <TableRow key={s.dxid}>
+                  <TableCell className="whitespace-normal">{s.name}</TableCell>
+                  <TableCell className="whitespace-normal">{s.location || ''}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        {method === 'stop' ? (
+          <div className="px-4 pb-4">
+            <div className="mt-5">
+              <p className="mb-2.5">
+                This database cluster will be stopped. After seven days, the database cluster will automatically
+                re-activate and begin incurring charges. If you do not wish to keep this database cluster, use the
+                Terminate action to permanently stop it and delete its contents.
+              </p>
+            </div>
+          </div>
+        ) : null}
+        <DialogFooter>
           {method === 'stop' ? (
-            <FooterInfo>
+            <p className="mr-auto pl-2">
               By clicking the &#34;Stop&#34; button, you acknowledge and accept this automatic restart behavior.
-            </FooterInfo>
+            </p>
           ) : null}
-          <ButtonRow>
+          <div className="flex items-center justify-end gap-2">
             {mutation.isPending && <Loader />}
-            <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
+            <Button variant="outline" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
               Cancel
             </Button>
-            <Button data-variant="primary" onClick={handleSubmit} disabled={mutation.isPending}>
+            <Button onClick={handleSubmit} disabled={mutation.isPending}>
               {methodText}
             </Button>
-          </ButtonRow>
-        </>
-      </Footer>
-    </ModalNext>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

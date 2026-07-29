@@ -1,32 +1,34 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
-import React, { useEffect, useMemo, useState } from 'react'
-import styled from 'styled-components'
-import { Button } from '../../../components/Button'
-import { Loader } from '../../../components/Loader'
-import { VerticalCenter } from '../../../components/Page/page.styles'
-import { ResourceTable, StyledName } from '../../../components/ResourceTable'
+import type { AxiosError } from 'axios'
+import { useEffect, useMemo, useState } from 'react'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FolderIcon } from '../../../components/icons/FolderIcon'
-import { itemsCountString } from '../../../utils/formatting'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../../modal/modal.styles'
-import { useModal } from '../../modal/useModal'
-import { ApiErrorResponse, DownloadListResponse } from '../../home/types'
-import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
-import { IFile } from '../files.types'
-import { getMessage } from './modal-utils'
+import { Loader } from '../../../components/Loader'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import { Button } from '../../../components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table'
+import { getSpaceIdFromScope } from '../../../utils'
+import { itemsCountString } from '../../../utils/formatting'
+import { cleanObject } from '../../../utils/object'
+import { getHomeScopeFromServerScope } from '../../home/getHomeScopeFromServerScope'
+import type { ApiErrorResponse, DownloadListResponse, ServerScope } from '../../home/types'
+import { getBasePathFromScope } from '../../home/utils'
+import { useModal } from '../../modal/useModal'
+import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
+import type { IFile } from '../files.types'
+import { getMessage } from './modal-utils'
 
-const StyledResourceTable = styled(ResourceTable)`
-  padding: 12px;
-`
-const StyledLoader = styled.div`
-  padding: 12px;
-`
-const StyledPath = styled.div`
-  min-width: 150px;
-`
+const buildFolderHref = (basePath: string, folderId: number, serverScope?: ServerScope) => {
+  const spaceId = getSpaceIdFromScope(serverScope)
+  const params = cleanObject({
+    // Home lists need scope; space routes are scoped by the path itself.
+    scope: spaceId ? undefined : getHomeScopeFromServerScope(serverScope ?? 'private'),
+    folderId: String(folderId),
+  })
+  const query = new URLSearchParams(params as Record<string, string>).toString()
+  return `${basePath}/files?${query}`
+}
 
 const DeleteFiles = ({
   selected,
@@ -68,19 +70,45 @@ const DeleteFiles = ({
   useEffect(() => {
     if (data) setNodesToBeDeleted(data)
   }, [data])
-  if (isLoading) return <StyledLoader>Loading...</StyledLoader>
+  if (isLoading) return <div className="p-3">Loading...</div>
   return data ? (
-    <StyledResourceTable
-      rows={data.map(s => ({
-        name: (
-          <StyledName href={s.viewURL} target="_blank">
-            <VerticalCenter>{s.type === 'file' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
-            {s.name}
-          </StyledName>
-        ),
-        path: <StyledPath>{s.fsPath}</StyledPath>,
-      }))}
-    />
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead sticky>Name</TableHead>
+          <TableHead sticky>Path</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.map(item => {
+          const selectedItem = selected.find(file => file.id === item.id)
+          const basePath = getBasePathFromScope(selectedItem?.scope)
+          const itemPath =
+            item.type === 'folder'
+              ? buildFolderHref(basePath, item.id, selectedItem?.scope)
+              : `${basePath}/files/${item.uid}`
+
+          return (
+            <TableRow key={item.id}>
+              <TableCell className="whitespace-normal">
+                <a
+                  href={selectedItem ? itemPath : item.viewURL}
+                  target="_blank"
+                  className="cursor-pointer break-all"
+                  rel="noreferrer"
+                >
+                  <span className="inline-block align-text-bottom">
+                    {item.type === 'file' ? <FileIcon width={14} height={14} /> : <FolderIcon width={14} height={14} />}
+                  </span>{' '}
+                  <span>{item.name}</span>
+                </a>
+              </TableCell>
+              <TableCell className="min-w-37.5 whitespace-normal">{item.fsPath}</TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody>
+    </Table>
   ) : (
     <div />
   )
@@ -120,29 +148,32 @@ export const useDeleteFileModal = ({ selected, onSuccess }: { selected: IFile[];
   const handleSubmit = () => {
     mutation.mutateAsync(nodesToBeDeleted.map(s => s.id))
   }
+  const title = `Delete ${nodesToBeDeleted ? itemsCountString('item', nodesToBeDeleted.length) : '...'}`
 
   const modalComp = (
-    <ModalNext id="modal-files-delete" data-testid="modal-files-delete" isShown={isShown} hide={() => setShowModal(false)}>
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={`Delete ${nodesToBeDeleted ? itemsCountString('item', nodesToBeDeleted.length) : '...'}`}
-        hide={() => setShowModal(false)}
-      />
-      <ModalScroll>
-        <DeleteFiles selected={memoSelected} setNodesToBeDeleted={setNodesToBeDeleted} />
-      </ModalScroll>
-      <Footer>
-        <ButtonRow>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="modal-files-delete" data-testid="modal-files-delete" variant="medium">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-(--modal-max-height,50vh) flex-1 overflow-auto **:data-[slot=table-container]:overflow-visible">
+          <DeleteFiles selected={memoSelected} setNodesToBeDeleted={setNodesToBeDeleted} />
+        </div>
+        <DialogFooter className="items-center">
           {mutation.isPending && <Loader />}
-          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
+          <Button variant="outline" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
-          <Button data-variant="warning" onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isPending}>
+          <Button
+            variant="destructive"
+            onClick={handleSubmit}
+            disabled={!nodesToBeDeleted.length || mutation.isPending}
+          >
             Delete
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

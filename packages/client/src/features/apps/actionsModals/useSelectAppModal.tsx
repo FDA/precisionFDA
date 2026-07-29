@@ -1,32 +1,27 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
-import { Checkbox } from '../../../components/Checkbox'
-import { InputText } from '../../../components/InputText'
+import { ExternalLink } from 'lucide-react'
+import { useState } from 'react'
+import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { Loader } from '../../../components/Loader'
 import { Radio } from '../../../components/Radio'
-import { StyledName } from '../../../components/ResourceTable'
 import { useDebounce } from '../../../components/Table/useDebounce'
-import { Tabs } from '../../../components/Tabs/Tabs'
-import { FileIcon } from '../../../components/icons/FileIcon'
+import { Button } from '../../../components/ui/button'
+import { Checkbox } from '../../../components/ui/checkbox'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog'
+import { Input } from '../../../components/ui/input'
+import { Switch } from '../../../components/ui/switch'
+import { Table, TableBody, TableCell, TableRow } from '../../../components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../../modal/modal.styles'
+import type { DialogType, ServerScope } from '../../home/types'
+import { getBasePathFromScope } from '../../home/utils'
 import { useModal } from '../../modal/useModal'
-import {
-  ButtonBadge,
-  SelectableTable,
-  StyledCell,
-  StyledContainer,
-  StyledFilterSection,
-  StyledOnlyMine,
-  StyledRow,
-  StyledSubtitle,
-  Tab,
-} from '../../actionModals/action-modals.styles'
-import { DialogType, ServerScope } from '../../home/types'
 import { fetchFilteredApps } from '../apps.api'
-import { IApp } from '../apps.types'
-import { Button } from '../../../components/Button'
+import type { IApp } from '../apps.types'
+
+type AppOrgLike = string | { name?: string; handle?: string } | null | undefined
+
+const getOrgLabel = (org: AppOrgLike): string => (typeof org === 'string' ? org : (org?.name ?? org?.handle ?? ''))
 
 const Row = ({
   app,
@@ -43,7 +38,8 @@ const Row = ({
   checkboxCallback: (checked: boolean, app: IApp) => void
   checked?: boolean
 }) => (
-  <StyledRow
+  <TableRow
+    className="cursor-pointer hover:bg-muted/50"
     onClick={() => {
       if (!viewOnly) {
         if (type === 'radio') {
@@ -54,23 +50,56 @@ const Row = ({
       }
     }}
   >
-    <StyledCell>
-      <StyledName>
+    <TableCell className="whitespace-normal px-3 py-2">
+      <div className="flex items-start gap-2 text-foreground">
         {type === 'radio' && !viewOnly && (
-          <StyledContainer>
+          <div className="mr-2 shrink-0 pt-0.5">
             <Radio checked={checked} onChange={() => {}} />
-          </StyledContainer>
+          </div>
         )}
         {type === 'checkbox' && !viewOnly && (
-          <StyledContainer>
-            <Checkbox onChange={() => {}} checked={checked} />
-          </StyledContainer>
+          <Checkbox
+            className="mr-2"
+            checked={checked}
+            onCheckedChange={isChecked => checkboxCallback(isChecked, app)}
+            onClick={event => event.stopPropagation()}
+          />
         )}
-        <FileIcon />
-        {app.title}
-      </StyledName>
-    </StyledCell>
-  </StyledRow>
+        <div className="min-w-0">
+          <div className="break-all">
+            <span className="inline-block align-text-bottom">
+              <CubeIcon height={14} />
+            </span>{' '}
+            <span>{app.title}</span>
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[85%] leading-5 text-muted-foreground">
+            <span>{app.location}</span>
+            <span>Revision {app.revision}</span>
+            <span>{app.user.full_name}</span>
+            <span>{getOrgLabel(app.org)}</span>
+          </div>
+        </div>
+      </div>
+    </TableCell>
+    <TableCell className="w-10 px-2 py-2 align-top">
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="text-primary"
+        render={
+          <a
+            href={`${getBasePathFromScope(app.scope)}/apps/${app.uid}`}
+            aria-label={`Open ${app.title}`}
+            onClick={event => event.stopPropagation()}
+          >
+            <span className="sr-only">Open {app.title}</span>
+          </a>
+        }
+      >
+        <ExternalLink className="size-4 shrink-0" />
+      </Button>
+    </TableCell>
+  </TableRow>
 )
 
 /**
@@ -149,85 +178,99 @@ export const useSelectAppModal = (
   const apps = appsData ?? []
 
   const modalComp = (
-    <ModalNext
-      isShown={isShown}
-      data-testid="select-app-modal"
-      id="select-app-modal"
-      headerText={title}
-      hide={() => setShowModal(false)}
-      variant="medium"
-    >
-      <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
-      {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <Tabs nonSelected={selectedApps.length === 0}>
-        <Tab title={`Selected ${selectedApps.length}`} key="selected">
-          {selectedApps.length === 0 && <StyledRow>No selected apps</StyledRow>}
-          {selectedApps.length > 0 && (
-            <ModalScroll>
-              <SelectableTable>
-                <tbody>
-                  {selectedApps.map(app => (
-                    <Row
-                      app={app}
-                      type={type}
-                      viewOnly
-                      key={app.id}
-                      radioCallback={radioCallback}
-                      checkboxCallback={checkboxCallback}
-                    />
-                  ))}
-                </tbody>
-              </SelectableTable>
-            </ModalScroll>
-          )}
-        </Tab>
-        <Tab title={`Apps ${apps.length}`} key="files">
-          <StyledFilterSection>
-            <InputText placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
-            <StyledOnlyMine>
-              <input type="checkbox" onClick={evt => toggleOnlyMine((evt.target as HTMLInputElement).checked)} />
-              Only mine
-            </StyledOnlyMine>
-          </StyledFilterSection>
-          {isLoadingApps && <Loader />}
-          {loadingAppsStatus === 'success' && (
-            <ModalScroll>
-              <SelectableTable>
-                <tbody>
-                  {apps
-                    .filter((app: IApp) => (showOnlyMyApps ? isMyApp(app) && showOnlyMyApps : true))
-                    .map((app: IApp) => (
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent
+        id="select-app-modal"
+        data-testid="select-app-modal"
+        variant="medium"
+        className="flex max-h-[calc(100dvh-2rem)] flex-col gap-4 overflow-hidden"
+      >
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        {subtitle && <div className="text-muted-foreground text-sm leading-5">{subtitle}</div>}
+        <Tabs defaultValue="apps" className="min-h-0 flex-1 flex-col overflow-hidden">
+          <TabsList className="shrink-0">
+            <TabsTrigger value="apps">Apps {apps.length}</TabsTrigger>
+            <TabsTrigger value="selected">Selected {selectedApps.length}</TabsTrigger>
+          </TabsList>
+          <TabsContent value="apps" className="flex min-h-0 min-w-[min(400px,100%)] flex-1 flex-col overflow-hidden">
+            <div className="flex flex-row items-start gap-2 pb-3">
+              <Input className="flex-1" placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
+              <label
+                htmlFor="select-apps-only-mine"
+                className="flex shrink-0 flex-col items-center gap-1 text-muted-foreground text-xs font-medium"
+              >
+                <Switch id="select-apps-only-mine" checked={showOnlyMyApps} onCheckedChange={toggleOnlyMine} />
+                <span>Mine only</span>
+              </label>
+            </div>
+            {isLoadingApps && <Loader />}
+            {loadingAppsStatus === 'success' && (
+              <div className="min-h-0 flex-1 overflow-auto">
+                <Table>
+                  <TableBody>
+                    {apps
+                      .filter((app: IApp) => (showOnlyMyApps ? isMyApp(app) && showOnlyMyApps : true))
+                      .map((app: IApp) => (
+                        <Row
+                          app={app}
+                          type={type}
+                          viewOnly={false}
+                          key={app.id}
+                          radioCallback={radioCallback}
+                          checkboxCallback={checkboxCallback}
+                          checked={selectedApps.some(selected => app.id === selected.id)}
+                        />
+                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+          <TabsContent
+            value="selected"
+            className="flex min-h-0 min-w-[min(400px,100%)] flex-1 flex-col overflow-hidden"
+          >
+            {selectedApps.length === 0 && <div className="border-t px-3 py-2 text-foreground">No selected apps</div>}
+            {selectedApps.length > 0 && (
+              <div className="min-h-0 flex-1 overflow-auto">
+                <Table>
+                  <TableBody>
+                    {selectedApps.map(app => (
                       <Row
                         app={app}
                         type={type}
-                        viewOnly={false}
+                        viewOnly
                         key={app.id}
                         radioCallback={radioCallback}
                         checkboxCallback={checkboxCallback}
-                        checked={selectedApps.some(selected => app.id === selected.id)}
                       />
                     ))}
-                </tbody>
-              </SelectableTable>
-            </ModalScroll>
-          )}
-        </Tab>
-      </Tabs>
-      <Footer>
-        <ButtonRow>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+        <DialogFooter>
           <Button
+            variant="outline"
             onClick={() => {
               setShowModal(false)
             }}
           >
             Cancel
           </Button>
-          <Button data-variant="primary" onClick={handleSubmit} disabled={selectedApps?.length === 0}>
-            Select &nbsp;<ButtonBadge>{selectedApps?.length}</ButtonBadge>
+          <Button onClick={handleSubmit} disabled={selectedApps?.length === 0}>
+            Select &nbsp;
+            <span className="rounded-[10px] bg-primary-foreground/20 px-1.75 py-0.75 leading-none">
+              {selectedApps?.length}
+            </span>
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

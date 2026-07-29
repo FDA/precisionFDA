@@ -239,7 +239,7 @@ export const useFilesColumns = ({
       size: 500,
       cell: ({ cell }) => (
         <StyledTags>
-          {cell.row.original.tags.map(tag => (
+          {cell.row.original.tags?.map(tag => (
             <StyledTagItem key={tag}>{tag}</StyledTagItem>
           ))}
         </StyledTags>

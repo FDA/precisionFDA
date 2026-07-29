@@ -3,25 +3,34 @@ import type { AxiosError } from 'axios'
 import type React from 'react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { Button } from '@/components/Button'
 import { FileCheckIcon } from '@/components/icons/FileCheckIcon'
 import { FileIcon } from '@/components/icons/FileIcon'
 import { FolderOpenIcon } from '@/components/icons/FolderOpenIcon'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { cn } from '@/utils/cn'
 import type { ApiErrorResponse, HomeScope, ServerScope } from '../../../home/types'
 import { getBasePathFromScope } from '../../../home/utils'
-import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
-import { Footer } from '../../../modal/modal.styles'
 import { useModal } from '../../../modal/useModal'
 import type { EditableSpace } from '../../../spaces/spaces.api'
 import { copyFilesRequest, fetchSelectedFiles, validateCopyingFiles } from '../../files.api'
 import type { IExistingFileSet, ISelectedFile, ISelectedFolder, SelectedNode } from '../../files.types'
-import styles from './CopyFilesModal.module.css'
 import { ScopeAndFolderSelection } from './ScopeAndFolderSelection'
 
 interface FileListItemContentProps {
   file: ISelectedFile
+}
+
+const getFileLocationPath = (path: string | undefined, fileName: string): string => {
+  if (!path) return ''
+  const normalizedPath = path.replace(/\/+$/, '')
+  const suffix = `/${fileName}`
+  if (normalizedPath.endsWith(suffix)) {
+    return normalizedPath.slice(0, -suffix.length) || '/'
+  }
+  return normalizedPath
 }
 
 const FileListItemContent = ({ file }: FileListItemContentProps): React.ReactElement => {
@@ -33,60 +42,65 @@ const FileListItemContent = ({ file }: FileListItemContentProps): React.ReactEle
   if (file.sourceFolderId) {
     folderQ = `&folderId=${file.sourceFolderId}`
   }
+  const sourceLocationPath = getFileLocationPath(file.sourceScopePath, file.name)
+  const targetLocationPath = getFileLocationPath(file.targetScopePath, file.name)
 
   return (
     <>
-      <div className={styles.fileHeader}>
+      <div className="flex min-w-0 items-center gap-2">
         <a
           href={`${currentPath}/${file.uid}`}
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.fileLink}
+          className={itemLinkClass}
           title={file.name}
         >
-          <FileIcon width={16} />
-          <span className={styles.fileName}>{file.name}</span>
+          <span className="-mt-1 inline-block align-middle">
+            <FileIcon width={14} height={14} />
+          </span>{' '}
+          <span>{file.name}</span>
         </a>
       </div>
-      <div className={styles.fileMetadata}>
+      <div className="flex flex-col gap-1">
         <a
           href={`${pathWithScope}${folderQ}`}
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.metadataItem}
-          title={file.sourceScopePath}
+          className={metadataLinkClass}
+          title={sourceLocationPath}
         >
-          <span className={styles.metadataIcon}>
-            <FolderOpenIcon width={14} />
-          </span>
-          <span className={styles.metadataText}>{file.sourceScopePath}</span>
+          <span className="truncate">{sourceLocationPath}</span>
         </a>
         {file.isCopied && (
           <a
             href={`${getBasePathFromScope(file.targetScope)}/files/${file.targetUid}`}
             target="_blank"
             rel="noopener noreferrer"
-            className={styles.metadataItem}
-            title={file.targetScopePath}
+            className={metadataLinkClass}
+            title={targetLocationPath}
           >
-            <span className={styles.metadataIcon}>
+            <span className="flex size-3.5 shrink-0 items-center justify-center text-success">
               <FileCheckIcon width={14} />
             </span>
-            <span className={styles.metadataText}>{file.targetScopePath}</span>
+            <span className="truncate">{targetLocationPath}</span>
           </a>
         )}
       </div>
     </>
   )
 }
-
 interface SelectedFileProps {
   file: ISelectedFile
 }
 
 const SelectedFile = ({ file }: SelectedFileProps): React.ReactElement => {
   return (
-    <li className={cn(styles.fileCard, file.isCopied && styles.fileCardCopied)}>
+    <li
+      className={cn(
+        'flex flex-col gap-1 rounded-md border border-border bg-background p-2 transition-colors',
+        file.isCopied && 'border-success/30 bg-success/10 dark:border-success/40 dark:bg-success/15',
+      )}
+    >
       <FileListItemContent file={file} />
     </li>
   )
@@ -103,24 +117,39 @@ const SelectedFolder = ({ folder }: SelectedFolderProps): React.ReactElement => 
   const pathWithScope = homeScope ? `${currentPath}?scope=${homeScope}&` : `${currentPath}?`
 
   return (
-    <li className={cn(styles.folderCard, folder.isCopied && styles.folderCardCopied)}>
-      <div className={styles.folderHeader}>
+    <li
+      className={cn(
+        'overflow-hidden rounded-md border border-border bg-background transition-colors',
+        folder.isCopied && 'border-success/30 bg-success/10 dark:border-success/40 dark:bg-success/15',
+      )}
+    >
+      <div
+        className={cn(
+          'flex min-w-0 items-center gap-2 border-b border-border bg-muted/30 px-2 py-1.5',
+          folder.isCopied && 'border-success/30 bg-success/15 dark:border-success/40 dark:bg-success/20',
+        )}
+      >
         <a
           href={`${pathWithScope}folderId=${folder.id}`}
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.folderLink}
+          className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold text-foreground no-underline hover:underline"
           title={folder.name}
         >
-          <FolderOpenIcon width={16} />
-          <span className={styles.folderName}>{folder.name}</span>
+          <span className="inline-flex size-4 shrink-0 items-center justify-center">
+            <FolderOpenIcon width={16} />
+          </span>
+          <span className="min-w-0 max-w-full break-all whitespace-normal">{folder.name}</span>
         </a>
       </div>
-      <ul className={styles.folderChildren}>
+      <ul className="m-0 list-none p-0">
         {folder.children.map((child: ISelectedFile) => (
           <li
             key={child.id}
-            className={cn(styles.folderChild, !folder.isCopied && child.isCopied && styles.folderChildCopied)}
+            className={cn(
+              'flex flex-col gap-1 border-b border-border px-2 py-1.5 pl-6 last:border-b-0',
+              !folder.isCopied && child.isCopied && 'bg-success/10 dark:bg-success/15',
+            )}
           >
             <FileListItemContent file={child} />
           </li>
@@ -136,7 +165,7 @@ interface CopyFileListProps {
 
 const CopyFileList = ({ nodes }: CopyFileListProps): React.ReactElement => {
   return (
-    <ul className={styles.selectedItemsList}>
+    <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
       {nodes.map((node: SelectedNode) => {
         return node.type === 'UserFile' ? (
           <SelectedFile key={node.id} file={node} />
@@ -153,6 +182,22 @@ const message = {
     'File(s) already exist in the destination scope and will not be included in the copy. When you click Copy, the remaining file(s) will be copied.',
   allFilesExist: 'All file(s) already exist in the destination scope. No file(s) will be copied.',
 }
+
+const panelLeftClass = cn(
+  'flex h-full w-full min-h-0 min-w-0 flex-col overflow-hidden bg-background',
+  'max-md:border-b max-md:border-border',
+)
+
+const scrollAreaClass = cn(
+  'min-h-0 flex-1 overflow-auto p-1.5 [scrollbar-color:hsl(var(--muted-foreground)/0.35)_transparent] [scrollbar-width:thin]',
+  '[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 [&::-webkit-scrollbar-thumb:hover]:bg-muted-foreground/45 [&::-webkit-scrollbar-track]:bg-transparent',
+)
+
+const itemLinkClass =
+  'block w-full max-w-full break-all whitespace-normal text-left text-sm font-medium !text-foreground/85 no-underline hover:!text-foreground/85 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+
+const metadataLinkClass =
+  'inline-flex w-fit max-w-full min-w-0 items-center gap-1.5 rounded bg-muted/60 px-1.5 py-0.5 text-xs !text-muted-foreground no-underline hover:bg-muted hover:!text-foreground hover:underline dark:bg-muted/40 dark:hover:bg-muted/60'
 
 export const useCopyFilesModal = ({
   sourceScopes,
@@ -301,49 +346,68 @@ export const useCopyFilesModal = ({
     mutation.mutate(selectedScope)
   }
 
-  const modalComp = (
-    <ModalNext
-      id="modal-files-validate-copied"
-      data-testid="modal-files-validate-copied"
-      headerText={headerText ?? 'Add Files To Space'}
-      isShown={isShown}
-      hide={(): void => setShowModal(false)}
-      variant="large"
-    >
-      <ModalHeaderTop headerText={headerText ?? 'Copy Files'} hide={(): void => setShowModal(false)} />
-      <div className={styles.modalContainer}>
-        {/* Left Panel - Selected Items */}
-        <div className={cn(styles.panel, styles.panelLeft)}>
-          <div className={styles.panelHeader}>
-            <div className={styles.panelTitle}>Selected Items</div>
-          </div>
-          <div className={styles.scrollArea}>
-            {isLoading && <div className={styles.loadingContainer}>Loading...</div>}
-            {isSuccess && <CopyFileList nodes={copyFiles} />}
-          </div>
-          {copyMessage.length > 0 && <div className={styles.infoCallout}>{copyMessage}</div>}
-        </div>
-
-        {/* Right Panel - Destination Selection */}
-        <ScopeAndFolderSelection
-          sourceScopes={sourceScopes}
-          onSelectFolder={setSelectedFolderId}
-          onSelectScope={setSelectedScope}
-          fixedTarget={fixedTarget}
-        />
+  const selectedItemsPanel = (
+    <div className={panelLeftClass}>
+      <div className="sticky top-0 z-10 shrink-0 border-b border-border bg-muted/30 px-3 py-2">
+        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Selected Items</div>
       </div>
-      <Footer>
-        <Button onClick={(): void => setShowModal(false)}>Cancel</Button>
-        <Button
-          data-variant="primary"
-          type="button"
-          disabled={isLoading || isDisableCopy}
-          onClick={(e: React.MouseEvent<HTMLButtonElement>): void => handleSubmit(e)}
-        >
-          Copy
-        </Button>
-      </Footer>
-    </ModalNext>
+      <div className={scrollAreaClass}>
+        {isLoading && (
+          <div className="flex items-center justify-center p-8 text-sm text-muted-foreground">Loading...</div>
+        )}
+        {isSuccess && <CopyFileList nodes={copyFiles} />}
+      </div>
+      {copyMessage.length > 0 && (
+        <div className="mx-1.5 mb-2 rounded-md border-l-4 border-primary bg-primary/10 px-3 py-2 text-xs leading-5 text-foreground dark:bg-primary/15">
+          {copyMessage}
+        </div>
+      )}
+    </div>
+  )
+
+  const destinationPanel = (
+    <ScopeAndFolderSelection
+      sourceScopes={sourceScopes}
+      onSelectFolder={setSelectedFolderId}
+      onSelectScope={setSelectedScope}
+      fixedTarget={fixedTarget}
+    />
+  )
+
+  const modalComp = (
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent
+        id="modal-files-validate-copied"
+        data-testid="modal-files-validate-copied"
+        variant="large"
+        className="flex flex-col gap-0 overflow-hidden bg-background p-0"
+      >
+        <DialogHeader className="mx-0 flex-row items-center px-3 py-4 pr-10 sm:px-4 sm:pr-12">
+          <DialogTitle>{headerText ?? 'Copy Files'}</DialogTitle>
+        </DialogHeader>
+        <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1 overflow-hidden bg-background">
+          <ResizablePanel defaultSize="50%" minSize="20%" className="min-w-0">
+            {selectedItemsPanel}
+          </ResizablePanel>
+          <ResizableHandle aria-label="Resize panels" />
+          <ResizablePanel defaultSize="50%" minSize="20%" className="min-w-0">
+            {destinationPanel}
+          </ResizablePanel>
+        </ResizablePanelGroup>
+        <DialogFooter className="mx-0 shrink-0 border-t px-4 py-3">
+          <Button variant="outline" onClick={(): void => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            disabled={isLoading || isDisableCopy}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>): void => handleSubmit(e)}
+          >
+            Copy
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

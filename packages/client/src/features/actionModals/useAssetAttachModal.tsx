@@ -1,21 +1,20 @@
-import clsx from 'clsx'
+import { Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Button, TransparentButton } from '@/components/Button'
-import { InputText } from '@/components/InputText'
-import { CrossIcon } from '@/components/icons/PlusIcon'
-import { SearchIcon } from '@/components/icons/SearchIcon'
 import { Loader } from '@/components/Loader'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, HeaderText, ModalScroll } from '../modal/modal.styles'
-import { useModal } from '../modal/useModal'
+import { Markdown, MarkdownStyle } from '@/components/Markdown'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
-  LeftBar,
-  ModalLoader,
-  NoteContainer,
-  NotesMarkdown,
-  SearchInput,
-  StyledAttachToModal,
-} from './AttachToModal/attach-to-modal.styles'
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogHeaderClose,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { cn } from '@/utils/cn'
+import { useModal } from '../modal/useModal'
 import { type Asset, useListAssetsQuery } from './AttachToModal/useListAssetsQuery'
 
 interface AssetAttachModalProps {
@@ -54,109 +53,120 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: Asse
   const reg = new RegExp(search, 'i')
   const filteredItems = search ? items.filter(e => reg.test(e.title)) : items
 
-  const itemsList = filteredItems.map(item => {
-    const classes = clsx('__menu-item', {
-      '__menu-item--selected': item.uid === selectedItem?.uid,
-    })
-
-    return (
-      <li key={item.uid} className={classes}>
-        <div>
-          <button
-            type="button"
-            className="__menu-item_label-wrapper"
-            onClick={() => {
-              setSelectedItem(item)
-              onCheckboxClick(item)
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              width: '100%',
-              textAlign: 'left',
-              cursor: 'pointer',
-            }}
-          >
-            <input type="checkbox" name={item.uid} checked={checkedItem.has(item.uid)} readOnly />
-            <span className="__menu-item_class-label">{item.className}</span>
-            <span className="__menu-item_title">{item.title}</span>
-          </button>
-        </div>
-      </li>
-    )
-  })
-
   return (
-    <ModalNext hide={hideAction} isShown={isShown} id="modal-attachto-asset">
-      <ModalHeaderTop
-        headerText={<HeaderText>Manage you Assets for your VM Environment</HeaderText>}
-        hide={hideAction}
-      />
-      {isLoading ? (
-        <ModalLoader>
-          <Loader />
-        </ModalLoader>
-      ) : (
-        <>
-          <StyledAttachToModal>
-            <LeftBar>
-              <SearchInput>
-                <InputText
-                  name="search"
-                  placeholder="Search..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
-                <span className="__menu-item_search-icons">
-                  {search ? (
-                    <TransparentButton onClick={() => setSearch('')}>
-                      <CrossIcon height={16} />
-                    </TransparentButton>
-                  ) : (
-                    <SearchIcon height={16} />
-                  )}
-                </span>
-              </SearchInput>
-              <ModalScroll>
-                <ul className="__items-list">
-                  {itemsList}
-                  {!itemsList.length && (
-                    <div className="__menu-item">
-                      <span className="text-muted _no-content">No results found</span>
-                      <TransparentButton className="__menu-item_clear" onClick={() => setSearch('')}>
+    <Dialog open={isShown} onOpenChange={open => !open && hideAction()}>
+      <DialogContent
+        id="modal-attachto-asset"
+        data-testid="modal-attachto-asset"
+        variant="large"
+        showCloseButton={false}
+        className="flex flex-col gap-0 overflow-hidden p-0"
+      >
+        <DialogHeader className="mx-0 flex-row items-center justify-between gap-2 px-4 py-3">
+          <DialogTitle className="min-w-0 truncate">Manage your Assets for your VM Environment</DialogTitle>
+          <DialogHeaderClose />
+        </DialogHeader>
+
+        {isLoading ? (
+          <div className="flex flex-1 items-center justify-center p-8">
+            <Loader />
+          </div>
+        ) : (
+          <>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
+              <div className="border-border flex min-h-0 w-full shrink-0 flex-col border-b md:w-87.5 md:border-r md:border-b-0">
+                <div className="border-border shrink-0 border-b p-3">
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <Search />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      name="search"
+                      placeholder="Search..."
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                      autoComplete="off"
+                    />
+                    {search ? (
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupButton size="icon-xs" aria-label="Clear search" onClick={() => setSearch('')}>
+                          <X />
+                        </InputGroupButton>
+                      </InputGroupAddon>
+                    ) : null}
+                  </InputGroup>
+                </div>
+
+                <ul className="min-h-0 flex-1 list-none overflow-y-auto p-0 m-0">
+                  {filteredItems.map(item => {
+                    const isSelected = item.uid === selectedItem?.uid
+                    const isChecked = checkedItem.has(item.uid)
+
+                    return (
+                      <li key={item.uid} className="border-border border-t first:border-t-0">
+                        <button
+                          type="button"
+                          aria-pressed={isChecked}
+                          className={cn(
+                            'flex w-full cursor-pointer items-center gap-2 border-none bg-transparent px-4 py-2 text-left transition-colors',
+                            isSelected ? 'bg-accent text-accent-foreground' : 'text-foreground hover:bg-accent/60',
+                          )}
+                          onClick={() => {
+                            setSelectedItem(item)
+                            onCheckboxClick(item)
+                          }}
+                        >
+                          <Checkbox checked={isChecked} tabIndex={-1} className="pointer-events-none" aria-hidden />
+                          <span className="text-primary shrink-0 text-[75%] font-bold uppercase">{item.className}</span>
+                          <span className="min-w-0 truncate font-normal">{item.title}</span>
+                        </button>
+                      </li>
+                    )
+                  })}
+                  {!filteredItems.length && (
+                    <li className="flex flex-col items-start gap-2 px-4 py-3">
+                      <span className="text-muted-foreground">No results found</span>
+                      <Button variant="link" className="h-auto p-0" onClick={() => setSearch('')}>
                         Clear query
-                      </TransparentButton>
-                    </div>
+                      </Button>
+                    </li>
                   )}
                 </ul>
-              </ModalScroll>
-            </LeftBar>
-            <NoteContainer>
-              <ModalScroll>
+              </div>
+
+              <div className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4">
                 {selectedItem && (
                   <>
-                    <div className="_title">
-                      <a href={selectedItem.path}>{selectedItem.title}</a>
+                    <div className="border-border mb-4 border-b pb-4">
+                      <a
+                        href={selectedItem.path}
+                        className="text-foreground text-2xl font-semibold no-underline! hover:underline!"
+                      >
+                        {selectedItem.title}
+                      </a>
                     </div>
-                    <NotesMarkdown data={selectedItem?.content} />
-                    <div className="_no-content">{!selectedItem?.content && 'No content written for this item'}</div>
+                    {selectedItem.content ? (
+                      <MarkdownStyle>
+                        <Markdown data={selectedItem.content} />
+                      </MarkdownStyle>
+                    ) : (
+                      <div className="text-muted-foreground">No content written for this item</div>
+                    )}
                   </>
                 )}
-              </ModalScroll>
-            </NoteContainer>
-          </StyledAttachToModal>
-          <Footer>
-            <ButtonRow>
-              <Button onClick={hideAction}>Cancel</Button>
-              <Button data-variant="primary" onClick={onClickAttachAction}>
-                Confirm
+              </div>
+            </div>
+
+            <DialogFooter className="mx-0 shrink-0 px-4 py-3">
+              <Button variant="outline" onClick={hideAction}>
+                Cancel
               </Button>
-            </ButtonRow>
-          </Footer>
-        </>
-      )}
-    </ModalNext>
+              <Button onClick={onClickAttachAction}>Confirm</Button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }
 

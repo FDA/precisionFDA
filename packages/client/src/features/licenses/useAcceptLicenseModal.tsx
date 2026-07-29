@@ -1,22 +1,14 @@
 import { useMutation } from '@tanstack/react-query'
-import styled from 'styled-components'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer } from '../modal/modal.styles'
-import { useModal } from '../modal/useModal'
-import type { APIResource } from '../home/types'
-import { acceptLicenseRequest } from './api'
-import { Button } from '../../components/Button'
-import type { IFile } from '../files/files.types'
 import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
-
-const ScrollWrapper = styled.div`
-  overflow-y: scroll;
-  max-height: 500px;
-  padding: 1rem;
-`
+import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import type { IFile } from '../files/files.types'
+import type { APIResource } from '../home/types'
+import { useModal } from '../modal/useModal'
+import { acceptLicenseRequest } from './api'
 
 export function useAcceptLicenseModal<
-  T extends { uid?: string; dxid?: string; fileLicense?: IFile['fileLicense']; file_license?: IFile['fileLicense'] }
+  T extends { uid?: string; dxid?: string; fileLicense?: IFile['fileLicense']; file_license?: IFile['fileLicense'] },
 >({
   selected,
   resource: _resource,
@@ -57,33 +49,28 @@ export function useAcceptLicenseModal<
   }
 
   const modalComp = (
-    <ModalNext
-      data-testid="modal-accept-licenses"
-      headerText="Accept License"
-      isShown={isShown}
-      hide={handleClose}
-      variant="medium"
-      id="accept-license-modal"
-    >
-      <ModalHeaderTop headerText="Accept License" hide={handleClose} />
-      <ScrollWrapper data-testid="accept-license-body">
-        <div>
-          Are you sure you want to accept the license:{' '}
-          <p>
-            <b data-testid="accept-license-name">{selectedLicenseRef?.title}</b>
+    <Dialog open={Boolean(isShown)} onOpenChange={open => !open && handleClose()}>
+      <DialogContent id="accept-license-modal" data-testid="modal-accept-licenses" variant="small">
+        <DialogHeader>
+          <DialogTitle>Accept License</DialogTitle>
+        </DialogHeader>
+        <div data-testid="accept-license-body" className="space-y-2 pb-2">
+          <p>Are you sure you want to accept the license:</p>
+          <p className="font-semibold" data-testid="accept-license-name">
+            {selectedLicenseRef?.title}
           </p>
         </div>
         {mutation.isError && mutation.error && <div>{mutation.error.message}</div>}
-      </ScrollWrapper>
-      <Footer>
-        <ButtonRow>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button data-testid="accept-license-submit" data-variant="primary" onClick={() => handleSubmit()}>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button data-testid="accept-license-submit" onClick={() => handleSubmit()}>
             Accept
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

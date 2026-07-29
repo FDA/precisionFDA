@@ -3,8 +3,9 @@ import { markdown } from '@codemirror/lang-markdown'
 import { yaml } from '@codemirror/lang-yaml'
 import { StreamLanguage } from '@codemirror/language'
 import { shell } from '@codemirror/legacy-modes/mode/shell'
-import CodeMirror, { type ReactCodeMirrorProps, type ViewUpdate } from '@uiw/react-codemirror'
+import CodeMirror, { EditorView, type ReactCodeMirrorProps, type ViewUpdate } from '@uiw/react-codemirror'
 import { useState } from 'react'
+import { cn } from '@/utils/cn'
 import { useTheme } from '@/utils/ThemeContext'
 
 type CodeMirrorEditorLanguage = 'cwl' | 'json' | 'markdown' | 'shell' | string
@@ -27,6 +28,12 @@ type CodeMirrorEditorProps = Omit<ReactCodeMirrorProps, 'defaultValue' | 'onChan
   onChange?: (value?: string, event?: ViewUpdate) => void
   options?: MonacoCompatibleOptions
 }
+
+const hideFocusOutline = EditorView.theme({
+  '&.cm-focused': {
+    outline: 'none !important',
+  },
+})
 
 const getLanguageExtension = (language?: CodeMirrorEditorLanguage) => {
   switch (language) {
@@ -58,6 +65,7 @@ const formatValue = (value: string, language?: CodeMirrorEditorLanguage, shouldF
 }
 
 const CodeMirrorEditor = ({
+  className,
   defaultLanguage,
   defaultValue = '',
   extensions = [],
@@ -100,10 +108,11 @@ const CodeMirrorEditor = ({
         foldGutter: false,
         highlightActiveLineGutter: false,
       }}
-      extensions={[getLanguageExtension(editorLanguage), ...extensions]}
+      extensions={[hideFocusOutline, getLanguageExtension(editorLanguage), ...extensions]}
       theme={resolvedTheme}
       value={editorValue}
       {...props}
+      className={cn('min-w-0', className)}
       onChange={handleChange}
       style={{
         ...padding,

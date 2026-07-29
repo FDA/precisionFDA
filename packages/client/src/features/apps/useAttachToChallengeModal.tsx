@@ -1,27 +1,17 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
-import styled from 'styled-components'
-import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
-import { TrophyIcon } from '../../components/icons/TrophyIcon'
+import { CircleCheckIcon, TrophyIcon } from 'lucide-react'
+import type React from 'react'
+import { useState } from 'react'
 import { Loader } from '../../components/Loader'
-import { breakPoints } from '../../styles/theme'
-import { displayPayloadMessage, Payload } from '../../utils/api'
-import { CheckCol, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../modal/ModalCheckList'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
-import { useModal } from '../modal/useModal'
-import { APIResource } from '../home/types'
-import { assignToChallengeRequest, fetchApp } from './apps.api'
-import { IApp } from './apps.types'
-import { Button } from '../../components/Button'
 import { toastError } from '../../components/NotificationCenter/ToastHelper'
-
-const StyledCheckCol = styled(CheckCol)`
-  justify-content: flex-end;
-`
-const CheckedColBody = styled(ColBody)`
-  justify-content: flex-end;
-`
+import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
+import { displayPayloadMessage, type Payload } from '../../utils/api'
+import type { APIResource } from '../home/types'
+import { useModal } from '../modal/useModal'
+import { assignToChallengeRequest, fetchApp } from './apps.api'
+import type { IApp } from './apps.types'
 
 const ChallengesList = ({
   selected,
@@ -37,43 +27,53 @@ const ChallengesList = ({
     queryFn: () => fetchApp(appUid),
   })
   const meta = data?.meta
-  if (isLoading) return <div>Loading...</div>
-  if (meta?.challenges.length === 0) return <div>No challenges yet.</div>
+  const challenges = meta?.challenges ?? []
+  if (isLoading)
+    return (
+      <div className="flex items-center gap-2 p-3 text-muted-foreground">
+        <Loader height={14} />
+        Loading...
+      </div>
+    )
+  if (challenges.length === 0) return <div className="p-3 text-muted-foreground">No challenges yet.</div>
 
   return (
     <Table>
-      <tbody>
-        <HeaderRow>
-          <CheckCol />
-        </HeaderRow>
-        {meta!.challenges.map((s, i) => (
-          <TableRow $isSelected={selected === s.id.toString()} key={i} onClick={() => onSelect(s.id.toString())}>
-            <TitleCol>
-              <ColBody>
-                <TrophyIcon height={14} />
+      <TableHeader>
+        <TableRow>
+          <TableHead sticky>Challenge</TableHead>
+          <TableHead sticky className="w-10 text-right">
+            <span className="sr-only">Selected</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {challenges.map((s, i) => (
+          <TableRow
+            aria-selected={selected === s.id.toString()}
+            className="cursor-pointer aria-selected:bg-muted"
+            key={i}
+            onClick={() => onSelect(s.id.toString())}
+          >
+            <TableCell className="whitespace-normal">
+              <div className="flex items-center gap-2 text-foreground">
+                <TrophyIcon className="size-3.5 shrink-0 text-muted-foreground" />
                 {s.name}
-              </ColBody>
-            </TitleCol>
-            <StyledCheckCol>
-              <CheckedColBody>{selected === s.id.toString() && <CircleCheckIcon height={16} />}</CheckedColBody>
-            </StyledCheckCol>
+              </div>
+            </TableCell>
+            <TableCell className="text-right">
+              {selected === s.id.toString() ? (
+                <CircleCheckIcon className="ml-auto size-5 text-primary-foreground [&_circle]:fill-primary [&_circle]:stroke-primary [&_path]:stroke-primary-foreground" />
+              ) : (
+                <div className="h-4 w-4" />
+              )}
+            </TableCell>
           </TableRow>
         ))}
-      </tbody>
+      </TableBody>
     </Table>
   )
 }
-
-const StyledForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  @media (min-width: ${breakPoints.small}px) {
-    min-width: 300px;
-    width: auto;
-  }
-`
 
 const ChallengeAppForm = ({
   app,
@@ -120,27 +120,20 @@ const ChallengeAppForm = ({
   }
   return (
     <>
-      <ModalScroll>
-        <StyledForm id="attach-to-challenge-form" onSubmit={handleSubmit}>
+      <div className="max-h-(--modal-max-height,50vh) min-w-[min(300px,100%)] flex-1 overflow-auto pb-3 **:data-[slot=table-container]:overflow-visible">
+        <form id="attach-to-challenge-form" className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <ChallengesList appUid={app.uid} selected={selectedId} onSelect={handleSelect} />
-        </StyledForm>
-      </ModalScroll>
-      <Footer>
-        <ButtonRow>
-          {mutation.isPending && <Loader height={14} />}
-          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
-            Cancel
-          </Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            form="attach-to-challenge-form"
-            disabled={!selectedId || mutation.isPending}
-          >
-            Assign
-          </Button>
-        </ButtonRow>
-      </Footer>
+        </form>
+      </div>
+      <DialogFooter>
+        {mutation.isPending && <Loader height={14} />}
+        <Button variant="outline" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
+          Cancel
+        </Button>
+        <Button type="submit" form="attach-to-challenge-form" disabled={!selectedId || mutation.isPending}>
+          Assign
+        </Button>
+      </DialogFooter>
     </>
   )
 }
@@ -157,15 +150,18 @@ export function useAttachToChallengeModal({
   const { isShown, setShowModal } = useModal()
 
   const modalComp = (
-    <ModalNext
-      id="attach-to-challenge-modal"
-      data-testid={`modal-${resource}-attach-to-challenge`}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop disableClose={false} headerText="Assign to challenge: " hide={() => setShowModal(false)} />
-      <ChallengeAppForm resource={resource} app={selected} setShowModal={setShowModal} onSuccess={onSuccess} />
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent
+        id="attach-to-challenge-modal"
+        data-testid={`modal-${resource}-attach-to-challenge`}
+        variant="medium"
+      >
+        <DialogHeader>
+          <DialogTitle>Assign to challenge</DialogTitle>
+        </DialogHeader>
+        <ChallengeAppForm resource={resource} app={selected} setShowModal={setShowModal} onSuccess={onSuccess} />
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

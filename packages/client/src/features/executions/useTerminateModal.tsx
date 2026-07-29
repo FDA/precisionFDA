@@ -1,20 +1,13 @@
-import React, { useMemo } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import styled from 'styled-components'
+import { useMemo } from 'react'
 import { Loader } from '../../components/Loader'
-import { ResourceTable } from '../../components/ResourceTable'
-import { ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
 import { useModal } from '../modal/useModal'
 import { terminateJobsRequest } from './executions.api'
-import { IExecution } from './executions.types'
-import { Button } from '../../components/Button'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
-
-const StyledResourceTable = styled(ResourceTable)`
-  padding: 0.5rem;
-  min-width: 300px;
-`
+import type { IExecution } from './executions.types'
 
 export function useTerminateModal({ selected }: { selected: IExecution[] }) {
   const queryClient = useQueryClient()
@@ -47,33 +40,42 @@ export function useTerminateModal({ selected }: { selected: IExecution[] }) {
   }
 
   const modalComp = (
-    <ModalNext
-      id="terminate-executions-modal"
-      data-testid="modal-execution-terminate"
-      headerText="Terminate selected execution?"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalScroll>
-        <StyledResourceTable
-          rows={selected.map(s => {
-            return {
-              name: <div>{s.name}</div>,
-              location: <div>{s.scope}</div>,
-            }
-          })}
-        />
-      </ModalScroll>
-      <Footer>
-        <ButtonRow>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="terminate-executions-modal" data-testid="modal-execution-terminate" variant="medium">
+        <DialogHeader>
+          <DialogTitle>Terminate selected execution?</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-(--modal-max-height,50vh) flex-1 overflow-auto **:data-[slot=table-container]:overflow-visible">
+          <div className="min-w-75 p-2">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead sticky>Name</TableHead>
+                  <TableHead sticky>Location</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selected.map(s => (
+                  <TableRow key={s.uid}>
+                    <TableCell className="whitespace-normal">{s.name}</TableCell>
+                    <TableCell className="whitespace-normal">{s.scope}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+        <DialogFooter className="items-center">
           {mutation.isPending && <Loader />}
-          <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button data-variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
+          <Button variant="outline" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleSubmit} disabled={mutation.isPending}>
             Terminate
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

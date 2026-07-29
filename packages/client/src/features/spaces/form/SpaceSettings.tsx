@@ -14,7 +14,6 @@ import { PageTitle } from '@/components/Page/page.styles'
 import { StyledTagItem, StyledTags } from '@/components/Tags'
 import { useEditTagsModal } from '@/features/actionModals/useEditTagsModal'
 import { type EditSpacePayload, editSpaceRequest, spaceRequest } from '@/features/spaces/spaces.api'
-import { UserLayout } from '@/layouts/UserLayout'
 import { SpaceTypeName } from '../common'
 import type { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
@@ -185,13 +184,11 @@ export const SpaceSettings = () => {
   }
 
   return (
-    <UserLayout mainScroll>
-      <StyledPageCenter>
-        <StyledPageContent>
-          <PageTitle className="pt-2">Space Settings</PageTitle>
-          <SpaceSettingsForm space={data.space} />
-        </StyledPageContent>
-      </StyledPageCenter>
-    </UserLayout>
+    <StyledPageCenter className="px-4 py-6 sm:px-8">
+      <StyledPageContent>
+        <PageTitle className="pt-2">Space Settings</PageTitle>
+        <SpaceSettingsForm space={data.space} />
+      </StyledPageContent>
+    </StyledPageCenter>
   )
 }

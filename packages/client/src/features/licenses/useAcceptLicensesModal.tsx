@@ -1,18 +1,18 @@
-import React, { ReactElement, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { type ReactElement, useState } from 'react'
 import styled from 'styled-components'
-import { Checkbox } from '../../components/Checkbox'
+import { Button } from '../../components/Button'
+import { ChevronRightIcon } from '../../components/icons/ChevronRightIcon'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 import { SideTabs } from '../../components/SideTab/SideTabs'
+import { Checkbox } from '../../components/ui/checkbox'
 import { colors } from '../../styles/theme'
+import type { AcceptedLicense } from '../apps/apps.types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { acceptLicensesRequest } from './api'
-import { License } from './types'
-import { ChevronRightIcon } from '../../components/icons/ChevronRightIcon'
-import { AcceptedLicense } from '../apps/apps.types'
-import { Button } from '../../components/Button'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import type { License } from './types'
 
 const StyledLicenceTitle = styled.div``
 
@@ -89,8 +89,8 @@ export const useAcceptLicensesModal = () => {
     setShowModal(true)
   }
 
-  const handleClick = (evt: React.ChangeEvent<HTMLInputElement>, license: License) => {
-    if (evt.target.checked) {
+  const handleCheckedChange = (checked: boolean, license: License) => {
+    if (checked) {
       setSelectedLicenses(prev => [...prev, license])
     } else {
       setSelectedLicenses(prev => prev.filter(element => element.id !== license.id))
@@ -100,7 +100,10 @@ export const useAcceptLicensesModal = () => {
   const getTitle = (license: License): ReactElement => (
     <>
       {!license.approval_required && (
-        <Checkbox onClick={(evt: React.ChangeEvent<HTMLInputElement>) => handleClick(evt, license)} />
+        <Checkbox
+          checked={selectedLicenses.some(selectedLicense => selectedLicense.id === license.id)}
+          onCheckedChange={checked => handleCheckedChange(checked, license)}
+        />
       )}
       <StyledTabTitle>
         <StyledLicenceTitle>{license.title}</StyledLicenceTitle>

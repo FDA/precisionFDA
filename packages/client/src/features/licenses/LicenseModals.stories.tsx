@@ -1,11 +1,8 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useEffect } from 'react'
 import { licensesMocks, mockAcceptedLicenses, mockLicenses } from '../../mocks/handlers/licenses.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
-import { WithListData } from '../../stories/helpers'
-import { FileLicense } from '../assets/assets.types'
-import { fetchFiles } from '../files/files.api'
-import { IFile } from '../files/files.types'
+import type { FileLicense } from '../assets/assets.types'
 import { useAcceptLicenseModal } from './useAcceptLicenseModal'
 import { useAcceptLicensesModal } from './useAcceptLicensesModal'
 import { useAttachLicensesModal } from './useAttachLicensesModal'
@@ -44,10 +41,10 @@ export const AcceptLicensesModal: Story = {
   render: () => <AcceptLicensesModalWrapper />,
 }
 
-const AcceptLicenseModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
+const AcceptLicenseModalWrapper = () => {
   const fileWithLicense = {
-    uid: data?.files?.[0]?.uid || 'file-uid-1',
-    dxid: data?.files?.[0]?.uid || 'file-dxid-1',
+    uid: 'file-accept-license-example-1',
+    dxid: 'file-accept-license-example-1',
     fileLicense: {
       id: '1',
       title: 'MIT License',
@@ -71,17 +68,13 @@ const AcceptLicenseModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
 }
 
 export const AcceptLicenseModal: Story = {
-  render: () => (
-    <WithListData resource="files" fetchList={fetchFiles}>
-      {({ data }) => <AcceptLicenseModalWrapper data={data as { files: IFile[] }} />}
-    </WithListData>
-  ),
+  render: () => <AcceptLicenseModalWrapper />,
 }
 
-const AttachLicensesModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
+const AttachLicensesModalWrapper = () => {
   const fileForLicense = {
-    uid: data?.files?.[0]?.uid || 'file-uid-1',
-    dxid: data?.files?.[0]?.uid || 'file-dxid-1',
+    uid: 'file-attach-license-example-1',
+    dxid: 'file-attach-license-example-1',
     fileLicense: undefined as FileLicense | undefined,
   }
 
@@ -101,17 +94,13 @@ const AttachLicensesModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
 }
 
 export const AttachLicensesModal: Story = {
-  render: () => (
-    <WithListData resource="files" fetchList={fetchFiles}>
-      {({ data }) => <AttachLicensesModalWrapper data={data as { files: IFile[] }} />}
-    </WithListData>
-  ),
+  render: () => <AttachLicensesModalWrapper />,
 }
 
-const DetachLicenseModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
+const DetachLicenseModalWrapper = () => {
   const fileWithLicense = {
-    uid: data?.files?.[0]?.uid || 'file-uid-1',
-    dxid: data?.files?.[0]?.uid || 'file-dxid-1',
+    uid: 'file-detach-license-example-1',
+    dxid: 'file-detach-license-example-1',
     fileLicense: {
       id: '1',
       title: 'MIT License',
@@ -135,16 +124,12 @@ const DetachLicenseModalWrapper = ({ data }: { data: { files: IFile[] } }) => {
 }
 
 export const DetachLicenseModal: Story = {
-  render: () => (
-    <WithListData resource="files" fetchList={fetchFiles}>
-      {({ data }) => <DetachLicenseModalWrapper data={data as { files: IFile[] }} />}
-    </WithListData>
-  ),
+  render: () => <DetachLicenseModalWrapper />,
 }
 
 const AcceptLicensesWithApprovalModalWrapper = () => {
   const { modalComp, setLicensesAndShow } = useAcceptLicensesModal()
-  
+
   const licensesWithApproval = [
     mockLicenses[0], // MIT - no approval required
     mockLicenses[1], // Commercial - approval required, pending
@@ -160,7 +145,7 @@ const AcceptLicensesWithApprovalModalWrapper = () => {
   useEffect(() => {
     setLicensesAndShow(licensesWithApproval, mockAcceptedLicenses)
   }, [])
-  
+
   return modalComp
 }
 

@@ -73,6 +73,10 @@ function getBase64(file?: File, callback?: (a: string | null) => void) {
   }
 }
 
+function datetimeLocalToDate(value: string) {
+  return value ? new Date(value) : undefined
+}
+
 export const ChallengeForm = ({
   challenge,
   defaultValues = {},
@@ -208,7 +212,8 @@ export const ChallengeForm = ({
           <FieldGroup label="Start at" required>
             <StyledDateInput
               type="datetime-local"
-              {...register('startAt', { valueAsDate: true })}
+              step="any"
+              {...register('startAt', { setValueAs: datetimeLocalToDate })}
               disabled={isSubmitting || ended}
               data-testid="challenge-start-at-input"
             />
@@ -218,7 +223,8 @@ export const ChallengeForm = ({
           <FieldGroup label="End at" required>
             <StyledDateInput
               type="datetime-local"
-              {...register('endAt', { valueAsDate: true })}
+              step="any"
+              {...register('endAt', { setValueAs: datetimeLocalToDate })}
               disabled={isSubmitting || ended}
               data-testid="challenge-end-at-input"
             />

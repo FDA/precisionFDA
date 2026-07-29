@@ -28,7 +28,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { getReviewAreaCopyTarget, isOpenable, type ReviewAreaCopyTarget } from './file.utils'
 import { moveFilesRequest } from './files.api'
-import type { IFile, IFolder, NodePermissions, TreeOnSelectInfo } from './files.types'
+import type { IFile, NodePermissions, TreeOnSelectInfo } from './files.types'
 import { normalizePermissions } from './normalizePermissions'
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
@@ -513,7 +513,7 @@ export const useFilesSelectActions = ({
     {
       name: 'Load into GSRS',
       type: 'link',
-      isDisabled: selected.length !== 1 || !selected[0].tags.includes('GSRS'),
+      isDisabled: selected.length !== 1 || !selected[0].tags?.includes('GSRS'),
       link:
         selected.length === 1
           ? `/ginas/app/ui/substances/register?action=pfda-file-import&file-uri=${encodeURIComponent(`/api/v2/files/${selected[0].uid}/${sanitizeFileName(selected[0].name)}?inline=true`)}`

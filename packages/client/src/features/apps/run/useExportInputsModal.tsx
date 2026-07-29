@@ -1,20 +1,14 @@
 import { useState } from 'react'
 import { Tooltip } from 'react-tooltip'
-import styled from 'styled-components'
-import { Button } from '../../../components/Button'
-import CodeMirrorEditor from '../../../components/CodeMirrorEditor/CodeMirrorEditor'
-import { toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import CodeMirrorEditor from '@/components/CodeMirrorEditor/CodeMirrorEditor'
+import { toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { cn } from '@/utils/cn'
 import { useFetchFilesByUIDQuery } from '../../files/query/useFetchFilesByUIDQuery'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
 import type { IApp } from '../apps.types'
 import { generateCopyUrl } from './utils'
-
-const StyledButtonRow = styled(ButtonRow)`
-  justify-content: space-between;
-  flex: 1 0 auto;
-`
 
 export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: boolean; app: IApp }) => {
   const { isShown, setShowModal } = useModal()
@@ -22,10 +16,11 @@ export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: 
   const [fileUids, setFileUids] = useState<string[]>([])
 
   const { isFetching, data: userListFiles } = useFetchFilesByUIDQuery(fileUids || [])
-  // const areAllFilePublic = userListFiles?.every(f => f.scope === 'public')
+  // const areAllFilePublic = userListFiles?.data.every(f => f.scope === 'public')
   // Temporarily disabling public files check
   const areAllFilePublic = true
-  const areFiles = userListFiles ? userListFiles?.length > 0 : false
+  const areFiles = (userListFiles?.data.length ?? 0) > 0
+  const copyDisabled = isFetching || (areFiles && !areAllFilePublic)
 
   const openModal = async (data: unknown, fuids: string[]) => {
     setShowModal(true)
@@ -45,36 +40,41 @@ export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: 
   }
 
   const modalComp = (
-    <ModalNext
-      id="modal-files-add-folder"
-      data-testid="modal-files-add-folder"
-      isShown={Boolean(isShown)}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop headerText="Export Input Values" hide={() => setShowModal(false)} />
-      <ModalScroll>
-        <CodeMirrorEditor
-          options={{
-            minimap: {
-              enabled: false,
-            },
-            padding: { top: 16 },
-          }}
-          formatDocument
-          defaultLanguage="json"
-          height="40vh"
-          width="50vw"
-          onChange={val => setDisplayData(val ?? '')}
-          value={displayData}
-        />
-      </ModalScroll>
-      <Footer>
-        <StyledButtonRow>
+    <Dialog open={Boolean(isShown)} onOpenChange={open => !open && setShowModal(false)}>
+      <DialogContent
+        id="modal-export-inputs"
+        data-testid="modal-export-inputs"
+        variant="medium"
+        className="min-w-0 gap-4 overflow-hidden"
+      >
+        <DialogHeader>
+          <DialogTitle>Export Input Values</DialogTitle>
+        </DialogHeader>
+        <div className="min-w-0 max-h-(--modal-max-height,50vh) flex-1 overflow-auto">
+          <CodeMirrorEditor
+            options={{
+              minimap: {
+                enabled: false,
+              },
+              padding: { top: 16 },
+            }}
+            formatDocument
+            defaultLanguage="json"
+            height="40vh"
+            width="100%"
+            onChange={val => setDisplayData(val ?? '')}
+            value={displayData}
+          />
+        </div>
+        <DialogFooter
+          className={cn('flex-row flex-wrap items-center gap-2', showCopyButton ? 'justify-between' : 'justify-end')}
+        >
           {showCopyButton ? (
-            <ButtonRow>
+            <div className="flex flex-wrap gap-2">
               <Button
-                disabled={isFetching || (areFiles && !areAllFilePublic)}
+                disabled={copyDisabled}
                 type="button"
+                variant="outline"
                 onClick={() => handleCopy('app')}
                 data-tooltip-id="selected-private-file-error"
                 data-tooltip-content="One or more files are private. Make sure to make those files public to share."
@@ -82,8 +82,9 @@ export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: 
                 Copy link for Current App
               </Button>
               <Button
-                disabled={isFetching || (areFiles && !areAllFilePublic)}
+                disabled={copyDisabled}
                 type="button"
+                variant="outline"
                 onClick={() => handleCopy('appSeries')}
                 data-tooltip-id="selected-private-file-error"
                 data-tooltip-content="One or more files are private. Make sure to make those files public to share."
@@ -91,18 +92,14 @@ export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: 
                 Copy link for Latest App
               </Button>
               {areFiles && !areAllFilePublic && <Tooltip id="selected-private-file-error" />}
-            </ButtonRow>
-          ) : (
-            <div />
-          )}
-          <ButtonRow>
-            <Button type="button" onClick={() => setShowModal(false)}>
-              Close
-            </Button>
-          </ButtonRow>
-        </StyledButtonRow>
-      </Footer>
-    </ModalNext>
+            </div>
+          ) : null}
+          <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

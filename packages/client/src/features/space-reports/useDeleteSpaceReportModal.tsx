@@ -1,21 +1,15 @@
-import { useMemo } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import styled from 'styled-components'
-import { Button } from '@/components/Button'
+import { useMemo } from 'react'
 import { Loader } from '@/components/Loader'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
-import { StyledTable, StyledTD } from '@/components/ResourceTable'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatDate, itemsCountString } from '@/utils/formatting'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
-import { ISpaceReport } from './space-report.types'
+import type { ISpaceReport } from './space-report.types'
 import { deleteReports } from './space-reports.api'
 import { reportStateToTextMap } from './useSpaceReportColumns'
-
-const StyledReportTable = styled(StyledTable)`
-  padding: 0.5rem;
-`
 
 export function useDeleteSpaceReportModal({
   selected,
@@ -59,41 +53,45 @@ export function useDeleteSpaceReportModal({
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
+  const title = `Delete ${itemsCountString('report', momoSelected.length)}?`
+
   const modalComp = (
-    <ModalNext id="space-report-delete-modal" isShown={isShown} hide={() => close()}>
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={`Delete ${itemsCountString('report', momoSelected.length)}?`}
-        hide={() => setShowModal(false)}
-      />
-      <ModalScroll>
-        <StyledReportTable>
-          <thead>
-            <tr>
-              <th>Created at</th>
-              <th>State</th>
-            </tr>
-          </thead>
-          <tbody>
-            {momoSelected.map(report => (
-              <tr key={report.id}>
-                <StyledTD>{formatDate(report.createdAt)}</StyledTD>
-                <StyledTD>{reportStateToTextMap[report.state]}</StyledTD>
-              </tr>
-            ))}
-          </tbody>
-        </StyledReportTable>
-      </ModalScroll>
-      <Footer>
-        <ButtonRow>
+    <Dialog open={Boolean(isShown)} onOpenChange={open => !open && close()}>
+      <DialogContent id="space-report-delete-modal" variant="medium">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-(--modal-max-height,50vh) flex-1 overflow-auto **:data-[slot=table-container]:overflow-visible">
+          <div className="p-2">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead sticky>Created at</TableHead>
+                  <TableHead sticky>State</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {momoSelected.map(report => (
+                  <TableRow key={report.id}>
+                    <TableCell>{formatDate(report.createdAt)}</TableCell>
+                    <TableCell>{reportStateToTextMap[report.state]}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+        <DialogFooter className="items-center">
           {mutation.isPending && <Loader />}
-          <Button onClick={() => close()}>Cancel</Button>
-          <Button data-variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
+          <Button variant="outline" onClick={() => close()}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleSubmit} disabled={mutation.isPending}>
             Delete
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

@@ -1,53 +1,76 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
-import React, { useEffect, useMemo, useState } from 'react'
-import styled from 'styled-components'
+import type { AxiosError } from 'axios'
+import { useEffect, useMemo, useState } from 'react'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FolderIcon } from '../../../components/icons/FolderIcon'
 import { Loader } from '../../../components/Loader'
-import { VerticalCenter } from '../../../components/Page/page.styles'
-import { ResourceTable, StyledName } from '../../../components/ResourceTable'
-import { itemsCountString, pluralize } from '../../../utils/formatting'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { Footer, ModalScroll } from '../../modal/modal.styles'
-import { useModal } from '../../modal/useModal'
-import { ApiErrorResponse, DownloadListResponse, ServerScope } from '../../home/types'
-import { fetchFilesListLockingRequest, LockUnlockActionType, lockUnlockFilesRequest } from '../files.api'
-import { IFile } from '../files.types'
-import { Button } from '../../../components/Button'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
-
-const StyledResourceTable = styled(ResourceTable)`
-  padding-left: 12px;
-`
-const Spacing = styled.div`
-  padding: 12px;
-`
-
-const StyledPath = styled.div`
-  min-width: 150px;
-`
+import { Button } from '../../../components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table'
+import { itemsCountString, pluralize } from '../../../utils/formatting'
+import type { ApiErrorResponse, DownloadListResponse, ServerScope } from '../../home/types'
+import { useModal } from '../../modal/useModal'
+import { fetchFilesListLockingRequest, type LockUnlockActionType, lockUnlockFilesRequest } from '../files.api'
+import type { IFile } from '../files.types'
 
 const ActionTypeName: Record<LockUnlockActionType, string> = {
   lock: 'Lock',
   unlock: 'Unlock',
 }
 
-const LockUnlockFiles = ({ files, statusText }: { files: DownloadListResponse[] | undefined; statusText: string | null }) => {
-  if (statusText) return <Spacing>{statusText}</Spacing>
+const LockUnlockFiles = ({
+  files,
+  statusText,
+}: {
+  files: DownloadListResponse[] | undefined
+  statusText: string | null
+}) => {
+  if (statusText) return <div className="p-3">{statusText}</div>
   if (!files?.length) return null
   return (
-    <StyledResourceTable
-      rows={files.map(s => ({
-        name: (
-          <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
-            <VerticalCenter>{s.type === 'file' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
-            {s.name}
-          </StyledName>
-        ),
-        path: <StyledPath>{s.fsPath}</StyledPath>,
-      }))}
-    />
+    <div className="overflow-hidden rounded-lg border border-border">
+      <div className="max-h-[calc(100dvh-14rem)] overflow-auto sm:max-h-[60vh] **:data-[slot=table-container]:overflow-visible">
+        <Table className="block w-full text-left sm:table sm:min-w-130 sm:table-fixed">
+          <TableHeader className="hidden sm:table-header-group">
+            <TableRow className="border-border hover:bg-transparent">
+              <TableHead sticky scope="col" className="h-auto w-[40%] px-4 py-2">
+                Name
+              </TableHead>
+              <TableHead sticky scope="col" className="h-auto px-4 py-2">
+                Path
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="block bg-background sm:table-row-group">
+            {files.map(s => (
+              <TableRow key={s.id} className="block p-4 hover:bg-muted/40 sm:table-row sm:p-0">
+                <TableCell className="block whitespace-normal p-0 align-middle sm:table-cell sm:px-4 sm:py-3">
+                  <a
+                    data-turbolinks="false"
+                    href={s.viewURL}
+                    target="_blank"
+                    className="block w-full max-w-full wrap-break-word whitespace-normal text-left font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    rel="noreferrer"
+                  >
+                    <span className="inline-block align-text-bottom">
+                      {s.type === 'file' ? <FileIcon width={14} height={14} /> : <FolderIcon width={14} height={14} />}
+                    </span>{' '}
+                    <span>{s.name}</span>
+                  </a>
+                </TableCell>
+                <TableCell
+                  className="mt-2 block wrap-break-word whitespace-normal p-0 text-muted-foreground sm:mt-0 sm:table-cell sm:px-4 sm:py-3 sm:align-middle"
+                  title={s.fsPath}
+                >
+                  {s.fsPath}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   )
 }
 
@@ -137,32 +160,28 @@ export const useLockUnlockFileModal = ({
   const isSubmitDisabled = () => {
     return downloadStatus !== 'success' || mutation.status !== 'idle' || !data?.length
   }
+  const title = `${ActionTypeName[type]} ${numberOfFiles ? itemsCountString('item', numberOfFiles) : '...'}`
 
   const modalComp = (
-    <ModalNext
-      id="modal-files-lock-unlock"
-      data-testid="modal-files-lock-unlock"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop
-        headerText={`${ActionTypeName[type]} ${numberOfFiles ? itemsCountString('item', numberOfFiles) : '...'}`}
-        hide={() => setShowModal(false)}
-      />
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="modal-files-lock-unlock" data-testid="modal-files-lock-unlock" variant="medium">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
 
-      <ModalScroll>
         <LockUnlockFiles files={data} statusText={getStatusText()} />
-      </ModalScroll>
-      <Footer>
-        {mutation.isPending && <Loader />}
-        <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
-          Cancel
-        </Button>
-        <Button data-variant="primary" onClick={handleSubmit} disabled={isSubmitDisabled()}>
-          {ActionTypeName[type]}
-        </Button>
-      </Footer>
-    </ModalNext>
+
+        <DialogFooter className="items-center">
+          {mutation.isPending && <Loader />}
+          <Button variant="outline" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={isSubmitDisabled()}>
+            {ActionTypeName[type]}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 
   return {

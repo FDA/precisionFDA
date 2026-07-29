@@ -4,7 +4,6 @@ import { useEffect } from 'react'
 import { Link, useLocation } from 'react-router'
 import { CopyText } from '@/components/CopyText/CopyText'
 import { DatabaseIcon } from '@/components/icons/DatabaseIcon'
-import { Loader } from '@/components/Loader'
 import { ActionsMenu } from '@/components/Menu'
 import { toastInfo } from '@/components/NotificationCenter/ToastHelper'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '@/components/Tags'
@@ -210,7 +209,6 @@ export const DatabaseShow = ({
             <Title>
               <DatabaseIcon height={20} />
               &nbsp;<span data-testid="db-name">{data.name}</span>
-              {['creating', 'starting', 'stopping', 'terminating'].includes(data.status) && <Loader />}
             </Title>
             <Description data-testid="db-description">{data.description}</Description>
           </HeaderLeft>

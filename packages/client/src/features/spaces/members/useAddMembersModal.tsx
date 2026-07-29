@@ -5,18 +5,15 @@ import type { AxiosError } from 'axios'
 import type React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import * as Yup from 'yup'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/utils/cn'
-import { Button } from '../../../components/Button'
-import { FieldGroup, Hint, InputError } from '../../../components/form/form.styles'
-import { InputText } from '../../../components/InputText'
 import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 import type { ApiRailsError } from '../../home/types'
-import { ModalHeaderTop, ModalNext, useModalFloatingPortalHost } from '../../modal/ModalNext'
-import { ButtonRow } from '../../modal/modal.styles'
 import { useModal } from '../../modal/useModal'
 import { addMembersToSpaceRequest } from './members.api'
-import { StyledFields, StyledFooter } from './members.styles'
 import type { MemberRole } from './members.types'
 
 interface FormValues {
@@ -45,7 +42,6 @@ interface AddMembersFormProps {
 }
 
 const AddMembersForm: React.FC<AddMembersFormProps> = ({ spaceId, onClose }) => {
-  const floatingPortalHost = useModalFloatingPortalHost()
   const queryClient = useQueryClient()
   const {
     register,
@@ -90,25 +86,34 @@ const AddMembersForm: React.FC<AddMembersFormProps> = ({ spaceId, onClose }) => 
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <StyledFields>
-        <FieldGroup>
-          <label htmlFor="modal-add-members-invitees">Username List</label>
-          <InputText
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <div className="grid gap-4">
+        <div className="grid gap-2">
+          <label htmlFor="modal-add-members-invitees" className="text-sm font-medium text-foreground">
+            Username List
+          </label>
+          <Input
             {...register('invitees')}
             id="modal-add-members-invitees"
             placeholder=""
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             disabled={mutation.isPending}
+            aria-invalid={errors.invitees ? true : undefined}
           />
-          <Hint>
+          <p className="text-muted-foreground text-sm leading-5">
             Enter usernames or emails seperated by commas. For example: first_user, second_user, third_user@email.com
-          </Hint>
-          <ErrorMessage errors={errors} name="invitees" render={({ message }) => <InputError>{message}</InputError>} />
-        </FieldGroup>
-        <FieldGroup>
-          <label htmlFor="modal-add-members-role">Role</label>
+          </p>
+          <ErrorMessage
+            errors={errors}
+            name="invitees"
+            render={({ message }) => <p className="text-destructive text-sm leading-5">{message}</p>}
+          />
+        </div>
+        <div className="grid gap-2">
+          <label htmlFor="modal-add-members-role" className="text-sm font-medium text-foreground">
+            Role
+          </label>
           <Controller
             name="invitees_role"
             control={control}
@@ -137,7 +142,7 @@ const AddMembersForm: React.FC<AddMembersFormProps> = ({ spaceId, onClose }) => 
                   >
                     <SelectValue placeholder="Choose…" />
                   </SelectTrigger>
-                  <SelectContent side="bottom" align="start" container={floatingPortalHost ?? undefined}>
+                  <SelectContent side="bottom" align="start">
                     {MEMBER_ROLE_OPTIONS.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -148,37 +153,35 @@ const AddMembersForm: React.FC<AddMembersFormProps> = ({ spaceId, onClose }) => 
               )
             }}
           />
-          <Hint>Select the new members role</Hint>
+          <p className="text-muted-foreground text-sm leading-5">Select the new members role</p>
           <ErrorMessage
             errors={errors}
             name="invitees_role"
-            render={({ message }) => <InputError>{message}</InputError>}
+            render={({ message }) => <p className="text-destructive text-sm leading-5">{message}</p>}
           />
-        </FieldGroup>
-      </StyledFields>
-      <StyledFooter>
-        <ButtonRow>
-          <Button
-            type="button"
-            onClick={() => {
-              reset()
-              onClose()
-            }}
-            disabled={mutation.isPending}
-            aria-label="Close modal"
-          >
-            Cancel
-          </Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            disabled={Object.keys(errors).length > 0 || mutation.isPending}
-            aria-label="Submit add members"
-          >
-            Add Members
-          </Button>
-        </ButtonRow>
-      </StyledFooter>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button
+          variant="outline"
+          type="button"
+          onClick={() => {
+            reset()
+            onClose()
+          }}
+          disabled={mutation.isPending}
+          aria-label="Close modal"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          disabled={Object.keys(errors).length > 0 || mutation.isPending}
+          aria-label="Submit add members"
+        >
+          Add Members
+        </Button>
+      </DialogFooter>
     </form>
   )
 }
@@ -186,20 +189,14 @@ const AddMembersForm: React.FC<AddMembersFormProps> = ({ spaceId, onClose }) => 
 export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
   const { isShown, setShowModal } = useModal()
   const modalComp = isShown && (
-    <ModalNext
-      id="modal-add-members"
-      data-testid="modal-add-members"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-      variant="medium"
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText="Add members to space"
-        hide={() => setShowModal(false)}
-      />
-      <AddMembersForm spaceId={spaceId} onClose={() => setShowModal(false)} />
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="modal-add-members" data-testid="modal-add-members" variant="medium">
+        <DialogHeader>
+          <DialogTitle>Add members to space</DialogTitle>
+        </DialogHeader>
+        <AddMembersForm spaceId={spaceId} onClose={() => setShowModal(false)} />
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

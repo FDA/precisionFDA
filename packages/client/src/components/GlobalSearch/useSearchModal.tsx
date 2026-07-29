@@ -415,7 +415,7 @@ export const SearchModal = ({ isShown, hide }: { isShown: boolean; hide: () => v
           </div>
           <div className={searchBar}>
             <div className={searchBarIconLeft}>
-              <Search aria-hidden className="size-[18px] shrink-0" strokeWidth={2} />
+              <Search aria-hidden className="size-4.5 shrink-0" strokeWidth={2} />
             </div>
             <input
               ref={searchInputRef}

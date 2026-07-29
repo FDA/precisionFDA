@@ -185,14 +185,16 @@ export const CreateAppForm = {
     // Set Ubuntu release first
     await CreateAppForm.setUbuntuRelease(page, '24.04')
 
+    const createAppResponsePromise = page.waitForResponse(
+      response => response.url().includes('/api/v2/apps') && response.request().method() === 'POST',
+      { timeout: TIMEOUTS.appSave },
+    )
+
     // Click Create button
     await page.getByRole('button', { name: 'Create App' }).click({ force: true })
 
-    // Wait for the create app API call to complete
-    await page.waitForLoadState('networkidle')
-
-    // Wait for success toast
-    await expect(page.getByText('Your app was created successfully')).toBeVisible()
+    const response = await createAppResponsePromise
+    expect(response.ok()).toBe(true)
 
     await AppDetail.validateBackToAppsLink(page)
   },

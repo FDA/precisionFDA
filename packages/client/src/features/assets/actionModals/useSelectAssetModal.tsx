@@ -1,37 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
-import { Checkbox } from '../../../components/Checkbox'
-import { InputText } from '../../../components/InputText'
-import { Loader } from '../../../components/Loader'
-import { Radio } from '../../../components/Radio'
-import { StyledName } from '../../../components/ResourceTable'
-import { useDebounce } from '../../../components/Table/useDebounce'
-import { Tabs } from '../../../components/Tabs/Tabs'
-import { ArrowUpRightFromSquareIcon } from '../../../components/icons/ArrowUpRightFromSquareIcon'
+import { ExternalLink } from 'lucide-react'
+import { useState } from 'react'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { GlobeIcon } from '../../../components/icons/GlobeIcon'
+import { Loader } from '../../../components/Loader'
+import { Radio } from '../../../components/Radio'
+import { useDebounce } from '../../../components/Table/useDebounce'
+import { Button } from '../../../components/ui/button'
+import { Checkbox } from '../../../components/ui/checkbox'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog'
+import { Input } from '../../../components/ui/input'
+import { Switch } from '../../../components/ui/switch'
+import { Table, TableBody, TableCell, TableRow } from '../../../components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../../modal/modal.styles'
+import type { DialogType, ServerScope } from '../../home/types'
 import { useModal } from '../../modal/useModal'
-import {
-  ButtonBadge,
-  SelectableTable,
-  StyledAction,
-  StyledCell,
-  StyledContainer,
-  StyledFileDetail,
-  StyledFileDetailItem,
-  StyledFilterSection,
-  StyledOnlyMine,
-  StyledRow,
-  StyledSubtitle,
-  Tab,
-} from '../../actionModals/action-modals.styles'
-import { DialogType, ServerScope } from '../../home/types'
 import { fetchFilteredAssets } from '../assets.api'
-import { IAsset } from '../assets.types'
-import { Button } from '../../../components/Button'
+import type { IAsset } from '../assets.types'
 
 const Row = ({
   asset,
@@ -48,7 +34,8 @@ const Row = ({
   checkboxCallback: (checked: boolean, asset: IAsset) => void
   checked?: boolean
 }) => (
-  <StyledRow
+  <TableRow
+    className="cursor-pointer hover:bg-muted/50"
     onClick={() => {
       if (!viewOnly) {
         if (type === 'radio') {
@@ -59,39 +46,59 @@ const Row = ({
       }
     }}
   >
-    <StyledCell>
-      <StyledName>
+    <TableCell className="whitespace-normal px-3 py-2">
+      <div className="flex items-start gap-2 text-foreground">
         {type === 'radio' && !viewOnly && (
-          <StyledContainer>
+          <div className="mr-2 shrink-0 pt-0.5">
             <Radio checked={checked} onChange={() => {}} />
-          </StyledContainer>
+          </div>
         )}
         {type === 'checkbox' && !viewOnly && (
-          <StyledContainer>
-            <Checkbox onChange={() => {}} checked={checked} />
-          </StyledContainer>
+          <div className="mr-2 shrink-0 pt-0.5">
+            <Checkbox
+              checked={checked}
+              onCheckedChange={isChecked => checkboxCallback(isChecked, asset)}
+              onClick={event => event.stopPropagation()}
+            />
+          </div>
         )}
-        <FileIcon />
-        {asset.title}
-      </StyledName>
-
-      <StyledFileDetail>
-        {asset.public && <GlobeIcon />}
-
-        {asset.private && 'Private'}
-        {asset.public && 'Public'}
-
-        <StyledFileDetailItem>{asset.location}</StyledFileDetailItem>
-        <StyledFileDetailItem>{asset.user.full_name}</StyledFileDetailItem>
-        <StyledFileDetailItem>{asset.org.name}</StyledFileDetailItem>
-      </StyledFileDetail>
-    </StyledCell>
-    <StyledCell>
-      <StyledAction href={asset.path}>
-        <ArrowUpRightFromSquareIcon />
-      </StyledAction>
-    </StyledCell>
-  </StyledRow>
+        <div className="min-w-0">
+          <div className="break-all">
+            <span className="inline-block align-text-bottom">
+              <FileIcon width={14} height={14} />
+            </span>{' '}
+            <span>{asset.title}</span>
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[85%] leading-5 text-muted-foreground">
+            {asset.public && (
+              <span className="inline-flex items-center">
+                <GlobeIcon height={13} />
+              </span>
+            )}
+            {asset.private && <span>Private</span>}
+            {asset.public && <span>Public</span>}
+            <span>{asset.location}</span>
+            <span>{asset.user.full_name}</span>
+            <span>{asset.org.name}</span>
+          </div>
+        </div>
+      </div>
+    </TableCell>
+    <TableCell className="w-10 px-2 py-2 align-top">
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="text-primary"
+        render={
+          <a href={asset.path} aria-label={`Open ${asset.title}`} onClick={event => event.stopPropagation()}>
+            <span className="sr-only">Open {asset.title}</span>
+          </a>
+        }
+      >
+        <ExternalLink className="size-4 shrink-0" />
+      </Button>
+    </TableCell>
+  </TableRow>
 )
 
 /**
@@ -170,78 +177,100 @@ export const useSelectAssetModal = (
   const assets = assetsData ?? []
 
   const modalComp = (
-    <ModalNext id="select-asset-modal" headerText={title} isShown={isShown} hide={() => setShowModal(false)}>
-      <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
-      {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <Tabs nonSelected={selectedAssets.length === 0}>
-        <Tab title={`Selected ${selectedAssets.length}`} key="selected">
-          {selectedAssets.length === 0 && <StyledRow>No selected assets</StyledRow>}
-          {selectedAssets.length > 0 && (
-            <ModalScroll>
-              <SelectableTable>
-                <tbody>
-                  {selectedAssets.map(asset => (
-                    <Row
-                      asset={asset}
-                      type={type}
-                      viewOnly
-                      key={asset.id}
-                      radioCallback={radioCallback}
-                      checkboxCallback={checkboxCallback}
-                    />
-                  ))}
-                </tbody>
-              </SelectableTable>
-            </ModalScroll>
-          )}
-        </Tab>
-        <Tab title={`Assets ${assets.length}`} key="files">
-          <StyledFilterSection>
-            <InputText placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
-            <StyledOnlyMine>
-              <input type="checkbox" onClick={evt => toggleOnlyMine((evt.target as HTMLInputElement).checked)} />
-              Only mine
-            </StyledOnlyMine>
-          </StyledFilterSection>
-          {isLoadingAssets && <Loader />}
-          {loadingAssetsStatus === 'success' && (
-            <ModalScroll>
-              <SelectableTable>
-                <tbody>
-                  {assets
-                    .filter((asset: IAsset) => (showOnlyMyAssets ? isMyAsset(asset) && showOnlyMyAssets : true))
-                    .map((asset: IAsset) => (
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent
+        id="select-asset-modal"
+        variant="medium"
+        className="flex max-h-[calc(100dvh-2rem)] flex-col gap-4 overflow-hidden"
+      >
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        {subtitle && <div className="text-muted-foreground text-sm leading-5">{subtitle}</div>}
+        <Tabs defaultValue="assets" className="min-h-0 flex-1 flex-col overflow-hidden">
+          <TabsList className="shrink-0">
+            <TabsTrigger value="assets">Assets {assets.length}</TabsTrigger>
+            <TabsTrigger value="selected">Selected {selectedAssets.length}</TabsTrigger>
+          </TabsList>
+          <TabsContent value="assets" className="flex min-h-0 min-w-[min(400px,100%)] flex-1 flex-col overflow-hidden">
+            <div className="flex flex-row items-start gap-2 pb-3">
+              <Input className="flex-1" placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
+              <label
+                htmlFor="select-assets-only-mine"
+                className="flex shrink-0 flex-col items-center gap-1 text-muted-foreground text-xs font-medium"
+              >
+                <Switch id="select-assets-only-mine" checked={showOnlyMyAssets} onCheckedChange={toggleOnlyMine} />
+                <span>Mine only</span>
+              </label>
+            </div>
+            {isLoadingAssets && <Loader />}
+            {loadingAssetsStatus === 'success' && (
+              <div className="min-h-0 flex-1 overflow-auto">
+                <Table>
+                  <TableBody>
+                    {assets
+                      .filter((asset: IAsset) => (showOnlyMyAssets ? isMyAsset(asset) && showOnlyMyAssets : true))
+                      .map((asset: IAsset) => (
+                        <Row
+                          asset={asset}
+                          type={type}
+                          viewOnly={false}
+                          key={asset.id}
+                          radioCallback={radioCallback}
+                          checkboxCallback={checkboxCallback}
+                          checked={selectedAssets.some(selected => asset.id === selected.id)}
+                        />
+                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+          <TabsContent
+            value="selected"
+            className="flex min-h-0 min-w-[min(400px,100%)] flex-1 flex-col overflow-hidden"
+          >
+            {selectedAssets.length === 0 && (
+              <div className="border-t px-3 py-2 text-foreground">No selected assets</div>
+            )}
+            {selectedAssets.length > 0 && (
+              <div className="min-h-0 flex-1 overflow-auto">
+                <Table>
+                  <TableBody>
+                    {selectedAssets.map(asset => (
                       <Row
                         asset={asset}
                         type={type}
-                        viewOnly={false}
+                        viewOnly
                         key={asset.id}
                         radioCallback={radioCallback}
                         checkboxCallback={checkboxCallback}
-                        checked={selectedAssets.some(selected => asset.id === selected.id)}
                       />
                     ))}
-                </tbody>
-              </SelectableTable>
-            </ModalScroll>
-          )}
-        </Tab>
-      </Tabs>
-      <Footer>
-        <ButtonRow>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+        <DialogFooter>
           <Button
+            variant="outline"
             onClick={() => {
               setShowModal(false)
             }}
           >
             Cancel
           </Button>
-          <Button data-variant="primary" onClick={handleSubmit} disabled={selectedAssets?.length === 0}>
-            Select &nbsp;<ButtonBadge>{selectedAssets?.length}</ButtonBadge>
+          <Button onClick={handleSubmit} disabled={selectedAssets?.length === 0}>
+            Select &nbsp;
+            <span className="rounded-[10px] bg-primary-foreground/20 px-1.75 py-0.75 leading-none">
+              {selectedAssets?.length}
+            </span>
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

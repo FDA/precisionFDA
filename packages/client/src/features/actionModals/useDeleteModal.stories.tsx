@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useEffect } from 'react'
 import { mockDeleteApps } from '../../mocks/handlers/apps.handlers'
 import { mockDeleteAssets } from '../../mocks/handlers/assets.handlers'
@@ -23,15 +23,33 @@ type Props = {
 }
 type Story = StoryObj<Props>
 
+type DeleteItem = {
+  id: string
+  name: string
+  location: string
+}
+
+const makeLongSelectedList = <T extends DeleteItem>(items: T[]) =>
+  Array.from({ length: 10 }, (_, index) => {
+    const item = items[index % items.length]
+    const itemNumber = index + 1
+
+    return {
+      ...item,
+      id: `${item.id}-${itemNumber}`,
+      name: `${item.name} ${itemNumber}`,
+    }
+  })
+
 const DeleteModalWrapper = ({ resource, multipleItems }: Props) => {
   const getSelectedData = () => {
     switch (resource) {
       case 'app':
-        return multipleItems ? mockDeleteApps : [mockDeleteApps[0]]
+        return multipleItems ? makeLongSelectedList(mockDeleteApps) : [mockDeleteApps[0]]
       case 'asset':
-        return multipleItems ? mockDeleteAssets : [mockDeleteAssets[0]]
+        return multipleItems ? makeLongSelectedList(mockDeleteAssets) : [mockDeleteAssets[0]]
       case 'workflow':
-        return multipleItems ? mockDeleteWorkflows : [mockDeleteWorkflows[0]]
+        return multipleItems ? makeLongSelectedList(mockDeleteWorkflows) : [mockDeleteWorkflows[0]]
       default:
         return [mockDeleteApps[0]]
     }
@@ -40,7 +58,7 @@ const DeleteModalWrapper = ({ resource, multipleItems }: Props) => {
   const { modalComp, setShowModal } = useDeleteModal({
     resource,
     selected: getSelectedData(),
-    onSuccess: (res) => console.log('Delete success:', res),
+    onSuccess: res => console.log('Delete success:', res),
     request: () => Promise.resolve({}),
   })
 

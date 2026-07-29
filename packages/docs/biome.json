@@ -1,9 +1,12 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
   "root": false,
   "extends": "//",
   "files": {
-    "includes": ["app/**", "biome.json"]
+    "includes": [
+      "app/**",
+      "biome.json"
+    ]
   },
   "linter": {
     "rules": {

@@ -1,24 +1,17 @@
-import React, { useMemo } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import styled from 'styled-components'
-import { AxiosError } from 'axios'
+import type { AxiosError } from 'axios'
+import { useMemo } from 'react'
 import { Loader } from '../../components/Loader'
-import { ResourceTable } from '../../components/ResourceTable'
-import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
-import { useModal } from '../modal/useModal'
-import { APIResource } from '../home/types'
-import { resourceCountString } from '../../utils/formatting'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { Button } from '../../components/Button'
-import { useConfirmModal } from '../files/actionModals/useConfirmModal'
+import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
+import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
 import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../constants'
 import { CONFIRM_APP_REVISION } from '../../constants/consts'
-import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
-
-const StyledResourceTable = styled(ResourceTable)`
-  padding: 0.5rem;
-  min-width: 300px;
-`
+import { resourceCountString } from '../../utils/formatting'
+import { useConfirmModal } from '../files/actionModals/useConfirmModal'
+import type { APIResource } from '../home/types'
+import { useModal } from '../modal/useModal'
 
 export interface CopyResponse {
   meta?: {
@@ -45,7 +38,8 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
 
   const mutation = useMutation({
     mutationKey: ['copy-to-private', resource],
-    mutationFn: ({ ids, properties }: { ids: number[]; properties?: Record<string, unknown> }) => copyFunction(ids, properties),
+    mutationFn: ({ ids, properties }: { ids: number[]; properties?: Record<string, unknown> }) =>
+      copyFunction(ids, properties),
     onError: (e: AxiosError<{ error: { code: string; type: string; message: string } }>) => {
       const error = e?.response?.data?.error
       if (
@@ -86,38 +80,48 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
     mutation.mutateAsync({ ids: momoSelected.map(s => s.id) })
   }
 
+  const title = `Copy ${resourceCountString(resource, momoSelected.length)} to My Home (private)?`
+
   const modalComp = (
-    <ModalNext
-      id={`modal-${resource}-copy-to-private`}
-      data-testid={`modal-${resource}-copy-to-private`}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={`Copy ${resourceCountString(resource, momoSelected.length)} to My Home (private)?`}
-        hide={() => setShowModal(false)}
-      />
-      <ModalScroll>
-        <StyledResourceTable
-          rows={selected.map(s => {
-            return {
-              name: <div>{s.name}</div>,
-            }
-          })}
-        />
-      </ModalScroll>
-      <Footer>
-        <ButtonRow>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent
+        id={`modal-${resource}-copy-to-private`}
+        data-testid={`modal-${resource}-copy-to-private`}
+        variant="medium"
+      >
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-(--modal-max-height,50vh) flex-1 overflow-auto **:data-[slot=table-container]:overflow-visible">
+          <div className="min-w-75">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead sticky>Name</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selected.map(s => (
+                  <TableRow key={s.id}>
+                    <TableCell className="whitespace-normal">{s.name}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+        <DialogFooter className="flex-row items-center justify-end">
           {mutation.isPending && <Loader />}
-          <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button data-variant="primary" onClick={handleSubmit} disabled={mutation.isPending}>
+          <Button variant="outline" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={mutation.isPending}>
             Copy
           </Button>
-        </ButtonRow>
-      </Footer>
-      {confirmModal}
-    </ModalNext>
+        </DialogFooter>
+        {confirmModal}
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

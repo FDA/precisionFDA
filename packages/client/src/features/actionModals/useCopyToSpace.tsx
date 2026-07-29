@@ -2,20 +2,18 @@ import { useMutation } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import type React from 'react'
 import { useMemo, useState } from 'react'
-import { Button } from '@/components/Button'
-import { InputText } from '@/components/InputText'
 import { Loader } from '@/components/Loader'
 import { toastError } from '@/components/NotificationCenter/ToastHelper'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '@/constants'
 import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '@/constants/consts'
 import { displayPayloadMessage, type Payload } from '@/utils/api'
 import { useConfirmModal } from '../files/actionModals/useConfirmModal'
 import type { APIResource, ApiErrorResponse, ApiResponse } from '../home/types'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import { SpaceSelectionList } from '../spaces/SpaceSelectionList'
-import { ModalSearchBar } from './action-modals.styles'
 
 export interface CopyToSpaceProperties {
   createAppRevision?: boolean
@@ -36,26 +34,27 @@ const SpacesList = ({
   const excludeScopes = spaceId ? [`space-${spaceId}`] : []
 
   return (
-    <>
-      <ModalSearchBar>
-        <InputText
-          placeholder={'Search by space name or ID...'}
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
+      <div className="flex shrink-0 gap-2">
+        <Input
+          className="h-8 min-w-0 flex-1"
+          placeholder={'Search space...'}
           value={searchQuery}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
         />
-        <Button type="button" onClick={(): void => setSearchQuery('')}>
+        <Button className="h-8 shrink-0" type="button" variant="outline" onClick={(): void => setSearchQuery('')}>
           Clear
         </Button>
-      </ModalSearchBar>
-      <ModalScroll>
+      </div>
+      <div className="min-h-0 min-w-0 flex-1 overflow-auto">
         <SpaceSelectionList
           excludeScopes={excludeScopes}
           filterString={searchQuery}
           selectedScope={selected}
           onSelect={space => onSelect(space.scope)}
         />
-      </ModalScroll>
-    </>
+      </div>
+    </div>
   )
 }
 
@@ -102,9 +101,10 @@ const CopyToSpaceForm = ({
     'Confirm',
     CONFIRM_APP_REVISION,
     async () => {
+      if (!selectedTarget) return
       setShowAppRevisionConfirmModal(false)
       await mutation.mutateAsync({
-        space: selectedTarget!,
+        space: selectedTarget,
         properties: { createAppRevision: true },
       })
     },
@@ -114,9 +114,10 @@ const CopyToSpaceForm = ({
     'Confirm',
     CONFIRM_APP_SERIES,
     async () => {
+      if (!selectedTarget) return
       setShowAppSeriesConfirmModal(false)
       await mutation.mutateAsync({
-        space: selectedTarget!,
+        space: selectedTarget,
         properties: { createAppSeries: true },
       })
     },
@@ -138,25 +139,22 @@ const CopyToSpaceForm = ({
   }
   return (
     <>
-      <form className="p-4" id="copy-to-space-form" onSubmit={handleSubmit}>
-        <SpacesList selected={selectedTarget} spaceId={spaceId?.toString()} onSelect={handleSelect} />
-      </form>
-      <Footer>
-        <ButtonRow>
+      <div className="flex max-h-(--modal-max-height,50vh) min-h-0 min-w-0 flex-1 flex-col">
+        <form className="flex min-h-0 min-w-0 flex-1 flex-col" id="copy-to-space-form" onSubmit={handleSubmit}>
+          <SpacesList selected={selectedTarget} spaceId={spaceId?.toString()} onSelect={handleSelect} />
+        </form>
+      </div>
+      <DialogFooter className="items-center">
+        <div className="flex items-center justify-end gap-2">
           {mutation.isPending && <Loader height={14} />}
-          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
+          <Button variant="outline" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            form="copy-to-space-form"
-            disabled={!selectedTarget || mutation.isPending}
-          >
+          <Button type="submit" form="copy-to-space-form" disabled={!selectedTarget || mutation.isPending}>
             Copy
           </Button>
-        </ButtonRow>
-      </Footer>
+        </div>
+      </DialogFooter>
       {appSeriesConfirmModal}
       {appRevisionConfirmModal}
     </>
@@ -184,27 +182,26 @@ export function useCopyToSpaceModal<T extends { id: string | number }>({
   const momoSelected = useMemo(() => selected, [selected])
 
   const modalComp = (
-    <ModalNext
-      id={`modal-${resource}-copytospace`}
-      data-testid={`modal-${resource}-copytospace`}
-      isShown={isShown}
-      hide={(): void => setShowModal(false)}
-      variant="medium"
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={`Copy to space: ${momoSelected.length} item${momoSelected.length > 1 ? 's' : ''}`}
-        hide={(): void => setShowModal(false)}
-      />
-      <CopyToSpaceForm
-        updateFunction={updateFunction}
-        resource={resource}
-        selected={selected.map(s => s.id.toString())}
-        spaceId={spaceId}
-        setShowModal={setShowModal}
-        onSuccess={onSuccess}
-      />
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={open => !open && setShowModal(false)}>
+      <DialogContent
+        id={`modal-${resource}-copytospace`}
+        data-testid={`modal-${resource}-copytospace`}
+        variant="medium"
+        className="min-w-0 gap-4 overflow-hidden"
+      >
+        <DialogHeader>
+          <DialogTitle>{`Copy to space: ${momoSelected.length} item${momoSelected.length > 1 ? 's' : ''}`}</DialogTitle>
+        </DialogHeader>
+        <CopyToSpaceForm
+          updateFunction={updateFunction}
+          resource={resource}
+          selected={selected.map(s => s.id.toString())}
+          spaceId={spaceId}
+          setShowModal={setShowModal}
+          onSuccess={onSuccess}
+        />
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

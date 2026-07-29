@@ -1,12 +1,11 @@
 import { useMutation } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { Button } from '@/components/Button'
 import { Loader } from '@/components/Loader'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
-import { ResourceTable } from '@/components/ResourceTable'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { itemsCountString } from '@/utils/formatting'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 
 export interface DeleteResponse {
@@ -65,36 +64,47 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
+  const title = `Delete ${itemsCountString(resource, momoSelected.length)}?`
+
   const modalComp = (
-    <ModalNext
-      id="modal-resource-delete"
-      data-testid="modal-resource-delete"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}
-        hide={() => setShowModal(false)}
-      />
-      <ModalScroll>
-        <ResourceTable
-          rows={momoSelected.map(s => ({
-            name: <div>{s.name}</div>,
-            path: <div>{s.location}</div>,
-          }))}
-        />
-      </ModalScroll>
-      <Footer>
-        <ButtonRow>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="modal-resource-delete" data-testid="modal-resource-delete" variant="medium">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-(--modal-max-height,50vh) flex-1 overflow-auto **:data-[slot=table-container]:overflow-visible">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead sticky className="font-semibold text-muted-foreground">
+                  Name
+                </TableHead>
+                <TableHead sticky className="font-semibold text-muted-foreground">
+                  Location
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {momoSelected.map(s => (
+                <TableRow key={s.id}>
+                  <TableCell className="whitespace-normal">{s.name}</TableCell>
+                  <TableCell className="whitespace-normal">{s.location}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <DialogFooter className="flex-row items-center justify-end">
           {mutation.isPending && <Loader />}
-          <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button data-variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
+          <Button variant="outline" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleSubmit} disabled={mutation.isPending}>
             Delete
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

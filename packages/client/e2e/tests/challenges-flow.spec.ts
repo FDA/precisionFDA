@@ -5,7 +5,6 @@ import {
   CHALLENGE_TIMEOUTS,
   AUTH_FILES,
   generateChallengeName,
-  getDateTimeLocalValue,
   waitForChallengeApi,
 } from './helpers/challenges.helpers'
 import { CreateAppForm, TIMEOUTS } from './helpers/apps.helpers'
@@ -44,6 +43,34 @@ let challengeId: string | null = null
 // Scoring app name (created by admin2 user)
 const scoringAppName = `e2e_scoring_app_${testId}`
 const scoringAppTitle = `E2E Scoring App ${testId}`
+
+const selectedUserValuePattern = (username: string) => new RegExp(`^${username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\b|$)`)
+
+function getDateTimeLocalValueInSeconds(secondsFromNow: number): string {
+  const date = new Date(Date.now() + secondsFromNow * 1000)
+  const pad = (value: number) => value.toString().padStart(2, '0')
+  const dateTime = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+
+  return date.getSeconds() === 0 ? dateTime : `${dateTime}:${pad(date.getSeconds())}`
+}
+
+async function setDateTimeLocalValue(page: Page, testId: string, value: string) {
+  const input = page.getByTestId(testId)
+  await input.focus()
+  await input.evaluate((element, nextValue) => {
+    const inputElement = element as HTMLInputElement
+    inputElement.form?.setAttribute('novalidate', '')
+    inputElement.setAttribute('step', 'any')
+
+    const valueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
+    valueSetter?.call(inputElement, nextValue)
+    inputElement.dispatchEvent(new Event('input', { bubbles: true }))
+    inputElement.dispatchEvent(new Event('change', { bubbles: true }))
+  }, value)
+  await input.blur()
+  await expect(input).toHaveValue(value)
+  await expect(input).toHaveJSProperty('validity.valid', true)
+}
 
 // Helper to create a new page with specific auth state
 async function createPageWithAuth(browser: Browser, authFile: string): Promise<{ context: BrowserContext; page: Page }> {
@@ -109,14 +136,6 @@ test.describe('Challenge Flow - Multi User', () => {
       const challengeImagePath = path.join(__dirname, '../fixtures/challenge.png')
       await imageInput.setInputFiles(challengeImagePath)
 
-      // Start date (yesterday - so challenge can be opened immediately)
-      const startDate = getDateTimeLocalValue(-1)
-      await page.getByTestId('challenge-start-at-input').fill(startDate)
-
-      // End date (30 days from now)
-      const endDate = getDateTimeLocalValue(30)
-      await page.getByTestId('challenge-end-at-input').fill(endDate)
-
       // Wait for select options to load
       await page.waitForTimeout(1000)
 
@@ -124,8 +143,8 @@ test.describe('Challenge Flow - Multi User', () => {
       const scopeSelect = page.getByTestId('challenge-scope-select')
       await scopeSelect.click()
       await page.waitForTimeout(500)
-      // Select the first available option
-      const scopeOption = page.locator('[class*="option"]').first()
+      // Select the Public option
+      const scopeOption = page.getByText('Public', { exact: true })
       if (await scopeOption.isVisible({ timeout: 3000 }).catch(() => false)) {
         await scopeOption.click()
       } else {
@@ -133,36 +152,52 @@ test.describe('Challenge Flow - Multi User', () => {
         await page.keyboard.press('Escape')
       }
 
-      // Select host lead user (first option)
+      // Select host lead user - use TEST_ADMIN_USERNAME from env
       const hostLeadSelect = page.getByTestId('challenge-host-lead-select')
       await hostLeadSelect.click()
       await page.waitForTimeout(500)
-      const hostLeadOption = page.locator('[class*="option"]').first()
-      if (await hostLeadOption.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await hostLeadOption.click()
+      const adminUsername = process.env.TEST_ADMIN_USERNAME
+      if (adminUsername) {
+        await hostLeadSelect.getByRole('combobox').fill(adminUsername)
+        await page.waitForTimeout(500)
+        const hostLeadOption = page.locator('[data-slot="combobox-item"]').filter({ hasText: adminUsername }).first()
+        if (await hostLeadOption.isVisible({ timeout: 3000 }).catch(() => false)) {
+          await hostLeadOption.click()
+          await expect(hostLeadSelect.getByRole('combobox')).toHaveValue(selectedUserValuePattern(adminUsername))
+        } else {
+          await page.keyboard.press('Escape')
+          console.warn(`⚠️ Could not find host lead user: ${adminUsername}`)
+        }
       } else {
-        await page.keyboard.press('Escape')
+        const hostLeadOption = page.locator('[data-slot="combobox-item"]').first()
+        if (await hostLeadOption.isVisible({ timeout: 3000 }).catch(() => false)) {
+          await hostLeadOption.click()
+        } else {
+          await page.keyboard.press('Escape')
+        }
       }
 
       // Select guest lead user - use TEST_ADMIN2_USERNAME from env (must be different from host lead)
       const guestLeadSelect = page.getByTestId('challenge-guest-lead-select')
       await guestLeadSelect.click()
       await page.waitForTimeout(500)
+      const regularUsername = process.env.TEST_REGULAR_USER
       const admin2Username = process.env.TEST_ADMIN2_USERNAME
       if (admin2Username) {
         // Type to search for the specific user
-        await page.keyboard.type(admin2Username)
+        await guestLeadSelect.getByRole('combobox').fill(admin2Username)
         await page.waitForTimeout(500)
-        const guestLeadOption = page.locator('[class*="option"]').first()
+        const guestLeadOption = page.locator('[data-slot="combobox-item"]').filter({ hasText: admin2Username }).first()
         if (await guestLeadOption.isVisible({ timeout: 3000 }).catch(() => false)) {
           await guestLeadOption.click()
+          await expect(guestLeadSelect.getByRole('combobox')).toHaveValue(selectedUserValuePattern(admin2Username))
         } else {
           await page.keyboard.press('Escape')
           console.warn(`⚠️ Could not find guest lead user: ${admin2Username}`)
         }
       } else {
         // Fallback: select second option if TEST_ADMIN2_USERNAME not set
-        const guestLeadOptions = page.locator('[class*="option"]')
+        const guestLeadOptions = page.locator('[data-slot="combobox-item"]')
         const guestLeadOptionCount = await guestLeadOptions.count()
         if (guestLeadOptionCount > 1) {
           await guestLeadOptions.nth(1).click()
@@ -171,25 +206,26 @@ test.describe('Challenge Flow - Multi User', () => {
         }
       }
 
-      // Select scoring app user - must be TEST_ADMIN2_USERNAME (who will create the scoring app)
+      // Select scoring app user - use TEST_REGULAR_USER from env
       const scoringAppSelect = page.getByTestId('challenge-scoring-app-select')
       await scoringAppSelect.click()
       await page.waitForTimeout(500)
-      if (admin2Username) {
+      if (regularUsername) {
         // Type to search for the specific user
-        await page.keyboard.type(admin2Username)
+        await scoringAppSelect.getByRole('combobox').fill(regularUsername)
         await page.waitForTimeout(500)
-        const scoringAppOption = page.locator('[class*="option"]').first()
+        const scoringAppOption = page.locator('[data-slot="combobox-item"]').filter({ hasText: regularUsername }).first()
         if (await scoringAppOption.isVisible({ timeout: 3000 }).catch(() => false)) {
           await scoringAppOption.click()
-          console.log(`✅ Selected scoring app user: ${admin2Username}`)
+          await expect(scoringAppSelect.getByRole('combobox')).toHaveValue(selectedUserValuePattern(regularUsername))
+          console.log(`✅ Selected scoring app user: ${regularUsername}`)
         } else {
           await page.keyboard.press('Escape')
-          console.warn(`⚠️ Could not find scoring app user: ${admin2Username}`)
+          console.warn(`⚠️ Could not find scoring app user: ${regularUsername}`)
         }
       } else {
-        // Fallback: select first option if TEST_ADMIN2_USERNAME not set
-        const scoringAppOption = page.locator('[class*="option"]').first()
+        // Fallback: select first option if TEST_REGULAR_USER not set
+        const scoringAppOption = page.locator('[data-slot="combobox-item"]').first()
         if (await scoringAppOption.isVisible({ timeout: 3000 }).catch(() => false)) {
           await scoringAppOption.click()
         } else {
@@ -199,11 +235,18 @@ test.describe('Challenge Flow - Multi User', () => {
 
       // Select status - setup initially
       const statusSelect = page.getByTestId('challenge-status-select')
-      await statusSelect.click()
-      await page.waitForTimeout(500)
-      const setupOption = page.getByText('setup', { exact: true })
+      await statusSelect.getByRole('combobox').click()
+      const setupOption = page.getByRole('option', { name: 'setup' })
       await expect(setupOption).toBeVisible({ timeout: 3000 })
       await setupOption.click()
+      await expect(statusSelect).toContainText('setup')
+
+      // Set dates last so the start date is still 15 seconds in the future at submit time
+      const startDate = getDateTimeLocalValueInSeconds(15)
+      await setDateTimeLocalValue(page, 'challenge-start-at-input', startDate)
+
+      const endDate = getDateTimeLocalValueInSeconds(30 * 24 * 60 * 60)
+      await setDateTimeLocalValue(page, 'challenge-end-at-input', endDate)
 
       // Set up API response listener
       const apiResponsePromise = waitForChallengeApi(page, 'POST')
@@ -257,6 +300,9 @@ test.describe('Challenge Flow - Multi User', () => {
       await expect(ourChallenge).toBeVisible({
         timeout: CHALLENGE_TIMEOUTS.pageLoad,
       })
+
+      // Wait for the challenge start time before the next serial test opens the challenge
+      await page.waitForTimeout(15000)
 
       console.log(`✅ Challenge "${challengeName}" verified in list`)
     } finally {
