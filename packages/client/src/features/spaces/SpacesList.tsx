@@ -1,7 +1,7 @@
-import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext } from '@dnd-kit/core'
 import { type UseQueryResult, useQuery } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import { BannerTitle, MainBanner } from '@/components/Banner'
 import { ContentFooter } from '@/components/Page/ContentFooter'
@@ -37,21 +37,20 @@ const useQuerySpaceGroups = (): UseQueryResult<ISpaceGroup[]> => {
   })
 }
 
+const resource = 'spaces'
+const locationKey = createLocationKey(resource)
+
 const SpacesList = () => {
-  const sensors = useSensors(useSensor(MouseSensor, { activationConstraint: { distance: 5 } }))
-  const resource = 'spaces'
-  const locationKey = createLocationKey(resource)
   const user = useAuthUser()
   const pagination = usePaginationParams(resource)
   const { selectedIndexes, setSelectedIndexes } = useListSelect()
-  const { sortBy, sort, setSortBy } = useOrderByParams({
-    onSetSortBy: () => setSelectedIndexes({}),
-  })
+  const { sortBy, sort, setSortBy } = useOrderByParams({})
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const { filterQuery, setSearchFilter } = useFilterParams({
     filters: columnFilters,
   })
+  // filterQuery includes spaceGroupId, so switching space groups also resets the selection
   const selectionResetTrigger = JSON.stringify({
     filterQuery,
     page: pagination.pageParam,
@@ -60,14 +59,12 @@ const SpacesList = () => {
   })
 
   useEffect(() => {
-    if (selectionResetTrigger) {
-      setSelectedIndexes({})
-    }
+    setSelectedIndexes({})
   }, [selectionResetTrigger, setSelectedIndexes])
 
   const query = useListQuery<FetchSpacesListResponse>({
     fetchList: spacesListRequest,
-    resource: resource,
+    resource,
     pagination: {
       page: pagination.pageParam,
       perPage: pagination.perPageParam,
@@ -79,46 +76,33 @@ const SpacesList = () => {
   const { isLoading, data, error } = query
   const meta = data?.meta
   const userCanAdministerSite = !!user?.can_administer_site
+  const userCanAdministerSpaceGroups = userCanAdministerSite || !!user?.review_space_admin
 
   // Space groups stuff
-  const [spaceGroup, setSpaceGroup] = useState<ISpaceGroup>()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const searchParamsString = searchParams.toString()
+  const [searchParams] = useSearchParams()
   const spaceGroupIdString = searchParams.get('spaceGroupId')
-  const spaceGroupId = spaceGroupIdString ? parseInt(spaceGroupIdString, 10) : undefined
-  const userCanAdministerSpaceGroups = !!user?.can_administer_site || !!user?.review_space_admin
+  const spaceGroupId = spaceGroupIdString ? Number.parseInt(spaceGroupIdString, 10) : undefined
 
   const { data: spaceGroups, isLoading: isSpaceGroupsLoading, error: errorSpaceGroups } = useQuerySpaceGroups()
-  const spaceGroupsMemo = useMemo(() => spaceGroups || [], [spaceGroups])
-  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data) || []
+  const spaceGroup = spaceGroupId ? spaceGroups?.find(sg => sg.id === spaceGroupId) : undefined
+  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data)
 
-  const { handleDragStart, handleDragEnd, dndAddSpacesModal } = useSpaceDnd({
-    selectedObjects: selectedObjects,
+  const { sensors, handleDragEnd, dndAddSpacesModal } = useSpaceDnd({
+    selectedObjects,
   })
 
-  useEffect(() => {
-    if (spaceGroupId === undefined || spaceGroupId > 0) {
-      setSelectedIndexes({})
-    }
-  }, [spaceGroupId, setSelectedIndexes])
+  const allSpacesColumns = useSpacesColumns()
+  const spacesColumns = useMemo(
+    () =>
+      allSpacesColumns.filter((column: ColumnDef<ISpaceV2>) => {
+        const isHiddenColumn = 'accessorKey' in column && column.accessorKey === 'hidden'
+        const isSelectColumn = 'id' in column && column.id === 'select'
 
-  useEffect(() => {
-    if (spaceGroupId && spaceGroupsMemo) {
-      const newParams = new URLSearchParams(searchParamsString)
-      newParams.set('spaceGroupId', spaceGroupId.toString())
-      setSearchParams(newParams)
-      setSpaceGroup(spaceGroupsMemo?.find(sg => sg.id === spaceGroupId))
-    } else {
-      setSpaceGroup(undefined)
-    }
-  }, [searchParamsString, setSearchParams, spaceGroupId, spaceGroupsMemo])
-
-  const spacesColumns = useSpacesColumns().filter((column: ColumnDef<ISpaceV2>) => {
-    const isHiddenColumn = 'accessorKey' in column && column.accessorKey === 'hidden'
-    const isSelectColumn = 'id' in column && column.id === 'select'
-
-    return userCanAdministerSite || (userCanAdministerSpaceGroups && !isHiddenColumn) || (!isHiddenColumn && !isSelectColumn)
-  })
+        // Hidden column is for site admins only; select column is for any admin
+        return userCanAdministerSite || (!isHiddenColumn && (userCanAdministerSpaceGroups || !isSelectColumn))
+      }),
+    [allSpacesColumns, userCanAdministerSite, userCanAdministerSpaceGroups],
+  )
 
   // This could possibly happen if you access Space Group directly via URL
   if (spaceGroupId && isSpaceGroupsLoading) {
@@ -135,7 +119,7 @@ const SpacesList = () => {
         {spaceGroup && <div className={styles.spaceGroupDescription}>{spaceGroup.description}</div>}
       </MainBanner>
       <div className={styles.spacesLayout}>
-        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} sensors={sensors}>
+        <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
           <SpaceGroupsSidebar
             userCanAdministerSpaceGroups={userCanAdministerSpaceGroups}
             spaceGroups={spaceGroups}
@@ -147,7 +131,7 @@ const SpacesList = () => {
               spaceGroup={spaceGroup}
               userCanAdministerSite={userCanAdministerSite}
               userCanAdministerSpaceGroups={userCanAdministerSpaceGroups}
-              spaceGroups={spaceGroupsMemo}
+              spaceGroups={spaceGroups}
               selectedItems={selectedObjects}
             />
             <div className={styles.spacesStyledTable}>
@@ -157,7 +141,7 @@ const SpacesList = () => {
                 columns={spacesColumns}
                 columnSizing={colWidths}
                 setColumnSizing={saveColumnResizeWidth}
-                rowSelection={selectedIndexes ?? {}}
+                rowSelection={selectedIndexes}
                 setSelectedRows={setSelectedIndexes}
                 setColumnFilters={setSearchFilter}
                 columnSortBy={sortBy}

@@ -1,20 +1,20 @@
 import type { Column, ColumnDef } from '@tanstack/react-table'
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { Link } from 'react-router'
 import styled from 'styled-components'
 import { SwitchButton } from '@/components/Button'
 import { AdminIcon } from '@/components/icons/AdminIcon'
+import { FdaRestrictedIcon } from '@/components/icons/FdaRestrictedIcon'
 import { GovernmentIcon } from '@/components/icons/GovernmentIcon'
 import { PrivateIcon } from '@/components/icons/PrivateIcon'
 import { ProfileIcon } from '@/components/icons/ProfileIcon'
+import { ProtectedIcon } from '@/components/icons/ProtectedIcon'
 import { UsersIcon } from '@/components/icons/UsersIcon'
 import { selectColumnDef } from '@/components/Table/selectColumnDef'
 import { StyledTagItem, StyledTags } from '@/components/Tags'
 import { formatDateOnly } from '@/utils/formatting'
 import SelectFilter, { selectFilterFn } from '../../components/Table/components/SelectFilter'
 import { SpaceTypeName } from './common'
-import { FdaRestrictedIcon } from '@/components/icons/FdaRestrictedIcon'
-import { ProtectedIcon } from '@/components/icons/ProtectedIcon'
 import type { ISpaceV2 } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
 
@@ -124,158 +124,161 @@ export const findSpaceTypeIcon = (type: string | number) => {
 }
 
 export const useSpacesColumns = (): ColumnDef<ISpaceV2>[] => {
-  return [
-    selectColumnDef<ISpaceV2>(),
-    {
-      header: 'Type',
-      accessorKey: 'type',
-      enableSorting: false,
-      filterFn: selectFilterFn,
-      meta: {
-        filterElement: (column: Column<ISpaceV2>) => (
-          <SelectFilter
-            column={column}
-            options={[
-              { label: 'Group', option: 'groups' },
-              { label: 'Review', option: 'review' },
-              { label: 'Private', option: 'private_type' },
-              { label: 'Government', option: 'government' },
-              { label: 'Administrator', option: 'administrator' },
-            ]}
-          />
+  return useMemo(
+    () => [
+      selectColumnDef<ISpaceV2>(),
+      {
+        header: 'Type',
+        accessorKey: 'type',
+        enableSorting: false,
+        filterFn: selectFilterFn,
+        meta: {
+          filterElement: (column: Column<ISpaceV2>) => (
+            <SelectFilter
+              column={column}
+              options={[
+                { label: 'Group', option: 'groups' },
+                { label: 'Review', option: 'review' },
+                { label: 'Private', option: 'private_type' },
+                { label: 'Government', option: 'government' },
+                { label: 'Administrator', option: 'administrator' },
+              ]}
+            />
+          ),
+        },
+        size: 170,
+        cell: ({ row }) => (
+          <SpaceTableTypeCell>
+            {findSpaceTypeIcon(row.original.type)}
+            {SpaceTypeName[row.original.type]}
+          </SpaceTableTypeCell>
         ),
       },
-      size: 170,
-      cell: ({ row }) => (
-        <SpaceTableTypeCell>
-          {findSpaceTypeIcon(row.original.type)}
-          {SpaceTypeName[row.original.type]}
-        </SpaceTableTypeCell>
-      ),
-    },
-    {
-      header: 'Name',
-      accessorKey: 'name',
-      size: 368,
-      filterFn: 'includesString',
-      cell: ({ row }) => (
-        <SpaceTableNameCell>
-          <NameRow>
-            {row.original.protected && (
-              <ProtectedIcon color={row.original.currentUserMembership ? undefined : 'var(--c-text-400)'} />
-            )}
-            {row.original.restrictedReviewer && (
-              <FdaRestrictedIcon color={row.original.currentUserMembership ? undefined : 'var(--c-text-400)'} />
-            )}
-            {row.original.currentUserMembership ? (
-              <StyledName $isAccess as={Link} to={{ pathname: `/spaces/${row.original.id}` }}>
-                {row.original.name}
-              </StyledName>
-            ) : (
-              <StyledName $isAccess={false}>{row.original.name}</StyledName>
-            )}
-          </NameRow>
-          <p>{row.original.description}</p>
-        </SpaceTableNameCell>
-      ),
-    },
-    {
-      header: 'ID',
-      accessorKey: 'id',
-      enableSorting: false,
-      size: 100,
-    },
-    {
-      header: 'State',
-      accessorKey: 'state',
-      size: 170,
-      enableSorting: false,
-      filterFn: selectFilterFn,
-      meta: {
-        filterElement: (column: Column<ISpaceV2>) => (
-          <SelectFilter
-            column={column}
-            options={[
-              { label: 'Active', option: 'active' },
-              { label: 'Locked', option: 'locked' },
-              { label: 'Unactivated', option: 'unactivated' },
-            ]}
-          />
+      {
+        header: 'Name',
+        accessorKey: 'name',
+        size: 368,
+        filterFn: 'includesString',
+        cell: ({ row }) => (
+          <SpaceTableNameCell>
+            <NameRow>
+              {row.original.protected && (
+                <ProtectedIcon color={row.original.currentUserMembership ? undefined : 'var(--c-text-400)'} />
+              )}
+              {row.original.restrictedReviewer && (
+                <FdaRestrictedIcon color={row.original.currentUserMembership ? undefined : 'var(--c-text-400)'} />
+              )}
+              {row.original.currentUserMembership ? (
+                <StyledName $isAccess as={Link} to={{ pathname: `/spaces/${row.original.id}` }}>
+                  {row.original.name}
+                </StyledName>
+              ) : (
+                <StyledName $isAccess={false}>{row.original.name}</StyledName>
+              )}
+            </NameRow>
+            <p>{row.original.description}</p>
+          </SpaceTableNameCell>
         ),
       },
-      cell: ({ row }) => (
-        <StatusCell $isActive={row.original.state === 'active'}>
-          <Dot />
-          {row.original.state}
-        </StatusCell>
-      ),
-    },
-    {
-      header: 'Hidden',
-      accessorKey: 'hidden',
-      size: 120,
-      enableSorting: false,
-      filterFn: selectFilterFn,
-      meta: {
-        filterElement: (column: Column<ISpaceV2>) => (
-          <SelectFilter
-            column={column}
-            options={[
-              { label: 'Not hidden', option: 'false' },
-              { label: 'Hidden', option: 'true' },
-            ]}
-          />
+      {
+        header: 'ID',
+        accessorKey: 'id',
+        enableSorting: false,
+        size: 100,
+      },
+      {
+        header: 'State',
+        accessorKey: 'state',
+        size: 170,
+        enableSorting: false,
+        filterFn: selectFilterFn,
+        meta: {
+          filterElement: (column: Column<ISpaceV2>) => (
+            <SelectFilter
+              column={column}
+              options={[
+                { label: 'Active', option: 'active' },
+                { label: 'Locked', option: 'locked' },
+                { label: 'Unactivated', option: 'unactivated' },
+              ]}
+            />
+          ),
+        },
+        cell: ({ row }) => (
+          <StatusCell $isActive={row.original.state === 'active'}>
+            <Dot />
+            {row.original.state}
+          </StatusCell>
         ),
       },
-      cell: c => (
-        <div>
-          <SpaceHiddenToggle id={c.row.original.id} hidden={c.row.original.hidden} />
-        </div>
-      ),
-    },
-    {
-      header: 'Tags',
-      accessorKey: 'tags',
-      enableSorting: false,
-      filterFn: 'includesString',
-      size: 200,
-      cell: ({ row }) => (
-        <StyledTags>
-          {row.original.tags.map(tag => (
-            <StyledTagItem key={tag}>{tag}</StyledTagItem>
-          ))}
-        </StyledTags>
-      ),
-    },
-    {
-      header: 'Created on',
-      accessorKey: 'createdAt',
-      sortDescFirst: true,
-      enableColumnFilter: false,
-      size: 150,
-      cell: ({ row }) => <div>{formatDateOnly(row.original?.createdAt)}</div>,
-    },
-    {
-      header: 'Modified on',
-      accessorKey: 'updatedAt',
-      sortDescFirst: true,
-      enableColumnFilter: false,
-      size: 150,
-      cell: ({ row }) => <div>{formatDateOnly(row.original?.updatedAt)}</div>,
-    },
-    {
-      header: 'Reviewer/Host lead',
-      accessorKey: 'hostLead',
-      enableSorting: false,
-      enableColumnFilter: false,
-      size: 200,
-    },
-    {
-      header: 'Sponsor/Guest lead',
-      accessorKey: 'guestLead',
-      enableSorting: false,
-      enableColumnFilter: false,
-      size: 200,
-    },
-  ]
+      {
+        header: 'Hidden',
+        accessorKey: 'hidden',
+        size: 120,
+        enableSorting: false,
+        filterFn: selectFilterFn,
+        meta: {
+          filterElement: (column: Column<ISpaceV2>) => (
+            <SelectFilter
+              column={column}
+              options={[
+                { label: 'Not hidden', option: 'false' },
+                { label: 'Hidden', option: 'true' },
+              ]}
+            />
+          ),
+        },
+        cell: c => (
+          <div>
+            <SpaceHiddenToggle id={c.row.original.id} hidden={c.row.original.hidden} />
+          </div>
+        ),
+      },
+      {
+        header: 'Tags',
+        accessorKey: 'tags',
+        enableSorting: false,
+        filterFn: 'includesString',
+        size: 200,
+        cell: ({ row }) => (
+          <StyledTags>
+            {row.original.tags.map(tag => (
+              <StyledTagItem key={tag}>{tag}</StyledTagItem>
+            ))}
+          </StyledTags>
+        ),
+      },
+      {
+        header: 'Created on',
+        accessorKey: 'createdAt',
+        sortDescFirst: true,
+        enableColumnFilter: false,
+        size: 150,
+        cell: ({ row }) => <div>{formatDateOnly(row.original?.createdAt)}</div>,
+      },
+      {
+        header: 'Modified on',
+        accessorKey: 'updatedAt',
+        sortDescFirst: true,
+        enableColumnFilter: false,
+        size: 150,
+        cell: ({ row }) => <div>{formatDateOnly(row.original?.updatedAt)}</div>,
+      },
+      {
+        header: 'Reviewer/Host lead',
+        accessorKey: 'hostLead',
+        enableSorting: false,
+        enableColumnFilter: false,
+        size: 200,
+      },
+      {
+        header: 'Sponsor/Guest lead',
+        accessorKey: 'guestLead',
+        enableSorting: false,
+        enableColumnFilter: false,
+        size: 200,
+      },
+    ],
+    [],
+  )
 }
