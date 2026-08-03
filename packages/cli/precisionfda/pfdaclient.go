@@ -7,11 +7,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"math"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -33,7 +31,10 @@ const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
 const maxRoutines = 100
-const minChunkSize = 1 << 24    // min. 16MB
+
+// MinChunkSize is the smallest allowed upload chunk size, also used by
+// callers to derive a chunk size from the file size.
+const MinChunkSize = 1 << 24    // min. 16MB
 const maxChunkSize = 1 << 32    // max. 4GB
 const maxFileSize = 5 * 1 << 40 // max. 5TB
 
@@ -93,13 +94,21 @@ type PFDAClient struct {
 	UserAgent       string
 	NumRoutines     int
 	ChunkSize       int
-	MinRoutines     int
-	MaxRoutines     int
-	MinChunkSize    int
-	MaxChunkSize    int
-	MaxFileSize     int
 	ContinueOnError bool
 	JsonResponse    bool
+
+	// jsonBatch, when non-nil, accumulates per-item JSON results so a command
+	// that reports on many items (rm, rmdir, multi-file upload/download, ...)
+	// can emit them as a single JSON array instead of many concatenated,
+	// unparseable objects. jsonMu guards it because some batches emit from
+	// concurrent goroutines.
+	jsonBatch *[]any
+	jsonMu    sync.Mutex
+
+	// reportedErrs logs the failures already shown to the user so batch
+	// commands can continue past individual failures and still exit non-zero
+	// at the end (see errorScope).
+	reportedErrs reportedErrs
 
 	Client  *retryablehttp.Client
 	AuthKey string
@@ -110,11 +119,6 @@ func NewPFDAClient(serverURL string) *PFDAClient {
 	c.BaseURL = https + serverURL
 	c.NumRoutines = defaultNumRoutines
 	c.ChunkSize = defaultChunkSize
-	c.MinRoutines = minRoutines
-	c.MaxRoutines = maxRoutines
-	c.MinChunkSize = minChunkSize
-	c.MaxChunkSize = maxChunkSize
-	c.MaxFileSize = maxFileSize
 	c.Client = &retryablehttp.Client{
 		HTTPClient:   cleanhttp.DefaultClient(),
 		RetryWaitMin: minRetryTime * time.Second,
@@ -127,9 +131,169 @@ func NewPFDAClient(serverURL string) *PFDAClient {
 	return &c
 }
 
+// startJSONBatch begins collecting per-item JSON output so it can be emitted as
+// a single JSON array (a valid, parseable document). It returns a finish func
+// that prints the array; the func only has an effect in JSON mode. Batches do
+// not nest: if one is already active the call is a no-op and items flow into the
+// outer batch, so the outermost command still yields a single array.
+func (c *PFDAClient) startJSONBatch() func() {
+	if !c.JsonResponse {
+		return func() {}
+	}
+	c.jsonMu.Lock()
+	defer c.jsonMu.Unlock()
+	if c.jsonBatch != nil {
+		return func() {} // already batching (e.g. nested call) -> no-op
+	}
+	batch := make([]any, 0)
+	c.jsonBatch = &batch
+	return c.finishJSONBatch
+}
+
+func (c *PFDAClient) finishJSONBatch() {
+	c.jsonMu.Lock()
+	if c.jsonBatch == nil {
+		c.jsonMu.Unlock()
+		return
+	}
+	batch := *c.jsonBatch
+	c.jsonBatch = nil
+	c.jsonMu.Unlock()
+	helpers.PrettyPrint(batch)
+}
+
+// canPrompt reports whether an interactive prompt can be put in front of the
+// user. It cannot in -json mode: promptui draws its widget onto stdout, which
+// corrupts the JSON document, and then aborts the process outright when stdin is
+// not a terminal - before the deferred batch flush has run, so the results
+// already collected are lost with it.
+//
+// Every prompt site is guarded by this. Where the arguments already given settle
+// the question, the guard simply takes that answer - see DownloadFile's
+// -overwrite handling, or Head's request for the whole file. Where only the user
+// could have decided, it fails with an error naming what settles it
+// non-interactively instead of guessing on their behalf; the more so as two of
+// those decisions are about which files to delete.
+func (c *PFDAClient) canPrompt() bool {
+	return !c.JsonResponse
+}
+
+// emitItem reports one item of a command's output in whichever form the caller
+// asked for: the JSON value when -json is set, the formatted line otherwise.
+// Taking both forms at a single call site is what keeps them from diverging -
+// a caller cannot emit JSON into plain-text output, nor add a field to the JSON
+// shape and forget that the text form exists. textFormat is a Printf format and
+// must carry its own trailing newline.
+func (c *PFDAClient) emitItem(item any, textFormat string, textArgs ...any) {
+	if !c.JsonResponse {
+		fmt.Printf(textFormat, textArgs...)
+		return
+	}
+	c.emitJSONItem(item)
+}
+
+// emitResult is emitItem for the generic {"result": ...} shape.
+func (c *PFDAClient) emitResult(result string, textFormat string, textArgs ...any) {
+	c.emitItem(jsonResult{Result: result}, textFormat, textArgs...)
+}
+
+// emitJSONItem records a single JSON result. When a batch is active the item is
+// appended to it for one array emission; otherwise it is printed immediately as
+// a standalone object (used by single-item commands). Safe for concurrent use.
+//
+// Prefer emitItem: it pairs the JSON value with its plain-text form so the two
+// cannot drift. This is the JSON half on its own, and the guard below is what
+// keeps a caller that reaches for it directly from printing JSON into plain-text
+// output.
+func (c *PFDAClient) emitJSONItem(item any) {
+	if !c.JsonResponse {
+		return
+	}
+	c.jsonMu.Lock()
+	defer c.jsonMu.Unlock()
+	if c.jsonBatch != nil {
+		*c.jsonBatch = append(*c.jsonBatch, item)
+		return
+	}
+	helpers.PrettyPrint(item)
+}
+
+// emitError reports err to the user (in JSON mode into the active batch) and
+// records it so the command exits non-zero. An error that was already reported
+// elsewhere is dropped: it was recorded where it was reported (every place that
+// marks an error reported emits it first), so it is already in the log of the
+// enclosing error scope, which was opened before the failing sub-operation ran.
+// Recording it again would duplicate the log entry - visible when a failure
+// bubbles up through a batch command, e.g. UploadFolder to UploadMultipleFiles
+// or a recursive Download to HandleError - and emitting it again would
+// duplicate the output.
+func (c *PFDAClient) emitError(err error) {
+	if err == nil || IsReported(err) {
+		return
+	}
+	c.reportedErrs.record(err)
+	if c.JsonResponse {
+		c.emitJSONItem(helpers.ErrorResponse{Error: err.Error()})
+		return
+	}
+	helpers.PrintError(err, false)
+}
+
 // Wire objects
 type jsonID struct {
 	ID string `json:"id"`
+}
+
+// jsonResult is the generic {"result": ...} shape for commands that report an
+// outcome rather than an entity.
+type jsonResult struct {
+	Result string `json:"result"`
+}
+
+// jsonURL is the JSON shape of a link to a created or uploaded entity.
+type jsonURL struct {
+	Url string `json:"url"`
+}
+
+// jsonJobResult is the JSON shape of a launched job. jsonHTTPSAppResult adds the
+// workstation URL an HTTPS app is reached at, which is only known after polling.
+type jsonJobResult struct {
+	JobUID       string `json:"jobUid"`
+	ExecutionURL string `json:"executionUrl"`
+}
+
+type jsonHTTPSAppResult struct {
+	JobUID         string `json:"jobUid"`
+	ExecutionURL   string `json:"executionUrl"`
+	WorkstationURL string `json:"workstationUrl"`
+}
+
+// jsonRemovedFile / jsonRemovedFolder are the JSON shapes of one removed node.
+type jsonRemovedFile struct {
+	Uid string `json:"uid"`
+}
+
+type jsonRemovedFolder struct {
+	ID int `json:"id"`
+}
+
+// jsonDownloadResult is the JSON shape of one downloaded file - shared by the
+// single-file and the bulk download paths so consumers see a single schema.
+// Skipped marks a file that was left untouched because it already existed and
+// -overwrite was not set; that is informational, not a failure.
+type jsonDownloadResult struct {
+	FileName string `json:"file_name"`
+	Path     string `json:"path"`
+	Skipped  bool   `json:"skipped,omitempty"`
+}
+
+// jsonUploadResult is the JSON shape of one uploaded file. The id and name are
+// reported next to the url so a consumer does not have to parse them back out
+// of it.
+type jsonUploadResult struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Url  string `json:"url"`
 }
 
 type bulkIDsPayload struct {
@@ -178,6 +342,12 @@ type jsonCreateFolderResponse struct {
 	} `json:"message"`
 }
 
+// jsonMkdirResult is a single created folder as reported by `mkdir --json`.
+type jsonMkdirResult struct {
+	Name string `json:"name"`
+	ID   int    `json:"id"`
+}
+
 // Below were migrated from pfda.go:
 //
 // COMMAND FUNCTIONS
@@ -213,28 +383,47 @@ func (c *PFDAClient) CallAPI(route string, data string, outputFile string) error
 // If spaceID is empty, the file will be uploaded to the user's home
 func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, withProgressBar bool) error {
 
+	// Batch from the very start so JSON output - including pre-upload
+	// validation failures - is always a single array; nested calls from the
+	// multi-file and folder uploads reuse the outer batch.
+	finishJSON := c.startJSONBatch()
+	defer finishJSON()
+
+	// reportValidation reports a pre-upload failure (into the JSON batch in
+	// JSON mode) so the command still emits one parseable array, and marks it
+	// reported so the top level only converts it into a non-zero exit code.
+	reportValidation := func(err error) error {
+		c.emitError(err)
+		return AsReported(err)
+	}
+
 	file, err := os.Open(path)
 	if err != nil {
-		return err
+		return reportValidation(err)
 	}
 	defer file.Close()
 
 	info, err := file.Stat()
 	if err != nil {
-		return err
+		return reportValidation(err)
 	}
 
 	size := info.Size()
 	if size > maxFileSize {
-		return fmt.Errorf("Size of file '%s' (%d) exceeds maximum allowed file size (%d)", path, size, maxFileSize)
+		return reportValidation(fmt.Errorf("Size of file '%s' (%d) exceeds maximum allowed file size (%d)", path, size, maxFileSize))
 	}
 
 	if size == 0 {
-		return fmt.Errorf("Size of file '%s' is 0 - uploading an empty file is not allowed", path)
+		return reportValidation(fmt.Errorf("Size of file '%s' is 0 - uploading an empty file is not allowed", path))
 	}
 
-	err = c.Upload(&*file, path, folderID, spaceID, size, withProgressBar)
-	c.HandleError(err)
+	if err := c.Upload(&*file, path, folderID, spaceID, size, withProgressBar); err != nil {
+		// Report the failure (into the JSON batch in JSON mode) and keep going -
+		// callers uploading several files continue with the remaining ones. The
+		// reported error still makes the command exit non-zero.
+		c.emitError(fmt.Errorf("uploading '%s' failed: %w", path, err))
+		return AsReported(err)
+	}
 
 	return nil
 }
@@ -244,8 +433,15 @@ func (c *PFDAClient) UploadStdin(fileName string, folderID string, spaceID strin
 	size := int64(1)
 	// stdin has to be wrapped in those - otherwise not working as expected with linux piping
 	stdin := io.NopCloser(bufio.NewReader(os.Stdin))
-	err := c.Upload(stdin, fileName, folderID, spaceID, size, withProgressBar)
-	c.HandleError(err)
+
+	// Batch so JSON output is always a single array.
+	finishJSON := c.startJSONBatch()
+	defer finishJSON()
+
+	if err := c.Upload(stdin, fileName, folderID, spaceID, size, withProgressBar); err != nil {
+		c.emitError(err)
+		return AsReported(err)
+	}
 	return nil
 }
 
@@ -266,8 +462,9 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 		parentId = dxJobId
 	}
 
+	name := filepath.Base(path)
 	jsonData, err := json.Marshal(jsonCreateFilePayload{
-		Name:       filepath.Base(path),
+		Name:       name,
 		Desc:       "",
 		FolderID:   folderID,
 		Scope:      scope,
@@ -289,16 +486,20 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 		fmt.Printf(">> Uploading file %s\n", path)
 	}
 
-	wait := c.initWaitGroup(fileID, chunkPool, &size, withProgressBar)
-	if err := c.readAndChunk(file, chunkPool, &size); err != nil {
-		close(chunkPool)
-		wait()
-		return fmt.Errorf("reading file: %w", err)
+	wait, abort := c.initWaitGroup(fileID, chunkPool, &size, withProgressBar)
+	readErr := c.readAndChunk(file, chunkPool, &size, abort)
+	close(chunkPool)
+
+	// A chunk or read failure aborts this upload but no longer exits the
+	// process, so a multi-file upload can carry on with the remaining files.
+	if err := wait(); err != nil {
+		return fmt.Errorf("uploading file: %w", err)
+	}
+	if readErr != nil {
+		return fmt.Errorf("reading file: %w", readErr)
 	}
 
-	close(chunkPool)
 	c.SetTags(fileID, []string{tagCLI})
-	wait()
 
 	if withProgressBar && !c.JsonResponse {
 		fmt.Println(">> Finalizing file...")
@@ -315,13 +516,9 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 		finalUrl = c.BaseURL + "/home/files/" + fileID
 	}
 
-	if c.JsonResponse {
-		helpers.PrettyPrint(struct {
-			Url string `json:"url"`
-		}{Url: finalUrl})
-	} else {
-		fmt.Println(">> Uploaded: ", path)
-	}
+	// N.B. two spaces after the colon - fmt.Println used to add one between its
+	// operands, and the plain-text output is kept byte-for-byte identical.
+	c.emitItem(jsonUploadResult{ID: fileID, Name: name, Url: finalUrl}, ">> Uploaded:  %s\n", path)
 
 	if withProgressBar && !c.JsonResponse {
 		fmt.Println(">> Done! Access your file at " + finalUrl)
@@ -331,6 +528,14 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 }
 
 func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID string) error {
+	// Report only failures of this operation, not of earlier ones on the client.
+	reported := c.errorScope()
+	// Emit uploaded files (and the final folder URL) as a single JSON array;
+	// per-file uploads happen in concurrent goroutines below, so the batch's
+	// collector is synchronized.
+	finishJSON := c.startJSONBatch()
+	defer finishJSON()
+
 	folders := make(map[string]string, 20)
 
 	p, _ := filepath.Split(folderPath)
@@ -356,7 +561,10 @@ func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID st
 	})
 
 	if err != nil {
-		return err
+		// Report into the active batch so JSON mode still emits a single valid
+		// array document instead of an array followed by a bare error object.
+		c.emitError(err)
+		return AsReported(err)
 	}
 
 	var wg = sync.WaitGroup{}
@@ -370,7 +578,7 @@ func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID st
 			parent, _ := filepath.Split(file)
 			err := c.UploadFile(file, folders[filepath.Dir(parent)], spaceID, false)
 			if err != nil {
-				helpers.PrintError(err, c.JsonResponse)
+				c.emitError(err)
 			}
 			<-guard
 			wg.Done()
@@ -386,17 +594,17 @@ func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID st
 		finalUrl = c.BaseURL + "/home/files?folder_id=" + folders[folderPath]
 	}
 
-	if c.JsonResponse {
-		helpers.PrettyPrint(struct {
-			Url string `json:"url"`
-		}{Url: finalUrl})
-	} else {
-		fmt.Println(">> Done! Access your files at " + finalUrl)
-	}
-	return nil
+	c.emitItem(jsonURL{Url: finalUrl}, ">> Done! Access your files at %s\n", finalUrl)
+	return reported()
 }
 
 func (c *PFDAClient) UploadMultipleFiles(paths []string, folderID string, spaceID string) error {
+
+	// Report only failures of this operation, not of earlier ones on the client.
+	reported := c.errorScope()
+	// Emit uploaded files as a single JSON array rather than concatenated objects.
+	finishJSON := c.startJSONBatch()
+	defer finishJSON()
 
 	if !c.JsonResponse {
 		fmt.Printf(">> Uploading multiple files...\n")
@@ -405,23 +613,23 @@ func (c *PFDAClient) UploadMultipleFiles(paths []string, folderID string, spaceI
 	// this could be done in parallel - be careful to used memory otherwise will get terminated by kernel OOM-killer.
 	for _, path := range paths {
 		f, err := os.Stat(path)
-		if os.IsNotExist(err) {
-			helpers.PrintError(fmt.Errorf("Input path '%s' does not exist - skipping", path), c.JsonResponse)
+		if err != nil {
+			c.emitError(fmt.Errorf("Input path '%s' does not exist or is not accessible - skipping", path))
 			continue
 		}
 		path = filepath.Clean(path)
-		if err := func() error {
-			if f.IsDir() {
-				return c.UploadFolder(path, folderID, spaceID)
-			} else {
-				return c.UploadFile(path, folderID, spaceID, false)
-			}
-		}(); err != nil {
-			helpers.PrintError(err, c.JsonResponse)
+		var uploadErr error
+		if f.IsDir() {
+			uploadErr = c.UploadFolder(path, folderID, spaceID)
+		} else {
+			uploadErr = c.UploadFile(path, folderID, spaceID, false)
 		}
+		// Already-reported errors are dropped here - the folder/file upload that
+		// failed has both printed and recorded them.
+		c.emitError(uploadErr)
 	}
 
-	return nil
+	return reported()
 }
 
 func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite string) error {
@@ -440,12 +648,7 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 		return fmt.Errorf("no fileUrl in response")
 	}
 
-	originalName := path.Base(fileURL)
-	fileName, err := url.PathUnescape(originalName)
-	if err != nil {
-		fileName = originalName
-	}
-	fileName = sanitizeFileName(fileName)
+	fileName := fileNameFromUrl(fileURL)
 
 	fileSize, ok := resultJSON["fileSize"].(float64)
 	if !ok {
@@ -482,35 +685,55 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 		}
 	}
 	// After the above block, outputFilePath should contain the target file path and cannot be a directory
-	if _, err := os.Stat(outputFilePath); err == nil && overwrite == "" {
+	if _, err := os.Stat(outputFilePath); err == nil && overwrite != "true" {
+		// Same condition and outcome as the bulk path in DownloadDirectly: a
+		// file already on disk that -overwrite does not authorise replacing is
+		// skipped, not failed, so re-running a download is idempotent.
+		//
+		// -overwrite=false says so outright. An omitted -overwrite would ask,
+		// but only a human can answer - and when they cannot be asked (see
+		// canPrompt), leaving the file alone is the answer that loses nothing.
+		if overwrite == "false" || !c.canPrompt() {
+			c.emitSkippedDownload(fileName, outputFilePath)
+			return nil
+		}
 		fmt.Printf(">> File %s already exists\n", outputFilePath)
-		dialogOverwrite := yesNo("  Overwrite already existing path? ")
+		dialogOverwrite, err := yesNo("  Overwrite already existing path? ")
+		if err != nil {
+			return err
+		}
 		if !dialogOverwrite {
 			return fmt.Errorf("Download cancelled")
 		}
-	} else if err == nil && overwrite == "false" {
-		return fmt.Errorf("Path %s already exists but -overwrite flag not set to true - skipping download", outputFilePath)
 	}
 
 	if !c.JsonResponse {
 		fmt.Printf(">> Output File :  %s\n", outputFilePath)
 	}
 	withProgressBar := !c.JsonResponse
-	err = c.DownloadFromUrl(fileURL, outputFilePath, int64(fileSize), withProgressBar)
+	err := c.DownloadFromUrl(fileURL, outputFilePath, int64(fileSize), withProgressBar)
 	if err != nil {
 		return err
 	}
-	if c.JsonResponse {
-		helpers.PrintResult(outputFilePath, true)
-	} else {
-		fmt.Printf(">> Done!\n\n")
-	}
+	c.emitItem(jsonDownloadResult{FileName: fileName, Path: outputFilePath}, ">> Done!\n\n")
 	return nil
 }
 
 func (c *PFDAClient) Download(args []string, folderID string, spaceID string, public bool, recursive bool, outputFilePath string, overwrite string) error {
 
-	c.ContinueOnError = len(args) > 1
+	// Report only failures of this operation, not of earlier ones on the client.
+	reported := c.errorScope()
+
+	// Multi-item downloads (several args, or a recursive tree) keep going on a
+	// per-item failure instead of aborting the whole batch via HandleError.
+	multi := len(args) > 1 || recursive
+	c.ContinueOnError = multi
+
+	// Batch from the start so results and per-item errors always form a single
+	// JSON array, regardless of how many files end up matching. Recursive
+	// calls reuse the outer batch.
+	finishJSON := c.startJSONBatch()
+	defer finishJSON()
 
 	fileIDs := make([]string, 0)
 	fileNames := make([]string, 0)
@@ -551,12 +774,14 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, pu
 
 		_, body, err := c.makeRequestFail("GET", apiURL+params.Encode(), nil)
 		if err != nil {
-			return err
+			c.HandleError(err)
+			continue
 		}
 
 		var children jsonListingResponse
 		if err := json.Unmarshal(body, &children); err != nil {
-			return err
+			c.HandleError(err)
+			continue
 		}
 
 		var uids []string
@@ -566,29 +791,41 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, pu
 			} else if recursive {
 				// create the child folder first.
 				if err := os.MkdirAll(filepath.Join(outputFilePath, child.Name), os.ModePerm); err != nil {
-					log.Fatal(err)
+					c.HandleError(err)
+					continue
 				}
-				c.Download([]string{fileName}, strconv.Itoa(child.Id), spaceID, public, recursive, filepath.Join(outputFilePath, child.Name), overwrite)
+				// Per-item failures inside the recursive call are already
+				// reported and recorded there - nothing to do with them here.
+				c.HandleError(c.Download([]string{fileName}, strconv.Itoa(child.Id), spaceID, public, recursive, filepath.Join(outputFilePath, child.Name), overwrite))
 			}
 		}
 
 		if (len(uids) > 1 && (helpers.ContainsWildcard(fileName))) || len(uids) == 1 || args[0] == "" {
 			fileIDs = append(fileIDs, uids...)
 		} else if len(uids) > 1 {
-			selected := pickFile(children.Files, "Multiple files found matching the given name, select which to download")
+			if !c.canPrompt() {
+				c.HandleError(fmt.Errorf("%d files match '%s' and there is no way to ask which one to download in -json mode - pass its file-id, or a wildcard to download all of them", len(uids), fileName))
+				continue
+			}
+			selected, err := pickFile(children.Files, "Multiple files found matching the given name, select which to download")
+			if err != nil {
+				c.HandleError(err)
+				continue
+			}
 			fileIDs = append(fileIDs, selected)
 		} else if !recursive {
 			c.HandleError(fmt.Errorf("Unable to find any files matching '%s' - verify it exists and you have access to it", fileName))
 		}
 	}
 
-	if len(fileIDs) > 1 || len(args) > 1 || recursive {
+	if len(fileIDs) > 1 || multi {
 		c.parallelDownload(fileIDs, outputFilePath, overwrite)
 	} else if len(fileIDs) == 1 {
-		err := c.DownloadFile(fileIDs[0], outputFilePath, overwrite)
-		c.HandleError(err)
+		// Single-item download never continues on error, so HandleError already
+		// exited non-zero (flushing the JSON batch) by the time we get here.
+		c.HandleError(c.DownloadFile(fileIDs[0], outputFilePath, overwrite))
 	}
-	return nil
+	return reported()
 }
 
 func (c *PFDAClient) FileViewLink(arg string, preauthenticated bool, duration int64) error {
@@ -628,13 +865,9 @@ func (c *PFDAClient) FileViewLink(arg string, preauthenticated bool, duration in
 
 	resultUrl := resultJSON["file_url"].(string)
 
-	if c.JsonResponse {
-		helpers.PrettyPrint(struct {
-			Url string `json:"url"`
-		}{Url: resultUrl})
-	} else {
-		fmt.Println("Url to view file:", resultUrl)
-	}
+	// N.B. one space after the colon - fmt.Println used to add it between its
+	// operands, and the plain-text output is kept byte-for-byte identical.
+	c.emitItem(jsonURL{Url: resultUrl}, "Url to view file: %s\n", resultUrl)
 	return nil
 }
 
@@ -723,9 +956,21 @@ func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) 
 	return nil
 }
 
+// emitCreatedFolder reports one successfully created folder.
+func (c *PFDAClient) emitCreatedFolder(name string, id string) {
+	folderId, _ := strconv.Atoi(id)
+	c.emitItem(jsonMkdirResult{Name: name, ID: folderId}, "Created folder %s (id: %s) \n", name, id)
+}
+
 func (c *PFDAClient) Mkdir(dirs []string, folderID string, spaceID string, parents bool) error {
 
 	c.ContinueOnError = len(dirs) > 1
+
+	// Report only failures of this operation, not of earlier ones on the client.
+	reported := c.errorScope()
+	// Emit created folders as a single JSON array rather than concatenated objects.
+	finishJSON := c.startJSONBatch()
+	defer finishJSON()
 
 	if parents {
 		for _, dir := range dirs {
@@ -734,149 +979,155 @@ func (c *PFDAClient) Mkdir(dirs []string, folderID string, spaceID string, paren
 			// created nested folders.
 			for _, folder := range parts {
 				id, err := c.createNewFolder(folder, parentId, spaceID)
+				// An empty id signals a hard failure (network/permission/bad
+				// response); a non-empty id with an error means the folder
+				// already exists, which is fine for -p - reuse it and continue.
+				if err != nil && id == "" {
+					c.HandleError(err)
+					break
+				}
 				if err == nil {
-					if c.JsonResponse {
-						folderId, _ := strconv.Atoi(id)
-						helpers.PrettyPrint(struct {
-							Name string `json:"name"`
-							ID   int    `json:"id"`
-						}{Name: folder, ID: folderId})
-					} else {
-						fmt.Printf("Created folder %s (id: %s) \n", folder, id)
-					}
+					c.emitCreatedFolder(folder, id)
 				}
 				parentId = id
 			}
 		}
 
-		return nil
+		return reported()
 	}
 
 	for _, dir := range dirs {
 		id, err := c.createNewFolder(dir, folderID, spaceID)
 		c.HandleError(err)
 		if err == nil {
-			if c.JsonResponse {
-				folderId, _ := strconv.Atoi(id)
-				helpers.PrettyPrint(struct {
-					Name string `json:"name"`
-					ID   int    `json:"id"`
-				}{Name: dir, ID: folderId})
-			} else {
-				fmt.Printf("Created folder %s (id: %s) \n", dir, id)
-			}
+			c.emitCreatedFolder(dir, id)
 		}
 	}
-	return nil
+	return reported()
 }
 
 func (c *PFDAClient) Rmdir(args []string, recursive bool) error {
 
 	c.ContinueOnError = len(args) > 1
 
+	// Report only failures of this operation, not of earlier ones on the client.
+	reported := c.errorScope()
+	// Emit removed folders as a single JSON array rather than concatenated objects.
+	finishJSON := c.startJSONBatch()
+	defer finishJSON()
+
 	for _, arg := range args {
-		if !helpers.IsFolderId(arg) {
-			c.HandleError(fmt.Errorf("Invalid folder id: %s - expected an integer", arg))
-			continue
-		}
-
-		jsonData, err := json.Marshal(jsonRmPayload{Arg: arg, Type: "Folder"})
-		if err != nil {
-			return err
-		}
-		body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
-		c.HandleError(err)
-
-		var response []jsonFindNodesResponse
-		if err := json.Unmarshal(body, &response); err != nil {
-			return err
-		}
-		if len(response) == 0 {
-			c.HandleError(fmt.Errorf("Target folder not found or inaccessible"))
-			continue
-		}
-
-		if response[0].Children > 0 && !recursive {
-			c.HandleError(fmt.Errorf("Unable to remove non-empty folder"))
-			continue
-		}
-
-		err = c.RemoveDir(arg)
-		c.HandleError(err)
+		c.HandleError(c.rmdirOne(arg, recursive))
 	}
 
-	return nil
+	return reported()
+}
+
+// rmdirOne removes a single folder; the caller reports the returned error.
+func (c *PFDAClient) rmdirOne(arg string, recursive bool) error {
+	if !helpers.IsFolderId(arg) {
+		return fmt.Errorf("Invalid folder id: %s - expected an integer", arg)
+	}
+
+	jsonData, err := json.Marshal(jsonRmPayload{Arg: arg, Type: "Folder"})
+	if err != nil {
+		return err
+	}
+	body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
+	if err != nil {
+		return err
+	}
+
+	var response []jsonFindNodesResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return err
+	}
+	if len(response) == 0 {
+		return fmt.Errorf("Target folder not found or inaccessible")
+	}
+	if response[0].Children > 0 && !recursive {
+		return fmt.Errorf("Unable to remove non-empty folder")
+	}
+
+	return c.RemoveDir(arg)
 }
 
 func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 
 	c.ContinueOnError = len(args) > 1
+
+	// Report only failures of this operation, not of earlier ones on the client.
+	reported := c.errorScope()
+	// Emit removed files as a single JSON array rather than concatenated objects.
+	finishJSON := c.startJSONBatch()
+	defer finishJSON()
+
 	for _, arg := range args {
-
-		if helpers.IsFileUid(arg) {
-			err := c.RemoveFile([]string{arg})
-			c.HandleError(err)
-			continue
-		}
-
-		jsonData, err := json.Marshal(jsonRmPayload{Arg: helpers.TransformToSQLWildcards(arg), Type: "UserFile", FolderID: folderID, SpaceID: spaceID})
-		if err != nil {
-			return err
-		}
-		// first check for matching files to be deleted - filename (with wildcard) logic
-		body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
-		if err != nil {
-			return err
-		}
-		var response []jsonFileResponse
-		err = json.Unmarshal(body, &response)
-		if err != nil {
-			return err
-		}
-
-		toBeDeletedCount := len(response)
-		if toBeDeletedCount > 1 {
-			// given arg matches more files, let user select one and delete it
-			if !helpers.ContainsWildcard(arg) {
-				result := pickFile(response, "Multiple files found matching the given name, select which to delete")
-				err := c.RemoveFile([]string{result})
-				c.HandleError(err)
-				// arg processed, continue to next
-				continue
-			}
-			// wildcard used, user wants to match more files, just inform about the count.
-			agree := yesNo(fmt.Sprintf("%d files match the given arg \"%s\", are you sure you want to continue?", toBeDeletedCount, arg))
-			if agree {
-				uids := make([]string, 0)
-				for _, file := range response {
-					uids = append(uids, file.Uid)
-				}
-				err := c.RemoveFile(uids)
-				c.HandleError(err)
-				// arg processed, continue to next
-				continue
-			}
-			if c.JsonResponse {
-				helpers.PrintResult("delete aborted", true)
-			} else {
-				fmt.Println(">> Delete aborted")
-			}
-			// arg processed, continue to next
-			continue
-		}
-		if toBeDeletedCount == 0 {
-			c.HandleError(fmt.Errorf("Target file not found or inaccessible"))
-			// arg processed, continue to next
-			continue
-		}
-		// single file matches the name, delete it
-		err = c.RemoveFile([]string{response[0].Uid})
-		c.HandleError(err)
-		// arg processed, continue to next
-		continue
-
+		c.HandleError(c.rmOne(arg, folderID, spaceID))
 	}
-	return nil
+
+	return reported()
+}
+
+// rmOne removes the file(s) matching a single argument (uid, name, or name
+// with wildcards); the caller reports the returned error.
+func (c *PFDAClient) rmOne(arg string, folderID string, spaceID string) error {
+	if helpers.IsFileUid(arg) {
+		return c.RemoveFile([]string{arg})
+	}
+
+	jsonData, err := json.Marshal(jsonRmPayload{Arg: helpers.TransformToSQLWildcards(arg), Type: "UserFile", FolderID: folderID, SpaceID: spaceID})
+	if err != nil {
+		return err
+	}
+	// first check for matching files to be deleted - filename (with wildcard) logic
+	body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
+	if err != nil {
+		return err
+	}
+	var response []jsonFileResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return err
+	}
+
+	switch {
+	case len(response) == 0:
+		return fmt.Errorf("Target file not found or inaccessible")
+	case len(response) == 1:
+		return c.RemoveFile([]string{response[0].Uid})
+	case !helpers.ContainsWildcard(arg):
+		// given arg matches more files, let user select one and delete it
+		if !c.canPrompt() {
+			return fmt.Errorf("%d files match '%s' and there is no way to ask which one to delete in -json mode - pass the file-id of the one to remove", len(response), arg)
+		}
+		selected, err := pickFile(response, "Multiple files found matching the given name, select which to delete")
+		if err != nil {
+			return err
+		}
+		return c.RemoveFile([]string{selected})
+	}
+
+	// wildcard used, user wants to match more files, just inform about the count.
+	// Without a prompt the confirmation cannot be obtained, and a delete of
+	// everything that matched is not something to assume on the user's behalf -
+	// so refuse, which is also what the unguarded prompt effectively did (it
+	// aborted the process on a non-terminal stdin, having deleted nothing).
+	if !c.canPrompt() {
+		return fmt.Errorf("%d files match '%s' and there is no way to confirm deleting them all in -json mode - pass their file-ids explicitly", len(response), arg)
+	}
+	confirmed, err := yesNo(fmt.Sprintf("%d files match the given arg \"%s\", are you sure you want to continue?", len(response), arg))
+	if err != nil {
+		return err
+	}
+	if !confirmed {
+		c.emitResult("delete aborted", ">> Delete aborted\n")
+		return nil
+	}
+	uids := make([]string, 0, len(response))
+	for _, file := range response {
+		uids = append(uids, file.Uid)
+	}
+	return c.RemoveFile(uids)
 }
 
 // RefreshToken Just gets the new token, the logic for token replacement is in go/pfda.go
@@ -915,8 +1166,8 @@ func (c *PFDAClient) GetLatestVersion() (string, error) {
 }
 
 func (c *PFDAClient) SetChunkSize(chunkSize int) error {
-	if chunkSize > maxChunkSize || chunkSize < minChunkSize {
-		return fmt.Errorf("chunk size must be between 16MB and 5GB")
+	if chunkSize > maxChunkSize || chunkSize < MinChunkSize {
+		return fmt.Errorf("chunk size must be between 16MB and 4GB")
 	}
 	c.ChunkSize = chunkSize
 	return nil
@@ -949,7 +1200,7 @@ func (c *PFDAClient) createFileID(url string, data []byte) (string, error) {
 	}
 
 	if resultJSON["id"] == nil {
-		return "", fmt.Errorf("No id in response!\n\nResponse: %s", string(body))
+		return "", fmt.Errorf("No id in response! Response: %s", string(body))
 	}
 	fileID := resultJSON["id"].(string)
 	return fileID, nil
@@ -1008,9 +1259,15 @@ func (c *PFDAClient) Head(arg string, lines int) error {
 	if !ok {
 		return fmt.Errorf("no fileSize in response")
 	}
-	// user wants print whole file, check size first.
-	if lines == -1 && fileSize > 10_000_000 {
-		agree := yesNo("The size of the file is over 10Mb - are you sure you want to display the whole content?")
+	// user wants print whole file, check size first. The check only spares a human
+	// an unexpected flood of terminal output, so where they cannot be asked (see
+	// canPrompt) it is dropped rather than turned into a failure: `cat` asked for
+	// the whole file, and printing it is what the caller came for.
+	if lines == -1 && fileSize > 10_000_000 && c.canPrompt() {
+		agree, err := yesNo("The size of the file is over 10Mb - are you sure you want to display the whole content?")
+		if err != nil {
+			return err
+		}
 		if !agree {
 			return fmt.Errorf("cat cancelled")
 		}
@@ -1026,32 +1283,68 @@ func (c *PFDAClient) downloadByChunks(uidsChunk []string, outputFilePath string,
 	})
 	_, body, err := c.makeRequestFail("POST", apiURL, jsonData)
 	if err != nil {
-		helpers.PrintError(fmt.Errorf("unable to download: %s", strings.Join(uidsChunk, ",")), c.JsonResponse)
+		c.emitDownloadFailure(strings.Join(uidsChunk, ","))
 		return
 	}
 	var resultJSON []map[string]interface{}
-	_ = json.Unmarshal(body, &resultJSON)
+	if err := json.Unmarshal(body, &resultJSON); err != nil {
+		c.emitDownloadFailure(strings.Join(uidsChunk, ","))
+		return
+	}
 
 	downloaded := make(map[string]string)
 	for _, file := range resultJSON {
-		c.DownloadDirectly(file["url"].(string), outputFilePath, overwrite)
-		downloaded[file["uid"].(string)] = ""
+		// Validate the response instead of type-asserting blindly: a panic here
+		// would kill the process from a goroutine and discard the JSON batch.
+		uid, uidOK := file["uid"].(string)
+		fileURL, urlOK := file["url"].(string)
+		if !uidOK || !urlOK || fileURL == "" {
+			// The post-download check below reports whichever uid is left over.
+			continue
+		}
+		if err := c.DownloadDirectly(fileURL, outputFilePath, overwrite); err != nil {
+			c.emitError(fmt.Errorf("unable to download: %s - %s", uid, err))
+		}
+		// Reported in place on failure, so the generic check below must not
+		// report it a second time.
+		downloaded[uid] = ""
 	}
 
 	// check if all requested files were downloaded.
 	for _, uid := range uidsChunk {
-		_, found := downloaded[uid]
-		if !found {
-			if c.JsonResponse {
-				helpers.PrintError(fmt.Errorf("unable to download: %s", uid), c.JsonResponse)
-			} else {
-				fmt.Printf(">> Unable to download: %s\n", uid)
-			}
+		if _, found := downloaded[uid]; !found {
+			c.emitDownloadFailure(uid)
 		}
 	}
 
 }
 
+// emitSkippedDownload reports a file left untouched because it already existed
+// and -overwrite was not set to true. Skipping is not a failure: nothing is
+// recorded, so an idempotent re-run of the same download still exits 0. Shared
+// by the single-file and the bulk download paths so the two cannot drift on
+// what an omitted or false -overwrite means.
+func (c *PFDAClient) emitSkippedDownload(fileName string, outputFilePath string) {
+	c.emitItem(
+		jsonDownloadResult{FileName: fileName, Path: outputFilePath, Skipped: true},
+		">> Path %s already exists but -overwrite flag not set to true - skipping download\n", outputFilePath,
+	)
+}
+
+// emitDownloadFailure records a bulk-download failure for the exit code while
+// keeping the CLI's ">>"-prefixed progress formatting in plain-text mode.
+func (c *PFDAClient) emitDownloadFailure(what string) {
+	if c.JsonResponse {
+		c.emitError(fmt.Errorf("unable to download: %s", what))
+		return
+	}
+	c.reportedErrs.record(fmt.Errorf("unable to download: %s", what))
+	fmt.Printf(">> Unable to download: %s\n", what)
+}
+
+// parallelDownload downloads the given files in parallel chunks. Every failure
+// is reported and recorded along the way (see emitError), so the caller only
+// needs its error scope to turn any of them into a non-zero exit code.
 func (c *PFDAClient) parallelDownload(uids []string, outputFilePath string, overwrite string) {
 
 	if len(uids) == 0 {
@@ -1067,7 +1360,11 @@ func (c *PFDAClient) parallelDownload(uids []string, outputFilePath string, over
 	// create outputFilePath in case it was specified - we assume user specified a dir name
 	if outputFilePath != "" {
 		if err := os.MkdirAll(outputFilePath, os.ModePerm); err != nil {
-			log.Fatal(err)
+			// Report through the normal channel so an active JSON batch is still
+			// emitted, instead of aborting the process and losing all output.
+			// Recording it (in emitError) makes the command exit non-zero.
+			c.emitError(err)
+			return
 		}
 	}
 
@@ -1096,22 +1393,43 @@ func (c *PFDAClient) parallelDownload(uids []string, outputFilePath string, over
 }
 
 // initWaitGroup launches numRoutines upload goroutines and returns a wait
-// function that blocks until all goroutines finish and then stops the
-// progress writer.  Callers must close chunkPool before calling wait().
-func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size *int64, withProgressBar bool) func() {
+// function that blocks until all goroutines finish, stops the progress writer
+// and returns the first chunk-upload failure (nil when all chunks succeeded),
+// plus an abort channel that is closed on the first failure. The producer
+// must select on abort while sending so it stops reading the source instead
+// of chunking the whole remaining file into a pool that is only drained.
+// Callers must close chunkPool before calling wait().
+func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size *int64, withProgressBar bool) (wait func() error, abort <-chan struct{}) {
 	numRoutines := helpers.Min(c.NumRoutines, int(math.Ceil(float64(*size)/float64(c.ChunkSize))))
 
 	var totalSent uint64 = 0
 	writer := uilive.New()
 	writer.Start()
 
+	abortCh := make(chan struct{})
 	var g sync.WaitGroup
+	var chunkErrMu sync.Mutex
+	var chunkErr error
 	for i := 0; i < numRoutines; i++ {
 		g.Add(1)
 		go func() {
+			defer g.Done()
 			for chunk := range chunkPool {
-				err := c.sendToStore(fileID, chunk)
-				c.HandleError(err)
+				chunkErrMu.Lock()
+				failed := chunkErr != nil
+				chunkErrMu.Unlock()
+				if failed {
+					continue // upload already failed - just drain the pool
+				}
+				if err := c.sendToStore(fileID, chunk); err != nil {
+					chunkErrMu.Lock()
+					if chunkErr == nil {
+						chunkErr = err
+						close(abortCh) // stop the producer - the remaining chunks would be thrown away
+					}
+					chunkErrMu.Unlock()
+					continue
+				}
 				atomic.AddUint64(&totalSent, uint64(len(chunk.data)))
 				currentSize := atomic.LoadUint64(&totalSent)
 				totalSize := atomic.LoadInt64(size)
@@ -1121,20 +1439,32 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 					writer.Flush()
 				}
 			}
-			g.Done()
 		}()
 	}
 
-	return func() {
+	return func() error {
 		g.Wait()
 		writer.Stop()
-	}
+		chunkErrMu.Lock()
+		defer chunkErrMu.Unlock()
+		return chunkErr
+	}, abortCh
 }
 
-func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *int64) error {
+// readAndChunk reads f into ChunkSize chunks and sends them to ch until EOF
+// or until abort is closed (the upload failed - the remaining chunks would
+// only be drained, so reading on wastes I/O and memory).
+func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *int64, abort <-chan struct{}) error {
 	chunkIndex := 1
 	var totalDataLength = 0
 	for {
+		select {
+		case <-abort:
+			// wait() reports the chunk failure that triggered the abort.
+			atomic.StoreInt64(size, int64(totalDataLength))
+			return nil
+		default:
+		}
 		byteBuf := make([]byte, c.ChunkSize)
 		i := 0
 		for i < c.ChunkSize {
@@ -1153,9 +1483,15 @@ func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *
 		if i == 0 && chunkIndex > 1 {
 			break
 		}
-		ch <- uploadChunk{
+		select {
+		case ch <- uploadChunk{
 			index: chunkIndex,
 			data:  byteBuf[:i],
+		}:
+		case <-abort:
+			// wait() reports the chunk failure that triggered the abort.
+			atomic.StoreInt64(size, int64(totalDataLength))
+			return nil
 		}
 		chunkIndex++
 	}
@@ -1179,27 +1515,40 @@ func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
 	if err := c.makeGetJSON(fullURL, &resultJSON); err != nil {
 		return err
 	}
-	if resultJSON["url"] == "" {
-		panic("No url in response!")
+	// Validate the response instead of panicking on a malformed one: this runs
+	// inside an upload goroutine, and a panic there would kill the process and
+	// discard the JSON batch accumulated so far.
+	chunkURL, ok := resultJSON["url"].(string)
+	if !ok || chunkURL == "" {
+		return fmt.Errorf("upload-url response for chunk %d of %s contains no url", chunk.index, id)
 	}
-	_, err := c.makeRequestWithHeaders("PUT", resultJSON["url"].(string), resultJSON["headers"].(map[string]interface{}), chunk.data)
+	headers, ok := resultJSON["headers"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("upload-url response for chunk %d of %s contains no headers", chunk.index, id)
+	}
+	_, err := c.makeRequestWithHeaders("PUT", chunkURL, headers, chunk.data)
 	return err
 }
 
-func yesNo(label string) bool {
+// yesNo asks the user to confirm. A failed prompt - an interrupt, or a stdin
+// that is not a terminal - is returned as an error rather than exiting the
+// process: the caller is inside a batch whose deferred JSON flush and error
+// scope still have to run. Callers must reach this only via canPrompt.
+func yesNo(label string) (bool, error) {
 	prompt := promptui.Select{
 		Label: label + " [Yes/No]",
 		Items: []string{"Yes", "No"},
 	}
 	_, result, err := prompt.Run()
 	if err != nil {
-		log.Fatalf("Prompt failed %v\n", err)
+		return false, fmt.Errorf("Prompt failed %v", err)
 	}
-	return result == "Yes"
+	return result == "Yes", nil
 }
 
-// Filters out only files to pick from.
-func pickFile(files []jsonFileResponse, label string) string {
+// Filters out only files to pick from. Reports a failed prompt as an error, see
+// yesNo.
+func pickFile(files []jsonFileResponse, label string) (string, error) {
 
 	options := make([]string, 0)
 	ids := make([]string, 0)
@@ -1216,7 +1565,7 @@ func pickFile(files []jsonFileResponse, label string) string {
 	}
 	index, _, err := prompt.Run()
 	if err != nil {
-		log.Fatalf("Prompt failed %v\n", err)
+		return "", fmt.Errorf("Prompt failed %v", err)
 	}
-	return ids[index]
+	return ids[index], nil
 }

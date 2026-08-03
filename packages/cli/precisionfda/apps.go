@@ -99,15 +99,10 @@ func (c *PFDAClient) buildExecURL(jsonConfig string, jobUID string) string {
 
 // outputJobResult prints the result for a regular (non-HTTPS) job.
 func (c *PFDAClient) outputJobResult(jobUID, execURL string) error {
-	if c.JsonResponse {
-		helpers.PrettyPrint(struct {
-			JobUID       string `json:"jobUid"`
-			ExecutionURL string `json:"executionUrl"`
-		}{JobUID: jobUID, ExecutionURL: execURL})
-	} else {
-		fmt.Printf(">> Job UID: %s\n", jobUID)
-		fmt.Printf(">> Execution URL: %s\n", execURL)
-	}
+	c.emitItem(
+		jsonJobResult{JobUID: jobUID, ExecutionURL: execURL},
+		">> Job UID: %s\n>> Execution URL: %s\n", jobUID, execURL,
+	)
 	return nil
 }
 
@@ -118,17 +113,11 @@ func (c *PFDAClient) outputHTTPSAppResult(jobUID, execURL string) error {
 		return err
 	}
 
-	if c.JsonResponse {
-		helpers.PrettyPrint(struct {
-			JobUID         string `json:"jobUid"`
-			ExecutionURL   string `json:"executionUrl"`
-			WorkstationURL string `json:"workstationUrl"`
-		}{JobUID: jobUID, ExecutionURL: execURL, WorkstationURL: httpsURL})
-	} else {
-		fmt.Printf(">> Job UID: %s\n", jobUID)
-		fmt.Printf(">> Execution URL: %s\n", execURL)
-		fmt.Printf("%s>> Workstation URL: %s%s\n", helpers.ColorGreen, httpsURL, helpers.ColorReset)
-	}
+	c.emitItem(
+		jsonHTTPSAppResult{JobUID: jobUID, ExecutionURL: execURL, WorkstationURL: httpsURL},
+		">> Job UID: %s\n>> Execution URL: %s\n%s>> Workstation URL: %s%s\n",
+		jobUID, execURL, helpers.ColorGreen, httpsURL, helpers.ColorReset,
+	)
 	return nil
 }
 

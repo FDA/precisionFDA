@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import supertest from 'supertest'
@@ -46,7 +48,10 @@ describe('/cli', async () => {
     expect(body).to.be.an('object')
     expect(body).to.have.property('version')
     expect(body.version).to.be.a('string')
-    expect(body.version).to.equal('2.14.2')
+    // packages/cli/VERSION is the single source of truth for the CLI version.
+    // This guards against the controller constant drifting from it on a version bump.
+    const expectedVersion = readFileSync(path.join(__dirname, '../../../../../../cli/VERSION'), 'utf8').trim()
+    expect(body.version).to.equal(expectedVersion)
   })
 
   describe('cli describe', () => {

@@ -61,9 +61,8 @@ func fipsBuildSetting() string {
 // GetTLSVersion returns the configured minimum TLS version for the transport.
 // This is the negotiated floor, not the version of any established connection.
 func GetTLSVersion(tr *http.Transport) string {
-	minVer := tr.TLSClientConfig.MinVersion
-	if minVer == 0 {
+	if tr.TLSClientConfig == nil || tr.TLSClientConfig.MinVersion == 0 {
 		return "Unknown"
 	}
-	return tls.VersionName(minVer)
+	return tls.VersionName(tr.TLSClientConfig.MinVersion)
 }

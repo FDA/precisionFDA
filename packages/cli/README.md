@@ -186,9 +186,15 @@ See the [Go FIPS 140-3 documentation](https://go.dev/doc/security/fips140) for d
 
 # Version History
 
+### 2.15.0 (2026-08-03)
+
+- fixed issue with `--json` output of `mkdir`, `rm`, `rmdir`, `upload-file`, and `download` - results and per-item errors are now always emitted as a single parseable JSON array
+- fixed issue where `mkdir`, `rm`, `rmdir`, `upload-file`, and `download` could exit with code 0 even though some items failed
+- fixed issue with multi-file upload aborting on the first failed file instead of continuing with the remaining files
+
 ### 2.14.2 (2026-08-03)
 
-- fixed issue with the distribution build configuration
+- fixed issue with the distribution build configuration across all platforms
 
 ### 2.14.1 (2026-07-27)
 

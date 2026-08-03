@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-
-	"dnanexus.com/precision-fda-cli/helpers"
 )
 
 type jsonFindNodesResponse struct {
@@ -43,13 +41,7 @@ func (c *PFDAClient) RemoveFile(uids []string) error {
 	}
 
 	for _, uid := range uids {
-		if c.JsonResponse {
-			helpers.PrettyPrint(struct {
-				Uid string `json:"uid"`
-			}{Uid: uid})
-		} else {
-			fmt.Printf("Removed %s \n", uid)
-		}
+		c.emitItem(jsonRemovedFile{Uid: uid}, "Removed %s \n", uid)
 	}
 	return nil
 }
@@ -79,12 +71,6 @@ func (c *PFDAClient) RemoveDir(id string) error {
 		return fmt.Errorf("Folder with id: %d not found or inaccessible", intId)
 	}
 
-	if c.JsonResponse {
-		helpers.PrettyPrint(struct {
-			ID int `json:"id"`
-		}{ID: intId})
-	} else {
-		fmt.Printf("Removed dir (id: %s) \n", id)
-	}
+	c.emitItem(jsonRemovedFolder{ID: intId}, "Removed dir (id: %s) \n", id)
 	return nil
 }

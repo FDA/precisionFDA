@@ -118,6 +118,19 @@ func PrintError(err error, asJSON bool) {
 	}
 }
 
+// PrintErrorAsArray prints the error the way the commands that report on many
+// items do - in JSON mode as a single-element array, matching the array they
+// emit on success. Without it a failure raised before the first item is
+// processed (bad arguments, missing key) would come out as a bare object and
+// consumers would have to parse two different shapes from the same command.
+func PrintErrorAsArray(err error, asJSON bool) {
+	if !asJSON {
+		PrintError(err, false)
+		return
+	}
+	PrettyPrint([]ErrorResponse{{Error: err.Error()}})
+}
+
 func ErrorFromError(err error, asJSON bool) int {
 	PrintError(err, asJSON)
 	return 1

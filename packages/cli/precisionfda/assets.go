@@ -9,8 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"dnanexus.com/precision-fda-cli/helpers"
 )
 
 type jsonCreateAssetPayload struct {
@@ -77,7 +75,7 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	// enough capacity to always start c.NumRoutines workers; readAndChunk
 	// overwrites it with the real byte count for accurate progress display.
 	uploadSize := int64(c.NumRoutines) * int64(c.ChunkSize)
-	wait := c.initWaitGroup(fileID, chunkPool, &uploadSize, true)
+	wait, abort := c.initWaitGroup(fileID, chunkPool, &uploadSize, true)
 
 	if !c.JsonResponse {
 		fmt.Println(">> Archiving asset...")
@@ -86,6 +84,9 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	// BSD/libarchive tar (macOS, and Windows 10 1803+) pads compressed output to 10240-byte blocking-factor multiples; GNU tar on Linux does not.
 	// archive/tar + compress/gzip produces identical, padding-free output everywhere and removes the dependency on a system `tar` binary (older Windows shipped none at all).
 	pr, pw := io.Pipe()
+	// Closing the read end unblocks the archiver goroutine with ErrClosedPipe
+	// if the upload aborts before the whole archive was consumed.
+	defer pr.Close()
 	go func() {
 		var writeErr error
 		if strings.HasSuffix(name, ".tar.gz") {
@@ -107,9 +108,9 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 		}
 		pw.CloseWithError(writeErr)
 	}()
-	if err := c.readAndChunk(pr, chunkPool, &uploadSize); err != nil {
+	if err := c.readAndChunk(pr, chunkPool, &uploadSize, abort); err != nil {
 		close(chunkPool)
-		wait()
+		_ = wait()
 		return fmt.Errorf("archiving asset: %w", err)
 	}
 	if !c.JsonResponse {
@@ -117,7 +118,9 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	}
 
 	close(chunkPool)
-	wait()
+	if err := wait(); err != nil {
+		return fmt.Errorf("uploading asset: %w", err)
+	}
 
 	if !c.JsonResponse {
 		fmt.Println(">| Uploaded 100%\n>> Finalizing asset...")
@@ -128,13 +131,7 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 		return err
 	}
 	assetURL := c.BaseURL + "/home/assets/" + fileID
-	if c.JsonResponse {
-		helpers.PrettyPrint(struct {
-			Url string `json:"url"`
-		}{Url: assetURL})
-	} else {
-		fmt.Println(">> Done! Access your asset at " + assetURL)
-	}
+	c.emitItem(jsonURL{Url: assetURL}, ">> Done! Access your asset at %s\n", assetURL)
 	return nil
 }
 

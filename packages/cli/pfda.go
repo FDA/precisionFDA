@@ -3,6 +3,7 @@ package main
 
 import (
 	"crypto/tls"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
@@ -220,6 +221,72 @@ var invokeCat = func(client precisionfda.IPFDAClient, arg *string) error {
 	return client.Head(*arg, -1)
 }
 
+// arrayJSONCommands are the commands whose -json output is a single JSON array:
+// one entry per item for the batch commands (uploaded file, created folder,
+// removed file, ...), one entry per row for the listings. Their failures have to
+// be emitted as an array too, so a consumer parses the same shape no matter
+// where the command failed - while validating arguments, or half-way through a
+// run with some items already done. Every other command reports a single object
+// on success and so keeps reporting a single {"error": ...} object.
+// N.B. plain `ls` is not in this list - it emits a {files, meta} object.
+var arrayJSONCommands = map[string]bool{
+	"upload-file":    true,
+	"download":       true,
+	"mkdir":          true,
+	"rm":             true,
+	"rmdir":          true,
+	"ls-apps":        true,
+	"ls-assets":      true,
+	"ls-workflows":   true,
+	"ls-executions":  true,
+	"ls-spaces":      true,
+	"ls-members":     true,
+	"ls-discussions": true,
+}
+
+// commandError reports err in the JSON shape the given command emits on success
+// and returns the exit code.
+func commandError(command string, err error, asJSON bool) int {
+	if arrayJSONCommands[command] {
+		helpers.PrintErrorAsArray(err, asJSON)
+		return 1
+	}
+	return helpers.ErrorFromError(err, asJSON)
+}
+
+// commandErrorFromString is commandError for a failure that has no error value
+// yet - typically argument validation.
+func commandErrorFromString(command string, msg string, asJSON bool) int {
+	return commandError(command, errors.New(msg), asJSON)
+}
+
+// requireArgs guards a command that cannot do anything without a positional
+// argument - for the batch commands that also means the loop would otherwise
+// iterate over nothing, print an empty JSON array and exit 0, which a scripted
+// caller that lost its argument list would read as success. It returns
+// (0, true) when at least one argument is present, and otherwise reports
+// "<what> is required - provide it as an argument: <usage>" in the command's
+// own JSON shape and returns the exit code to hand back. Building the sentence
+// in one place is what keeps the wording from drifting per command.
+func requireArgs(command string, args []string, what string, usage string, asJSON bool) (int, bool) {
+	if len(args) > 0 {
+		return 0, true
+	}
+	msg := fmt.Sprintf("%s is required - provide it as an argument: %s", what, usage)
+	return commandErrorFromString(command, msg, asJSON), false
+}
+
+// commandExit converts a command error into the process exit code. An error
+// that was already reported (printed, or included in the emitted JSON array)
+// only sets the exit code - printing it here again would duplicate the message
+// and, in JSON mode, emit a second document next to the batch array.
+func commandExit(command string, err error, asJSON bool) int {
+	if precisionfda.IsReported(err) {
+		return 1
+	}
+	return commandError(command, err, asJSON)
+}
+
 var invokeGetScope = func(client precisionfda.IPFDAClient) error {
 	return client.GetScope()
 }
@@ -301,7 +368,7 @@ func mainInternal() int {
 	spaceID := flag.String("space-id", "", "Space ID of the target space")
 	portalID := flag.String("portal-id", "", "Slug or ID of the target portal")
 	outputFilePath := flag.String("output", "", "[optional] File path to write api call response data. Defaults to stdout.")
-	inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (Min 5MB,/Max 2GB).")
+	inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (min 16MB, max 4GB).")
 	inputNumRoutines := flag.Int("threads", defaultNumRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")
 	server := flag.String("server", "", "[optional] Server to connect and make requests to.")
 	skipVerify := flag.String("skipverify", defaultSkipVerify, "[optional] Boolean string to skip certificate verification.")
@@ -353,7 +420,7 @@ func mainInternal() int {
 	config, configErr := helpers.GetConfig()
 	if configErr != nil {
 		if !os.IsNotExist(configErr) {
-			return helpers.ErrorFromError(configErr, *flagJson)
+			return commandError(command, configErr, *flagJson)
 		}
 	}
 
@@ -398,7 +465,7 @@ func mainInternal() int {
 		pfdaclient.AuthKey = *authKey
 		if *authKey == "" {
 			if config == nil {
-				return helpers.ErrorFromString("Missing authorization key - could not find config file and no key was provided with the command.", *flagJson)
+				return commandErrorFromString(command, "Missing authorization key - could not find config file and no key was provided with the command.", *flagJson)
 			}
 			pfdaclient.AuthKey = config.Key
 		}
@@ -422,7 +489,7 @@ func mainInternal() int {
 		}
 
 		f, err := os.Stat(*assetFolderPath)
-		if os.IsNotExist(err) || !f.IsDir() {
+		if err != nil || !f.IsDir() {
 			return helpers.ErrorFromString(fmt.Sprintf("Input asset folder path '%s' does not exist or is not a directory", *assetFolderPath), *flagJson)
 		}
 
@@ -439,7 +506,7 @@ func mainInternal() int {
 		}
 
 		f, err = os.Stat(*readmeFilePath)
-		if os.IsNotExist(err) || f.IsDir() {
+		if err != nil || f.IsDir() {
 			return helpers.ErrorFromString(fmt.Sprintf("Input readme file path '%s' does not exist or is a directory", *readmeFilePath), *flagJson)
 		}
 
@@ -456,8 +523,8 @@ func mainInternal() int {
 		stdinData := false
 		stdinFile := os.Stdin
 
-		fi, _ := os.Stdin.Stat()
-		if (fi.Mode() & os.ModeCharDevice) == 0 {
+		fi, statErr := os.Stdin.Stat()
+		if statErr == nil && (fi.Mode()&os.ModeCharDevice) == 0 {
 			stdinData = true
 		}
 
@@ -469,11 +536,11 @@ func mainInternal() int {
 		// STDIN upload logic
 		if len(args) == 0 && stdinData {
 			if *fileName == "" {
-				return helpers.ErrorFromString("Filename for stdin input is required - provide it as [-name <FILE_NAME>]", *flagJson)
+				return commandErrorFromString(command, "Filename for stdin input is required - provide it as [-name <FILE_NAME>]", *flagJson)
 			}
 			err := invokeUploadStdinFile(pfdaclient, fileName, folderID, spaceID, inputChunkSize, inputNumRoutines)
 			if err != nil {
-				return helpers.ErrorFromError(err, *flagJson)
+				return commandExit(command, err, *flagJson)
 
 			}
 			defer stdinFile.Close()
@@ -481,41 +548,41 @@ func mainInternal() int {
 		}
 
 		if len(args) != 0 && stdinData {
-			return helpers.ErrorFromString("Cannot combine multiple file sources - use either args or stdin", *flagJson)
+			return commandErrorFromString(command, "Cannot combine multiple file sources - use either args or stdin", *flagJson)
 		}
 
-		if len(args) == 0 {
-			return helpers.ErrorFromString("Path for upload is required - provide it as an argument or stdin", *flagJson)
+		if code, ok := requireArgs(command, args, "Path for upload", "upload-file <PATH>, or pipe the data to stdin", *flagJson); !ok {
+			return code
 		}
 
 		// uploading more than one file/folder
 		if len(args) > 1 {
 			err := invokeUploadMultipleFiles(pfdaclient, &args, folderID, spaceID, inputChunkSize, inputNumRoutines)
 			if err != nil {
-				return helpers.ErrorFromError(err, *flagJson)
+				return commandExit(command, err, *flagJson)
 			}
 			// just one file/folder to upload
 		} else {
 			path := filepath.Clean(args[0])
 			f, err := os.Stat(path)
-			if os.IsNotExist(err) {
-				return helpers.ErrorFromString(fmt.Sprintf("Input path '%s' does not exist", path), *flagJson)
+			if err != nil {
+				return commandErrorFromString(command, fmt.Sprintf("Input path '%s' does not exist or is not accessible", path), *flagJson)
 			}
 
 			if f.IsDir() {
 				err = invokeUploadFolder(pfdaclient, &path, folderID, spaceID, inputChunkSize, inputNumRoutines)
 				if err != nil {
-					return helpers.ErrorFromError(err, *flagJson)
+					return commandExit(command, err, *flagJson)
 
 				}
 			} else {
 				if *inputChunkSize == defaultChunkSize {
 					// if chunkSize was not set by user, calculate it based on file size
-					*inputChunkSize = helpers.CalculateChunkSize(f.Size(), pfdaclient.MinChunkSize)
+					*inputChunkSize = helpers.CalculateChunkSize(f.Size(), precisionfda.MinChunkSize)
 				}
 				err = invokeUploadFile(pfdaclient, &path, folderID, spaceID, inputChunkSize, inputNumRoutines)
 				if err != nil {
-					return helpers.ErrorFromError(err, *flagJson)
+					return commandExit(command, err, *flagJson)
 				}
 			}
 		}
@@ -527,22 +594,26 @@ func mainInternal() int {
 
 		// TODO: remove deprecated -file-id flag in V3.0.0
 		if *fileID != "" {
-			return helpers.ErrorFromString("The '-file-id' flag is deprecated. Please provide the file ID as a positional argument instead. Use -help flag to print help section.", *flagJson)
+			return commandErrorFromString(command, "The '-file-id' flag is deprecated. Please provide the file ID as a positional argument instead. Use -help flag to print help section.", *flagJson)
 		}
 
-		if *folderID == "" && *spaceID == "" && len(args) == 0 {
-			return helpers.ErrorFromString("File ID or name of the file to be downloaded is required. Use -help flag to print help section.", *flagJson)
+		// -folder-id and -space-id name what to download on their own; without
+		// either of them it has to come from the arguments.
+		if *folderID == "" && *spaceID == "" {
+			if code, ok := requireArgs(command, args, "File ID or name of the file to download", "download <FILE_ID>", *flagJson); !ok {
+				return code
+			}
 		}
 
 		// we need tri-state as there is different behavior for -overwrite=false and completely omitted -overwrite flag
 		validOverwrite := map[string]bool{"": true, "true": true, "false": true}
 		if !validOverwrite[*flagOverwriteFile] {
-			return helpers.ErrorFromString("Invalid value for -overwrite flag - acceptable values are true, false, or omit it completely", *flagJson)
+			return commandErrorFromString(command, "Invalid value for -overwrite flag - acceptable values are true, false, or omit it completely", *flagJson)
 		}
 
 		err := invokeDownload(pfdaclient, &args, folderID, spaceID, *flagPublic, recursive, outputFilePath, flagOverwriteFile)
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandExit(command, err, *flagJson)
 		}
 
 	case "view-link":
@@ -614,7 +685,7 @@ func mainInternal() int {
 
 		err := invokeLsApps(pfdaclient, spaceID, flags)
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandError(command, err, *flagJson)
 		}
 
 	case "ls-assets":
@@ -631,7 +702,7 @@ func mainInternal() int {
 
 		err := invokeLsAssets(pfdaclient, scope)
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandError(command, err, *flagJson)
 		}
 	case "ls-workflows":
 		if help {
@@ -645,7 +716,7 @@ func mainInternal() int {
 
 		err := invokeLsWorkflows(pfdaclient, spaceID, flags)
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandError(command, err, *flagJson)
 		}
 
 	case "ls-executions":
@@ -662,7 +733,7 @@ func mainInternal() int {
 
 		err := invokeLsExecutions(pfdaclient, scope)
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandError(command, err, *flagJson)
 
 		}
 
@@ -698,7 +769,7 @@ func mainInternal() int {
 		}
 		err := invokeLsSpaces(pfdaclient, state, typesList, *flagProtected)
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandError(command, err, *flagJson)
 		}
 
 	case "ls-members":
@@ -709,13 +780,13 @@ func mainInternal() int {
 		if *spaceID != "" {
 			args = []string{*spaceID}
 		}
-		if len(args) == 0 {
-			return helpers.ErrorFromString("Space ID is required", *flagJson)
+		if code, ok := requireArgs(command, args, "Space ID", "ls-members <SPACE_ID>", *flagJson); !ok {
+			return code
 		}
 
 		err := invokeLsMembers(pfdaclient, &args[0])
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandError(command, err, *flagJson)
 		}
 
 	case "ls-discussions":
@@ -727,17 +798,17 @@ func mainInternal() int {
 			args = []string{*spaceID}
 		}
 
-		if len(args) == 0 {
-			return helpers.ErrorFromString("Space ID is required", *flagJson)
+		if code, ok := requireArgs(command, args, "Space ID", "ls-discussions <SPACE_ID>", *flagJson); !ok {
+			return code
 		}
 
 		if len(args) != 1 {
-			return helpers.ErrorFromString("Only one space ID is allowed", *flagJson)
+			return commandErrorFromString(command, "Only one space ID is allowed", *flagJson)
 		}
 
 		err := invokeLsDiscussions(pfdaclient, &args[0])
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandError(command, err, *flagJson)
 
 		}
 
@@ -771,32 +842,44 @@ func mainInternal() int {
 		if help {
 			return helpers.PrintMkdirHelp()
 		}
+		if code, ok := requireArgs(command, args, "Folder name", "mkdir <NAME>", *flagJson); !ok {
+			return code
+		}
 		err := invokeMkdir(pfdaclient, &args, folderID, spaceID, parents)
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandExit(command, err, *flagJson)
 		}
 
 	case "rmdir":
 		if help {
 			return helpers.PrintRmdirHelp()
 		}
+		if code, ok := requireArgs(command, args, "Folder ID", "rmdir <FOLDER_ID>", *flagJson); !ok {
+			return code
+		}
 		err := invokeRmdir(pfdaclient, &args, recursive)
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandExit(command, err, *flagJson)
 		}
 
 	case "rm":
 		if help {
 			return helpers.PrintRmHelp()
 		}
+		if code, ok := requireArgs(command, args, "File ID or name", "rm <FILE_ID>", *flagJson); !ok {
+			return code
+		}
 		err := invokeRm(pfdaclient, &args, folderID, spaceID)
 		if err != nil {
-			return helpers.ErrorFromError(err, *flagJson)
+			return commandExit(command, err, *flagJson)
 		}
 
 	case "head":
 		if help {
 			return helpers.PrintHeadHelp()
+		}
+		if len(args) == 0 {
+			return helpers.ErrorFromString("File ID is required - provide it as an argument: head <FILE_ID>", *flagJson)
 		}
 		err := invokeHead(pfdaclient, &args[0], *flagLines)
 		if err != nil {
@@ -806,6 +889,9 @@ func mainInternal() int {
 	case "cat":
 		if help {
 			return helpers.PrintCatHelp()
+		}
+		if len(args) == 0 {
+			return helpers.ErrorFromString("File ID is required - provide it as an argument: cat <FILE_ID>", *flagJson)
 		}
 		err := invokeCat(pfdaclient, &args[0])
 		if err != nil {
@@ -831,6 +917,10 @@ func mainInternal() int {
 			return helpers.ErrorFromString("Space ID is required", *flagJson)
 		}
 
+		if len(args) == 0 {
+			return helpers.ErrorFromString("JSON body is required - provide it as an argument: create-discussion '<JSON_BODY>'", *flagJson)
+		}
+
 		err := invokeCreateDiscussion(pfdaclient, spaceID, &args[0])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
@@ -839,6 +929,10 @@ func mainInternal() int {
 	case "create-reply":
 		if help {
 			return helpers.PrintCreateReplyHelp()
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("JSON body is required - provide it as an argument: create-reply '<JSON_BODY>'", *flagJson)
 		}
 
 		err := invokeCreateReply(pfdaclient, &args[0])
@@ -851,6 +945,10 @@ func mainInternal() int {
 			return helpers.PrintEditDiscussionHelp()
 		}
 
+		if len(args) == 0 {
+			return helpers.ErrorFromString("JSON body is required - provide it as an argument: edit-discussion '<JSON_BODY>'", *flagJson)
+		}
+
 		err := invokeEditDiscussion(pfdaclient, &args[0])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
@@ -859,6 +957,10 @@ func mainInternal() int {
 	case "edit-reply":
 		if help {
 			return helpers.PrintEditReplyHelp()
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("JSON body is required - provide it as an argument: edit-reply '<JSON_BODY>'", *flagJson)
 		}
 
 		err := invokeEditReply(pfdaclient, &args[0])
@@ -916,6 +1018,9 @@ func mainInternal() int {
 		if help {
 			return helpers.PrintSetTagsHelp()
 		}
+		if len(args) < 2 {
+			return helpers.ErrorFromString("Entity ID and tags are required - provide them as arguments: set-tags <ENTITY_ID> 'TAG1,TAG2,...'", *flagJson)
+		}
 		entityType := helpers.ParseEntityType(args[0])
 		if entityType == "" {
 			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, discussion, job, file, folder, workflow.", args[0]), *flagJson)
@@ -931,6 +1036,9 @@ func mainInternal() int {
 	case "set-properties":
 		if help {
 			return helpers.PrintSetPropertiesHelp()
+		}
+		if len(args) < 2 {
+			return helpers.ErrorFromString("Entity ID and properties are required - provide them as arguments: set-properties <ENTITY_ID> '<JSON_PROPERTIES>'", *flagJson)
 		}
 		entityType := helpers.ParseEntityType(args[0])
 		if entityType == "" {
@@ -1110,6 +1218,7 @@ func checkLatestVersion(pfdaclient *precisionfda.PFDAClient) {
 	res, err := invokeGetLatestVersion(pfdaclient)
 	if err != nil {
 		fmt.Println("Error while checking for latest available version.")
+		return
 	}
 	if res != Version {
 		fmt.Printf("\nThere is a newer version available for you to download - v%s \nVisit https://precision.fda.gov/docs/cli to get the latest version!\n", res)

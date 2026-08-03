@@ -44,7 +44,7 @@ jobs:
 
       - name: Run Go unit tests
         working-directory: ${{ env.BUILD_DIR }}
-        run: GOEXPERIMENT=boringcrypto go test -v ./...
+        run: GOFIPS140=v1.0.0-c2097c7c go test -v ./...
 
       - name: Set build script as executable
         run: chmod +x $BUILD_DIR/build-dist.sh
@@ -61,11 +61,11 @@ jobs:
         run: |
           ./build-dist.sh
 
-      - name: Extract version from build script
+      - name: Extract version from VERSION file
         id: extract_version
         working-directory: ${{ env.BUILD_DIR }}
         run: |
-          VERSION=$(grep '^VERSION=' build-dist.sh | cut -d'=' -f2)
+          VERSION=$(tr -d '[:space:]' < VERSION)
           echo "VERSION=$VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"

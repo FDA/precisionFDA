@@ -104,7 +104,7 @@ func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte
 	body, _ = io.ReadAll(resp.Body)
 
 	if !strings.HasPrefix(status, "2") {
-		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n", requestType, url, status)
+		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.", requestType, url, status)
 	}
 	return status, body, err
 }

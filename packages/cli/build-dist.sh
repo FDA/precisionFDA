@@ -2,13 +2,21 @@
 #
 # N.B. run from packages/cli
 
-VERSION=2.14.2
+set -eu
+
+# Single source of truth for the CLI version lives in the VERSION file.
+VERSION=$(tr -d '[:space:]' < "$(dirname "$0")/VERSION")
 COMMITID=$(git rev-parse HEAD)
 SHORT_SHA=$(git rev-parse --short HEAD)
 
-if [ "$CI" = "true" ]; then
+# Native Go FIPS builds don't need CGO; keep binaries statically linked everywhere.
+export CGO_ENABLED=0
+
+USER_ARG=""
+GOMODCACHE_DIR=""
+GOCACHE_DIR=""
+if [ "${CI:-}" = "true" ]; then
     export HOME=/go/src/dnanexus.com/precision-fda-cli
-    export CGO_ENABLED=0
     export GOMODCACHE_DIR="/go/src/dnanexus.com/precision-fda-cli/.go_cache/pkg/mod"
     export GOCACHE_DIR="/go/src/dnanexus.com/precision-fda-cli/.go_cache/cache"
     USER_ARG="--user $(id -u):$(id -g)"

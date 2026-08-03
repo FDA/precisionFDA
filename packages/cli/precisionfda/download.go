@@ -10,7 +10,6 @@ import (
 	"path"
 	"regexp"
 
-	"dnanexus.com/precision-fda-cli/helpers"
 	"github.com/docker/go-units"
 	"github.com/gosuri/uilive"
 	"github.com/hashicorp/go-retryablehttp"
@@ -53,12 +52,6 @@ func (wc *Writer) Write(p []byte) (int, error) {
 }
 
 func (c *PFDAClient) DownloadFromUrl(fileURL string, outputFilePath string, fileSize int64, withProgressBar bool) error {
-	out, err := os.Create(outputFilePath) // Create the file
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
 	req, err := retryablehttp.NewRequest("GET", fileURL, nil)
 	if err != nil {
 		return err
@@ -69,6 +62,18 @@ func (c *PFDAClient) DownloadFromUrl(fileURL string, outputFilePath string, file
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("error downloading file: %s", resp.Status)
+	}
+
+	// Create the file only after the response is known to be OK, so a failed
+	// download never truncates an existing file nor leaves a 0-byte one behind.
+	out, err := os.Create(outputFilePath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
 
 	writer := uilive.New()
 	writer.Start()
@@ -87,11 +92,7 @@ func (c *PFDAClient) DownloadFromUrl(fileURL string, outputFilePath string, file
 }
 
 func (c *PFDAClient) DownloadDirectly(downloadUrl string, outputFilePath string, overwrite string) error {
-	originalName := path.Base(downloadUrl)
-	fileName, err := url.PathUnescape(originalName)
-	if err != nil {
-		fileName = originalName
-	}
+	fileName := fileNameFromUrl(downloadUrl)
 	if outputFilePath == "" {
 		// If output is not specified, use the original filename and current working directory
 		dir, err := os.Getwd()
@@ -106,25 +107,21 @@ func (c *PFDAClient) DownloadDirectly(downloadUrl string, outputFilePath string,
 		outputFilePath = path.Join(outputFilePath, fileName)
 	}
 
-	if _, err := os.Stat(outputFilePath); err == nil && (overwrite == "false" || overwrite == "") {
-		helpers.PrintError(fmt.Errorf("Path %s already exists but -overwrite flag not set to true - skipping download", outputFilePath), c.JsonResponse)
+	if _, err := os.Stat(outputFilePath); err == nil && overwrite != "true" {
+		c.emitSkippedDownload(fileName, outputFilePath)
 		return nil
 	}
 
-	err = c.DownloadFromUrl(downloadUrl, outputFilePath, 0, false)
+	err := c.DownloadFromUrl(downloadUrl, outputFilePath, 0, false)
 	if err != nil {
-		helpers.PrintError(fmt.Errorf("Download of %s failed - %s.\n", fileName, err), c.JsonResponse)
+		c.emitError(fmt.Errorf("Download of %s failed - %s", fileName, err))
 		return nil
 	}
 
-	if c.JsonResponse {
-		helpers.PrettyPrint(struct {
-			FileName string `json:"file_name"`
-			Path     string `json:"path"`
-		}{FileName: fileName, Path: outputFilePath})
-	} else {
-		fmt.Printf("Downloaded %s to %s\n", fileName, outputFilePath)
-	}
+	c.emitItem(
+		jsonDownloadResult{FileName: fileName, Path: outputFilePath},
+		"Downloaded %s to %s\n", fileName, outputFilePath,
+	)
 	return nil
 }
 
@@ -161,4 +158,20 @@ var unsafeFileNameChars = regexp.MustCompile(`[<>:"/\\|?*]+`)
 
 func sanitizeFileName(name string) string {
 	return unsafeFileNameChars.ReplaceAllString(name, "_")
+}
+
+// fileNameFromUrl derives the on-disk name of a download from its url: the last
+// path segment, percent-decoded and sanitized. Both download paths - single
+// (DownloadFile) and bulk (DownloadDirectly) - must go through here, so they
+// agree on the name they report and on the one they write. Decoding is what
+// makes sanitizing mandatory: the last segment of the url cannot contain a
+// separator, but its decoded form can (`%2f`, `%5c`), which would otherwise let
+// a server-supplied name steer the write out of the requested -output directory.
+func fileNameFromUrl(downloadUrl string) string {
+	originalName := path.Base(downloadUrl)
+	fileName, err := url.PathUnescape(originalName)
+	if err != nil {
+		fileName = originalName
+	}
+	return sanitizeFileName(fileName)
 }

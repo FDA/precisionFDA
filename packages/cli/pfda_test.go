@@ -1,12 +1,17 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
+	"dnanexus.com/precision-fda-cli/helpers"
 	"dnanexus.com/precision-fda-cli/precisionfda"
 	"dnanexus.com/precision-fda-cli/precisionfda/test"
 )
@@ -16,10 +21,21 @@ func TestMain(m *testing.M) {
 	// but works since main uses the default flagset
 	flag.Usage = func() {}
 
+	// Many tests pass -key, and mainInternal persists it via helpers.SaveConfig
+	// on every successful command. Point the config at a temp dir so a test run
+	// does not overwrite the developer's real ~/.pfda_config.
+	tempConfigDir, err := os.MkdirTemp("", "pfda-test-config")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Could not create temp config dir: %s\n", err)
+		os.Exit(1)
+	}
+	helpers.ConfigPath = filepath.Join(tempConfigDir, ".pfda_config")
+
 	// Run tests
 	exitVal := m.Run()
 
 	// Teardown
+	os.RemoveAll(tempConfigDir)
 
 	// Exit with exit value from tests
 	os.Exit(exitVal)
@@ -126,15 +142,22 @@ func captureStdout(t *testing.T, fn func()) string {
 	test.Ok(t, err)
 
 	os.Stdout = writer
+	defer func() { os.Stdout = originalStdout }()
+
+	// Drain the pipe concurrently so a large write can never block on a full
+	// pipe buffer while nothing is reading.
+	outC := make(chan string, 1)
+	go func() {
+		data, _ := io.ReadAll(reader)
+		outC <- string(data)
+	}()
+
 	fn()
 	test.Ok(t, writer.Close())
-	os.Stdout = originalStdout
 
-	output, err := io.ReadAll(reader)
-	test.Ok(t, err)
+	output := <-outC
 	test.Ok(t, reader.Close())
-
-	return string(output)
+	return output
 }
 
 func captureStderr(t *testing.T, fn func()) string {
@@ -145,15 +168,36 @@ func captureStderr(t *testing.T, fn func()) string {
 	test.Ok(t, err)
 
 	os.Stderr = writer
+	defer func() { os.Stderr = originalStderr }()
+
+	// Drain the pipe concurrently so a large write can never block on a full
+	// pipe buffer while nothing is reading.
+	outC := make(chan string, 1)
+	go func() {
+		data, _ := io.ReadAll(reader)
+		outC <- string(data)
+	}()
+
 	fn()
 	test.Ok(t, writer.Close())
-	os.Stderr = originalStderr
 
-	output, err := io.ReadAll(reader)
-	test.Ok(t, err)
+	output := <-outC
 	test.Ok(t, reader.Close())
+	return output
+}
 
-	return string(output)
+// assertSingleErrorArray checks that output is the JSON array shape the batch
+// commands emit - a single-element array holding the error - rather than a bare
+// error object, so a consumer parses one shape whether the command failed on its
+// arguments or half-way through the batch.
+func assertSingleErrorArray(t *testing.T, output string, wantErrorSubstring string) {
+	t.Helper()
+
+	var results []map[string]string
+	test.Ok(t, json.Unmarshal([]byte(output), &results))
+	test.Equals(t, 1, len(results))
+	test.Assert(t, strings.Contains(results[0]["error"], wantErrorSubstring),
+		"expected error containing %q inside the array, got %q", wantErrorSubstring, output)
 }
 
 func TestMainNoArgs(t *testing.T) {
@@ -436,6 +480,69 @@ func TestInvokeUploadAsset(t *testing.T) {
 	reset()
 }
 
+func TestDownloadReportedErrorExitsNonZeroWithoutReprinting(t *testing.T) {
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+
+	oldInvokeDownload := invokeDownload
+	defer func() { invokeDownload = oldInvokeDownload }()
+	invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string, public bool, recursive bool, outputFilePath *string, overwriteFile *string) error {
+		// The client already emitted this into the JSON batch it printed.
+		return precisionfda.AsReported(errors.New("mkdir /nope: permission denied"))
+	}
+
+	os.Args = []string{"pfda", "download", "file-12345", "file-23456", "--key", "HELLO", "--json"}
+	var returnCode int
+	output := captureStdout(t, func() {
+		returnCode = runMainInternal(false)
+	})
+
+	test.Equals(t, 1, returnCode)
+	test.Assert(t, !strings.Contains(output, "permission denied"), "expected the reported error not to be printed again, got %q", output)
+}
+
+func TestJSONErrorShapeMatchesCommandOutputShape(t *testing.T) {
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+
+	// upload-file emits a JSON array of uploaded files, so a failure raised
+	// before any upload starts has to be an array too - a consumer parses the
+	// output the same way wherever the command failed.
+	os.Args = []string{"pfda", "upload-file", "./i-do-not-exist", "--key", "HELLO", "--json"}
+	var returnCode int
+	output := captureStdout(t, func() {
+		returnCode = runMainInternal(false)
+	})
+
+	test.Equals(t, 1, returnCode)
+	var results []map[string]string
+	test.Ok(t, json.Unmarshal([]byte(output), &results))
+	test.Equals(t, len(results), 1)
+	test.Assert(t, strings.Contains(results[0]["error"], "i-do-not-exist"), "expected the failure inside the array, got %q", output)
+
+	// A command whose successful JSON output is a single object still reports
+	// its failures as a single object.
+	os.Args = []string{"pfda", "describe", "--key", "HELLO", "--json"}
+	output = captureStdout(t, func() {
+		returnCode = runMainInternal(false)
+	})
+
+	test.Equals(t, 1, returnCode)
+	var result map[string]string
+	test.Ok(t, json.Unmarshal([]byte(output), &result))
+	test.Assert(t, result["error"] != "", "expected a single error object, got %q", output)
+
+	// The listings emit an array of rows, so they report failures as an array
+	// as well - checked directly, as reaching them requires a server.
+	output = captureStdout(t, func() {
+		test.Equals(t, 1, commandError("ls-spaces", errors.New("boom"), true))
+	})
+	results = nil
+	test.Ok(t, json.Unmarshal([]byte(output), &results))
+	test.Equals(t, len(results), 1)
+	test.Equals(t, results[0]["error"], "boom")
+}
+
 func TestInvokeDownloadFile(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
@@ -712,6 +819,17 @@ func TestInvokeMkdir(t *testing.T) {
 	test.Equals(t, []string{"dir1/dir2/dir3"}, *input.Args)
 	test.Equals(t, true, input.FlagParents)
 	reset()
+
+	// Case: no folder name given - fails instead of creating nothing and
+	// reporting success, and the failure keeps the array shape of -json.
+	os.Args = []string{"pfda", "mkdir", "--key", "AUTH_KEY", "--json"}
+	output := captureStdout(t, func() {
+		returnCode = runMainInternal(false)
+	})
+	test.Equals(t, 1, returnCode)
+	test.Equals(t, false, funcWasCalled)
+	assertSingleErrorArray(t, output, "Folder name is required")
+	reset()
 }
 
 func TestInvokeRmdir(t *testing.T) {
@@ -767,6 +885,17 @@ func TestInvokeRmdir(t *testing.T) {
 	test.Equals(t, []string{"123"}, *input.Args)
 	test.Equals(t, true, input.FlagRecursive)
 	reset()
+
+	// Case: no folder id given - fails instead of removing nothing and
+	// reporting success, and the failure keeps the array shape of -json.
+	os.Args = []string{"pfda", "rmdir", "--key", "AUTH_KEY", "--json"}
+	output := captureStdout(t, func() {
+		returnCode = runMainInternal(false)
+	})
+	test.Equals(t, 1, returnCode)
+	test.Equals(t, false, funcWasCalled)
+	assertSingleErrorArray(t, output, "Folder ID is required")
+	reset()
 }
 
 func TestInvokeRm(t *testing.T) {
@@ -802,6 +931,17 @@ func TestInvokeRm(t *testing.T) {
 	test.Equals(t, []string{"123*", "333"}, *input.Args)
 
 	test.Equals(t, false, input.FlagParents)
+	reset()
+
+	// Case: no file given - fails instead of removing nothing and reporting
+	// success, and the failure keeps the array shape of -json.
+	os.Args = []string{"pfda", "rm", "--key", "AUTH_KEY", "--json"}
+	output := captureStdout(t, func() {
+		returnCode = runMainInternal(false)
+	})
+	test.Equals(t, 1, returnCode)
+	test.Equals(t, false, funcWasCalled)
+	assertSingleErrorArray(t, output, "File ID or name is required")
 	reset()
 }
 
