@@ -9,13 +9,13 @@ With the precisionFDA CLI, you can easily manage your files, folders, and assets
 import { Download } from 'lucide-react'
 
 <div className="flex gap-4 shrink">
-  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.15.0.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
+  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.15.1.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
     <button data-variant="primary" className="flex items-center gap-1.5 bg-[#1f70b7] py-1 px-4 rounded-md border border-[#4e8cc1] text-white cursor-pointer"><Download className='h-4.5' />Linux</button>
   </a>
-  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.15.0.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
+  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.15.1.tar.gz" className='no-underline' target="_blank" rel="noreferrer">
     <button data-variant="primary" className="flex items-center gap-1.5 bg-[#1f70b7] py-1 px-4 rounded-md border border-[#4e8cc1] text-white cursor-pointer"><Download className='h-4.5' />MacOS</button>
   </a>
-  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.15.0.zip" className='no-underline' target="_blank" rel="noreferrer">
+  <a href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.15.1.zip" className='no-underline' target="_blank" rel="noreferrer">
     <button data-variant="primary" className="flex items-center gap-1.5 bg-[#1f70b7] py-1 px-4 rounded-md border border-[#4e8cc1] text-white cursor-pointer"><Download className='h-4.5' />Windows</button>
   </a>
 </div>
@@ -823,7 +823,8 @@ _# Sets properties for a file by its ID using a JSON object._<br/>
 ## pFDA CLI Changelog
 | <div style={{width:'195px'}}>Version</div> | Note  |
 |---|---|
-| Version 2.15.0 (08/03/2026) | Reworked `--json` output and exit-code semantics for batch commands |
+| Version 2.15.1 (08/06/2026) | Fixed issue with executable build |
+| Version 2.15.0 (08/04/2026) | Reworked `--json` output and exit-code semantics for batch commands |
 | Version 2.14.2 (08/03/2026) | Fixed issue with the distribution build across all platforms |
 | Version 2.14.1 (07/27/2026) | Fixed issue with upload-asset across all platforms |
 | Version 2.14.0 (07/27/2026) | New features: rmdir -r flag for deleting non-empty folders, -debug flag for requests tracing |

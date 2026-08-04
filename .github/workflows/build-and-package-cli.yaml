@@ -28,7 +28,6 @@ jobs:
       GO_VERSION: 1.26.4
       BUILD_DIR: packages/cli
       STAGING_BUCKET: pfda-staging-static-files-transition-area
-      JOB_EXECUTION_ENABLED: false # workstations feature flag
 
     steps:
       - name: Checkout repository

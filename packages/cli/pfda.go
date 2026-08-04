@@ -23,10 +23,6 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 
 func getUsageMessage() string {
-	jobCmds := ""
-	if jobExecutionEnabled == "true" {
-		jobCmds = "\n   pfda run\n   pfda terminate"
-	}
 	return fmt.Sprintf(
 		`********************************
 PFDA COMMAND LINE TOOL v%s
@@ -56,9 +52,11 @@ All available commands:
    pfda rm-discussion
    pfda rm-reply
    pfda rmdir
-   pfda rotate-password%s
+   pfda rotate-password
+   pfda run
    pfda set-properties
    pfda set-tags
+   pfda terminate
    pfda upload-asset
    pfda upload-file
    pfda upload-resource
@@ -70,7 +68,7 @@ Command specific help section with description, examples and available flags:
 To print version info and exit:
    pfda -version
 
-Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli`, Version, jobCmds)
+Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli`, Version)
 }
 
 //
@@ -93,11 +91,10 @@ var defaultURL = "precision.fda.gov"
 
 // these variables are populated by -ldflags -X command line options
 var (
-	commitID            string
-	Version             string
-	BuildTime           string
-	OsArch              string
-	jobExecutionEnabled string
+	commitID  string
+	Version   string
+	BuildTime string
+	OsArch    string
 )
 
 // ACTION FUNCTIONS
@@ -1091,10 +1088,6 @@ func mainInternal() int {
 
 	case "run":
 
-		if jobExecutionEnabled != "true" {
-			return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found ! Please check all available commands via -help flag", command), *flagJson)
-		}
-
 		if help {
 			return helpers.PrintRunAppHelp()
 		}
@@ -1123,10 +1116,6 @@ func mainInternal() int {
 		}
 
 	case "terminate":
-
-		if jobExecutionEnabled != "true" {
-			return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found ! Please check all available commands via -help flag", command), *flagJson)
-		}
 
 		if help {
 			return helpers.PrintTerminateHelp()

@@ -25,13 +25,11 @@ BuildAndPackage() {
     PLATFORM=$1
     ARCH=$2
     BUILDTIME=$(date +%Y-%m-%d-%H%M%S)
-    JOB_EXECUTION_ENABLED="${JOB_EXECUTION_ENABLED:-false}"
     echo "Building pfda CLI (v$VERSION) for $PLATFORM $ARCH"
     docker run --rm $USER_ARG --mount type=bind,source="$(pwd)",target=/go/src/dnanexus.com/precision-fda-cli \
            -e GOOS="$PLATFORM" -e GOARCH="$ARCH" -e COMMITID="$COMMITID" \
            -e VERSION="$VERSION" -e BUILDTIME="$BUILDTIME" -e HOME="$HOME" -e CGO_ENABLED="$CGO_ENABLED" \
-           -e GOMODCACHE="$GOMODCACHE_DIR" -e GOCACHE="$GOCACHE_DIR" \
-           -e JOB_EXECUTION_ENABLED="$JOB_EXECUTION_ENABLED" precisionfda-cli
+           -e GOMODCACHE="$GOMODCACHE_DIR" -e GOCACHE="$GOCACHE_DIR" precisionfda-cli
     cd ./dist
 
     OUT_FILE=pfda_${PLATFORM}_${ARCH}

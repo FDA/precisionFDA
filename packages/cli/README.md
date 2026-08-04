@@ -186,7 +186,12 @@ See the [Go FIPS 140-3 documentation](https://go.dev/doc/security/fips140) for d
 
 # Version History
 
-### 2.15.0 (2026-08-03)
+### 2.15.1 (2026-08-06)
+
+- New feature - `run`; launches an app with an optional JSON configuration (`pfda run <app_uid> '<json_config>'`)
+- New feature - `terminate`; terminates a running job by its UID (`pfda terminate <job_uid>`)
+
+### 2.15.0 (2026-08-04)
 
 - fixed issue with `--json` output of `mkdir`, `rm`, `rmdir`, `upload-file`, and `download` - results and per-item errors are now always emitted as a single parseable JSON array
 - fixed issue where `mkdir`, `rm`, `rmdir`, `upload-file`, and `download` could exit with code 0 even though some items failed
