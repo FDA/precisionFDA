@@ -4,19 +4,18 @@ import type { AxiosError } from 'axios'
 import type { FieldErrors } from 'react-hook-form'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import * as Yup from 'yup'
-import { Button } from '@/components/Button'
 import { FieldGroup } from '@/components/form/FieldGroup'
-import { InputText } from '@/components/InputText'
 import { Loader } from '@/components/Loader'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { FieldSet } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 import type { FormInput, InputSpec } from '@/features/apps/apps.types'
 import { ErrorMessageForField } from '@/features/apps/run/ErrorMessageForField'
 import { JobRunInput } from '@/features/apps/run/JobRunInput'
 import { getValue, prepareValidationsForInputs, shouldIncludeInputValue } from '@/features/apps/run/utils'
 import { Empty } from '@/features/home/home.styles'
-import { ModalHeaderTop, ModalNext } from '@/features/modal/ModalNext'
-import { Footer, ModalScrollAutoHeight, StyledForm } from '@/features/modal/modal.styles'
 import { useModal } from '@/features/modal/useModal'
 import { fetchChallengeApp, submitChallengeEntry } from '../api'
 import type { Challenge } from '../types'
@@ -91,7 +90,7 @@ const SubmitChallengeModalContent = ({ challenge, hide }: { challenge: Challenge
 
   if (isLoadingApp) {
     return (
-      <div className="flex min-h-50 items-center justify-center p-6">
+      <div className="flex min-h-50 flex-1 items-center justify-center p-6">
         <Loader />
       </div>
     )
@@ -99,7 +98,7 @@ const SubmitChallengeModalContent = ({ challenge, hide }: { challenge: Challenge
 
   if (isAppError) {
     return (
-      <div className="p-6">
+      <div className="flex-1 p-6">
         <p className="text-sm text-destructive">
           Failed to load the challenge app configuration. Please close and try again.
         </p>
@@ -109,8 +108,8 @@ const SubmitChallengeModalContent = ({ challenge, hide }: { challenge: Challenge
 
   return (
     <FormProvider {...methods}>
-      <ModalScrollAutoHeight>
-        <StyledForm id="submit-challenge-entry-form" onSubmit={onSubmit}>
+      <div className="min-h-0 flex-1 overflow-y-auto pt-4">
+        <form id="submit-challenge-entry-form" className="min-w-0" onSubmit={onSubmit}>
           <div className="min-w-0 max-w-full">
             <FieldSet
               className="mb-6 min-w-0 max-w-full gap-0 overflow-x-clip rounded-md border border-border p-0"
@@ -124,21 +123,21 @@ const SubmitChallengeModalContent = ({ challenge, hide }: { challenge: Challenge
               </div>
               <div className="w-full min-w-0 space-y-3 px-3 py-2 sm:px-4 sm:py-2.5">
                 <FieldGroup label="Name" required>
-                  <InputText
+                  <Input
                     {...register('name')}
                     placeholder="Name this submission…"
                     disabled={submitMutation.isPending}
-                    data-variant={errors.name ? 'error' : undefined}
+                    aria-invalid={errors.name ? true : undefined}
                   />
                   <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="name" />
                 </FieldGroup>
 
                 <FieldGroup label="Description" required>
-                  <InputText
+                  <Input
                     {...register('desc')}
                     placeholder="Describe your submission…"
                     disabled={submitMutation.isPending}
-                    data-variant={errors.desc ? 'error' : undefined}
+                    aria-invalid={errors.desc ? true : undefined}
                   />
                   <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="desc" />
                 </FieldGroup>
@@ -184,22 +183,17 @@ const SubmitChallengeModalContent = ({ challenge, hide }: { challenge: Challenge
               </div>
             </FieldSet>
           </div>
-        </StyledForm>
-      </ModalScrollAutoHeight>
+        </form>
+      </div>
 
-      <Footer>
-        <Button type="button" onClick={hide} disabled={submitMutation.isPending}>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={hide} disabled={submitMutation.isPending}>
           Cancel
         </Button>
-        <Button
-          data-variant="primary"
-          type="submit"
-          form="submit-challenge-entry-form"
-          disabled={submitMutation.isPending}
-        >
+        <Button type="submit" form="submit-challenge-entry-form" disabled={submitMutation.isPending}>
           {submitMutation.isPending ? 'Submitting…' : 'Submit Entry'}
         </Button>
-      </Footer>
+      </DialogFooter>
     </FormProvider>
   )
 }
@@ -208,16 +202,20 @@ export const useSubmitChallengeModal = (challenge: Challenge) => {
   const { isShown, setShowModal } = useModal()
 
   const modalComp = (
-    <ModalNext
-      id="submit-challenge-modal"
-      headerText="Submit Challenge Entry"
-      hide={() => setShowModal(false)}
-      isShown={isShown}
-      variant="medium"
-    >
-      <ModalHeaderTop headerText="Submit Challenge Entry" hide={() => setShowModal(false)} />
-      <SubmitChallengeModalContent challenge={challenge} hide={() => setShowModal(false)} />
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent
+        id="submit-challenge-modal"
+        data-testid="submit-challenge-modal"
+        forceOverlay
+        variant="medium"
+        className="flex max-h-[min(90vh,800px)] flex-col gap-0 overflow-hidden"
+      >
+        <DialogHeader>
+          <DialogTitle>Submit Challenge Entry</DialogTitle>
+        </DialogHeader>
+        <SubmitChallengeModalContent challenge={challenge} hide={() => setShowModal(false)} />
+      </DialogContent>
+    </Dialog>
   )
 
   return {

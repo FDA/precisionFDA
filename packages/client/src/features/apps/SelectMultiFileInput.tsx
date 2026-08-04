@@ -1,34 +1,9 @@
 import type { JSX } from 'react'
-import styled, { css } from 'styled-components'
-import { Button } from '../../components/Button'
-import { theme } from '../../styles/theme'
-import { pluralize } from '../../utils/formatting'
+import { Button } from '@/components/ui/button'
+import { pluralize } from '@/utils/formatting'
 import { useSelectFileModal } from '../files/actionModals/useSelectFileModal'
 import type { IFile } from '../files/files.types'
 import type { DialogType, ScopeContext } from '../home/types'
-import { ButtonRow } from '../modal/modal.styles'
-
-const StyledButtonRow = styled(ButtonRow)`
-  justify-content: flex-start;
-  gap: 4px;
-`
-
-const FileButton = styled(Button)<{ $isError?: boolean }>`
-  ${({ $isError }) =>
-    $isError &&
-    css`
-    border-color: ${theme.colors.darkRed};
-    color: ${theme.colors.darkRed};
-    &:hover {
-      border-color: ${theme.colors.darkRed};
-      color: ${theme.colors.darkRed};
-      &:hover {
-        border-color: ${theme.colors.darkRed};
-        color: ${theme.colors.darkRed};
-        background-color: ${theme.colors.stateFailedBackground};
-      }
-    `}
-`
 
 interface Props {
   dialogType?: DialogType
@@ -68,29 +43,30 @@ export const SelectMultiFileInput = ({
     true,
   )
 
+  const hasSelection = !!value && Array.isArray(value) && value.length > 0
+
   return (
     <>
       {modalComp}
-      <StyledButtonRow>
-        <FileButton
-          $isError={isError}
+      <div className="flex flex-wrap items-center justify-start gap-1">
+        <Button
           type="button"
-          onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+          variant="outline"
+          disabled={disabled}
+          aria-invalid={isError || undefined}
+          onClick={evt => {
             evt.preventDefault()
             showModalResetState()
           }}
-          disabled={disabled}
         >
-          {value && Array.isArray(value) && value.length > 0
-            ? `${value.length} ${pluralize('File', value.length)} Selected`
-            : 'Select file...'}
-        </FileButton>
-        {!!value && (
-          <Button type="button" onClick={clear} disabled={disabled}>
+          {hasSelection ? `${value.length} ${pluralize('File', value.length)} Selected` : 'Select file...'}
+        </Button>
+        {hasSelection ? (
+          <Button type="button" variant="outline" onClick={clear} disabled={disabled}>
             Clear
           </Button>
-        )}
-      </StyledButtonRow>
+        ) : null}
+      </div>
     </>
   )
 }

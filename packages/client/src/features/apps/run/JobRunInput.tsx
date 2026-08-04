@@ -11,7 +11,6 @@ import {
 } from 'react-hook-form'
 import { BoolButton, BoolButtonGroup } from '@/components/Button/BoolButtons'
 import { FieldInfo } from '@/components/form/FieldInfo'
-import { InputText } from '@/components/InputText'
 import { Button } from '@/components/ui/button'
 import {
   Combobox,
@@ -207,6 +206,25 @@ const ChoiceArrayInput = ({
         </ComboboxList>
       </ComboboxContent>
     </Combobox>
+  )
+}
+
+const ScalarTextInput = ({ disabled, field }: { disabled: boolean; field: ControlledField }) => {
+  const { getFieldState, formState } = useFormContext<FieldValues>()
+  const { error, isTouched } = getFieldState(field.name as FieldPath<FieldValues>, formState)
+  const showInvalid = !!error && (isTouched || formState.isSubmitted)
+
+  return (
+    <Input
+      type="text"
+      name={field.name}
+      value={getStringValue(field.value) ?? ''}
+      onChange={field.onChange}
+      onBlur={field.onBlur}
+      ref={field.ref}
+      disabled={disabled}
+      aria-invalid={showInvalid || undefined}
+    />
   )
 }
 
@@ -478,15 +496,7 @@ export const JobRunInput = ({
           {choices ? (
             <ChoiceInput disabled={disabled} field={field} options={choiceOptions} />
           ) : (
-            <InputText
-              type="text"
-              name={field.name}
-              value={getStringValue(field.value) ?? ''}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              ref={field.ref}
-              disabled={disabled}
-            />
+            <ScalarTextInput disabled={disabled} field={field} />
           )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
@@ -512,15 +522,7 @@ export const JobRunInput = ({
           {choices ? (
             <ChoiceInput disabled={disabled} field={field} options={choiceOptions} />
           ) : (
-            <InputText
-              type="text"
-              name={field.name}
-              value={getStringValue(field.value) ?? ''}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              ref={field.ref}
-              disabled={disabled}
-            />
+            <ScalarTextInput disabled={disabled} field={field} />
           )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
@@ -546,15 +548,7 @@ export const JobRunInput = ({
           {choices ? (
             <ChoiceInput disabled={disabled} field={field} options={choiceOptions} />
           ) : (
-            <InputText
-              type="text"
-              name={field.name}
-              value={getStringValue(field.value) ?? ''}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              ref={field.ref}
-              disabled={disabled}
-            />
+            <ScalarTextInput disabled={disabled} field={field} />
           )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
