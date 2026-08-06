@@ -6,6 +6,9 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Non-sensitive key used only for running tests, can be overridden via ENV.
+  config.secret_key_base = ENV.fetch("SECRET_KEY_BASE", "64c32c2a3e180ab5acb343c830f779ac5c3e2c4748ade7aea198bc8a359cb42a530f7abbf66379f4997e82970ed9f5c6f38329dae74e4455e21bddfece163087")
+
   config.cache_classes = true
 
   # Do not eager load code on boot. This avoids loading your whole application

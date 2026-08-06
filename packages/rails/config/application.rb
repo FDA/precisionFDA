@@ -23,6 +23,10 @@ module PrecisionFda
 
     config.autoloader = :zeitwerk
 
+    # The secret key base is always read from the SECRET_KEY_BASE environment
+    # variable (secrets.yml has been removed from the repository).
+    config.secret_key_base = ENV["SECRET_KEY_BASE"]
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded after loading
