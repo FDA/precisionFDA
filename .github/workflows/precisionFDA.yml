@@ -8,33 +8,12 @@ on:
       - "*"
 
 jobs:
-  # Prepopulates ruby cache
-  # This is because of behaviour of github actions
-  # When two parallel jobs attempt to write same set of deps into cache
-  # It causes following error
-  # Unable to reserve cache with key setup-ruby-bundler-cache-v3-ubuntu-20.04-ruby-2.7.5-Gemfile.lock-e82dcaca5ba83e867a2506d159bec55cc14ba20a0d7df00850b22a1f25d364ba, another job may be creating this cache.
-  # Example run: https://github.com/dnanexus/precision-fda/runs/5841042836?check_suite_focus=true
-  # Every job that uses ruby dependencies should wait for this job first
-  # needs: [ruby-setup]
-  ruby-setup:
-    name: Setup Ruby
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f # v1.310.0
-        with:
-          working-directory: ./packages/rails
-          bundler-cache: true
-          cache-version: 1
-
   static-analysis-master:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     name: Static Analysis for Master
     runs-on: ubuntu-latest
     env:
       MAKE: "make --jobs 4"
-    needs: [ruby-setup]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -63,7 +42,6 @@ jobs:
       contents: read
       pull-requests: write
       statuses: write
-    needs: [ruby-setup]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -172,7 +150,6 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: password
-    needs: [ruby-setup]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup Ruby
@@ -188,7 +165,7 @@ jobs:
           NO_FIPS: 1
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake libssl-dev nodejs
+          sudo apt-get install -y nodejs
           npm install -g bower
           bower install --allow-root
           cp config/database.ci.yml config/database.yml
@@ -222,11 +199,20 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: password
+        # Datadir in RAM - the job is fsync-heavy on commits and was hostage to
+        # runner disk speed. Health check gates on mysqld accepting TCP (it is
+        # socket-only during image init); no credentials because `mysqladmin
+        # ping` exits 0 even on Access denied.
+        options: >-
+          --tmpfs /var/lib/mysql:rw,size=2g
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
       redis:
         image: redis:8.6.3
         ports:
           - 6379:6379
-    needs: [ruby-setup]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -256,8 +242,6 @@ jobs:
         env:
           NO_FIPS: 1
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake libssl-dev
           cp config/database.ci.yml config/database.yml
           bundle exec rake db:setup
           bundle exec rake db:generate_mock_data
