@@ -164,6 +164,7 @@ export enum SEVERITY {
 
 // TODO share the enum with backend
 export enum NOTIFICATION_ACTION {
+  CONNECTED = 'CONNECTED',
   JOB_INITIALIZING = 'JOB_INITIALIZING',
   JOB_RUNNING = 'JOB_RUNNING',
   JOB_RUNNABLE = 'JOB_RUNNABLE',
@@ -199,8 +200,8 @@ export type NotificationMeta = {
 
 export type Notification = {
   id: number
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string // ISODateString
+  updatedAt: string // ISODateString
   action: NOTIFICATION_ACTION
   message: string
   severity: SEVERITY
@@ -221,6 +222,7 @@ export type JobLogItem = {
 export enum WEBSOCKET_MESSAGE_TYPE {
   NOTIFICATION = 'notification',
   JOB_LOG = 'jobLog',
+  SYNC = 'sync',
 }
 
 export type WebSocketMessage = {

@@ -8,4 +8,5 @@ export interface PfdaWebSocket extends WebSocket {
 export enum WEBSOCKET_EVENTS {
   JOB_LOG = 'jobLog',
   NOTIFICATION = 'notification',
+  SYNC = 'sync',
 }

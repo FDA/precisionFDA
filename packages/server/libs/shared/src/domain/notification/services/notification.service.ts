@@ -1,4 +1,4 @@
-import { Reference } from '@mikro-orm/core'
+import { QueryOrder, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger, Optional } from '@nestjs/common'
 import { createClient } from 'redis'
@@ -8,7 +8,9 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
+import { NotificationDTO } from '../dto/notification.dto'
 import { NotificationInput } from '../notification.input'
+import { NotificationRepository } from '../notification.repository'
 
 export type RedisClientType = ReturnType<typeof createClient>
 
@@ -19,7 +21,8 @@ export class NotificationService {
 
   constructor(
     private readonly em: SqlEntityManager,
-    private readonly user?: UserContext,
+    private readonly user: UserContext,
+    private readonly notificationRepo: NotificationRepository,
     @Optional() private redisClient?: RedisClientType,
   ) {
     this.logger.debug('NotificationService initialized')
@@ -46,36 +49,54 @@ export class NotificationService {
       new Date(),
       notificationInput.meta,
     )
-    await this.em.persistAndFlush(notification)
+    await this.notificationRepo.persistAndFlush(notification)
 
-    const notificationMessage = {
-      id: notification.id,
-      sessionId: notificationInput.sessionId,
-      user: notificationInput.userId,
-      action: notification.action,
-      message: notification.message,
-      severity: notification.severity,
-      meta: notificationInput.meta,
-    }
+    const mappedNotification = NotificationDTO.fromEntity(notification)
 
-    this.redisClient?.publish(NOTIFICATIONS_QUEUE, JSON.stringify(notificationMessage))
+    this.redisClient?.publish(
+      NOTIFICATIONS_QUEUE,
+      JSON.stringify({
+        notification: mappedNotification,
+        userId: notification.user?.id,
+        sessionId: notification.sessionId,
+      }),
+    )
 
     this.logger.debug('Notification published')
   }
 
   /**
-   * Returns notifications for current user that have empty deliveredAt flag.
+   * For the REST endpoint: fetches unread notifications for the authenticated user
+   * and immediately marks them as delivered.
    */
-  async getUnreadNotifications(): Promise<Notification[]> {
+  async fetchAndMarkDelivered(): Promise<NotificationDTO[]> {
     this.logger.log({
       message: `Getting unread notifications for user id: ${this.user.id}`,
       userId: this.user.id,
     })
-    return await this.em.find(
-      Notification,
-      { user: this.user.id, deliveredAt: null },
-      { orderBy: { createdAt: 'DESC' } },
-    )
+    const notifications = await this.queryUnread(this.user.id)
+
+    const now = new Date()
+    const ids = notifications.map(notification => notification.id)
+    await this.em.nativeUpdate(Notification, { id: { $in: ids } }, { deliveredAt: now })
+
+    return notifications.map((notification: Notification) => NotificationDTO.fromEntity(notification))
+  }
+
+  /**
+   * For the WebSocket sync: fetches unread notifications for a specific user
+   * without marking them as delivered (the client confirms each one individually).
+   */
+  async fetchUnreadForSync(userId: number): Promise<Notification[]> {
+    this.logger.log({
+      message: `Getting unread notifications for sync, user id: ${userId}`,
+      userId,
+    })
+    return this.queryUnread(userId)
+  }
+
+  private async queryUnread(userId: number): Promise<Notification[]> {
+    return this.notificationRepo.find({ user: userId, deliveredAt: null }, { orderBy: { createdAt: QueryOrder.DESC } })
   }
 
   /**
@@ -84,10 +105,13 @@ export class NotificationService {
    * @param notificationId
    * @param deliveredAt
    */
-  async updateDeliveredAt(notificationId: number, deliveredAt?: Date): Promise<Notification> {
-    const loadedFromDb = await this.em.findOne(Notification, notificationId, {
-      populate: ['user'],
-    })
+  async updateDeliveredAt(notificationId: number, deliveredAt?: Date): Promise<NotificationDTO> {
+    const loadedFromDb = await this.notificationRepo.findOne(
+      { id: notificationId },
+      {
+        populate: ['user'],
+      },
+    )
 
     if (!loadedFromDb) {
       throw new NotFoundError()
@@ -102,7 +126,7 @@ export class NotificationService {
     } else {
       loadedFromDb.deliveredAt = new Date()
     }
-    await this.em.persistAndFlush(loadedFromDb)
-    return loadedFromDb
+    await this.em.flush()
+    return NotificationDTO.fromEntity(loadedFromDb)
   }
 }

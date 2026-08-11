@@ -160,6 +160,7 @@ describe('UserFileService', () => {
     ...USER,
     accessToken: 'accessToken',
     dxuser: 'dxuser',
+    sessionId: 'sessionId',
     loadEntity: async () => USER,
   }
 
@@ -489,6 +490,7 @@ describe('UserFileService', () => {
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.FILE_CLOSED,
         userId: USER.id,
+        sessionId: USER_CTX.sessionId,
       })
     })
 
@@ -517,6 +519,7 @@ describe('UserFileService', () => {
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.FILE_CLOSED,
         userId: USER.id,
+        sessionId: USER_CTX.sessionId,
       })
       expect(createAndSendSpaceEventStub.calledOnce).to.be.true()
       expect(createAndSendSpaceEventStub.firstCall.args[0]).deep.eq({
@@ -554,6 +557,7 @@ describe('UserFileService', () => {
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.FILE_CLOSED,
         userId: USER.id,
+        sessionId: USER_CTX.sessionId,
       })
     })
   })

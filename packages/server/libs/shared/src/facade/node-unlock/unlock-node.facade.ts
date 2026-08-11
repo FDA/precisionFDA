@@ -50,6 +50,7 @@ export class UnlockNodeFacade {
             severity: SEVERITY.INFO,
             action: NOTIFICATION_ACTION.NODES_LOCKED,
             userId: this.userCtx.id,
+            sessionId: this.userCtx.sessionId,
           })
         }
         this.logger.log({ filesCount: unlockedFilesCount }, 'Unlocked total objects')
@@ -60,6 +61,7 @@ export class UnlockNodeFacade {
           severity: SEVERITY.ERROR,
           action: NOTIFICATION_ACTION.NODES_UNLOCKED,
           userId: this.userCtx.id,
+          sessionId: this.userCtx.sessionId,
         })
         await this.rollbackUnlockingState(nodes)
         throw err

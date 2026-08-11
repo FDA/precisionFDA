@@ -1,3 +1,10 @@
+import {
+  NOTIFICATION_ACTION,
+  type Notification,
+  WEBSOCKET_MESSAGE_TYPE,
+  type WebSocketMessage,
+} from '@/features/home/types'
+
 type WebSocketMessageEvent = MessageEvent<string>
 
 export type WebSocketConnectionKey = string | symbol
@@ -23,10 +30,11 @@ const INITIAL_SNAPSHOT: WebSocketConnectionSnapshot = {
   status: 'idle',
 }
 
-function parseJsonMessage(message: WebSocketMessageEvent): unknown {
+function parseJsonMessage(message: WebSocketMessageEvent): WebSocketMessage | null {
   try {
     return JSON.parse(message.data)
-  } catch {
+  } catch (error: unknown) {
+    console.warn('Unable to parse WebSocket message: ', error)
     return null
   }
 }
@@ -70,7 +78,11 @@ class WebSocketConnectionStore {
 
     this.socket = socket
 
+    // Capture before onopen resets it; used to decide whether to SYNC after CONNECTED
+    let wasReconnect = false
+
     socket.onopen = () => {
+      wasReconnect = this.snapshot.reconnectAttempt > 0
       this.updateSnapshot({
         reconnectAttempt: 0,
         status: 'open',
@@ -78,15 +90,31 @@ class WebSocketConnectionStore {
     }
 
     socket.onmessage = message => {
+      const parsed = parseJsonMessage(message)
+      // Send SYNC only after server confirms registration, ensuring the handler runs on a live connection
+      if (
+        wasReconnect &&
+        parsed?.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
+        (parsed?.data as Notification).action === NOTIFICATION_ACTION.CONNECTED
+      ) {
+        wasReconnect = false
+        socket.send(JSON.stringify({ event: WEBSOCKET_MESSAGE_TYPE.SYNC }))
+      }
       this.updateSnapshot({
-        lastJsonMessage: parseJsonMessage(message),
+        lastJsonMessage: parsed,
         lastMessageEvent: message,
       })
     }
 
-    socket.onclose = () => {
+    socket.onclose = (event: CloseEvent) => {
       this.socket = null
       this.updateSnapshot({ status: 'closed' })
+
+      // Code 4001 means the server explicitly rejected the connection (auth failure,
+      // session not found, session expired). Do not reconnect.
+      if (event.code === 4001) {
+        return
+      }
 
       // Reconnect only while something still retains this store. That lets the
       // manager keep shared connections efficient without background sockets

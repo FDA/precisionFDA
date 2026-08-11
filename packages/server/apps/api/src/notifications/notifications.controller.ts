@@ -1,6 +1,5 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { NotificationDTO } from '@shared/domain/notification/dto/notification.dto'
-import { Notification } from '@shared/domain/notification/notification.entity'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
@@ -20,13 +19,12 @@ export class NotificationsController {
 
   @Put('/:notificationId')
   async updateNotification(@Param('notificationId') notificationId: number): Promise<NotificationDTO> {
-    const updated = await this.notificationService.updateDeliveredAt(notificationId)
-    return NotificationDTO.fromEntity(updated)
+    return this.notificationService.updateDeliveredAt(notificationId)
   }
 
-  @Get('/unread')
-  async getUnreadNotifications(): Promise<NotificationDTO[]> {
-    const notifications = await this.notificationService.getUnreadNotifications()
-    return notifications.map((notification: Notification) => NotificationDTO.fromEntity(notification))
+  @HttpCode(200)
+  @Post('/unread/deliver')
+  async fetchAndMarkDelivered(): Promise<NotificationDTO[]> {
+    return this.notificationService.fetchAndMarkDelivered()
   }
 }

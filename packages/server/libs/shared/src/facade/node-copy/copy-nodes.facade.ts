@@ -46,7 +46,11 @@ export class CopyNodesFacade {
     private readonly spaceEventService: SpaceEventService,
   ) {}
 
-  async copyNodes(requestedIds: number[], targetScope: EntityScope, targetFolderId?: number): Promise<NodeCopyResultDTO[]> {
+  async copyNodes(
+    requestedIds: number[],
+    targetScope: EntityScope,
+    targetFolderId?: number,
+  ): Promise<NodeCopyResultDTO[]> {
     this.logger.log(
       `Copying nodes with ids: [${requestedIds.join(', ')}] to folderId: ${targetFolderId} within scope: ${targetScope}`,
     )
@@ -174,7 +178,9 @@ export class CopyNodesFacade {
       // collect all dxids of cloned files and rollback
       const dxids = fileDxIds
       // filter out nodes that existed in target to avoid deleting user's existing files
-      const dxidsToRollback = dxids.filter(dxid => !nodesExistingInTarget.find(node => (node as FileOrAsset).dxid === dxid))
+      const dxidsToRollback = dxids.filter(
+        dxid => !nodesExistingInTarget.find(node => (node as FileOrAsset).dxid === dxid),
+      )
 
       const chunkSize = 100
       for (let i = 0; i < dxidsToRollback.length; i += chunkSize) {
@@ -287,6 +293,7 @@ export class CopyNodesFacade {
       severity: SEVERITY.ERROR,
       action: NOTIFICATION_ACTION.NODES_COPIED,
       userId: this.user.id,
+      sessionId: this.user.sessionId,
     })
   }
 
@@ -300,6 +307,7 @@ export class CopyNodesFacade {
       severity: SEVERITY.INFO,
       action: NOTIFICATION_ACTION.NODES_COPIED,
       userId: this.user.id,
+      sessionId: this.user.sessionId,
     })
   }
 

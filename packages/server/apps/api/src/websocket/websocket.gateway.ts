@@ -18,8 +18,12 @@ import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { JobLogService } from '@shared/domain/job/services/job-log.service'
+import { NotificationDTO } from '@shared/domain/notification/dto/notification.dto'
+import { Notification } from '@shared/domain/notification/notification.entity'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Session } from '@shared/domain/session/session.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NOTIFICATION_ACTION } from '@shared/enums'
 import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
@@ -40,7 +44,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   private clientConnections = new Map<number, Set<PfdaWebSocket>>()
 
   constructor(
-    // private readonly notificationService: NotificationService,
+    private readonly notificationService: NotificationService,
     private readonly jobRepository: JobRepository,
     private readonly jobLogService: JobLogService,
     private readonly em: SqlEntityManager,
@@ -98,26 +102,19 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
         }
 
         this.clientConnections.get(userId).add(client)
+        client.send(
+          JSON.stringify({ type: WEBSOCKET_EVENTS.NOTIFICATION, data: { action: NOTIFICATION_ACTION.CONNECTED } }),
+        )
 
         this.logger.debug({
           message: 'User authenticated for WebSocket notifications',
           user: dxuser,
           userId: userId,
         })
-
-        // move to endpoint call.
-        // const unreadNotifications = await this.notificationService.getUnreadNotifications(userId)
-        // unreadNotifications.forEach((notification) => {
-        //   client.send(
-        //     JSON.stringify({
-        //       type: WEBSOCKET_EVENTS.NOTIFICATION,
-        //       data: notification,
-        //     }),
-        //   )
-        // })
       } catch (e) {
-        this.logger.error({ message: 'WebSocket connection error', error: e.message })
-        client.close(4001, e.message)
+        const errorMessage = e instanceof Error ? e.message : String(e)
+        this.logger.error({ message: 'WebSocket connection error', error: errorMessage })
+        client.close(4001, errorMessage)
       }
     })
   }
@@ -147,7 +144,29 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
         remainingConnections: connections.size,
       })
     } catch (e) {
-      this.logger.error({ message: 'WebSocket disconnection error', error: e.message })
+      const errorMessage = e instanceof Error ? e.message : String(e)
+      this.logger.error({ message: 'WebSocket disconnection error', error: errorMessage })
+    }
+  }
+
+  @SubscribeMessage(WEBSOCKET_EVENTS.SYNC)
+  async syncUnreadNotifications(@ConnectedSocket() client: PfdaWebSocket): Promise<void> {
+    try {
+      const userId = client.pfdaUserContext.id
+      const unreadNotifications = await this.notificationService.fetchUnreadForSync(userId)
+      unreadNotifications.forEach((notification: Notification) => {
+        this.sendNotification(
+          userId,
+          JSON.stringify({
+            type: WEBSOCKET_EVENTS.NOTIFICATION,
+            data: NotificationDTO.fromEntity(notification),
+          }),
+          notification.sessionId,
+        )
+      })
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      this.logger.error({ message: 'Failed to sync unread notifications', error: errorMessage })
     }
   }
 
@@ -163,7 +182,8 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
       }
       await this.jobLogService.streamJobLogs(job, client)
     } catch (error) {
-      this.logger.error({ message: 'Failed to fetch job log', error: error.message })
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      this.logger.error({ message: 'Failed to fetch job log', error: errorMessage })
     }
   }
 
@@ -171,19 +191,16 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     const client = await createRedisClient()
 
     client.subscribe(NOTIFICATIONS_QUEUE, (notificationJson: string) => {
-      const notification: { user: number; sessionId?: string } = JSON.parse(notificationJson)
-      const userId = notification.user
-
-      const sessionId = notification.sessionId
-
-      delete notification.user // not sending user info to client
-      delete notification.sessionId // not sending session id to client
+      const notificationMessage: { userId: number; sessionId?: string; notification: NotificationDTO } =
+        JSON.parse(notificationJson)
+      const userId = notificationMessage.userId
+      const sessionId = notificationMessage.sessionId
 
       this.sendNotification(
         userId,
         JSON.stringify({
           type: WEBSOCKET_EVENTS.NOTIFICATION,
-          data: notification,
+          data: notificationMessage.notification,
         }),
         sessionId,
       )
@@ -209,7 +226,8 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
         })
         connection.send(notification)
       } catch (error) {
-        this.logger.error({ message: 'Sending notification failed', error: error.message })
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        this.logger.error({ message: 'Sending notification failed', error: errorMessage })
       }
     })
   }

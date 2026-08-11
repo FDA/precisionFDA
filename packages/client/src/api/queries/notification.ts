@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchUnreadNotifications } from '../../features/notifications/notifications.api'
+import { fetchAndMarkDelivered } from '../../features/notifications/notifications.api'
 
-export const getFetchUnreadNotificationsQueryKey = () => ['notifications', 'unread']
+export const fetchAndDeliverUnreadQueryKey = () => ['notifications', 'unread']
 
-export const useFetchUnreadNotificationsQuery = () =>
+export const useFetchAndDeliverUnreadNotificationsQuery = (enabled: boolean) =>
   useQuery({
-    queryKey: getFetchUnreadNotificationsQueryKey(),
-    queryFn: fetchUnreadNotifications,
+    queryKey: fetchAndDeliverUnreadQueryKey(),
+    queryFn: fetchAndMarkDelivered,
+    enabled,
   })

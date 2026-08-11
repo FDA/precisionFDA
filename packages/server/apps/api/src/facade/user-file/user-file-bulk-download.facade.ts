@@ -52,6 +52,7 @@ export class UserFileBulkDownloadFacade {
         severity: SEVERITY.WARN,
         action: NOTIFICATION_ACTION.DOWNLOAD_FILES_WARNING,
         userId: this.userCtx.id,
+        sessionId: this.userCtx.sessionId,
       })
     }
     let downloadableNodes = nodes.filter(

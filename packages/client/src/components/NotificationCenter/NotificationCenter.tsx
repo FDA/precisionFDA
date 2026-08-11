@@ -1,8 +1,8 @@
 import { formatDistanceToNow } from 'date-fns'
 import type React from 'react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNotificationCenter } from 'react-toastify/addons/use-notification-center'
-import { useFetchUnreadNotificationsQuery } from '../../api/queries/notification'
+import { useFetchAndDeliverUnreadNotificationsQuery } from '../../api/queries/notification'
 import { NOTIFICATION_ACTION, type Notification } from '../../features/home/types'
 import { confirmNotification } from '../../features/notifications/notifications.api'
 import { useLastWSNotification } from '../../hooks/useLastWSNotification'
@@ -39,10 +39,14 @@ const createToastContent = (message: string, meta?: Notification['meta']) => {
 }
 
 export const NotificationCenter = () => {
-  const { notifications, clear, markAllAsRead, markAsRead, remove, unreadCount, add } = useNotificationCenter()
+  const [isConnected, setIsConnected] = useState<boolean>(false)
+  const { notifications, clear, markAllAsRead, markAsRead, remove, unreadCount, add } = useNotificationCenter({
+    // Suppress auto-capture of toasts we manage manually (to control createdAt)
+    filter: item => !(item.data as { skipCenter?: boolean })?.skipCenter,
+  })
   const lastJsonMessage = useLastWSNotification()
 
-  const { data } = useFetchUnreadNotificationsQuery()
+  const { data } = useFetchAndDeliverUnreadNotificationsQuery(isConnected)
 
   useEffect(() => {
     initializeToastHelper(markAsRead)
@@ -53,13 +57,11 @@ export const NotificationCenter = () => {
     data?.forEach(notification => {
       const toastContent = createToastContent(notification.message, notification.meta)
       add({
+        id: String(notification.id),
         createdAt: new Date(notification.createdAt).getTime(),
         read: false,
         content: toastContent,
         type: 'success',
-      })
-      confirmNotification(notification.id).catch(error => {
-        console.error(`Failed to confirm notification ${notification.id}:`, error)
       })
     })
   }, [data])
@@ -70,6 +72,11 @@ export const NotificationCenter = () => {
 
     const notification = lastJsonMessage.data as Notification
     console.log(`Received notification ${JSON.stringify(notification)}`)
+
+    if (notification.action === NOTIFICATION_ACTION.CONNECTED) {
+      setIsConnected(true)
+      return
+    }
 
     // Skip notifications that shouldn't show toasts
     if (NO_TOAST_NOTIFICATIONS.includes(notification.action)) {
@@ -82,10 +89,18 @@ export const NotificationCenter = () => {
     const toastContent = createToastContent(notification.message, notification.meta)
 
     try {
-      toastHandlers[notification.severity](toastContent)
+      toastHandlers[notification.severity](toastContent, { data: { skipCenter: true } })
     } catch (error) {
       console.error('Error showing toast notification:', error)
     }
+
+    add({
+      id: String(notification.id),
+      createdAt: new Date(notification.createdAt).getTime(),
+      read: true,
+      content: toastContent,
+      type: 'success',
+    })
 
     confirmNotification(notification.id).catch(error => {
       console.error(`Failed to confirm notification ${notification.id}:`, error)
@@ -146,6 +161,7 @@ export const NotificationCenter = () => {
                   </div>
                   <div className={styles.notificationActions}>
                     <button
+                      type="button"
                       className={styles.deleteButton}
                       onClick={() => handleRemove(n.id)}
                       title="Remove notification"

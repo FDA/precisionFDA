@@ -1,7 +1,10 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Notification } from '@shared/domain/notification/notification.entity'
+import { NotificationRepository } from '@shared/domain/notification/notification.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
@@ -87,7 +90,8 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     })
     await this.em.flush()
 
-    const notificationService = new NotificationService(this.em)
+    const notificationRepo = this.em.getRepository(Notification) as NotificationRepository
+    const notificationService = new NotificationService(this.em, this.ctx.user as UserContext, notificationRepo)
     const leads = space.spaceMemberships.getItems().filter(sm => sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)
 
     // send notification to all leads

@@ -2,9 +2,10 @@ import { Reference } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { createClient } from 'redis'
-import sinon from 'sinon'
+import { stub } from 'sinon'
 import { database } from '@shared/database'
 import { Notification } from '@shared/domain/notification/notification.entity'
+import { NotificationRepository } from '@shared/domain/notification/notification.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -19,8 +20,14 @@ describe('Notification service tests', () => {
   let user1: User
   let user2: User
   let notificationService: NotificationService
+  let notificationRepo: NotificationRepository
   const userId = 100
   type RedisClientType = ReturnType<typeof createClient>
+
+  const publishStub = stub()
+  const redisClient = {
+    publish: publishStub,
+  } as unknown as RedisClientType
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -31,25 +38,15 @@ describe('Notification service tests', () => {
     userCtx = {
       id: userId,
     } as UserContext
-    notificationService = new NotificationService(em, userCtx)
+    notificationRepo = em.getRepository(Notification)
+    notificationService = new NotificationService(em, userCtx, notificationRepo)
+
+    publishStub.reset()
+    publishStub.resolves()
   })
 
   it('Test create Notification', async () => {
-    const redisClient = {
-      publish: function () {},
-    } as RedisClientType
-    const redisClientMock = sinon.mock(redisClient)
-    redisClientMock.expects('publish').withArgs(
-      NOTIFICATIONS_QUEUE,
-      JSON.stringify({
-        id: 1,
-        user: 1,
-        action: NOTIFICATION_ACTION.NODES_REMOVED,
-        message: 'msg',
-        severity: SEVERITY.WARN,
-      }),
-    )
-    notificationService = new NotificationService(em, userCtx, redisClient)
+    notificationService = new NotificationService(em, userCtx, notificationRepo, redisClient)
     await notificationService.createNotification({
       userId: 1,
       action: NOTIFICATION_ACTION.NODES_REMOVED,
@@ -62,29 +59,20 @@ describe('Notification service tests', () => {
     expect(notifications[0].action).to.be.equal(NOTIFICATION_ACTION.NODES_REMOVED)
     expect(notifications[0].message).to.be.equal('msg')
     expect(notifications[0].severity).to.be.equal(SEVERITY.WARN)
-    redisClientMock.verify()
+    expect(publishStub.callCount).to.be.equal(1)
+    expect(publishStub.firstCall.args[0]).to.equal(NOTIFICATIONS_QUEUE)
+    const published = JSON.parse(publishStub.firstCall.args[1])
+    expect(published.userId).to.be.equal(1)
+    expect(published.notification).to.deep.include({
+      id: 1,
+      action: NOTIFICATION_ACTION.NODES_REMOVED,
+      message: 'msg',
+      severity: SEVERITY.WARN,
+    })
   })
 
   it('Test create Notification with linkTitle and linkUrl', async () => {
-    const redisClient = {
-      publish: function () {},
-    } as RedisClientType
-    const redisClientMock = sinon.mock(redisClient)
-    redisClientMock.expects('publish').withArgs(
-      NOTIFICATIONS_QUEUE,
-      // N.B. ordering of keys seem to matter here
-      JSON.stringify({
-        id: 1,
-        action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED,
-        message: 'msg',
-        severity: SEVERITY.WARN,
-        meta: {
-          linkTitle: 'hello',
-          linkUrl: 'https://world.xyz',
-        },
-      }),
-    )
-    notificationService = new NotificationService(em, userCtx, redisClient)
+    notificationService = new NotificationService(em, userCtx, notificationRepo, redisClient)
     await notificationService.createNotification({
       action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED,
       message: 'msg',
@@ -104,10 +92,21 @@ describe('Notification service tests', () => {
       linkUrl: 'https://world.xyz',
     })
     expect(notifications[0].severity).to.be.equal(SEVERITY.WARN)
-    redisClientMock.verify()
+    expect(publishStub.callCount).to.be.equal(1)
+    expect(publishStub.firstCall.args[0]).to.equal(NOTIFICATIONS_QUEUE)
+    const published = JSON.parse(publishStub.firstCall.args[1])
+    expect(published.notification).to.deep.include({
+      action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED,
+      message: 'msg',
+      severity: SEVERITY.WARN,
+      meta: {
+        linkTitle: 'hello',
+        linkUrl: 'https://world.xyz',
+      },
+    })
   })
 
-  it('Test get unread Notifications', async () => {
+  it('Test get and deliver unread Notifications', async () => {
     const savedNotification = new Notification(
       Reference.createFromPK(User, user1.id),
       '1',
@@ -126,7 +125,7 @@ describe('Notification service tests', () => {
       ),
     )
 
-    const unread = await notificationService.getUnreadNotifications(userId)
+    const unread = await notificationService.fetchAndMarkDelivered()
     expect(unread.length).to.equal(1) // only one despite two saved
     expect(unread[0].id).to.equal(savedNotification.id)
   })
@@ -151,7 +150,7 @@ describe('Notification service tests', () => {
     userCtx = {
       id: user2.id,
     } as UserContext
-    notificationService = new NotificationService(em, userCtx)
+    notificationService = new NotificationService(em, userCtx, notificationRepo)
 
     const savedNotification = new Notification(
       Reference.createFromPK(User, user1.id),

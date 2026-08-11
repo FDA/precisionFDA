@@ -3,6 +3,7 @@ import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
+import { NotificationRepository } from './notification.repository'
 
 export type NotificationMeta = {
   linkTitle?: string
@@ -10,7 +11,7 @@ export type NotificationMeta = {
   linkTarget?: string
 }
 
-@Entity({ tableName: 'notifications' })
+@Entity({ tableName: 'notifications', repository: () => NotificationRepository })
 export class Notification extends BaseEntity {
   @Property()
   action: NOTIFICATION_ACTION

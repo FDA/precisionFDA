@@ -64,6 +64,7 @@ export class LockNodeFacade {
       severity: SEVERITY.ERROR,
       action: NOTIFICATION_ACTION.NODES_LOCKED,
       userId: this.userCtx.id,
+      sessionId: this.userCtx.sessionId,
     })
   }
 
@@ -73,6 +74,7 @@ export class LockNodeFacade {
       severity: SEVERITY.INFO,
       action: NOTIFICATION_ACTION.NODES_LOCKED,
       userId: this.userCtx.id,
+      sessionId: this.userCtx.sessionId,
     })
   }
 

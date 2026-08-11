@@ -189,12 +189,7 @@ export class UserFileService {
     await createFileSynchronizeJobTask({ fileUid, isChallengeBotFile, followUpAction }, userCtx)
   }
 
-  private async handleFileClose(
-    fileUid: string,
-    userId: number,
-    fileDescribe: FileDescribeResponse,
-    node: Node,
-  ): Promise<void> {
+  private async handleFileClose(fileUid: string, fileDescribe: FileDescribeResponse, node: Node): Promise<void> {
     this.logger.log(`File with uid: ${fileUid} is closed`)
     node.state = fileDescribe.state as FILE_STATE
     node.fileSize = fileDescribe.size
@@ -217,7 +212,8 @@ export class UserFileService {
         message: `File ${node.name} is closed`,
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.FILE_CLOSED,
-        userId,
+        userId: this.userCtx.id,
+        sessionId: this.userCtx.sessionId,
       })
     } catch (error) {
       this.logger.error(`Error creating notification ${error}`)
@@ -264,7 +260,7 @@ export class UserFileService {
       })
       this.logger.log(`FileDescribe: ${JSON.stringify(fileDescribe)}`)
       if (fileDescribe.state === FILE_STATE_DX.CLOSED) {
-        await this.handleFileClose(fileUid, this.userCtx.id, fileDescribe, node)
+        await this.handleFileClose(fileUid, fileDescribe, node)
         return true
       }
       this.logger.log(`File ${fileUid} is not closed yet`)

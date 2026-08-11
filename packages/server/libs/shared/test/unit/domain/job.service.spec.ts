@@ -14,6 +14,7 @@ import { JobCountService } from '@shared/domain/job/services/job-count.service'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { JobWorkstationService } from '@shared/domain/job/services/job-workstation.service'
 import { Notification } from '@shared/domain/notification/notification.entity'
+import { NotificationRepository } from '@shared/domain/notification/notification.repository'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
@@ -36,6 +37,7 @@ describe('Job service tests', () => {
   let user: User
   let jobService: JobService
   let userCtx: UserContext
+  let notificationRepo: NotificationRepository
   let notificationService: NotificationService
   let nodeService: NodeService
   let jobSynchronizationService: JobSynchronizationService
@@ -56,6 +58,8 @@ describe('Job service tests', () => {
   const spaceRepoFindOneStub = stub()
   const eventHelperCreateFileEventStub = stub()
   const nodeServiceCreateFoldersOnPathStub = stub()
+  const notiPersistAndFlushStub = stub()
+  const notiFindStub = stub()
   const aliveStub = stub()
   const setAPIKeyStub = stub()
   const snapshotStub = stub()
@@ -83,7 +87,8 @@ describe('Job service tests', () => {
       loadEntity: userContextLoadEntityStub,
     } as UserContext
 
-    notificationService = new NotificationService(em, userCtx)
+    notificationRepo = em.getRepository(Notification)
+    notificationService = new NotificationService(em, userCtx, notificationRepo)
     nodeService = {
       createFoldersOnPath: nodeServiceCreateFoldersOnPathStub,
     } as unknown as NodeService
@@ -132,6 +137,12 @@ describe('Job service tests', () => {
 
     jobRepoFindStub.reset()
     jobRepoFindStub.throws()
+
+    notiFindStub.reset()
+    notiFindStub.throws()
+
+    notiPersistAndFlushStub.reset()
+    notiPersistAndFlushStub.resolves()
 
     eventHelperCreateFileEventStub.reset()
     eventHelperCreateFileEventStub.throws()
