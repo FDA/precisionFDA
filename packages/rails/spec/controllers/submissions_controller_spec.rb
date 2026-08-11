@@ -42,6 +42,31 @@ RSpec.describe SubmissionsController, type: :controller do
       stub_request(:post, "https://localhost:3001/emails/typed")
     end
 
+    # Stubs the Node API copy endpoint with a real source -> target mapping,
+    # the way the NestJS facade responds on a successful copy. An empty
+    # mapping ("[]") would mask copy failures and let the job run with the
+    # submitter's private file UIDs.
+    def stub_nodes_copy(mapping)
+      stub_request(:post, "https://localhost:3001/nodes/copy").to_return(
+        status: 200,
+        headers: { "Content-Type" => "application/json" },
+        body: mapping.map { |source, target|
+          { sourceNodeId: source.id, targetNodeId: target.id, copied: true }
+        }.to_json,
+      )
+    end
+
+    def create_cloned_file(source)
+      create(
+        :user_file,
+        dxid: source.dxid,
+        project: space.host_project,
+        scope: space.scope,
+        parent_id: User.challenge_bot.id,
+        user_id: User.challenge_bot.id,
+      )
+    end
+
     context "with invalid data" do
       it "flashes a error" do
         post :create, params: { challenge_id: challenge.id, submission: { inputs: {}.to_json } }
@@ -51,11 +76,27 @@ RSpec.describe SubmissionsController, type: :controller do
 
     context "with valid data" do
       it "creates a job" do
+        stub_nodes_copy(file1 => create_cloned_file(file1), file2 => create_cloned_file(file2))
+
         post :create, params: {
           challenge_id: challenge.id,
           submission: { name: "1", desc: "1", inputs: valid_inputs.to_json },
         }
+        expect(flash[:error]).to be_nil
         expect(Job).to be_any
+      end
+
+      it "fails the submission when the copy mapping does not cover all files" do
+        # Only file1 gets a clone mapping - file2 is missing from the response.
+        stub_nodes_copy(file1 => create_cloned_file(file1))
+
+        post :create, params: {
+          challenge_id: challenge.id,
+          submission: { name: "1", desc: "1", inputs: valid_inputs.to_json },
+        }
+
+        expect(flash[:error]).to include(file2.uid)
+        expect(Submission.count).to eq(0)
       end
 
       it "persists all input values and remaps file UIDs to cloned copies" do

@@ -3,7 +3,7 @@ class CopyService
     def initialize(api:, user:, file_copier: nil)
       @api = api
       @user = user
-      @file_copier = file_copier || FileCopier.new(api: api, user: user)
+      @file_copier = file_copier || CopyService::NodeApiCopier.new(api: api, user: user)
     end
 
     def copy(comparison, scope)

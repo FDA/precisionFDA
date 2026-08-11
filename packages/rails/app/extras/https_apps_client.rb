@@ -1,8 +1,14 @@
 # The client for communicating with nodejs-api service.
-# Token and user information is passed using RequestContext
+# Authentication headers from the original request are passed using
+# RequestContext unless an explicit auth key is provided. The Node API handles
+# both session cookies and "Authorization: Key <token>" headers, so the
+# original headers must be forwarded unchanged.
 class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # initializes the instance
-  def initialize; end
+  # @param auth_key [String, nil] Explicit Node API auth key for service calls.
+  def initialize(auth_key: nil)
+    @auth_key = auth_key
+  end
 
   def get_upload_url(fileUid, index, md5, size)
     request(
@@ -553,6 +559,26 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # Copy files/folders/assets to target scope.
+  # @param ids [Array<Integer>] Node IDs to copy.
+  # @param scope [String] Destination scope.
+  # @param folder_id [Integer, nil] Destination folder ID.
+  # @param async [Boolean] When false, execute synchronously.
+  def nodes_copy(ids, scope, folder_id = nil, async = true)
+    body = {
+      ids: ids,
+      scope: scope,
+      async: async,
+    }
+    body[:folderId] = folder_id.to_s if folder_id.present?
+
+    request(
+      "/nodes/copy",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   def cli_node_search(arg, type, space_id, folder_id)
     request(
       "/cli/nodes",
@@ -874,6 +900,8 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   end
 
   def auth_headers
+    return { "Authorization" => "Key #{@auth_key}" } if @auth_key.present?
+
     unless RequestContext.instance
       Rails.logger.info("RequestContext.instance is not present, auth query part will be empty")
       return {}

@@ -14,6 +14,8 @@ class DNAnexusAPI
   include DXClient::Endpoints::Workflows
   include DXClient::Common
 
+  attr_reader :bearer_token
+
   class << self
     def for_admin
       new(ADMIN_TOKEN)
@@ -27,6 +29,7 @@ class DNAnexusAPI
   def initialize(bearer_token, apiserver_url = DNANEXUS_APISERVER_URI)
     raise "Bearer token for DNAnexus API is not set" if bearer_token.blank?
 
+    @bearer_token = bearer_token
     @transport = DXClient::Transport.new(bearer_token, apiserver_url)
   end
 

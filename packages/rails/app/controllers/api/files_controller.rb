@@ -568,7 +568,7 @@ module Api
     end
 
     def node_copier
-      @node_copier ||= CopyService::NodeCopier.new(api: @context.api, user: current_user)
+      @node_copier ||= CopyService::NodeApiCopier.new(api: @context.api, user: current_user)
     end
 
     def find_file

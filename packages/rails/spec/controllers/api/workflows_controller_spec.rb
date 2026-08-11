@@ -104,7 +104,7 @@ RSpec.describe Api::WorkflowsController, type: :controller do
         aggregate_failures do
           expect(response).to be_successful
           expect(payload["workflow"]).to match(
-            a_hash_including("workflow_series_id" => workflow.id),
+            a_hash_including("workflow_series_id" => workflow.workflow_series_id),
           )
         end
       end

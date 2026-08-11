@@ -309,7 +309,11 @@ class UserFile < Node
   # Check if the current file is a challenge card image.
   # @return [true or false] - depends upon whether file is a challenge card image.
   def challenge_card_image?
-    parent_type == "User" && parent == User.challenge_bot && scope == SCOPE_PUBLIC
+    return false unless parent_type == "User" && scope == SCOPE_PUBLIC
+
+    parent == User.challenge_bot
+  rescue ActiveRecord::RecordNotFound
+    false
   end
 
   def to_param

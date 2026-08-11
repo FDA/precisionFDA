@@ -125,9 +125,7 @@ class ApplicationController < ActionController::Base
   # @return [String] Generated key.
   def generate_auth_key(duration = 1.day)
     # Generate new token for pfda uploader
-    context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
-    context["expiration"] = [context["expiration"], Time.now.to_i + duration].min
-    rails_encryptor.encrypt_and_sign({ context: context }.to_json)
+    NodeApiAuthKey.from_context(@context, duration: duration)
   end
 
   # Resets and saves new session.

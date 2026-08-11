@@ -32,71 +32,37 @@ class FilePublisher
   #   returns 0 when no files were published.
   # rubocop:disable Metrics/MethodLength
   def publish(files, scope = "public")
-    count = 0
     destination_project = UserFile.publication_project!(user, scope)
-    projects = {}
-    files.uniq.each do |file|
+    files_to_publish = files.uniq.select do |file|
       next unless file.publishable?(user)
 
-      unless [UserFile::STATE_CLOSED, UserFile::STATE_COPYING].include?(file.state) ||
-        (file.klass == "folder")
-        raise "Unable to publish #{file.name} - file is not closed"
-      end
+      validate_publishable_state!(file)
 
       if destination_project == file.project
         raise "Source and destination collision for file #{file.id} (#{file.dxid})"
       end
 
-      projects[file.project] = [] unless projects.key?(file.project)
-      projects[file.project].push(file)
+      true
     end
 
-    # rubocop:disable Metrics/BlockLength
-    projects.each do |project, project_files|
-      # clone only files, not folders
-      clone_challenge_objects(project_files, destination_project)
+    challenge_files, regular_files = files_to_publish.partition(&:challenge_file?)
 
-      non_challehge_files_dxids =
-        project_files.map { |file| file.dxid unless file.challenge_file? }.compact
-      if project.present? && !non_challehge_files_dxids.empty?
-        api.project_clone(project, destination_project, { objects: non_challehge_files_dxids })
-      end
+    copies = node_api_copier.copy(regular_files, scope) if regular_files.any?
+    publish_challenge_files(challenge_files, scope, destination_project) if challenge_files.any?
 
-      UserFile.transaction do
-        project_files.each do |file|
-          file.reload
-
-          unless file.publishable?(user)
-            raise "Race condition for #{file.klass} #{file.id} (#{file.dxid})"
-          end
-
-          CopyService::FileCopier.copy_record(
-            file,
-            scope,
-            destination_project,
-            state: UserFile::STATE_CLOSED,
-          )
-
-          count += 1
-
-          if scope =~ /^space-(\d+)$/
-            event_type = :file_added if file.klass == "file"
-            if event_type.present?
-              SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, file, event_type)
-            end
-          end
-        end
-      end
-    end
-    # rubocop:enable Metrics/BlockLength
-
-    count
+    # publish_challenge_files raises on any failure, so all challenge files
+    # that reach this point were published.
+    count_published(regular_files, copies) + challenge_files.size
   end
 
-  # Publishes an asset - to make its scope 'public'
+  # Publishes an asset - to make its scope 'public'.
+  #   Behaves like a move: the asset is cloned to the destination project,
+  #   the existing record is updated in place, and the origin object is
+  #   removed from the source project afterwards.
   def publish_assets(assets, scope = "public")
-    count = 0
     destination_project = UserFile.publication_project!(user, scope)
+    count = 0
+
     projects = {}
     assets.uniq.each do |asset|
       next unless asset.publishable?(user)
@@ -109,18 +75,15 @@ class FilePublisher
         raise "Source and destination collision for file #{asset.id} (#{asset.dxid})"
       end
 
-      projects[asset.project] = [] unless projects.key?(asset.project)
-      projects[asset.project].push(asset)
+      (projects[asset.project] ||= []).push(asset)
     end
 
-    # rubocop:disable Metrics/BlockLength
     projects.each do |project, project_assets|
-      # clone only files, not folders
       clone_challenge_objects(project_assets, destination_project)
 
-      non_challenge_files_dxids =
-        project_assets.map { |file| file.dxid unless file.challenge_file? }.compact
-      if project.present? && !non_challenge_files_dxids.empty?
+      non_challenge_files_dxids = project_assets.reject(&:challenge_file?).map(&:dxid)
+
+      if project.present? && non_challenge_files_dxids.any?
         api.project_clone(project, destination_project, { objects: non_challenge_files_dxids })
       end
 
@@ -128,9 +91,7 @@ class FilePublisher
         project_assets.each do |file|
           file.reload
 
-          unless file.publishable?(user)
-            raise "Race condition for #{file.klass} #{file.id} (#{file.dxid})"
-          end
+          raise "Race condition for #{file.klass} #{file.id} (#{file.dxid})" unless file.publishable?(user)
 
           file.update!(
             state: UserFile::STATE_CLOSED,
@@ -140,22 +101,17 @@ class FilePublisher
           )
 
           count += 1
-          
-          if scope =~ /^space-(\d+)$/
-            event_type = :asset_added if file.klass == "asset"
-            if event_type.present?
-              SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, file, event_type)
-            end
+
+          if scope =~ /^space-(\d+)$/ && file.klass == "asset"
+            SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, file, :asset_added)
           end
         end
       end
 
-      if project.present? && !non_challenge_files_dxids.empty?
+      if project.present? && non_challenge_files_dxids.any?
         api.call(project, "removeObjects", objects: non_challenge_files_dxids)
       end
-
     end
-    # rubocop:enable Metrics/BlockLength
 
     count
   end
@@ -164,28 +120,99 @@ class FilePublisher
 
   private
 
+  # Regular files are published through the Node API, which skips any
+  # non-closed file - admitting the transient "copying" state here would
+  # return success while the file is silently dropped, so it is rejected
+  # up front with an explicit error. Challenge files keep the legacy
+  # force-publish path (direct platform clone + record created as closed),
+  # which tolerates the "copying" state.
+  def validate_publishable_state!(file)
+    return if file.klass == "folder"
+    return if file.state == UserFile::STATE_CLOSED
+    return if file.challenge_file? && file.state == UserFile::STATE_COPYING
+
+    raise "Unable to publish #{file.name} - file is not closed"
+  end
+
+  # Reconciles the number of published regular files against the mapping the
+  # Node API actually returned. Files that are not in the mapping were
+  # silently skipped by the facade (e.g. a state race - the file was no
+  # longer closed by the time the server processed it) and must NOT be
+  # reported as published. Nodes reported with copied: false already existed
+  # in the destination, which counts as published.
+  def count_published(regular_files, copies)
+    return 0 if regular_files.blank?
+
+    published_source_ids = (copies&.copies || []).filter_map { |copy| copy.source&.id }
+    skipped = regular_files.reject { |file| published_source_ids.include?(file.id) }
+
+    if skipped.any?
+      Rails.logger.warn(
+        "FilePublisher: Node API skipped #{skipped.size} file(s) during publish: " \
+        "#{skipped.map(&:uid).join(', ')} (most likely not in the closed state)",
+      )
+    end
+
+    regular_files.size - skipped.size
+  end
+
   def clone_challenge_objects(project_files, destination_project)
     project_files.each do |file|
       next unless file.challenge_file?
 
-      result = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call(
-        "system",
-        "describeDataObjects",
-        objects: [file.dxid],
-      )["results"][0]
+      source_project = challenge_source_project(file)
+      next if source_project.blank?
 
-      next if result["describe"].blank?
-
-      api.project_clone(
-        result["describe"]["project"],
-        destination_project,
-        { objects: [file.dxid] },
-      )
+      api.project_clone(source_project, destination_project, { objects: [file.dxid] })
     end
   end
 
-  def copy_service
-    @copy_service ||= CopyService.new(api:, user: current_user)
+  def publish_challenge_files(challenge_files, scope, destination_project)
+    challenge_files.each do |file|
+      file.reload
+      raise "Race condition for #{file.klass} #{file.id} (#{file.dxid})" unless file.publishable?(user)
+
+      source_project = challenge_source_project(file)
+      raise "Cannot resolve challenge source project for file #{file.id} (#{file.dxid})" if source_project.blank?
+
+      api.project_clone(source_project, destination_project, { objects: [file.dxid] })
+      copy_file_record(file, scope, destination_project, state: UserFile::STATE_CLOSED)
+
+      next unless scope =~ /^space-(\d+)$/
+
+      SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, file, :file_added)
+    end
+  end
+
+  def challenge_source_project(file)
+    result = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call(
+      "system",
+      "describeDataObjects",
+      objects: [file.dxid],
+    )["results"]&.first
+
+    result&.dig("describe", "project")
+  end
+
+  # rubocop:disable Style/OptionalBooleanParameter
+  def copy_file_record(file, scope, destination_project, attrs = {}, skip_parent = false)
+    existed_file = UserFile.find_by(dxid: file.dxid, project: destination_project)
+    return existed_file if existed_file
+
+    file.dup.tap do |new_file|
+      new_file.assign_attributes(attrs)
+      new_file.scope = scope
+      new_file.project = destination_project
+      new_file.parent = file unless skip_parent
+      new_file.archive_entries = file.archive_entries.map(&:dup) if defined? file.archive_entries
+      new_file.locked = false
+      new_file.save!
+    end
+  end
+  # rubocop:enable Style/OptionalBooleanParameter
+
+  def node_api_copier
+    @node_api_copier ||= CopyService::NodeApiCopier.new(api:, user:)
   end
 
   attr_reader :api, :user

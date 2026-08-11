@@ -41,7 +41,8 @@ RSpec.describe Api::SpacesController, type: :controller do
       allow(CopyService::AppCopier).to receive(:new).and_return(app_copy_service)
       allow(ActiveRecord::Base.connection).to receive(:commit_db_transaction)
       stub_request(:post, "https://localhost:3001/emails/typed")
-      stub_request(:post, "https://localhost:3001/nodes/copy")
+      stub_request(:post, "https://localhost:3001/nodes/copy").
+        to_return(status: 200, body: "[]", headers: { "Content-Type" => "application/json" })
     end
 
     it "copies apps" do

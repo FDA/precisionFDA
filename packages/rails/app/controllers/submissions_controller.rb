@@ -363,7 +363,23 @@ class SubmissionsController < ApplicationController
         "user-#{CHALLENGE_BOT_DX_USER}",
       )
     end
+
+    verify_inputs_cloned!(files, copied_files)
+
     copied_files
+  end
+
+  # Ensures every submitted file was actually cloned into the challenge space.
+  # Without this check an incomplete copy mapping would let the job silently
+  # run with the submitter's private file UIDs inside the challenge space.
+  def verify_inputs_cloned!(files, copied_files)
+    cloned_uids = copied_files.copies.filter_map { |copy| copy.source&.uid }
+    missing = files.map(&:uid) - cloned_uids
+
+    return if missing.empty?
+
+    raise "Unable to copy submission file(s) #{missing.join(', ')} to the challenge space. " \
+          "Please try again or contact support if the problem persists."
   end
 
   # Remaps file UIDs in `input_info.run_inputs` (persisted on Job#run_data)

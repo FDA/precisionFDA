@@ -1,134 +1,112 @@
 require "rails_helper"
 
-RSpec.describe CopyService::NodeCopier, type: :service do
-  subject(:copier) { described_class.new(api: api, user: user) }
+RSpec.describe CopyService::NodeApiCopier, type: :service do
+  subject(:copier) { described_class.new(api:, user:) }
 
   let(:user) { create(:user) }
-  let(:api) { instance_double(DNAnexusAPI, project_clone: nil) }
+  let(:api) { instance_double(DNAnexusAPI, bearer_token: "challenge-bot-token", project_clone: nil) }
+  let(:node_client) { instance_double(HttpsAppsClient) }
+  let(:captured_auth_keys) { [] }
 
   describe "#copy" do
-    let(:source_scope) { "private" }
-    let(:parent_folder_column) { "parent_folder_id" }
-    let(:file_one) { create(:user_file, name: "file_one", scope: source_scope, user: user) }
-    let(:folder_one) { create(:folder, name: "folder_one", scope: source_scope, user: user) }
-
-    let(:file_two) do
-      create(
-        :user_file,
-        scope: source_scope,
-        name: "file_two",
-        user: user,
-        parent_folder_column => folder_one.id,
-      )
-    end
-
-    let(:folder_two) do
-      create(
-        :folder,
-        name: "folder_two",
-        scope: source_scope,
-        user: user,
-        parent_folder_column => folder_one.id,
-      )
-    end
+    let(:project_one) { "project-one" }
+    let(:file_one) { create(:user_file, name: "file_one", project: project_one, scope: "private", user:) }
+    let(:folder_one) { create(:folder, name: "folder_one", project: project_one, scope: "private", user:) }
 
     before do
-      file_two.reload
-      folder_two.reload
-      allow(ActiveRecord::Base.connection).to receive(:commit_db_transaction)
-      stub_request(:post, "https://localhost:3001/emails/typed")
+      allow(HttpsAppsClient).to receive(:new) do |auth_key:|
+        captured_auth_keys << auth_key
+        node_client
+      end
+      allow(node_client).to receive(:nodes_copy).and_return([])
     end
 
-    context "when copy from space to space" do
-      let(:space) { create(:space, :review, :accepted, host_lead_id: user.id) }
-      let(:source_space) { create(:space, :review, :accepted, host_lead_id: user.id) }
-      let(:source_scope) { source_space.uid }
-      let(:parent_folder_column) { "scoped_parent_folder_id" }
+    it "delegates copy to Node API synchronously in a single batch with folders first" do
+      nodes = [file_one, folder_one]
 
-      it "copies files and folders recursively" do
-        nodes = Node.where(id: [file_one.id, folder_one.id])
+      copier.copy(nodes, "public", nil)
 
-        expect { copier.copy(nodes, space.uid, nil) }.to change(space.nodes, :size).from(0).to(4)
-
-        nodes_root = space.nodes.where(scoped_parent_folder_id: nil).pluck(:name)
-        nodes_in_folder = space.folders.where(name: "folder_one").first.children.pluck(:name)
-
-        expect(nodes_root).to contain_exactly("file_one", "folder_one")
-        expect(nodes_in_folder).to contain_exactly("file_two", "folder_two")
-      end
-
-      it "copies folders recursively and sync files and subfolders if folder already exists" do
-        nodes = Node.where(id: folder_one.id)
-        copier.copy(nodes, space.uid, nil)
-
-        create(:user_file, scope: source_scope, name: "added_file_one", user:, parent_folder_column => folder_one.id)
-        added_folder_one = create(:folder, scope: source_scope, name: "added_folder_one", user:, parent_folder_column => folder_one.id)
-        create(:user_file, scope: source_scope, name: "added_file_two", user:, parent_folder_column => added_folder_one.id)
-
-        expect { copier.copy(nodes, space.uid, nil) }.to change(space.nodes, :size).from(3).to(6)
-
-        copy_folder = space.folders.where(name: "folder_one").first
-        nodes_in_folder = copy_folder.children.pluck(:name)
-        nodes_in_copy_subfolder = copy_folder.children.where(name: "added_folder_one").first.children.pluck(:name)
-        expect(nodes_in_folder).to contain_exactly("file_two", "folder_two", "added_file_one", "added_folder_one")
-        expect(nodes_in_copy_subfolder).to contain_exactly("added_file_two")
-      end
-
-      it "copies folders recursively and copy files and folders to a subfolder" do
-        nodes = Node.where(id: folder_one.id)
-        copier.copy(nodes, space.uid, nil)
-
-        added_file_one = create(:user_file, scope: source_scope, name: "added_file_one", user:, parent_folder_column => nil)
-        added_folder_one = create(:folder, scope: source_scope, name: "added_folder_one", user:, parent_folder_column => nil)
-        create(:user_file, scope: source_scope, name: "added_file_two", user:, parent_folder_column => added_folder_one.id)
-
-        space_folder_two = space.folders.where(name: "folder_one").first.children.where(name: "folder_two").first
-        expect { copier.copy([added_file_one, added_folder_one], space.uid, space_folder_two.id) }.to change(space.nodes, :size).from(3).to(6)
-
-        nodes_in_copy_folder = space_folder_two.children.pluck(:name)
-        nodes_in_copy_subfolder = space_folder_two.children.where(name: "added_folder_one").first.children.pluck(:name)
-        expect(nodes_in_copy_folder).to contain_exactly("added_file_one", "added_folder_one")
-        expect(nodes_in_copy_subfolder).to contain_exactly("added_file_two")
-      end
+      expect(HttpsAppsClient).to have_received(:new).with(auth_key: kind_of(String))
+      expect(node_client).to have_received(:nodes_copy).with([folder_one.id, file_one.id], "public", nil, false)
     end
 
-    context "when copy from space to public scope" do
-      let(:source_space) { create(:space, :review, :accepted, host_lead_id: user.id) }
-      let(:source_scope) { source_space.uid }
-      let(:parent_folder_column) { "scoped_parent_folder_id" }
+    it "authenticates with a Node API key carrying the acting user and platform token" do
+      copier.copy([file_one], "public", nil)
 
-      it "copies files and folders recursively" do
-        nodes = Node.where(id: [file_one.id, folder_one.id])
+      decrypted = JSON.parse(Rails.configuration.encryptor.decrypt_and_verify(captured_auth_keys.sole))
+      context = decrypted.fetch("context")
 
-        result_nodes = Node.where(scope: "public")
-
-        expect { copier.copy(nodes, "public", nil) }.to change(result_nodes, :size).from(0).to(4)
-
-        nodes_root = result_nodes.where(parent_folder_id: nil).pluck(:name)
-        nodes_in_folder = result_nodes.where(name: "folder_one").first.children.pluck(:name)
-
-        expect(nodes_root).to contain_exactly("file_one", "folder_one")
-        expect(nodes_in_folder).to contain_exactly("file_two", "folder_two")
-      end
+      expect(context["user_id"]).to eq(user.id)
+      expect(context["username"]).to eq(user.dxuser)
+      expect(context["token"]).to eq("challenge-bot-token")
+      expect(context["org_id"]).to eq(user.org_id)
+      expect(context["expiration"]).to be > Time.now.to_i
     end
 
-    context "when copy from private to public scope" do
-      let(:source_scope) { "private" }
-      let(:parent_folder_column) { "parent_folder_id" }
+    it "splits nodes from different source projects into separate API requests" do
+      file_two = create(:user_file, name: "file_two", project: "project-two", scope: "private", user:)
 
-      it "copies files and folders recursively" do
-        nodes = user.nodes.where(id: [file_one.id, folder_one.id])
+      copier.copy([file_one, file_two], "public", nil)
 
-        result_nodes = Node.where(scope: "public")
+      expect(node_client).to have_received(:nodes_copy).with([file_one.id], "public", nil, false)
+      expect(node_client).to have_received(:nodes_copy).with([file_two.id], "public", nil, false)
+    end
 
-        expect { copier.copy(nodes, "public", nil) }.to change(result_nodes, :size).from(0).to(4)
+    it "attaches the folder skeleton to every per-project file batch to preserve hierarchy" do
+      # Folders have no project - splitting them from their files would make
+      # the Node API resolve file parents against an empty per-request folder
+      # map, silently flattening the published tree.
+      file_two = create(:user_file, name: "file_two", project: "project-two", scope: "private", user:)
 
-        nodes_root = result_nodes.where(parent_folder_id: nil).pluck(:name)
-        nodes_in_folder = result_nodes.where(name: "folder_one").first.children.pluck(:name)
+      copier.copy([folder_one, file_one, file_two], "public", nil)
 
-        expect(nodes_root).to contain_exactly("file_one", "folder_one")
-        expect(nodes_in_folder).to contain_exactly("file_two", "folder_two")
-      end
+      expect(node_client).to have_received(:nodes_copy).with([folder_one.id, file_one.id], "public", nil, false)
+      expect(node_client).to have_received(:nodes_copy).with([folder_one.id, file_two.id], "public", nil, false)
+    end
+
+    it "returns empty copies when input is empty" do
+      expect(copier.copy([], "public", nil)).to be_empty
+      expect(node_client).not_to have_received(:nodes_copy)
+    end
+
+    it "maps sources to read-back targets returned by the Node API" do
+      target = create(:user_file, name: "file_one_copy", project: "project-space", scope: "space-1", user:)
+      allow(node_client).to receive(:nodes_copy).and_return(
+        [{ "sourceNodeId" => file_one.id, "targetNodeId" => target.id, "copied" => true }],
+      )
+
+      copies = copier.copy([file_one], "space-1")
+
+      copy = copies.copies.sole
+      expect(copy.object).to eq(target)
+      expect(copy.source).to eq(file_one)
+      expect(copy.copied).to be(true)
+    end
+
+    it "raises when the Node API reports copied nodes that are not readable" do
+      # Simulates snapshot isolation hiding rows committed by the Node API
+      # (e.g. when the copier is invoked inside an open transaction).
+      allow(node_client).to receive(:nodes_copy).and_return(
+        [{ "sourceNodeId" => file_one.id, "targetNodeId" => -1, "copied" => true }],
+      )
+
+      expect { copier.copy([file_one], "space-1") }.
+        to raise_error(described_class::CopyError, /not visible in the current DB session/)
+    end
+
+    it "raises on an unexpected response shape instead of treating it as empty" do
+      allow(node_client).to receive(:nodes_copy).and_return("<html>gateway timeout</html>")
+
+      expect { copier.copy([file_one], "space-1") }.
+        to raise_error(described_class::CopyError, /expected an Array of mapping entries, got String/)
+    end
+
+    it "refuses to run inside an open transaction outside of the test env" do
+      allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new("production"))
+
+      expect { copier.copy([file_one], "public") }.
+        to raise_error(described_class::CopyError, /must not be invoked inside a database transaction/)
+      expect(node_client).not_to have_received(:nodes_copy)
     end
   end
 end

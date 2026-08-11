@@ -30,6 +30,11 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
     }
     const options: JobOptions = {
       jobId: `${wrapped.type}.${user.dxuser}-${Date.now()}`,
+      // Node copy is not idempotent-safe to retry blindly: a replay repeats
+      // the platform projectClone call and duplicates user notifications.
+      // Failures are handled and reported by CopyNodesFacade; run once only
+      // (overrides the queue default of attempts: 15).
+      attempts: 1,
     }
     return await this.addToQueue(wrapped, options)
   }

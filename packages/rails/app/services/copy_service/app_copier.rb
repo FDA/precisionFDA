@@ -3,7 +3,7 @@ class CopyService
     def initialize(api:, user:, file_copier: nil)
       @api = api
       @user = user
-      @file_copier = file_copier || FileCopier.new(api: api, user: user)
+      @file_copier = file_copier || CopyService::NodeApiCopier.new(api: api, user: user)
     end
 
     # Creates a copy of an app in another scope.
@@ -12,19 +12,24 @@ class CopyService
     # @param properties [Hash] Properties to create a new app with.
     # return [CopyService::Copies] Object that includes a source and a new app.
     def copy(app, scope, properties = {})
-      opts = {}
-      ActiveRecord::Base.transaction do
-        opts = build_opts(app, scope)
+      # NOTE: build_opts triggers asset/default-input-file copies through the
+      # Node API (HTTP) and reads the copied rows back. It must NOT run inside
+      # a database transaction - REPEATABLE READ snapshot isolation would hide
+      # the rows committed by the Node API on its own connection, silently
+      # creating the app without assets/default input files.
+      #
+      # Node-side copies cannot be rolled back from Rails; on mid-copy failure
+      # the destination keeps already-copied nodes. Retrying converges: the
+      # Node API dedupes copies by dxid + destination project (copied: false).
+      opts = build_opts(app, scope)
 
-        opts[:createAppSeries] = properties["createAppSeries"] if properties.key?("createAppSeries")
-        opts[:createAppRevision] = properties["createAppRevision"] if properties.key?("createAppRevision")
-      end
+      opts[:createAppSeries] = properties["createAppSeries"] if properties.key?("createAppSeries")
+      opts[:createAppRevision] = properties["createAppRevision"] if properties.key?("createAppRevision")
 
       new_app = AppService.create_app(user, api, opts)
+      authorize_users(new_app, scope)
       ActiveRecord::Base.transaction do
-        authorize_users(new_app, scope)
         user.tag(new_app.app_series, with: app.app_series.tags, on: :tags)
-        new_app
       end
       SpaceEventService.call(Space.from_scope(new_app.scope).id, user.id, nil, new_app, :app_added) if new_app.in_space?
       new_app
@@ -117,7 +122,16 @@ class CopyService
     def copy_assets(app, scope)
       return [] unless app.assets.exists?
 
-      file_copier.copy(app.assets, scope, nil, true).all
+      # Asset parent semantics (PFDA-3325: parent_type must stay "Asset") are
+      # handled by the Node API based on the node's STI type.
+      copies = file_copier.copy(app.assets, scope)
+      copies.each do |target, source, copied|
+        next unless copied && target.is_a?(Asset) && source.is_a?(Asset)
+
+        target.archive_entries = source.archive_entries.map(&:dup)
+      end
+
+      copies.all
     end
 
     # Copies default input files from a source app.

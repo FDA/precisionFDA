@@ -38,7 +38,20 @@ export class FileSyncQueueProcessor {
   @ProcessWithContext(TASK_TYPE.COPY_NODES)
   async copyNodes(job: Job<CopyNodesJob>): Promise<void> {
     const input = job.data.payload
-    await this.copyNodesFacade.copyNodes(input.ids, input.scope, input.folderId)
+    try {
+      await this.copyNodesFacade.copyNodes(input.ids, input.scope, input.folderId)
+    } catch (error) {
+      // Deliberately swallow the error instead of letting Bull retry:
+      // a retry would replay the platform projectClone call and re-emit a
+      // duplicate error notification on every attempt (the queue inherits
+      // attempts: 15 with exponential backoff). The facade has already
+      // notified the user and rolled back its own platform clones, so the
+      // failure is fully handled at this point.
+      this.logger.error(
+        `Copy nodes task failed for node ids [${input.ids.join(', ')}] targeting scope ${input.scope}`,
+        error as Error,
+      )
+    }
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_OUTPUTS)

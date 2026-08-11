@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer'
-import { ArrayNotEmpty, IsArray, IsInt, IsOptional } from 'class-validator'
+import { ArrayNotEmpty, IsArray, IsBoolean, IsInt, IsOptional } from 'class-validator'
 import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
 import { EntityScope } from '@shared/types/common'
 
@@ -16,4 +16,9 @@ export class NodesCopyDTO {
   @Type(() => Number)
   @IsInt()
   folderId?: number
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  async?: boolean
 }

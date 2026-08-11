@@ -16,7 +16,7 @@ class CopyService
 
   def copier_class(entity)
     case entity
-    when UserFile   then FileCopier
+    when UserFile   then NodeApiCopier
     when Job        then JobCopier
     when App        then AppCopier
     when Note       then NoteCopier

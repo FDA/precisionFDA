@@ -8,9 +8,17 @@ class CopyService
       @user = user
     end
 
+    # NOTE: This method (and copy_dependencies) copies files/apps through the
+    # Node API (HTTP) and reads the copied rows back. It must NOT be wrapped
+    # in a database transaction - REPEATABLE READ snapshot isolation would
+    # hide the rows committed by the Node API on its own connection.
+    #
+    # Node-side copies cannot be rolled back from Rails, so a mid-copy failure
+    # (or HTTP timeout) leaves already-copied nodes in the destination. That
+    # partial state is recoverable by retrying: the Node API dedupes copies by
+    # dxid + destination project and reports existing nodes as copied: false,
+    # so a re-run converges instead of duplicating data.
     def copy(workflow, scope, properties = {})
-      Workflow.transaction do
-      end
       # TODO: When moving this to Node consider creating a new workflow instead of cloning it
       new_workflow = workflow.dup
       new_workflow.scope = scope
@@ -81,7 +89,7 @@ class CopyService
     end
 
     def file_copy_service
-      @file_copy_service ||= CopyService::FileCopier.new(api:, user:)
+      @file_copy_service ||= CopyService::NodeApiCopier.new(api:, user:)
     end
 
     def copy_dependencies(new_workflow, workflow, scope, properties)

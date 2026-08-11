@@ -10,7 +10,9 @@ import { SpaceEventService } from '@shared/domain/space-event/space-event.servic
 import { NodeTagging } from '@shared/domain/tagging/node-tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { NodeCopyResultDTO } from '@shared/domain/user-file/dto/node-copy-result.dto'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
@@ -19,7 +21,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
 import { FILE_STI_TYPE, FileOrAsset, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { EntityScope } from '@shared/types/common'
@@ -44,7 +46,7 @@ export class CopyNodesFacade {
     private readonly spaceEventService: SpaceEventService,
   ) {}
 
-  async copyNodes(requestedIds: number[], targetScope: EntityScope, targetFolderId?: number): Promise<void> {
+  async copyNodes(requestedIds: number[], targetScope: EntityScope, targetFolderId?: number): Promise<NodeCopyResultDTO[]> {
     this.logger.log(
       `Copying nodes with ids: [${requestedIds.join(', ')}] to folderId: ${targetFolderId} within scope: ${targetScope}`,
     )
@@ -53,9 +55,10 @@ export class CopyNodesFacade {
 
     const nodes = await this.nodeService.loadNodes(requestedIds, {})
 
-    // Validate that all nodes are from the same project
-    const sourceProject = nodes[0]?.project
-    const fileNodes = nodes.filter(node => node.isFile)
+    // Folders carry no project - resolve the source project from file nodes
+    // and validate that all of them belong to the same one.
+    const fileNodes = nodes.filter(node => node.isFile || node.isAsset)
+    const sourceProject = fileNodes[0]?.project
     const allSameProject = fileNodes.every(node => node.project === sourceProject)
     if (!allSameProject) {
       throw new InvalidStateError('All nodes to be copied must belong to the same source project.')
@@ -66,33 +69,60 @@ export class CopyNodesFacade {
     if (!destinationProject) {
       this.logger.error(`Failed to resolve destination project for scope ${targetScope}`)
       await this.processErrorNotification('You do not have permission to copy files to this scope.')
-      return
+      throw new PermissionError('You do not have permission to copy files to this scope.')
     }
-    const fileDxIds = nodes.filter(node => node.isFile || node.isAsset).map((n: FileOrAsset) => n.dxid)
+    // Parent folders must be processed before their children so that
+    // sourceFoldersMap contains the mapped destination folder by the time a
+    // child is copied - otherwise the child silently falls back to the scope
+    // root and the folder hierarchy is lost. Do not rely on the input order:
+    // sort explicitly by parent-child dependencies.
+    const nodesToProcess = this.sortParentsFirst(nodes)
+    const copyableNodes: Node[] = []
+    // The challenge bot copies challenge submitters' files into the challenge space
+    // on their behalf. The bot never owns those files - access is granted by a
+    // temporary platform-level VIEW permission on the submitter's project, so the
+    // DB accessibility check must be skipped for the bot identity. The platform
+    // projectClone call remains the effective permission gatekeeper.
+    const skipAccessibilityCheck = user.isChallengeBot()
+    for (const sourceNode of nodesToProcess) {
+      if (await this.validateNode(sourceNode, skipAccessibilityCheck)) {
+        copyableNodes.push(sourceNode)
+      }
+    }
 
-    try {
-      await this.platformClient.projectClone(sourceProject, destinationProject, fileDxIds)
-    } catch (error: unknown) {
-      // permissions are most likely missing - log and notify user
-      this.logger.error('An error occurred while copying nodes', error as Error)
-      await this.processErrorNotification()
-      return
+    const fileDxIds = copyableNodes
+      .filter((node): node is FileOrAsset => node.isFile || node.isAsset)
+      .map(node => node.dxid)
+
+    if (fileDxIds.length > 0) {
+      try {
+        await this.platformClient.projectClone(sourceProject, destinationProject, fileDxIds)
+      } catch (error: unknown) {
+        // permissions are most likely missing - log and notify user
+        this.logger.error('An error occurred while copying nodes', error as Error)
+        await this.processErrorNotification()
+        throw error
+      }
     }
 
     let newlyCreatedFilesCount = 0
     let newlyCreatedFoldersCount = 0
     const nodesExistingInTarget: Node[] = []
+    const copyResults: NodeCopyResultDTO[] = []
 
-    const nodesToProcess = [...nodes].reverse()
     const sourceFoldersMap = new Map<number, Node>()
-    for (const sourceNode of nodesToProcess) {
-      await this.validateNode(sourceNode)
-    }
 
     try {
       await this.em.transactional(async tem => {
-        for (const sourceNode of nodesToProcess) {
-          const existingNode = await this.getExistingNode(sourceNode, targetScope, user, targetFolderId)
+        for (const sourceNode of copyableNodes) {
+          const targetParentFolderId = this.getTargetParentFolderId(sourceNode, sourceFoldersMap, targetFolderId)
+          const existingNode = await this.getExistingNode(
+            sourceNode,
+            targetScope,
+            user,
+            destinationProject,
+            targetParentFolderId,
+          )
           if (existingNode) {
             this.logger.log(`Node with uid: ${sourceNode.uid} already exists in target. Skipping.`)
 
@@ -101,6 +131,11 @@ export class CopyNodesFacade {
             }
 
             nodesExistingInTarget.push(existingNode)
+            copyResults.push({
+              sourceNodeId: sourceNode.id,
+              targetNodeId: existingNode.id,
+              copied: false,
+            })
             continue
           }
 
@@ -120,6 +155,11 @@ export class CopyNodesFacade {
           await this.copyProperties(sourceNode, newlyCreatedNode)
           await this.copyTags(sourceNode as UserFile | Asset | Folder, newlyCreatedNode)
           await this.processEvents(newlyCreatedNode, user, sourceNode, sourceFoldersMap)
+          copyResults.push({
+            sourceNodeId: sourceNode.id,
+            targetNodeId: newlyCreatedNode.id,
+            copied: true,
+          })
 
           if (newlyCreatedNode.isFile) {
             newlyCreatedFilesCount++
@@ -129,13 +169,12 @@ export class CopyNodesFacade {
         }
       })
       await this.processInfoNotification(nodesExistingInTarget.length, newlyCreatedFilesCount, newlyCreatedFoldersCount)
+      return copyResults
     } catch (error: unknown) {
       // collect all dxids of cloned files and rollback
-      const dxids = nodes.filter(node => node.isFile).map((n: FileOrAsset) => n.dxid)
+      const dxids = fileDxIds
       // filter out nodes that existed in target to avoid deleting user's existing files
-      const dxidsToRollback = dxids.filter(
-        dxid => !nodesExistingInTarget.find((node: FileOrAsset) => node.dxid === dxid),
-      )
+      const dxidsToRollback = dxids.filter(dxid => !nodesExistingInTarget.find(node => (node as FileOrAsset).dxid === dxid))
 
       const chunkSize = 100
       for (let i = 0; i < dxidsToRollback.length; i += chunkSize) {
@@ -145,22 +184,25 @@ export class CopyNodesFacade {
 
       this.logger.error('An error occurred while copying nodes', error as Error)
       await this.processErrorNotification()
+      throw error
     }
   }
 
-  private async validateNode(node: Node): Promise<void> {
-    const result = await this.nodeService.getAccessibleEntityById(node.id)
+  private async validateNode(node: Node, skipAccessibilityCheck = false): Promise<boolean> {
+    const result = skipAccessibilityCheck ? node : await this.nodeService.getAccessibleEntityById(node.id)
     if (!result) {
       throw new NotFoundError(`Node with id ${node.id} is not accessible or does not exist`)
     }
 
     await this.nodeService.validateProtectedSpaces('copy', this.user.id, node)
     if ((result.isFile || result.isAsset) && result.state !== 'closed') {
-      throw new InvalidStateError(`Only files in 'closed' state can be copied.`)
+      this.logger.warn(`Skipping node with id ${node.id} because it is not in the closed state.`)
+      return false
     }
     if (result.isFolder && result.state === 'removing') {
       throw new InvalidStateError(`Folder in 'removing' state cannot be copied.`)
     }
+    return true
   }
 
   private async processEvents(
@@ -169,10 +211,15 @@ export class CopyNodesFacade {
     sourceNode: Node,
     sourceFoldersMap: Map<number, Node>,
   ): Promise<void> {
-    if (newlyCreatedNode.isInSpace() && newlyCreatedNode.isFile) {
+    if (newlyCreatedNode.isInSpace() && (newlyCreatedNode.isFile || newlyCreatedNode.isAsset)) {
       const spaceEvent = await this.spaceEventService.createSpaceEvent({
-        activityType: SPACE_EVENT_ACTIVITY_TYPE.file_added,
-        entity: { type: 'userFile', value: newlyCreatedNode },
+        activityType: newlyCreatedNode.isAsset
+          ? SPACE_EVENT_ACTIVITY_TYPE.asset_added
+          : SPACE_EVENT_ACTIVITY_TYPE.file_added,
+        entity: {
+          type: newlyCreatedNode.isAsset ? 'asset' : 'userFile',
+          value: newlyCreatedNode,
+        },
         spaceId: newlyCreatedNode.getSpaceId(),
         userId: user.id,
       })
@@ -223,7 +270,10 @@ export class CopyNodesFacade {
       await this.em.populate(sourceAsset, ['archiveEntries'])
       if (sourceAsset.archiveEntries?.length > 0) {
         for (const archiveEntry of sourceAsset.archiveEntries) {
-          ;(newlyCreatedNode as Asset).archiveEntries.add(archiveEntry)
+          const copiedArchiveEntry = new ArchiveEntry()
+          copiedArchiveEntry.name = archiveEntry.name
+          copiedArchiveEntry.path = archiveEntry.path
+          ;(newlyCreatedNode as Asset).archiveEntries.add(copiedArchiveEntry)
         }
       }
     }
@@ -353,18 +403,59 @@ export class CopyNodesFacade {
     sourceFoldersMap: Map<number, Node>,
     targetFolderId?: number,
   ): void {
-    if (this.hasParentFolder(sourceNode)) {
-      const parentId = this.getParentFolderId(sourceNode)
-      const targetFolderFromSource = sourceFoldersMap.get(parentId)
+    const targetParentFolderId = this.getTargetParentFolderId(sourceNode, sourceFoldersMap, targetFolderId)
+    if (targetParentFolderId !== undefined && targetParentFolderId !== null) {
+      this.possiblySetTargetParentFolderId(targetScope, targetNode, targetParentFolderId)
+    }
+  }
 
+  /**
+   * Orders nodes so that any parent folder present in the batch comes before
+   * all of its descendants. The copy loop registers copied folders in
+   * sourceFoldersMap and children look their new parent up there, so
+   * processing a child before its parent would silently re-root it.
+   * Nodes without an in-batch parent keep their relative order.
+   */
+  private sortParentsFirst(nodes: Node[]): Node[] {
+    const nodesById = new Map(nodes.map(node => [node.id, node]))
+    const visited = new Set<number>()
+    const ordered: Node[] = []
+
+    const visit = (node: Node): void => {
+      if (visited.has(node.id)) {
+        return
+      }
+      visited.add(node.id)
+
+      const parentId = this.getParentFolderId(node)
+      const parent = parentId != null ? nodesById.get(parentId) : undefined
+      if (parent) {
+        visit(parent)
+      }
+
+      ordered.push(node)
+    }
+
+    for (const node of nodes) {
+      visit(node)
+    }
+
+    return ordered
+  }
+
+  private getTargetParentFolderId(
+    sourceNode: Node,
+    sourceFoldersMap: Map<number, Node>,
+    targetFolderId?: number,
+  ): number | undefined {
+    if (this.hasParentFolder(sourceNode)) {
+      const targetFolderFromSource = sourceFoldersMap.get(this.getParentFolderId(sourceNode))
       if (targetFolderFromSource) {
-        this.possiblySetTargetParentFolderId(targetScope, targetNode, targetFolderFromSource.id)
+        return targetFolderFromSource.id
       }
     }
-    // if no parent folder is set on target and targetFolderId is provided use it
-    if (!this.hasParentFolder(targetNode) && targetFolderId !== null && targetFolderId !== undefined) {
-      this.possiblySetTargetParentFolderId(targetScope, targetNode, targetFolderId)
-    }
+
+    return targetFolderId
   }
 
   private getParentFolderId(node: Node): number | undefined {
@@ -391,25 +482,30 @@ export class CopyNodesFacade {
     sourceNode: Node,
     targetScope: EntityScope,
     user: User,
+    destinationProject: `project-${string}`,
     targetFolderId?: number,
-  ): Promise<Node> {
-    const conditions: Partial<Asset> = {
-      stiType: sourceNode.stiType,
-      user: Reference.create(user),
-      scope: targetScope,
-    }
-
+  ): Promise<Node | null> {
     if (sourceNode.isFolder) {
-      conditions.name = sourceNode.name
+      const conditions: Partial<Folder> = {
+        stiType: sourceNode.stiType,
+        user: Reference.create(user),
+        scope: targetScope,
+        name: sourceNode.name,
+      }
+      this.possiblySetTargetParentFolderId(targetScope, conditions, targetFolderId)
+      return await this.em.findOne(Node, conditions)
     }
 
     if (sourceNode.isFile || sourceNode.isAsset) {
-      conditions.dxid = (sourceNode as FileOrAsset).dxid
+      const conditions: Partial<Asset> = {
+        stiType: sourceNode.stiType,
+        dxid: (sourceNode as FileOrAsset).dxid,
+        project: destinationProject,
+      }
+      return await this.em.findOne(Node, conditions)
     }
 
-    this.possiblySetTargetParentFolderId(targetScope, conditions, targetFolderId)
-
-    return await this.em.findOne(Node, conditions)
+    return null
   }
 
   private possiblySetTargetParentFolderId(

@@ -1,8 +1,11 @@
-import { Body, Controller, Delete, HttpCode, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, HttpCode, Post, Res, UseGuards } from '@nestjs/common'
+import { Response } from 'express'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodeCopyResultDTO } from '@shared/domain/user-file/dto/node-copy-result.dto'
 import { NodesCopyDTO } from '@shared/domain/user-file/dto/nodes-copy.dto'
 import { NodesInputDTO } from '@shared/domain/user-file/dto/nodes-input.dto'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
+import { CopyNodesFacade } from '@shared/facade/node-copy/copy-nodes.facade'
 import { LockNodeFacade } from '@shared/facade/node-lock/lock-node.facade'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { UnlockNodeFacade } from '@shared/facade/node-unlock/unlock-node.facade'
@@ -16,13 +19,22 @@ export class NodesController {
     private readonly removeNodesFacade: RemoveNodesFacade,
     private readonly lockNodeFacade: LockNodeFacade,
     private readonly unlockNodeFacade: UnlockNodeFacade,
+    private readonly copyNodesFacade: CopyNodesFacade,
     private readonly fileSyncQueueJobProducer: FileSyncQueueJobProducer,
   ) {}
 
-  @HttpCode(204)
   @Post('/copy')
-  async copyNodes(@Body() input: NodesCopyDTO): Promise<void> {
-    await this.fileSyncQueueJobProducer.createCopyNodesTask(input, this.user)
+  async copyNodes(@Body() input: NodesCopyDTO, @Res({ passthrough: true }) res: Response): Promise<NodeCopyResultDTO[]> {
+    const runAsync = input.async !== false
+
+    if (runAsync) {
+      res.status(204)
+      await this.fileSyncQueueJobProducer.createCopyNodesTask(input, this.user)
+      return []
+    }
+
+    res.status(200)
+    return await this.copyNodesFacade.copyNodes(input.ids, input.scope, input.folderId)
   }
 
   @HttpCode(204)
