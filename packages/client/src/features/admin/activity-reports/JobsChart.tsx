@@ -41,6 +41,7 @@ export function JobsChart({ dateFrom, dateTo }: JobsChartProps) {
     <div className="col-span-full rounded-lg border border-(--c-layout-border) bg-background p-4 shadow-[0_1px_3px_0_var(--base-opacity-06),0_1px_2px_0_var(--base-opacity-06)]">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-sm font-medium text-(--c-text-500)">Jobs Run / Failed</span>
+        <span className="text-xs text-(--c-text-400) italic">* Data is only reliable from 2025 onwards</span>
       </div>
 
       <div className="h-[220px]">
