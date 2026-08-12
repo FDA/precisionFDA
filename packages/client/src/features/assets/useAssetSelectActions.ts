@@ -183,7 +183,10 @@ export const useAssetActions = ({
     },
     {
       name: 'Make Public',
-      isDisabled: selected.length !== 1 || selectedButNotClosed || !user?.allowed_to_publish,
+      // `links.publish` is emitted by the backend only for an owned asset that is not already
+      // public (see AssetSerializer#links), so it also guards against publishing a public asset.
+      isDisabled:
+        selected.length !== 1 || selectedButNotClosed || !user?.allowed_to_publish || !selected[0]?.links.publish,
       type: 'route',
       to: `/publish?identifier=${selected[0]?.uid}&type=asset`,
     },

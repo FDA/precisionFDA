@@ -203,7 +203,14 @@ module Api
                    end
         end
       when DELETE_ACTION
-        nodes = Node.editable_by(@context).where(id: params[:ids]).to_a
+        node_scope = if @context.user.can_administer_site?
+          # Site admins can delete any public file, not just their own.
+          Node.editable_by(@context).or(Node.where(scope: UserFile::SCOPE_PUBLIC))
+        else
+          # Public nodes are removable only by site admins, including own public nodes.
+          Node.editable_by(@context).where.not(scope: UserFile::SCOPE_PUBLIC)
+        end
+        nodes = node_scope.where(id: params[:ids]).to_a
         files += nodes
         nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
         files.filter! { |file| file.scope == params[:scope] }

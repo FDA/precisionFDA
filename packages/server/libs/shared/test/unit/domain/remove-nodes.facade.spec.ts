@@ -1,6 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { stub } from 'sinon'
+import { SinonStub, stub } from 'sinon'
+import { config } from '@shared/config'
 import { ComparisonService } from '@shared/domain/comparison/comparison.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
@@ -54,6 +55,9 @@ describe('RemoveNodesFacade', () => {
   const removeArchiveEntriesForNodeStub = stub()
   const taggingServiceRemoveTaggingsStub = stub()
   const userClientFileRemoveStub = stub()
+  const adminClientFileRemoveStub = stub()
+  const adminClientProjectInviteStub = stub()
+  const adminClientProjectLeaveStub = stub()
   const spaceEventServiceCreateSpaceEventStub = stub()
   const spaceEventServiceSendNotificationForEventStub = stub()
   const nodeHelperGetNodePathStub = stub()
@@ -108,6 +112,12 @@ describe('RemoveNodesFacade', () => {
       fileRemove: userClientFileRemoveStub,
     } as unknown as PlatformClient
 
+    const adminPlatformClient = {
+      fileRemove: adminClientFileRemoveStub,
+      projectInvite: adminClientProjectInviteStub,
+      projectLeave: adminClientProjectLeaveStub,
+    } as unknown as PlatformClient
+
     const nodeHelper = {
       getNodePath: nodeHelperGetNodePathStub,
     } as unknown as NodeHelper
@@ -137,7 +147,33 @@ describe('RemoveNodesFacade', () => {
       dataPortalService,
       fileSyncQueueJobProducer,
       userClient,
+      adminPlatformClient,
     )
+  }
+
+  /**
+   * The beforeEach hook arms every stub to throw so unexpected calls fail loudly.
+   * Tests call this to allow the stubs hit by the file removal flow,
+   * plus any scenario-specific extras.
+   */
+  const resetFileRemovalStubs = (...extraStubs: SinonStub[]): void => {
+    const stubs = [
+      emClearStub,
+      emPersistStub,
+      emRemoveStub,
+      eventHelperCreateFileEventStub,
+      licensedItemServiceRemoveItemLicensedForNodeStub,
+      taggingServiceRemoveTaggingsStub,
+      spaceEventServiceCreateSpaceEventStub,
+      spaceEventServiceSendNotificationForEventStub,
+      userClientFileRemoveStub,
+      adminClientFileRemoveStub,
+      ...extraStubs,
+    ]
+    stubs.forEach(s => s.reset())
+    nodeHelperGetNodePathStub.callsFake((node: Node) => {
+      return `/path/to/${node.name}`
+    })
   }
 
   beforeEach(() => {
@@ -196,6 +232,15 @@ describe('RemoveNodesFacade', () => {
 
     userClientFileRemoveStub.reset()
     userClientFileRemoveStub.throws()
+
+    adminClientFileRemoveStub.reset()
+    adminClientFileRemoveStub.throws()
+
+    adminClientProjectInviteStub.reset()
+    adminClientProjectInviteStub.throws()
+
+    adminClientProjectLeaveStub.reset()
+    adminClientProjectLeaveStub.throws()
 
     spaceEventServiceCreateSpaceEventStub.reset()
     spaceEventServiceCreateSpaceEventStub.throws()
@@ -304,6 +349,7 @@ describe('RemoveNodesFacade', () => {
         id: 1,
         name: 'node1',
         isInSpace: () => true,
+        isPublic: () => false,
         getSpaceId: () => 1,
         dxid: 'file-1',
         project: 'project-id',
@@ -313,6 +359,7 @@ describe('RemoveNodesFacade', () => {
         id: 2,
         name: 'node2',
         isInSpace: () => false,
+        isPublic: () => false,
         dxid: 'file-2',
         stiType: FILE_STI_TYPE.USERFILE,
       } as unknown as UserFile
@@ -320,23 +367,11 @@ describe('RemoveNodesFacade', () => {
       const nodes = [node1, node2, folder1]
       const spaceEvent = { id: 42 }
 
-      nodeHelperGetNodePathStub.callsFake((node: Node) => {
-        return `/path/to/${node.name}`
-      })
-      eventHelperCreateFileEventStub.reset()
-      eventHelperCreateFolderEventStub.reset()
+      resetFileRemovalStubs(eventHelperCreateFolderEventStub)
+      spaceEventServiceCreateSpaceEventStub.resolves(spaceEvent)
       nodeServiceLoadNodesStub.withArgs(ids).returns(nodes)
-      emClearStub.reset()
       userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
       userFileRepositoryCountStub.withArgs({ dxid: node2.dxid }).returns(2)
-      licensedItemServiceRemoveItemLicensedForNodeStub.reset()
-      taggingServiceRemoveTaggingsStub.reset()
-      emPersistStub.reset()
-      userClientFileRemoveStub.reset()
-      spaceEventServiceCreateSpaceEventStub.reset()
-      spaceEventServiceCreateSpaceEventStub.resolves(spaceEvent)
-      spaceEventServiceSendNotificationForEventStub.reset()
-      emRemoveStub.reset()
 
       const removeNodesFacade = createRemoveNodesFacade()
 
@@ -377,6 +412,8 @@ describe('RemoveNodesFacade', () => {
           ids: ['file-1'],
         }),
       ).to.be.true()
+      expect(adminClientFileRemoveStub.called).to.be.false()
+
       expect(spaceEventServiceCreateSpaceEventStub.calledOnce).to.be.true()
       expect(
         spaceEventServiceCreateSpaceEventStub.calledWith({
@@ -413,6 +450,7 @@ describe('RemoveNodesFacade', () => {
         id: 1,
         name: 'node1',
         isInSpace: () => true,
+        isPublic: () => false,
         getSpaceId: () => 1,
         project: 'project-id',
         dxid: 'file-1',
@@ -422,24 +460,18 @@ describe('RemoveNodesFacade', () => {
         id: 2,
         name: 'node2',
         isInSpace: () => false,
+        isPublic: () => false,
         dxid: 'file-2',
         stiType: FILE_STI_TYPE.USERFILE,
       } as unknown as UserFile
       const nodes = [node1, node2]
       const spaceEvent = { id: 42 }
 
-      nodeHelperGetNodePathStub.callsFake((node: Node) => {
-        return `/path/to/${node.name}`
-      })
-      eventHelperCreateFileEventStub.reset()
+      resetFileRemovalStubs()
+      spaceEventServiceCreateSpaceEventStub.resolves(spaceEvent)
       nodeServiceLoadNodesStub.withArgs(ids).returns(nodes)
-      emClearStub.reset()
       userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
       userFileRepositoryCountStub.withArgs({ dxid: node2.dxid }).returns(2)
-      licensedItemServiceRemoveItemLicensedForNodeStub.reset()
-      taggingServiceRemoveTaggingsStub.reset()
-      emPersistStub.reset()
-      userClientFileRemoveStub.reset()
       userClientFileRemoveStub
         .withArgs({
           projectId: node1.project,
@@ -451,10 +483,6 @@ describe('RemoveNodesFacade', () => {
             clientResponse: '',
           }),
         )
-      spaceEventServiceCreateSpaceEventStub.reset()
-      spaceEventServiceCreateSpaceEventStub.resolves(spaceEvent)
-      spaceEventServiceSendNotificationForEventStub.reset()
-      emRemoveStub.reset()
 
       const removeNodesFacade = createRemoveNodesFacade()
 
@@ -522,6 +550,7 @@ describe('RemoveNodesFacade', () => {
         id: 1,
         name: 'node1',
         isInSpace: () => true,
+        isPublic: () => false,
         getSpaceId: () => 1,
         project: 'project-id',
         dxid: 'file-1',
@@ -531,31 +560,19 @@ describe('RemoveNodesFacade', () => {
         id: 2,
         name: 'node2',
         isInSpace: () => false,
+        isPublic: () => false,
         dxid: 'file-2',
         stiType: FILE_STI_TYPE.USERFILE,
       } as unknown as UserFile
       const node3 = { id: 3, stiType: FILE_STI_TYPE.FOLDER } as unknown as Folder
       const nodes = [node1, node2, node3]
 
-      nodeHelperGetNodePathStub.callsFake((node: Node) => {
-        return `/path/to/${node.name}`
-      })
-      eventHelperCreateFileEventStub.reset()
+      resetFileRemovalStubs(nodeServiceRollbackRemovingStateStub)
       nodeServiceLoadNodesStub.withArgs(ids).returns(nodes)
-      emClearStub.reset()
       userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
       // simulate any kind of error
       userFileRepositoryCountStub.withArgs({ dxid: node2.dxid }).throws(new Error('Error'))
-      licensedItemServiceRemoveItemLicensedForNodeStub.reset()
-      taggingServiceRemoveTaggingsStub.reset()
-      emPersistStub.reset()
-      userClientFileRemoveStub.reset()
-      spaceEventServiceCreateSpaceEventStub.reset()
-      spaceEventServiceSendNotificationForEventStub.reset()
-      emRemoveStub.reset()
 
-      nodeServiceRollbackRemovingStateStub.reset()
-      nodeServiceLoadNodesStub.withArgs(ids).returns(nodes)
       const removeNodesFacade = createRemoveNodesFacade()
 
       await expect(removeNodesFacade.removeNodes(ids, true)).to.be.rejectedWith(Error, 'Error')
@@ -564,11 +581,34 @@ describe('RemoveNodesFacade', () => {
       expect(nodeServiceRollbackRemovingStateStub.calledWith([node2, node3])).to.be.true()
     })
 
+    it('rejects unsupported node types', async () => {
+      const ids = [1]
+      const unsupportedNode = {
+        id: 1,
+        stiType: 'unsupported',
+      } as unknown as Node
+
+      nodeServiceLoadNodesStub.withArgs(ids).returns([unsupportedNode])
+      emClearStub.reset()
+      nodeServiceRollbackRemovingStateStub.reset()
+
+      const removeNodesFacade = createRemoveNodesFacade()
+
+      await expect(removeNodesFacade.removeNodes(ids, true)).to.be.rejectedWith(
+        Error,
+        'Unsupported node type: unsupported',
+      )
+
+      expect(nodeServiceRollbackRemovingStateStub.calledOnce).to.be.true()
+      expect(nodeServiceRollbackRemovingStateStub.calledWith([unsupportedNode])).to.be.true()
+    })
+
     it('should not create space event when skipCreateSpaceEvent is true', async () => {
       const node1 = {
         id: 1,
         name: 'node1',
         isInSpace: () => true,
+        isPublic: () => false,
         getSpaceId: () => 111,
         dxid: 'file-1',
         project: 'project-id',
@@ -576,26 +616,9 @@ describe('RemoveNodesFacade', () => {
       } as unknown as UserFile
       const nodes = [node1]
 
-      nodeHelperGetNodePathStub.callsFake((node: Node) => {
-        return `/path/to/${node.name}`
-      })
-
-      eventHelperCreateFileEventStub.reset()
+      resetFileRemovalStubs()
       nodeServiceLoadNodesStub.withArgs([node1.id]).returns(nodes)
-      emClearStub.reset()
       userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
-      licensedItemServiceRemoveItemLicensedForNodeStub.reset()
-      taggingServiceRemoveTaggingsStub.reset()
-      emPersistStub.reset()
-      userClientFileRemoveStub.reset()
-      spaceEventServiceCreateSpaceEventStub.reset()
-      spaceEventServiceSendNotificationForEventStub.reset()
-      emRemoveStub.reset()
-      nodeServiceValidateProtectedSpacesStub.reset()
-      nodeServiceValidateEditableByStub.reset()
-      spaceServiceValidateVerificationSpaceStub.reset()
-      comparisonServiceValidateComparisonsStub.reset()
-      nodeServiceValidateSpaceReportsStub.reset()
 
       const removeNodesFacade = createRemoveNodesFacade()
 
@@ -615,6 +638,173 @@ describe('RemoveNodesFacade', () => {
       ).to.be.true()
 
       expect(userClientFileRemoveStub.calledOnce).to.be.true()
+    })
+
+    it('should remove a public file using the admin platform client', async () => {
+      const isPublicStub = stub().returns(true)
+      const node1 = {
+        id: 1,
+        name: 'public-node',
+        isInSpace: () => false,
+        isPublic: isPublicStub,
+        dxid: 'file-public',
+        project: 'project-public',
+        stiType: FILE_STI_TYPE.USERFILE,
+      } as unknown as UserFile
+      const nodes = [node1]
+
+      resetFileRemovalStubs(adminClientProjectInviteStub, adminClientProjectLeaveStub)
+      nodeServiceLoadNodesStub.withArgs([node1.id]).returns(nodes)
+      userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
+
+      const removeNodesFacade = createRemoveNodesFacade()
+
+      const result = await removeNodesFacade.removeFile(node1, true)
+
+      expect(result).to.deep.equal(1)
+
+      const adminUserId = `user-${config.platform.adminUser}`
+      expect(adminClientProjectInviteStub.calledOnce).to.be.true()
+      expect(adminClientProjectInviteStub.calledWith('project-public', adminUserId, 'ADMINISTER')).to.be.true()
+
+      expect(adminClientFileRemoveStub.calledOnce).to.be.true()
+      expect(
+        adminClientFileRemoveStub.calledWith({
+          projectId: 'project-public',
+          ids: ['file-public'],
+        }),
+      ).to.be.true()
+
+      expect(adminClientProjectLeaveStub.calledOnce).to.be.true()
+      expect(adminClientProjectLeaveStub.calledWith({ projectDxid: 'project-public' })).to.be.true()
+
+      expect(adminClientProjectInviteStub.calledBefore(adminClientFileRemoveStub)).to.be.true()
+      expect(adminClientProjectLeaveStub.calledAfter(adminClientFileRemoveStub)).to.be.true()
+
+      expect(userClientFileRemoveStub.called).to.be.false()
+      expect(isPublicStub.calledOnce).to.be.true()
+
+      expect(emRemoveStub.calledOnce).to.be.true()
+      expect(emRemoveStub.calledWith(node1)).to.be.true()
+    })
+
+    it('should revoke temporary admin access even when the public file is already gone from platform', async () => {
+      const node1 = {
+        id: 1,
+        name: 'public-node',
+        isInSpace: () => false,
+        isPublic: () => true,
+        dxid: 'file-public',
+        project: 'project-public',
+        stiType: FILE_STI_TYPE.USERFILE,
+      } as unknown as UserFile
+
+      resetFileRemovalStubs(adminClientProjectInviteStub, adminClientProjectLeaveStub)
+      nodeServiceLoadNodesStub.withArgs([node1.id]).returns([node1])
+      userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
+      adminClientFileRemoveStub.throws(
+        new ClientRequestError('not found', { clientResponse: '', clientStatusCode: 404 }),
+      )
+
+      const removeNodesFacade = createRemoveNodesFacade()
+
+      const result = await removeNodesFacade.removeFile(node1, true)
+
+      expect(result).to.deep.equal(1)
+
+      expect(adminClientProjectLeaveStub.calledOnce).to.be.true()
+
+      expect(emRemoveStub.calledOnce).to.be.true()
+      expect(emRemoveStub.calledWith(node1)).to.be.true()
+    })
+
+    it('should not fail the removal when revoking temporary admin access fails', async () => {
+      const node1 = {
+        id: 1,
+        name: 'public-node',
+        isInSpace: () => false,
+        isPublic: () => true,
+        dxid: 'file-public',
+        project: 'project-public',
+        stiType: FILE_STI_TYPE.USERFILE,
+      } as unknown as UserFile
+
+      resetFileRemovalStubs(adminClientProjectInviteStub, adminClientProjectLeaveStub)
+      nodeServiceLoadNodesStub.withArgs([node1.id]).returns([node1])
+      userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
+      // the file is removed from the platform, but revoking the temporary access fails
+      adminClientProjectLeaveStub.throws(new Error('revoke failed'))
+
+      const removeNodesFacade = createRemoveNodesFacade()
+
+      // the revoke failure must not propagate and roll back the already-completed removal
+      const result = await removeNodesFacade.removeFile(node1, true)
+
+      expect(result).to.deep.equal(1)
+
+      expect(adminClientFileRemoveStub.calledOnce).to.be.true()
+      expect(adminClientProjectLeaveStub.calledOnce).to.be.true()
+
+      expect(emRemoveStub.calledOnce).to.be.true()
+      expect(emRemoveStub.calledWith(node1)).to.be.true()
+    })
+
+    it('propagates a 404 from projectInvite instead of swallowing it as a missing file', async () => {
+      const node1 = {
+        id: 1,
+        name: 'public-node',
+        isInSpace: () => false,
+        isPublic: () => true,
+        dxid: 'file-public',
+        project: 'project-public',
+        stiType: FILE_STI_TYPE.USERFILE,
+      } as unknown as UserFile
+
+      resetFileRemovalStubs(adminClientProjectInviteStub, adminClientProjectLeaveStub)
+      nodeServiceLoadNodesStub.withArgs([node1.id]).returns([node1])
+      userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
+      // a 404 here means the project or the invitee is missing, not that the file is already gone -
+      // it must not be mistaken for a benign "file already removed" and must roll the removal back
+      adminClientProjectInviteStub.throws(
+        new ClientRequestError('not found', { clientResponse: '', clientStatusCode: 404 }),
+      )
+
+      const removeNodesFacade = createRemoveNodesFacade()
+
+      await expect(removeNodesFacade.removeFile(node1, true)).to.be.rejectedWith(ClientRequestError, 'not found')
+
+      // the file removal never ran and the DB record was not deleted
+      expect(adminClientFileRemoveStub.called).to.be.false()
+      expect(emRemoveStub.called).to.be.false()
+      // the invite failed before any access was granted, so there is nothing to revoke
+      expect(adminClientProjectLeaveStub.called).to.be.false()
+    })
+
+    it('propagates a non-404 error from the public file removal and rolls the removal back', async () => {
+      const node1 = {
+        id: 1,
+        name: 'public-node',
+        isInSpace: () => false,
+        isPublic: () => true,
+        dxid: 'file-public',
+        project: 'project-public',
+        stiType: FILE_STI_TYPE.USERFILE,
+      } as unknown as UserFile
+
+      resetFileRemovalStubs(adminClientProjectInviteStub, adminClientProjectLeaveStub)
+      nodeServiceLoadNodesStub.withArgs([node1.id]).returns([node1])
+      userFileRepositoryCountStub.withArgs({ dxid: node1.dxid }).returns(1)
+      adminClientFileRemoveStub.throws(
+        new ClientRequestError('server error', { clientResponse: '', clientStatusCode: 500 }),
+      )
+
+      const removeNodesFacade = createRemoveNodesFacade()
+
+      await expect(removeNodesFacade.removeFile(node1, true)).to.be.rejectedWith(ClientRequestError, 'server error')
+
+      // the DB record was not deleted, but the temporary access is still revoked
+      expect(emRemoveStub.called).to.be.false()
+      expect(adminClientProjectLeaveStub.calledOnce).to.be.true()
     })
   })
 })

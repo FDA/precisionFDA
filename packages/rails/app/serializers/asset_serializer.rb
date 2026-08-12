@@ -76,8 +76,9 @@ class AssetSerializer < UserFileSerializer
           links[:publish] = publish_object unless object.public?
           # POST: /api/assets/rename
           links[:rename] = rename_api_assets_path(object)
-          # DELETE: /api/assets/:id - Delete single asset
-          links[:remove] = api_asset_path(object)
+          # DELETE: /api/assets/:id - Delete single asset.
+          # Public assets are removable only by site admins (gated client-side).
+          links[:remove] = api_asset_path(object) unless object.public?
           # POST associate item to a license
           links[:license] = "/api/licenses/:id/license_item/:item_uid" if licenseable
           if object.license&.owned_by_user?(current_user)

@@ -152,14 +152,33 @@ describe('NodeService', () => {
   })
 
   describe('#validateEditableBy', () => {
-    it('node public', async () => {
+    it('node public - non-admin non-owner rejected', async () => {
       const node = {
+        name: 'node-name',
         locked: false,
         isPublic: () => true,
+        isPrivate: () => false,
         user: { id: 1 },
         isInSpace: () => false,
       } as unknown as Node
       const currentUser = { id: 2, isSiteAdmin: () => false } as unknown as User
+      const nodeService = createNodeService(currentUser)
+
+      await expect(nodeService.validateEditableBy(node)).to.be.rejectedWith(
+        PermissionError,
+        `You have no permissions to remove '${node.name}'.`,
+      )
+    })
+
+    it('node public - site admin allowed', async () => {
+      const node = {
+        locked: false,
+        isPublic: () => true,
+        isPrivate: () => false,
+        user: { id: 1 },
+        isInSpace: () => false,
+      } as unknown as Node
+      const currentUser = { id: 2, isSiteAdmin: () => true } as unknown as User
       const nodeService = createNodeService(currentUser)
 
       await nodeService.validateEditableBy(node)
@@ -179,17 +198,60 @@ describe('NodeService', () => {
       await nodeService.validateEditableBy(node)
     })
 
-    it('current user is site admin', async () => {
+    it('private node of another user - not editable by owner of a different node', async () => {
       const node = {
+        name: 'node-name',
         locked: false,
         isPublic: () => false,
+        isPrivate: () => true,
+        user: { id: 1 },
+        isInSpace: () => false,
+      } as unknown as Node
+      const currentUser = { id: 2, isSiteAdmin: () => false } as unknown as User
+      const nodeService = createNodeService(currentUser)
+
+      await expect(nodeService.validateEditableBy(node)).to.be.rejectedWith(
+        PermissionError,
+        `You have no permissions to remove '${node.name}'.`,
+      )
+    })
+
+    it('private node of another user - site admin rejected', async () => {
+      const node = {
+        name: 'node-name',
+        locked: false,
+        isPublic: () => false,
+        isPrivate: () => true,
         user: { id: 1 },
         isInSpace: () => false,
       } as unknown as Node
       const currentUser = { id: 2, isSiteAdmin: () => true } as unknown as User
       const nodeService = createNodeService(currentUser)
 
-      await nodeService.validateEditableBy(node)
+      await expect(nodeService.validateEditableBy(node)).to.be.rejectedWith(
+        PermissionError,
+        `You have no permissions to remove '${node.name}'.`,
+      )
+    })
+
+    it('node in space - site admin without edit role rejected', async () => {
+      const node = {
+        name: 'node-name',
+        locked: false,
+        isPublic: () => false,
+        isPrivate: () => false,
+        user: { id: 1 },
+        isInSpace: () => true,
+        getSpaceId: () => 1,
+      } as unknown as Node
+      const currentUser = { id: 2, isSiteAdmin: () => true } as unknown as User
+      spaceRepositoryFindOneStub.resolves(undefined)
+      const nodeService = createNodeService(currentUser)
+
+      await expect(nodeService.validateEditableBy(node)).to.be.rejectedWith(
+        PermissionError,
+        `You have no permissions to remove '${node.name}'.`,
+      )
     })
 
     it('locked', async () => {
@@ -209,6 +271,7 @@ describe('NodeService', () => {
       const node = {
         locked: false,
         isPublic: () => false,
+        isPrivate: () => false,
         user: { id: 1 },
         isInSpace: () => true,
         getSpaceId: () => 1,
@@ -236,6 +299,7 @@ describe('NodeService', () => {
         name: 'node-name',
         locked: false,
         isPublic: () => false,
+        isPrivate: () => false,
         user: { id: 1 },
         isInSpace: () => true,
         getSpaceId: () => 1,

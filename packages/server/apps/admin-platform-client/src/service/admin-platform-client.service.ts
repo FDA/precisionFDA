@@ -27,6 +27,7 @@ export class AdminPlatformClientService {
     'resendActivationEmail',
     'userResetMfa',
     'orgDescribe',
+    'fileRemove',
   ]
 
   constructor(private readonly platformClient: PlatformClient) {}

@@ -162,8 +162,9 @@ export class NodeService {
   /**
    * Validates if node is editable by current user. Which means:
    * - node is not locked
-   * - node is public or user is owner or user is site admin
-   * - if node is in space, user has edit role in space
+   * - public node is only editable by a site admin
+   * - private node is only editable by its owner
+   * - node in a space is only editable by a member with an edit role in that (active) space
    * @param node
    */
   async validateEditableBy(node: Node): Promise<void> {
@@ -171,10 +172,12 @@ export class NodeService {
       throw new Error('Locked items cannot be removed.')
     }
     const currentUser = await this.userRepository.findOne(this.user.id)
-    if (node.isPublic() || (node.user.id === currentUser.id && node.isPrivate()) || (await currentUser.isSiteAdmin())) {
-      return
-    }
-    if (node.isInSpace()) {
+
+    if (node.isPublic()) {
+      if (await currentUser.isSiteAdmin()) return
+    } else if (node.isPrivate()) {
+      if (node.user.id === currentUser.id) return
+    } else if (node.isInSpace()) {
       const spaceId = node.getSpaceId()
       const space = await this.spaceRepository.findOne({
         id: spaceId,

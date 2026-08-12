@@ -116,5 +116,52 @@ RSpec.describe Api::FilesController, type: :controller do
       end
     end
   end
+
+  describe "POST download_list" do
+    context "with delete task" do
+      let(:public_file) { create(:user_file, :public, user:) }
+
+      context "when user is a site admin" do
+        before { authenticate!(admin) }
+
+        it "includes public files owned by other users" do
+          post :download_list, params: { task: "delete", ids: [public_file.id], scope: "public" },
+                               format: :json
+
+          expect(response).to be_successful
+          ids = JSON.parse(response.body).pluck("id")
+          expect(ids).to include(public_file.id)
+        end
+      end
+
+      context "when user is not an admin" do
+        let(:other_user) { create(:user, dxuser: "other.user") }
+
+        before { authenticate!(other_user) }
+
+        it "does not include public files owned by other users" do
+          post :download_list, params: { task: "delete", ids: [public_file.id], scope: "public" },
+                               format: :json
+
+          expect(response).to be_successful
+          ids = JSON.parse(response.body).pluck("id")
+          expect(ids).not_to include(public_file.id)
+        end
+      end
+
+      context "when user is a non-admin owner of a public file" do
+        before { authenticate!(user) }
+
+        it "does not include the user's own public files" do
+          post :download_list, params: { task: "delete", ids: [public_file.id], scope: "public" },
+                               format: :json
+
+          expect(response).to be_successful
+          ids = JSON.parse(response.body).pluck("id")
+          expect(ids).not_to include(public_file.id)
+        end
+      end
+    end
+  end
 end
 # rubocop:enable RSpec/AnyInstance

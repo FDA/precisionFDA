@@ -24,8 +24,8 @@ export function normalizePermissions(
   const isOwnerByFullName = item.addedBy === user?.full_name
   const isOwner = isOwnerByDxuser || (!item.addedByDxuser && isOwnerByFullName)
   const isAdmin = !!user?.admin
-  const isClosed = item.type === 'UserFile' ? item.state === 'closed' : true
-  const isFolder = item.type === 'Folder'
+  const isClosed = item.stiType === 'UserFile' ? item.state === 'closed' : true
+  const isFolder = item.stiType === 'Folder'
   const isResource = 'resource' in item && (item as IFile).resource
 
   const inSpace = !!space
@@ -33,6 +33,8 @@ export function normalizePermissions(
   const isSpaceLead = inSpace && (space.host_lead?.id === user?.id || space.guest_lead?.id === user?.id)
   const hasEditRole = inSpace && !!memberRole && CAN_EDIT_ROLES.includes(memberRole as (typeof CAN_EDIT_ROLES)[number])
   const isProtectedAndNotLead = inSpace && !!space.protected && !isSpaceLead
+  // Public nodes are removable only by site admins, including own public nodes.
+  const isPublicScope = item.scope === 'public'
 
   // No license required -> can pass this check
   // License required + download link present -> can pass
@@ -43,7 +45,10 @@ export function normalizePermissions(
 
   return {
     canDelete:
-      !item.locked && !isResource && !isProtectedAndNotLead && (isOwner || isAdmin || (inSpace && hasEditRole)),
+      !item.locked &&
+      !isResource &&
+      !isProtectedAndNotLead &&
+      (isAdmin || ((isOwner || (inSpace && hasEditRole)) && !isPublicScope)),
     canMove: !item.locked && isClosed && !isProtectedAndNotLead && (isOwner || isAdmin || (inSpace && hasEditRole)),
     canDownload: (isFolder || isClosed) && !item.locked && canDownloadWithLicense && !isProtectedAndNotLead,
     canCopy: isClosed && (!item.locked || isSpaceLead),

@@ -1,5 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import { config } from '@shared/config'
 import { ComparisonService } from '@shared/domain/comparison/comparison.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
@@ -25,6 +26,7 @@ import { FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.t
 import { ClientRequestError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 
 @Injectable()
 export class RemoveNodesFacade {
@@ -47,6 +49,8 @@ export class RemoveNodesFacade {
     private readonly dataPortalService: DataPortalService,
     private readonly fileSyncQueueJobProducer: FileSyncQueueJobProducer,
     private readonly userClient: PlatformClient,
+    @Inject(ADMIN_PLATFORM_CLIENT)
+    private readonly adminPlatformClient: PlatformClient,
   ) {}
 
   /**
@@ -82,12 +86,18 @@ export class RemoveNodesFacade {
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i]
 
-        if ([FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET].includes(node.stiType)) {
-          await this.removeFile(node as UserFile)
-          removedFilesCount++
-        } else {
-          await this.removeFolder(node as Folder)
-          removedFoldersCount++
+        switch (node.stiType) {
+          case FILE_STI_TYPE.USERFILE:
+          case FILE_STI_TYPE.ASSET:
+            await this.removeFile(node as FileOrAsset)
+            removedFilesCount++
+            break
+          case FILE_STI_TYPE.FOLDER:
+            await this.removeFolder(node as Folder)
+            removedFoldersCount++
+            break
+          default:
+            throw new Error(`Unsupported node type: ${node.stiType}`)
         }
 
         // Mark as processed to exclude from potential rollback later
@@ -142,7 +152,7 @@ export class RemoveNodesFacade {
     this.logger.log(`Removing file with uid: ${fileToRemove.uid}`)
 
     const lastNode = (await this.userFileRepository.count({ dxid: fileToRemove.dxid })) === 1
-    const filePath = await this.nodeHelper.getNodePath(fileToRemove as Node)
+    const filePath = await this.nodeHelper.getNodePath(fileToRemove)
     const user = await this.user.loadEntity()
     let spaceEvent: SpaceEvent | undefined
     await this.em.transactional(async () => {
@@ -158,19 +168,7 @@ export class RemoveNodesFacade {
 
       if (lastNode) {
         // we're deleting from platform only if it's the last with given dxid
-        this.logger.log(`Removing file with dxid: ${fileToRemove.dxid} from platform`)
-        try {
-          await this.userClient.fileRemove({
-            projectId: fileToRemove.project,
-            ids: [fileToRemove.dxid],
-          })
-        } catch (error) {
-          if (error instanceof ClientRequestError && error.props?.clientStatusCode === 404) {
-            this.logger.log(`File with dxid ${fileToRemove.dxid} already does not exist on platform`)
-          } else {
-            throw error
-          }
-        }
+        await this.removeFileFromPlatform(fileToRemove)
       }
 
       if (fileToRemove.isInSpace() && !skipCreateSpaceEvent) {
@@ -192,6 +190,67 @@ export class RemoveNodesFacade {
     }
 
     return 1
+  }
+
+  /**
+   * Removes the file from the platform.
+   */
+  private async removeFileFromPlatform(file: FileOrAsset): Promise<void> {
+    if (file.isPublic()) {
+      // public files live in a project the requesting user (even a site admin) is generally not
+      // a member of, so use the admin platform client to perform the removal for them
+      await this.removePublicFileFromPlatformAsAdmin(file)
+    } else {
+      this.logger.log(`Removing file with dxid: ${file.dxid} from platform`)
+      await this.fileRemoveTolerating404(this.userClient, file)
+    }
+  }
+
+  /**
+   * Calls fileRemove and tolerates a 404 (the file is already gone from the platform).
+   * Only the fileRemove call is guarded - errors from other platform calls (e.g. project
+   * invite/leave) must still propagate so a failed removal never silently deletes the DB record.
+   */
+  private async fileRemoveTolerating404(client: PlatformClient, file: FileOrAsset): Promise<void> {
+    try {
+      await client.fileRemove({
+        projectId: file.project,
+        ids: [file.dxid],
+      })
+    } catch (error) {
+      if (error instanceof ClientRequestError && error.props?.clientStatusCode === 404) {
+        this.logger.log(`File with dxid ${file.dxid} already does not exist on platform`)
+      } else {
+        throw error
+      }
+    }
+  }
+
+  /**
+   * The admin user temporarily self-grants ADMINISTER access to the file's project,
+   * removes the file and revokes the access again.
+   */
+  private async removePublicFileFromPlatformAsAdmin(file: FileOrAsset): Promise<void> {
+    const adminUserId = `user-${config.platform.adminUser}`
+    this.logger.log(`Removing public file with dxid: ${file.dxid} from platform using admin platform client`)
+
+    await this.adminPlatformClient.projectInvite(file.project, adminUserId, 'ADMINISTER')
+    try {
+      await this.fileRemoveTolerating404(this.adminPlatformClient, file)
+    } finally {
+      // Best-effort revoke of the temporary access, even when fileRemove fails. A failure to
+      // revoke must not override the outcome of the file removal - otherwise a cleanup error
+      // would roll back an already-completed platform deletion (leaving a dangling DB record)
+      // or mask a benign 404 for a file that was already gone.
+      try {
+        await this.adminPlatformClient.projectLeave({ projectDxid: file.project })
+      } catch (error) {
+        this.logger.error(
+          { error },
+          `Failed to revoke temporary admin access to project ${file.project} after removing public file ${file.dxid}`,
+        )
+      }
+    }
   }
 
   private async removeFolder(folderToRemove: Folder): Promise<number> {
