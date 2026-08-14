@@ -16,7 +16,9 @@ SecureHeaders::Configuration.default do |config|
 
   config.csp = {
     base_uri: %w('self'),
-    block_all_mixed_content: true, # see [http://www.w3.org/TR/mixed-content/](http://www.w3.org/TR/mixed-content/)
+    # 'block-all-mixed-content' was deprecated in the CSP spec and removed in secure_headers 7.x;
+    # 'upgrade-insecure-requests' is its successor (see https://www.w3.org/TR/mixed-content/)
+    upgrade_insecure_requests: true,
     child_src: %w('self' https://www.youtube.com blob:),
     # "data:" is necessary because of the Ketcher in GSRS
     connect_src: %w(
