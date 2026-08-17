@@ -44,6 +44,7 @@ export const useAssetActions = ({
   const isAdmin = user?.admin
   const selectedButNotClosed = selected.some(e => e.state !== 'closed')
   const canDeleteAsset = Boolean(selected[0]?.links.remove) || (isAdmin && selected[0]?.scope === 'public')
+  const canRenameAsset = Boolean(selected[0]?.links.rename)
 
   const featureMutation = useFeatureMutation({
     resource: 'assets',
@@ -149,7 +150,7 @@ export const useAssetActions = ({
     {
       name: 'Rename',
       type: 'modal',
-      isDisabled: selected.length !== 1 || selectedButNotClosed,
+      isDisabled: selected.length !== 1 || selectedButNotClosed || !canRenameAsset,
       func: () => setEditModal(true),
       modal: editModal,
       showModal: isShownEditModal,
