@@ -1,31 +1,29 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import {
-  Control,
-  FieldArrayWithId,
-  FieldErrors,
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormTrigger,
-  UseFormWatch,
+  type Control,
+  type FieldErrors,
+  type UseFormGetValues,
+  type UseFormRegister,
+  type UseFormSetValue,
+  type UseFormTrigger,
+  type UseFormWatch,
   useFieldArray,
 } from 'react-hook-form'
 import { TransparentButton } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
-import {
-  BooleanInput,
-  FileInput,
-  FloatInput,
-  IntInput,
-  SelectIOClass,
-  SpecProps,
-  StringInput,
-} from './Fields'
-import { SectionTitle, SectionTitleRow, StyledClassTd, StyledInputOutputBox, StyledRemove, TableStyles } from './apps-form.styles'
-import { CreateAppForm, IOSpec } from '../apps.types'
-import { removeArrayStringFromClassType, setClassVal } from './common'
 import { useSkipFirstRenderUseEffect } from '../../../hooks/useSkipFirstRender'
-
+import type { CreateAppForm, IOSpec } from '../apps.types'
+import {
+  SectionTitle,
+  SectionTitleRow,
+  StyledClassTd,
+  StyledInputOutputBox,
+  StyledRemove,
+  TableStyles,
+} from './apps-form.styles'
+import { filledNamePaths, removeArrayStringFromClassType, setClassVal } from './common'
+import { BooleanInput, FileInput, FloatInput, IntInput, SelectIOClass, type SpecProps, StringInput } from './Fields'
 
 interface InputSpecRowProps {
   watch: UseFormWatch<CreateAppForm>
@@ -34,29 +32,31 @@ interface InputSpecRowProps {
   errors: FieldErrors<CreateAppForm>
   index: number
   remove: (index?: number | number[] | undefined) => void
-  field: FieldArrayWithId<CreateAppForm, 'input_spec', 'id'>
   trigger: UseFormTrigger<CreateAppForm>
   setValue: UseFormSetValue<CreateAppForm>
+  getValues: UseFormGetValues<CreateAppForm>
 }
 
 const InputSpecRow = ({
   index,
   watch,
-  field,
   control,
   errors,
   register,
   remove,
   trigger,
   setValue,
+  getValues,
 }: InputSpecRowProps) => {
   const sClass = watch(`input_spec.${index}.class`)
   const isArray = watch(`input_spec.${index}.isArray`)
 
   useSkipFirstRenderUseEffect(() => {
-    trigger(`input_spec.${index}.default`)
-    setValue(`input_spec.${index}.default`, null)
+    // both writes have to land before validating: the schema for 'default' branches on the
+    // sibling 'class', so validating first leaves a stale error on the now-empty field
     setValue(`input_spec.${index}.class`, setClassVal(sClass, Boolean(isArray)))
+    setValue(`input_spec.${index}.default`, null)
+    void trigger(`input_spec.${index}.default`)
   }, [isArray])
 
   // trigger validations on 'default' if 'choices' changes
@@ -71,32 +71,35 @@ const InputSpecRow = ({
     control,
     index,
     register,
+    trigger,
+    getValues,
   } satisfies SpecProps
 
   return (
-    <tr key={field.id}>
+    <tr>
       <StyledClassTd>
         <InputText disabled value={removeArrayStringFromClassType(sClass)} />
       </StyledClassTd>
 
-      {(sClass === 'string' || sClass === 'array:string') && (
-        <StringInput {...baseProps} />
-      )}
-      {(sClass === 'file' || sClass === 'array:file') && (
-        <FileInput {...baseProps} />
-      )}
-      {(sClass === 'int' || sClass === 'array:int') && (
-        <IntInput {...baseProps} />
-      )}
-      {sClass === 'boolean' && (
-        <BooleanInput {...baseProps} />
-      )}
-      {(sClass === 'float' || sClass === 'array:float') && (
-        <FloatInput {...baseProps} />
-      )}
+      {(sClass === 'string' || sClass === 'array:string') && <StringInput {...baseProps} />}
+      {(sClass === 'file' || sClass === 'array:file') && <FileInput {...baseProps} />}
+      {(sClass === 'int' || sClass === 'array:int') && <IntInput {...baseProps} />}
+      {sClass === 'boolean' && <BooleanInput {...baseProps} />}
+      {(sClass === 'float' || sClass === 'array:float') && <FloatInput {...baseProps} />}
       <td>
         <StyledRemove>
-          <TransparentButton title="remove row" type="button" onClick={() => remove(index)}>
+          <TransparentButton
+            title="remove row"
+            type="button"
+            onClick={() => {
+              remove(index)
+              // removing a row can resolve a duplicate name flagged on another row
+              const paths = filledNamePaths('input_spec', getValues('input_spec'))
+              if (paths.length > 0) {
+                void trigger(paths)
+              }
+            }}
+          >
             <CrossIcon height={12} />
           </TransparentButton>
         </StyledRemove>
@@ -112,6 +115,7 @@ interface InputProps {
   errors: FieldErrors<CreateAppForm>
   trigger: UseFormTrigger<CreateAppForm>
   setValue: UseFormSetValue<CreateAppForm>
+  getValues: UseFormGetValues<CreateAppForm>
 }
 
 export const Inputs = (props: InputProps) => {
@@ -121,7 +125,16 @@ export const Inputs = (props: InputProps) => {
     name: 'input_spec',
   })
   const addInput = (c: IOSpec['class']) => {
-    inputs.append({ class: c, isArray: false, name: '', label: '', help: '', default: null, choices: null, optional: false })
+    inputs.append({
+      class: c,
+      isArray: false,
+      name: '',
+      label: '',
+      help: '',
+      default: null,
+      choices: null,
+      optional: false,
+    })
   }
 
   return (
@@ -133,36 +146,28 @@ export const Inputs = (props: InputProps) => {
         </SelectIOClass>
       </SectionTitleRow>
       <TableStyles>
-      {inputs?.fields?.length === 0 && (
-        <div>No input defined</div>
-      )}
-      {inputs.fields.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>Class</th>
-              <th>Array?</th>
-              <th>Name</th>
-              <th>Label</th>
-              <th>Help</th>
-              <th>Default</th>
-              <th>Choices</th>
-              <th>Optional?</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inputs.fields.map((field, index) => (
-              <InputSpecRow
-                key={field.id}
-                index={index}
-                field={field}
-                remove={inputs.remove}
-                {...props}
-              />
-            ))}
-          </tbody>
-        </table>
-      )}
+        {inputs?.fields?.length === 0 && <div>No input defined</div>}
+        {inputs.fields.length > 0 && (
+          <table>
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Array?</th>
+                <th>Name</th>
+                <th>Label</th>
+                <th>Help</th>
+                <th>Default</th>
+                <th>Choices</th>
+                <th>Optional?</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inputs.fields.map((field, index) => (
+                <InputSpecRow key={field.id} index={index} remove={inputs.remove} {...props} />
+              ))}
+            </tbody>
+          </table>
+        )}
       </TableStyles>
     </StyledInputOutputBox>
   )

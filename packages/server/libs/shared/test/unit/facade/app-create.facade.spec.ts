@@ -707,14 +707,16 @@ describe('AppCreateFacade', () => {
         'The input name cannot be empty.',
       )
 
-      // incorrect name
-      intSpec.name = 'na me'
+      // incorrect name - must be a valid shell variable name, as the platform requires
+      for (const invalidName of ['na me', '1foo', 'my-input', 'foo.bar']) {
+        intSpec.name = invalidName
 
-      await expect(appCreateFacade.create(appInput)).to.be.rejectedWith(
-        ValidationError,
-        `The input name 'na me' can only contain the characters A-Z, a-z, 0-9, ` +
-          "'.' (period), '_' (underscore) and '-' (dash).",
-      )
+        await expect(appCreateFacade.create(appInput)).to.be.rejectedWith(
+          ValidationError,
+          `The input name '${invalidName}' contains invalid characters. ` +
+            "It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9.",
+        )
+      }
 
       // duplicate
       intSpec.name = 'name'

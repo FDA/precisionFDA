@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import { useAssetAttachModal } from '../../actionModals/useAssetAttachModal'
 import type { CreateAppForm } from '../apps.types'
-import { InstanceTypeSelect } from './InstanceTypeSelect'
 import { FormFields, Help } from './apps-form.styles'
+import { InstanceTypeSelect } from './InstanceTypeSelect'
 
 const SectionLabelRow = ({
   label,

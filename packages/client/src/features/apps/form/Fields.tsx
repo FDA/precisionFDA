@@ -1,20 +1,27 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { get } from 'lodash'
 import type React from 'react'
-import { type Control, Controller, type FieldErrors, type UseFormRegister } from 'react-hook-form'
+import {
+  type Control,
+  Controller,
+  type FieldErrors,
+  type UseFormGetValues,
+  type UseFormRegister,
+  type UseFormTrigger,
+} from 'react-hook-form'
 import { Tooltip } from 'react-tooltip'
 import styled, { css } from 'styled-components'
-import { Button } from '../../../components/Button'
-import { BoolButton, BoolButtonGroup } from '../../../components/Button/BoolButtons'
-import { Checkbox } from '../../../components/CheckboxNext'
-import { InputError } from '../../../components/form/form.styles'
-import { InputText } from '../../../components/InputText'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
+import { Button } from '@/components/Button'
+import { BoolButton, BoolButtonGroup } from '@/components/Button/BoolButtons'
+import { Checkbox } from '@/components/CheckboxNext'
+import { InputError } from '@/components/form/form.styles'
+import { InputText } from '@/components/InputText'
+import { PlusIcon } from '@/components/icons/PlusIcon'
+import { SelectMultiFileInput } from '@/features/apps/SelectMultiFileInput'
+import { theme } from '@/styles/theme'
 import Menu from '../../../components/Menu/Menu'
-import { theme } from '../../../styles/theme'
 import type { CreateAppForm, IOSpec } from '../apps.types'
-import { SelectMultiFileInput } from '../SelectMultiFileInput'
-import { formatCSVStringToArray, handleSnakeNameChange } from './common'
+import { filledNamePaths, formatCSVStringToArray, handleSnakeNameChange } from './common'
 
 const StyledDropMenuLinks = styled.div`
   padding-top: 0;
@@ -39,34 +46,20 @@ export const InputTextS = styled(InputText)<{ $isError?: boolean }>`
 `
 
 const DefaultBooleanTd = styled.td`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  height: 32px;
-
-  label {
     display: flex;
     align-items: center;
-    margin-left: 12px;
+    flex-wrap: wrap;
+    height: 32px;
 
-    input {
-      margin: 0;
-      margin-right: 4px;
+    label {
+        display: flex;
+        align-items: center;
+        margin-left: 12px;
+
+        input {
+            margin: 0 4px 0 0;
+        }
     }
-  }
-`
-
-const StyledItem = styled.div`
-  cursor: pointer;
-  width: auto;
-  transition: color 0.3s ease;
-  text-transform: uppercase;
-  font-size: 13px;
-  padding: 0 12px;
-  line-height: 30px;
-  &:hover {
-    background-color: ${theme.colors.textLightGrey};
-  }
 `
 
 const StyledIsArray = styled.td`
@@ -82,6 +75,8 @@ export interface SpecProps {
   index: number
   control: Control<CreateAppForm>
   errors: FieldErrors<CreateAppForm>
+  trigger: UseFormTrigger<CreateAppForm>
+  getValues: UseFormGetValues<CreateAppForm>
   sClass?: IOSpec['class']
 }
 
@@ -89,13 +84,22 @@ export interface OutputSpecProps extends SpecProps {
   sClass: IOSpec['class']
 }
 
-export const Name = ({ base, register, index, errors }: SpecProps) => {
+export const Name = ({ base, register, index, errors, trigger, getValues }: SpecProps) => {
   let message: string | undefined = ''
   let isError = false
   const e = get(errors, `${base}.${index}.name`)
   if (e) {
-    message = e['message']
+    message = e.message
     isError = true
+  }
+
+  // RHF's blur handling covers this row; the siblings need it because the duplicate-name
+  // check spans the array but reports on a single row
+  const revalidateSiblingNames = () => {
+    const paths = filledNamePaths(base, getValues(base), index)
+    if (paths.length > 0) {
+      void trigger(paths)
+    }
   }
 
   return (
@@ -104,6 +108,7 @@ export const Name = ({ base, register, index, errors }: SpecProps) => {
         {...register(`${base}.${index}.name`, {
           required: 'Name is required.',
           onChange: handleSnakeNameChange,
+          onBlur: revalidateSiblingNames,
         })}
         data-tooltip-id={`${base}.${index}.name`}
         data-tooltip-content={message}
@@ -344,7 +349,7 @@ export const IsArray = ({ base, index, control, errors }: SpecProps) => {
           return (
             <CheckboxWrapLabel id={id}>
               <Checkbox
-                data-testid={id + '-checkbox'}
+                data-testid={`${id}-checkbox`}
                 checked={field.value as boolean}
                 onChange={field.onChange}
                 onBlur={field.onBlur}

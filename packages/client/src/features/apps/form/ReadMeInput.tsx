@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Button } from '../../../components/Button'
+import { Button } from '@/components/Button'
+import { Markdown } from '@/components/Markdown'
 import CodeMirrorEditor from '../../../components/CodeMirrorEditor/CodeMirrorEditor'
 import ExternalLink from '../../../components/Controls/ExternalLink'
-import { Markdown } from '../../../components/Markdown'
 import { FormFields, Help, StyledMarkdownAppShow } from './apps-form.styles'
 
 const ButtonRow = styled.div`

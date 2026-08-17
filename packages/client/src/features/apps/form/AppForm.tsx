@@ -2,21 +2,21 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, type Resolver, useForm } from 'react-hook-form'
+import { Button } from '@/components/Button'
+import { FieldGroup, InputError } from '@/components/form/form.styles'
+import { InputText } from '@/components/InputText'
+import { ArrowLeftIcon } from '@/components/icons/ArrowLeftIcon'
+import { Loader } from '@/components/Loader'
+import { PageTitle } from '@/components/Page/page.styles'
+import { ButtonRow } from '@/components/Public/public-layout.styles'
+import { PfTabContent } from '@/components/Tabs/PfTab'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '@/constants'
+import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '@/constants/consts'
 import { type ComputeResourceKey, RESOURCE_LABELS } from '@/types/user'
+import { getSpaceIdFromScope } from '@/utils'
 import { cn } from '@/utils/cn'
-import { Button } from '../../../components/Button'
 import CodeMirrorEditor from '../../../components/CodeMirrorEditor/CodeMirrorEditor'
-import { FieldGroup, InputError } from '../../../components/form/form.styles'
-import { InputText } from '../../../components/InputText'
-import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
-import { Loader } from '../../../components/Loader'
-import { PageTitle } from '../../../components/Page/page.styles'
-import { ButtonRow } from '../../../components/Public/public-layout.styles'
-import { PfTabContent } from '../../../components/Tabs/PfTab'
-import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
-import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../../constants/consts'
-import { getSpaceIdFromScope } from '../../../utils'
 import { useConfirmModal } from '../../files/actionModals/useConfirmModal'
 import { StyledBackLink } from '../../home/home.styles'
 import type { CreateAppPayload } from '../apps.api'
@@ -382,6 +382,7 @@ const AppFormInner = ({
               register={register}
               trigger={trigger}
               setValue={setValue}
+              getValues={getValues}
             />
             <Outputs
               control={control}
@@ -390,6 +391,7 @@ const AppFormInner = ({
               register={register}
               trigger={trigger}
               setValue={setValue}
+              getValues={getValues}
             />
           </PfTabContent>
 

@@ -464,10 +464,12 @@ export class AppCreateFacade {
       this.throwValidationError(`The ${type} name cannot be empty.`)
     }
 
-    if (!/^[a-zA-Z0-9._-]+$/.test(spec.name)) {
+    // Spec names become shell variables in the execution environment, so the platform requires
+    // them to be valid variable names. This is stricter than the app name rule above.
+    if (!/^[a-zA-Z_][0-9a-zA-Z_]*$/.test(spec.name)) {
       this.throwValidationError(
-        `The ${type} name '${spec.name}' can only contain the characters A-Z, a-z, 0-9, ` +
-          "'.' (period), '_' (underscore) and '-' (dash).",
+        `The ${type} name '${spec.name}' contains invalid characters. ` +
+          "It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9.",
       )
     }
 

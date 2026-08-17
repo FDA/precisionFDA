@@ -13,6 +13,18 @@ export const formatCSVStringToArray = (csvVal: string | null) => {
   return csvToArray(csvVal)[0].map(c => c.trim())
 }
 
+/**
+ * Paths of the `name` fields that currently hold a value, in one of the IO spec arrays.
+ *
+ * For revalidating siblings after a name changes. Passing the array itself to `trigger` would
+ * also surface `required` on every row the user has added and not filled in yet.
+ */
+export const filledNamePaths = (
+  base: 'input_spec' | 'output_spec',
+  rows: { name?: string }[] | undefined,
+  skipIndex?: number,
+) => (rows ?? []).flatMap((row, index) => (index !== skipIndex && row?.name ? [`${base}.${index}.name` as const] : []))
+
 interface DefaultCreateType {
   'array:file': string[] | null
   file: string | null
@@ -188,6 +200,7 @@ export const validationSchema = Yup.object().shape({
           .required('Class field is required'),
         default: Yup.mixed().when(['class', 'choices'], {
           is: () => true,
+          // biome-ignore lint/suspicious/noThenProperty: `then` is Yup's conditional-schema API, not a thenable
           then: schema => {
             return schema
               .test('val-is-not-in-choices', 'One of the values is not in the choices list', function (value) {

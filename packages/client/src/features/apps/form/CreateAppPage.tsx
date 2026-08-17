@@ -1,13 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
+import type { AxiosError } from 'axios'
 import { useNavigate } from 'react-router'
-import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
-import { cleanObject } from '../../../utils/object'
-import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '@/constants'
+import { cleanObject } from '@/utils/object'
+import type { ApiErrorResponse } from '../../home/types'
+import { type CreateAppPayload, type CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { AppForm } from './AppForm'
-import { ApiErrorResponse } from '../../home/types'
-import { AxiosError } from 'axios'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
 
 export const CreateAppPage = () => {
   const navigate = useNavigate()

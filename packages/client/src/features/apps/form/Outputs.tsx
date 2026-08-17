@@ -1,19 +1,19 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import {
-  Control,
-  FieldArrayWithId,
-  FieldErrors,
-  UseFieldArrayUpdate,
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormTrigger,
-  UseFormWatch,
+  type Control,
+  type FieldArrayWithId,
+  type FieldErrors,
+  type UseFormGetValues,
+  type UseFormRegister,
+  type UseFormSetValue,
+  type UseFormTrigger,
+  type UseFormWatch,
   useFieldArray,
 } from 'react-hook-form'
 import { TransparentButton } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
-import { OutputFields, SelectIOClass } from './Fields'
+import type { CreateAppForm, IOSpec } from '../apps.types'
 import {
   SectionTitle,
   SectionTitleRow,
@@ -22,8 +22,8 @@ import {
   StyledRemove,
   TableStyles,
 } from './apps-form.styles'
-import { CreateAppForm, IOSpec } from '../apps.types'
-import { removeArrayStringFromClassType, setClassVal } from './common'
+import { filledNamePaths, removeArrayStringFromClassType, setClassVal } from './common'
+import { OutputFields, SelectIOClass } from './Fields'
 
 interface OutputSpecRow {
   watch: UseFormWatch<CreateAppForm>
@@ -32,10 +32,10 @@ interface OutputSpecRow {
   errors: FieldErrors<CreateAppForm>
   index: number
   remove: (index?: number | number[] | undefined) => void
-  update: UseFieldArrayUpdate<CreateAppForm, 'output_spec'>
   field: FieldArrayWithId<CreateAppForm, 'output_spec', 'id'>
   trigger: UseFormTrigger<CreateAppForm>
   setValue: UseFormSetValue<CreateAppForm>
+  getValues: UseFormGetValues<CreateAppForm>
 }
 
 const OutputSpecRow = ({
@@ -47,15 +47,14 @@ const OutputSpecRow = ({
   register,
   trigger,
   setValue,
+  getValues,
   remove,
 }: OutputSpecRow) => {
   const sClass = watch(`output_spec.${index}.class`)
   const isArray = watch(`output_spec.${index}.isArray`)
 
-  // trigger validations on 'default' if 'isArray' changes
+  // keep the stored class in sync with the 'isArray' toggle
   useEffect(() => {
-    // @ts-expect-error dynamic field name
-    trigger(`output_spec.${index}.default`)
     setValue(`output_spec.${index}.class`, setClassVal(sClass, Boolean(isArray)))
   }, [isArray])
 
@@ -73,11 +72,23 @@ const OutputSpecRow = ({
         control={control}
         index={index}
         register={register}
+        trigger={trigger}
+        getValues={getValues}
       />
 
       <td>
         <StyledRemove>
-          <TransparentButton type="button" onClick={() => remove(index)}>
+          <TransparentButton
+            type="button"
+            onClick={() => {
+              remove(index)
+              // removing a row can resolve a duplicate name flagged on another row
+              const paths = filledNamePaths('output_spec', getValues('output_spec'))
+              if (paths.length > 0) {
+                void trigger(paths)
+              }
+            }}
+          >
             <CrossIcon height={12} />
           </TransparentButton>
         </StyledRemove>
@@ -93,6 +104,7 @@ interface OutputProps {
   errors: FieldErrors<CreateAppForm>
   trigger: UseFormTrigger<CreateAppForm>
   setValue: UseFormSetValue<CreateAppForm>
+  getValues: UseFormGetValues<CreateAppForm>
 }
 
 export const Outputs = (props: OutputProps) => {
@@ -116,7 +128,9 @@ export const Outputs = (props: OutputProps) => {
     <StyledInputOutputBox>
       <SectionTitleRow>
         <SectionTitle>Outputs</SectionTitle>
-        <SelectIOClass addRow={addOutput} testId="add-output-button">Add Output</SelectIOClass>
+        <SelectIOClass addRow={addOutput} testId="add-output-button">
+          Add Output
+        </SelectIOClass>
       </SectionTitleRow>
       <TableStyles>
         {outputs.fields.length === 0 && <div>No outputs defined</div>}
@@ -135,14 +149,7 @@ export const Outputs = (props: OutputProps) => {
             </thead>
             <tbody>
               {outputs.fields.map((field, index) => (
-                <OutputSpecRow
-                  key={field.id}
-                  index={index}
-                  field={field}
-                  remove={outputs.remove}
-                  update={outputs.update}
-                  {...props}
-                />
+                <OutputSpecRow key={field.id} index={index} field={field} remove={outputs.remove} {...props} />
               ))}
             </tbody>
           </table>
