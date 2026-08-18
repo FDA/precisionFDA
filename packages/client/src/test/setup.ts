@@ -1,6 +1,7 @@
 /// <reference types="vitest/globals" />
 import { setupWorker } from 'msw/browser'
 import { handlers } from '../mocks/handlers'
+import '../styles/tailwind.css'
 
 // Setup MSW worker for browser mode
 export const worker = setupWorker(...handlers)

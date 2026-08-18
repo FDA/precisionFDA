@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { Alert } from '../admin/alerts/alerts.types'
-import { CDMHKey, siteSettingsRequest } from './api'
+import type { Alert } from '../admin/alerts/alerts.types'
+import { type CDMHKey, siteSettingsRequest } from './api'
 
 export const CDMHNames: Record<CDMHKey, string> = {
   cdmhPortal: 'CDMH Portal',

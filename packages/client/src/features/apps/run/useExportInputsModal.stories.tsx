@@ -6,7 +6,7 @@ import { StorybookProviders } from '../../../stories/StorybookProviders'
 import { useExportInputsModal } from './useExportInputsModal'
 
 const meta: Meta = {
-  title: 'Modals/Apps',
+  title: 'Modals/Apps/Export Inputs',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -34,7 +34,7 @@ const ExportInputsModalWrapper = ({ showCopyButton }: Props) => {
   return modalComp
 }
 
-export const ExportInputsModal: Story = {
+export const Default: Story = {
   render: ({ showCopyButton = true }) => {
     return <ExportInputsModalWrapper showCopyButton={showCopyButton} />
   },

@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useEffect } from 'react'
-import { mockSelectAssets } from '../../../mocks/handlers/assets.handlers'
-import { StorybookProviders } from '../../../stories/StorybookProviders'
+import { mockSelectAssets } from '@/mocks/handlers/assets.handlers'
+import { StorybookProviders } from '@/stories/StorybookProviders'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
 import type { IAsset } from '../assets.types'
 import { useDownloadAssetsModal } from './useDownloadAssetsModal'
 
 const meta: Meta = {
-  title: 'Modals/Assets',
+  title: 'Modals/Assets/Download Assets',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -32,13 +32,11 @@ const assets = mockSelectAssets.map(asset => ({
 const DownloadAssetsModalWrapper = (props: Props) => {
   const { modalComp, setShowModal } = useDownloadAssetsModal(props.data)
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
+  useOpenModalInStory(setShowModal)
   return modalComp
 }
 
-export const DownloadAssetsModal: Story = {
+export const Default: Story = {
   render: () => <DownloadAssetsModalWrapper data={assets} />,
 }
 

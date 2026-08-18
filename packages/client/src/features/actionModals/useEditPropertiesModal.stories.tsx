@@ -1,16 +1,16 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
-import { useEffect } from 'react'
-import { StorybookProviders } from '../../stories/StorybookProviders'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
 import { WithListData } from '../../stories/helpers'
-import { fetchApps, FetchAppsQuery } from '../apps/apps.api'
-import { IApp } from '../apps/apps.types'
-import { fetchFiles, FetchFilesQuery } from '../files/files.api'
-import { IFile, IFolder } from '../files/files.types'
-import { APIResource, PropertiesResource, ServerScope } from '../home/types'
+import { StorybookProviders } from '../../stories/StorybookProviders'
+import { type FetchAppsQuery, fetchApps } from '../apps/apps.api'
+import type { IApp } from '../apps/apps.types'
+import { type FetchFilesQuery, fetchFiles } from '../files/files.api'
+import type { IFile, IFolder } from '../files/files.types'
+import type { APIResource, PropertiesResource, ServerScope } from '../home/types'
 import { useEditPropertiesModal } from './useEditPropertiesModal'
 
 const meta: Meta = {
-  title: 'Modals/Common',
+  title: 'Modals/Common/Edit Properties',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -22,6 +22,7 @@ const meta: Meta = {
 
 type EditableResource = {
   id: number
+  uid: string
   name: string
   properties: { [key: string]: string }
   scope: ServerScope
@@ -38,17 +39,15 @@ type Story = StoryObj<Props>
 const EditPropertiesModalWrapper = (props: Props) => {
   const { modalComp, setShowModal } = useEditPropertiesModal({
     selected: [props.data],
-    type: props.type,
   })
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
+  useOpenModalInStory(setShowModal)
   return modalComp
 }
 
 const convertToEditableResource = (item: IFile | IFolder | IApp): EditableResource => ({
   id: item.id,
+  uid: item.uid,
   name: item.name,
   properties: item.properties,
   scope: item.scope,
@@ -66,10 +65,10 @@ const getAPIResourceFromPropertiesResource = (type: PropertiesResource): APIReso
   }
 }
 
-export const EditPropertiesModal: Story = {
+export const Default: Story = {
   render: ({ type = 'node' }) => {
     const apiResource = getAPIResourceFromPropertiesResource(type)
-    
+
     if (apiResource === 'files') {
       return (
         <WithListData resource={apiResource} fetchList={fetchFiles}>
@@ -77,15 +76,15 @@ export const EditPropertiesModal: Story = {
             if (!data) {
               return <div>No data available</div>
             }
-            
+
             const filesData = data as FetchFilesQuery
             const items = filesData.files || []
             const firstItem = items[0]
-            
+
             if (!firstItem) {
               return <div>No data available</div>
             }
-            
+
             const editableData = convertToEditableResource(firstItem)
             return <EditPropertiesModalWrapper data={editableData} type={type} />
           }}
@@ -98,15 +97,15 @@ export const EditPropertiesModal: Story = {
             if (!data) {
               return <div>No data available</div>
             }
-            
+
             const appsData = data as FetchAppsQuery
             const items = appsData.apps || []
             const firstItem = items[0]
-            
+
             if (!firstItem) {
               return <div>No data available</div>
             }
-            
+
             const editableData = convertToEditableResource(firstItem)
             return <EditPropertiesModalWrapper data={editableData} type={type} />
           }}

@@ -1,70 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useRef } from 'react'
-import styled from 'styled-components'
-import { InfoCircleIcon } from '../../components/icons/InfoCircleIcon'
-import { Svg } from '../../components/icons/Svg'
-import { Loader } from '../../components/Loader'
-import { theme } from '../../styles/theme'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ModalScroll } from '../modal/modal.styles'
+import { InfoIcon } from 'lucide-react'
+import { useRef } from 'react'
+import { Loader } from '@/components/Loader'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { useModal } from '../modal/useModal'
 import { generateKeyRequest } from './api'
-import { Button } from '../../components/Button'
-import { toastSuccess } from '../../components/NotificationCenter/ToastHelper'
-
-const StyledButtonRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 24px;
-`
-const InfoRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 24px 0;
-`
-
-const ExpirationInfo = styled.div`
-  display: flex;
-  align-items: center;
-
-  ${Svg} {
-    margin-right: 8px;
-  }
-`
-
-const StyledTextarea = styled.textarea`
-  margin: 0;
-  padding: 8px;
-  flex: 1 0 auto;
-  font-family: ${theme.monofontFamily};
-  width: 450px;
-  height: 140px;
-  resize: none;
-  box-sizing: border-box;
-  font-size: 11.5px;
-
-  &:disabled {
-    background-color: var(--tertiary-100);
-    color: var(--tertiary-600);
-  }
-`
-const ContentWrapper = styled.div`
-  padding: 12px 24px 0;
-`
-
-const KeyLoader = styled.div`
-  cursor: default;
-  box-sizing: border-box;
-  background-color: rgba(239, 239, 239, 0.3);
-  color: rgb(84, 84, 84);
-  border-color: rgba(118, 118, 118, 0.3);
-  border-width: 1px;
-  border-style: solid;
-  width: 450px;
-  height: 150px;
-  margin: 0 0 16px 0;
-  padding: 8px;
-`
 
 const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
   const { data, isLoading } = useQuery({
@@ -75,44 +18,51 @@ const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
 
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  const copyToClipboard = () => {
+  const copyToClipboard = async () => {
     const val = inputRef.current?.value
     if (val) {
-      toastSuccess('The key has been copied into your clipboard')
-      navigator.clipboard.writeText(val)
+      try {
+        await navigator.clipboard.writeText(val)
+        toastSuccess('The key has been copied into your clipboard')
+      } catch {
+        toastError('The key could not be copied to your clipboard')
+      }
     }
   }
 
   return (
     <>
-      <ModalScroll>
-        <ContentWrapper>
-          {isLoading ? (
-            <KeyLoader>
-              <Loader />
-            </KeyLoader>
-          ) : (
-            <StyledTextarea ref={inputRef} disabled value={data?.Key} />
-          )}
-        </ContentWrapper>
-      </ModalScroll>
-      <InfoRow>
-        <ExpirationInfo>
-          <InfoCircleIcon height={15} />
+      <div className="min-h-0 overflow-y-auto py-1">
+        {isLoading ? (
+          <div className="flex h-36 w-full items-center justify-center rounded-md border border-input bg-muted/30">
+            <Loader />
+          </div>
+        ) : (
+          <Textarea ref={inputRef} disabled value={data?.Key} className="h-36 resize-none font-mono text-xs" />
+        )}
+      </div>
+      <div className="flex flex-col justify-between gap-2 text-sm sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2">
+          <InfoIcon className="size-4" />
           This key will expire in 24 hours
-        </ExpirationInfo>
-        <a target="_blank" href="/docs/guides/cli">
+        </div>
+        <a
+          className="text-primary underline underline-offset-3"
+          target="_blank"
+          rel="noreferrer"
+          href="/docs/guides/cli"
+        >
           CLI Documentation
         </a>
-      </InfoRow>
-      <StyledButtonRow>
-        <Button data-variant="primary" onClick={copyToClipboard}>
+      </div>
+      <DialogFooter className="sm:justify-between">
+        <Button disabled={isLoading || !data?.Key} onClick={copyToClipboard}>
           Copy to Clipboard
         </Button>
-        <Button data-variant="primary" onClick={handleClose}>
+        <Button variant="outline" onClick={handleClose}>
           Close
         </Button>
-      </StyledButtonRow>
+      </DialogFooter>
     </>
   )
 }
@@ -122,10 +72,14 @@ export const useGenerateKeyModal = () => {
   const handleClose = () => setShowModal(false)
 
   const modalComp = (
-    <ModalNext id="generate-key" data-testid="generate-key" isShown={isShown} hide={() => setShowModal(false)}>
-      <ModalHeaderTop headerText="CLI Authentication Key" hide={() => setShowModal(false)} />
-      <GenerateKey handleClose={handleClose} />
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="generate-key" data-testid="generate-key" variant="medium" className="gap-4">
+        <DialogHeader>
+          <DialogTitle>CLI Authentication Key</DialogTitle>
+        </DialogHeader>
+        <GenerateKey handleClose={handleClose} />
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

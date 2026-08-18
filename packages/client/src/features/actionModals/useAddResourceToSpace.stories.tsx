@@ -1,12 +1,12 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useMutation } from '@tanstack/react-query'
-import React, { useEffect } from 'react'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
 import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useAddResourceToModal } from './useAddResourceToSpace'
 
 const meta: Meta = {
-  title: 'Modals/Common',
+  title: 'Modals/Common/Add Resource to Space',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -39,7 +39,7 @@ const AddResourceToSpaceModalWrapper = ({ resource, spaceId }: Props) => {
   })
 
   const { modalComp, setShowModal } = useAddResourceToModal({
-    spaceId: spaceId!,
+    spaceId,
     resource,
     mutation,
     onSuccess: () => {
@@ -48,14 +48,12 @@ const AddResourceToSpaceModalWrapper = ({ resource, spaceId }: Props) => {
     },
   })
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
+  useOpenModalInStory(setShowModal)
 
   return modalComp
 }
 
-export const AddAppsToSpaceModal: Story = {
+export const Apps: Story = {
   render: ({ spaceId = 'space-123' }) => {
     return <AddResourceToSpaceModalWrapper resource="apps" spaceId={spaceId} />
   },
@@ -64,7 +62,7 @@ export const AddAppsToSpaceModal: Story = {
   },
 }
 
-export const AddWorkflowsToSpaceModal: Story = {
+export const Workflows: Story = {
   render: ({ spaceId = 'space-456' }) => {
     return <AddResourceToSpaceModalWrapper resource="workflows" spaceId={spaceId} />
   },
@@ -73,7 +71,7 @@ export const AddWorkflowsToSpaceModal: Story = {
   },
 }
 
-export const AddResourceToSpaceModalWithoutSpaceId: Story = {
+export const WithoutSpaceId: Story = {
   render: () => {
     return <AddResourceToSpaceModalWrapper resource="apps" />
   },

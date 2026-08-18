@@ -3,15 +3,13 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import type React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import * as Yup from 'yup'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/utils/cn'
-import { Button } from '../../../components/Button'
 import { Callout } from '../../../components/Callout'
-import { ErrorHint, FieldGroup, Hint, InputError } from '../../../components/form/form.styles'
-import { InputText } from '../../../components/InputText'
-import { ModalHeaderTop, ModalNext, useModalFloatingPortalHost } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'
-import { StyledFields, StyledFooter } from './members.styles'
 import type { MemberRole, SpaceMembership, UpdateRolesFormValues } from './members.types'
 import { useUpdateMemberRolesMutation } from './useUpdateMemberRolesMutation'
 
@@ -42,7 +40,6 @@ interface ChangeMemberRoleFormProps {
 }
 
 const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, member, onClose }) => {
-  const floatingPortalHost = useModalFloatingPortalHost()
   const {
     handleSubmit,
     control,
@@ -82,21 +79,27 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
   const isMemberDisabled = member.active === 'Inactive' || member.active === 'Account deactivated'
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <StyledFields>
-        <FieldGroup>
-          <label htmlFor="change-member-role-username">Username</label>
-          <InputText id="change-member-role-username" value={member.user_name} disabled />
-        </FieldGroup>
-        <FieldGroup>
-          <label htmlFor="change-member-role-current">Current role</label>
-          <InputText
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="change-member-role-username" className="text-sm font-medium text-foreground">
+            Username
+          </label>
+          <Input id="change-member-role-username" value={member.user_name} disabled />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="change-member-role-current" className="text-sm font-medium text-foreground">
+            Current role
+          </label>
+          <Input
             id="change-member-role-current"
             value={isMemberDisabled ? `${member.role} (disabled)` : member.role}
             disabled
           />
-        </FieldGroup>
-        <FieldGroup>
-          <label htmlFor="select_member_role">Change to role</label>
+        </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="select_member_role" className="text-sm font-medium text-foreground">
+            Change to role
+          </label>
           <Controller
             name="role"
             control={control}
@@ -125,7 +128,7 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
                   >
                     <SelectValue placeholder="Choose…" />
                   </SelectTrigger>
-                  <SelectContent side="bottom" align="start" container={floatingPortalHost ?? undefined}>
+                  <SelectContent side="bottom" align="start">
                     {roleOptions.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -136,29 +139,33 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
               )
             }}
           />
-          <Hint>{member.active === 'Active' && 'Select the members role.'}</Hint>
-          <ErrorHint>
+          {member.active === 'Active' && <p className="text-sm text-muted-foreground">Select the members role.</p>}
+          <p className="text-sm text-destructive">
             {member.active === 'Inactive' && 'Enable the member first to change their role.'}
             {member.active === 'Account deactivated' &&
               'Account is deactivated in precisionFDA and cannot be modified. An admin must reactivate the account first.'}
-          </ErrorHint>
-          <ErrorMessage errors={errors} name="role" render={({ message }) => <InputError>{message}</InputError>} />
-        </FieldGroup>
+          </p>
+          <ErrorMessage
+            errors={errors}
+            name="role"
+            render={({ message }) => <p className="text-sm text-destructive">{message}</p>}
+          />
+        </div>
         {isLeadSelected && (
           <Callout data-variant="warning">
             Changing this user to Lead role will make you admin in this space. The new Lead will assume billing for this
             Space, including storage costs for files and run costs for App Executions.
           </Callout>
         )}
-      </StyledFields>
-      <StyledFooter>
+      </div>
+      <DialogFooter className="mt-6 sm:justify-between">
         <div>
           {canDisableOrEnable && (
             <Button
+              variant={member.active === 'Active' ? 'destructive' : 'success'}
               type="button"
               onClick={onDisableToggle}
               disabled={isSubmitting || member.active === 'Account deactivated'}
-              data-variant={member.active === 'Active' ? 'warning' : 'success'}
               aria-label={member.active === 'Active' ? 'Disable member' : 'Enable member'}
             >
               {!isMemberDisabled ? 'Disable Member' : 'Enable Member'}
@@ -166,11 +173,10 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button type="button" onClick={onCancel} disabled={isSubmitting} aria-label="Close modal">
+          <Button variant="outline" type="button" onClick={onCancel} disabled={isSubmitting} aria-label="Close modal">
             Cancel
           </Button>
           <Button
-            data-variant="primary"
             type="submit"
             disabled={Object.keys(errors).length > 0 || isSubmitting || isMemberDisabled}
             aria-label="Change member role"
@@ -178,24 +184,27 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
             Change Role
           </Button>
         </div>
-      </StyledFooter>
+      </DialogFooter>
     </form>
   )
 }
 
 export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: number; member: SpaceMembership }) => {
   const { isShown, setShowModal } = useModal()
-  const modalComp = isShown && (
-    <ModalNext
-      id="add-resource-to-space"
-      data-testid="modal-change-membership-role"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-      variant="medium"
-    >
-      <ModalHeaderTop disableClose={false} headerText="Change member role" hide={() => setShowModal(false)} />
-      <ChangeMemberRoleForm spaceId={spaceId} member={member} onClose={() => setShowModal(false)} />
-    </ModalNext>
+  const modalComp = (
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent
+        id="modal-change-membership-role"
+        data-testid="modal-change-membership-role"
+        variant="medium"
+        className="gap-4"
+      >
+        <DialogHeader>
+          <DialogTitle>Change member role</DialogTitle>
+        </DialogHeader>
+        <ChangeMemberRoleForm spaceId={spaceId} member={member} onClose={() => setShowModal(false)} />
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

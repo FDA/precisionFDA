@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { HttpResponse, http } from 'msw'
-import { useEffect } from 'react'
-import { mockSelectAssets } from '../../../mocks/handlers/assets.handlers'
-import { StorybookProviders } from '../../../stories/StorybookProviders'
+import { mockSelectAssets } from '@/mocks/handlers/assets.handlers'
+import { StorybookProviders } from '@/stories/StorybookProviders'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
 import type { DialogType, ServerScope } from '../../home/types'
 import type { IAsset } from '../assets.types'
 import { useSelectAssetModal } from './useSelectAssetModal'
@@ -126,7 +126,7 @@ const selectAssetHandlers = [
 ]
 
 const meta: Meta = {
-  title: 'Modals/Assets',
+  title: 'Modals/Assets/Select Asset',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -154,14 +154,12 @@ const SelectAssetModalWrapper = ({ dialogType, showSubtitle }: Props) => {
     ['private', 'public', 'space-123'],
   )
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
+  useOpenModalInStory(setShowModal)
 
   return modalComp
 }
 
-export const SelectAssetModal: Story = {
+export const Default: Story = {
   parameters: {
     msw: {
       handlers: selectAssetHandlers,

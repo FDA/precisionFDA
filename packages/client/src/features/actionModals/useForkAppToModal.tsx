@@ -1,12 +1,11 @@
 import type React from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Button } from '@/components/Button'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getSpaceIdFromScope } from '@/utils'
 import type { IApp } from '../apps/apps.types'
 import { getBaseLink } from '../apps/run/utils'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalContentPadding } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import type { EditableSpace } from '../spaces/spaces.api'
 import { ScopeList } from './ScopeList'
@@ -30,27 +29,24 @@ export const useForkAppToModal = ({ selectedApp }: { selectedApp?: IApp }) => {
   }
 
   const modalComp = (
-    <ModalNext
-      id="fork-app-to-modal"
-      data-testid="fork-app-to-modal"
-      headerText="Fork App To"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-      variant="medium"
-    >
-      <ModalHeaderTop headerText="Fork App To" hide={() => setShowModal(false)} />
-      <ModalContentPadding>
-        <ScopeList onSelect={setSelectedTarget} />
-      </ModalContentPadding>
-      <Footer>
-        <ButtonRow>
-          <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button data-variant="primary" type="button" disabled={!selectedTarget} onClick={e => handleSubmit(e)}>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="fork-app-to-modal" data-testid="fork-app-to-modal" variant="medium" className="gap-4">
+        <DialogHeader>
+          <DialogTitle>Fork App To</DialogTitle>
+        </DialogHeader>
+        <div className="min-h-0 py-1">
+          <ScopeList onSelect={setSelectedTarget} />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button type="button" disabled={!selectedTarget} onClick={handleSubmit}>
             Fork
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

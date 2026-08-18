@@ -1,11 +1,11 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
-import { useEffect } from 'react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
 import { mockForkApp } from '../../mocks/handlers/apps.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useForkAppToModal } from './useForkAppToModal'
 
 const meta: Meta = {
-  title: 'Modals/Apps',
+  title: 'Modals/Apps/Fork App To',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -25,14 +25,12 @@ const ForkAppToModalWrapper = ({ hasApp }: Props) => {
     selectedApp: hasApp ? mockForkApp : undefined,
   })
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
+  useOpenModalInStory(setShowModal)
 
   return modalComp
 }
 
-export const ForkAppToModal: Story = {
+export const Default: Story = {
   render: ({ hasApp = true }) => {
     return <ForkAppToModalWrapper hasApp={hasApp} />
   },

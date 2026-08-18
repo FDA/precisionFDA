@@ -1,11 +1,11 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
-import React, { useEffect } from 'react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
+import { mockTestSpace, mockUnlockedTestSpace } from '../../mocks/handlers/spaces.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useUnlockSpaceModal } from './useUnlockSpaceModal'
-import { mockTestSpace, mockUnlockedTestSpace } from '../../mocks/handlers/spaces.handlers'
 
 const meta: Meta = {
-  title: 'Modals/Spaces',
+  title: 'Modals/Spaces/Lock or Unlock Space',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -22,29 +22,25 @@ type Story = StoryObj<Props>
 
 const UnlockSpaceModalWrapper = ({ spaceState }: Props) => {
   const space = spaceState === 'locked' ? mockTestSpace : mockUnlockedTestSpace
-  
+
   const { modalComp, setShowModal } = useUnlockSpaceModal({
     space,
-    onSuccess: (isLocked) => console.log('Space lock state changed:', isLocked),
+    onSuccess: isLocked => console.log('Space lock state changed:', isLocked),
   })
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
+  useOpenModalInStory(setShowModal)
 
   return modalComp
 }
 
-export const UnlockSpaceModal: Story = {
-  render: ({ spaceState = 'locked' }) => {
-    return <UnlockSpaceModalWrapper spaceState={spaceState} />
-  },
-  argTypes: {
-    spaceState: {
-      options: ['locked', 'unlocked'],
-      control: { type: 'radio' },
-    },
-  },
+export const Unlock: Story = {
+  args: { spaceState: 'locked' },
+  render: args => <UnlockSpaceModalWrapper {...args} />,
+}
+
+export const Lock: Story = {
+  args: { spaceState: 'unlocked' },
+  render: args => <UnlockSpaceModalWrapper {...args} />,
 }
 
 export default meta

@@ -1,4 +1,4 @@
-import { IUser } from '@/types/user'
+import type { IUser } from '@/types/user'
 import { useAuthUserQuery } from './api'
 
 export function useAuthUser(withLoading: true): { user: IUser | undefined; loading: boolean }

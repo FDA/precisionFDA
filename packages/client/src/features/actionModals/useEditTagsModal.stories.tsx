@@ -1,16 +1,16 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
-import { useEffect } from 'react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
 import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { fetchApps } from '../apps/apps.api'
-import { IApp } from '../apps/apps.types'
+import type { IApp } from '../apps/apps.types'
 import { fetchFiles } from '../files/files.api'
-import { IFile } from '../files/files.types'
-import { APIResource } from '../home/types'
+import type { IFile } from '../files/files.types'
+import type { APIResource } from '../home/types'
 import { useEditTagsModal } from './useEditTagsModal'
 
 const meta: Meta = {
-  title: 'Modals/Common',
+  title: 'Modals/Common/Edit Tags',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -38,13 +38,11 @@ const EditTagsModalWrapper = (props: Props) => {
     selected: props.data,
   })
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
+  useOpenModalInStory(setShowModal)
   return modalComp
 }
 
-export const EditTagsModal: Story = {
+export const Default: Story = {
   render: ({ type = 'files' }) => {
     if (type === 'files') {
       return (
@@ -52,11 +50,11 @@ export const EditTagsModal: Story = {
           {({ data }) => {
             const files = data?.files || []
             const firstItem = files[0] as IFile
-            
+
             if (!firstItem) {
               return <div>No data available</div>
             }
-            
+
             return <EditTagsModalWrapper data={firstItem} type={type} />
           }}
         </WithListData>
@@ -67,11 +65,11 @@ export const EditTagsModal: Story = {
           {({ data }) => {
             const apps = data?.apps || []
             const firstItem = apps[0] as IApp
-            
+
             if (!firstItem) {
               return <div>No data available</div>
             }
-            
+
             return <EditTagsModalWrapper data={firstItem} type={type} />
           }}
         </WithListData>

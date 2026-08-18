@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { HttpResponse, http } from 'msw'
-import { useEffect } from 'react'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import type { IFile } from '../files/files.types'
 import type { ISpaceReport, SpaceReportFormat, SpaceReportState } from './space-report.types'
 import { useDeleteSpaceReportModal } from './useDeleteSpaceReportModal'
 
 const meta: Meta = {
-  title: 'Modals/Space Reports',
+  title: 'Modals/Spaces/Space Reports/Delete',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -74,14 +74,12 @@ const DeleteSpaceReportModalWrapper = ({ multipleItems }: Props) => {
     onClose: () => console.log('Space report delete modal closed'),
   })
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
+  useOpenModalInStory(setShowModal)
 
   return modalComp
 }
 
-export const DeleteSpaceReportModal: Story = {
+export const Default: Story = {
   render: ({ multipleItems = true }) => <DeleteSpaceReportModalWrapper multipleItems={multipleItems} />,
   argTypes: {
     multipleItems: {

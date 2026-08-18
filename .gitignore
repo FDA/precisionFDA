@@ -111,3 +111,5 @@ vendor/assets/bower_components/
 # GSRS seed data (downloaded via `make gsrs-seed-data`)
 packages/gsrs/seed-data/
 docker/misc/gsrs-db-init/02-gsrsdb-data.sql
+
+okdocs/

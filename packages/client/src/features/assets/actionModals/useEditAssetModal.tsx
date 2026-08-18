@@ -1,16 +1,14 @@
-import { ErrorMessage } from '@hookform/error-message'
-import React, { useMemo } from 'react'
-import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { FieldGroup, InputError } from '../../../components/form/form.styles'
-import { InputText } from '../../../components/InputText'
-import { ButtonRow, Footer, StyledForm } from '../../modal/modal.styles'
+import { useMemo } from 'react'
+import { useForm } from 'react-hook-form'
+import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 import { useModal } from '../../modal/useModal'
 import { editAssetRequest } from '../assets.api'
-import { IAsset } from '../assets.types'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { Button } from '../../../components/Button'
-import { toastError, toastSuccess } from '../../../components/NotificationCenter/ToastHelper'
+import type { IAsset } from '../assets.types'
 
 const EditAssetInfoForm = ({ asset, handleClose }: { asset: IAsset; handleClose: () => void }) => {
   const queryClient = useQueryClient()
@@ -53,27 +51,27 @@ const EditAssetInfoForm = ({ asset, handleClose }: { asset: IAsset; handleClose:
 
   return (
     <>
-      <StyledForm id="edit-asset-form" onSubmit={handleSubmit(onSubmit)}>
-        <FieldGroup>
-          <label>Asset Name</label>
-          <InputText
+      <form id="edit-asset-form" className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+        <Field data-invalid={Boolean(errors.name)}>
+          <FieldLabel htmlFor="edit-asset-name">Asset Name</FieldLabel>
+          <Input
+            id="edit-asset-name"
             {...register('name', { required: 'Name is required.' })}
             placeholder="Edit name..."
             disabled={editMutation.isPending}
+            aria-invalid={Boolean(errors.name)}
           />
-          <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
-        </FieldGroup>
-      </StyledForm>
-      <Footer>
-        <ButtonRow>
-          <Button type="button" onClick={handleClose} disabled={editMutation.isPending}>
-            Cancel
-          </Button>
-          <Button data-variant="primary" type="submit" form="edit-asset-form" disabled={editMutation.isPending}>
-            Edit
-          </Button>
-        </ButtonRow>
-      </Footer>
+          <FieldError errors={[errors.name]} />
+        </Field>
+      </form>
+      <DialogFooter>
+        <Button variant="outline" type="button" onClick={handleClose} disabled={editMutation.isPending}>
+          Cancel
+        </Button>
+        <Button type="submit" form="edit-asset-form" disabled={editMutation.isPending}>
+          Edit
+        </Button>
+      </DialogFooter>
     </>
   )
 }
@@ -84,10 +82,14 @@ export const useEditAssetModal = (selectedItem: IAsset) => {
   const handleClose = () => setShowModal(false)
 
   const modalComp = (
-    <ModalNext id="modal-asset-edit" data-testid="modal-asset-edit" isShown={isShown} hide={() => setShowModal(false)}>
-      <ModalHeaderTop disableClose={false} headerText="Edit asset info" hide={() => setShowModal(false)} />
-      <EditAssetInfoForm asset={selected} handleClose={handleClose} />
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="modal-asset-edit" data-testid="modal-asset-edit" variant="small" className="gap-4">
+        <DialogHeader>
+          <DialogTitle>Edit asset info</DialogTitle>
+        </DialogHeader>
+        <EditAssetInfoForm asset={selected} handleClose={handleClose} />
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

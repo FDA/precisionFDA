@@ -3,10 +3,10 @@ import { expect, userEvent, within } from 'storybook/test'
 import { StorybookProviders } from '@/stories/StorybookProviders'
 import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
 import { useModal } from '../modal/useModal'
-import { ExpiringSessionModal } from './ExpiringSessionModal'
+import { SessionExpiredModal } from './SessionExpiredModal'
 
 const meta: Meta = {
-  title: 'Modals/Auth/Expiring Session',
+  title: 'Modals/Auth/Session Expired',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -15,21 +15,19 @@ const meta: Meta = {
     ),
   ],
 }
-type Story = StoryObj<{ expired: boolean }>
+type Story = StoryObj
 
-const ExpiringSessionModalHarness = ({ expired }: { expired: boolean }) => {
-  // biome-ignore lint/suspicious/noDocumentCookie: The production timer reads this cookie directly.
-  document.cookie = `sessionExpiredAt=${Math.floor(Date.now() / 1000) + (expired ? -10 : 45)}; path=/`
+const SessionExpiredModalHarness = () => {
   const modal = useModal()
   useOpenModalInStory(modal.setShowModal)
-  return <ExpiringSessionModal modal={modal} />
+  return <SessionExpiredModal {...modal} />
 }
 
-export const Approaching: Story = {
-  render: () => <ExpiringSessionModalHarness expired={false} />,
+export const Default: Story = {
+  render: () => <SessionExpiredModalHarness />,
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body)
-    const dialog = await body.findByRole('dialog', { name: 'Session Expiring' })
+    const dialog = await body.findByRole('dialog', { name: 'Session Expired' })
     const overlay = canvasElement.ownerDocument.querySelector<HTMLElement>('[data-slot="dialog-overlay"]')
 
     await expect(overlay).toHaveClass('supports-backdrop-filter:backdrop-blur-[6px]')
@@ -39,10 +37,6 @@ export const Approaching: Story = {
     if (overlay) await userEvent.click(overlay)
     await expect(dialog).toBeVisible()
   },
-}
-
-export const Expired: Story = {
-  render: () => <ExpiringSessionModalHarness expired />,
 }
 
 export default meta

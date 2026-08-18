@@ -1,41 +1,30 @@
-import React from 'react'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Content, Footer } from '../modal/modal.styles'
-import { UseModal } from '../modal/useModal'
+import type React from 'react'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import type { UseModal } from '../modal/useModal'
 import { onLogInWithSSO, useSiteSettingsQuery } from './useSiteSettingsQuery'
-import { Button } from '../../components/Button'
-
 
 export const SessionExpiredModal: React.FC<UseModal> = props => {
   const { data } = useSiteSettingsQuery()
   return (
-    <ModalNext
-      isShown={props.isShown}
-      hide={() => props.setShowModal(false)}
-      headerText="Session Expired"
-      id='session-expired-modal'
-      blur
-    >
-      <ModalHeaderTop
-        disableClose
-        headerText="Session Expired"
-        hide={() => props.setShowModal(false)}
-      />
-      <Content $overflowContent={false}>
-        You were logged out after 15 minutes of inactivity. Please Log In again.
-      </Content>
-      <Footer>
-        <ButtonRow>
+    <Dialog open={Boolean(props.isShown)} onOpenChange={() => {}}>
+      <DialogContent
+        id="session-expired-modal"
+        showCloseButton={false}
+        overlayClassName="supports-backdrop-filter:backdrop-blur-[6px]"
+        className="gap-4"
+      >
+        <DialogHeader>
+          <DialogTitle>Session Expired</DialogTitle>
+        </DialogHeader>
+        <div className="py-1">You were logged out after 15 minutes of inactivity. Please Log In again.</div>
+        <DialogFooter>
           {data?.ssoButton.isEnabled && (
-            <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data?.ssoUrl)}>
-              Log In with SSO
-            </Button>
+            <Button onClick={() => onLogInWithSSO(data.ssoButton.data?.ssoUrl)}>Log In with SSO</Button>
           )}
-          <Button data-variant="primary" onClick={() => (window.location.href = '/login')}>
-            Log in
-          </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+          <Button onClick={() => (window.location.href = '/login')}>Log in</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -7,7 +7,7 @@ import type { Asset } from './AttachToModal/useListAssetsQuery'
 import { useAssetAttachModal } from './useAssetAttachModal'
 
 const meta: Meta = {
-  title: 'Modals/Common',
+  title: 'Modals/Common/Attach Assets',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -52,7 +52,7 @@ const AssetAttachModalWrapper = ({ initialAssets = [] }: Props) => {
   )
 }
 
-export const AssetAttachModal: Story = {
+export const Default: Story = {
   parameters: {
     msw: {
       handlers: [http.post('/api/list_assets', () => HttpResponse.json(mockAttachAssets))],

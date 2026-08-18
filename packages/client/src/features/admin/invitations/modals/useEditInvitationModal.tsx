@@ -5,12 +5,11 @@ import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import * as Yup from 'yup'
 import { getBackendErrorMessage } from '@/api/types'
-import { Button } from '@/components/Button'
-import { FieldGroup, InputError } from '@/components/form/form.styles'
-import { InputText } from '@/components/InputText'
 import { toastError, toastSuccess } from '@/components/NotificationCenter/ToastHelper'
-import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
-import { ButtonRow, Footer, StyledForm, StyledModalScroll } from '../../../modal/modal.styles'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useModal } from '../../../modal/useModal'
 import { editInvitationBasicInfo, type Invitation } from '../../users/api'
 
@@ -62,55 +61,63 @@ const EditInvitationInfoForm = ({ invitation, handleClose }: { invitation: Invit
 
   return (
     <>
-      <StyledModalScroll>
-        <StyledForm id="edit-invitation-form" onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup>
-            <label>First Name</label>
-            <InputText
+      <div className="min-h-0 overflow-y-auto p-1">
+        <form id="edit-invitation-form" className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="edit-invitation-first-name">First Name</Label>
+            <Input
+              id="edit-invitation-first-name"
               {...register('firstName', { required: 'First Name is required.' })}
               placeholder="Enter first name..."
               disabled={isSubmitting}
+              aria-invalid={Boolean(errors.firstName)}
             />
             <ErrorMessage
               errors={errors}
               name="firstName"
-              render={({ message }) => <InputError>{message}</InputError>}
+              render={({ message }) => <p className="text-sm text-destructive">{message}</p>}
             />
-          </FieldGroup>
-          <FieldGroup>
-            <label>Last Name</label>
-            <InputText
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="edit-invitation-last-name">Last Name</Label>
+            <Input
+              id="edit-invitation-last-name"
               {...register('lastName', { required: 'Last Name is required.' })}
               placeholder="Enter last name..."
               disabled={isSubmitting}
+              aria-invalid={Boolean(errors.lastName)}
             />
             <ErrorMessage
               errors={errors}
               name="lastName"
-              render={({ message }) => <InputError>{message}</InputError>}
+              render={({ message }) => <p className="text-sm text-destructive">{message}</p>}
             />
-          </FieldGroup>
-          <FieldGroup>
-            <label>Email</label>
-            <InputText
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="edit-invitation-email">Email</Label>
+            <Input
+              id="edit-invitation-email"
               {...register('email', { required: 'Email is required.' })}
               placeholder="Enter email..."
               disabled={isSubmitting}
+              aria-invalid={Boolean(errors.email)}
             />
-            <ErrorMessage errors={errors} name="email" render={({ message }) => <InputError>{message}</InputError>} />
-          </FieldGroup>
-        </StyledForm>
-      </StyledModalScroll>
-      <Footer>
-        <ButtonRow>
-          <Button type="button" onClick={handleClose} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button data-variant="primary" type="submit" form="edit-invitation-form" disabled={isSubmitting}>
-            Edit
-          </Button>
-        </ButtonRow>
-      </Footer>
+            <ErrorMessage
+              errors={errors}
+              name="email"
+              render={({ message }) => <p className="text-sm text-destructive">{message}</p>}
+            />
+          </div>
+        </form>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" type="button" onClick={handleClose} disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button type="submit" form="edit-invitation-form" disabled={isSubmitting}>
+          Edit
+        </Button>
+      </DialogFooter>
     </>
   )
 }
@@ -122,17 +129,14 @@ export const useEditInvitationModal = (selectedItem: Invitation) => {
     setShowModal(false)
   }
   const modalComp = (
-    <ModalNext
-      id="modal-invitation-edit"
-      data-testid="modal-invitation-edit"
-      headerText="Edit invitation info"
-      isShown={isShown}
-      hide={handleClose}
-      variant="small"
-    >
-      <ModalHeaderTop headerText="Edit invitation info" hide={handleClose} />
-      <EditInvitationInfoForm invitation={selected} handleClose={handleClose} />
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="modal-invitation-edit" data-testid="modal-invitation-edit" variant="small" className="gap-4">
+        <DialogHeader>
+          <DialogTitle>Edit invitation info</DialogTitle>
+        </DialogHeader>
+        <EditInvitationInfoForm invitation={selected} handleClose={handleClose} />
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

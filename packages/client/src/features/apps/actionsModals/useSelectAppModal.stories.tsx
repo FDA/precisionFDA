@@ -23,7 +23,7 @@ const longSelectAppList = Array.from({ length: 18 }, (_, index) => {
 })
 
 const meta: Meta = {
-  title: 'Modals/Apps',
+  title: 'Modals/Apps/Select App',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -62,7 +62,7 @@ const SelectAppModalWrapper = ({ dialogType }: Props) => {
   return modalComp
 }
 
-export const SelectAppModal: Story = {
+export const Default: Story = {
   render: ({ dialogType = 'checkbox' }) => {
     return <SelectAppModalWrapper dialogType={dialogType} />
   },

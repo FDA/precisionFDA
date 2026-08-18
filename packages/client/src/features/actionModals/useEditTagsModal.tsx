@@ -1,28 +1,13 @@
 import { useMutation } from '@tanstack/react-query'
-import React, { useMemo } from 'react'
-import { useForm } from 'react-hook-form'
-import styled from 'styled-components'
-import { FieldGroup } from '../../components/form/form.styles'
-import { InputText } from '../../components/InputText'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer } from '../modal/modal.styles'
-import { useModal } from '../modal/useModal'
-import { APIResource } from '../home/types'
-import { Button } from '../../components/Button'
 import axios from 'axios'
+import { useEffect, useMemo } from 'react'
+import { useForm } from 'react-hook-form'
 import { toastError, toastSuccess } from '../../components/NotificationCenter/ToastHelper'
-
-const StyledForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  gap: 1rem;
-`
-
-const StyledSubtext = styled.div`
-  font-size: 12px;
-  color: var(--c-text-500);
-`
+import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import { Input } from '../../components/ui/input'
+import type { APIResource } from '../home/types'
+import { useModal } from '../modal/useModal'
 
 async function editTagsRequest({ uid, tags }: { uid: string; tags: string }) {
   const response = await axios.post('/api/set_tags', {
@@ -55,7 +40,7 @@ const EditTagsForm = ({
     },
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     setFocus('tags')
   }, [setFocus])
 
@@ -78,23 +63,23 @@ const EditTagsForm = ({
 
   return (
     <>
-      <StyledForm id="edit-tag-form" onSubmit={handleSubmit(onSubmit)}>
-        <StyledSubtext>Tags are public to the community</StyledSubtext>
-        <FieldGroup>
-          <label>Tags (comma-separated)</label>
-          <InputText {...register('tags')} disabled={mutation.isPending} />
-        </FieldGroup>
-      </StyledForm>
-      <Footer>
-        <ButtonRow>
-          <Button type="button" onClick={hideModal} disabled={mutation.isPending}>
-            Cancel
-          </Button>
-          <Button data-variant="primary" type="submit" form="edit-tag-form" disabled={mutation.isPending}>
-            Edit Tags
-          </Button>
-        </ButtonRow>
-      </Footer>
+      <form className="flex flex-col gap-4 py-2" id="edit-tag-form" onSubmit={handleSubmit(onSubmit)}>
+        <p className="text-muted-foreground text-xs">Tags are public to the community</p>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium" htmlFor="edit-tags-input">
+            Tags (comma-separated)
+          </label>
+          <Input id="edit-tags-input" {...register('tags')} disabled={mutation.isPending} />
+        </div>
+      </form>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={hideModal} disabled={mutation.isPending}>
+          Cancel
+        </Button>
+        <Button type="submit" form="edit-tag-form" disabled={mutation.isPending}>
+          Edit Tags
+        </Button>
+      </DialogFooter>
     </>
   )
 }
@@ -113,10 +98,20 @@ export function useEditTagsModal<T extends { uid: string; name: string; tags: st
   const hideModal = () => setShowModal(false)
 
   const modalComp = (
-    <ModalNext id="edit-tags-modal" data-testid={`modal-${resource}-edit-tags`} isShown={isShown} hide={hideModal}>
-      <ModalHeaderTop disableClose={false} headerText={`Edit tags for ${mSelected?.name}`} hide={hideModal} />
-      <EditTagsForm resource={resource} onSuccess={onSuccess} uid={mSelected?.uid} hideModal={hideModal} tags={mSelected?.tags} />
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="edit-tags-modal" data-testid={`modal-${resource}-edit-tags`} className="gap-4">
+        <DialogHeader>
+          <DialogTitle>{`Edit tags for ${mSelected?.name}`}</DialogTitle>
+        </DialogHeader>
+        <EditTagsForm
+          resource={resource}
+          onSuccess={onSuccess}
+          uid={mSelected?.uid}
+          hideModal={hideModal}
+          tags={mSelected?.tags}
+        />
+      </DialogContent>
+    </Dialog>
   )
 
   return {

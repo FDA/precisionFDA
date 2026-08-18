@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import type { PropsWithChildren } from 'react'
+import { type PropsWithChildren, useState } from 'react'
 import { BrowserRouter } from 'react-router'
 import '../styles/tailwind.css'
 import '../styles/variables.css'
@@ -24,6 +24,11 @@ export function resetStorybookQueryClient() {
 }
 
 export function StorybookProviders({ children }: PropsWithChildren) {
+  useState(() => {
+    resetStorybookQueryClient()
+    return true
+  })
+
   return (
     <ThemeProvider>
       <BrowserRouter>

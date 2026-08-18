@@ -7,7 +7,7 @@ import { StorybookProviders } from '../../stories/StorybookProviders'
 import { useDeleteModal } from './useDeleteModal'
 
 const meta: Meta = {
-  title: 'Modals/Common',
+  title: 'Modals/Common/Delete',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -69,7 +69,7 @@ const DeleteModalWrapper = ({ resource, multipleItems }: Props) => {
   return modalComp
 }
 
-export const DeleteModal: Story = {
+export const Default: Story = {
   render: ({ resource = 'app', multipleItems = false }) => {
     return <DeleteModalWrapper resource={resource} multipleItems={multipleItems} />
   },

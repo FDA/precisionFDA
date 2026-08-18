@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
@@ -35,13 +34,14 @@ export const ResourceForm = ({
   setShowModal: (show: boolean) => void
   onSuccess: () => void
 }) => {
-  const { isLoading, selectedFiles, removeItemByIndex, handleSubmit, handleNameChange, handleFileChange } = useUploadResource({
-    id: pid,
-    onSuccess() {
-      onSuccess()
-      setShowModal(false)
-    },
-  })
+  const { isLoading, selectedFiles, removeItemByIndex, handleSubmit, handleNameChange, handleFileChange } =
+    useUploadResource({
+      id: pid,
+      onSuccess() {
+        onSuccess()
+        setShowModal(false)
+      },
+    })
 
   return (
     <form onSubmit={handleSubmit}>
@@ -103,16 +103,15 @@ export const CreateResource = ({ pid, onSuccess }: { pid: string; onSuccess: () 
       >
         Upload Resources
       </Button>
-    
-        <ModalNext
-          id="add-resource-to-space"
-          data-testid="modal-add-resource"
-          isShown={isShown}
-          hide={() => setShowModal(false)}
-        >
-          <ResourceForm pid={pid} setShowModal={setShowModal} onSuccess={() => onSuccess()} />
-        </ModalNext>
-      
+
+      <ModalNext
+        id="modal-add-resource"
+        data-testid="modal-add-resource"
+        isShown={isShown}
+        hide={() => setShowModal(false)}
+      >
+        <ResourceForm pid={pid} setShowModal={setShowModal} onSuccess={() => onSuccess()} />
+      </ModalNext>
     </div>
   )
 }

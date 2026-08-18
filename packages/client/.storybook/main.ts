@@ -7,7 +7,7 @@ const config: StorybookConfig = {
   stories: [
     '../src/**/*.stories.@(js|jsx|ts|tsx)',
   ],
-  addons: [],
+  addons: ['msw-storybook-addon'],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},

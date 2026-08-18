@@ -1,33 +1,9 @@
-import React from 'react'
-import styled from 'styled-components'
-import { Button } from '../../components/Button'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
+import type React from 'react'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useModal } from '../modal/useModal'
-import { IWorkflow } from '../workflows/workflows.types'
-import { IApp } from './apps.types'
-
-const StyledExportTo = styled.div`
-  min-width: 400px;
-  padding: 1rem;
-  ul {
-    margin: 0;
-    padding: 0;
-  }
-
-  li {
-    list-style: none;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-
-    a {
-      padding: 5px 15px;
-      flex: 1 0 auto;
-      display: block;
-    }
-  }
-`
+import type { IWorkflow } from '../workflows/workflows.types'
+import type { IApp } from './apps.types'
 
 type ValType = 'docker' | 'cwl' | 'wdl'
 type ExportType = {
@@ -100,27 +76,35 @@ export function useExportToModal({ selected, resource }: { selected?: IApp | IWo
   const exportOptions = getExportOptions(resource, selected?.uid)
 
   const modalComp = (
-    <ModalNext id="modal-export-to" data-testid="modal-export-to" isShown={isShown} hide={() => setShowModal(false)}>
-      <ModalHeaderTop disableClose={false} headerText="Export to" hide={() => setShowModal(false)} />
-      <ModalScroll>
-        <StyledExportTo>
-          <ul>
-            {exportOptions.map(e => (
-              <li key={e.label}>
-                <a onClick={event => handleClick(event, e)} href={e.link} data-turbolinks="false" download>
-                  {e.label}
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="modal-export-to" data-testid="modal-export-to" className="gap-4">
+        <DialogHeader>
+          <DialogTitle>Export to</DialogTitle>
+        </DialogHeader>
+        <div className="min-h-0 overflow-y-auto p-1">
+          <ul className="m-0 p-0">
+            {exportOptions.map(exportOption => (
+              <li key={exportOption.label} className="flex list-none text-sm">
+                <a
+                  className="block flex-1 cursor-pointer rounded-md px-4 py-2 hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  onClick={event => handleClick(event, exportOption)}
+                  href={exportOption.link}
+                  data-turbolinks="false"
+                  download
+                >
+                  {exportOption.label}
                 </a>
               </li>
             ))}
           </ul>
-        </StyledExportTo>
-      </ModalScroll>
-      <Footer>
-        <ButtonRow>
-          <Button onClick={() => setShowModal(false)}>Cancel</Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

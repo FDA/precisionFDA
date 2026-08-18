@@ -1,14 +1,14 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useEffect } from 'react'
 import { mockCopyApps } from '../../mocks/handlers/apps.handlers'
 import { mockCopyFiles } from '../../mocks/handlers/files.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { copyAppsToPrivate } from '../apps/apps.api'
-import { APIResource } from '../home/types'
+import type { APIResource } from '../home/types'
 import { useCopyToPrivateModal } from './useCopyToPrivateModal'
 
 const meta: Meta = {
-  title: 'Modals/Common',
+  title: 'Modals/Common/Copy to Private',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -48,7 +48,7 @@ const CopyToPrivateModalWrapper = ({ type }: Props) => {
   return modalComp
 }
 
-export const CopyToPrivateModal: Story = {
+export const Default: Story = {
   render: ({ type = 'files' }) => {
     return <CopyToPrivateModalWrapper type={type} />
   },

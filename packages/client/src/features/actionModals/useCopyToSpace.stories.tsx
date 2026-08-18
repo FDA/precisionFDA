@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import { mockCopyToSpaceApps } from '../../mocks/handlers/apps.handlers'
@@ -6,11 +6,11 @@ import { mockCopyToSpaceFiles } from '../../mocks/handlers/files.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { copyAppsRequest } from '../apps/apps.api'
 import { copyFilesRequest } from '../files/files.api'
-import { APIResource } from '../home/types'
+import type { APIResource } from '../home/types'
 import { useCopyToSpaceModal } from './useCopyToSpace'
 
 const meta: Meta = {
-  title: 'Modals/Common',
+  title: 'Modals/Common/Copy to Space',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -27,8 +27,14 @@ type Story = StoryObj<Props>
 
 const CopyToSpaceModalWrapper = ({ type }: Props) => {
   const mockData = type === 'apps' ? mockCopyToSpaceApps : mockCopyToSpaceFiles
-  const updateFunction = type === 'apps' ? copyAppsRequest : 
-    (scope: string, ids: string[]) => copyFilesRequest(scope, ids.map(id => parseInt(id, 10)))
+  const updateFunction =
+    type === 'apps'
+      ? copyAppsRequest
+      : (scope: string, ids: string[]) =>
+          copyFilesRequest(
+            scope,
+            ids.map(id => parseInt(id, 10)),
+          )
 
   const { modalComp, setShowModal } = useCopyToSpaceModal({
     selected: mockData,
@@ -42,11 +48,11 @@ const CopyToSpaceModalWrapper = ({ type }: Props) => {
   useEffect(() => {
     setShowModal(true)
   }, [setShowModal])
-  
+
   return modalComp
 }
 
-export const CopyToSpaceModal: Story = {
+export const Default: Story = {
   render: ({ type = 'files' }) => {
     return <CopyToSpaceModalWrapper type={type} />
   },

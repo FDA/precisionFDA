@@ -2,66 +2,19 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { get } from 'lodash'
+import { XIcon } from 'lucide-react'
 import type React from 'react'
 import { useMemo } from 'react'
 import { type FieldErrors, useFieldArray, useForm } from 'react-hook-form'
-import { Tooltip } from 'react-tooltip'
-import styled from 'styled-components'
 import * as Yup from 'yup'
-import { Button, TransparentButton } from '@/components/Button'
-import { FieldGroup } from '@/components/form/form.styles'
-import { CrossIcon } from '@/components/icons/PlusIcon'
-import '../../utils/yupValidators'
 import { toastSuccess } from '@/components/NotificationCenter/ToastHelper'
-import { InputTextS } from '../apps/form/Fields'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import '../../utils/yupValidators'
 import type { ServerScope } from '../home/types'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
 import type { RequestResponse } from './useFeatureMutation'
-
-const StyledForm = styled.form`
-  min-width: 450px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-`
-const StyledFieldGroup = styled(FieldGroup)`
-  padding: 16px 8px 16px 24px;
-`
-const StyledButtonText = styled(TransparentButton)`
-  justify-self: flex-start;
-  color: var(--primary-500);
-  &:hover {
-    color: var(--primary-400);
-  }
-`
-const StyledFooter = styled(Footer)`
-  justify-content: space-between;
-`
-const NoProperties = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 14px;
-`
-
-const FieldWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-`
-
-const Remove = styled.div`
-  width: 30px;
-  height: 30px;
-  padding: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  border-radius: 50%;
-`
 
 type Properties = {
   [key: string]: string
@@ -210,64 +163,99 @@ const EditPropertiesForm = ({
 
   return (
     <>
-      <StyledForm
+      <form
+        className="flex min-h-0 flex-col"
         id="edit-properties-form"
         onSubmit={e => {
           e.stopPropagation()
           handleSubmit(onSubmit)(e)
         }}
       >
-        <ModalScroll>
-          <StyledFieldGroup>
+        <div className="max-h-(--modal-max-height,50vh) overflow-y-auto px-2 py-4 sm:px-4">
+          <div className="flex flex-col gap-4">
             {fields.length === 0 && (
-              <NoProperties>
+              <div className="flex items-center gap-4 text-sm">
                 No properties have been added{' '}
-                <StyledButtonText onClick={handleAppendProperty}>Add a property</StyledButtonText>
-              </NoProperties>
+                <Button className="h-auto p-0" type="button" variant="link" onClick={handleAppendProperty}>
+                  Add a property
+                </Button>
+              </div>
             )}
             {fields.map((field, index) => {
               const { isError, message } = getError(errors, `props.${index}.key`)
               return (
-                <FieldWrapper key={field.id} data-testid={`property-${index}`}>
-                  <InputTextS
-                    autoComplete="off"
-                    {...register(`props.${index}.key`)}
-                    data-tooltip-id={`props.${index}.key`}
-                    data-tooltip-content={message}
+                <div
+                  className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-start gap-4"
+                  key={field.id}
+                  data-testid={`property-${index}`}
+                >
+                  <div className="min-w-0">
+                    <label className="sr-only" htmlFor={`property-${field.id}-key`}>
+                      Property name
+                    </label>
+                    <Input
+                      id={`property-${field.id}-key`}
+                      aria-invalid={isError || undefined}
+                      aria-describedby={isError ? `property-${field.id}-error` : undefined}
+                      autoComplete="off"
+                      {...register(`props.${index}.key`)}
+                      disabled={mutation.isPending}
+                    />
+                    {isError && (
+                      <p id={`property-${field.id}-error`} className="mt-1 text-destructive text-xs">
+                        {message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <label className="sr-only" htmlFor={`property-${field.id}-value`}>
+                      Property value
+                    </label>
+                    <Input
+                      id={`property-${field.id}-value`}
+                      autoComplete="off"
+                      {...register(`props.${index}.value`)}
+                      disabled={mutation.isPending}
+                    />
+                  </div>
+                  <Button
+                    aria-label="Remove property"
+                    data-testid="property-remove"
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => remove(index)}
                     disabled={mutation.isPending}
-                    $isError={isError}
-                  />
-                  {isError && <Tooltip id={`props.${index}.key`} />}
-                  <InputTextS autoComplete="off" {...register(`props.${index}.value`)} disabled={mutation.isPending} />
-                  <Remove data-testid="property-remove" onClick={() => remove(index)}>
-                    <CrossIcon />
-                  </Remove>
-                </FieldWrapper>
+                  >
+                    <XIcon />
+                  </Button>
+                </div>
               )
             })}
-          </StyledFieldGroup>
-        </ModalScroll>
-      </StyledForm>
-      <StyledFooter>
+          </div>
+        </div>
+      </form>
+      <DialogFooter className="sm:justify-between">
         {fields.length > 0 ? (
-          <StyledButtonText onClick={handleAppendProperty}>Add another property</StyledButtonText>
+          <Button className="h-auto self-center p-0" type="button" variant="link" onClick={handleAppendProperty}>
+            Add another property
+          </Button>
         ) : (
           <div />
         )}
-        <ButtonRow>
-          <Button type="button" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
           <Button
-            data-variant="primary"
             type="submit"
             form="edit-properties-form"
             disabled={mutation.isPending || Object.keys(errors).length > 0}
           >
             Edit Properties
           </Button>
-        </ButtonRow>
-      </StyledFooter>
+        </div>
+      </DialogFooter>
     </>
   )
 }
@@ -286,20 +274,21 @@ export function useEditPropertiesModal<
   const mSelected = useMemo(() => selected, [isShown])
 
   const modalComp = (
-    <ModalNext
-      id="edit-properties-modal"
-      data-testid={'modal-edit-properties'}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={`Edit ${mSelected.length > 1 ? `common properties for ${mSelected.length} items` : `properties for ${mSelected[0]?.name}`}`}
-        hide={() => setShowModal(false)}
-      />
-
-      <EditPropertiesForm onSuccess={onSuccess} setShowModal={setShowModal} selected={mSelected} />
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent
+        id="edit-properties-modal"
+        data-testid="modal-edit-properties"
+        variant="medium"
+        className="min-w-0 gap-0 overflow-hidden"
+      >
+        <DialogHeader>
+          <DialogTitle>
+            {`Edit ${mSelected.length > 1 ? `common properties for ${mSelected.length} items` : `properties for ${mSelected[0]?.name}`}`}
+          </DialogTitle>
+        </DialogHeader>
+        <EditPropertiesForm onSuccess={onSuccess} setShowModal={setShowModal} selected={mSelected} />
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

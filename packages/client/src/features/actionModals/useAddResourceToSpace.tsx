@@ -1,25 +1,16 @@
-import { UseMutationResult, useQuery } from '@tanstack/react-query'
-import { ColumnDef } from '@tanstack/react-table'
+import { type UseMutationResult, useQuery } from '@tanstack/react-query'
+import type { ColumnDef } from '@tanstack/react-table'
 import axios from 'axios'
-import React, { MouseEvent, useEffect, useState } from 'react'
-import styled from 'styled-components'
-import { Button } from '../../components/Button'
+import { type MouseEvent, useEffect, useState } from 'react'
 import { Loader } from '../../components/Loader'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 import Table from '../../components/Table'
 import { selectColumnDef } from '../../components/Table/selectColumnDef'
+import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { useListSelect } from '../home/useListSelect'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../modal/modal.styles'
 import { useModal } from '../modal/useModal'
-import { Empty } from '../home/home.styles'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
-
-const StyledName = styled.div`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`
 
 type ResourceTypes = 'apps' | 'workflows'
 
@@ -52,7 +43,7 @@ function ResourceTable<T extends { id: number; uid: string; name: string; revisi
       enableColumnFilter: false,
       enableSorting: false,
       enableResizing: false,
-      cell: c => <StyledName>{c.row.original.name}</StyledName>,
+      cell: c => <div className="overflow-hidden text-ellipsis whitespace-nowrap">{c.row.original.name}</div>,
     },
     {
       header: 'Revision',
@@ -75,7 +66,7 @@ function ResourceTable<T extends { id: number; uid: string; name: string; revisi
         <Loader />
       </div>
     )
-  if (!data) return <Empty>There are no resources here</Empty>
+  if (!data) return <div className="p-4 text-center text-muted-foreground text-sm">There are no resources here</div>
 
   return (
     <Table<T>
@@ -121,33 +112,30 @@ export function useAddResourceToModal({
   }
 
   const modalComp = (
-    <ModalNext
-      id="add-resource-to-space"
-      data-testid={`modal-${resource}-add-resource`}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop disableClose={false} headerText={`Add ${resource} to space`} hide={() => setShowModal(false)} />
-      <ModalScroll>
-        <ResourceTable resource={resource} setSelectedUids={setSelectedUids} />
-      </ModalScroll>
-      <Footer>
-        <ButtonRow>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent
+        id="add-resource-to-space"
+        data-testid={`modal-${resource}-add-resource`}
+        variant="medium"
+        className="min-w-0 gap-4 overflow-hidden"
+      >
+        <DialogHeader>
+          <DialogTitle>{`Add ${resource} to space`}</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-(--modal-max-height,50vh) min-h-0 overflow-y-auto">
+          <ResourceTable resource={resource} setSelectedUids={setSelectedUids} />
+        </div>
+        <DialogFooter className="items-center">
           {mutation?.isPending && <Loader height={14} />}
-          <Button onClick={() => setShowModal(false)} disabled={mutation?.isPending}>
+          <Button variant="outline" onClick={() => setShowModal(false)} disabled={mutation?.isPending}>
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            type="submit"
-            onClick={handleSubmit}
-            disabled={!selectedUids.length || mutation?.isPending}
-          >
+          <Button type="submit" onClick={handleSubmit} disabled={!selectedUids.length || mutation?.isPending}>
             Add to Space
           </Button>
-        </ButtonRow>
-      </Footer>
-    </ModalNext>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,

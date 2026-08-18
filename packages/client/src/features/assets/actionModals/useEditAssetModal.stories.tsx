@@ -1,13 +1,13 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
-import { useEffect } from 'react'
-import { WithListData } from '../../../stories/helpers'
-import { StorybookProviders } from '../../../stories/StorybookProviders'
-import { fetchAssets } from '../assets.api'
-import { IAsset } from '../assets.types'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { mockSelectAssets } from '@/mocks/handlers/assets.handlers'
+import { StorybookProviders } from '@/stories/StorybookProviders'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
+import type { IAsset } from '../assets.types'
 import { useEditAssetModal } from './useEditAssetModal'
 
 const meta: Meta = {
-  title: 'Modals/Assets',
+  title: 'Modals/Assets/Edit Asset',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -16,27 +16,36 @@ const meta: Meta = {
     ),
   ],
 }
-type Props = {
-  data: IAsset
+type Story = StoryObj
+
+const asset: IAsset = {
+  ...mockSelectAssets[0],
+  name: 'GRCh38 reference bundle.tar.gz',
+  origin: { text: 'GRCh38 reference bundle' },
 }
-type Story = StoryObj<Props>
 
-const EditAssetsModalWrapper = (props: Props) => {
-  const { modalComp, setShowModal } = useEditAssetModal(props.data)
+const EditAssetModalHarness = () => {
+  const { modalComp, setShowModal } = useEditAssetModal(asset)
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [])
+  useOpenModalInStory(setShowModal)
   return modalComp
 }
 
-export const EditAssetsModal: Story = {
-  render: () => {
-    return (
-      <WithListData resource="assets" fetchList={fetchAssets}>
-        {({ data }) => data && <EditAssetsModalWrapper data={data.assets[0]} />}
-      </WithListData>
-    )
+export const Default: Story = {
+  render: () => <EditAssetModalHarness />,
+}
+
+export const Validation: Story = {
+  render: () => <EditAssetModalHarness />,
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body)
+    const nameInput = await body.findByRole('textbox', { name: 'Asset Name' })
+
+    await userEvent.clear(nameInput)
+    await userEvent.click(body.getByRole('button', { name: 'Edit' }))
+
+    await waitFor(() => expect(nameInput).toHaveAttribute('aria-invalid', 'true'))
+    await expect(body.getByRole('alert')).toHaveTextContent('Name is required.')
   },
 }
 

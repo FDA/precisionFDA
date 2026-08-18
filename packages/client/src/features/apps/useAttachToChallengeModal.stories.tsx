@@ -99,7 +99,7 @@ const exampleAppResponse: AppFetchResponse = {
 }
 
 const meta: Meta = {
-  title: 'Modals/Apps',
+  title: 'Modals/Apps/Attach To Challenge',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -133,7 +133,7 @@ const AttachToChallengeModalWrapper = (props: Props) => {
   return modalComp
 }
 
-export const AttachToChallengeModal: Story = {
+export const Default: Story = {
   render: () => <AttachToChallengeModalWrapper data={exampleApp} />,
 }
 

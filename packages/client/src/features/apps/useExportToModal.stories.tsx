@@ -1,12 +1,12 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
-import { useEffect } from 'react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useOpenModalInStory } from '@/stories/useOpenModalInStory'
 import { mockExportApp } from '../../mocks/handlers/apps.handlers'
 import { mockExportWorkflow } from '../../mocks/handlers/workflows.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
-import { ExportToResource, useExportToModal } from './useExportToModal'
+import { type ExportToResource, useExportToModal } from './useExportToModal'
 
 const meta: Meta = {
-  title: 'Modals/Apps',
+  title: 'Modals/Apps/Export To',
   decorators: [
     Story => (
       <StorybookProviders>
@@ -29,14 +29,12 @@ const ExportToModalWrapper = ({ resource }: Props) => {
     resource,
   })
 
-  useEffect(() => {
-    setShowModal(true)
-  }, [setShowModal])
+  useOpenModalInStory(setShowModal)
 
   return modalComp
 }
 
-export const ExportToModal: Story = {
+export const Default: Story = {
   render: ({ resource = 'apps' }) => {
     return <ExportToModalWrapper resource={resource} />
   },

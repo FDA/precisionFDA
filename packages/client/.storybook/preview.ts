@@ -1,13 +1,11 @@
 import type { Preview } from '@storybook/react-vite'
-import { initialize, mswLoader } from 'msw-storybook-addon'
+import { mswLoader } from 'msw-storybook-addon/csf3'
 import { handlers } from '../src/mocks/handlers'
 import { resetStorybookQueryClient } from '../src/stories/StorybookProviders'
 
-initialize()
-
 const preview: Preview = {
   loaders: [
-    mswLoader,
+    mswLoader(),
     () => {
       resetStorybookQueryClient()
       return {}

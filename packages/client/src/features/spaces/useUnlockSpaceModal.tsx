@@ -1,19 +1,18 @@
 import { useMutation } from '@tanstack/react-query'
-import React from 'react'
-import { styled } from 'styled-components'
-import { Button } from '../../components/Button'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { Footer } from '../modal/modal.styles'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { toastError } from '../../components/NotificationCenter/ToastHelper'
 import { useModal } from '../modal/useModal'
 import { unlockSpaceRequest } from './spaces.api'
-import { ISpace } from './spaces.types'
-import { toastError } from '../../components/NotificationCenter/ToastHelper'
+import type { ISpace } from './spaces.types'
 
-const StyledBody = styled.div`
-  padding: 20px;
-`
-
-export const useUnlockSpaceModal = ({ space, onSuccess }: { space: ISpace; onSuccess?: (isLocked: boolean) => void }) => {
+export const useUnlockSpaceModal = ({
+  space,
+  onSuccess,
+}: {
+  space: ISpace
+  onSuccess?: (isLocked: boolean) => void
+}) => {
   const isLocked = space.links.unlock
 
   const { isShown, setShowModal } = useModal()
@@ -33,34 +32,32 @@ export const useUnlockSpaceModal = ({ space, onSuccess }: { space: ISpace; onSuc
   }
 
   const modalComp = (
-    <ModalNext
-      id="unlock-lock-space-modal"
-      data-testid="modal-unlock-lock-space"
-      headerText={`${isLocked ? 'Unlock' : 'Lock'} space`}
-      isShown={isShown}
-      hide={handleClose}
-    >
-      <ModalHeaderTop headerText={`${isLocked ? 'Unlock' : 'Lock'} space`} hide={handleClose} />
-      <StyledBody>Are you sure you want to {isLocked ? 'unlock' : 'lock'} this space?</StyledBody>
-      <Footer>
-        <Button type="button" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button
-          data-variant="primary"
-          type="button"
-          onClick={() =>
-            unlockSpaceMutation.mutateAsync({
-              id: space.id.toString(),
-              op: isLocked ? 'lock' : 'unlock',
-              link: space.links.lock ? space.links.lock : space.links.unlock,
-            })
-          }
-        >
-          {isLocked ? 'Unlock' : 'Lock'}
-        </Button>
-      </Footer>
-    </ModalNext>
+    <Dialog open={Boolean(isShown)} onOpenChange={setShowModal}>
+      <DialogContent id="unlock-lock-space-modal" data-testid="modal-unlock-lock-space">
+        <DialogHeader>
+          <DialogTitle>{isLocked ? 'Unlock' : 'Lock'} space</DialogTitle>
+        </DialogHeader>
+        <p>Are you sure you want to {isLocked ? 'unlock' : 'lock'} this space?</p>
+        <DialogFooter>
+          <Button variant="outline" type="button" onClick={handleClose} disabled={unlockSpaceMutation.isPending}>
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            disabled={unlockSpaceMutation.isPending}
+            onClick={() =>
+              unlockSpaceMutation.mutate({
+                id: space.id.toString(),
+                op: isLocked ? 'lock' : 'unlock',
+                link: space.links.lock ? space.links.lock : space.links.unlock,
+              })
+            }
+          >
+            {isLocked ? 'Unlock' : 'Lock'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
   return {
     modalComp,
