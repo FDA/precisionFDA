@@ -11,7 +11,7 @@ Since publishing an item means that others will be able to access it, it's very 
 | App | The app will appear in everyone's list of available apps to run. Users will be able to run the app, and view the app's specification (input and output spec, VM environment details and app shell script). |
 | App asset | The asset will appear in everyone's list of available assets. Users will be able to use the asset when making apps, view the asset's information (readme, and list of files), and download the asset. |
 | Comparison | The comparison will appear in everyone's list of available comparisons. Users will be able to view comparison details (including statistics such as sensitivity and positive predictive value), visualize the comparison, and download any of the comparison output files. |
-| File | The file will appear in everyone's list of available files. Users will be able to download the file or use it as input in their jobs. <br><br> The file will appear in everyone's list of available files. Users will be able to download the file or use it as input in their jobs. **NOTE:** only files in root folder can be published. |
+| File | The file will appear in everyone's list of available files. Users will be able to download the file or use it as input in their jobs. **NOTE:** only files in root folder can be published. |
 | Job | Users will be able to view job details, such as which parameters/values were provided as inputs. **NOTE:** users will not see the job's log. |
 | Note | The note will appear in everyone's list of notes. Users will be able to read the note. |
 

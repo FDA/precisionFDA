@@ -12,7 +12,7 @@ pnpm dev
 yarn dev
 ```
 
-Open http://localhost:4040 with your browser to see the result.
+Open http://localhost:4040/docs with your browser to see the result.
 
 ## Learn More
 

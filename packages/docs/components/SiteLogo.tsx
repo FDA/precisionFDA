@@ -1,11 +1,13 @@
 export const SiteLogo = () => {
   return (
-    <div className="md:h-14 md:relative text-gray-700 dark:text-gray-50" aria-label="Back to pFDA">
+    <div className="md:h-14 md:relative text-gray-700 dark:text-gray-50">
       <svg
         className="md:absolute md:left-0"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 3100 689"
         width={175}
+        role="img"
+        aria-label="precisionFDA"
       >
         <path
           fill="currentColor"
@@ -14,5 +16,5 @@ export const SiteLogo = () => {
         />
       </svg>
     </div>
-  );
-};
+  )
+}

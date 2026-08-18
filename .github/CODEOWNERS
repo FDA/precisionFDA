@@ -16,3 +16,6 @@
 /packages/server @jirkalagan @pavelkubal @lbobek-dnanexus @nganphtgit @ihitch
 /packages/rails @jirkalagan @pavelkubal @lbobek-dnanexus @nganphtgit @ihitch
 /packages/server/libs/shared/src/domain/cli-exchange-token/services/cli-exchange-token.service.ts @jselbaz @marektamaskovic @keithmccartney-dna
+
+# Docs
+/packages/docs @ddcech @jirkalagan @pavelkubal @lbobek-dnanexus @nganphtgit @ihitch

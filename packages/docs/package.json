@@ -10,29 +10,31 @@
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@r4ai/remark-callout": "0.6.2",
-    "fumadocs-core": "16.8.10",
+    "fumadocs-core": "16.8.12",
     "fumadocs-mdx": "14.3.2",
-    "fumadocs-ui": "16.8.10",
-    "lucide-react": "1.14.0",
-    "next": "16.2.11",
-    "react": "19.2.5",
-    "react-dom": "19.2.5",
-    "rehype-raw": "7.0.0",
-    "unified": "11.0.5"
+    "fumadocs-ui": "16.8.12",
+    "lucide-react": "1.31.0",
+    "next": "16.2.12",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.0",
-    "@tailwindcss/postcss": "4.3.0",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/mdx": "2.0.13",
     "@types/node": "24.0.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "postcss": "8.5.23",
-    "tailwindcss": "4.3.0",
-    "typescript": "5.9.3"
+    "postcss": "8.5.26",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "unified": "11.0.5"
   }
 }

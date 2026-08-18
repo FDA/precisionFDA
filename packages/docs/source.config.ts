@@ -1,5 +1,5 @@
-import { defineDocs, defineConfig } from 'fumadocs-mdx/config'
-import remarkCallout from "@r4ai/remark-callout"
+import remarkCallout from '@r4ai/remark-callout'
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config'
 import type { Pluggable } from 'unified'
 
 export const docs = defineDocs({
@@ -9,6 +9,5 @@ export const docs = defineDocs({
 export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkCallout as Pluggable],
-    // rehypePlugins: [rehypeRaw],
-  }
+  },
 })

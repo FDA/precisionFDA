@@ -420,6 +420,10 @@ module Api
       # the row order match exactly. `analyses.id` is added as a tie-breaker
       # before `jobs.id` so analyses sharing the same `created_at` do not
       # interleave their jobs (see `default_chronological_order`).
+      #
+      # Brakeman flags this Arel.sql as SQL injection; ignored in
+      # config/brakeman.ignore because `order_dir` is always a frozen
+      # "ASC"/"DESC" constant from `Sortable#order_direction`, never raw params.
       if order_by_key == "launched_on"
         return Arel.sql(
           "COALESCE(analyses.created_at, jobs.created_at) #{order_dir}, " \

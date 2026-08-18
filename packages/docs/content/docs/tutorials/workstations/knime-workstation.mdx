@@ -135,9 +135,12 @@ ip addr show docker0
     inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
 ```
 
-<div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px;" markdown="1">
-  <img src="./assets/image-26.png" alt="pgadmin connect">
-  <img src="./assets/image-27.png" alt="pgadmin database list">
+<div className="grid grid-cols-[1.2fr_1fr] gap-4 items-start">
+
+![pgAdmin connection settings](./assets/image-26.png)
+
+![pgAdmin database list](./assets/image-27.png)
+
 </div>
 
 ### Share Files Between Workstation FS and PostgreSQL Docker FS
@@ -197,9 +200,7 @@ mv KNIME-Tutorial-20230217.knwf ~/knime-workspace/
 ### Run the KNIME Data Transformation Workflow
 Restart KNIME to pickup the newly added files.
 
-<div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px;" markdown="1">
-  <img src="./assets/image-28.png" alt="pgadmin database list">
-</div>
+![Restarting KNIME to pick up the newly added files](./assets/image-28.png)
 
 ### Import and Open the Workflow and Update Dependencies
 
@@ -223,9 +224,12 @@ Ignore the warnings and errors.
 
 Configure the pfdacli-access-key String Widget to set the pfda CLI authentication token.
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" markdown="1">
-  <img src="./assets/image-36.png" alt="1">
-  <img src="./assets/image-37.png" alt="1">
+<div className="grid grid-cols-2 gap-4 items-start">
+
+![Configuring the pfdacli-access-key String Widget (1 of 2)](./assets/image-36.png)
+
+![Configuring the pfdacli-access-key String Widget (2 of 2)](./assets/image-37.png)
+
 </div>
 
 (Temporary workaround until the precisionFDA CLI is updated to properly perform ls on folders in the Everyone scope). 
@@ -236,17 +240,23 @@ In KNIME, Configure the datasource-folderid String Widget to set the folder ID.
 
 (Steps once the pFDA CLI is updated; ignore for now) Navigate to the KNIME Workstation Tutorial folder in the My Home Everyone context and copy the folder ID for the Datafiles folder from the browser URL. Configure the datasource-folderid String Widget to set the folder ID.
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" markdown="1">
-  <img src="./assets/image-38.png" alt="1">
-  <img src="./assets/image-39.png" alt="1">
+<div className="grid grid-cols-2 gap-4 items-start">
+
+![Configuring the datasource-folderid String Widget (1 of 2)](./assets/image-38.png)
+
+![Configuring the datasource-folderid String Widget (2 of 2)](./assets/image-39.png)
+
 </div>
 
 #### Create the DB
 Execute the Create ehr_data DB tables with primary keys node.
 
-<div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px;" markdown="1">
-  <img src="./assets/image-40.png" alt="1">
-  <img src="./assets/image-41.png" alt="1">
+<div className="grid grid-cols-[1.5fr_1fr] gap-4 items-start">
+
+![Create ehr_data DB tables with primary keys node (1 of 2)](./assets/image-40.png)
+
+![Create ehr_data DB tables with primary keys node (2 of 2)](./assets/image-41.png)
+
 </div>
 
 Once the node shows green, refresh the KNIME Tutorial DB Server in pgadmin to see the newly created knime_tutorial_ehr_data DB.
@@ -256,9 +266,12 @@ Once the node shows green, refresh the KNIME Tutorial DB Server in pgadmin to se
 #### Download the Data from precisionFDA Folder
 Execute the Ingest compressed EHR Data files from precisionFDA to local FS node.
 
-<div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px;" markdown="1">
-  <img src="./assets/image-43.png" alt="1">
-  <img src="./assets/image-44.png" alt="1">
+<div className="grid grid-cols-[1.5fr_1fr] gap-4 items-start">
+
+![Ingest compressed EHR Data files from precisionFDA node (1 of 2)](./assets/image-43.png)
+
+![Ingest compressed EHR Data files from precisionFDA node (2 of 2)](./assets/image-44.png)
+
 </div>
 
 Once the node shows green, check the downloaded files in the newly created EHR_Data directory.
@@ -268,24 +281,33 @@ Once the node shows green, check the downloaded files in the newly created EHR_D
 #### ETL the Data into the DB
 Execute the ETL EHR Data from files into a PostgreSQL DB node to ETL the data from the compressed csv files into the DB.
 
-<div style="display: grid; grid-template-columns: 3fr 1fr; gap: 16px;" markdown="1">
-  <img src="./assets/image-46.png" alt="1">
-  <img src="./assets/image-47.png" alt="1">
+<div className="grid grid-cols-[3fr_1fr] gap-4 items-start">
+
+![ETL EHR Data into a PostgreSQL DB node (1 of 2)](./assets/image-46.png)
+
+![ETL EHR Data into a PostgreSQL DB node (2 of 2)](./assets/image-47.png)
+
 </div>
 
 Once the shows green, check the DB for content in pgadmin.
 
-<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px;" markdown="1">
-  <img src="./assets/image-48.png" alt="1">
-  <img src="./assets/image-49.png" alt="1">
+<div className="grid grid-cols-[1fr_2fr] gap-4 items-start">
+
+![Checking the DB for content in pgAdmin (1 of 2)](./assets/image-48.png)
+
+![Checking the DB for content in pgAdmin (2 of 2)](./assets/image-49.png)
+
 </div>
 
 #### Analyze the Data and Create Reports
 Execute the Dashboard node to and when it shows green, inspect the data table and geomap in the interactive node view .
 
-<div style="display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px;" markdown="1">
-  <img src="./assets/image-50.png" alt="1">
-  <img src="./assets/image-51.png" alt="1">
+<div className="grid grid-cols-[1fr_1.4fr] gap-4 items-start">
+
+![Dashboard node interactive view: data table](./assets/image-50.png)
+
+![Dashboard node interactive view: geomap](./assets/image-51.png)
+
 </div>
 
 #### Publish the Reports to precisionFDA My Home

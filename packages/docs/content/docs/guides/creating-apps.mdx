@@ -159,10 +159,10 @@ The following table summarizes ways in which you can use the VirtualBox machine 
 
 | To include...               | Do this...                                                                                                                                                 |
 |-----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Compilable executables      | `make` <br> `mkdir -p fake_root/usr/bin` <br> `cp _program_ fake_root/usr/bin`                                                                             |
-| Complex compilable packages | `./configure --prefix=/opt/_packagename_` <br> `sudo make install` <br> `mkdir -p fake_root/opt/` <br> `cp -R /opt/_packagename_ fake_root/opt/`           |
-| Python packages             | `pip install --user _packagename_` <br> `mkdir -p fake_root/work/` <br> `mv ~/.local fake_root/work/`                                                      |
-| R packages                  | `R` <br> `> install.packages(...)` <br> Answer Y to the question "create a personal library" <br> `mkdir -p fake_root/work/` <br> `mv ~/R fake_root/work/` |
+| Compilable executables      | `make` <br /> `mkdir -p fake_root/usr/bin` <br /> `cp _program_ fake_root/usr/bin`                                                                             |
+| Complex compilable packages | `./configure --prefix=/opt/_packagename_` <br /> `sudo make install` <br /> `mkdir -p fake_root/opt/` <br /> `cp -R /opt/_packagename_ fake_root/opt/`           |
+| Python packages             | `pip install --user _packagename_` <br /> `mkdir -p fake_root/work/` <br /> `mv ~/.local fake_root/work/`                                                      |
+| R packages                  | `R` <br /> `> install.packages(...)` <br /> Answer Y to the question "create a personal library" <br /> `mkdir -p fake_root/work/` <br /> `mv ~/R fake_root/work/` |
 
 After assembling your fake\_root, prepare a Readme file for your asset. This file needs to contain [Markdown syntax](https://jonschlinkert.github.io/remarkable/demo/). Below is an example of the Readme file included with the htslib-1.2.1 public asset: (note the extra two spaces after tabix-1.2.1.html -- this is how you introduce line breaks in markdown)
 
@@ -216,14 +216,14 @@ App inputs are handled in the following way:
 
 | Scenario                                                         | Example script                                                                                                                                                                                               |
 |------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| string\[\] string_output integer\[\] int\_output float\[\] float\_output | `emit _string_output_ "hello" "world"` <br> `emit _int_output_ 11 22 33` <br>`emit _float_output_ 10.5 13.1 77.7`                                                                                            |
-| string\[\] string\_input <br> string\[\] string\_output          | `_string_input[0]_="${_string_input[0]_}""added_to_first_element"` <br> `_string_input[1]_="${_string_input[1]_}""added_to_second_element"` <br> `emit _string_output_ "${_string_input[@]_}"`               |
-| file\[\] file\_output                                               | `echo "Test output file 1." > file1.txt` <br> `echo "Test output file 2." > file2.txt` <br> `emit _file_output_ file1.txt file2.txt`                                                                         |
-| file\[\] file\_input <br> file\[\] file\_output                  | `arr=("test1.txt" "test2.txt")` <br> ``echo `head ./in/file_input/0/test.txt` > test1.txt`` <br> `echo "added content" >> test1.txt` <br> `echo "content" > test2.txt` <br> `emit _file_output_ "${arr[@]}"` |
+| string\[\] string_output integer\[\] int\_output float\[\] float\_output | `emit _string_output_ "hello" "world"` <br /> `emit _int_output_ 11 22 33` <br />`emit _float_output_ 10.5 13.1 77.7`                                                                                            |
+| string\[\] string\_input <br /> string\[\] string\_output          | `_string_input[0]_="${_string_input[0]_}""added_to_first_element"` <br /> `_string_input[1]_="${_string_input[1]_}""added_to_second_element"` <br /> `emit _string_output_ "${_string_input[@]_}"`               |
+| file\[\] file\_output                                               | `echo "Test output file 1." > file1.txt` <br /> `echo "Test output file 2." > file2.txt` <br /> `emit _file_output_ file1.txt file2.txt`                                                                         |
+| file\[\] file\_input <br /> file\[\] file\_output                  | `arr=("test1.txt" "test2.txt")` <br /> ``echo `head ./in/file_input/0/test.txt` > test1.txt`` <br /> `echo "added content" >> test1.txt` <br /> `echo "content" > test2.txt` <br /> `emit _file_output_ "${arr[@]}"` |
 
 #### Example of system-defined variables
 
-For our [example](/guides/creating-apps#app-io), the system would define the following variables:
+For our [example](/guides/creating-apps#input-and-output-spec), the system would define the following variables:
 
 | Variable            | Content                           |
 |---------------------|-----------------------------------|
@@ -273,7 +273,7 @@ In addition, this feature can be used to take a peek at the insides of an app â€
 
 ## App Import
 
-On precisionFDA, there are two methods for building apps. You may create apps on precisionFDA using the UI, as is described in [Creating Apps](./../../pdfs/Tutorial_-_Apps_and_Workflows_-_20221130.pdf). However, advanced users may choose to instead create their app by writing a CWL or WDL file that contains all the pertinent details for the app and uploading this to precisionFDA.
+On precisionFDA, there are two methods for building apps. You may create apps on precisionFDA using the UI, as is described in the [Apps and Workflows tutorial](/tutorials/apps/introduction). However, advanced users may choose to instead create their app by writing a CWL or WDL file that contains all the pertinent details for the app and uploading this to precisionFDA.
 
 ## Why Use App Import?
 
@@ -372,7 +372,7 @@ In order to successfully import as an app in precisionFDA, the WDL script must i
 
 First, the inputs and outputs specified in the WDL script must be one of the five data types used on precisionFDA - file, string, float, integer, or Boolean. Arrays are not supported as a data type on precisionFDA, and any WDL script that specifies an array as an input or output will not import successfully as an app.
 
-Second, command only uses and cannot run with <<< and >>>.
+Second, command only uses and cannot run with `<<<` and `>>>`.
 
 Finally, the required docker is under runtime. Using this method, we specify a public Docker image that will be automatically pulled and used to execute the commands of the app.
 

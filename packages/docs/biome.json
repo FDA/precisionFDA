@@ -3,10 +3,7 @@
   "root": false,
   "extends": "//",
   "files": {
-    "includes": [
-      "app/**",
-      "biome.json"
-    ]
+    "includes": ["app/**", "components/**", "lib/**", "*.ts", "*.mjs", "biome.json", "!next-env.d.ts"]
   },
   "linter": {
     "rules": {

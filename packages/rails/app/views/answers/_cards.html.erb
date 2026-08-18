@@ -7,14 +7,14 @@
             <% if defined?(show_discussion) && show_discussion %>
               <div class="pfda-answer-to-discussion-meta">
                 <div class="pfda-answer-to-discussion">
-                  <%= link_to "Answer to #{truncate(answer.discussion.title, length: 100, escape: false, separator: ' ')}", pathify(answer), target: "_blank" %>
+                  <%= link_to "Answer to #{truncate(answer.discussion.title, length: 100, escape: false, separator: ' ')}", pathify(answer), target: "_blank", rel: "noopener noreferrer" %>
                 </div>
               </div>
             <% else %>
               <div class="media">
                 <div class="media-body">
                   <div class="pfda-answer-meta">
-                    <%= link_to(answer.user.full_name, pathify(answer), target: "_blank") %>
+                    <%= link_to(answer.user.full_name, pathify(answer), target: "_blank", rel: "noopener noreferrer") %>
                     <br>
                     <small><%= answer.user.org.name %></small>
                   </div>
@@ -44,14 +44,14 @@
                 <%= render "_partials/upvote_link", item: answer %>
               </li>
               <li>
-                <%= link_to pathify(answer), target: "_blank", class: '' do %>
+                <%= link_to pathify(answer), target: "_blank", rel: "noopener noreferrer", class: '' do %>
                    Comment | <%= answer.comment_threads.size %>
                 <% end %>
               </li>
             </ul>
             <br>
           <% end %>
-          <%= link_to "Read answer", pathify(answer), target: "_blank", class: "btn btn-default btn-sm btn-block" %>
+          <%= link_to "Read answer", pathify(answer), target: "_blank", rel: "noopener noreferrer", class: "btn btn-default btn-sm btn-block" %>
         </div>
       </div>
     <% end %>
