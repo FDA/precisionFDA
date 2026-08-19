@@ -115,8 +115,6 @@ export const useFilesColumns = ({
     {
       header: 'Location',
       accessorKey: 'location',
-      // TODO (PFDA-7013): support sorting location string in Nodejs
-      enableSorting: false,
       filterFn: 'includesString',
       size: 250,
       cell: ({ row, getValue }) => {
@@ -160,8 +158,6 @@ export const useFilesColumns = ({
     {
       header: 'Added By',
       accessorKey: 'addedBy',
-      // TODO (PFDA-7013): support sorting full name in Nodejs
-      enableSorting: false,
       filterFn: 'includesString',
       size: 198,
     },
@@ -245,12 +241,6 @@ export const useFilesColumns = ({
         </StyledTags>
       ),
     },
-    // TODO (PFDA-7013): support sorting properties in Nodejs
-    ...propertiesColumnDef<INode>(properties).map(col => {
-      return {
-        ...col,
-        enableSorting: false,
-      }
-    }),
+    ...propertiesColumnDef<INode>(properties),
   ]
 }

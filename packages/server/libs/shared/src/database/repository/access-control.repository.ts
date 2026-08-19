@@ -10,22 +10,22 @@ import { userContextStorage } from '@shared/domain/user-context/storage/user-con
 import { createUserContextManager } from '@shared/domain/user-context/storage/user-context-storage.manager'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
-const EMPTY_PAGEABLE_RESULT: PaginatedResult<never> = {
-  data: [],
-  meta: {
-    total: 0,
-    totalPages: 1,
-    pageSize: 0,
-    page: 1,
-  },
-}
-const EMPTY_FIND_RESULT: never[] = []
-const EMPTY_FIND_ONE_RESULT = null
-
 export abstract class AccessControlRepository<Entity extends BaseEntity> extends PaginatedRepository<Entity> {
   protected readonly user: UserContext = createUserContextManager(userContextStorage)
   @ServiceLogger()
-  private readonly logger: Logger
+  protected readonly logger: Logger
+
+  protected readonly EMPTY_PAGEABLE_RESULT: PaginatedResult<never> = {
+    data: [],
+    meta: {
+      total: 0,
+      totalPages: 1,
+      pageSize: 0,
+      page: 1,
+    },
+  }
+  protected readonly EMPTY_FIND_RESULT: never[] = []
+  protected readonly EMPTY_FIND_ONE_RESULT = null
 
   async paginateAccessible<Hint extends string = never, Fields extends string = '*', Excludes extends string = never>(
     pagination: PaginationDTO<Entity>,
@@ -35,7 +35,7 @@ export abstract class AccessControlRepository<Entity extends BaseEntity> extends
     const accessibleWhere = await this.getAccessibleWhere()
     if (!accessibleWhere) {
       this.logger.log('No accessible entities found, returning empty result')
-      return EMPTY_PAGEABLE_RESULT
+      return this.EMPTY_PAGEABLE_RESULT
     }
 
     const mergedWhere = this.getMergedWhere(where, accessibleWhere)
@@ -51,7 +51,7 @@ export abstract class AccessControlRepository<Entity extends BaseEntity> extends
     const editableWhere = await this.getEditableWhere()
     if (!editableWhere) {
       this.logger.log('No editable entities found, returning empty result')
-      return EMPTY_PAGEABLE_RESULT
+      return this.EMPTY_PAGEABLE_RESULT
     }
     const mergedWhere = this.getMergedWhere(where, editableWhere)
 
@@ -65,7 +65,7 @@ export abstract class AccessControlRepository<Entity extends BaseEntity> extends
     const accessibleWhere = await this.getAccessibleWhere()
     if (!accessibleWhere) {
       this.logger.log('No accessible entities found, returning empty result')
-      return EMPTY_FIND_RESULT
+      return this.EMPTY_FIND_RESULT
     }
     const mergedWhere = this.getMergedWhere(where, accessibleWhere)
 
@@ -79,7 +79,7 @@ export abstract class AccessControlRepository<Entity extends BaseEntity> extends
     const editableWhere = await this.getEditableWhere()
     if (!editableWhere) {
       this.logger.log('No editable entities found, returning empty result')
-      return EMPTY_FIND_RESULT
+      return this.EMPTY_FIND_RESULT
     }
 
     const mergedWhere = this.getMergedWhere(where, editableWhere)
@@ -94,7 +94,7 @@ export abstract class AccessControlRepository<Entity extends BaseEntity> extends
     const accessibleWhere = await this.getAccessibleWhere()
     if (!accessibleWhere) {
       this.logger.log('No accessible entities found, returning empty result')
-      return EMPTY_FIND_ONE_RESULT
+      return this.EMPTY_FIND_ONE_RESULT
     }
     const mergedWhere = this.getMergedWhere(where, accessibleWhere)
     return this.findOne(mergedWhere, options)
@@ -107,7 +107,7 @@ export abstract class AccessControlRepository<Entity extends BaseEntity> extends
     const editableWhere = await this.getEditableWhere()
     if (!editableWhere) {
       this.logger.log('No editable entities found, returning empty result')
-      return EMPTY_FIND_ONE_RESULT
+      return this.EMPTY_FIND_ONE_RESULT
     }
     const mergedWhere = this.getMergedWhere(where, editableWhere)
     return this.findOne(mergedWhere, options)
@@ -138,7 +138,7 @@ export abstract class AccessControlRepository<Entity extends BaseEntity> extends
    */
   protected abstract getEditableWhere(): Promise<FilterQuery<Entity>>
 
-  private getMergedWhere(baseWhere: FilterQuery<Entity>, additionalWhere: FilterQuery<Entity>): FilterQuery<Entity> {
+  protected getMergedWhere(baseWhere: FilterQuery<Entity>, additionalWhere: FilterQuery<Entity>): FilterQuery<Entity> {
     if (Object.keys(baseWhere).length === 0) {
       return additionalWhere
     }

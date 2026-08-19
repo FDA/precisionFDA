@@ -1,4 +1,4 @@
-import { Property } from '@mikro-orm/core'
+import { FormulaTable, Property } from '@mikro-orm/core'
 import { BaseEntity } from '@shared/database/base.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { EntityScope } from '@shared/types/common'
@@ -9,6 +9,24 @@ import { EntityScope } from '@shared/types/common'
 export abstract class ScopedEntity extends BaseEntity {
   @Property()
   scope: EntityScope
+
+  @Property({
+    formula: (alias: FormulaTable) => `
+    CASE
+      WHEN ${alias}.scope = 'private' THEN 'Private'
+      WHEN ${alias}.scope = 'public' THEN 'Public'
+      ELSE (
+        SELECT s.name
+        FROM spaces s
+        WHERE CONCAT('space-', s.id) = ${alias}.scope
+      )
+    END
+  `,
+    persist: false,
+    hidden: true,
+    lazy: true,
+  })
+  location?: string
 
   isInSpace(): boolean {
     return /^space-\d+$/.test(this.scope)

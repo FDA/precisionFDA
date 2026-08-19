@@ -34,7 +34,7 @@ describe('NodeService', () => {
   const nodeRepositoryFindAccessibleStub = stub()
   const spaceRepositoryFindOneStub = stub()
   const nodeHelperCollectChildrenStub = stub()
-  const paginateStub = stub()
+  const paginateAccessibleStub = stub()
   const nodeHelperGetParentFolderStub = stub()
   const nodeHelperGetNodePathStub = stub()
   let referenceStub: SinonStub
@@ -52,7 +52,7 @@ describe('NodeService', () => {
     const nodeRepository = {
       find: nodeRepositoryFindStub,
       findAccessible: nodeRepositoryFindAccessibleStub,
-      paginate: paginateStub,
+      paginateAccessible: paginateAccessibleStub,
     } as unknown as NodeRepository
     const userFileService = {} as unknown as UserFileService
     const folderService = {} as unknown as FolderService
@@ -107,8 +107,8 @@ describe('NodeService', () => {
     nodeRepositoryFindAccessibleStub.reset()
     nodeRepositoryFindAccessibleStub.throws()
 
-    paginateStub.reset()
-    paginateStub.throws()
+    paginateAccessibleStub.reset()
+    paginateAccessibleStub.throws()
 
     nodeHelperGetNodePathStub.reset()
     nodeHelperGetNodePathStub.withArgs(match.any).returns('/')
@@ -551,7 +551,7 @@ describe('NodeService', () => {
           scope: 'private',
         },
       ] as unknown as UserFile[]
-      paginateStub.returns({ data: files, meta: { total: 2, page: 1, pageSize: 10 } })
+      paginateAccessibleStub.resolves({ data: files, meta: { total: 2, page: 1, pageSize: 10 } })
 
       const nodeService = createNodeService(defaultUser)
       const res = await nodeService.paginate({
@@ -563,17 +563,21 @@ describe('NodeService', () => {
         },
         scope: 'private',
         sort: { createdAt: QueryOrder.DESC },
+        ignoreChallengeBot: true,
+        ignoreComparison: true,
       })
       expect(res.data).to.deep.eq(files)
-      expect(paginateStub.calledOnce).to.be.true()
-      expect(paginateStub.firstCall.args[0]).to.deep.eq({
+      expect(paginateAccessibleStub.calledOnce).to.be.true()
+      expect(paginateAccessibleStub.firstCall.args[0]).to.deep.eq({
         page: 1,
         pageSize: 10,
+        scope: 'private',
+        filter: undefined,
         sort: {
           createdAt: QueryOrder.DESC,
         },
       })
-      expect(paginateStub.firstCall.args[1].$and).to.deep.include({
+      expect(paginateAccessibleStub.firstCall.args[1].$and).to.deep.include({
         $or: [
           {
             uid: /file-uid-1/i,
@@ -592,7 +596,7 @@ describe('NodeService', () => {
         uid: 'file-uid-1',
         scope: 'private',
       } as unknown as UserFile
-      paginateStub.returns({ data: [file], meta: { total: 1, page: 1, pageSize: 10 } })
+      paginateAccessibleStub.returns({ data: [file], meta: { total: 1, page: 1, pageSize: 10 } })
 
       const nodeService = createNodeService(defaultUser)
       const res = await nodeService.paginate({
@@ -605,17 +609,21 @@ describe('NodeService', () => {
         },
         scope: 'private',
         sort: { createdAt: QueryOrder.DESC },
+        ignoreChallengeBot: true,
+        ignoreComparison: true,
       })
       expect(res.data).to.deep.eq([file])
-      expect(paginateStub.calledOnce).to.be.true()
-      expect(paginateStub.firstCall.args[0]).to.deep.eq({
+      expect(paginateAccessibleStub.calledOnce).to.be.true()
+      expect(paginateAccessibleStub.firstCall.args[0]).to.deep.eq({
         page: 1,
         pageSize: 10,
+        scope: 'private',
+        filter: undefined,
         sort: {
           createdAt: QueryOrder.DESC,
         },
       })
-      expect(paginateStub.firstCall.args[1].$and).to.deep.include({
+      expect(paginateAccessibleStub.firstCall.args[1].$and).to.deep.include({
         $or: [
           {
             uid: /file-uid-1/i,

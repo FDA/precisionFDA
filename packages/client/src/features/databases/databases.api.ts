@@ -10,7 +10,6 @@ export interface FetchDatabaseListQuery {
 
 function normalizeDbClusterFilterKeys(query: Record<string, string>): Record<string, string> {
   const normalized = { ...query }
-
   if (normalized['filter[type]']) {
     normalized['filter[engine]'] = normalized['filter[type]']
     delete normalized['filter[type]']

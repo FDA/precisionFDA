@@ -3,7 +3,9 @@ import { Type } from 'class-transformer'
 import { IsInt, IsOptional, Min } from 'class-validator'
 
 //TODO PFDA-6051: Ludvik - revisit if we need this custom type.
-export type SortDefinition<Entity extends object> = Partial<{ [key in keyof Entity]: QueryOrder }>
+export type SortDefinition<Entity extends object> = Partial<{
+  [key in keyof Entity | 'location' | `props.${string}`]: QueryOrder
+}>
 
 export class PaginationDTO<Entity extends object> {
   @Type(() => Number)

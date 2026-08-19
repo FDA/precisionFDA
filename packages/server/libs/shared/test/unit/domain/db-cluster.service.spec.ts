@@ -1,5 +1,6 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
+import { populate } from 'dotenv'
 import { invertObj } from 'ramda'
 import { match, stub } from 'sinon'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
@@ -224,7 +225,7 @@ describe('DbClusterService', () => {
         page: 1,
         pageSize: 10,
         scope: 'private' as const,
-        sort: asDbClusterSort({ myCustomProperty: 'ASC' }),
+        sort: asDbClusterSort({ 'props.myCustomProperty': 'ASC' }),
       }
       const where = { scope: STATIC_SCOPE.PRIVATE }
 
@@ -232,12 +233,12 @@ describe('DbClusterService', () => {
 
       expect(paginateWithPropertySortStub.calledOnce).to.be.true()
       const call = paginateWithPropertySortStub.getCall(0)
-      expect(call.args[0]).to.equal('myCustomProperty')
-      expect(call.args[1]).to.equal('ASC')
-      expect(call.args[3]).to.equal(1) // page
-      expect(call.args[4]).to.equal(10) // limit
-      expect(call.args[5]).to.equal('properties') // propertiesRelation
-      expect(call.args[6]).to.deep.equal(['user', 'properties', 'taggings.tag']) // populate
+      expect(call.args[0]).to.deep.equal({
+        page: 1,
+        pageSize: 10,
+        sort: { 'props.myCustomProperty': 'ASC' },
+      })
+      expect(call.args[2]).to.deep.equal({ populate: ['user', 'properties', 'taggings.tag'] })
       expect(paginateStub.called).to.be.false()
       expect(result).to.equal(paginatedResult)
     })
@@ -249,7 +250,7 @@ describe('DbClusterService', () => {
         page: 2,
         pageSize: 25,
         scope: 'private' as const,
-        sort: asDbClusterSort({ someProperty: 'desc' }),
+        sort: asDbClusterSort({ 'props.someProperty': 'desc' }),
       }
       const where = { scope: STATIC_SCOPE.PRIVATE }
 
@@ -257,12 +258,12 @@ describe('DbClusterService', () => {
 
       expect(paginateWithPropertySortStub.calledOnce).to.be.true()
       const call = paginateWithPropertySortStub.getCall(0)
-      expect(call.args[0]).to.equal('someProperty')
-      expect(call.args[1]).to.equal('DESC')
-      expect(call.args[3]).to.equal(2) // page
-      expect(call.args[4]).to.equal(25) // limit
-      expect(call.args[5]).to.equal('properties') // propertiesRelation
-      expect(call.args[6]).to.deep.equal(['user', 'properties', 'taggings.tag']) // populate
+      expect(call.args[0]).to.deep.equal({
+        page: 2,
+        pageSize: 25,
+        sort: { 'props.someProperty': 'desc' },
+      })
+      expect(call.args[2]).to.deep.equal({ populate: ['user', 'properties', 'taggings.tag'] })
     })
 
     it('should fall back to regular paginate when sort key is a known entity field', async () => {
@@ -323,7 +324,7 @@ describe('DbClusterService', () => {
 
       const pagination = {
         scope: 'private' as const,
-        sort: asDbClusterSort({ customProp: 'ASC' }),
+        sort: asDbClusterSort({ 'props.customProp': 'ASC' }),
       }
       const where = { scope: STATIC_SCOPE.PRIVATE }
 
@@ -331,8 +332,8 @@ describe('DbClusterService', () => {
 
       expect(paginateWithPropertySortStub.calledOnce).to.be.true()
       const call = paginateWithPropertySortStub.getCall(0)
-      expect(call.args[3]).to.equal(1) // default page
-      expect(call.args[4]).to.equal(10) // default pageSize
+      expect(call.args[0].page).to.equal(1) // default page
+      expect(call.args[0].pageSize).to.equal(10) // default pageSize
     })
 
     it('should treat all known entity fields as non-property sorts', async () => {
@@ -380,24 +381,6 @@ describe('DbClusterService', () => {
           `Expected no property sort for entity field "${field}"`,
         ).to.be.false()
       }
-    })
-
-    it('should default to DESC when direction is not ASC', async () => {
-      paginateWithPropertySortStub.resolves(paginatedResult)
-
-      const pagination = {
-        page: 1,
-        pageSize: 10,
-        scope: 'private' as const,
-        sort: asDbClusterSort({ myProp: 'invalid' }),
-      }
-      const where = { scope: STATIC_SCOPE.PRIVATE }
-
-      await getInstance().paginate(pagination, where)
-
-      expect(paginateWithPropertySortStub.calledOnce).to.be.true()
-      const call = paginateWithPropertySortStub.getCall(0)
-      expect(call.args[1]).to.equal('DESC')
     })
   })
 
