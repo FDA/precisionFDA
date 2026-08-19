@@ -117,6 +117,8 @@
   --c-discussion-answer-500: #ac8f43;
   --c-discussion-answer-300: #e4c472;
 
+  --c-codemirror-bg: var(--tertiary-70);
+
   --c-tabs-selected: rgba(179, 69, 61, 1);
 
   --c-footer-bg: #f4f8fd;
@@ -258,6 +260,8 @@ html.dark {
   --c-discussion-answer-bg: #32312d;
   --c-discussion-answer-500: #ba983e;
   --c-discussion-answer-300: #7a6633;
+
+  --c-codemirror-bg: hsl(220 12% 20%);
 
   --c-tabs-selected: rgba(203, 84, 76, 1);
 

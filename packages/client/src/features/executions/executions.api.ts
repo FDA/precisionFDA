@@ -234,7 +234,7 @@ export async function terminateJobsRequest(ids: string[]) {
 
 export async function workstationSnapshotRequest(
   uid: string,
-  { name, terminate }: { name: string; terminate: boolean },
+  { name, terminate, preScript }: { name: string; terminate: boolean; preScript?: string },
 ) {
-  return axios.patch(`/api/jobs/${uid}/snapshot`, { name, terminate }).then(res => res.data)
+  return axios.post(`/api/v2/jobs/${uid}/snapshot`, { name, terminate, preScript }).then(res => res.data)
 }

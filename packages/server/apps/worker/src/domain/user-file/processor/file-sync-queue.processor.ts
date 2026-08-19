@@ -100,10 +100,10 @@ export class FileSyncQueueProcessor {
   async createWorkstationSnapshot(job: Job<WorkstationSnapshotJob>): Promise<void> {
     await this.jobWorkstationFacade.snapshot(
       job.data.payload.jobUid,
-      job.data.payload.code,
-      job.data.payload.key,
+      job.data.payload.httpsJobExternalUrl,
       job.data.payload.name,
       job.data.payload.terminate,
+      job.data.payload.preScript,
     )
   }
 

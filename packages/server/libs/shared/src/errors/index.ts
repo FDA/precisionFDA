@@ -349,3 +349,13 @@ export class DataPortalUrlSlugNotUniqueError extends BaseError {
     })
   }
 }
+
+export class WorkstationAPIError extends BaseError {
+  constructor(message = 'Error: Unknown zerror', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.WORKSTATION_API_ERROR,
+      statusCode: 422,
+      ...props,
+    })
+  }
+}

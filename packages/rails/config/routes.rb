@@ -256,10 +256,7 @@ Rails.application.routes.draw do
       end
 
       resources :jobs, only: %i(index create) do
-        get :open_external, on: :member
-        patch :refresh_api_key, on: :member
         get :describe, on: :member, to: "jobs#describe"
-        patch :snapshot, on: :member
 
         collection do
           get :featured
