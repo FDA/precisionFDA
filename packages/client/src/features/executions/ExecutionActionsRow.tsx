@@ -90,7 +90,7 @@ export const ExecutionActionsRow = ({
       jobName: execution.name,
       jobLimit: execution.costLimit,
       scope: getScope(),
-      output_folder_path: execution.runDataUpdates?.output_folder_path,
+      outputFolderPath: execution.runDataUpdates?.output_folder_path,
       inputs: [
         {
           id: 1,
