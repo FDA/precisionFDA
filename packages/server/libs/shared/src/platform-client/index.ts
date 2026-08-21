@@ -1135,6 +1135,29 @@ export class PlatformClient {
   // -----------------
 
   /**
+   * Generates an HTTPS app auth token for a job via /system/newAuthToken.
+   * API: /system/newAuthToken
+   * @see https://documentation.dnanexus.com/developer/api/system-methods#api-method-system-newauthtoken
+   * @param httpsJobExternalUrl - The external URL of the HTTPS job (from job.httpsJobExternalUrl)
+   */
+  async systemNewAuthToken(httpsJobExternalUrl: string): Promise<string> {
+    const url = `${config.platform.authApiUrl}/system/newAuthToken`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      url,
+      data: {
+        grant_type: 'authorization_code',
+        scope: { full: true },
+        label: 'httpsapp',
+        client_id: 'httpsapp',
+        redirect_uri: `${httpsJobExternalUrl.toLowerCase()}/oauth2/access`,
+      },
+    }
+    const res = await this.sendRequest<{ authorization_code: string }>(options)
+    return res.authorization_code
+  }
+
+  /**
    * Describe data objects
    * @see https://documentation.dnanexus.com/developer/api/system-methods#api-method-system-describedataobjects
    * For param details look at platform API page

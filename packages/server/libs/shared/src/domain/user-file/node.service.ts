@@ -2,6 +2,7 @@ import { FindOptions } from '@mikro-orm/core'
 import { FilterQuery, Loaded, Populate, SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
+import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { CountStats } from '@shared/database/statistics.type'
 import { ScopeFilterContext } from '@shared/domain/counters/counters.types'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -335,12 +336,15 @@ export class NodeService {
   }
 
   async paginate(query: UserFilePaginationDTO): Promise<PaginatedResult<Node>> {
+    const where = this.buildCommonFilters(query)
+
     const pagination = {
       page: query.page,
       pageSize: query.pageSize,
       sort: query.sort,
+      scope: query.scope,
+      filter: query.filter,
     }
-    const where = await this.buildCommonFilters(query)
 
     const populate = ['user']
     if (query.fields?.path) {
@@ -353,7 +357,7 @@ export class NodeService {
       populate.push('properties')
     }
 
-    const result = await this.nodeRepository.paginate(pagination, where, {})
+    const result = await this.nodeRepository.paginateAccessible(pagination, where, {})
     await this.em.populate(result.data, populate as unknown as Populate<Node>)
 
     return result
@@ -363,12 +367,8 @@ export class NodeService {
     return await this.userFileService.verifyAccessibleFiles(uids)
   }
 
-  private async buildCommonFilters(query: UserFilePaginationDTO): Promise<FilterQuery<Node>> {
-    const userEntity = await this.user.loadEntity()
-    const accessibleSpaces = await userEntity.accessibleSpaces()
-    const accessibleScopes: EntityScope[] = accessibleSpaces.map(space => space.scope)
-    const accessibleScopeSet = new Set(accessibleScopes)
-    const where: FilterQuery<UserFile> = {
+  private buildCommonFilters(query: UserFilePaginationDTO): ObjectFilterQuery<Node> {
+    const where: ObjectFilterQuery<UserFile> = {
       stiType: query.type ?? [FILE_STI_TYPE.USERFILE],
       $or: [],
       $and: [{ $or: [{ state: null }, { state: { $ne: FILE_STATE_PFDA.REMOVING } }] }],
@@ -383,33 +383,6 @@ export class NodeService {
     }
     if (typeof query.featured === 'boolean') {
       where.featured = query.featured
-    }
-    if (!query.scope) {
-      where.$or.push(
-        { user: this.user.id, scope: 'private' },
-        { scope: 'public' },
-        { scope: { $in: accessibleScopes } },
-      )
-    } else {
-      if (query.scope === 'private') {
-        where.$or.push({ user: this.user.id, scope: 'private' })
-      }
-      if (query.scope === 'public') {
-        where.$or.push({ scope: 'public' })
-      }
-      if (query.scope === 'spaces') {
-        const location = query.filter?.location
-        const scopes = location
-          ? accessibleSpaces
-              .filter(space => space.name.toLowerCase().includes(location.toLowerCase()))
-              .map(space => space.scope)
-          : accessibleScopes
-        where.$or.push({ scope: { $in: scopes } })
-      } else if (accessibleScopeSet.has(query.scope)) {
-        where.$or.push({
-          scope: { $in: [query.scope] },
-        })
-      }
     }
     if (query.folderId) {
       where.$and.push({

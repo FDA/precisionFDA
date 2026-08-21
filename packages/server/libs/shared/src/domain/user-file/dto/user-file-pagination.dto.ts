@@ -12,18 +12,20 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator'
-import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
-import { PaginationDTO, SortDefinition } from '@shared/domain/entity/domain/pagination.dto'
+import { SortDefinition } from '@shared/domain/entity/domain/pagination.dto'
+import {
+  ScopedEntityFilter,
+  ScopedEntityPaginationDTO,
+} from '@shared/domain/entity/domain/scoped-entity-pagination.dto'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE, FILE_STATE_DX, FILE_STATE_PFDA, FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
-import { HOME_SCOPE } from '@shared/enums'
-import { EntityScope } from '@shared/types/common'
 import { TransformAndValidateBoolean } from '@shared/utils/transformers/is-valid-boolean'
 import { ToNumberRange } from '@shared/utils/transformers/to-range.decorator'
+import { TransformSortKeys } from '@shared/utils/transformers/transform-sort-keys.decorator'
 import { NumberRange } from '@shared/utils/types/range/number-range'
 
-class UserFileFilter {
+class UserFileFilter extends ScopedEntityFilter {
   @IsOptional()
   @IsNotEmpty()
   @IsString()
@@ -51,11 +53,6 @@ class UserFileFilter {
   @IsNotEmpty()
   @IsString()
   addedBy?: string
-
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  location?: string
 }
 
 class UserFileFields {
@@ -85,7 +82,7 @@ class UserFileFields {
   origin?: boolean
 }
 
-export class UserFilePaginationDTO extends PaginationDTO<UserFile> {
+export class UserFilePaginationDTO extends ScopedEntityPaginationDTO<UserFile> {
   @IsOptional()
   @IsArray()
   @IsIn([...Object.values(FILE_STI_TYPE)], { each: true })
@@ -100,12 +97,6 @@ export class UserFilePaginationDTO extends PaginationDTO<UserFile> {
     return Number.isNaN(newValue) ? value : newValue
   })
   folderId?: number | null
-
-  @IsOptional()
-  @IsValidScope({
-    allowHomeScope: { me: false, featured: false, everybody: false, spaces: true },
-  })
-  scope: HOME_SCOPE.SPACES | EntityScope
 
   @IsOptional()
   @IsArray()
@@ -138,5 +129,6 @@ export class UserFilePaginationDTO extends PaginationDTO<UserFile> {
   @Type(() => UserFileFilter)
   filter?: UserFileFilter
 
+  @TransformSortKeys({ addedBy: 'user.dxuser' })
   sort: SortDefinition<UserFile> = { createdAt: QueryOrder.DESC }
 }

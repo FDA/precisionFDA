@@ -15,6 +15,7 @@ import { allowedInstanceTypes } from '@shared/domain/job/job.enum'
 import { JobCountService } from '@shared/domain/job/services/job-count.service'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { JobWorkstationService } from '@shared/domain/job/services/job-workstation.service'
+import { WorkstationAPIResponse } from '@shared/domain/job/services/workstation-client/workstation-client'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
@@ -28,7 +29,6 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { JobCreateParams } from '@shared/platform-client/platform-client.params'
 import { IOType } from '@shared/types/common'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { WorkstationAPIResponse } from '@shared/workstation-client/workstation-client'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 import * as errors from '../../errors'
 import { PlatformClient } from '../../platform-client'
@@ -201,8 +201,20 @@ export class JobService implements SearchableByUid<'job'> {
     }
   }
 
-  async checkAlive(jobUid: Uid<'job'>, key: string): Promise<boolean> {
-    return await this.jobWorkstationService.alive(jobUid, key)
+  async checkAlive(jobUid: Uid<'job'>): Promise<{ alive: boolean }> {
+    const job = await this.jobRepo.findAccessibleOne({ uid: jobUid })
+    if (!job) {
+      throw new errors.NotFoundError('Job is not found or is not accessible')
+    }
+
+    const jobUrl = job.getHttpsAppUrl()
+    if (!jobUrl) {
+      throw new errors.InvalidStateError(`Job is not an HTTPS app or the workstation is not running`)
+    }
+
+    const key = await this.platformClient.systemNewAuthToken(jobUrl)
+    const isAlive = await this.jobWorkstationService.alive(jobUid, key)
+    return { alive: isAlive }
   }
 
   async setAPIKey(jobUid: Uid<'job'>, dto: JobSetAPIKeyBodyDTO): Promise<void> {
@@ -215,8 +227,9 @@ export class JobService implements SearchableByUid<'job'> {
     key: string,
     name: string,
     terminate: boolean,
+    preScript?: string,
   ): Promise<WorkstationAPIResponse> {
-    return await this.jobWorkstationService.snapshot(jobUid, code, key, name, terminate)
+    return await this.jobWorkstationService.snapshot(jobUid, code, key, name, terminate, preScript)
   }
 
   buildProvenance(jobDxId: DxId<'job'>, app: App, inputs: Record<string, IOType>): Provenance {

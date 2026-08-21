@@ -4,6 +4,7 @@ import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
 import { database } from '@shared/database'
 import { EmailService } from '@shared/domain/email/email.service'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { EVENT_TYPES } from '@shared/domain/event/event.entity'
 import { EventHelper } from '@shared/domain/event/event.helper'
 import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body.dto'
@@ -25,7 +26,7 @@ import { NodeService } from '@shared/domain/user-file/node.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { InvalidStateError } from '@shared/errors'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { FileStatesParams, JobFindParams } from '@shared/platform-client/platform-client.params'
 import { FileStateResult, FindJobsResponse } from '@shared/platform-client/platform-client.responses'
@@ -54,6 +55,7 @@ describe('Job service tests', () => {
   const userRepoFindAdminUserStub = stub()
   const jobRepoFindOneOrFailStub = stub()
   const jobRepoFindStub = stub()
+  const jobFindAccessibleOneStub = stub()
   const spaceMembershipRepoGetMembershipStub = stub()
   const spaceRepoFindOneStub = stub()
   const eventHelperCreateFileEventStub = stub()
@@ -68,6 +70,7 @@ describe('Job service tests', () => {
   const file2Dxid = 'file-GXPKG480q0jQPgXxFxKyyJ7q'
   const file3Dxid = 'file-GXgzZ7j00k4KVKfBzFyq8YXx'
   const userId = 100
+  const CODE = 'code'
 
   const queueAdd = stub()
   const queue = {
@@ -99,6 +102,7 @@ describe('Job service tests', () => {
     jobRepo = {
       findOneOrFail: jobRepoFindOneOrFailStub,
       find: jobRepoFindStub,
+      findAccessibleOne: jobFindAccessibleOneStub,
     } as unknown as JobRepository
     spaceRepo = {
       findOne: spaceRepoFindOneStub,
@@ -125,6 +129,9 @@ describe('Job service tests', () => {
 
     jobRepoFindOneOrFailStub.reset()
     jobRepoFindOneOrFailStub.throws()
+
+    jobFindAccessibleOneStub.reset()
+    jobFindAccessibleOneStub.throws()
 
     spaceMembershipRepoGetMembershipStub.reset()
     spaceMembershipRepoGetMembershipStub.throws()
@@ -263,7 +270,10 @@ describe('Job service tests', () => {
           results: [],
         } as FindJobsResponse
       },
-    } as PlatformClient
+      async systemNewAuthToken(): Promise<string> {
+        return CODE
+      },
+    } as unknown as PlatformClient
   }
 
   it('Test Job Outputs sync - error when incorrect number of results returned', async () => {
@@ -459,59 +469,75 @@ describe('Job service tests', () => {
 
   it('Test Job Outputs sync - job dxid null -> error', async () => {
     userContextLoadEntityStub.returns(user)
-    const thrownError = new Error('Job not found ({ dxid: null })')
-    thrownError.name = 'NotFoundError'
-    jobRepoFindOneOrFailStub.withArgs({ dxid: null }).throws(thrownError)
+    jobRepoFindOneOrFailStub.withArgs({ dxid: null }).throws(new NotFoundError('Job not found ({ dxid: null })'))
     jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
 
-    try {
-      await jobService.syncOutputs(null)
-      expect.fail('Expected to fail')
-    } catch (error) {
-      expect(error.name).eq('NotFoundError')
-      expect(error.message).to.equal('Job not found ({ dxid: null })')
-    }
+    await expect(jobService.syncOutputs(null)).to.be.rejectedWith(NotFoundError, 'Job not found ({ dxid: null })')
   })
 
   it('Test Job Outputs sync - non existing job dxid -> error', async () => {
     const nonExistingJobDxid = 'job-non-existing'
     userContextLoadEntityStub.returns(user)
-    const thrownError = new Error(`Job not found ({ dxid: '${nonExistingJobDxid}' })`)
-    thrownError.name = 'NotFoundError'
-    jobRepoFindOneOrFailStub.withArgs({ dxid: nonExistingJobDxid }).throws(thrownError)
+    jobRepoFindOneOrFailStub
+      .withArgs({ dxid: nonExistingJobDxid })
+      .throws(new NotFoundError(`Job not found ({ dxid: '${nonExistingJobDxid}' })`))
     jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
 
-    try {
-      await jobService.syncOutputs(nonExistingJobDxid)
-      expect.fail('Expected to fail')
-    } catch (error) {
-      expect(error.name).eq('NotFoundError')
-      expect(error.message).to.equal(`Job not found ({ dxid: '${nonExistingJobDxid}' })`)
-    }
+    await expect(jobService.syncOutputs(nonExistingJobDxid)).to.be.rejectedWith(
+      NotFoundError,
+      `Job not found ({ dxid: '${nonExistingJobDxid}' })`,
+    )
   })
 
   context('checkAlive', () => {
-    it('returns true if workstation client is alive', async () => {
-      const job = create.jobHelper.create(em, { user }, { dxid: 'job-1' })
-      await em.flush()
-      const key = 'test-cli-key'
+    it('throws NotFoundError when the job is not found', async () => {
+      const jobUid = 'job-not-found-1' as Uid<'job'>
+      jobFindAccessibleOneStub.withArgs({ uid: jobUid }).resolves(null)
 
       jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
-      const result = await jobService.checkAlive(job.uid, key)
-      expect(result).to.be.true()
-      expect(aliveStub.calledOnceWithExactly(job.uid, key)).to.be.true()
+      await expect(jobService.checkAlive(jobUid)).to.be.rejectedWith(
+        NotFoundError,
+        'Job is not found or is not accessible',
+      )
+    })
+
+    it('throws InvalidStateError when the job has no HTTPS app URL', async () => {
+      // A regular (non-HTTPS) job has no HTTPS URL
+      const job = create.jobHelper.create(em, { user }, { dxid: 'job-no-url-1' })
+      jobFindAccessibleOneStub.withArgs({ uid: job.uid }).resolves(job)
+      await em.flush()
+
+      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
+      await expect(jobService.checkAlive(job.uid)).to.be.rejectedWith(
+        InvalidStateError,
+        'Job is not an HTTPS app or the workstation is not running',
+      )
+      expect(aliveStub.notCalled).to.be.true()
+    })
+
+    it('returns true if workstation client is alive', async () => {
+      const httpsApp = create.appHelper.createHTTPS(em, { user })
+      const job = create.jobHelper.create(em, { user, app: httpsApp }, { dxid: 'job-alive-1' })
+      jobFindAccessibleOneStub.withArgs({ uid: job.uid }).resolves(job)
+      await em.flush()
+
+      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
+      const result = await jobService.checkAlive(job.uid)
+      expect(result.alive).to.be.true()
+      expect(aliveStub.calledOnceWithExactly(job.uid, CODE)).to.be.true()
     })
 
     it('returns false if workstation client is not alive', async () => {
-      const job = create.jobHelper.create(em, { user }, { dxid: 'job-1' })
+      const httpsApp = create.appHelper.createHTTPS(em, { user })
+      const job = create.jobHelper.create(em, { user, app: httpsApp }, { dxid: 'job-not-alive-1' })
+      jobFindAccessibleOneStub.withArgs({ uid: job.uid }).resolves(job)
       await em.flush()
-      const key = 'test-cli-key'
 
       aliveStub.resolves(false)
       jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
-      const result = await jobService.checkAlive(job.uid, key)
-      expect(result).to.be.false()
-      expect(aliveStub.calledOnceWithExactly(job.uid, key)).to.be.true()
+      const result = await jobService.checkAlive(job.uid)
+      expect(result.alive).to.be.false()
+      expect(aliveStub.calledOnceWithExactly(job.uid, CODE)).to.be.true()
     })
   })
 
@@ -557,7 +583,7 @@ describe('Job service tests', () => {
 
       jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
       await jobService.createWorkstationSnapshot(job.uid, authCode, key, name, terminate)
-      expect(snapshotStub.calledOnceWithExactly(job.uid, authCode, key, name, terminate)).to.be.true()
+      expect(snapshotStub.calledOnceWithExactly(job.uid, authCode, key, name, terminate, undefined)).to.be.true()
     })
 
     it('should throw error if snapshot on workstation client fails', async () => {
@@ -575,7 +601,7 @@ describe('Job service tests', () => {
         InvalidStateError,
         `Cannot obtain job url for job ${job.id}`,
       )
-      expect(snapshotStub.calledOnceWithExactly(job.uid, authCode, key, name, terminate)).to.be.true()
+      expect(snapshotStub.calledOnceWithExactly(job.uid, authCode, key, name, terminate, undefined)).to.be.true()
     })
   })
 

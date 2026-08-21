@@ -136,6 +136,27 @@ describe('AppRunFacade tests', () => {
     },
     scope: 'public',
   } as unknown as App
+  const APP_WITH_FALSY_DEFAULTS_UID = 'app-falsydefaults1234567890ab-1'
+  const APP_WITH_FALSY_DEFAULTS = {
+    id: 4,
+    name: 'Test App with falsy defaults',
+    uid: APP_WITH_FALSY_DEFAULTS_UID,
+    assets: {
+      getItems: (): Asset[] => {
+        return []
+      },
+    },
+    spec: {
+      input_spec: [
+        { name: 'optional_bool', class: 'boolean', optional: true, default: false },
+        { name: 'optional_int', class: 'int', optional: true, default: 0 },
+        { name: 'optional_string', class: 'string', optional: true, default: '' },
+        { name: 'required_bool', class: 'boolean', optional: false, default: false },
+        { name: 'no_default_optional', class: 'string', optional: true },
+      ],
+    },
+    scope: 'public',
+  } as unknown as App
   const APP_WITH_ASSETS_UID = 'app-withassets1234567890abcdef-1'
   const ASSET_1 = {
     id: 1,
@@ -330,6 +351,8 @@ describe('AppRunFacade tests', () => {
       .resolves(APP_WITH_ASSETS)
       .withArgs(APP_WITH_CLI_UID)
       .resolves(APP_WITH_CLI)
+      .withArgs(APP_WITH_FALSY_DEFAULTS_UID)
+      .resolves(APP_WITH_FALSY_DEFAULTS)
 
     findLicensedItemsByNodeUidsStub.reset()
     findLicensedItemsByNodeUidsStub.throws()
@@ -593,6 +616,78 @@ describe('AppRunFacade tests', () => {
       InvalidStateError,
       APP_RUN_ERRORS.APP_INPUT_REQUIRED(APP_UID, 'file_input'),
     )
+  })
+
+  it('applies falsy spec defaults for omitted inputs instead of dropping them', async () => {
+    const facade = getInstance()
+    const runAppDTO = new RunAppDTO()
+    runAppDTO.jobLimit = USER_JOB_LIMIT
+    runAppDTO.instanceType = 'baseline-2'
+    runAppDTO.inputs = {}
+    runAppDTO.scope = 'private'
+
+    transactionalStub.callsFake(async callback => {
+      await callback(em)
+      return PRIVATE_JOB
+    })
+    jobCreateStub.resolves({ id: PRIVATE_JOB.dxid })
+
+    await facade.run(APP_WITH_FALSY_DEFAULTS_UID, runAppDTO)
+
+    const platformInput = buildClientApiCallStub.firstCall.args[2]
+    expect(platformInput.optional_bool).to.equal(false)
+    expect(platformInput.optional_int).to.equal(0)
+    expect(platformInput.optional_string).to.equal('')
+    // A required input with a falsy default must resolve, not be rejected as "no value provided".
+    expect(platformInput.required_bool).to.equal(false)
+    // No default and not provided - still omitted.
+    expect(platformInput).to.not.have.property('no_default_optional')
+  })
+
+  it('persists falsy spec defaults so a re-run prefills the values the job actually used', async () => {
+    const facade = getInstance()
+    const runAppDTO = new RunAppDTO()
+    runAppDTO.jobLimit = USER_JOB_LIMIT
+    runAppDTO.instanceType = 'baseline-2'
+    runAppDTO.inputs = {}
+    runAppDTO.scope = 'private'
+
+    transactionalStub.callsFake(async callback => {
+      await callback(em)
+      return PRIVATE_JOB
+    })
+    jobCreateStub.resolves({ id: PRIVATE_JOB.dxid })
+
+    await facade.run(APP_WITH_FALSY_DEFAULTS_UID, runAppDTO)
+
+    // runAppDTO.inputs is what gets stored as run_data.run_inputs.
+    expect(runAppDTO.inputs).to.deep.equal({
+      optional_bool: false,
+      optional_int: 0,
+      optional_string: '',
+      required_bool: false,
+    })
+  })
+
+  it('keeps an explicitly cleared input cleared even when the spec has a falsy default', async () => {
+    const facade = getInstance()
+    const runAppDTO = new RunAppDTO()
+    runAppDTO.jobLimit = USER_JOB_LIMIT
+    runAppDTO.instanceType = 'baseline-2'
+    runAppDTO.inputs = { optional_bool: null, required_bool: true }
+    runAppDTO.scope = 'private'
+
+    transactionalStub.callsFake(async callback => {
+      await callback(em)
+      return PRIVATE_JOB
+    })
+    jobCreateStub.resolves({ id: PRIVATE_JOB.dxid })
+
+    await facade.run(APP_WITH_FALSY_DEFAULTS_UID, runAppDTO)
+
+    const platformInput = buildClientApiCallStub.firstCall.args[2]
+    expect(platformInput).to.not.have.property('optional_bool')
+    expect(platformInput.required_bool).to.equal(true)
   })
 
   it('throws lead space PermissionError if lead does not have workstations permissions', async () => {

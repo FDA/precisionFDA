@@ -188,7 +188,10 @@ export class AppRunFacade {
       }
 
       if (appInputs[spec.name] === undefined) {
-        if (spec.default) {
+        // Existence check, not truthiness: `false`, `0` and `''` are valid defaults. Testing
+        // `spec.default` would skip them, silently dropping the default for an optional input
+        // and rejecting a required one as "no value provided".
+        if (spec.default != null) {
           appInputs[spec.name] = spec.default
         } else if (spec.optional) {
           continue
@@ -198,23 +201,33 @@ export class AppRunFacade {
       }
 
       if (spec.class === 'file') {
-        const inputFile = inputFiles.find(f => f.uid === appInputs[spec.name])
-        runInput[spec.name] = {
-          $dnanexus_link: { id: inputFile.dxid, project: inputFile.project },
-        }
+        runInput[spec.name] = this.buildFileLink(appInputs[spec.name] as Uid<'file'>, inputFiles)
       } else if (spec.class === 'array:file') {
         const fileUids: Uid<'file'>[] = appInputs[spec.name] as Uid<'file'>[]
-        runInput[spec.name] = fileUids.map((fileUid: Uid<'file'>) => {
-          const inputFile = inputFiles.find(f => f.uid === fileUid)
-          return {
-            $dnanexus_link: { id: inputFile.dxid, project: inputFile.project },
-          }
-        })
+        runInput[spec.name] = fileUids.map((fileUid: Uid<'file'>) => this.buildFileLink(fileUid, inputFiles))
       } else {
         runInput[spec.name] = appInputs[spec.name]
       }
     }
     return runInput
+  }
+
+  /**
+   * Resolves a file uid against the files loaded by getInputFiles. That runs before defaults are
+   * applied, so a file input backfilled from its spec default was never looked up - report it as
+   * not found rather than dereferencing undefined.
+   */
+  private buildFileLink(
+    fileUid: Uid<'file'>,
+    inputFiles: UserFile[],
+  ): { $dnanexus_link: { id: DxId<'file'>; project: string } } {
+    const inputFile = inputFiles.find(f => f.uid === fileUid)
+    if (!inputFile) {
+      throw new NotFoundError(APP_RUN_ERRORS.FILES_NOT_FOUND(getPluralizedTerm(1, 'file'), String(fileUid)), {
+        code: ErrorCodes.USER_FILE_NOT_FOUND,
+      })
+    }
+    return { $dnanexus_link: { id: inputFile.dxid, project: inputFile.project } }
   }
 
   private async getRunProjectFromScope(scope: SCOPE, user: User): Promise<DxId<'project'>> {

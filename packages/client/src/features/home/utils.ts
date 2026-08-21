@@ -106,7 +106,9 @@ export type Params = {
 export type QueryType = Record<string, unknown>
 
 const createSortQueryKey = (sortField: string) =>
-  sortField.split('.').reduce((key, segment) => `${key}[${segment}]`, 'sort')
+  sortField.startsWith('props.')
+    ? `sort[${sortField}]`
+    : sortField.split('.').reduce((key, segment) => `${key}[${segment}]`, 'sort')
 
 export function formatScopeQ(scope?: HomeScope) {
   if (!scope || scope === 'me') return ''
@@ -180,11 +182,10 @@ export function prepareListFetchV2(filters: IFilter[], params: Params): QueryTyp
     filterParams[`filter[${id}]`] = f.value
   })
 
-  const sortField = params.sortBy?.order_by?.includes('props.')
-    ? params.sortBy.order_by.replace('props.', '')
-    : renameOrderByKeys(params?.sortBy?.order_by)
+  const sortField = renameOrderByKeys(params?.sortBy?.order_by)
 
-  const sort = sortField && params.sortBy?.order_dir ? { [createSortQueryKey(sortField)]: params.sortBy.order_dir } : {}
+  const sortKey = sortField ? createSortQueryKey(sortField) : undefined
+  const sort = sortKey && params.sortBy?.order_dir ? { [sortKey]: params.sortBy.order_dir } : {}
 
   return cleanObject({
     folderId: params?.folderId?.toString(),

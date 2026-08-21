@@ -253,11 +253,6 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
       # POST /api/jobs/terminate
       links[:terminate] = terminate_api_jobs_path unless object.terminal?
 
-      if object.https? && object.running? && object.https_app_ready?
-        # GET /api/jobs/:id/open_external
-        links[:open_external] = open_external_api_job_path(object)
-      end
-
       if logged_user.can_administer_site?
         # PUT /api/jobs/feature
         links[:feature] = feature_api_jobs_path

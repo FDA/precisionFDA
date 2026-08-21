@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common'
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import axios, { AxiosInstance } from 'axios'
 import { wrapper } from 'axios-cookiejar-support'
 import { compareVersions } from 'compare-versions'
 import { omit } from 'ramda'
@@ -11,24 +11,25 @@ import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { InvalidStateError, JobNotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { getServiceFactory } from '@shared/services/service-factory'
 import {
   CLIConfigParams,
   IWorkstationClient,
+  WORKSTATION_CLIENT_FACTORY,
   WorkstationAPIResponse,
-} from '@shared/workstation-client/workstation-client'
-
-interface AxiosCookieJarConfig extends AxiosRequestConfig {
-  jar: CookieJar
-  withCredentials: boolean
-}
+  WorkstationClientFactory,
+} from './workstation-client/workstation-client'
+import { AxiosCookieJarConfig } from './workstation-client/workstation-client.type'
 
 @Injectable()
 export class JobWorkstationService {
   @ServiceLogger()
   private readonly logger: Logger
 
-  constructor(private readonly jobRepository: JobRepository) {}
+  constructor(
+    private readonly jobRepository: JobRepository,
+    @Inject(WORKSTATION_CLIENT_FACTORY)
+    private readonly workstationClientFactory: WorkstationClientFactory,
+  ) {}
 
   async alive(jobUid: Uid<'job'>, authToken: string): Promise<boolean> {
     const { client } = await this.initWithJob(jobUid, authToken)
@@ -46,11 +47,12 @@ export class JobWorkstationService {
     key: string,
     name: string,
     terminate: boolean,
+    preScript?: string,
   ): Promise<WorkstationAPIResponse> {
     const { job, client } = await this.initWithJob(jobUid, authCode)
     this.logger.log('Beginning snapshot', { name, terminate })
     await this.setAPIKeyOnWorkstation(job, client, key)
-    const res = await client.snapshot({ name, terminate })
+    const res = await client.snapshot({ name, terminate, preScript })
     this.logger.log('Snapshot returned results', { name, terminate, res })
     return res
   }
@@ -61,8 +63,8 @@ export class JobWorkstationService {
       jar,
       withCredentials: true, // required when using cookies
     }
-    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
-    const axiosInstance = wrapper(axios.create(config) as any)
+
+    const axiosInstance = wrapper(axios.create(config))
 
     const job = await this.jobRepository.findAccessibleOne({ uid: jobUid }, { populate: ['app'] })
     if (!job) {
@@ -100,6 +102,7 @@ export class JobWorkstationService {
     } else {
       const pfdaConfig: CLIConfigParams = {
         Key: key,
+        Scope: 'private',
       }
       if (config.api.railsHost) {
         const hostUrl = new URL(config.api.railsHost)
@@ -136,7 +139,7 @@ export class JobWorkstationService {
     //
     // this.ctx.log.verbose(`JobWorkstationService: got authToken ${this.authToken}, calling oauth`)
 
-    const client = getServiceFactory().getWorkstationClient(jobUrl, axiosInstance)
+    const client = this.workstationClientFactory(jobUrl, axiosInstance)
     const apiVersion = job.app?.getEntity().workstationAPIVersion
     if (apiVersion) {
       client.apiVersion = apiVersion

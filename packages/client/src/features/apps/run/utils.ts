@@ -23,11 +23,37 @@ import type {
   RunJobFormType,
   SelectableSpace,
 } from '../apps.types'
-import { isFloatValid, isStrictlyInteger } from '../form/common'
+import { getDefaultValueFromServer, isFloatValid, isStrictlyInteger } from '../form/common'
 import { getComputeInstanceSelectionKey, INSTANCE_TYPE_UNAVAILABLE_MESSAGE } from '../instanceTypeAvailability'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
 
 export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
+
+/** Mirrors ServerType in ../form/common - the shape values have before the form maps them. */
+type ServerShapedValue = string | string[] | number | number[] | boolean | null
+
+/**
+ * Builds the run form's input fields from the app spec, preferring prefilled values (re-run,
+ * copied link) over the spec defaults. Prefilled values arrive server-shaped - a boolean comes
+ * back as JSON `false`, not the 'false' string the form holds - so both go through the same
+ * per-class mapping. Keying off inputSpec also keeps fields the spec no longer declares out of
+ * the form.
+ */
+export const buildInputFields = (
+  inputSpecs: InputSpec[],
+  prefilledFields?: BatchInput['fields'],
+): BatchInput['fields'] =>
+  Object.fromEntries(
+    inputSpecs.map(spec => {
+      // hasOwn, not `!== undefined`: input names like 'toString' would otherwise pick up
+      // Object.prototype members. An explicit null means the user cleared it, so it stands.
+      const value =
+        prefilledFields && Object.hasOwn(prefilledFields, spec.name)
+          ? (prefilledFields[spec.name] as ServerShapedValue)
+          : spec.default
+      return [spec.name, getDefaultValueFromServer(spec.class, value)]
+    }),
+  )
 
 export const getSchema = (schema: Yup.Schema, input: InputSpec) => {
   if (input.optional) {
@@ -167,7 +193,8 @@ export const getValue = (inputKey: string, value: FormInput, inputSpecs: InputSp
     return (value as string[]).map(v => parseInt(v as string, 10))
   }
   if (inputClass === 'boolean') {
-    return value !== 'false'
+    // Prefilled forms can hold a real boolean, so don't assume the 'true'/'false' strings the buttons set.
+    return value === true || value === 'true'
   }
   return value as string | boolean
 }

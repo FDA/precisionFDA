@@ -196,19 +196,9 @@ const createDbClusterSyncTask = async (data: SyncDbClusterJob['payload'], user: 
  */
 const createTestMaxMemoryTask = async (): Promise<Job> => maintenanceJobProducer.createTestMaxMemoryTask()
 
-// Queue adding helpers
-/**
- * @deprecated Use the job producer directly within the DI
- */
-const addToFileSyncQueueEnsureUnique = async <T extends Task>(
-  task: T,
-  jobId: string | undefined,
-): Promise<Bull.Job<T>> => fileSyncJobProducer.addToQueueEnsureUnique(task, jobId)
-
 export { CleanupWorkerQueueOperation } from './ops/cleanup-worker-queue'
 export * as debug from './queue.debug'
 export {
-  addToFileSyncQueueEnsureUnique,
   clearOrphanedRepeatableJobs,
   createCloseFileJobTask,
   createDbClusterSyncTask,

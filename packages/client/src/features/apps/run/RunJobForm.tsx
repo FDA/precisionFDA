@@ -21,7 +21,6 @@ import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
 import { SavingModal } from '../../modal/SavingModal'
 import { fetchLicensesOnApp } from '../apps.api'
 import type { AppSpec, BatchInput, IApp, RunJobFormType } from '../apps.types'
-import { getDefaultValueFromServer } from '../form/common'
 import { useApplyDefaultRunJobInstanceTypes, useInstanceTypeAvailability } from '../instanceTypeAvailability'
 import { RightGroup, StyledActionsContainer, StyledGrid, StyledJobName } from './apps-run.styles'
 import { ErrorMessageForField } from './ErrorMessageForField'
@@ -33,6 +32,7 @@ import { SetOutputFolder } from './SetOutputFolder'
 import { useExportInputsModal } from './useExportInputsModal'
 import { useRunJobMutation } from './useRunJobMutation'
 import {
+  buildInputFields,
   collectFileUidsFromBatchInput,
   createRequestObject,
   exportFormData,
@@ -60,26 +60,28 @@ const getDefaults = (
   hash: string,
   opts: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] },
 ): RunJobFormType => {
+  // Shared links get truncated or mangled in transit, so a bad fragment falls back to the spec
+  // defaults rather than throwing out of render - this route has no error boundary above it.
+  let values: Partial<RunJobFormType> = {}
   const base64Encoded = hash.split('#')[1]
-  const decoded = base64Encoded ? atob(base64Encoded) : '{}'
-  const values = JSON.parse(decodeURIComponent(decoded))
+  if (base64Encoded) {
+    try {
+      values = JSON.parse(decodeURIComponent(atob(base64Encoded))) ?? {}
+    } catch (error) {
+      // No toast here - getDefaults runs during render, and toasting would set state mid-render.
+      console.error('Could not read prefilled values from the link:', error)
+    }
+  }
+
+  const prefilled = values.inputs?.[0]
+  const fields = buildInputFields(opts.spec.inputSpec, prefilled?.fields)
 
   return {
     jobName: values.jobName ?? opts.app.name,
     jobLimit: values.jobLimit ?? opts.userJobLimit,
     outputFolderPath: values.outputFolderPath ?? '',
-    scope: values.scope,
-    inputs: values.inputs
-      ? [values.inputs['0']]
-      : [
-          {
-            id: 1,
-            instanceType: null,
-            fields: Object.fromEntries(
-              opts.spec.inputSpec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
-            ),
-          } as BatchInput,
-        ],
+    scope: values.scope as RunJobFormType['scope'],
+    inputs: [{ id: prefilled?.id ?? 1, instanceType: prefilled?.instanceType ?? null, fields } as BatchInput],
   }
 }
 
@@ -262,9 +264,7 @@ export const RunJobForm = ({
         {
           instanceType: computeInstances[0],
           id: lastId + 1,
-          fields: Object.fromEntries(
-            spec.inputSpec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
-          ),
+          fields: buildInputFields(spec.inputSpec),
         },
         { shouldFocus: false },
       )
@@ -351,8 +351,10 @@ export const RunJobForm = ({
   }
 
   const handleExportInputClick = () => {
+    // getValues() is only a shallow copy, and mapInputKeyVals rewrites each row's fields in place,
+    // so export the values without converting the live form state to its server shape.
     const vals = getValues()
-    vals.inputs = mapInputKeyVals(vals.inputs, spec.inputSpec)
+    vals.inputs = mapInputKeyVals(structuredClone(vals.inputs), spec.inputSpec)
     const fileUids = getFileUIDsFromAppRun(vals.inputs, spec.inputSpec)
 
     exportModal.openModal(vals, fileUids)

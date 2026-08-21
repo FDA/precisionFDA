@@ -149,10 +149,9 @@ export type WorkstationSnapshotJob = TaskWithAuth & {
   type: TASK_TYPE.WORKSTATION_SNAPSHOT
   payload: {
     jobUid: Uid<'job'>
-    code: string // Auth code from auth server
-    // TODO: generate from user context in nodejs instead of passing from Rails
-    key: string // Key for the pFDA CLI
+    httpsJobExternalUrl: string
     name: string
     terminate: boolean
+    preScript?: string
   }
 }

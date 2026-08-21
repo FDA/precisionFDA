@@ -1,6 +1,6 @@
 import { HttpResponse, http } from 'msw'
 import type { FetchExecutionsQuery } from '../../features/executions/executions.api'
-import type { IExecution, IJob } from '../../features/executions/executions.types'
+import type { ExecutionListItem, IExecution, IJob } from '../../features/executions/executions.types'
 
 export const mockRunningExecution: IExecution = {
   id: 1,
@@ -305,15 +305,11 @@ export const mockWorkstationExecution: IExecution = {
   dxid: 'job-workstation-test-789',
   state: 'running',
   name: 'My Workstation Session',
-  title: 'Interactive Workstation',
-  addedBy: 'user@example.com',
   appTitle: 'Interactive Workstation',
   appUid: 'app-workstation-123',
   appRevision: 1,
   appActive: true,
-  workstationApiVersion: '1.0.0',
-  workflowTitle: 'N/A',
-  workflowUid: 'N/A',
+  workstationApiVersion: '1.3.0',
   platformTags: null,
   runInputData: [],
   runOutputData: [],
@@ -335,14 +331,10 @@ export const mockWorkstationExecution: IExecution = {
   scope: 'private',
   location: 'Private',
   launchedBy: 'user@example.com',
+  launchedByUserId: 1,
   launchedByDxuser: 'user',
   launchedOn: '2024-01-01T10:00:00Z',
   featured: false,
-  revision: 1,
-  readme: '',
-  workflowSeriesId: 1,
-  version: '1',
-  active: true,
   snapshot: false,
   entityType: 'regular' as const,
   loggedDxuser: 'user',
@@ -350,9 +342,11 @@ export const mockWorkstationExecution: IExecution = {
   properties: {},
 }
 
-const workflowExecution: IExecution = {
+const workflowExecution: ExecutionListItem = {
   id: 111,
-  uid: 'workflow-Gfqkj8Q07by7JbB4xVqFQQj1-1',
+  uid: 'job-uid-1',
+  workflowUid: 'workflow-Gfqkj8Q07by7JbB4xVqFQQj1-1',
+  workflowTitle: 'NGS Pipeline',
   dxid: 'workflow-Gfqkj8Q07by7JbB4xVqFQQj1',
   state: 'done' as const,
   name: 'ngs-pipeline',
@@ -361,12 +355,15 @@ const workflowExecution: IExecution = {
   createdAt: '01/29/2024',
   createdAtDateTime: '2024-01-29 12:37:54 UTC',
   launchedBy: 'Zarlik Vexor',
+  launchedByUserId: 2,
   launchedByDxuser: 'zvexor',
   launchedOn: '2024-01-29 13:03:26 UTC',
+  platformTags: null,
   appTitle: '',
   appUid: 'app-example-1',
   appRevision: 1,
   appActive: true,
+  isPublishable: true,
   workstationApiVersion: null,
   runInputData: [],
   runOutputData: [],
@@ -400,6 +397,7 @@ const workflowExecution: IExecution = {
       state: 'done' as const,
       name: 'pheno-predictor',
       appTitle: 'PhenoPredictor',
+      appUid: 'app-uid-2',
       appRevision: 1,
       appActive: true,
       workflowTitle: 'ngs-pipeline',
@@ -432,6 +430,7 @@ const workflowExecution: IExecution = {
       scope: 'private',
       location: 'Private',
       launchedBy: 'Zarlik Vexor',
+      launchedByDxuser: 'zarlik.vexor',
       launchedOn: '2024-01-29 13:03:26 UTC',
       featured: false,
       entityType: 'regular',
@@ -570,12 +569,16 @@ export const executionsMocks = [
             tags: [],
             properties: {},
           },
-        ] as IExecution[],
+        ] as ExecutionListItem[],
         meta: {
           links: {},
           path: [],
           count: 8,
           challenges: null,
+          spec: {
+            input_spec: [],
+            output_spec: [],
+          },
           pagination: {
             current_page: 1,
             next_page: null,
@@ -648,6 +651,7 @@ export const executionsMocks = [
         scope: 'private' as const,
         location: 'Private',
         launchedBy: 'Randall Ebert',
+        launchedByUserId: 3,
         launchedByDxuser: 'randall.ebert',
         launchedOn: '2024-10-10 11:36:35 CEST',
         featured: false,
