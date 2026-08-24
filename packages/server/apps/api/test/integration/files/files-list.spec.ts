@@ -163,6 +163,13 @@ describe('GET /files', () => {
     expect(body4.error.message).to.equal(
       'Scope must be one of: "private", "public", "space-{number}" (where {number} is an integer).',
     )
+
+    const { body: body5 } = await supertest(testedApp.getHttpServer())
+      .get(`/files?scope=space-999999`)
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body5.data.length).to.equal(0)
   })
 
   it('fetch and sort files by created time', async () => {
@@ -190,6 +197,97 @@ describe('GET /files', () => {
     expect(body2.data[0].name).to.equal('file3.txt')
     expect(body2.data[1].name).to.equal('file2.txt')
     expect(body2.data[2].name).to.equal('file1.txt')
+  })
+
+  it('sorts files by a property value', async () => {
+    const firstFile = create.filesHelper.create(em, { user }, { name: 'first.txt', scope: 'private' })
+    const secondFile = create.filesHelper.create(em, { user }, { name: 'second.txt', scope: 'private' })
+    const thirdFile = create.filesHelper.create(em, { user }, { name: 'third.txt', scope: 'private' })
+    await em.flush()
+
+    create.nodePropertiesHelper.create(em, { node: firstFile }, { propertyName: 'rank', propertyValue: '1' })
+    create.nodePropertiesHelper.create(em, { node: secondFile }, { propertyName: 'rank', propertyValue: '2' })
+    create.nodePropertiesHelper.create(em, { node: thirdFile }, { propertyName: 'rank', propertyValue: '3' })
+    await em.flush()
+
+    const { body: ascBody } = await supertest(testedApp.getHttpServer())
+      .get('/files?scope=private&sort[props.rank]=ASC')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(ascBody.data.map((file: FileGetDTO) => file.name)).to.deep.equal(['first.txt', 'second.txt', 'third.txt'])
+
+    const { body: descBody } = await supertest(testedApp.getHttpServer())
+      .get('/files?scope=private&sort[props.rank]=DESC')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(descBody.data.map((file: FileGetDTO) => file.name)).to.deep.equal(['third.txt', 'second.txt', 'first.txt'])
+  })
+
+  it('sorts files by location', async () => {
+    const spaceZulu = create.spacesHelper.create(em, { name: 'Zulu Space' })
+    const spaceBravo = create.spacesHelper.create(em, { name: 'Bravo Space' })
+    const spaceAlpha = create.spacesHelper.create(em, { name: 'Alpha Space' })
+    create.spacesHelper.addMember(
+      em,
+      { space: spaceZulu, user },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { space: spaceBravo, user },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { space: spaceAlpha, user },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    await em.flush()
+
+    create.filesHelper.create(em, { user }, { name: 'zulu.txt', scope: spaceZulu.scope })
+    create.filesHelper.create(em, { user }, { name: 'bravo.txt', scope: spaceBravo.scope })
+    create.filesHelper.create(em, { user }, { name: 'alpha.txt', scope: spaceAlpha.scope })
+    await em.flush()
+
+    const { body: ascBody } = await supertest(testedApp.getHttpServer())
+      .get('/files?scope=spaces&sort[location]=ASC')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(ascBody.data.map((file: FileGetDTO) => file.name)).to.deep.equal(['alpha.txt', 'bravo.txt', 'zulu.txt'])
+
+    const { body: descBody } = await supertest(testedApp.getHttpServer())
+      .get('/files?scope=spaces&sort[location]=DESC')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(descBody.data.map((file: FileGetDTO) => file.name)).to.deep.equal(['zulu.txt', 'bravo.txt', 'alpha.txt'])
+  })
+
+  it('sorts files by the uploader dxuser through the addedBy alias', async () => {
+    const zuluUser = create.userHelper.create(em, { dxuser: 'zulu-user' })
+    const bravoUser = create.userHelper.create(em, { dxuser: 'bravo-user' })
+    const alphaUser = create.userHelper.create(em, { dxuser: 'alpha-user' })
+    create.filesHelper.create(em, { user: zuluUser }, { name: 'zulu.txt', scope: 'public' })
+    create.filesHelper.create(em, { user: bravoUser }, { name: 'bravo.txt', scope: 'public' })
+    create.filesHelper.create(em, { user: alphaUser }, { name: 'alpha.txt', scope: 'public' })
+    await em.flush()
+
+    const { body: ascBody } = await supertest(testedApp.getHttpServer())
+      .get('/files?scope=public&sort[addedBy]=ASC')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(ascBody.data.map((file: FileGetDTO) => file.name)).to.deep.equal(['alpha.txt', 'bravo.txt', 'zulu.txt'])
+
+    const { body: descBody } = await supertest(testedApp.getHttpServer())
+      .get('/files?scope=public&sort[addedBy]=DESC')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(descBody.data.map((file: FileGetDTO) => file.name)).to.deep.equal(['zulu.txt', 'bravo.txt', 'alpha.txt'])
   })
 
   it('fetch files by combination of folderId and scope', async () => {

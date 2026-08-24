@@ -1,11 +1,11 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Res, UseGuards } from '@nestjs/common'
 import { ApiOperation } from '@nestjs/swagger'
+import { Response } from 'express'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { JobGetDTO } from '@shared/domain/job/dto/job-get.dto'
 import { JobSetAPIKeyBodyDTO } from '@shared/domain/job/dto/job-set-api-key-body.dto'
 import { JobSnapshotBodyDTO } from '@shared/domain/job/dto/job-snapshot-body.dto'
 import { JobUidParamDTO } from '@shared/domain/job/dto/job-uid-param.dto'
-import { WorkstationAliveBodyDTO } from '@shared/domain/job/dto/workstation-alive-body.dto'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobService } from '@shared/domain/job/job.service'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
@@ -50,10 +50,17 @@ export class JobsController {
     return { message: 'Job sync task created' }
   }
 
+  @ApiOperation({ summary: 'Open HTTPS workstation external URL' })
+  @Get('/:uid/open-external')
+  async openExternal(@Param() params: JobUidParamDTO, @Res() res: Response): Promise<void> {
+    const url = await this.jobWorkstationFacade.openExternal(params.uid)
+    res.redirect(url)
+  }
+
   @ApiOperation({ summary: 'Check if the workstation is alive, only dev use' })
-  @Patch('/:uid/alive')
-  async checkAlive(@Param() params: JobUidParamDTO, @Body() body: WorkstationAliveBodyDTO): Promise<boolean> {
-    return await this.jobService.checkAlive(params.uid, body.code)
+  @Get('/:uid/alive')
+  async checkAlive(@Param() params: JobUidParamDTO): Promise<{ alive: boolean }> {
+    return await this.jobService.checkAlive(params.uid)
   }
 
   @ApiOperation({ summary: 'Set CLI key for the workstation, internal call from Rails app' })
@@ -63,9 +70,8 @@ export class JobsController {
     return await this.jobService.setAPIKey(params.uid, body)
   }
 
-  @ApiOperation({ summary: 'Create a snapshot of the workstation, internal call from Rails app' })
-  @UseGuards(InternalRouteGuard)
-  @Patch('/:uid/snapshot')
+  @ApiOperation({ summary: 'Create a snapshot of the workstation' })
+  @Post('/:uid/snapshot')
   async createSnapshot(
     @Param() params: JobUidParamDTO,
     @Body() body: JobSnapshotBodyDTO,

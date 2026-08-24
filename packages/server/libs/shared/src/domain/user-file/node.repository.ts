@@ -1,23 +1,63 @@
 import { FilterQuery } from '@mikro-orm/mysql'
-import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
+import { ScopedEntityAccessControlRepository } from '@shared/database/repository/scoped-entity-access-control.repository'
 import { CountStats } from '@shared/database/statistics.type'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { User } from '@shared/domain/user/user.entity'
-import { STATIC_SCOPE } from '../../enums'
+import { EntityScope } from '@shared/types/common'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import { HOME_SCOPE, STATIC_SCOPE } from '../../enums'
 import { Node } from './node.entity'
 
-export class NodeRepository extends AccessControlRepository<Node> {
+export class NodeRepository extends ScopedEntityAccessControlRepository<Node> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Node>> {
     const user = await this.em.findOne(User, { id: this.user.id })
-
     if (!user) {
       return null
     }
-
     const accessibleSpaces = await user.accessibleSpaces()
     const spaceScopes = accessibleSpaces.map(space => space.scope)
 
     // TODO PFDA-6222: define rules for site-admins
+    return {
+      $or: [
+        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
+        { scope: STATIC_SCOPE.PUBLIC },
+        { scope: { $in: spaceScopes } },
+      ],
+    }
+  }
+
+  protected async getAccessibleWhereByScope(
+    scope?: HOME_SCOPE.SPACES | EntityScope,
+    location?: string,
+  ): Promise<FilterQuery<Node>> {
+    // Fast-path for non-space scopes: no DB lookup needed
+    if (scope === STATIC_SCOPE.PUBLIC) {
+      return { scope: STATIC_SCOPE.PUBLIC }
+    }
+    if (scope === STATIC_SCOPE.PRIVATE) {
+      return { user: this.user.id, scope: STATIC_SCOPE.PRIVATE }
+    }
+
+    const user = await this.em.findOne(User, { id: this.user.id })
+    if (!user) {
+      return null
+    }
+
+    const accessibleSpaces = await user.accessibleSpaces(location)
+    const spaceScopes = accessibleSpaces.map(space => space.scope)
+
+    if (scope === HOME_SCOPE.SPACES) {
+      return { scope: { $in: spaceScopes } }
+    }
+
+    if (EntityScopeUtils.isSpaceScope(scope)) {
+      if (!spaceScopes.includes(scope)) {
+        return null
+      }
+      return { scope }
+    }
+
     return {
       $or: [
         { user: user.id, scope: STATIC_SCOPE.PRIVATE },

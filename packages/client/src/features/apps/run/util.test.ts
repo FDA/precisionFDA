@@ -1,5 +1,14 @@
 import type { IApp, InputSpec } from '../apps.types'
-import { createRequestObject, generateCopyUrl, shouldIncludeInputValue } from './utils'
+import { buildInputFields, createRequestObject, generateCopyUrl, getValue, shouldIncludeInputValue } from './utils'
+
+const makeInputSpec = (overrides: Partial<InputSpec> & Pick<InputSpec, 'name' | 'class'>): InputSpec => ({
+  label: overrides.name,
+  optional: false,
+  default: null,
+  choices: null,
+  help: '',
+  ...overrides,
+})
 
 describe('shouldIncludeInputValue', () => {
   it('should return false for undefined', () => {
@@ -158,5 +167,81 @@ describe('createRequestObject', () => {
     expect(result.inputs).toHaveProperty('intInput', 0)
     expect(result.inputs).not.toHaveProperty('nullInput')
     expect(result.inputs).not.toHaveProperty('undefinedInput')
+  })
+})
+
+describe('getValue', () => {
+  const inputSpecs = [makeInputSpec({ name: 'boolInput', class: 'boolean' })]
+
+  it('converts the boolean strings the form buttons set', () => {
+    expect(getValue('boolInput', 'true', inputSpecs)).toBe(true)
+    expect(getValue('boolInput', 'false', inputSpecs)).toBe(false)
+  })
+
+  it('converts real booleans from a prefilled form', () => {
+    expect(getValue('boolInput', true, inputSpecs)).toBe(true)
+    expect(getValue('boolInput', false, inputSpecs)).toBe(false)
+  })
+
+  it('returns null for an unset boolean', () => {
+    expect(getValue('boolInput', null, inputSpecs)).toBeNull()
+  })
+})
+
+describe('buildInputFields', () => {
+  const boolSpecs = [makeInputSpec({ name: 'boolInput', class: 'boolean' })]
+
+  it('maps a prefilled boolean false to the string the form holds', () => {
+    expect(buildInputFields(boolSpecs, { boolInput: false })).toEqual({ boolInput: 'false' })
+  })
+
+  it('re-submits a prefilled boolean false as false', () => {
+    const fields = buildInputFields(boolSpecs, { boolInput: false })
+
+    expect(getValue('boolInput', fields.boolInput, boolSpecs)).toBe(false)
+  })
+
+  it('stringifies prefilled numbers and number arrays', () => {
+    const inputSpecs = [
+      makeInputSpec({ name: 'intInput', class: 'int' }),
+      makeInputSpec({ name: 'arrayIntInput', class: 'array:int' }),
+    ]
+
+    expect(buildInputFields(inputSpecs, { intInput: 0, arrayIntInput: [1, 2] })).toEqual({
+      intInput: '0',
+      arrayIntInput: ['1', '2'],
+    })
+  })
+
+  it('falls back to the spec default when a field is not prefilled', () => {
+    const inputSpecs = [
+      makeInputSpec({ name: 'withDefault', class: 'string', default: 'hello' }),
+      makeInputSpec({ name: 'withoutDefault', class: 'string' }),
+    ]
+
+    expect(buildInputFields(inputSpecs, { unrelated: 'x' })).toEqual({
+      withDefault: 'hello',
+      withoutDefault: null,
+    })
+  })
+
+  it('keeps an explicitly cleared field cleared instead of restoring the spec default', () => {
+    const inputSpecs = [makeInputSpec({ name: 'withDefault', class: 'string', default: 'hello' })]
+
+    expect(buildInputFields(inputSpecs, { withDefault: null })).toEqual({ withDefault: null })
+  })
+
+  it('does not mistake inherited Object members for prefilled values', () => {
+    const inputSpecs = [makeInputSpec({ name: 'toString', class: 'string', default: 'hello' })]
+
+    expect(buildInputFields(inputSpecs, {})).toEqual({ toString: 'hello' })
+  })
+
+  it('drops prefilled fields the spec no longer declares', () => {
+    expect(buildInputFields(boolSpecs, { boolInput: true, removedInput: 'stale' })).toEqual({ boolInput: 'true' })
+  })
+
+  it('uses spec defaults when there is nothing prefilled', () => {
+    expect(buildInputFields(boolSpecs)).toEqual({ boolInput: null })
   })
 })

@@ -102,7 +102,9 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
       user: this.user,
     }
     const jobId = `${wrapped.type}.${data.jobUid}`
-    return await this.addToQueueEnsureUnique(wrapped, jobId)
+    return await this.addToQueueEnsureUnique(wrapped, jobId, {
+      attempts: 0,
+    })
   }
 
   private async createSyncTask<T extends Task>(task: T, dxid: string): Promise<Job> {

@@ -1,6 +1,6 @@
-import { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import { ResourceProperties } from '../../features/apps/apps.types'
+import type { ResourceProperties } from '../../features/apps/apps.types'
 import { Checkbox } from '../CheckboxNext'
 
 export function selectColumnDef<T extends { id: string | number }>(): ColumnDef<T> {
@@ -45,6 +45,7 @@ export function propertiesColumnDef<T extends { id: string | number; properties:
         accessorFn: row => row.properties[property],
         id: `props.${property}`,
         enableColumnFilter: false,
+        sortDescFirst: false,
         size: 200,
       }) satisfies ColumnDef<T>,
   )

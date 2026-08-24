@@ -1,16 +1,16 @@
 import { Logger } from '@nestjs/common'
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { compareVersions } from 'compare-versions'
 import { CookieJar } from 'tough-cookie'
-import { ClientRequestError, IncompatibleVersionError, InternalError } from '@shared/errors'
-import { getLogger } from '../logger'
-import { maskAuthHeader } from '../utils/logging'
-
-// TODO (PFDA-6774): moving this to job package and move the type definitions to the type file
+import { IncompatibleVersionError, InternalError, WorkstationAPIError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { maskAuthHeader } from '@shared/utils/logging'
+import { AxiosResponseWithJar } from './workstation-client.type'
 
 export type SnapshotParams = {
   name?: string
   terminate: boolean
+  preScript?: string
 }
 
 export type CLIConfigParams = {
@@ -20,9 +20,19 @@ export type CLIConfigParams = {
 }
 
 export type WorkstationAPIResponse = {
-  result?: 'success' | 'error'
-  data?: unknown // legacy structure, deprecated in the current workstation API
-  error?: string | object
+  status: number
+  statusText: string
+  data: { message: string }
+}
+
+export type WorkstationAPIErrorResponse = {
+  error:
+    | string
+    | {
+        type: string
+        message: string
+      }
+  message?: string
 }
 
 export interface IWorkstationClient {
@@ -34,7 +44,8 @@ export interface IWorkstationClient {
   setPFDAConfig(params: CLIConfigParams): Promise<WorkstationAPIResponse>
 }
 
-const defaultLog = getLogger('workstation-client-logger')
+export const WORKSTATION_CLIENT_FACTORY = 'WORKSTATION_CLIENT_FACTORY'
+export type WorkstationClientFactory = (url: string, axiosInstance: AxiosInstance) => IWorkstationClient
 
 const API_PORT = '8081'
 const USER_AGENT =
@@ -48,6 +59,7 @@ const USER_AGENT =
 // as we may want to package it to be used by scripts or other clients
 //
 export class WorkstationClient implements IWorkstationClient {
+  @ServiceLogger()
   private readonly logger: Logger
   // Axios instance must be passed in, to inherit the same session and cookies from PlatformAuthClient
   private readonly axiosInstance: AxiosInstance
@@ -61,12 +73,11 @@ export class WorkstationClient implements IWorkstationClient {
 
   cookie: string
 
-  constructor(url: string, axiosInstance?: AxiosInstance, logger?: Logger) {
+  constructor(url: string, axiosInstance?: AxiosInstance) {
     this.axiosInstance = axiosInstance ?? axios.create()
     this.workstationUrl = url
     this.host = new URL(url).host
     this.baseUrl = `https://${this.host}:${API_PORT}/api`
-    this.logger = logger ?? defaultLog
   }
 
   // OAuth access to the workstation
@@ -92,7 +103,7 @@ export class WorkstationClient implements IWorkstationClient {
     }
 
     try {
-      const response = (await this.sendRequest(options, true)) as AxiosResponse
+      const response = (await this.sendRequest(options, true)) as AxiosResponseWithJar
       const cookie = await this.extractWorkstationCookie(response)
       if (!cookie) {
         throw new InternalError('Unable to obtain workstation cookie')
@@ -117,8 +128,7 @@ export class WorkstationClient implements IWorkstationClient {
     }
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
-  private async extractWorkstationCookie(response: any): Promise<string | null> {
+  private async extractWorkstationCookie(response: AxiosResponseWithJar): Promise<string | null> {
     const jar = response.config.jar as CookieJar
     const cookies = await jar.getCookies(this.workstationUrl)
     this.logger.log(`extractWorkstationCookie got cookie keys: ${cookies.map(c => c.key).join(', ')}`)
@@ -178,6 +188,7 @@ export class WorkstationClient implements IWorkstationClient {
    * Set the pFDA CLI key
    *
    * Available on workstation_api v1.0 or above
+   * @deprecated Use {@link setPFDAConfig} instead
    */
   async setAPIKey(key: string): Promise<WorkstationAPIResponse> {
     this.validateCookie()
@@ -205,7 +216,6 @@ export class WorkstationClient implements IWorkstationClient {
     }
 
     this.validateCookie()
-
     const url = `${this.baseUrl}/setPFDAConfig`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -213,9 +223,11 @@ export class WorkstationClient implements IWorkstationClient {
       data: JSON.stringify(params),
       url,
     }
-    return await this.sendRequest(options)
+    return this.sendRequest(options)
   }
 
+  protected async sendRequest(options: AxiosRequestConfig, returnFullResponse: true): Promise<AxiosResponse>
+  protected async sendRequest(options: AxiosRequestConfig, returnFullResponse?: false): Promise<WorkstationAPIResponse>
   protected async sendRequest(
     options: AxiosRequestConfig,
     returnFullResponse?: boolean,
@@ -225,10 +237,20 @@ export class WorkstationClient implements IWorkstationClient {
       this.logClientRequest(options)
       const res = await this.axiosInstance.request(options)
       this.logger.log({ data: res.data }, 'SendRequest response')
-      return returnFullResponse ? res : res.data
-    } catch (err) {
+      if (res.data.result === 'error' || res.data.error) {
+        throw new AxiosError(res.data.error, undefined, res.config, res.request, res)
+      }
+      if (returnFullResponse) {
+        return res
+      }
+      return {
+        status: res.status,
+        statusText: res.statusText,
+        data: res.data,
+      }
+    } catch (err: unknown) {
       this.logClientFailed(options)
-      return this.handleFailed(err)
+      this.handleFailed(err as AxiosError<WorkstationAPIErrorResponse>)
     }
   }
 
@@ -245,9 +267,18 @@ export class WorkstationClient implements IWorkstationClient {
     }
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
-  protected maskRequestData(data: any): any {
-    return data?.Key ? { ...data, Key: '[masked]' } : data
+  protected maskRequestData(data: unknown): unknown {
+    if (typeof data !== 'object' || data === null) {
+      return data
+    }
+    let masked = data as Record<string, unknown>
+    if ('Key' in masked) {
+      masked = { ...masked, Key: '[masked]' }
+    }
+    if ('preScript' in masked) {
+      masked = { ...masked, preScript: '[masked]' }
+    }
+    return masked
   }
 
   protected logClientRequest(options: AxiosRequestConfig): void {
@@ -274,22 +305,19 @@ export class WorkstationClient implements IWorkstationClient {
     )
   }
 
-  protected handleFailed(
-    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
-    err: any,
-    customErrorThrower?: (statusCode: number, errorType: string, errorMessage: string) => void,
-    // biome-ignore lint/suspicious/noExplicitAny: Should be fixed
-  ): any {
+  protected handleFailed(err: AxiosError<WorkstationAPIErrorResponse>): Error {
     if (err.response) {
       const statusCode = err.response.status
-      const errorType = err.response.data?.error?.type || 'Server Error'
-      const errorMessage = err.response.data?.error?.message || err.response.data
-      if (customErrorThrower) {
-        customErrorThrower(statusCode, errorType, errorMessage)
+      if (typeof err.response.data.error === 'string') {
+        throw new WorkstationAPIError(err.response.data.error, {
+          statusCode,
+        })
       }
-      throw new ClientRequestError(`${errorType} (${statusCode}): ${errorMessage}`, {
-        clientResponse: err.response.data,
-        clientStatusCode: statusCode,
+
+      const errorType = err.response.data.error?.type || 'Server Error'
+      const errorMessage = err.response.data.error?.message
+      throw new WorkstationAPIError(`${errorType} (${statusCode}): ${errorMessage}`, {
+        statusCode,
       })
     } else if (err.request) {
       // the request was made but no response was received
@@ -297,5 +325,6 @@ export class WorkstationClient implements IWorkstationClient {
     } else {
       this.logger.error({ err }, 'Failed workstation request - unhandled error')
     }
+    throw new InternalError()
   }
 }

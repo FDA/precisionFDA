@@ -29,6 +29,7 @@ import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { Organization } from '@shared/domain/org/organization.entity'
 import { Profile } from '@shared/domain/profile/profile.entity'
+import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Session } from '@shared/domain/session/session.entity'
 import { Space } from '@shared/domain/space/space.entity'
@@ -654,6 +655,23 @@ const filesHelper = {
   },
 }
 
+const nodePropertiesHelper = {
+  create: (
+    em: EntityManager,
+    references: { node: UserFile },
+    data: Pick<NodeProperty, 'propertyName' | 'propertyValue'>,
+  ): NodeProperty => {
+    const property = em.create<NodeProperty>(NodeProperty, {
+      targetId: references.node.id,
+      targetType: 'node',
+      node: Reference.create(references.node),
+      ...data,
+    })
+    em.persist(property)
+    return property
+  },
+}
+
 const workflowHelper = {
   create: (em: EntityManager, references: { user: User }, data?: Partial<Workflow>): Workflow => {
     const workflow = wrap(new Workflow(references.user)).assign(
@@ -999,6 +1017,7 @@ export {
   jobHelper,
   licenseHelper,
   newsHelper,
+  nodePropertiesHelper,
   noteHelper,
   orgHelper,
   profileHelper,

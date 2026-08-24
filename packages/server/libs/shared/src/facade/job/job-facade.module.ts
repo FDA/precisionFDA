@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { AuthModule } from '@shared/domain/auth/auth.module'
 import { EmailModule } from '@shared/domain/email/email.module'
 import { EntityLinkModule } from '@shared/domain/entity/entity-link/entity-link.module'
 import { JobModule } from '@shared/domain/job/job.module'
@@ -10,7 +11,15 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
 import { JobStaleCheckFacade } from './job-stale-check.facade'
 
 @Module({
-  imports: [JobModule, EmailModule, EntityLinkModule, UserFileModule, NotificationModule, PlatformClientModule],
+  imports: [
+    JobModule,
+    EmailModule,
+    EntityLinkModule,
+    UserFileModule,
+    NotificationModule,
+    PlatformClientModule,
+    AuthModule,
+  ],
   providers: [JobStaleCheckFacade, JobSyncTaskCheckFacade, JobWorkstationFacade],
   exports: [JobStaleCheckFacade, JobSyncTaskCheckFacade, JobWorkstationFacade],
 })

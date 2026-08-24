@@ -1,8 +1,8 @@
-import { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useEffect } from 'react'
 import { mockWorkstationExecution } from '../../mocks/handlers/executions.handlers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
-import { IExecution } from './executions.types'
+import type { IExecution } from './executions.types'
 import { useSnapshotModal } from './useSnapshotModal'
 
 const meta: Meta = {
@@ -26,8 +26,8 @@ const SnapshotModalWrapper = ({ workstationState }: Props) => {
     ...mockWorkstationExecution,
     state: workstationState,
   }
-  
-  const { modalComp, setShowModal } = useSnapshotModal({ 
+
+  const { modalComp, setShowModal } = useSnapshotModal({
     selected: workstation as IExecution,
   })
 

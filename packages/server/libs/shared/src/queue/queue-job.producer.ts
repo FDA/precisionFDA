@@ -39,7 +39,11 @@ export abstract class QueueJobProducer {
   //    allow a duplicate job with the same bull jobId to be added
   //    repeatable jobs should not use this function
   // TODO: The queue methods should be cleaned up and a lot of code could be consolidated
-  async addToQueueEnsureUnique<T extends Task>(task: T, jobId: string | undefined): Promise<Job<T>> {
+  async addToQueueEnsureUnique<T extends Task>(
+    task: T,
+    jobId: string | undefined,
+    jobOptions?: JobOptions,
+  ): Promise<Job<T>> {
     // If jobId is provided, there should not be multiple items with this jobId in the queue
     if (jobId) {
       // Do not allow a second job to be added to the queue
@@ -55,6 +59,7 @@ export abstract class QueueJobProducer {
 
     const options: JobOptions = {
       jobId,
+      ...jobOptions,
     }
     return await this.addToQueue(task, options)
   }

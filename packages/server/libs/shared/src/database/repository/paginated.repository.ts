@@ -11,7 +11,6 @@ export abstract class PaginatedRepository<T extends object> extends BaseEntityRe
     options?: Omit<FindOptions<T, Hint, Fields, Excludes>, 'limit' | 'offset'>,
   ): Promise<PaginatedResult<Loaded<T, Hint, Fields, Excludes>>> {
     const { page, pageSize: limit, sort: orderBy } = pagination
-
     const offset = this.calculateOffset(page, limit)
 
     const [data, total] = await this.findAndCount<Hint, Fields, Excludes>(where, {
@@ -54,15 +53,15 @@ export abstract class PaginatedRepository<T extends object> extends BaseEntityRe
     Fields extends string = '*',
     Excludes extends string = never,
   >(
-    propertyName: string,
-    orderDir: 'ASC' | 'DESC',
+    pagination: PaginationDTO<T>,
     where: FilterQuery<T>,
-    page: number,
-    limit: number,
-    propertiesRelation: string,
-    populate?: FindOptions<T, Hint, Fields, Excludes>['populate'],
+    options?: Omit<FindOptions<T, Hint, Fields, Excludes>, 'limit' | 'offset'>,
   ): Promise<PaginatedResult<Loaded<T, Hint, Fields, Excludes>>> {
+    const page = pagination.page ?? 1
+    const limit = pagination.pageSize ?? 10
     const offset = (page - 1) * limit
+
+    const { propertyName, orderDir } = this.extractPropertySort(pagination)
 
     // Get total count (unaffected by property sorting)
     const total = await this.count(where)
@@ -78,7 +77,7 @@ export abstract class PaginatedRepository<T extends object> extends BaseEntityRe
     // GROUP BY ensures each entity appears only once despite multiple properties
     const qb = this.createQueryBuilder('e')
       .select('e.id')
-      .leftJoin(`e.${propertiesRelation}`, 'p')
+      .leftJoin(`e.properties`, 'p')
       .where(where as QBFilterQuery<T>)
       .groupBy('e.id')
       .orderBy({
@@ -103,13 +102,9 @@ export abstract class PaginatedRepository<T extends object> extends BaseEntityRe
       }
     }
 
-    // Fetch full entities with proper population
-    const findOptions: FindOptions<T, Hint, Fields, Excludes> = {}
-    if (populate) {
-      findOptions.populate = populate
-    }
-
-    const entities = await this.find({ id: { $in: ids } } as unknown as FilterQuery<T>, findOptions)
+    const entities = await this.find({ id: { $in: ids } } as unknown as FilterQuery<T>, {
+      ...options,
+    })
 
     // Preserve the order from the sorted query
     const idOrder = new Map(ids.map((id, idx) => [id, idx]))
@@ -124,6 +119,26 @@ export abstract class PaginatedRepository<T extends object> extends BaseEntityRe
         page,
       },
     }
+  }
+
+  extractPropertySort(
+    pagination: PaginationDTO<T>,
+  ): { propertyName: string; orderDir: 'ASC' | 'DESC' } | Record<string, never> {
+    const sort = pagination.sort
+    if (!sort || typeof sort !== 'object') return {}
+
+    for (const key of Object.keys(sort)) {
+      if (key.startsWith('props.')) {
+        const propertyName = key.replace('props.', '')
+        const dir = (sort as Record<string, string>)[key]?.toUpperCase?.()
+        return {
+          propertyName: propertyName,
+          orderDir: dir === 'ASC' ? 'ASC' : 'DESC',
+        }
+      }
+    }
+
+    return {}
   }
 
   private calculateOffset(page?: number, limit?: number): number | null {

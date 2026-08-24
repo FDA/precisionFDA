@@ -1,4 +1,15 @@
-import { Collection, Entity, Enum, ManyToOne, OneToMany, OneToOne, Property, Ref, Reference } from '@mikro-orm/core'
+import {
+  Collection,
+  Entity,
+  Enum,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  Property,
+  QueryOrder,
+  Ref,
+  Reference,
+} from '@mikro-orm/core'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
 import { DxId } from '@shared/domain/entity/domain/dxid'
@@ -13,8 +24,9 @@ import { SPACE_STATE } from '@shared/domain/space/space.enum'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { ADMIN_LEAD_ROLES, CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
 import { UserExtras } from '@shared/domain/user/user-extras'
-import { EntityScope } from '@shared/types/common'
+import { EntityScope, SpaceScope } from '@shared/types/common'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import { StringUtils } from '@shared/utils/string.utils'
 import { config } from '../../config'
 import { BaseEntity } from '../../database/base.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
@@ -301,10 +313,20 @@ export class User extends BaseEntity {
     }
   }
 
-  async accessibleSpaces(): Promise<Space[]> {
+  async accessibleSpaces(locationFilter?: string): Promise<Space[]> {
+    const membershipWhere = this.spaceMembershipWhere('accessible')
+
     await this.spaceMemberships.load({
       populate: ['spaces'],
-      where: this.spaceMembershipWhere('accessible'),
+      where: {
+        ...membershipWhere,
+        spaces: {
+          ...(membershipWhere.spaces as object),
+          ...(locationFilter && {
+            name: { $like: `%${StringUtils.escapeSqlLike(locationFilter)}%` },
+          }),
+        },
+      },
     })
 
     return Array.from(this.spaceMemberships).flatMap(spaceMembership => Array.from(spaceMembership.spaces))

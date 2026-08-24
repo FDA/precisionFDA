@@ -1,4 +1,4 @@
-import { ExecutionListItem, IExecution, JobState } from './executions.types'
+import type { ExecutionListItem, IExecution, JobState } from './executions.types'
 
 const jobExecutionPrefix = 'job-'
 const workflowExecutionPrefix = 'workflow-'
@@ -17,11 +17,9 @@ export function getExecutionJobsList(executions: IExecution[]): string[] {
   for (const execution of executions) {
     if (isJobExecution(execution)) {
       jobs.push(execution.uid)
-    }
-    else if (isWorkflowExecution(execution) && execution.jobs) {
+    } else if (isWorkflowExecution(execution) && execution.jobs) {
       jobs.push(...execution.jobs.map(e => e.uid))
-    }
-    else {
+    } else {
       console.log(`Warning: undetermined execution type ${execution.uid}`)
     }
   }
@@ -35,7 +33,7 @@ export function getUserLink(dxuser: string): string {
 }
 
 export function getOpenExternalUrl(uid: string): string {
-  return `/api/jobs/${uid}/open_external`
+  return `/api/v2/jobs/${uid}/open-external`
 }
 
 export function isOpenExternalAvailable(execution: IExecution): boolean {
@@ -43,8 +41,7 @@ export function isOpenExternalAvailable(execution: IExecution): boolean {
     return false
   }
 
-  const requiresHttpsAppState =
-    execution.platformTags?.some(tag => tag.startsWith(httpsAppStateTagPrefix)) ?? false
+  const requiresHttpsAppState = execution.platformTags?.some(tag => tag.startsWith(httpsAppStateTagPrefix)) ?? false
 
   if (!requiresHttpsAppState) {
     return true
