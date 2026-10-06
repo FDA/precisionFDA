@@ -68,7 +68,7 @@
     "@tanstack/react-table": "8.21.3",
     "@tanstack/react-virtual": "3.14.3",
     "@uiw/react-codemirror": "4.25.10",
-    "axios": "1.18.1",
+    "axios": "1.20.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "date-fns": "4.4.0",
