@@ -133,7 +133,7 @@
     "playwright": "1.61.1",
     "storybook": "10.5.7",
     "typescript": "6.0.3",
-    "vite": "8.1.5",
+    "vite": "8.1.6",
     "vitest": "4.1.10",
     "vitest-browser-react": "2.2.0"
   },
