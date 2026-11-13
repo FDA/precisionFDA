@@ -108,7 +108,7 @@ GEM
       activesupport (>= 4.0)
       awesome_nested_set (>= 3.0)
     acts_as_votable (0.14.0)
-    addressable (2.9.0)
+    addressable (2.9.1)
       public_suffix (>= 2.0.2, < 8.0)
     annotate (3.2.0)
       activerecord (>= 3.2, < 8.0)
